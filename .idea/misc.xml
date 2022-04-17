@@ -88,7 +88,10 @@
         <entry key="..\:/Users/shaha/OneDrive - Technological University Dublin/practice programs/android app/Nimaz/app/src/main/res/xml/prayer_time_adjust.xml" value="0.3515625" />
         <entry key="..\:/Users/shaha/OneDrive - Technological University Dublin/practice programs/android app/Nimaz/app/src/main/res/xml/root_preferences.xml" value="0.3515625" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/quran/src/main/res/layout/activity_quran.xml" value="0.325" />
+        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable-nodpi/display.xml" value="0.1" />
+        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable-nodpi/widgethighlight.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable-v24/aboutcard.xml" value="0.1" />
+        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable-v24/nameslist.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/animator_progress_bar.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/battery.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/bookmark.xml" value="0.1" />
@@ -121,6 +124,7 @@
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/ic_tasbih.xml" value="0.1245" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/ic_vector.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/ic_vector__1_.xml" value="0.1" />
+        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/inputfield.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/moonphaseback.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/settingoption.xml" value="0.1" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/drawable/settings.xml" value="0.1" />
@@ -142,6 +146,8 @@
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/bottom_sheet_tasbeeh.xml" value="0.22314814814814815" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/calc_method_list_dialog.xml" value="0.20925925925925926" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/calc_method_row_item.xml" value="0.20925925925925926" />
+        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/dikhrlist.xml" value="0.18333333333333332" />
+        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_about.xml" value="0.16666666666666666" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_aya_list.xml" value="0.15" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_compass.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_help.xml" value="0.1712962962962963" />
@@ -158,7 +164,7 @@
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_quran_search.xml" value="0.15" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_service_init.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_settings_main.xml" value="0.3333333333333333" />
-        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_tasbeeh.xml" value="0.4466666666666667" />
+        <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_tasbeeh.xml" value="0.42950108459869846" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/fragment_tasbeeh2.xml" value="0.17777777777777778" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/gotoayadialog.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/shaha/StudioProjects/Nimaz/app/src/main/res/layout/inputdialog.xml" value="0.20052083333333334" />
