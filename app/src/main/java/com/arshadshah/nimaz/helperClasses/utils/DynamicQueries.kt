@@ -11,7 +11,7 @@ class DynamicQueries {
             val dynamicQuery = ArrayList<String>()
             if (word.contains(" ")) {
                 val words = word.split(" ")
-                
+
                 for (i in words) {
                     dynamicQuery.add(i)
                 }

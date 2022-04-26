@@ -103,14 +103,14 @@ internal class AyaListCustomAdapterSearch(
 
         val unicodeWithNumber = unicodeAyaEndStart + endOfAyaWithNumber + unicodeAyaEndEnd
 
-        if (isEnglish){
+        if (isEnglish) {
             //find parts of the ayat
             val querysToDo = DynamicQueries.getDynamicQuery(searchQuery)
 
             //find any occurance of each of the queries in the AyaObject.ayaEnglish
             for (query in querysToDo) {
                 //if the query is found in the AyaObject.ayaEnglish
-                val indexOfQuery = AyaObject.ayaEnglish.indexOf(query,0,true)
+                val indexOfQuery = AyaObject.ayaEnglish.indexOf(query, 0, true)
                 if (indexOfQuery != -1) {
                     //if the query is found, highlight it
                     val startIndex = indexOfQuery
@@ -123,7 +123,7 @@ internal class AyaListCustomAdapterSearch(
                     EnglishName?.text = Html.fromHtml(highlightedAya)
                 }
             }
-        }else{
+        } else {
             EnglishName?.text = AyaObject.ayaEnglish
         }
         ArabicName?.text =

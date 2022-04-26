@@ -312,7 +312,7 @@ class DatabaseAccessHelper(context: Context) {
         val querysToDo = DynamicQueries.getDynamicQuery(query)
 
         //for each query in the arraylist
-        for(querys in querysToDo){
+        for (querys in querysToDo) {
             //the cursor with a limit of 50 results
             val cursor = db!!.rawQuery(
                 "SELECT * FROM $tableName WHERE $columnName LIKE '%$querys%'",
@@ -414,13 +414,17 @@ class DatabaseAccessHelper(context: Context) {
      * @param query the query to search for
      * @return the number of ayas found
      */
-    fun searchForAyaAmountFound(query: String, tableName: String, columnName: String): HashMap<String, Int> {
+    fun searchForAyaAmountFound(
+        query: String,
+        tableName: String,
+        columnName: String
+    ): HashMap<String, Int> {
         val querysToDo = DynamicQueries.getDynamicQuery(query)
         //create a hashmap to store the number of ayas found for each query
         val numberOfAyasFound = HashMap<String, Int>()
 
         //for each query in the arraylist map the number of ayas found to the query
-        for(querys in querysToDo){
+        for (querys in querysToDo) {
             //the cursor with a limit of 50 results
             val cursor = db!!.rawQuery(
                 "SELECT * FROM $tableName WHERE $columnName LIKE '%$querys%'",
@@ -438,7 +442,7 @@ class DatabaseAccessHelper(context: Context) {
         }
 
         //return the hashmap with the number of ayas found for each query
-        
+
         return numberOfAyasFound
     }
 

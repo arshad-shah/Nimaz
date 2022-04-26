@@ -8,7 +8,6 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
@@ -110,9 +109,9 @@ class QuranMainList : AppCompatActivity() {
                 //for each key in arraylist of keys render a textview with the key and value
                 for (i in arrayOfKeys.indices) {
                     val textView = TextView(this)
-                    textView.text = "Key word" + arrayOfKeys[i] + " Found " + arrayOfValues[i]
+                    textView.text = "Keyword: " + arrayOfKeys[i] + " was Found " + arrayOfValues[i] + " Times"
                     textView.setTextColor(resources.getColor(R.color.primaryTextColor))
-                    textView.setPadding(0, 10, 0, 10)
+                    textView.setPadding(0, 5, 0, 0)
                     searchFragmentTitle.addView(textView)
                 }
 

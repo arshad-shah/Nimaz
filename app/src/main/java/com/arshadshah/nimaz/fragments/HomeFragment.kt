@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,16 +23,11 @@ import com.arshadshah.nimaz.helperClasses.utils.LocationFinder
 import com.arshadshah.nimaz.helperClasses.utils.NetworkChecker
 import com.arshadshah.nimaz.helperClasses.utils.prayerTimesUtils.*
 import com.arshadshah.nimaz.helperClasses.utils.prayerTimesUtils.data.DateComponents
-import com.arshadshah.nimaz.helperClasses.utils.sunMoonUtils.SunMoonCalc
-import com.arshadshah.nimaz.helperClasses.utils.sunMoonUtils.roundToFloat
 import java.text.DateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 
