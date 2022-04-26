@@ -3,24 +3,26 @@ package com.arshadshah.nimaz.helperClasses.quran
 import android.content.Context
 import android.content.SharedPreferences
 import android.database.DataSetObserver
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ListAdapter
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.arabicReshaper.ArabicUtilities
 import com.arshadshah.nimaz.helperClasses.database.BookmarkDatabaseAccessHelper
+import com.arshadshah.nimaz.helperClasses.utils.DynamicQueries
 import java.text.NumberFormat
 import java.util.*
 
 internal class AyaListCustomAdapterSearch(
     var context: Context,
-    private var arrayList: ArrayList<SearchAyaObject?>
+    private var arrayList: ArrayList<SearchAyaObject?>,
+    private var searchQuery: String
 ) :
     ListAdapter {
     val sharedPreferences: SharedPreferences =
@@ -101,7 +103,29 @@ internal class AyaListCustomAdapterSearch(
 
         val unicodeWithNumber = unicodeAyaEndStart + endOfAyaWithNumber + unicodeAyaEndEnd
 
-        EnglishName?.text = AyaObject.ayaEnglish
+        if (isEnglish){
+            //find parts of the ayat
+            val querysToDo = DynamicQueries.getDynamicQuery(searchQuery)
+
+            //find any occurance of each of the queries in the AyaObject.ayaEnglish
+            for (query in querysToDo) {
+                //if the query is found in the AyaObject.ayaEnglish
+                val indexOfQuery = AyaObject.ayaEnglish.indexOf(query,0,true)
+                if (indexOfQuery != -1) {
+                    //if the query is found, highlight it
+                    val startIndex = indexOfQuery
+                    val endIndex = indexOfQuery + query.length
+                    val highlightedAya = AyaObject.ayaEnglish.substring(0, startIndex) +
+                            "<span style='padding:8px; background-color: #f7cd49; font-weight: bold;'>" + AyaObject.ayaEnglish.substring(
+                        startIndex,
+                        endIndex
+                    ) + "</span>" + AyaObject.ayaEnglish.substring(endIndex)
+                    EnglishName?.text = Html.fromHtml(highlightedAya)
+                }
+            }
+        }else{
+            EnglishName?.text = AyaObject.ayaEnglish
+        }
         ArabicName?.text =
             ArabicUtilities.reshape(AyaObject.ayaArabic + " " + unicodeWithNumber)
 

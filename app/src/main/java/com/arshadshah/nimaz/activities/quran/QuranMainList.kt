@@ -45,11 +45,7 @@ class QuranMainList : AppCompatActivity() {
 
         val backButton: ImageView = findViewById(R.id.backButton2)
 
-        val keyword: TextView = findViewById(R.id.keyword)
-
-        val keywordAmount: TextView = findViewById(R.id.keywordAmount)
-
-        val searchFragmentTitle: ConstraintLayout = findViewById(R.id.searchFragmentTitle)
+        val searchFragmentTitle: LinearLayout = findViewById(R.id.searchFragmentTitle)
 
         backButton.setOnClickListener {
             val expandIn: Animation =
@@ -90,7 +86,17 @@ class QuranMainList : AppCompatActivity() {
             val numberOfAyas =
                 helperQuranDatabase.searchForAyaAmountFound(query, "en_sahih", "text")
 
-            if (numberOfAyas != 0) {
+            //separate the hashmap into the amount of keys it has into separate arraylist of strings
+            //where the array name is the key and the value is the value
+            val arrayOfKeys = ArrayList<String>()
+            val arrayOfValues = ArrayList<String>()
+
+            numberOfAyas.forEach {
+                arrayOfKeys.add(it.key)
+                arrayOfValues.add(it.value.toString())
+            }
+
+            if (numberOfAyas.isNotEmpty()) {
                 val bundle = Bundle()
                 bundle.putString("query", query)
                 supportFragmentManager.commit {
@@ -100,8 +106,16 @@ class QuranMainList : AppCompatActivity() {
                 }
                 //get string from resources and add the number of ayas found and the query to it
                 searchFragmentTitle.isVisible = true
-                keyword.text = query
-                keywordAmount.text = getString(R.string.times, numberOfAyas.toString())
+
+                //for each key in arraylist of keys render a textview with the key and value
+                for (i in arrayOfKeys.indices) {
+                    val textView = TextView(this)
+                    textView.text = "Key word" + arrayOfKeys[i] + " Found " + arrayOfValues[i]
+                    textView.setTextColor(resources.getColor(R.color.primaryTextColor))
+                    textView.setPadding(0, 10, 0, 10)
+                    searchFragmentTitle.addView(textView)
+                }
+
                 numberOfPage!!.isVisible = false
                 nameOfPage?.isVisible = false
                 helperQuranDatabase.close()
