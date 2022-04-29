@@ -330,7 +330,7 @@ class DatabaseAccessHelper(context: Context) {
         }
 
         val surahNames = ArrayList<String?>()
-        lateinit var cursorOfSurahNames: Cursor
+        var cursorOfSurahNames: Cursor? = null
         for (i in 0 until surahNumber.size) {
             cursorOfSurahNames = db!!.rawQuery(
                 "SELECT * FROM suras WHERE suranumberdata = ${surahNumber[i]}",
@@ -340,7 +340,7 @@ class DatabaseAccessHelper(context: Context) {
                 surahNames.add(cursorOfSurahNames.getString(3))
             }
         }
-        cursorOfSurahNames.close()
+        cursorOfSurahNames!!.close()
 
 
         //arraylist of AyaObjects
