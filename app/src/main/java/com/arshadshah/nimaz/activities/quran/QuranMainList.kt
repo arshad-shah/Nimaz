@@ -110,7 +110,9 @@ class QuranMainList : AppCompatActivity() {
                 for (i in arrayOfKeys.indices) {
                     val textView = TextView(this)
                     textView.text = "Keyword: " + arrayOfKeys[i] + " was Found " + arrayOfValues[i] + " Times"
-                    textView.setTextColor(resources.getColor(R.color.primaryTextColor))
+                    //set the font to nunito
+                    textView.typeface =
+                        resources.getFont(R.font.nunito)
                     textView.setPadding(0, 5, 0, 0)
                     searchFragmentTitle.addView(textView)
                 }

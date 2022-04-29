@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.database.DataSetObserver
 import android.text.Html
+import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -103,6 +105,16 @@ internal class AyaListCustomAdapterSearch(
 
         val unicodeWithNumber = unicodeAyaEndStart + endOfAyaWithNumber + unicodeAyaEndEnd
 
+        //get primary color from theme using attribute
+        val typedValue = TypedValue()
+        val theme = context.theme
+        theme.resolveAttribute(R.attr.colorPrimaryVariant, typedValue, true)
+        val color = typedValue.data
+
+        //get the hex value of the color
+        val hexColor = String.format("#%06X", 0xFFFFFF and color)
+        
+
         if (isEnglish) {
             //find parts of the ayat
             val querysToDo = DynamicQueries.getDynamicQuery(searchQuery)
@@ -116,7 +128,7 @@ internal class AyaListCustomAdapterSearch(
                     val startIndex = indexOfQuery
                     val endIndex = indexOfQuery + query.length
                     val highlightedAya = AyaObject.ayaEnglish.substring(0, startIndex) +
-                            "<span style='padding:8px; background-color: #f7cd49; font-weight: bold;'>" + AyaObject.ayaEnglish.substring(
+                            "<span style='background-color: ${hexColor};'>" + AyaObject.ayaEnglish.substring(
                         startIndex,
                         endIndex
                     ) + "</span>" + AyaObject.ayaEnglish.substring(endIndex)

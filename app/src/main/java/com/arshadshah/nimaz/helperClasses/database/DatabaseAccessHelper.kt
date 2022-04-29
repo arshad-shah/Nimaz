@@ -340,7 +340,7 @@ class DatabaseAccessHelper(context: Context) {
                 surahNames.add(cursorOfSurahNames.getString(3))
             }
         }
-        cursorOfSurahNames!!.close()
+        cursorOfSurahNames?.close()
 
 
         //arraylist of AyaObjects
