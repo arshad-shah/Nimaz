@@ -95,7 +95,7 @@ class QuranMainList : AppCompatActivity() {
                 arrayOfValues.add(it.value.toString())
             }
 
-            if (numberOfAyas.isNotEmpty()) {
+            if (!numberOfAyas.containsValue(0)) {
                 val bundle = Bundle()
                 bundle.putString("query", query)
                 supportFragmentManager.commit {
