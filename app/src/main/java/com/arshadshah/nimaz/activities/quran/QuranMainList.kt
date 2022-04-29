@@ -109,7 +109,8 @@ class QuranMainList : AppCompatActivity() {
                 //for each key in arraylist of keys render a textview with the key and value
                 for (i in arrayOfKeys.indices) {
                     val textView = TextView(this)
-                    textView.text = "Keyword: " + arrayOfKeys[i] + " was Found " + arrayOfValues[i] + " Times"
+                    textView.text =
+                        "Keyword: " + arrayOfKeys[i] + " was Found " + arrayOfValues[i] + " Times"
                     //set the font to nunito
                     textView.typeface =
                         resources.getFont(R.font.nunito)

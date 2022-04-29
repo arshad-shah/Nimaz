@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.database.DataSetObserver
 import android.text.Html
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -113,7 +112,7 @@ internal class AyaListCustomAdapterSearch(
 
         //get the hex value of the color
         val hexColor = String.format("#%06X", 0xFFFFFF and color)
-        
+
 
         if (isEnglish) {
             //find parts of the ayat

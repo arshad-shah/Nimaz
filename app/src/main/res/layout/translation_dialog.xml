@@ -57,19 +57,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito"
-                    android:padding="10dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp"
                     android:text="English"
-                    android:textSize="24sp" />
+                    android:textSize="20sp" />
 
                 <RadioButton
                     android:id="@+id/urduTranslation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/urdu"
-                    android:padding="10dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp"
                     android:text="اُردو"
                     android:textAlignment="viewStart"
-                    android:textSize="34sp" />
+                    android:textSize="20sp" />
             </RadioGroup>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
