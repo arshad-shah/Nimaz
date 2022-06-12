@@ -8,7 +8,6 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
@@ -45,11 +44,7 @@ class QuranMainList : AppCompatActivity() {
 
         val backButton: ImageView = findViewById(R.id.backButton2)
 
-        val keyword: TextView = findViewById(R.id.keyword)
-
-        val keywordAmount: TextView = findViewById(R.id.keywordAmount)
-
-        val searchFragmentTitle: ConstraintLayout = findViewById(R.id.searchFragmentTitle)
+        val searchFragmentTitle: LinearLayout = findViewById(R.id.searchFragmentTitle)
 
         backButton.setOnClickListener {
             val expandIn: Animation =
@@ -90,7 +85,17 @@ class QuranMainList : AppCompatActivity() {
             val numberOfAyas =
                 helperQuranDatabase.searchForAyaAmountFound(query, "en_sahih", "text")
 
-            if (numberOfAyas != 0) {
+            //separate the hashmap into the amount of keys it has into separate arraylist of strings
+            //where the array name is the key and the value is the value
+            val arrayOfKeys = ArrayList<String>()
+            val arrayOfValues = ArrayList<String>()
+
+            numberOfAyas.forEach {
+                arrayOfKeys.add(it.key)
+                arrayOfValues.add(it.value.toString())
+            }
+
+            if (!numberOfAyas.containsValue(0)) {
                 val bundle = Bundle()
                 bundle.putString("query", query)
                 supportFragmentManager.commit {
@@ -100,8 +105,19 @@ class QuranMainList : AppCompatActivity() {
                 }
                 //get string from resources and add the number of ayas found and the query to it
                 searchFragmentTitle.isVisible = true
-                keyword.text = query
-                keywordAmount.text = getString(R.string.times, numberOfAyas.toString())
+
+                //for each key in arraylist of keys render a textview with the key and value
+                for (i in arrayOfKeys.indices) {
+                    val textView = TextView(this)
+                    textView.text =
+                        "Keyword: " + arrayOfKeys[i] + " was Found " + arrayOfValues[i] + " Times"
+                    //set the font to nunito
+                    textView.typeface =
+                        resources.getFont(R.font.nunito)
+                    textView.setPadding(0, 5, 0, 0)
+                    searchFragmentTitle.addView(textView)
+                }
+
                 numberOfPage!!.isVisible = false
                 nameOfPage?.isVisible = false
                 helperQuranDatabase.close()

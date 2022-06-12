@@ -153,7 +153,7 @@
     <string name="reset_counter" translatable="false">Reset Counter</string>
     <string name="search" translatable="false">Search</string>
     <string name="Quran_List_Page_Label_for_Search" translatable="false">The Word %1$s was found %2$s Times</string>
-    <string name="times" translatable="false">%1$s Times</string>
+    <string name="keyWordfound" translatable="false">%1$s found %2$s Times</string>
     <string name="help" translatable="false">help</string>
     <string name="go_to_bookmark" translatable="false">Go to Bookmark</string>
     <string name="go_to_ayat" translatable="false">go to ayat</string>

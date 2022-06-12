@@ -48,7 +48,7 @@ class QuranFragment : Fragment() {
                         // Create the object of
                         // AlertDialog Builder class
                         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
-                        val moreDialog = inflater.inflate(R.layout.moredialog, null)
+                        val moreDialog = inflater.inflate(R.layout.translation_dialog, null)
                         val englishTranslation: RadioButton =
                             moreDialog.findViewById(R.id.englishTranslation)
                         val urduTranslation: RadioButton =

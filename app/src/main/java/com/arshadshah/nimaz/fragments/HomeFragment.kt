@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,16 +23,11 @@ import com.arshadshah.nimaz.helperClasses.utils.LocationFinder
 import com.arshadshah.nimaz.helperClasses.utils.NetworkChecker
 import com.arshadshah.nimaz.helperClasses.utils.prayerTimesUtils.*
 import com.arshadshah.nimaz.helperClasses.utils.prayerTimesUtils.data.DateComponents
-import com.arshadshah.nimaz.helperClasses.utils.sunMoonUtils.SunMoonCalc
-import com.arshadshah.nimaz.helperClasses.utils.sunMoonUtils.roundToFloat
 import java.text.DateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 
@@ -173,6 +167,7 @@ class HomeFragment : Fragment() {
             }
         }
 
+        val isIshaaLongTrue = sharedPreferences.getBoolean("ishaaTimeLonger", false)
 
         //current time
         val currentTime = System.currentTimeMillis()
@@ -315,30 +310,68 @@ class HomeFragment : Fragment() {
             Prayer.ISHA -> nextPrayerNameCleaned = getString(R.string.ishaa)
         }
 
-        when {
-            currentTime in isha..fajrTommorow -> {
-                TimerCreater().getTimer(
-                    requireContext(),
-                    fajrTommorow,
-                    timerToNextPrayer,
-                    nextPrayerNameCleaned
-                )
+        if(!isIshaaLongTrue){
+            when {
+                currentTime in isha..fajrTommorow -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        fajrTommorow,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                currentTime < prayerfajr -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                else -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
             }
-            currentTime < prayerfajr -> {
-                TimerCreater().getTimer(
-                    requireContext(),
-                    nextPrayerTimeInLong,
-                    timerToNextPrayer,
-                    nextPrayerNameCleaned
-                )
-            }
-            else -> {
-                TimerCreater().getTimer(
-                    requireContext(),
-                    nextPrayerTimeInLong,
-                    timerToNextPrayer,
-                    nextPrayerNameCleaned
-                )
+        }else{
+            when {
+                currentTime in isha..fajrTommorow -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        fajrTommorow,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                currentTime < prayerfajr -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                currentTime in maghrib..(maghrib+18000000) -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        (maghrib+18000000),
+                        timerToNextPrayer,
+                        "Ishaa After Maghrib",
+                        ishaaLong = true
+                    )
+                }
+                else -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
             }
         }
 

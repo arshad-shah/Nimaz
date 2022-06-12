@@ -57,7 +57,12 @@ class QuranSearchFragment : Fragment() {
                 progressBarContainer.isVisible = false
                 progressBar.isVisible = false
                 ayaList.divider = null
-                ayaListCustomAdapter = AyaListCustomAdapterSearch(requireContext(), ayaFound)
+                //highlight the search query in the list view
+                ayaListCustomAdapter = AyaListCustomAdapterSearch(
+                    requireContext(),
+                    ayaFound,
+                    searchQuery.toString()
+                )
                 ayaList.adapter = ayaListCustomAdapter
             }
             helper.close()

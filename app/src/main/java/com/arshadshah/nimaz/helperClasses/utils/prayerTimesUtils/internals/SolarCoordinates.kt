@@ -42,9 +42,12 @@ internal class SolarCoordinates(julianDay: Double) {
         val julianCentury = julianCentury(julianDay)
         val meanSolarLongitude = meanSolarLongitude( /* julianCentury */julianCentury)
         val meanLunarLongitude = meanLunarLongitude( /* julianCentury */julianCentury)
-        val ascendingLunarNodeLongitude = ascendingLunarNodeLongitude( /* julianCentury */julianCentury)
+        val ascendingLunarNodeLongitude =
+            ascendingLunarNodeLongitude( /* julianCentury */julianCentury)
         val apparentSolarLongitudeRadians = Math.toRadians(
-            apparentSolarLongitude( /* julianCentury */julianCentury,  /* meanLongitude */meanSolarLongitude)
+            apparentSolarLongitude( /* julianCentury */julianCentury,  /* meanLongitude */
+                meanSolarLongitude
+            )
         )
         val meanSiderealTime = meanSiderealTime( /* julianCentury */julianCentury)
         val nutationInLongitude = nutationInLongitude(/* solarLongitude */
@@ -58,7 +61,8 @@ internal class SolarCoordinates(julianDay: Double) {
             meanLunarLongitude,  /* ascendingNode */
             ascendingLunarNodeLongitude
         )
-        val meanObliquityOfTheEcliptic = meanObliquityOfTheEcliptic( /* julianCentury */julianCentury)
+        val meanObliquityOfTheEcliptic =
+            meanObliquityOfTheEcliptic( /* julianCentury */julianCentury)
         val apparentObliquityOfTheEclipticRadians = Math.toRadians(
             apparentObliquityOfTheEcliptic( /* julianCentury */julianCentury,  /* meanObliquityOfTheEcliptic */
                 meanObliquityOfTheEcliptic
@@ -72,7 +76,13 @@ internal class SolarCoordinates(julianDay: Double) {
 
         /* Equation from Astronomical Algorithms page 165 */
         rightAscension = unwindAngle(
-            Math.toDegrees(atan2(cos(apparentObliquityOfTheEclipticRadians) * sin(apparentSolarLongitudeRadians), cos(apparentSolarLongitudeRadians)))
+            Math.toDegrees(
+                atan2(
+                    cos(apparentObliquityOfTheEclipticRadians) * sin(
+                        apparentSolarLongitudeRadians
+                    ), cos(apparentSolarLongitudeRadians)
+                )
+            )
         )
 
         /* Equation from Astronomical Algorithms page 88 */

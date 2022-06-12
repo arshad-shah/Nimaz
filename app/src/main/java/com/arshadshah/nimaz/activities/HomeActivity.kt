@@ -72,7 +72,7 @@ class HomeActivity : AppCompatActivity() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val isFirstInstall = sharedPreferences.getBoolean("isFirstInstall", true)
         val isNetworkAvailable = NetworkChecker().networkCheck(this)
-        if(!isNetworkAvailable && isFirstInstall){
+        if (!isNetworkAvailable && isFirstInstall) {
             with(sharedPreferences.edit()) {
                 putBoolean("isFirstInstall", false)
                 apply()
@@ -84,7 +84,8 @@ class HomeActivity : AppCompatActivity() {
             builder.setPositiveButton("OK") { _, _ ->
                 //dismiss the dialog
                 builder.create().dismiss()
-                Toast.makeText(this, "Using default Values for Prayer times", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Using default Values for Prayer times", Toast.LENGTH_SHORT)
+                    .show()
             }
             builder.create().show()
         }

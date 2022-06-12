@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.preference.PreferenceManager
 import com.arshadshah.nimaz.helperClasses.quran.AyaObject
 import com.arshadshah.nimaz.helperClasses.quran.SearchAyaObject
+import com.arshadshah.nimaz.helperClasses.utils.DynamicQueries
 
 /**
  * A class that provides methods to access the database
@@ -295,9 +296,6 @@ class DatabaseAccessHelper(context: Context) {
         tableName: String,
         columnName: String
     ): ArrayList<SearchAyaObject?> {
-        val cursor =
-            db!!.rawQuery("SELECT * FROM $tableName WHERE $columnName LIKE '%$query%'", null)
-
         //arabic text array
         val arabicText = ArrayList<String?>()
 
@@ -307,19 +305,32 @@ class DatabaseAccessHelper(context: Context) {
         //aya number array
         val ayaNumber = ArrayList<String?>()
 
+        val ayaNumberInSurah = ArrayList<String?>()
+
         val surahNumber = ArrayList<String?>()
 
-        //loop through the cursor and add the ayanumbers for the ayas to the table quran_text
-        while (cursor.moveToNext()) {
-            //add the ayaNumber at index 0 to the ayaNumber array
-            ayaNumber.add(cursor.getString(2))
-            surahNumber.add(cursor.getString(1))
+        val querysToDo = DynamicQueries.getDynamicQuery(query)
+
+        //for each query in the arraylist
+        for (querys in querysToDo) {
+            //the cursor with a limit of 50 results
+            val cursor = db!!.rawQuery(
+                "SELECT * FROM $tableName WHERE $columnName LIKE '%$querys%'",
+                null
+            )
+
+            //loop through the cursor and add the ayanumbers for the ayas to the table quran_text
+            while (cursor.moveToNext()) {
+                //add the ayaNumber at index 0 to the ayaNumber array
+                ayaNumber.add(cursor.getString(0))
+                surahNumber.add(cursor.getString(1))
+            }
+
+            cursor.close()
         }
 
-        cursor.close()
-
         val surahNames = ArrayList<String?>()
-        lateinit var cursorOfSurahNames: Cursor
+        var cursorOfSurahNames: Cursor? = null
         for (i in 0 until surahNumber.size) {
             cursorOfSurahNames = db!!.rawQuery(
                 "SELECT * FROM suras WHERE suranumberdata = ${surahNumber[i]}",
@@ -329,7 +340,7 @@ class DatabaseAccessHelper(context: Context) {
                 surahNames.add(cursorOfSurahNames.getString(3))
             }
         }
-        cursorOfSurahNames.close()
+        cursorOfSurahNames?.close()
 
 
         //arraylist of AyaObjects
@@ -361,6 +372,7 @@ class DatabaseAccessHelper(context: Context) {
             //add the arabic text at index 3 to the arabicText array
             while (cursorOfAyasFromArabic.moveToNext()) {
                 arabicText.add(cursorOfAyasFromArabic.getString(3))
+                ayaNumberInSurah.add(cursorOfAyasFromArabic.getString(2))
             }
 
             if (sharedPreferences.getBoolean("isEnglish", true)) {
@@ -378,7 +390,7 @@ class DatabaseAccessHelper(context: Context) {
             //add the ayaObject to the arraylist
             ayas.add(
                 SearchAyaObject(
-                    ayaNumber[i]!!,
+                    ayaNumberInSurah[i]!!,
                     surahNames[i]!!,
                     translationText[i]!!,
                     arabicText[i]!!
@@ -402,18 +414,36 @@ class DatabaseAccessHelper(context: Context) {
      * @param query the query to search for
      * @return the number of ayas found
      */
-    fun searchForAyaAmountFound(query: String, tableName: String, columnName: String): Int {
-        //find the ayas that have the query in the table
-        val cursor =
-            db!!.rawQuery("SELECT * FROM $tableName WHERE $columnName LIKE '%$query%'", null)
+    fun searchForAyaAmountFound(
+        query: String,
+        tableName: String,
+        columnName: String
+    ): HashMap<String, Int> {
+        val querysToDo = DynamicQueries.getDynamicQuery(query)
+        //create a hashmap to store the number of ayas found for each query
+        val numberOfAyasFound = HashMap<String, Int>()
 
+        //for each query in the arraylist map the number of ayas found to the query
+        for (querys in querysToDo) {
+            //the cursor with a limit of 50 results
+            val cursor = db!!.rawQuery(
+                "SELECT * FROM $tableName WHERE $columnName LIKE '%$querys%'",
+                null
+            )
 
-        //number of ayas found
-        val ayaAmountForQuery = cursor.count
+            //loop through the cursor and add the ayanumbers for the ayas to the table quran_text
+            var numberOfAyas = 0
+            while (cursor.moveToNext()) {
+                numberOfAyas++
+            }
 
-        cursor.close()
+            numberOfAyasFound[querys] = numberOfAyas
+            cursor.close()
+        }
 
-        return ayaAmountForQuery
+        //return the hashmap with the number of ayas found for each query
+
+        return numberOfAyasFound
     }
 
     fun getNumberOfAyatJuz(number: Int): ArrayList<String?> {
@@ -424,7 +454,7 @@ class DatabaseAccessHelper(context: Context) {
 
         while (cursor!!.moveToNext()) {
             //add the ayaNumber at index 2 to the ayaNumber array
-            ayaNumber.add(cursor.getString(0))
+            ayaNumber.add(cursor.getString(3))
         }
         cursor.close()
 
@@ -443,7 +473,7 @@ class DatabaseAccessHelper(context: Context) {
 
         while (cursor.moveToNext()) {
             //add the arabic text at index 3 to the arabicText array
-            arabicText.add(cursor.getString(2))
+            arabicText.add(cursor.getString(3))
         }
         cursor.close()
 

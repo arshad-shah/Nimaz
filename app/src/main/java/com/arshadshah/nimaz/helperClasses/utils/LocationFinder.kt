@@ -82,7 +82,8 @@ class LocationFinder {
                     val cityNameFromStorage =
                         sharedPreferences.getString("location_input", "Portlaoise").toString()
 
-                    cityName = sharedPreferences.getString("location_input", "Portlaoise").toString()
+                    cityName =
+                        sharedPreferences.getString("location_input", "Portlaoise").toString()
                     Log.i("Location", "Location Found From Storage $cityName")
                 }
             } else {
