@@ -167,6 +167,7 @@ class HomeFragment : Fragment() {
             }
         }
 
+        val isIshaaLongTrue = sharedPreferences.getBoolean("ishaaTimeLonger", false)
 
         //current time
         val currentTime = System.currentTimeMillis()
@@ -309,30 +310,68 @@ class HomeFragment : Fragment() {
             Prayer.ISHA -> nextPrayerNameCleaned = getString(R.string.ishaa)
         }
 
-        when {
-            currentTime in isha..fajrTommorow -> {
-                TimerCreater().getTimer(
-                    requireContext(),
-                    fajrTommorow,
-                    timerToNextPrayer,
-                    nextPrayerNameCleaned
-                )
+        if(!isIshaaLongTrue){
+            when {
+                currentTime in isha..fajrTommorow -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        fajrTommorow,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                currentTime < prayerfajr -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                else -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
             }
-            currentTime < prayerfajr -> {
-                TimerCreater().getTimer(
-                    requireContext(),
-                    nextPrayerTimeInLong,
-                    timerToNextPrayer,
-                    nextPrayerNameCleaned
-                )
-            }
-            else -> {
-                TimerCreater().getTimer(
-                    requireContext(),
-                    nextPrayerTimeInLong,
-                    timerToNextPrayer,
-                    nextPrayerNameCleaned
-                )
+        }else{
+            when {
+                currentTime in isha..fajrTommorow -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        fajrTommorow,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                currentTime < prayerfajr -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
+                currentTime in maghrib..(maghrib+18000000) -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        (maghrib+18000000),
+                        timerToNextPrayer,
+                        "Ishaa After Maghrib",
+                        ishaaLong = true
+                    )
+                }
+                else -> {
+                    TimerCreater().createTimer(
+                        requireContext(),
+                        nextPrayerTimeInLong,
+                        timerToNextPrayer,
+                        nextPrayerNameCleaned
+                    )
+                }
             }
         }
 

@@ -16,23 +16,13 @@ import com.arshadshah.nimaz.fragments.HomeFragment
  * */
 class TimerCreater {
 
-    fun getTimer(context: Context, endTime: Long, teller: TextView, nextPrayerName: String) {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-        if (sharedPreferences.getBoolean("ishaaTimeLonger", false)) {
-            teller.text = context.getString(R.string.maghrib)
-        } else {
-            createTimer(context, endTime, teller, nextPrayerName)
-        }
-    }
-
     /**
      * method to create timer using countdown timer funtion
      * @param context context of the activity
      * @param endTime end time of the timer
      * @param textView textview to display the timer
      */
-    fun createTimer(context: Context, endTime: Long, textView: TextView, nextPrayerName: String) {
+    fun createTimer(context: Context, endTime: Long, textView: TextView, nextPrayerName: String , ishaaLong: Boolean = false) {
         // countdown timer for prayers
         var countDownTimer: CountDownTimer? = null
         // declare and initialize variables
@@ -62,43 +52,48 @@ class TimerCreater {
                     diff %= secondsInMilli
 
                     val res: Resources = context.resources
-                    val filledText = when {
-                        elapsedHours > 1 && elapsedMinutes.toInt() != 0 -> {
-                            val text = res.getString(R.string.timerWithText)
-                            String.format(text, elapsedHours, elapsedMinutes, nextPrayerName)
-                        }
-                        elapsedHours > 1 && elapsedMinutes.toInt() == 0 -> {
-                            val text = res.getString(R.string.timerSeconds)
-                            String.format(text, elapsedHours, "hrs", nextPrayerName)
-                        }
-                        elapsedHours.toInt() == 1 && elapsedMinutes.toInt() in 2..59 -> {
-                            val text = res.getString(R.string.timerWithTextSingle)
-                            String.format(text, elapsedHours, elapsedMinutes, nextPrayerName)
-                        }
-                        elapsedHours.toInt() == 1 && elapsedMinutes < 2 && elapsedMinutes > 0 -> {
-                            val text = res.getString(R.string.timerWithTextSingleMin)
-                            String.format(text, elapsedHours, elapsedMinutes, nextPrayerName)
-                        }
-                        elapsedHours.toInt() == 1 && elapsedMinutes.toInt() == 0 -> {
-                            val text = res.getString(R.string.timerSeconds)
-                            String.format(text, elapsedHours, "hr", nextPrayerName)
-                        }
-                        elapsedHours.toInt() == 0 && elapsedMinutes in 2..59 -> {
-                            val text = res.getString(R.string.timerSeconds)
-                            String.format(text, elapsedMinutes, "mins", nextPrayerName)
-                        }
-                        elapsedHours.toInt() == 0 && elapsedMinutes < 2 && elapsedMinutes > 0 -> {
-                            val text = res.getString(R.string.timerWithTextSingleMinAndSec)
-                            String.format(text, elapsedMinutes, elapsedSeconds, nextPrayerName)
-                        }
-                        elapsedHours.toInt() == 0 && elapsedMinutes.toInt() == 0 -> {
-                            val text = res.getString(R.string.timerSeconds)
-                            String.format(text, elapsedSeconds, "seconds", nextPrayerName)
-                        }
-                        //if there is less than 1 minute left
-                        else -> {
-                            val text = res.getString(R.string.timerSeconds)
-                            String.format(text, elapsedSeconds, "seconds", nextPrayerName)
+                    val filledText: String
+                    if(ishaaLong){
+                        filledText = nextPrayerName
+                    }else{
+                        filledText = when {
+                            elapsedHours > 1 && elapsedMinutes.toInt() != 0 -> {
+                                val text = res.getString(R.string.timerWithText)
+                                String.format(text, elapsedHours, elapsedMinutes, nextPrayerName)
+                            }
+                            elapsedHours > 1 && elapsedMinutes.toInt() == 0 -> {
+                                val text = res.getString(R.string.timerSeconds)
+                                String.format(text, elapsedHours, "hrs", nextPrayerName)
+                            }
+                            elapsedHours.toInt() == 1 && elapsedMinutes.toInt() in 2..59 -> {
+                                val text = res.getString(R.string.timerWithTextSingle)
+                                String.format(text, elapsedHours, elapsedMinutes, nextPrayerName)
+                            }
+                            elapsedHours.toInt() == 1 && elapsedMinutes < 2 && elapsedMinutes > 0 -> {
+                                val text = res.getString(R.string.timerWithTextSingleMin)
+                                String.format(text, elapsedHours, elapsedMinutes, nextPrayerName)
+                            }
+                            elapsedHours.toInt() == 1 && elapsedMinutes.toInt() == 0 -> {
+                                val text = res.getString(R.string.timerSeconds)
+                                String.format(text, elapsedHours, "hr", nextPrayerName)
+                            }
+                            elapsedHours.toInt() == 0 && elapsedMinutes in 2..59 -> {
+                                val text = res.getString(R.string.timerSeconds)
+                                String.format(text, elapsedMinutes, "mins", nextPrayerName)
+                            }
+                            elapsedHours.toInt() == 0 && elapsedMinutes < 2 && elapsedMinutes > 0 -> {
+                                val text = res.getString(R.string.timerWithTextSingleMinAndSec)
+                                String.format(text, elapsedMinutes, elapsedSeconds, nextPrayerName)
+                            }
+                            elapsedHours.toInt() == 0 && elapsedMinutes.toInt() == 0 -> {
+                                val text = res.getString(R.string.timerSeconds)
+                                String.format(text, elapsedSeconds, "seconds", nextPrayerName)
+                            }
+                            //if there is less than 1 minute left
+                            else -> {
+                                val text = res.getString(R.string.timerSeconds)
+                                String.format(text, elapsedSeconds, "seconds", nextPrayerName)
+                            }
                         }
                     }
                     textView.text = filledText
