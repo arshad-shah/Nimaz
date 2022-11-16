@@ -1,0 +1,33 @@
+@startuml
+'https://plantuml.com/component-diagram
+title Arcitecture of NIMAZ
+
+frame "Frontend" as frontend{
+[Android]
+}
+
+frame location {
+[Geocoder]
+[Geolocation]
+}
+
+frame "Backend" as backend{
+cloud {
+  component "SpringBoot API" as server
+}
+}
+
+frame "Persistence" as persistence{
+
+database "Database" as db{
+  component "MySQL" as mysql
+}
+}
+
+frontend --> location
+
+frontend --> backend : REST
+backend --> persistence : JDBC
+
+'end
+@enduml

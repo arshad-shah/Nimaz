@@ -1,0 +1,113 @@
+@startuml
+title "Nimaz"
+'the user case diagram
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor FloralWhite
+    BorderColor Black
+    ArrowColor Black
+}
+
+left to right direction
+actor User
+
+rectangle "Prayer Times" {
+    (Open App) as (1)
+
+    (Show prayer times) as (2)
+    (show Qibla direction) as (3)
+    (show Quran) as (4)
+
+    (Show More) as (5)
+    (Show Tasbih) as (6)
+    (Show Names of Allah) as (7)
+    (Show Shahadah) as (8)
+    (Show Help) as (9)
+
+    (get current location) as (10)
+    (geocode city name/coordinates) as (11)
+
+    (Settings) as (12)
+    (Toggle manual/Auto location) as (13)
+    (Enter city name) as (14)
+    (Enter coordinates) as (15)
+
+    (Prayer times Customization) as (16)
+    (Instructions) as (17)
+    (Change calculation method) as (18)
+    (Change Asr Juristic method) as (19)
+    (Change High Latitudes method) as (20)
+    (Change angle) as (21)
+    (Change prayer times adjustments) as (22)
+
+    (Reset Alarms) as (23)
+    (Set a test alarm)  as (24)
+    (Navigate to Notification Settings) as (25)
+
+    (Battery Optimization) as (26)
+
+    (Privacy Policy) as (27)
+    (Terms of Service) as (28)
+    (About) as (29)
+
+    (Select an option) as (30)
+
+    (get Direction towards Qibla) as (31)
+    (get location from storage) as (32)
+}
+
+   (get Data from API) as (33)
+
+
+'connections
+User --> (1)
+(1) --> (30)
+
+'navigation
+(30) <|-- (2) : extends
+(30) <|-- (3) : extends
+(30) <|-- (4) : extends
+(30) <|-- (5) : extends
+(30) <|-- (12) : extends
+
+'prayer times
+(2) .> (10) : includes
+(2) .> (11) : includes
+
+'Qibla
+(3) .> (32) : includes
+(3) .> (31) : extends
+
+'More
+(5) <|-- (6) : extends
+(5) <|-- (7) : extends
+(5) <|-- (8) : extends
+(5) <|-- (9) : extends
+
+'Settings
+(12) <|-- (13) : extends
+(12) <|-- (14) : extends
+(12) <|-- (15) : extends
+(12) <|-- (16) : extends
+(12) <|-- (23) : extends
+(12) <|-- (24) : extends
+(12) <|-- (25) : extends
+(12) <|-- (26) : extends
+(12) <|-- (27) : extends
+(12) <|-- (28) : extends
+(12) <|-- (29) : extends
+
+'prayer times customization
+(16) <|-- (17) : extends
+(16) <|-- (18) : extends
+(16) <|-- (19) : extends
+(16) <|-- (20) : extends
+(16) <|-- (21) : extends
+(16) <|-- (22) : extends
+
+'Quran
+(4) .> (33) : includes
+
+
+@enduml

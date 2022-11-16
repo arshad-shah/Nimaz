@@ -1,0 +1,20 @@
+@startuml
+class CalculationParameters{
+{field} +fajrAngle: Double
+{field} +ishaAngle: Double
+{field} +ishaInterval: Int = 0
+{field} +method: CalculationMethod
+{field} +madhab: Madhab
+{field} +highLatitudeRule: HighLatitudeRule
+{field} +adjustments: PrayerAdjustments()
+{field} +methodAdjustments: PrayerAdjustments()
+
++<<constructor>> CalculationParameters(fajrAngle:Double, ishaAngle:Double)
++<<constructor>> CalculationParameters(fajrAngle:Double, ishaInterval:Int):CalculationParameters(fajrAngle, 0.0)
++<<constructor>> CalculationParameters(fajrAngle:Double, ishaAngle:Double, method:CalculationMethod):CalculationParameters(fajrAngle, ishaAngle)
++<<constructor>> CalculationParameters(fajrAngle:Double, ishaInterval:Int, method:CalculationMethod):CalculationParameters(fajrAngle, 0.0, method)
++withMethodAdjustments(adjustments: PrayerAdjustments):CalculationParameters
+
+}
+
+@enduml

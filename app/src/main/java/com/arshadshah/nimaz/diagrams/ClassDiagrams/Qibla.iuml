@@ -1,0 +1,6 @@
+@startuml
+class Qibla {
+-MAKKAH: Coordinates
++calculateQiblaDirection(coordinates: Coordinates): Double
+}
+@enduml

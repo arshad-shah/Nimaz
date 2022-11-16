@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Nimaz</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="prayer_times_screen">Prayer Times</string>
+    <string name="gps_not_enabled">GPS not enabled</string>
+    <string name="required_for_this_app">GPS is required to get your location automatically, if you would like to use the app manually please input location in settings</string>
+    <string name="enable_now">Enable GPS now</string>
+    <string name="permission_required">Location Permission Required</string>
+    <string name="Location_required_for_this_app">Location is required to get correct prayer times.  if you dont want to use the auto location, please enter your city name in settings.</string>
+    <string name="AllowPerms">Allow Location</string>
+    <string name="title_activity_setting">Setting</string>
+    <string name="title_activity_introduction">Introduction</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="app_widget_description">This is an app widget description</string>
+    <string name="title_activity_aya">AyaActivity</string>
+</resources>
