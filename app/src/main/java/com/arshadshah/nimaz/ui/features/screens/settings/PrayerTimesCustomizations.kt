@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.arshadshah.nimaz.constants.PrayerTimesCustomizationMapping
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
@@ -34,9 +34,9 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
     val ishaAdjustment: String = sharedPreferences.getData("isha_adjustment", "0")
 
 
-    val mapOfMethods = PrayerTimesCustomizationMapping().getMethods()
-    val mapOfMadhabs = PrayerTimesCustomizationMapping().getMadhabs()
-    val mapOfHighLatitudeRules = PrayerTimesCustomizationMapping().getHighLatitudeRules()
+    val mapOfMethods = AppConstants.getMethods()
+    val mapOfMadhabs = AppConstants.getMadhabs()
+    val mapOfHighLatitudeRules = AppConstants.getHighLatitudeRules()
 
     val calculationMethodState =
         rememberPreferenceStringSettingState("calculation_method", "IRELAND", sharedPreferences)

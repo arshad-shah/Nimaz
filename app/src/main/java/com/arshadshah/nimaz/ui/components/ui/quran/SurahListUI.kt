@@ -17,24 +17,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.models.Surah
 import com.arshadshah.nimaz.ui.theme.quranFont
 
 @Composable
 fun SurahListUI(
-    surahs: List<Map<String, String>>,
+    surahs: ArrayList<Surah>,
     paddingValues: PaddingValues,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
 ) {
     LazyColumn(userScrollEnabled = true, contentPadding = paddingValues) {
         items(surahs.size) { index ->
             SurahListItemUI(
-                surahNumber = surahs[index]["surahNumber"] ?: "0",
-                surahAyaAmount = surahs[index]["surahAyaAmount"] ?: "0",
-                surahName = surahs[index]["surahName"] ?: "0",
-                englishName = surahs[index]["englishName"] ?: "0",
-                englishNameTranslation = surahs[index]["englishNameTranslation"] ?: "0",
-                type = surahs[index]["type"] ?: "0",
-                rukus = surahs[index]["rukus"] ?: "0",
+                surahNumber = surahs[index].number.toString(),
+                surahAyaAmount = surahs[index].numberOfAyahs.toString(),
+                surahName = surahs[index].name,
+                englishName = surahs[index].englishName,
+                englishNameTranslation = surahs[index].englishNameTranslation,
+                type = surahs[index].revelationType,
+                rukus = surahs[index].rukus.toString(),
                 onNavigateToAyatScreen = onNavigateToAyatScreen
             )
         }

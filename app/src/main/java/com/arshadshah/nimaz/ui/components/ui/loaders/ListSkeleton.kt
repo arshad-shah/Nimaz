@@ -25,7 +25,7 @@ fun ItemSkeleton(brush: Brush) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(8.dp)
             .height(50.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(brush)

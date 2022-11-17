@@ -17,20 +17,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.models.Juz
 import com.arshadshah.nimaz.ui.theme.quranFont
 
 @Composable
 fun JuzListUI(
-    juz: List<Map<String, String>>,
+    juz: ArrayList<Juz>,
     paddingValues: PaddingValues,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
 ) {
     LazyColumn(userScrollEnabled = true, contentPadding = paddingValues) {
         items(juz.size) { index ->
             JuzListItemUI(
-                juzNumber = juz[index]["juzNumber"] ?: "",
-                name = juz[index]["name"] ?: "",
-                tname = juz[index]["tname"] ?: "",
+                juzNumber = juz[index].number.toString(),
+                name = juz[index].name,
+                tname = juz[index].tname,
                 onNavigateToAyatScreen = onNavigateToAyatScreen
             )
         }

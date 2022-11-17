@@ -1,18 +1,18 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.ui.components.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.ui.components.utils.QuranApi
+import com.arshadshah.nimaz.ui.components.utils.repositories.QuranRepository
+import com.arshadshah.nimaz.ui.models.Surah
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SurahViewModel(context: Context) : ViewModel() {
+class SurahViewModel : ViewModel() {
     sealed class SurahState {
         object Loading : SurahState()
-        data class Success(val data: String) : SurahState()
+        data class Success(val data: ArrayList<Surah>?) : SurahState()
         data class Error(val errorMessage: String) : SurahState()
     }
 
@@ -20,17 +20,14 @@ class SurahViewModel(context: Context) : ViewModel() {
     val surahState = _surahState.asStateFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                _surahState.value = SurahState.Loading
-                val api = QuranApi(context)
-                api.getAllSurahs(context)
-                val sharedPreferences = PrivateSharedPreferences(context)
-                val surahList = sharedPreferences.getData("surahList", "")
-                if (surahList != "") {
-                    _surahState.value = SurahState.Success(surahList)
+                val response = QuranRepository.getSurahs()
+                if (response.data != null) {
+                    _surahState.value = SurahState.Success(response.data)
+                } else {
+                    _surahState.value = SurahState.Error(response.message!!)
                 }
-
             } catch (e: Exception) {
                 _surahState.value = SurahState.Error(e.message ?: "Unknown error")
             }
