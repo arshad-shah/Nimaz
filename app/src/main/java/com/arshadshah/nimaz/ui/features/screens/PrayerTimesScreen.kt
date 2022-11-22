@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.features.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -11,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
+import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.utils.Location
 import com.arshadshah.nimaz.ui.components.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.ui.components.utils.location.LocationFinder
@@ -25,6 +27,9 @@ fun PrayerTimesScreen(paddingValues: PaddingValues) {
             .wrapContentSize(Alignment.Center),
     ) {
         val context = LocalContext.current
+        val viewModel = PrayerTimesViewModel(context)
+        val state = viewModel.prayerTimesListState.collectAsState()
+
         val sharedPreferences = PrivateSharedPreferences(context)
         val locationAuto = sharedPreferences.getDataBoolean("location_auto", true)
         val location = remember {
@@ -54,7 +59,6 @@ fun PrayerTimesScreen(paddingValues: PaddingValues) {
 
         LocationTimeContainer()
         DatesContainer()
-        PrayerTimesList()
-
+        PrayerTimesList(state = state)
     }
 }

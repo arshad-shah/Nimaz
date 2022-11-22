@@ -18,19 +18,14 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun PrayerTimesListUI(modifier: Modifier = Modifier, prayerTimesMap: Map<String, LocalDateTime?>) {
-    val listsize = remember(prayerTimesMap) { prayerTimesMap.size }
-    val listState = rememberLazyListState(0)
-    //the UI for the prayer times list
-    //padding for the list and rounded corners
-    //a drop shadow is added to the list
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(0.dp, 8.dp)
             .shadow(5.dp, shape = MaterialTheme.shapes.medium, clip = true)
     ) {
-        LazyColumn (state = listState){
-            items(listsize) {
+        LazyColumn{
+            items(prayerTimesMap.size) {
                 Column {
                     //if the element is first then dont add a divider else add a divider on top
                     if (it != 0) {

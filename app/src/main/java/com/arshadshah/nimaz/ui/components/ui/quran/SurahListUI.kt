@@ -53,7 +53,6 @@ fun SurahListItemUI(
     rukus: String,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
 ) {
-    val context = LocalContext.current
     ElevatedCard(
         modifier = Modifier
             .padding(4.dp)

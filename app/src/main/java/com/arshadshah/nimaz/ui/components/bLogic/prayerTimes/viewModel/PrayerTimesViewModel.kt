@@ -26,7 +26,7 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
 
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
                 val response = PrayerTimesRepository.getPrayerTimes(context)
                 if (response.data != null) {
@@ -40,4 +40,5 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
             }
         }
     }
+
 }

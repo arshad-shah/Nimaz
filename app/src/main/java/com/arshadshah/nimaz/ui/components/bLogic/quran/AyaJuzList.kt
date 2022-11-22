@@ -1,33 +1,39 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.models.Aya
 
 @Composable
 fun AyaJuzList(
-    viewModel: AyaJuzViewModel = AyaJuzViewModel(),
     paddingValues: PaddingValues,
     number: Int,
     isEnglish: Boolean,
+    state: State<AyaJuzViewModel.AyaJuzState>,
 ) {
-    viewModel.getAllAyaForJuz(number, isEnglish)
-    when (val state = viewModel.ayaJuzstate.collectAsState().value) {
+    when (val ayatJuzListState = state.value) {
         is AyaJuzViewModel.AyaJuzState.Loading -> {
             CircularLoaderCard()
         }
         is AyaJuzViewModel.AyaJuzState.Success -> {
-            val correctedList = processAyatMap(state.data, isEnglish, number)
+            val correctedList = processAyatMap(ayatJuzListState.data, isEnglish, number)
 
             AyaListUI(ayaList = correctedList, paddingValues = paddingValues)
         }
         is AyaJuzViewModel.AyaJuzState.Error -> {
-            Text(text = state.errorMessage)
+            Toast.makeText(
+                LocalContext.current,
+                ayatJuzListState.errorMessage,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }

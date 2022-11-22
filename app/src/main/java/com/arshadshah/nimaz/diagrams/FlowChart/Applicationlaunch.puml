@@ -1,6 +1,6 @@
 @startuml
 'https://plantuml.com/activity-diagram-beta
-title Launch of the Application
+title Launch of the Application and Get prayer times
 start
 :Launch the application;
 :Splash screen;
@@ -10,7 +10,6 @@ if (firstInstall?) then (true)
     :Show the Privacy Policy screen;
     :Show the Terms of Use screen;
     :Show the Set up screen;
-    :ask for location mode;
     if(autoLocation?) then (true)
      :ask for location permission;
      if (permissionGranted?) then (yes)
@@ -21,6 +20,7 @@ if (firstInstall?) then (true)
      endif
     else (false)
     :ask for location input;
+    :Get coordinates from the input;
     endif
     :ask for Battery Optimization exemption;
     if (exempted?) then (yes)
@@ -28,12 +28,16 @@ if (firstInstall?) then (true)
     :set the toggle button to true;
     else (no)
     endif
-    :navigate to the main screen;
 else (false)
-    :navigate to the main screen;
+:navigate to the main screen;
+:Call the Nimaz_api;
+:Show loading Skeleton;
+if(apiResponse?) then (yes)
+    :show the prayer times;
+else (no)
+    :show the error message;
 endif
-:Calculate the Prayer Times;
 :Show the Prayer Times;
+endif
 stop
-
 @enduml
