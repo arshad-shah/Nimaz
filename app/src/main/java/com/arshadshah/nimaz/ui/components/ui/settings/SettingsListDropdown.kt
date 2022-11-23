@@ -29,8 +29,8 @@ fun SettingsListDropdown(
     subtitle: (@Composable () -> Unit)? = null,
     menuItem: (@Composable (index: Int, text: String) -> Unit)? = null,
 ) {
-    if (state.value > items.size) {
-        throw IndexOutOfBoundsException("Current value of state for list setting cannot be grater than items size")
+    if (state.value >= items.size) {
+        throw IndexOutOfBoundsException("Current value of state for list setting cannot be greater than items size")
     }
 
     Surface {
@@ -96,7 +96,9 @@ internal fun SettingsListDropdownPreview() {
     NimazTheme {
         SettingsListDropdown(
             title = { Text(text = "Title") },
-            items = listOf("Item 1", "Item 2", "Item 3")
+            items = listOf("Item 1", "Item 2", "Item 3"),
+            icon = { Icon(imageVector = Icons.Outlined.ArrowDropDown, contentDescription = null) },
+            subtitle = { Text(text = "Subtitle") }
         )
     }
 }

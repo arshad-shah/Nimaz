@@ -3,17 +3,15 @@ package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import com.arshadshah.nimaz.data.remote.viewModel.JuzViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.JuzListUI
 
 @Composable
 fun JuzList(
-    paddingValues: PaddingValues,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit,
     state: State<JuzViewModel.JuzState>
 ) {
@@ -24,7 +22,6 @@ fun JuzList(
         is JuzViewModel.JuzState.Success -> {
             JuzListUI(
                 juz = juzState.data,
-                paddingValues = paddingValues,
                 onNavigateToAyatScreen = onNavigateToAyatScreen
             )
         }

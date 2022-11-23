@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+title Nimaz state
+
+'the app state is from source to http client to repo to view model to ui
+' the view model has three state for the ui to show
+' 1. loading
+' 2. error
+' 3. success
+
+
+state "loading" as loading
+
+state "error" as error
+
+state "success" as success
+
+error: error message
+
+success: prayer times
+
+loading --> error: error
+loading --> success: success
+
+success --> loading: update
+error --> loading: update
+
+
+
+@enduml

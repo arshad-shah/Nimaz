@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+title Get Prayer times
+start
+:On Application start;
+:Check if network is available;
+if (Network is available) then (yes)
+  :Check if auto Location is true;
+  if(AutoLocation?) then (true)
+  :Get location from GPS;
+  else (false)
+    :Get location from Geocoder;
+  endif
+else (no)
+:Get last saved coordinates;
+endif
+:Set UI state to loading;
+:Call the nimaz API prayer times service;
+if(Data recieved Successfully) then (yes)
+:Set UI state to data recieved;
+else(no)
+:Set UI state to error;
+endif
+:Show Prayer times UI;
+stop
+
+@enduml

@@ -1,16 +1,18 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.remote.viewModel.AyaJuzViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
-import com.arshadshah.nimaz.ui.models.Aya
+import com.arshadshah.nimaz.ui.components.ui.quran.Verses
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun AyaJuzList(
@@ -26,7 +28,18 @@ fun AyaJuzList(
         is AyaJuzViewModel.AyaJuzState.Success -> {
             val correctedList = processAyatMap(ayatJuzListState.data, isEnglish, number)
 
-            AyaListUI(ayaList = correctedList, paddingValues = paddingValues)
+            //get the translation type from shared preferences
+            val pageType = PrivateSharedPreferences(LocalContext.current).getData(key ="PageType", s = "List")
+            var isList = true
+            if(pageType != "List"){
+                isList = false
+            }
+
+            if (isList) {
+                AyaListUI(ayaList = correctedList, paddingValues = paddingValues)
+            } else {
+                Verses(correctedList, paddingValues)
+            }
         }
         is AyaJuzViewModel.AyaJuzState.Error -> {
             Toast.makeText(
@@ -59,6 +72,8 @@ fun processAyatMap(
         ayaNumberOfBismillah.toInt(),
         ayaArabicOfBismillah,
         ayaOfBismillah,
+        "Juz",
+        juzNumber
     )
 
     //find all the objects in arraylist ayaForJuz where ayaForJuz[i]!!.ayaNumber = 1

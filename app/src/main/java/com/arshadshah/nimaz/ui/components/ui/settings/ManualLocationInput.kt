@@ -8,8 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.components.utils.Location
-import com.arshadshah.nimaz.ui.components.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.Location
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

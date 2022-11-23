@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.ui.components.bLogic.settings.state
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
-import com.arshadshah.nimaz.ui.components.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun rememberPreferenceBooleanSettingState(

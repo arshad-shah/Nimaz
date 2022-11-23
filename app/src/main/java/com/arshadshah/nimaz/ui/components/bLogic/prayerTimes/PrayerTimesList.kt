@@ -2,12 +2,11 @@ package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
 import android.widget.Toast
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.ListSkeletonLoader
 import com.arshadshah.nimaz.ui.components.ui.loaders.loadingShimmerEffect
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
@@ -37,7 +36,11 @@ fun PrayerTimesList(
         }
         is PrayerTimesViewModel.PrayerTimesListState.Error -> {
             PrayerTimesListUI(modifier, mapOf())
-            Toast.makeText(LocalContext.current, prayerTimesListState.errorMessage, Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                LocalContext.current,
+                prayerTimesListState.errorMessage,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }

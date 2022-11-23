@@ -1,0 +1,22 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+title Compass
+start
+:On navigate to compass;
+:Check if device has Accelerometer and magnetometer;
+if(Accelerometer and Magnetometer exist?) then (yes)
+:Register the sensor listeners;
+:Call the Compass to get bearing;
+if (Bearing is available?) then (yes)
+:get readings from the sensor listeners;
+:Turn the compass to the bearing;
+else (no)
+:Display error message;
+:remove the sensor listeners;
+endif
+else (no)
+:Show error message;
+endif
+stop
+
+@enduml

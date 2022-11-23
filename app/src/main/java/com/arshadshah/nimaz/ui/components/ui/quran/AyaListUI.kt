@@ -17,12 +17,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.models.Aya
+import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.utils.AyaEndProcesser
 import java.text.NumberFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Composable
 fun AyaListUI(ayaList: ArrayList<Aya>, paddingValues: PaddingValues) {
@@ -43,22 +44,9 @@ fun AyaListItemUI(
     ayaArabic: String,
     ayaTranslation: String,
 ) {
-    val unicodeAyaEndEnd = "\uFD3E"
-    val unicodeAyaEndStart = "\uFD3F"
-
-    val number = ayaNumber.toInt()
-    val arabicLocal = Locale.forLanguageTag("AR")
-    val nf: NumberFormat = NumberFormat.getInstance(arabicLocal)
-    val endOfAyaWithNumber = nf.format(number)
-    //add the unicode characters to the end of the aya
-    val unicodeWithNumber = "$unicodeAyaEndStart$endOfAyaWithNumber$unicodeAyaEndEnd"
-
-    val ayaArabicWithEnd = "$ayaArabic $unicodeWithNumber"
-
     ElevatedCard(
         modifier = Modifier
-            .padding(4.dp)
-            .shadow(8.dp, clip = true, shape = RoundedCornerShape(8.dp))
+            .padding(4.dp).fillMaxHeight()
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(8.dp)
     ) {
@@ -67,14 +55,16 @@ fun AyaListItemUI(
                 .fillMaxWidth()
         ) {
 
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.12f)
-                    .padding(start = 8.dp),
-                text = "$ayaNumber.",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            if (ayaNumber != "0") {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(0.12f)
+                        .padding(start = 8.dp),
+                    text = "$ayaNumber.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -82,10 +72,10 @@ fun AyaListItemUI(
             ) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Text(
-                        text = ayaArabicWithEnd,
+                        text = AyaEndProcesser(ayaArabic, ayaNumber.toInt()),
                         style = MaterialTheme.typography.titleLarge,
                         fontFamily = quranFont,
-                        textAlign = TextAlign.Justify,
+                        textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 4.dp)
@@ -93,10 +83,12 @@ fun AyaListItemUI(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = ayaTranslation, style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier
+                    text = ayaTranslation,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center,
+                    modifier = if (ayaNumber != "0") Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 4.dp)
+                        .padding(bottom = 4.dp) else Modifier.fillMaxWidth().padding(4.dp)
                 )
             }
         }
@@ -107,16 +99,48 @@ fun AyaListItemUI(
 @Composable
 fun AyaListItemUIPreview() {
     NimazTheme {
-        //make 10 Aya
+        //make 10 LocalAya
         val ayaList = ArrayList<Aya>()
         //add the aya to the list
-        ayaList.add(Aya(1, "بسم الله الرحمن الرحيم", "In the name of Allah, the Entirely Merciful, the Especially Merciful."))
-        ayaList.add(Aya(2, "الحمد لله رب العالمين", "All praise is due to Allah, Lord of the worlds."))
-        ayaList.add(Aya(3, "الرحمن الرحيم", "The Entirely Merciful, the Especially Merciful."))
-        ayaList.add(Aya(4, "مالك يوم الدين", "Master of the Day of Judgment."))
-        ayaList.add(Aya(5, "إياك نعبد وإياك نستعين", "You alone do we worship, and You alone do we implore for help."))
-        ayaList.add(Aya(6, "اهدنا الصراط المستقيم", "Guide us to the straight path."))
-        ayaList.add(Aya(7, "صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين", "The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray."))
+        ayaList.add(
+            Aya(
+                1,
+                "بسم الله الرحمن الرحيم",
+                "In the name of Allah, the Entirely Merciful, the Especially Merciful.","Surah",
+                1
+            )
+        )
+        ayaList.add(
+            Aya(
+                2,
+                "الحمد لله رب العالمين",
+                "All praise is due to Allah, Lord of the worlds.","Surah",
+                1
+            )
+        )
+        ayaList.add(Aya(3, "الرحمن الرحيم", "The Entirely Merciful, the Especially Merciful.","Surah",
+            1))
+        ayaList.add(Aya(4, "مالك يوم الدين", "Master of the Day of Judgment.","Surah",
+            1))
+        ayaList.add(
+            Aya(
+                5,
+                "إياك نعبد وإياك نستعين",
+                "You alone do we worship, and You alone do we implore for help.","Surah",
+                1
+            )
+        )
+        ayaList.add(Aya(6, "اهدنا الصراط المستقيم", "Guide us to the straight path.","Surah",
+            1))
+        ayaList.add(
+            Aya(
+                7,
+                "صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين",
+                "The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray.",
+                "Surah",
+                1
+            )
+        )
 
         AyaListUI(ayaList, PaddingValues(8.dp))
     }

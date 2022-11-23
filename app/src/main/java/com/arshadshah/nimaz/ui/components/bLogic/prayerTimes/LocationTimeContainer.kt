@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.viewModel.LocationViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.LocationViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.LocationTimeContainerUI
 
 @Preview

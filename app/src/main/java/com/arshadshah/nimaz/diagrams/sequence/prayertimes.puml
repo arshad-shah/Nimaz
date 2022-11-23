@@ -1,0 +1,42 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Custom Prayer Times
+autonumber
+
+'the main system consists of the ui, viewmodel, repository, httpclient, datasource
+actor User as user
+participant "UI" as ui
+participant "ViewModel" as vm
+participant "Repository" as repo
+participant "HttpClient" as http
+participant "DataSource" as ds
+
+
+'the view model has state that is updated by change to the data it has from repository
+user -> ui: showPrayerTimes
+ui -> vm: getPrayerTimes()
+vm --> ui: setStateToLoading()
+ui --> user: showLoadingSkeleton()
+
+vm -> repo: getPrayerTimes()
+repo -> repo: getParametersFromStorage()
+repo -> repo: generateMapOfParameters()
+repo -> http: getPrayerTimes(params: Map<String,String>)
+
+'now http makes a post resquest to the datasource
+http -> ds: getPrayerTimes(POST params)
+'request comes back
+ds --> http: JSONOBJECT(PrayerTimes)
+http -> repo: JSONOBJECT((PrayerTimes)
+
+repo -> repo: Serialize prayertimes to model
+
+repo --> vm: PrayerTimes
+
+vm --> ui:setStateToSuccess((PrayerTimes)
+
+ui --> user: diplayPrayerTimes
+
+
+@enduml

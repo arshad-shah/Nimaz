@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,16 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.models.Surah
+import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun SurahListUI(
     surahs: ArrayList<Surah>,
-    paddingValues: PaddingValues,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
 ) {
-    LazyColumn(userScrollEnabled = true, contentPadding = paddingValues) {
+    LazyColumn(userScrollEnabled = true) {
         items(surahs.size) { index ->
             SurahListItemUI(
                 surahNumber = surahs[index].number.toString(),
@@ -51,7 +52,8 @@ fun SurahListItemUI(
     englishNameTranslation: String,
     type: String,
     rukus: String,
-    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
+    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit,
+    context: Context = LocalContext.current
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -60,6 +62,12 @@ fun SurahListItemUI(
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(8.dp)
     ) {
+        //get the translation type from shared preferences
+        val translationType = PrivateSharedPreferences(context).getData(key ="Translation", s = "English")
+        var isEnglishType = true
+        if(translationType != "English"){
+            isEnglishType = false
+        }
         Row(
             modifier = Modifier
                 .padding(8.dp)
@@ -67,7 +75,7 @@ fun SurahListItemUI(
                 .clickable(
                     enabled = true,
                     onClick = {
-                        onNavigateToAyatScreen(surahNumber, true, true)
+                        onNavigateToAyatScreen(surahNumber, true, isEnglishType)
                     }
                 )
         ) {

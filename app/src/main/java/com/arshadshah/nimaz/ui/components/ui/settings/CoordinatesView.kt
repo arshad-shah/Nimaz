@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.ui.components.ui.settings
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.arshadshah.nimaz.ui.components.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun CoordinatesView() {

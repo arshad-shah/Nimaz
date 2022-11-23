@@ -1,6 +1,6 @@
 @startuml
 'https://plantuml.com/activity-diagram-beta
-title Launch of the Application and Get prayer times
+title Launch of the Application
 start
 :Launch the application;
 :Splash screen;
@@ -28,16 +28,9 @@ if (firstInstall?) then (true)
     :set the toggle button to true;
     else (no)
     endif
+    :navigate to the main screen;
 else (false)
 :navigate to the main screen;
-:Call the Nimaz_api;
-:Show loading Skeleton;
-if(apiResponse?) then (yes)
-    :show the prayer times;
-else (no)
-    :show the error message;
-endif
-:Show the Prayer Times;
 endif
 stop
 @enduml

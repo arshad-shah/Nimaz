@@ -2,13 +2,11 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
@@ -24,7 +22,7 @@ fun PrayerTimesListUI(modifier: Modifier = Modifier, prayerTimesMap: Map<String,
             .padding(0.dp, 8.dp)
             .shadow(5.dp, shape = MaterialTheme.shapes.medium, clip = true)
     ) {
-        LazyColumn{
+        LazyColumn {
             items(prayerTimesMap.size) {
                 Column {
                     //if the element is first then dont add a divider else add a divider on top

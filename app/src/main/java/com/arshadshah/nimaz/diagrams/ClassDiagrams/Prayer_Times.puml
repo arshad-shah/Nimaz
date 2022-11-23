@@ -1,6 +1,0 @@
-@startuml
-!include PrayerTimes.iuml
-!include utils.iuml
-!include enums.iuml
-!include Qibla.iuml
-@enduml

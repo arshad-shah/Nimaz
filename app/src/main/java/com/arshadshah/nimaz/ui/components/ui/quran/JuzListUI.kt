@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,16 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.models.Juz
+import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun JuzListUI(
     juz: ArrayList<Juz>,
-    paddingValues: PaddingValues,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
 ) {
-    LazyColumn(userScrollEnabled = true, contentPadding = paddingValues) {
+    LazyColumn(userScrollEnabled = true) {
         items(juz.size) { index ->
             JuzListItemUI(
                 juzNumber = juz[index].number.toString(),
@@ -44,10 +45,8 @@ fun JuzListItemUI(
     name: String,
     tname: String,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit,
+    context: Context = LocalContext.current
 ) {
-
-    val context = LocalContext.current
-
     ElevatedCard(
         modifier = Modifier
             .padding(4.dp)
@@ -55,6 +54,12 @@ fun JuzListItemUI(
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(8.dp)
     ) {
+        //get the translation type from shared preferences
+        val translationType = PrivateSharedPreferences(context).getData(key ="Translation", s = "English")
+        var isEnglishType = true
+        if(translationType != "English"){
+            isEnglishType = false
+        }
         Row(
             modifier = Modifier
                 .padding(8.dp)
@@ -62,7 +67,7 @@ fun JuzListItemUI(
                 .clickable(
                     enabled = true
                 ) {
-                    onNavigateToAyatScreen(juzNumber, false, true)
+                    onNavigateToAyatScreen(juzNumber, false, isEnglishType)
                 }
         ) {
 
