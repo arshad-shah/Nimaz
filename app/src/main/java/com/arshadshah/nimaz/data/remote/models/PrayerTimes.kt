@@ -9,4 +9,6 @@ data class PrayerTimes(
     val asr: LocalDateTime?,
     val maghrib: LocalDateTime?,
     val isha: LocalDateTime?,
+    val nextPrayer: Prayertime?,
+    val currentPrayer: Prayertime?,
 )

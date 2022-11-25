@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable

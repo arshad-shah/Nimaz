@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.utils.network
 
+import com.arshadshah.nimaz.data.remote.models.Prayertime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,4 +19,16 @@ data class PrayerTimeResponse(
     val maghrib: String,
     @SerialName("isha")
     val isha: String,
-)
+    @SerialName("nextPrayer")
+    val nextPrayer: Prayertime,
+    @SerialName("currentPrayer")
+    val currentPrayer: Prayertime,
+){
+    @Serializable
+    data class Prayertime(
+        @SerialName("name")
+        val name: String,
+        @SerialName("time")
+        val time: String
+    )
+}

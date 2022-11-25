@@ -32,10 +32,10 @@ fun PrayerTimesList(
             prayerTimesMap["maghrib"] = prayerTimes.maghrib
             prayerTimesMap["isha"] = prayerTimes.isha
 
-            PrayerTimesListUI(modifier, prayerTimesMap)
+            prayerTimes.currentPrayer?.let { PrayerTimesListUI(modifier, prayerTimesMap, it.name) }
         }
         is PrayerTimesViewModel.PrayerTimesListState.Error -> {
-            PrayerTimesListUI(modifier, mapOf())
+            PrayerTimesListUI(modifier, mapOf(), "")
             Toast.makeText(
                 LocalContext.current,
                 prayerTimesListState.errorMessage,

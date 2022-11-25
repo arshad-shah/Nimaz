@@ -33,7 +33,8 @@ fun LocationTimeContainerUI(location: String) {
         Row(horizontalArrangement = Arrangement.Center) {
             //only allow 50% of the width for the location text
             Text(
-                text = location, modifier = Modifier
+                text = location,
+                modifier = Modifier
                     .padding(8.dp)
                     .weight(0.45f),
                 textAlign = TextAlign.Center

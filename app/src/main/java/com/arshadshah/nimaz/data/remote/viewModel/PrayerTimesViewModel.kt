@@ -23,6 +23,11 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
 
 
     init {
+        loadPrayerTimes(context)
+    }
+
+    //load prayer times again
+    fun loadPrayerTimes(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = PrayerTimesRepository.getPrayerTimes(context)

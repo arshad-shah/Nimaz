@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.remote.repositories
 import android.content.Context
 import android.util.Log
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
+import com.arshadshah.nimaz.data.remote.models.Prayertime
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
@@ -48,13 +49,22 @@ object PrayerTimesRepository {
             val response = NimazServicesImpl.getPrayerTimes(mapOfParams)
 
             Log.d("PrayerTimesRepository", "getPrayerTimes: $response")
+
             val prayerTimes = PrayerTimes(
-                LocalDateTime.parse(response.fajr),
-                LocalDateTime.parse(response.sunrise),
-                LocalDateTime.parse(response.dhuhr),
-                LocalDateTime.parse(response.asr),
-                LocalDateTime.parse(response.maghrib),
-                LocalDateTime.parse(response.isha),
+                fajr = LocalDateTime.parse(response.fajr),
+                sunrise = LocalDateTime.parse(response.sunrise),
+                dhuhr = LocalDateTime.parse(response.dhuhr),
+                asr = LocalDateTime.parse(response.asr),
+                maghrib = LocalDateTime.parse(response.maghrib),
+                isha = LocalDateTime.parse(response.isha),
+                nextPrayer = Prayertime(
+                    name = response.nextPrayer.name,
+                    time = LocalDateTime.parse(response.nextPrayer.time)
+                ),
+                currentPrayer = Prayertime(
+                    name = response.currentPrayer.name,
+                    time = LocalDateTime.parse(response.currentPrayer.time)
+                )
             )
 
             ApiResponse.Success(prayerTimes)
