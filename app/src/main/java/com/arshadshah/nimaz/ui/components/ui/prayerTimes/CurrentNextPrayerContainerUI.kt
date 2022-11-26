@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,7 +31,7 @@ fun CurrentNextPrayerContainerUI(
                 .fillMaxWidth()
                 .padding(0.dp , 8.dp)
                 .height(IntrinsicSize.Max)
-                .shadow(5.dp , shape = MaterialTheme.shapes.medium , clip = true)
+				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		val nextPrayerNameSentenceCase = nextPrayerName
 			.lowercase()

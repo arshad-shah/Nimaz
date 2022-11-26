@@ -2,10 +2,7 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +24,7 @@ fun LocationTimeContainerUI(location : String)
 			modifier = Modifier
                 .padding(0.dp , 8.dp)
                 .height(IntrinsicSize.Max)
-                .shadow(5.dp , shape = MaterialTheme.shapes.medium , clip = true)
+                .shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		//align items to center
 
