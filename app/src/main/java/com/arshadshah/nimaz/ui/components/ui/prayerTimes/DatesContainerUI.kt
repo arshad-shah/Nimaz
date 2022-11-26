@@ -15,16 +15,17 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DatesContainerUI(GregDate: String, islamDate: String) {
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(5.dp, shape = MaterialTheme.shapes.medium, clip = true)
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = GregDate, Modifier.padding(16.dp))
-            Divider(color = MaterialTheme.colorScheme.outline)
-            Text(text = islamDate, Modifier.padding(16.dp))
-        }
-    }
+fun DatesContainerUI(GregDate : String , islamDate : String)
+{
+	ElevatedCard(
+			modifier = Modifier
+				.fillMaxWidth()
+				.shadow(5.dp , shape = MaterialTheme.shapes.medium , clip = true)
+				) {
+		Column(horizontalAlignment = Alignment.CenterHorizontally) {
+			Text(text = GregDate , Modifier.padding(16.dp))
+			Divider(color = MaterialTheme.colorScheme.outline)
+			Text(text = islamDate , Modifier.padding(16.dp))
+		}
+	}
 }

@@ -17,44 +17,49 @@ import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuranScreen(
-    paddingValues: PaddingValues,
-    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
-) {
-    val viewModel = QuranViewModel()
-    //save the state of the tab
-    val (selectedTab, setSelectedTab) = rememberSaveable { mutableStateOf(0) }
-    val titles = listOf("Surah", "Juz")
-    Column(modifier = Modifier.padding(paddingValues)) {
+	paddingValues : PaddingValues ,
+	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+			   )
+{
+	val viewModel = QuranViewModel()
+	//save the state of the tab
+	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
+	val titles = listOf("Surah" , "Juz")
+	Column(modifier = Modifier.padding(paddingValues)) {
 
-        TabRow(selectedTabIndex = selectedTab) {
-            titles.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTab == index,
-                    onClick = { setSelectedTab(index) },
-                    text = {
-                        Text(
-                            text = title,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                )
-            }
-        }
-        when (selectedTab) {
-            0 -> {
-                SurahList(
-                    onNavigateToAyatScreen = onNavigateToAyatScreen,
-                    state = viewModel.surahState.collectAsState()
-                )
-            }
-            1 -> {
-                JuzList(
-                    onNavigateToAyatScreen = onNavigateToAyatScreen,
-                    state = viewModel.juzState.collectAsState(),
-                )
-            }
-        }
-    }
+		TabRow(selectedTabIndex = selectedTab) {
+			titles.forEachIndexed { index , title ->
+				Tab(
+						selected = selectedTab == index ,
+						onClick = { setSelectedTab(index) } ,
+						text = {
+							Text(
+									text = title ,
+									maxLines = 2 ,
+									overflow = TextOverflow.Ellipsis ,
+									style = MaterialTheme.typography.titleSmall
+								)
+						}
+				   )
+			}
+		}
+		when (selectedTab)
+		{
+			0 ->
+			{
+				SurahList(
+						onNavigateToAyatScreen = onNavigateToAyatScreen ,
+						state = viewModel.surahState.collectAsState()
+						 )
+			}
+
+			1 ->
+			{
+				JuzList(
+						onNavigateToAyatScreen = onNavigateToAyatScreen ,
+						state = viewModel.juzState.collectAsState() ,
+					   )
+			}
+		}
+	}
 }

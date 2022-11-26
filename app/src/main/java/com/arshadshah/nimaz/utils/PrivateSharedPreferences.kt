@@ -2,89 +2,109 @@ package com.arshadshah.nimaz.utils
 
 import android.content.Context
 
-class PrivateSharedPreferences(context: Context) {
-    private val file = "com.arshadshah.nimaz.preferencesData"
-    private val sharedPreferences = context.getSharedPreferences(file, Context.MODE_PRIVATE)
-    private val editor = sharedPreferences.edit()
+class PrivateSharedPreferences(context : Context)
+{
 
-    fun saveData(customkey: String, data: String) {
-        editor.putString(customkey, data)
-        editor.apply()
-    }
+	private val file = "com.arshadshah.nimaz.preferencesData"
+	private val sharedPreferences = context.getSharedPreferences(file , Context.MODE_PRIVATE)
+	private val editor = sharedPreferences.edit()
 
-    fun getData(key: String, s: String): String {
-        return sharedPreferences.getString(key, s)!!
-    }
+	fun saveData(customkey : String , data : String)
+	{
+		editor.putString(customkey , data)
+		editor.apply()
+	}
 
-    fun saveDataBoolean(customkey: String, data: Boolean) {
-        editor.putBoolean(customkey, data)
-        editor.apply()
-    }
+	fun getData(key : String , s : String) : String
+	{
+		return sharedPreferences.getString(key , s) !!
+	}
 
-    fun getDataBoolean(key: String, defaultValue: Boolean): Boolean {
-        return sharedPreferences.getBoolean(key, defaultValue)
-    }
+	fun saveDataBoolean(customkey : String , data : Boolean)
+	{
+		editor.putBoolean(customkey , data)
+		editor.apply()
+	}
 
-    fun saveDataInt(customkey: String, data: Int) {
-        editor.putInt(customkey, data)
-        editor.apply()
-    }
+	fun getDataBoolean(key : String , defaultValue : Boolean) : Boolean
+	{
+		return sharedPreferences.getBoolean(key , defaultValue)
+	}
 
-    fun getDataInt(key: String): Int {
-        return sharedPreferences.getInt(key, 0)
-    }
+	fun saveDataInt(customkey : String , data : Int)
+	{
+		editor.putInt(customkey , data)
+		editor.apply()
+	}
 
-    fun saveDataLong(customkey: String, data: Long) {
-        editor.putLong(customkey, data)
-        editor.apply()
-    }
+	fun getDataInt(key : String) : Int
+	{
+		return sharedPreferences.getInt(key , 0)
+	}
 
-    fun getDataLong(key: String): Long {
-        return sharedPreferences.getLong(key, 0)
-    }
+	fun saveDataLong(customkey : String , data : Long)
+	{
+		editor.putLong(customkey , data)
+		editor.apply()
+	}
 
-    fun saveDataFloat(customkey: String, data: Float) {
-        editor.putFloat(customkey, data)
-        editor.apply()
-    }
+	fun getDataLong(key : String) : Long
+	{
+		return sharedPreferences.getLong(key , 0)
+	}
 
-    fun getDataFloat(key: String): Float {
-        return sharedPreferences.getFloat(key, 0f)
-    }
+	fun saveDataFloat(customkey : String , data : Float)
+	{
+		editor.putFloat(customkey , data)
+		editor.apply()
+	}
 
-    fun getDataDouble(key: String, d: Double): Double {
-        return sharedPreferences.getString(key, d.toString())!!.toDouble()
-    }
+	fun getDataFloat(key : String) : Float
+	{
+		return sharedPreferences.getFloat(key , 0f)
+	}
 
-    fun saveDataDouble(customkey: String, data: Double) {
-        editor.putString(customkey, data.toString())
-        editor.apply()
-    }
+	fun getDataDouble(key : String , d : Double) : Double
+	{
+		return sharedPreferences.getString(key , d.toString()) !!.toDouble()
+	}
 
-    fun saveIntSet(customkey: String, data: Set<Int>) {
-        editor.putStringSet(customkey, data.map { it.toString() }.toSet())
-        editor.apply()
-    }
+	fun saveDataDouble(customkey : String , data : Double)
+	{
+		editor.putString(customkey , data.toString())
+		editor.apply()
+	}
 
-    fun getIntSet(key: String, defaultValue: String): String? {
-        return sharedPreferences.getString(key, defaultValue)
-    }
+	fun saveIntSet(customkey : String , data : Set<Int>)
+	{
+		editor.putStringSet(customkey , data.map { it.toString() }.toSet())
+		editor.apply()
+	}
 
-    fun clearData() {
-        editor.clear()
-        editor.apply()
-    }
+	fun getIntSet(key : String , defaultValue : String) : String?
+	{
+		return sharedPreferences.getString(key , defaultValue)
+	}
 
-    fun removeData(key: String) {
-        editor.remove(key)
-        editor.apply()
-    }
+	fun clearData()
+	{
+		editor.clear()
+		editor.apply()
+	}
 
-    fun containsData(key: String): Boolean {
-        return sharedPreferences.contains(key)
-    }
+	fun removeData(key : String)
+	{
+		editor.remove(key)
+		editor.apply()
+	}
 
-    fun getAllData(): Map<String, *> {
-        return sharedPreferences.all
-    }
+	fun containsData(key : String) : Boolean
+	{
+		return sharedPreferences.contains(key)
+	}
+
+	fun getAllData() : Map<String , *>
+	{
+		return sharedPreferences.all
+	}
 }

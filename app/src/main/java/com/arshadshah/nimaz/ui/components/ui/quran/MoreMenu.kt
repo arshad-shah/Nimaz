@@ -14,55 +14,59 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun MoreMenu(
-    menuOpen: Boolean = false,
-    setMenuOpen: (Boolean) -> Unit,
-    state: SettingValueState<Int> = rememberIntSettingState(),
-) {
+	menuOpen : Boolean = false ,
+	setMenuOpen : (Boolean) -> Unit ,
+	state : SettingValueState<Int> = rememberIntSettingState() ,
+			)
+{
 
-    val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
+	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 
-    val pageTypeState =
-        rememberPreferenceStringSettingState("PageType", "List", sharedPreferences)
-    val translationState =
-        rememberPreferenceStringSettingState("Translation", "English", sharedPreferences)
+	val pageTypeState =
+		rememberPreferenceStringSettingState("PageType" , "List" , sharedPreferences)
+	val translationState =
+		rememberPreferenceStringSettingState("Translation" , "English" , sharedPreferences)
 
-    val items1: List<String> = listOf("List", "Page")
-    val items2: List<String> = listOf("English", "Urdu")
-    val (showDialog1, setShowDialog1) = remember { mutableStateOf(false) }
-    val (showDialog2, setShowDialog2) = remember { mutableStateOf(false) }
-    DropdownMenu(
-        expanded = menuOpen,
-        onDismissRequest = { setMenuOpen(false) },
-        content = {
-            DropdownMenuItem(onClick = {
-                setShowDialog1(true)
-                setMenuOpen(false)
-            }, text = { Text(text = "Display Type") })
-            DropdownMenuItem(onClick = {
-                setShowDialog2(true)
-                setMenuOpen(false)
-            }, text = { Text(text = "Translation") })
-        }
-    )
+	val items1 : List<String> = listOf("List" , "Page")
+	val items2 : List<String> = listOf("English" , "Urdu")
+	val (showDialog1 , setShowDialog1) = remember { mutableStateOf(false) }
+	val (showDialog2 , setShowDialog2) = remember { mutableStateOf(false) }
+	DropdownMenu(
+			expanded = menuOpen ,
+			onDismissRequest = { setMenuOpen(false) } ,
+			content = {
+				DropdownMenuItem(onClick = {
+					setShowDialog1(true)
+					setMenuOpen(false)
+				} , text = { Text(text = "Display Type") })
+				DropdownMenuItem(onClick = {
+					setShowDialog2(true)
+					setMenuOpen(false)
+				} , text = { Text(text = "Translation") })
+			}
+				)
 
 
-    if (showDialog1) {
-        CustomDialog(
-            title = "Display Type",
-            setShowDialog = setShowDialog1,
-            state = state,
-            valueState = pageTypeState,
-            items = items1,
-        )
-    } else if (showDialog2) {
-        CustomDialog(
-            title = "Translation",
-            setShowDialog = setShowDialog2,
-            state = state,
-            valueState = translationState,
-            items = items2,
-        )
-    } else {
-        return
-    }
+	if (showDialog1)
+	{
+		CustomDialog(
+				title = "Display Type" ,
+				setShowDialog = setShowDialog1 ,
+				state = state ,
+				valueState = pageTypeState ,
+				items = items1 ,
+					)
+	} else if (showDialog2)
+	{
+		CustomDialog(
+				title = "Translation" ,
+				setShowDialog = setShowDialog2 ,
+				state = state ,
+				valueState = translationState ,
+				items = items2 ,
+					)
+	} else
+	{
+		return
+	}
 }

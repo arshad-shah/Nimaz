@@ -9,18 +9,19 @@ import java.time.format.DateTimeFormatter
 
 @Preview
 @Composable
-fun DatesContainer() {
+fun DatesContainer()
+{
 
-    //localDate
-    val currentDate = LocalDate.now()
-    // Gregorian Date
-    val Gregformat = DateTimeFormatter.ofPattern(" EEEE, dd - MMMM - yyyy")
-    val GregDate = Gregformat.format(currentDate)
+	//localDate
+	val currentDate = LocalDate.now()
+	// Gregorian Date
+	val Gregformat = DateTimeFormatter.ofPattern(" EEEE, dd - MMMM - yyyy")
+	val GregDate = Gregformat.format(currentDate)
 
-    // hijri date
-    val islamicDate = HijrahDate.now()
-    val islamformat = DateTimeFormatter.ofPattern(" dd - MMMM - yyyy G")
-    val islamDate = islamformat.format(islamicDate)
+	// hijri date
+	val islamicDate = HijrahDate.now()
+	val islamformat = DateTimeFormatter.ofPattern(" dd - MMMM - yyyy G")
+	val islamDate = islamformat.format(islamicDate)
 
-    DatesContainerUI(GregDate, islamDate)
+	DatesContainerUI(GregDate , islamDate)
 }

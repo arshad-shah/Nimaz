@@ -12,40 +12,43 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun ListSkeletonLoader(modifier: Modifier = Modifier, brush: Brush) {
-    Column(modifier = modifier) {
-        repeat(6) {
-            ItemSkeleton(brush = brush)
-        }
-    }
+fun ListSkeletonLoader(modifier : Modifier = Modifier , brush : Brush)
+{
+	Column(modifier = modifier) {
+		repeat(6) {
+			ItemSkeleton(brush = brush)
+		}
+	}
 }
 
 @Composable
-fun ItemSkeleton(brush: Brush) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .height(50.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(brush)
-    ) {
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
+fun ItemSkeleton(brush : Brush)
+{
+	Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(8.dp)
+				.height(50.dp)
+				.clip(RoundedCornerShape(8.dp))
+				.background(brush)
+	   ) {
+		Spacer(modifier = Modifier.width(16.dp))
+		Column(
+				modifier = Modifier
+					.fillMaxWidth()
+					.fillMaxHeight()
+					.padding(8.dp) ,
+				verticalArrangement = Arrangement.SpaceEvenly
+			  ) {
+			Spacer(modifier = Modifier.height(8.dp))
+			Spacer(modifier = Modifier.height(8.dp))
+		}
+	}
 }
 
 @Composable
 @Preview(showBackground = true)
-fun ShimmerPreview() {
-    ListSkeletonLoader(brush = loadingShimmerEffect())
+fun ShimmerPreview()
+{
+	ListSkeletonLoader(brush = loadingShimmerEffect())
 }

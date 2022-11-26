@@ -13,25 +13,26 @@ import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun QuranNavGraph(navController: NavController, paddingValues: PaddingValues) {
-    NavHost(
-        navController = navController as NavHostController,
-        startDestination = "quran"
-    ) {
-        composable("quran") {
-            QuranScreen(
-                paddingValues,
-                onNavigateToAyatScreen = { number: String, isSurah: Boolean, isEnglish: Boolean ->
-                    navController.navigate("ayatScreen/$number/$isSurah/$isEnglish")
-                })
-        }
-        composable("ayatScreen/{number}/{isSurah}/{isEnglish}") {
-            AyatScreen(
-                number = it.arguments?.getString("number"),
-                isSurah = it.arguments?.getString("isSurah")!!,
-                isEnglish = it.arguments?.getString("isEnglish")!!,
-                paddingValues = paddingValues
-            )
-        }
-    }
+fun QuranNavGraph(navController : NavController , paddingValues : PaddingValues)
+{
+	NavHost(
+			navController = navController as NavHostController ,
+			startDestination = "quran"
+		   ) {
+		composable("quran") {
+			QuranScreen(
+					paddingValues ,
+					onNavigateToAyatScreen = { number : String , isSurah : Boolean , isEnglish : Boolean ->
+						navController.navigate("ayatScreen/$number/$isSurah/$isEnglish")
+					})
+		}
+		composable("ayatScreen/{number}/{isSurah}/{isEnglish}") {
+			AyatScreen(
+					number = it.arguments?.getString("number") ,
+					isSurah = it.arguments?.getString("isSurah") !! ,
+					isEnglish = it.arguments?.getString("isEnglish") !! ,
+					paddingValues = paddingValues
+					  )
+		}
+	}
 }

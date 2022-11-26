@@ -8,11 +8,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 
 
 @Composable
-internal fun SettingsTileSubtitle(subtitle: @Composable () -> Unit) {
-    ProvideTextStyle(value = MaterialTheme.typography.titleSmall) {
-        CompositionLocalProvider(
-            LocalContentColor provides LocalContentColor.current.copy(alpha = 0.6f),
-            content = subtitle
-        )
-    }
+internal fun SettingsTileSubtitle(subtitle : @Composable () -> Unit)
+{
+	ProvideTextStyle(value = MaterialTheme.typography.titleSmall) {
+		CompositionLocalProvider(
+				LocalContentColor provides LocalContentColor.current.copy(alpha = 0.6f) ,
+				content = subtitle
+								)
+	}
 }

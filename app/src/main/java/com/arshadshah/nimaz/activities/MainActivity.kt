@@ -15,24 +15,27 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
-class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
-    @RequiresApi(Build.VERSION_CODES.S)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        this.actionBar?.hide()
-        super.onCreate(savedInstanceState)
-        //this is used to show the full activity on the screen
-        setContent {
-            NimazTheme {
-                val navController = rememberNavController()
-                Scaffold(
-                    bottomBar = { BottomNavigationBar(navController = navController) }
-                ) { it ->
-                    NavigationGraph(navController = navController, it)
-                }
-            }
-        }
-    }
+class MainActivity : ComponentActivity()
+{
+
+	@OptIn(ExperimentalMaterial3Api::class)
+	@RequiresApi(Build.VERSION_CODES.S)
+	override fun onCreate(savedInstanceState : Bundle?)
+	{
+		this.actionBar?.hide()
+		super.onCreate(savedInstanceState)
+		//this is used to show the full activity on the screen
+		setContent {
+			NimazTheme {
+				val navController = rememberNavController()
+				Scaffold(
+						bottomBar = { BottomNavigationBar(navController = navController) }
+						) { it ->
+					NavigationGraph(navController = navController , it)
+				}
+			}
+		}
+	}
 }
 
 //this is a main component to show everything else
@@ -40,12 +43,13 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
-    Scaffold(
-        bottomBar = { BottomNavigationBar(navController = navController) }
-    ) { it ->
-        NavigationGraph(navController = navController, it)
-    }
+fun DefaultPreview(modifier : Modifier = Modifier)
+{
+	val navController = rememberNavController()
+	Scaffold(
+			bottomBar = { BottomNavigationBar(navController = navController) }
+			) { it ->
+		NavigationGraph(navController = navController , it)
+	}
 }
 

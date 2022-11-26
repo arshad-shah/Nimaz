@@ -15,32 +15,43 @@ import java.time.LocalDateTime
 
 @Composable
 fun PrayerTimesList(
-    modifier: Modifier = Modifier,
-    state: State<PrayerTimesViewModel.PrayerTimesState>
-) {
-    when (val prayerTimesState = state.value) {
-        is PrayerTimesViewModel.PrayerTimesState.Loading -> {
-            ListSkeletonLoader(brush = loadingShimmerEffect())
-        }
-        is PrayerTimesViewModel.PrayerTimesState.Success -> {
-            val prayerTimes = prayerTimesState.prayerTimes
-            val prayerTimesMap = mutableMapOf<String, LocalDateTime?>()
-            prayerTimesMap["fajr"] = prayerTimes!!.fajr
-            prayerTimesMap["sunrise"] = prayerTimes.sunrise
-            prayerTimesMap["dhuhr"] = prayerTimes.dhuhr
-            prayerTimesMap["asr"] = prayerTimes.asr
-            prayerTimesMap["maghrib"] = prayerTimes.maghrib
-            prayerTimesMap["isha"] = prayerTimes.isha
+	modifier : Modifier = Modifier ,
+	state : State<PrayerTimesViewModel.PrayerTimesState> ,
+				   )
+{
+	when (val prayerTimesState = state.value)
+	{
+		is PrayerTimesViewModel.PrayerTimesState.Loading ->
+		{
+			ListSkeletonLoader(brush = loadingShimmerEffect())
+		}
 
-            prayerTimes.currentPrayer?.let { PrayerTimesListUI(modifier, prayerTimesMap, it.name) }
-        }
-        is PrayerTimesViewModel.PrayerTimesState.Error -> {
-            PrayerTimesListUI(modifier, mapOf(), "")
-            Toast.makeText(
-                LocalContext.current,
-                prayerTimesState.errorMessage,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
+		is PrayerTimesViewModel.PrayerTimesState.Success ->
+		{
+			val prayerTimes = prayerTimesState.prayerTimes
+			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
+			prayerTimesMap["fajr"] = prayerTimes !!.fajr
+			prayerTimesMap["sunrise"] = prayerTimes.sunrise
+			prayerTimesMap["dhuhr"] = prayerTimes.dhuhr
+			prayerTimesMap["asr"] = prayerTimes.asr
+			prayerTimesMap["maghrib"] = prayerTimes.maghrib
+			prayerTimesMap["isha"] = prayerTimes.isha
+
+			prayerTimes.currentPrayer?.let {
+				PrayerTimesListUI(modifier ,
+								  prayerTimesMap ,
+								  it.name)
+			}
+		}
+
+		is PrayerTimesViewModel.PrayerTimesState.Error ->
+		{
+			PrayerTimesListUI(modifier , mapOf() , "")
+			Toast.makeText(
+					LocalContext.current ,
+					prayerTimesState.errorMessage ,
+					Toast.LENGTH_SHORT
+						  ).show()
+		}
+	}
 }

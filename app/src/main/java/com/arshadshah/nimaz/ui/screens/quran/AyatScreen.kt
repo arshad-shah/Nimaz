@@ -9,28 +9,31 @@ import com.arshadshah.nimaz.ui.components.bLogic.quran.AyaSurahList
 
 @Composable
 fun AyatScreen(
-    number: String?,
-    isSurah: String,
-    isEnglish: String,
-    paddingValues: PaddingValues
-) {
-    val viewModel = QuranViewModel()
+	number : String? ,
+	isSurah : String ,
+	isEnglish : String ,
+	paddingValues : PaddingValues ,
+			  )
+{
+	val viewModel = QuranViewModel()
 
-    if (isSurah.toBoolean()) {
-        viewModel.getAllAyaForSurah(number!!.toInt(), isEnglish.toBoolean())
-        AyaSurahList(
-            number = number.toInt(), isEnglish = isEnglish.toBoolean(),
-            paddingValues = paddingValues,
-            state = viewModel.ayaSurahState.collectAsState()
-        )
+	if (isSurah.toBoolean())
+	{
+		viewModel.getAllAyaForSurah(number !!.toInt() , isEnglish.toBoolean())
+		AyaSurahList(
+				number = number.toInt() , isEnglish = isEnglish.toBoolean() ,
+				paddingValues = paddingValues ,
+				state = viewModel.ayaSurahState.collectAsState()
+					)
 
-    } else {
-        viewModel.getAllAyaForJuz(number!!.toInt(), isEnglish.toBoolean())
-        AyaJuzList(
-            number = number.toInt(),
-            isEnglish = isEnglish.toBoolean(),
-            paddingValues = paddingValues,
-            state = viewModel.ayaJuzstate.collectAsState()
-        )
-    }
+	} else
+	{
+		viewModel.getAllAyaForJuz(number !!.toInt() , isEnglish.toBoolean())
+		AyaJuzList(
+				number = number.toInt() ,
+				isEnglish = isEnglish.toBoolean() ,
+				paddingValues = paddingValues ,
+				state = viewModel.ayaJuzstate.collectAsState()
+				  )
+	}
 }

@@ -11,21 +11,28 @@ import com.arshadshah.nimaz.ui.components.ui.quran.JuzListUI
 
 @Composable
 fun JuzList(
-    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit,
-    state: State<QuranViewModel.JuzState>
-) {
-    when (val juzState = state.value) {
-        is QuranViewModel.JuzState.Loading -> {
-            CircularLoaderCard()
-        }
-        is QuranViewModel.JuzState.Success -> {
-            JuzListUI(
-                juz = juzState.data,
-                onNavigateToAyatScreen = onNavigateToAyatScreen
-            )
-        }
-        is QuranViewModel.JuzState.Error -> {
-            Toast.makeText(LocalContext.current, juzState.errorMessage, Toast.LENGTH_SHORT).show()
-        }
-    }
+	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	state : State<QuranViewModel.JuzState> ,
+		   )
+{
+	when (val juzState = state.value)
+	{
+		is QuranViewModel.JuzState.Loading ->
+		{
+			CircularLoaderCard()
+		}
+
+		is QuranViewModel.JuzState.Success ->
+		{
+			JuzListUI(
+					juz = juzState.data ,
+					onNavigateToAyatScreen = onNavigateToAyatScreen
+					 )
+		}
+
+		is QuranViewModel.JuzState.Error ->
+		{
+			Toast.makeText(LocalContext.current , juzState.errorMessage , Toast.LENGTH_SHORT).show()
+		}
+	}
 }

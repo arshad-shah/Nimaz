@@ -13,14 +13,15 @@ import androidx.compose.ui.unit.dp
 
 @Preview
 @Composable
-fun CircularLoaderCard() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(100.dp),
-            strokeWidth = 8.dp,
-        )
-    }
+fun CircularLoaderCard()
+{
+	Box(modifier = Modifier.fillMaxSize() , contentAlignment = Alignment.Center) {
+		CircularProgressIndicator(
+				color = MaterialTheme.colorScheme.primary ,
+				modifier = Modifier
+					.align(Alignment.Center)
+					.size(100.dp) ,
+				strokeWidth = 8.dp ,
+								 )
+	}
 }

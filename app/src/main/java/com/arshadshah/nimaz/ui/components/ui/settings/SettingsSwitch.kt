@@ -25,52 +25,54 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun SettingsSwitch(
-    modifier: Modifier = Modifier,
-    state: SettingValueState<Boolean> = rememberBooleanSettingState(),
-    icon: @Composable (() -> Unit)? = null,
-    title: @Composable () -> Unit,
-    subtitle: @Composable (() -> Unit)? = null,
-    onCheckedChange: (Boolean) -> Unit = {},
-) {
-    var storageValue by state
-    val update: (Boolean) -> Unit = { boolean ->
-        storageValue = boolean
-        onCheckedChange(storageValue)
-    }
-    Surface {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .toggleable(
-                    value = storageValue,
-                    role = Role.Switch,
-                    onValueChange = { update(!storageValue) }
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SettingsTileIcon(icon = icon)
-            SettingsTileTexts(title = title, subtitle = subtitle)
-            SettingsTileAction {
-                Switch(
-                    checked = storageValue,
-                    onCheckedChange = update
-                )
-            }
-        }
-    }
+	modifier : Modifier = Modifier ,
+	state : SettingValueState<Boolean> = rememberBooleanSettingState() ,
+	icon : @Composable (() -> Unit)? = null ,
+	title : @Composable () -> Unit ,
+	subtitle : @Composable (() -> Unit)? = null ,
+	onCheckedChange : (Boolean) -> Unit = {} ,
+				  )
+{
+	var storageValue by state
+	val update : (Boolean) -> Unit = { boolean ->
+		storageValue = boolean
+		onCheckedChange(storageValue)
+	}
+	Surface {
+		Row(
+				modifier = modifier
+					.fillMaxWidth()
+					.toggleable(
+							value = storageValue ,
+							role = Role.Switch ,
+							onValueChange = { update(! storageValue) }
+							   ) ,
+				verticalAlignment = Alignment.CenterVertically ,
+		   ) {
+			SettingsTileIcon(icon = icon)
+			SettingsTileTexts(title = title , subtitle = subtitle)
+			SettingsTileAction {
+				Switch(
+						checked = storageValue ,
+						onCheckedChange = update
+					  )
+			}
+		}
+	}
 }
 
 @Preview
 @Composable
-internal fun SettingsSwitchPreview() {
-    NimazTheme {
-        val storage = rememberBooleanSettingState(defaultValue = true)
-        SettingsSwitch(
-            state = storage,
-            icon = { Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear") },
-            title = { Text(text = "Hello") },
-            subtitle = { Text(text = "This is a longer text") },
-            onCheckedChange = { }
-        )
-    }
+internal fun SettingsSwitchPreview()
+{
+	NimazTheme {
+		val storage = rememberBooleanSettingState(defaultValue = true)
+		SettingsSwitch(
+				state = storage ,
+				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+				title = { Text(text = "Hello") } ,
+				subtitle = { Text(text = "This is a longer text") } ,
+				onCheckedChange = { }
+					  )
+	}
 }

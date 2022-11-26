@@ -19,35 +19,37 @@ import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun NavigationGraph(navController: NavController, paddingValues: PaddingValues) {
-    NavHost(
-        navController = navController as NavHostController,
-        startDestination = BottomNavItem.PrayerTimesScreen.screen_route
-    ) {
-        composable(BottomNavItem.PrayerTimesScreen.screen_route) {
-            PrayerTimesScreen()
-        }
-        composable(BottomNavItem.QiblaScreen.screen_route) {
-            QiblaScreen(paddingValues)
-        }
-        activity(BottomNavItem.QuranScreen.screen_route) {
-            this.activityClass = QuranActivity::class
-        }
-        SettingGraph(navController = navController, paddingValues = paddingValues)
-    }
+fun NavigationGraph(navController : NavController , paddingValues : PaddingValues)
+{
+	NavHost(
+			navController = navController as NavHostController ,
+			startDestination = BottomNavItem.PrayerTimesScreen.screen_route
+		   ) {
+		composable(BottomNavItem.PrayerTimesScreen.screen_route) {
+			PrayerTimesScreen()
+		}
+		composable(BottomNavItem.QiblaScreen.screen_route) {
+			QiblaScreen(paddingValues)
+		}
+		activity(BottomNavItem.QuranScreen.screen_route) {
+			this.activityClass = QuranActivity::class
+		}
+		SettingGraph(navController = navController , paddingValues = paddingValues)
+	}
 }
 
-fun NavGraphBuilder.SettingGraph(navController: NavController, paddingValues: PaddingValues) {
-    navigation(startDestination = "settings", route = BottomNavItem.SettingsScreen.screen_route) {
-        composable("settings") {
-            SettingsScreen(onNavigateToPrayerTimeCustomizationScreen = {
-                navController.navigate(
-                    "PrayerTimesCustomizations"
-                )
-            }, paddingValues)
-        }
-        composable("PrayerTimesCustomizations") {
-            PrayerTimesCustomizations(paddingValues)
-        }
-    }
+fun NavGraphBuilder.SettingGraph(navController : NavController , paddingValues : PaddingValues)
+{
+	navigation(startDestination = "settings" , route = BottomNavItem.SettingsScreen.screen_route) {
+		composable("settings") {
+			SettingsScreen(onNavigateToPrayerTimeCustomizationScreen = {
+				navController.navigate(
+						"PrayerTimesCustomizations"
+									  )
+			} , paddingValues)
+		}
+		composable("PrayerTimesCustomizations") {
+			PrayerTimesCustomizations(paddingValues)
+		}
+	}
 }

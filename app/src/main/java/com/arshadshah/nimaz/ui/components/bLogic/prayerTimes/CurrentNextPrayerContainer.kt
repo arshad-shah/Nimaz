@@ -11,29 +11,36 @@ import java.time.LocalDateTime
 
 @Composable
 fun CurrentNextPrayerContainer(
-    state: State<PrayerTimesViewModel.PrayerTimesState>,
-    timerState: LiveData<CountDownTime>,
-    viewModel: PrayerTimesViewModel
-) {
+	state : State<PrayerTimesViewModel.PrayerTimesState> ,
+	timerState : LiveData<CountDownTime> ,
+	viewModel : PrayerTimesViewModel ,
+							  )
+{
 
-    val context = LocalContext.current
+	val context = LocalContext.current
 
-    when (val prayerTimesListState = state.value) {
-        is PrayerTimesViewModel.PrayerTimesState.Success -> {
-            val prayerTimes = prayerTimesListState.prayerTimes
-            val timeToNextPrayerLong =
-                prayerTimes?.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())?.toInstant()
-                    ?.toEpochMilli()
-            val currentTime =
-                LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
-                    .toEpochMilli()
-            val difference = timeToNextPrayerLong?.minus(currentTime)
-            viewModel.startTimer(context, difference!!)
-            CurrentNextPrayerContainerUI(prayerTimes.nextPrayer.name, timerState)
-        }
-        is PrayerTimesViewModel.PrayerTimesState.Error -> {
-        }
-        is PrayerTimesViewModel.PrayerTimesState.Loading -> {
-        }
-    }
+	when (val prayerTimesListState = state.value)
+	{
+		is PrayerTimesViewModel.PrayerTimesState.Success ->
+		{
+			val prayerTimes = prayerTimesListState.prayerTimes
+			val timeToNextPrayerLong =
+				prayerTimes?.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())?.toInstant()
+					?.toEpochMilli()
+			val currentTime =
+				LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
+					.toEpochMilli()
+			val difference = timeToNextPrayerLong?.minus(currentTime)
+			viewModel.startTimer(context , difference !!)
+			CurrentNextPrayerContainerUI(prayerTimes.nextPrayer.name , timerState)
+		}
+
+		is PrayerTimesViewModel.PrayerTimesState.Error ->
+		{
+		}
+
+		is PrayerTimesViewModel.PrayerTimesState.Loading ->
+		{
+		}
+	}
 }

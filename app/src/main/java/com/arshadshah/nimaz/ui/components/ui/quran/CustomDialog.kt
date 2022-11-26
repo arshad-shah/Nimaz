@@ -19,77 +19,79 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CustomDialog(
-    title: String,
-    items: List<String>,
-    setShowDialog: (Boolean) -> Unit,
-    state: SettingValueState<Int>,
-    valueState: SettingValueState<String>,
-) {
+	title : String ,
+	items : List<String> ,
+	setShowDialog : (Boolean) -> Unit ,
+	state : SettingValueState<Int> ,
+	valueState : SettingValueState<String> ,
+				)
+{
 
-    val coroutineScope = rememberCoroutineScope()
-    val onSelected: (Int) -> Unit = { selectedIndex ->
-        coroutineScope.launch {
-            state.value = selectedIndex
-            valueState.value = items[selectedIndex]
-        }
-    }
+	val coroutineScope = rememberCoroutineScope()
+	val onSelected : (Int) -> Unit = { selectedIndex ->
+		coroutineScope.launch {
+			state.value = selectedIndex
+			valueState.value = items[selectedIndex]
+		}
+	}
 
-    AlertDialog(
-        shape = CardDefaults.elevatedShape,
-        title = { Text(text = title) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-            ) {
-                items.forEachIndexed { index, item ->
-                    val isSelected by rememberUpdatedState(newValue = state.value == index)
-                    //if valuestate.value has a value, then set the state.value to the index of the valuestate.value
-                    if (valueState.value.isNotEmpty() && valueState.value == item) {
-                        state.value = index
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .selectable(
-                                role = Role.RadioButton,
-                                selected = isSelected,
-                                onClick = { if (!isSelected) onSelected(index) }
-                            ),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = { if (!isSelected) onSelected(index) }
-                        )
-                        Text(
-                            text = item,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-                }
-            }
-        },
-        onDismissRequest = { setShowDialog(false) },
-        properties = DialogProperties(
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true,
-        ),
-        confirmButton = {
-            Button(
-                onClick = { setShowDialog(false) },
-                content = { Text(text = "Confirm") }
-            )
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { setShowDialog(false) },
-                content = { Text(text = "Cancel") }
-            )
-        }
-    )
+	AlertDialog(
+			shape = CardDefaults.elevatedShape ,
+			title = { Text(text = title) } ,
+			text = {
+				Column(
+						modifier = Modifier
+							.verticalScroll(rememberScrollState())
+							.fillMaxWidth()
+							.fillMaxHeight()
+					  ) {
+					items.forEachIndexed { index , item ->
+						val isSelected by rememberUpdatedState(newValue = state.value == index)
+						//if valuestate.value has a value, then set the state.value to the index of the valuestate.value
+						if (valueState.value.isNotEmpty() && valueState.value == item)
+						{
+							state.value = index
+						}
+						Row(
+								modifier = Modifier
+									.fillMaxWidth()
+									.height(48.dp)
+									.selectable(
+											role = Role.RadioButton ,
+											selected = isSelected ,
+											onClick = { if (! isSelected) onSelected(index) }
+											   ) ,
+								verticalAlignment = Alignment.CenterVertically
+						   ) {
+							RadioButton(
+									selected = isSelected ,
+									onClick = { if (! isSelected) onSelected(index) }
+									   )
+							Text(
+									text = item ,
+									style = MaterialTheme.typography.titleMedium ,
+									modifier = Modifier.padding(start = 8.dp)
+								)
+						}
+					}
+				}
+			} ,
+			onDismissRequest = { setShowDialog(false) } ,
+			properties = DialogProperties(
+					dismissOnBackPress = true ,
+					dismissOnClickOutside = true ,
+										 ) ,
+			confirmButton = {
+				Button(
+						onClick = { setShowDialog(false) } ,
+						content = { Text(text = "Confirm") }
+					  )
+			} ,
+			dismissButton = {
+				TextButton(
+						onClick = { setShowDialog(false) } ,
+						content = { Text(text = "Cancel") }
+						  )
+			}
+			   )
 }

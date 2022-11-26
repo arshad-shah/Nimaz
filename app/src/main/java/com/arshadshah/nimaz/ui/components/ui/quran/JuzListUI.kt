@@ -27,85 +27,89 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun JuzListUI(
-    juz: ArrayList<Juz>,
-    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
-) {
-    LazyColumn(userScrollEnabled = true) {
-        items(juz.size) { index ->
-            JuzListItemUI(
-                juzNumber = juz[index].number.toString(),
-                name = juz[index].name,
-                tname = juz[index].tname,
-                onNavigateToAyatScreen = onNavigateToAyatScreen
-            )
-        }
-    }
+	juz : ArrayList<Juz> ,
+	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+			 )
+{
+	LazyColumn(userScrollEnabled = true) {
+		items(juz.size) { index ->
+			JuzListItemUI(
+					juzNumber = juz[index].number.toString() ,
+					name = juz[index].name ,
+					tname = juz[index].tname ,
+					onNavigateToAyatScreen = onNavigateToAyatScreen
+						 )
+		}
+	}
 }
 
 @Composable
 fun JuzListItemUI(
-    juzNumber: String,
-    name: String,
-    tname: String,
-    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit,
-    context: Context = LocalContext.current
-) {
-    ElevatedCard(
-        modifier = Modifier
-            .padding(4.dp)
-            .shadow(8.dp, clip = true, shape = RoundedCornerShape(8.dp))
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(8.dp)
-    ) {
-        //get the translation type from shared preferences
-        val translationType =
-            PrivateSharedPreferences(context).getData(key = "Translation", s = "English")
-        var isEnglishType = true
-        if (translationType != "English") {
-            isEnglishType = false
-        }
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .clickable(
-                    enabled = true
-                ) {
-                    onNavigateToAyatScreen(juzNumber, false, isEnglishType)
-                }
-        ) {
+	juzNumber : String ,
+	name : String ,
+	tname : String ,
+	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	context : Context = LocalContext.current ,
+				 )
+{
+	ElevatedCard(
+			modifier = Modifier
+				.padding(4.dp)
+				.shadow(8.dp , clip = true , shape = RoundedCornerShape(8.dp))
+				.fillMaxWidth()
+				.background(color = MaterialTheme.colorScheme.surface) ,
+			shape = RoundedCornerShape(8.dp)
+				) {
+		//get the translation type from shared preferences
+		val translationType =
+			PrivateSharedPreferences(context).getData(key = "Translation" , s = "English")
+		var isEnglishType = true
+		if (translationType != "English")
+		{
+			isEnglishType = false
+		}
+		Row(
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth()
+					.clickable(
+							enabled = true
+							  ) {
+						onNavigateToAyatScreen(juzNumber , false , isEnglishType)
+					}
+		   ) {
 
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.10f),
-                text = "$juzNumber.",
-                style = MaterialTheme.typography.bodyLarge
-            )
+			Text(
+					modifier = Modifier
+						.align(Alignment.CenterVertically)
+						.weight(0.10f) ,
+					text = "$juzNumber." ,
+					style = MaterialTheme.typography.bodyLarge
+				)
 
-            Column(
-                modifier = Modifier
-                    .padding(16.dp, 0.dp)
-                    .align(Alignment.CenterVertically)
-                    .weight(0.80f)
-            ) {
-                //apply quran font
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontFamily = quranFont
-                )
-                Text(text = tname, style = MaterialTheme.typography.titleSmall)
-            }
-            //an arrow right icon
-            Icon(
-                imageVector = Icons.Rounded.KeyboardArrowRight,
-                contentDescription = "Clear",
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.10f)
-                    .fillMaxWidth()
-            )
-        }
-    }
+			Column(
+					modifier = Modifier
+						.padding(16.dp , 0.dp)
+						.align(Alignment.CenterVertically)
+						.weight(0.80f)
+				  ) {
+				//apply quran font
+				Text(
+						text = name ,
+						style = MaterialTheme.typography.titleLarge ,
+						fontFamily = quranFont
+					)
+				Text(text = tname , style = MaterialTheme.typography.titleSmall)
+			}
+			//an arrow right icon
+			Icon(
+					imageVector = Icons.Rounded.KeyboardArrowRight ,
+					contentDescription = "Clear" ,
+					modifier = Modifier
+						.align(Alignment.CenterVertically)
+						.weight(0.10f)
+						.fillMaxWidth()
+				)
+		}
+	}
 }

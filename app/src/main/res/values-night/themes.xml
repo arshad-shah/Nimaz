@@ -9,7 +9,7 @@
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" >?attr/colorOnPrimary</item>
+        <item name="android:statusBarColor">?attr/colorOnPrimary</item>
     </style>
 
     <style name="SplashTheme" parent="Theme.Nimaz">

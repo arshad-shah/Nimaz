@@ -6,22 +6,22 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SurahResponse(
-    @SerialName("suranumberdata")
-    val number: Int,
-    @SerialName("aya")
-    val numberOfAyahs: Int,
-    @SerialName("start")
-    val startAya: Int,
-    @SerialName("name")
-    val name: String,
-    @SerialName("tname")
-    val englishName: String,
-    @SerialName("ename")
-    val englishNameTranslation: String,
-    @SerialName("type")
-    val revelationType: String,
-    @SerialName("orderOfNuzool")
-    val revelationOrder: Int,
-    @SerialName("rukus")
-    val rukus: Int,
-)
+	@SerialName("suranumberdata")
+	val number : Int ,
+	@SerialName("aya")
+	val numberOfAyahs : Int ,
+	@SerialName("start")
+	val startAya : Int ,
+	@SerialName("name")
+	val name : String ,
+	@SerialName("tname")
+	val englishName : String ,
+	@SerialName("ename")
+	val englishNameTranslation : String ,
+	@SerialName("type")
+	val revelationType : String ,
+	@SerialName("orderOfNuzool")
+	val revelationOrder : Int ,
+	@SerialName("rukus")
+	val rukus : Int ,
+						)

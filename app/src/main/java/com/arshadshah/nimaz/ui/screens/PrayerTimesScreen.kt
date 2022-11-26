@@ -17,28 +17,29 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContain
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 
 @Composable
-fun PrayerTimesScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .wrapContentSize(Alignment.Center),
-    ) {
-        val context = LocalContext.current
+fun PrayerTimesScreen()
+{
+	Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(8.dp)
+				.wrapContentSize(Alignment.Center) ,
+		  ) {
+		val context = LocalContext.current
 
-        val viewModel = PrayerTimesViewModel(context)
+		val viewModel = PrayerTimesViewModel(context)
 
-        val state = viewModel.prayerTimesState.collectAsState()
-
-
-        val locationState = viewModel.location.collectAsState()
-
-        val timerState = viewModel.timer
+		val state = viewModel.prayerTimesState.collectAsState()
 
 
-        LocationTimeContainer(state = locationState)
-        DatesContainer()
-        CurrentNextPrayerContainer(state = state, timerState = timerState, viewModel = viewModel)
-        PrayerTimesList(state = state)
-    }
+		val locationState = viewModel.location.collectAsState()
+
+		val timerState = viewModel.timer
+
+
+		LocationTimeContainer(state = locationState)
+		DatesContainer()
+		CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
+		PrayerTimesList(state = state)
+	}
 }
