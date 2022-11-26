@@ -74,20 +74,20 @@ fun CustomDialog(
                 }
             }
         },
-        onDismissRequest = {setShowDialog(false)},
+        onDismissRequest = { setShowDialog(false) },
         properties = DialogProperties(
             dismissOnBackPress = true,
             dismissOnClickOutside = true,
         ),
         confirmButton = {
             Button(
-                onClick = {setShowDialog(false)},
+                onClick = { setShowDialog(false) },
                 content = { Text(text = "Confirm") }
             )
         },
         dismissButton = {
             TextButton(
-                onClick = {setShowDialog(false)},
+                onClick = { setShowDialog(false) },
                 content = { Text(text = "Cancel") }
             )
         }

@@ -3,7 +3,9 @@ package com.arshadshah.nimaz.ui.components.ui.quran
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
@@ -15,8 +17,7 @@ fun MoreMenu(
     menuOpen: Boolean = false,
     setMenuOpen: (Boolean) -> Unit,
     state: SettingValueState<Int> = rememberIntSettingState(),
-)
-{
+) {
 
     val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 
@@ -31,7 +32,7 @@ fun MoreMenu(
     val (showDialog2, setShowDialog2) = remember { mutableStateOf(false) }
     DropdownMenu(
         expanded = menuOpen,
-        onDismissRequest = {setMenuOpen(false)},
+        onDismissRequest = { setMenuOpen(false) },
         content = {
             DropdownMenuItem(onClick = {
                 setShowDialog1(true)
@@ -40,12 +41,12 @@ fun MoreMenu(
             DropdownMenuItem(onClick = {
                 setShowDialog2(true)
                 setMenuOpen(false)
-            }, text = { Text(text="Translation") })
+            }, text = { Text(text = "Translation") })
         }
     )
 
 
-    if (showDialog1){
+    if (showDialog1) {
         CustomDialog(
             title = "Display Type",
             setShowDialog = setShowDialog1,
@@ -53,7 +54,7 @@ fun MoreMenu(
             valueState = pageTypeState,
             items = items1,
         )
-    }else if (showDialog2){
+    } else if (showDialog2) {
         CustomDialog(
             title = "Translation",
             setShowDialog = setShowDialog2,
@@ -61,7 +62,7 @@ fun MoreMenu(
             valueState = translationState,
             items = items2,
         )
-    }else{
+    } else {
         return
     }
 }

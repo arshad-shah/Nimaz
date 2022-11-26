@@ -4,12 +4,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import com.arshadshah.nimaz.data.remote.viewModel.JuzViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.SurahViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
 import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
 
@@ -19,6 +20,7 @@ fun QuranScreen(
     paddingValues: PaddingValues,
     onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
 ) {
+    val viewModel = QuranViewModel()
     //save the state of the tab
     val (selectedTab, setSelectedTab) = rememberSaveable { mutableStateOf(0) }
     val titles = listOf("Surah", "Juz")
@@ -28,24 +30,29 @@ fun QuranScreen(
             titles.forEachIndexed { index, title ->
                 Tab(
                     selected = selectedTab == index,
-                    onClick = {setSelectedTab(index)},
-                    text = { Text(text = title, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall) }
+                    onClick = { setSelectedTab(index) },
+                    text = {
+                        Text(
+                            text = title,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
                 )
             }
         }
         when (selectedTab) {
             0 -> {
-                val viewModelSurah = SurahViewModel()
                 SurahList(
                     onNavigateToAyatScreen = onNavigateToAyatScreen,
-                    state = viewModelSurah.surahState.collectAsState()
+                    state = viewModel.surahState.collectAsState()
                 )
             }
             1 -> {
-                val viewModelJuz = JuzViewModel()
                 JuzList(
                     onNavigateToAyatScreen = onNavigateToAyatScreen,
-                    state = viewModelJuz.juzState.collectAsState(),
+                    state = viewModel.juzState.collectAsState(),
                 )
             }
         }

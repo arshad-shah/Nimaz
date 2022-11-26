@@ -1,19 +1,19 @@
 package com.arshadshah.nimaz.ui.navigation
 
-import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.navigation.*
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.arshadshah.nimaz.activities.QuranActivity
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
-import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
-import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 
@@ -25,7 +25,7 @@ fun NavigationGraph(navController: NavController, paddingValues: PaddingValues) 
         startDestination = BottomNavItem.PrayerTimesScreen.screen_route
     ) {
         composable(BottomNavItem.PrayerTimesScreen.screen_route) {
-            PrayerTimesScreen(paddingValues)
+            PrayerTimesScreen()
         }
         composable(BottomNavItem.QiblaScreen.screen_route) {
             QiblaScreen(paddingValues)

@@ -1,18 +1,29 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import com.arshadshah.nimaz.data.remote.viewModel.LocationViewModel
+import androidx.compose.runtime.State
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.LocationTimeContainerUI
 
-@Preview
 @Composable
-fun LocationTimeContainer(viewModel: LocationViewModel = LocationViewModel(LocalContext.current)) {
-    when (val state = viewModel.location.collectAsState().value) {
-        is LocationViewModel.LocationState.Loading -> LocationTimeContainerUI("Loading...")
-        is LocationViewModel.LocationState.Success -> LocationTimeContainerUI(state.location)
-        is LocationViewModel.LocationState.Error -> LocationTimeContainerUI(state.errorMessage)
+fun LocationTimeContainer(
+    state: State<PrayerTimesViewModel.LocationState>
+) {
+    when (val locationState = state.value) {
+        is PrayerTimesViewModel.LocationState.Loading -> {
+            LocationTimeContainerUI(
+                location = "Loading...",
+            )
+        }
+        is PrayerTimesViewModel.LocationState.Success -> {
+            LocationTimeContainerUI(
+                location = locationState.location,
+            )
+        }
+        is PrayerTimesViewModel.LocationState.Error -> {
+            LocationTimeContainerUI(
+                location = "Error",
+            )
+        }
     }
 }

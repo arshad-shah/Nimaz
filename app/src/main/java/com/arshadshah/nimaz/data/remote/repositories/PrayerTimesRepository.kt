@@ -66,7 +66,6 @@ object PrayerTimesRepository {
                     time = LocalDateTime.parse(response.currentPrayer.time)
                 )
             )
-
             ApiResponse.Success(prayerTimes)
         } catch (e: ClientRequestException) {
             ApiResponse.Error(e.message, null)

@@ -21,7 +21,7 @@ import java.text.NumberFormat
 import java.util.*
 
 @Composable
-fun Verses(AyaList : ArrayList<Aya>, paddingValues: PaddingValues) {
+fun Verses(AyaList: ArrayList<Aya>, paddingValues: PaddingValues) {
     //if the aya is bismillah, then it is the first aya of the surah
     var text = ""
     for (aya in AyaList) {
@@ -39,10 +39,9 @@ fun Verses(AyaList : ArrayList<Aya>, paddingValues: PaddingValues) {
 
         //if the aya is bisillah, then add a new line at the start and end of the aya
         //check both english and urdu translations of bismillah and the arabic text
-        if (aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ")
-        {
+        if (aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ") {
             text += "\t$text $ayaArabicWithEnd\n"
-        }else{
+        } else {
             text = "$text $ayaArabicWithEnd"
         }
     }
@@ -55,7 +54,7 @@ fun Verses(AyaList : ArrayList<Aya>, paddingValues: PaddingValues) {
 }
 
 @Composable
-fun Verse(arabic : String, paddingValues: PaddingValues) {
+fun Verse(arabic: String, paddingValues: PaddingValues) {
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Text(
@@ -76,13 +75,13 @@ fun Verse(arabic : String, paddingValues: PaddingValues) {
 fun PageUIPreview() {
 
     //make 10 LocalAya
-    val ayaList = java.util.ArrayList<Aya>()
+    val ayaList = ArrayList<Aya>()
     //add the aya to the list
     ayaList.add(
         Aya(
             1,
             "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
-            "In the name of Allah, the Entirely Merciful, the Especially Merciful.","Surah",
+            "In the name of Allah, the Entirely Merciful, the Especially Merciful.", "Surah",
             1
         )
     )
@@ -90,24 +89,36 @@ fun PageUIPreview() {
         Aya(
             2,
             "الحمد لله رب العالمين",
-            "All praise is due to Allah, Lord of the worlds.","Surah",
+            "All praise is due to Allah, Lord of the worlds.", "Surah",
             1
         )
     )
-    ayaList.add(Aya(3, "الرحمن الرحيم", "The Entirely Merciful, the Especially Merciful.","Surah",
-        1))
-    ayaList.add(Aya(4, "مالك يوم الدين", "Master of the Day of Judgment.","Surah",
-        1))
+    ayaList.add(
+        Aya(
+            3, "الرحمن الرحيم", "The Entirely Merciful, the Especially Merciful.", "Surah",
+            1
+        )
+    )
+    ayaList.add(
+        Aya(
+            4, "مالك يوم الدين", "Master of the Day of Judgment.", "Surah",
+            1
+        )
+    )
     ayaList.add(
         Aya(
             5,
             "إياك نعبد وإياك نستعين",
-            "You alone do we worship, and You alone do we implore for help.","Surah",
+            "You alone do we worship, and You alone do we implore for help.", "Surah",
             1
         )
     )
-    ayaList.add(Aya(6, "اهدنا الصراط المستقيم", "Guide us to the straight path.","Surah",
-        1))
+    ayaList.add(
+        Aya(
+            6, "اهدنا الصراط المستقيم", "Guide us to the straight path.", "Surah",
+            1
+        )
+    )
     ayaList.add(
         Aya(
             7,

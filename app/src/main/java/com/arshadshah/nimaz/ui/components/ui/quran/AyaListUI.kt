@@ -11,19 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.utils.AyaEndProcesser
-import java.text.NumberFormat
-import java.util.*
 
 @Composable
 fun AyaListUI(ayaList: ArrayList<Aya>, paddingValues: PaddingValues) {
@@ -46,7 +42,8 @@ fun AyaListItemUI(
 ) {
     ElevatedCard(
         modifier = Modifier
-            .padding(4.dp).fillMaxHeight()
+            .padding(4.dp)
+            .fillMaxHeight()
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(8.dp)
     ) {
@@ -88,7 +85,9 @@ fun AyaListItemUI(
                     textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center,
                     modifier = if (ayaNumber != "0") Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 4.dp) else Modifier.fillMaxWidth().padding(4.dp)
+                        .padding(bottom = 4.dp) else Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
                 )
             }
         }
@@ -106,7 +105,7 @@ fun AyaListItemUIPreview() {
             Aya(
                 1,
                 "بسم الله الرحمن الرحيم",
-                "In the name of Allah, the Entirely Merciful, the Especially Merciful.","Surah",
+                "In the name of Allah, the Entirely Merciful, the Especially Merciful.", "Surah",
                 1
             )
         )
@@ -114,24 +113,36 @@ fun AyaListItemUIPreview() {
             Aya(
                 2,
                 "الحمد لله رب العالمين",
-                "All praise is due to Allah, Lord of the worlds.","Surah",
+                "All praise is due to Allah, Lord of the worlds.", "Surah",
                 1
             )
         )
-        ayaList.add(Aya(3, "الرحمن الرحيم", "The Entirely Merciful, the Especially Merciful.","Surah",
-            1))
-        ayaList.add(Aya(4, "مالك يوم الدين", "Master of the Day of Judgment.","Surah",
-            1))
+        ayaList.add(
+            Aya(
+                3, "الرحمن الرحيم", "The Entirely Merciful, the Especially Merciful.", "Surah",
+                1
+            )
+        )
+        ayaList.add(
+            Aya(
+                4, "مالك يوم الدين", "Master of the Day of Judgment.", "Surah",
+                1
+            )
+        )
         ayaList.add(
             Aya(
                 5,
                 "إياك نعبد وإياك نستعين",
-                "You alone do we worship, and You alone do we implore for help.","Surah",
+                "You alone do we worship, and You alone do we implore for help.", "Surah",
                 1
             )
         )
-        ayaList.add(Aya(6, "اهدنا الصراط المستقيم", "Guide us to the straight path.","Surah",
-            1))
+        ayaList.add(
+            Aya(
+                6, "اهدنا الصراط المستقيم", "Guide us to the straight path.", "Surah",
+                1
+            )
+        )
         ayaList.add(
             Aya(
                 7,

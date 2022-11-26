@@ -8,8 +8,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
-import com.arshadshah.nimaz.ui.screens.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 

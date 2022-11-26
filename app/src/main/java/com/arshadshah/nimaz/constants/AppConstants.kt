@@ -2,12 +2,11 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants {
 
-    const val applicationContext = "com.arshadshah.nimaz"
     const val BASE_URL = "http://178.62.35.217:8080"
 
-//    const val BASE_URL = "http://192.168.0.62:8080"
+    //    const val BASE_URL = "http://192.168.0.62:8080"
     const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/"
-    const val PRAYER_TIMES_BY_METHOD_URL = "$BASE_URL/prayertimes/byMethod/"
+//    const val PRAYER_TIMES_BY_METHOD_URL = "$BASE_URL/prayertimes/byMethod/"
     const val QURAN_SURAH_URL = "$BASE_URL/quran/surahs/"
     const val QURAN_JUZ_URL = "$BASE_URL/quran/juzs/"
     const val QURAN_SURAH_AYAT_URL = "$BASE_URL/quran/surah/"

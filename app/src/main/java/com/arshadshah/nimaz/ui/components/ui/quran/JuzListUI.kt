@@ -3,7 +3,10 @@ package com.arshadshah.nimaz.ui.components.ui.quran
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -55,9 +58,10 @@ fun JuzListItemUI(
             .background(color = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(8.dp)
     ) {
         //get the translation type from shared preferences
-        val translationType = PrivateSharedPreferences(context).getData(key ="Translation", s = "English")
+        val translationType =
+            PrivateSharedPreferences(context).getData(key = "Translation", s = "English")
         var isEnglishType = true
-        if(translationType != "English"){
+        if (translationType != "English") {
             isEnglishType = false
         }
         Row(

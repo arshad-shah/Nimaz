@@ -22,9 +22,9 @@ fun DatesContainerUI(GregDate: String, islamDate: String) {
             .shadow(5.dp, shape = MaterialTheme.shapes.medium, clip = true)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = GregDate, Modifier.padding(8.dp))
+            Text(text = GregDate, Modifier.padding(16.dp))
             Divider(color = MaterialTheme.colorScheme.outline)
-            Text(text = islamDate, Modifier.padding(8.dp))
+            Text(text = islamDate, Modifier.padding(16.dp))
         }
     }
 }

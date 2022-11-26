@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.data.remote.viewModel.AyaSurahViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.Verses
@@ -18,18 +18,19 @@ fun AyaSurahList(
     paddingValues: PaddingValues,
     number: Int,
     isEnglish: Boolean,
-    state: State<AyaSurahViewModel.AyaSurahState>,
+    state: State<QuranViewModel.AyaSurahState>,
 ) {
     when (val ayatSurahListState = state.value) {
-        is AyaSurahViewModel.AyaSurahState.Loading -> {
+        is QuranViewModel.AyaSurahState.Loading -> {
             CircularLoaderCard()
         }
-        is AyaSurahViewModel.AyaSurahState.Success -> {
+        is QuranViewModel.AyaSurahState.Success -> {
             val correctedAyatList = processSurahAyatMap(ayatSurahListState.data, isEnglish, number)
             //get the translation type from shared preferences
-            val pageType = PrivateSharedPreferences(LocalContext.current).getData(key ="PageType", s = "List")
+            val pageType =
+                PrivateSharedPreferences(LocalContext.current).getData(key = "PageType", s = "List")
             var isList = true
-            if(pageType != "List"){
+            if (pageType != "List") {
                 isList = false
             }
 
@@ -39,7 +40,7 @@ fun AyaSurahList(
                 Verses(correctedAyatList, paddingValues)
             }
         }
-        is AyaSurahViewModel.AyaSurahState.Error -> {
+        is QuranViewModel.AyaSurahState.Error -> {
             Toast.makeText(
                 LocalContext.current,
                 ayatSurahListState.errorMessage,
