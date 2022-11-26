@@ -2,16 +2,14 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -27,8 +25,8 @@ fun PrayerTimesListUI(
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
-				.shadow(5.dp , shape = MaterialTheme.shapes.medium , clip = true)
 				.padding(paddingValues)
+				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		Column {
 			//iterate over the map
@@ -96,16 +94,18 @@ fun getHighlightRow(prayerName : String , name : String) : Boolean
 @Composable
 fun PrayerTimesListUIPreview()
 {
-	PrayerTimesListUI(
-			prayerTimesMap = mapOf(
-					"FAJR" to LocalDateTime.now() ,
-					"SUNRISE" to LocalDateTime.now() ,
-					"DHUHR" to LocalDateTime.now() ,
-					"ASR" to LocalDateTime.now() ,
-					"MAGHRIB" to LocalDateTime.now() ,
-					"ISHA" to LocalDateTime.now()
-								  ) ,
-			name = "FAJR" ,
-			paddingValues = PaddingValues(16.dp)
-					 )
+	NimazTheme {
+		PrayerTimesListUI(
+				prayerTimesMap = mapOf(
+						"FAJR" to LocalDateTime.now() ,
+						"SUNRISE" to LocalDateTime.now() ,
+						"DHUHR" to LocalDateTime.now() ,
+						"ASR" to LocalDateTime.now() ,
+						"MAGHRIB" to LocalDateTime.now() ,
+						"ISHA" to LocalDateTime.now()
+									  ) ,
+				name = "FAJR" ,
+				paddingValues = PaddingValues(16.dp)
+						 )
+	}
 }

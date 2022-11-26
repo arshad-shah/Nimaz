@@ -84,7 +84,7 @@ fun SettingsScreen(
 		ElevatedCard(
 				modifier = Modifier
 					.padding(8.dp)
-					.shadow(4.dp , clip = true , shape = CardDefaults.elevatedShape)
+					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
 					) {
 			SettingsMenuLink(

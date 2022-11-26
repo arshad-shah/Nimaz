@@ -20,7 +20,7 @@ fun SettingsGroup(
 	ElevatedCard(
 			modifier = modifier
 				.padding(8.dp)
-				.shadow(4.dp , clip = true , shape = CardDefaults.elevatedShape)
+				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		Column(
 				modifier = modifier.fillMaxWidth() ,
