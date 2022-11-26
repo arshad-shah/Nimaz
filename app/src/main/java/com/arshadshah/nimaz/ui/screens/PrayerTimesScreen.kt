@@ -1,9 +1,6 @@
 package com.arshadshah.nimaz.ui.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -17,7 +14,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContain
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 
 @Composable
-fun PrayerTimesScreen()
+fun PrayerTimesScreen(paddingValues : PaddingValues)
 {
 	Column(
 			modifier = Modifier
@@ -40,6 +37,6 @@ fun PrayerTimesScreen()
 		LocationTimeContainer(state = locationState)
 		DatesContainer()
 		CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
-		PrayerTimesList(state = state)
+		PrayerTimesList(state = state,paddingValues = paddingValues)
 	}
 }

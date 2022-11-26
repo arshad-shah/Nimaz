@@ -21,12 +21,14 @@ fun PrayerTimesListUI(
 	modifier : Modifier = Modifier ,
 	prayerTimesMap : Map<String , LocalDateTime?> ,
 	name : String ,
+	paddingValues : PaddingValues ,
 					 )
 {
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
 				.shadow(5.dp , shape = MaterialTheme.shapes.medium , clip = true)
+				.padding(paddingValues)
 				) {
 		Column {
 			//iterate over the map
@@ -65,7 +67,7 @@ fun PrayerTimesRow(prayerName : String , prayerTime : LocalDateTime? , isHighlig
 			{
 				Modifier
 					.fillMaxWidth()
-					.background(MaterialTheme.colorScheme.primaryContainer)
+					.background(MaterialTheme.colorScheme.secondaryContainer)
 			} else
 			{
 				Modifier
@@ -103,6 +105,7 @@ fun PrayerTimesListUIPreview()
 					"MAGHRIB" to LocalDateTime.now() ,
 					"ISHA" to LocalDateTime.now()
 								  ) ,
-			name = "FAJR"
+			name = "FAJR" ,
+			paddingValues = PaddingValues(16.dp)
 					 )
 }
