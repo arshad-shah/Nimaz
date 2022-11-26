@@ -12,60 +12,64 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun SettingsGroup(
-    modifier: Modifier = Modifier,
-    title: @Composable (() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    ElevatedCard(
-        modifier = modifier
-            .padding(8.dp)
-            .shadow(4.dp, clip = true, shape = CardDefaults.elevatedShape)
-    ) {
-        Column(
-            modifier = modifier.fillMaxWidth(),
-        ) {
-            if (title != null) {
-                SettingsGroupTitle(title)
-                Divider(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
-            content()
-        }
-    }
+	modifier : Modifier = Modifier ,
+	title : @Composable (() -> Unit)? = null ,
+	content : @Composable ColumnScope.() -> Unit ,
+				 )
+{
+	ElevatedCard(
+			modifier = modifier
+				.padding(8.dp)
+				.shadow(4.dp , clip = true , shape = CardDefaults.elevatedShape)
+				) {
+		Column(
+				modifier = modifier.fillMaxWidth() ,
+			  ) {
+			if (title != null)
+			{
+				SettingsGroupTitle(title)
+				Divider(
+						modifier = Modifier.fillMaxWidth() ,
+						color = MaterialTheme.colorScheme.outline
+					   )
+			}
+			content()
+		}
+	}
 }
 
 @Composable
-internal fun SettingsGroupTitle(title: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        val primary = MaterialTheme.colorScheme.secondary
-        val titleStyle = MaterialTheme.typography.titleLarge.copy(color = primary)
-        ProvideTextStyle(value = titleStyle) { title() }
-    }
+internal fun SettingsGroupTitle(title : @Composable () -> Unit)
+{
+	Box(
+			modifier = Modifier
+				.fillMaxWidth()
+				.height(64.dp)
+				.padding(horizontal = 16.dp) ,
+			contentAlignment = Alignment.CenterStart
+	   ) {
+		val primary = MaterialTheme.colorScheme.secondary
+		val titleStyle = MaterialTheme.typography.titleLarge.copy(color = primary)
+		ProvideTextStyle(value = titleStyle) { title() }
+	}
 }
 
 @Preview
 @Composable
-internal fun SettingsGroupPreview() {
-    NimazTheme {
-        SettingsGroup(
-            title = { Text(text = "Title") }
-        ) {
-            Box(
-                modifier = Modifier
-                    .height(64.dp)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = "Settings group")
-            }
-        }
-    }
+internal fun SettingsGroupPreview()
+{
+	NimazTheme {
+		SettingsGroup(
+				title = { Text(text = "Title") }
+					 ) {
+			Box(
+					modifier = Modifier
+						.height(64.dp)
+						.fillMaxWidth() ,
+					contentAlignment = Alignment.Center ,
+			   ) {
+				Text(text = "Settings group")
+			}
+		}
+	}
 }

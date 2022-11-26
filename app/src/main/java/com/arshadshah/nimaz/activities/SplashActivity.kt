@@ -10,21 +10,25 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 
 @SuppressLint("CustomSplashScreen")
-class SplashActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+class SplashActivity : ComponentActivity()
+{
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val splashScreen = installSplashScreen()
-            splashScreen.setKeepOnScreenCondition { true }
-        }
+	override fun onCreate(savedInstanceState : Bundle?)
+	{
 
-        super.onCreate(savedInstanceState)
-        lifecycleScope.launchWhenCreated {
-            delay(2000)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+		{
+			val splashScreen = installSplashScreen()
+			splashScreen.setKeepOnScreenCondition { true }
+		}
 
-            val intent = Intent(this@SplashActivity, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-    }
+		super.onCreate(savedInstanceState)
+		lifecycleScope.launchWhenCreated {
+			delay(2000)
+
+			val intent = Intent(this@SplashActivity , MainActivity::class.java)
+			startActivity(intent)
+			finish()
+		}
+	}
 }

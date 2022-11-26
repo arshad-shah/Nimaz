@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AyaResponse(
-    @SerialName("ayaNumber")
-    val number: Int,
-    @SerialName("ayaArabic")
-    val arabic: String,
-    @SerialName("ayaTranslation")
-    val translation: String,
-)
+	@SerialName("ayaNumber")
+	val number : Int ,
+	@SerialName("ayaArabic")
+	val arabic : String ,
+	@SerialName("ayaTranslation")
+	val translation : String ,
+					  )

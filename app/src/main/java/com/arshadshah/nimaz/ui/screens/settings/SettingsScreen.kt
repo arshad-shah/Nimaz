@@ -29,70 +29,76 @@ import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 
 @Composable
 fun SettingsScreen(
-    onNavigateToPrayerTimeCustomizationScreen: () -> Unit,
-    paddingValues: PaddingValues
-) {
-    val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
-    val locationFinderAuto = LocationFinderAuto()
-    val cityname =
-        rememberPreferenceStringSettingState(key = "location_input", defaultValue = "Abbeyleix")
+	onNavigateToPrayerTimeCustomizationScreen : () -> Unit ,
+	paddingValues : PaddingValues ,
+				  )
+{
+	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
+	val locationFinderAuto = LocationFinderAuto()
+	val cityname =
+		rememberPreferenceStringSettingState(key = "location_input" , defaultValue = "Abbeyleix")
 
-    Column(modifier = Modifier.verticalScroll(rememberScrollState(), true)) {
-        SettingsGroup(title = { Text(text = "Location") }) {
-            val storage =
-                rememberPreferenceBooleanSettingState("location_auto", true, sharedPreferences)
-            SettingsSwitch(
-                state = storage,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Outlined.LocationOn,
-                        contentDescription = "Clear"
-                    )
-                },
-                title = {
-                    if (storage.value) {
-                        Text(text = "Automatic")
-                        //if the location city name is not null, then run the code
-                        if (cityname.value != "") {
-                            Location().getAutomaticLocation(LocalContext.current)
-                        }
-                    } else {
-                        Text(text = "Manual")
-                        locationFinderAuto.stopLocationUpdates()
-                    }
-                },
-                subtitle = {
-                    if (storage.value) {
-                        Text(text = cityname.value)
-                    }
-                },
-                onCheckedChange = {
-                    storage.value = it
-                }
-            )
-            if (!storage.value) {
-                ManualLocationInput()
-                CoordinatesView()
-            }
-        }
-        ElevatedCard(
-            modifier = Modifier
-                .padding(8.dp)
-                .shadow(4.dp, clip = true, shape = CardDefaults.elevatedShape)
-                .fillMaxWidth()
-        ) {
-            SettingsMenuLink(
-                title = { Text(text = "Prayer Times Adjustments") },
-                onClick = onNavigateToPrayerTimeCustomizationScreen,
-                icon = {
-                    Icon(
-                        imageVector =
-                        //get the icon from the resources
-                        ImageVector.vectorResource(id = R.drawable.ic_clock),
-                        contentDescription = "Clock"
-                    )
-                },
-            )
-        }
-    }
+	Column(modifier = Modifier.verticalScroll(rememberScrollState() , true)) {
+		SettingsGroup(title = { Text(text = "Location") }) {
+			val storage =
+				rememberPreferenceBooleanSettingState("location_auto" , true , sharedPreferences)
+			SettingsSwitch(
+					state = storage ,
+					icon = {
+						Icon(
+								imageVector = Icons.Outlined.LocationOn ,
+								contentDescription = "Clear"
+							)
+					} ,
+					title = {
+						if (storage.value)
+						{
+							Text(text = "Automatic")
+							//if the location city name is not null, then run the code
+							if (cityname.value != "")
+							{
+								Location().getAutomaticLocation(LocalContext.current)
+							}
+						} else
+						{
+							Text(text = "Manual")
+							locationFinderAuto.stopLocationUpdates()
+						}
+					} ,
+					subtitle = {
+						if (storage.value)
+						{
+							Text(text = cityname.value)
+						}
+					} ,
+					onCheckedChange = {
+						storage.value = it
+					}
+						  )
+			if (! storage.value)
+			{
+				ManualLocationInput()
+				CoordinatesView()
+			}
+		}
+		ElevatedCard(
+				modifier = Modifier
+					.padding(8.dp)
+					.shadow(4.dp , clip = true , shape = CardDefaults.elevatedShape)
+					.fillMaxWidth()
+					) {
+			SettingsMenuLink(
+					title = { Text(text = "Prayer Times Adjustments") } ,
+					onClick = onNavigateToPrayerTimeCustomizationScreen ,
+					icon = {
+						Icon(
+								imageVector =
+								//get the icon from the resources
+								ImageVector.vectorResource(id = R.drawable.ic_clock) ,
+								contentDescription = "Clock"
+							)
+					} ,
+							)
+		}
+	}
 }
