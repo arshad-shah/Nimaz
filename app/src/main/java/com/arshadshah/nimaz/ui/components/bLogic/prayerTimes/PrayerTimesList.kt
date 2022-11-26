@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
@@ -17,6 +18,7 @@ import java.time.LocalDateTime
 fun PrayerTimesList(
 	modifier : Modifier = Modifier ,
 	state : State<PrayerTimesViewModel.PrayerTimesState> ,
+	paddingValues : PaddingValues ,
 				   )
 {
 	when (val prayerTimesState = state.value)
@@ -40,13 +42,14 @@ fun PrayerTimesList(
 			prayerTimes.currentPrayer?.let {
 				PrayerTimesListUI(modifier ,
 								  prayerTimesMap ,
-								  it.name)
+								  it.name,
+								  paddingValues)
 			}
 		}
 
 		is PrayerTimesViewModel.PrayerTimesState.Error ->
 		{
-			PrayerTimesListUI(modifier , mapOf() , "")
+			PrayerTimesListUI(modifier , mapOf() , "" , paddingValues)
 			Toast.makeText(
 					LocalContext.current ,
 					prayerTimesState.errorMessage ,

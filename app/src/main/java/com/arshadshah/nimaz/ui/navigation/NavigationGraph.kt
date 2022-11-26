@@ -26,7 +26,7 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 			startDestination = BottomNavItem.PrayerTimesScreen.screen_route
 		   ) {
 		composable(BottomNavItem.PrayerTimesScreen.screen_route) {
-			PrayerTimesScreen()
+			PrayerTimesScreen(paddingValues = paddingValues)
 		}
 		composable(BottomNavItem.QiblaScreen.screen_route) {
 			QiblaScreen(paddingValues)
