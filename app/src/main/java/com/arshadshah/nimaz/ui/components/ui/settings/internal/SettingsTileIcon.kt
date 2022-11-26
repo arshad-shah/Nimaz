@@ -14,33 +14,37 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 internal fun SettingsTileIcon(
-    modifier: Modifier = Modifier,
-    icon: @Composable (() -> Unit)? = null,
-) {
-    Box(
-        modifier = modifier.size(64.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (icon != null) {
-            icon()
-        }
-    }
+	modifier : Modifier = Modifier ,
+	icon : @Composable (() -> Unit)? = null ,
+							 )
+{
+	Box(
+			modifier = modifier.size(64.dp) ,
+			contentAlignment = Alignment.Center ,
+	   ) {
+		if (icon != null)
+		{
+			icon()
+		}
+	}
 }
 
 @Preview
 @Composable
-fun SettingsIconPreview() {
-    NimazTheme {
-        SettingsTileIcon {
-            Icon(imageVector = Icons.Default.Clear, contentDescription = "")
-        }
-    }
+fun SettingsIconPreview()
+{
+	NimazTheme {
+		SettingsTileIcon {
+			Icon(imageVector = Icons.Default.Clear , contentDescription = "")
+		}
+	}
 }
 
 @Preview
 @Composable
-fun SettingsIconPreviewEmpty() {
-    NimazTheme {
-        SettingsTileIcon()
-    }
+fun SettingsIconPreviewEmpty()
+{
+	NimazTheme {
+		SettingsTileIcon()
+	}
 }

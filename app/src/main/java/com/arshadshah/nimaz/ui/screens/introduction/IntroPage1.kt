@@ -5,7 +5,8 @@ import androidx.compose.runtime.Composable
 
 
 @Composable
-fun IntroPage1() {
+fun IntroPage1()
+{
 
-    Text(text = "Welcome")
+	Text(text = "Welcome")
 }

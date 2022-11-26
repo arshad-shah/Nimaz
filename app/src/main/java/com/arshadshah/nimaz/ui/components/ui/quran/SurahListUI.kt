@@ -3,7 +3,10 @@ package com.arshadshah.nimaz.ui.components.ui.quran
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,123 +27,128 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun SurahListUI(
-    surahs: ArrayList<Surah>,
-    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit
-) {
-    LazyColumn(userScrollEnabled = true) {
-        items(surahs.size) { index ->
-            SurahListItemUI(
-                surahNumber = surahs[index].number.toString(),
-                surahAyaAmount = surahs[index].numberOfAyahs.toString(),
-                surahName = surahs[index].name,
-                englishName = surahs[index].englishName,
-                englishNameTranslation = surahs[index].englishNameTranslation,
-                type = surahs[index].revelationType,
-                rukus = surahs[index].rukus.toString(),
-                onNavigateToAyatScreen = onNavigateToAyatScreen
-            )
-        }
-    }
+	surahs : ArrayList<Surah> ,
+	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+			   )
+{
+	LazyColumn(userScrollEnabled = true) {
+		items(surahs.size) { index ->
+			SurahListItemUI(
+					surahNumber = surahs[index].number.toString() ,
+					surahAyaAmount = surahs[index].numberOfAyahs.toString() ,
+					surahName = surahs[index].name ,
+					englishName = surahs[index].englishName ,
+					englishNameTranslation = surahs[index].englishNameTranslation ,
+					type = surahs[index].revelationType ,
+					rukus = surahs[index].rukus.toString() ,
+					onNavigateToAyatScreen = onNavigateToAyatScreen
+						   )
+		}
+	}
 }
 
 @Composable
 fun SurahListItemUI(
-    surahNumber: String,
-    surahAyaAmount: String,
-    surahName: String,
-    englishName: String,
-    englishNameTranslation: String,
-    type: String,
-    rukus: String,
-    onNavigateToAyatScreen: (String, Boolean, Boolean) -> Unit,
-    context: Context = LocalContext.current
-) {
-    ElevatedCard(
-        modifier = Modifier
-            .padding(4.dp)
-            .shadow(8.dp, clip = true, shape = RoundedCornerShape(8.dp))
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(8.dp)
-    ) {
-        //get the translation type from shared preferences
-        val translationType = PrivateSharedPreferences(context).getData(key ="Translation", s = "English")
-        var isEnglishType = true
-        if(translationType != "English"){
-            isEnglishType = false
-        }
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .clickable(
-                    enabled = true,
-                    onClick = {
-                        onNavigateToAyatScreen(surahNumber, true, isEnglishType)
-                    }
-                )
-        ) {
+	surahNumber : String ,
+	surahAyaAmount : String ,
+	surahName : String ,
+	englishName : String ,
+	englishNameTranslation : String ,
+	type : String ,
+	rukus : String ,
+	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	context : Context = LocalContext.current ,
+				   )
+{
+	ElevatedCard(
+			modifier = Modifier
+				.padding(4.dp)
+				.shadow(8.dp , clip = true , shape = RoundedCornerShape(8.dp))
+				.fillMaxWidth()
+				.background(color = MaterialTheme.colorScheme.surface) ,
+			shape = RoundedCornerShape(8.dp)
+				) {
+		//get the translation type from shared preferences
+		val translationType =
+			PrivateSharedPreferences(context).getData(key = "Translation" , s = "English")
+		var isEnglishType = true
+		if (translationType != "English")
+		{
+			isEnglishType = false
+		}
+		Row(
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth()
+					.clickable(
+							enabled = true ,
+							onClick = {
+								onNavigateToAyatScreen(surahNumber , true , isEnglishType)
+							}
+							  )
+		   ) {
 
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.15f),
-                text = "$surahNumber.",
-                style = MaterialTheme.typography.bodyLarge
-            )
+			Text(
+					modifier = Modifier
+						.align(Alignment.CenterVertically)
+						.weight(0.15f) ,
+					text = "$surahNumber." ,
+					style = MaterialTheme.typography.bodyLarge
+				)
 
-            Column(
-                modifier = Modifier
-                    .padding(16.dp, 0.dp)
-                    .align(Alignment.CenterVertically)
-                    .weight(0.50f)
-            ) {
-                Text(text = englishName, style = MaterialTheme.typography.titleSmall)
-                //apply quran font
-                Text(
-                    text = surahName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontFamily = quranFont
-                )
-                Text(text = englishNameTranslation, style = MaterialTheme.typography.titleSmall)
-            }
+			Column(
+					modifier = Modifier
+						.padding(16.dp , 0.dp)
+						.align(Alignment.CenterVertically)
+						.weight(0.50f)
+				  ) {
+				Text(text = englishName , style = MaterialTheme.typography.titleSmall)
+				//apply quran font
+				Text(
+						text = surahName ,
+						style = MaterialTheme.typography.titleLarge ,
+						fontFamily = quranFont
+					)
+				Text(text = englishNameTranslation , style = MaterialTheme.typography.titleSmall)
+			}
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.30f)
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = "Type: $type",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                )
-                Text(
-                    text = "Ayat: $surahAyaAmount",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                )
-                Text(
-                    text = "Ruku: $rukus",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                )
-            }
-            //an arrow right icon
-            Icon(
-                imageVector = Icons.Rounded.KeyboardArrowRight,
-                contentDescription = "Clear",
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.05f)
-                    .fillMaxWidth()
-            )
-        }
-    }
+			Column(
+					modifier = Modifier
+						.align(Alignment.CenterVertically)
+						.weight(0.30f)
+						.fillMaxWidth()
+				  ) {
+				Text(
+						text = "Type: $type" ,
+						style = MaterialTheme.typography.titleSmall ,
+						modifier = Modifier
+							.padding(4.dp)
+							.fillMaxWidth()
+					)
+				Text(
+						text = "Ayat: $surahAyaAmount" ,
+						style = MaterialTheme.typography.titleSmall ,
+						modifier = Modifier
+							.padding(4.dp)
+							.fillMaxWidth()
+					)
+				Text(
+						text = "Ruku: $rukus" ,
+						style = MaterialTheme.typography.titleSmall ,
+						modifier = Modifier
+							.padding(4.dp)
+							.fillMaxWidth()
+					)
+			}
+			//an arrow right icon
+			Icon(
+					imageVector = Icons.Rounded.KeyboardArrowRight ,
+					contentDescription = "Clear" ,
+					modifier = Modifier
+						.align(Alignment.CenterVertically)
+						.weight(0.05f)
+						.fillMaxWidth()
+				)
+		}
+	}
 }

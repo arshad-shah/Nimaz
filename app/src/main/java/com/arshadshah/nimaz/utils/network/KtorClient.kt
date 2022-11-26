@@ -5,17 +5,19 @@ import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 
 
-object KtorClient {
-    private val client = HttpClient {
-        install(JsonFeature) {
-            serializer = KotlinxSerializer(
-                kotlinx.serialization.json.Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                }
-            )
-        }
-    }
+object KtorClient
+{
 
-    val getInstance = client
+	private val client = HttpClient {
+		install(JsonFeature) {
+			serializer = KotlinxSerializer(
+					kotlinx.serialization.json.Json {
+						ignoreUnknownKeys = true
+						isLenient = true
+					}
+										  )
+		}
+	}
+
+	val getInstance = client
 }

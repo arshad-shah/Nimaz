@@ -13,54 +13,55 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManualLocationInput() {
+fun ManualLocationInput()
+{
 
-    val context = LocalContext.current
-    //get laitude and longitude from private shared preferences
-    val sharedPreferences = PrivateSharedPreferences(context)
-    val cityName = rememberPreferenceStringSettingState(
-        key = "location_input",
-        defaultValue = "Abbeyleix",
-        sharedPreferences
-    )
-    val showDialog = remember { mutableStateOf(false) }
-    //show manual location input
-    //onclick open dialog
-    SettingsMenuLink(title = { Text(text = "Edit Location") },
-        subtitle = { Text(text = cityName.value) },
-        onClick = {
-            showDialog.value = true
-        })
+	val context = LocalContext.current
+	//get laitude and longitude from private shared preferences
+	val sharedPreferences = PrivateSharedPreferences(context)
+	val cityName = rememberPreferenceStringSettingState(
+			key = "location_input" ,
+			defaultValue = "Abbeyleix" ,
+			sharedPreferences
+													   )
+	val showDialog = remember { mutableStateOf(false) }
+	//show manual location input
+	//onclick open dialog
+	SettingsMenuLink(title = { Text(text = "Edit Location") } ,
+					 subtitle = { Text(text = cityName.value) } ,
+					 onClick = {
+						 showDialog.value = true
+					 })
 
-    if (!showDialog.value) return
-    //text input field
-    //open dialog
-    AlertDialog(
-        onDismissRequest = {
-        },
-        title = { Text(text = "Edit Location") },
-        text = {
-            OutlinedTextField(
-                value = cityName.value,
-                onValueChange = { cityName.value = it },
-                label = { Text(text = "Location") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        confirmButton = {
-            Button(onClick = {
-                //get Manual location
-                Location().getManualLocation(name = cityName.value, context = context)
-                showDialog.value = false
-            }) { Text(text = "Confirm") }
-        },
-        dismissButton = {
-            TextButton(onClick = {
-                showDialog.value = false
+	if (! showDialog.value) return
+	//text input field
+	//open dialog
+	AlertDialog(
+			onDismissRequest = {
+			} ,
+			title = { Text(text = "Edit Location") } ,
+			text = {
+				OutlinedTextField(
+						value = cityName.value ,
+						onValueChange = { cityName.value = it } ,
+						label = { Text(text = "Location") } ,
+						singleLine = true ,
+						modifier = Modifier.fillMaxWidth()
+								 )
+			} ,
+			confirmButton = {
+				Button(onClick = {
+					//get Manual location
+					Location().getManualLocation(name = cityName.value , context = context)
+					showDialog.value = false
+				}) { Text(text = "Confirm") }
+			} ,
+			dismissButton = {
+				TextButton(onClick = {
+					showDialog.value = false
 
-            }) { Text(text = "Cancel") }
-        },
-    )
+				}) { Text(text = "Cancel") }
+			} ,
+			   )
 
 }
