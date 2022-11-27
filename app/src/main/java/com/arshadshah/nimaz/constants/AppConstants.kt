@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
-	const val BASE_URL = "http://178.62.35.217:8080"
+	private const val BASE_URL = "http://178.62.35.217:8080"
 
 	//    const val BASE_URL = "http://192.168.0.62:8080"
 	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/"
@@ -14,43 +14,44 @@ object AppConstants
 	const val QURAN_SURAH_AYAT_URL = "$BASE_URL/quran/surah/"
 	const val QURAN_JUZ_AYAT_URL = "$BASE_URL/quran/juz/"
 
-	//function to return the list of Methods
-	fun getMethods() : List<String>
+	//function to return the map of methods
+	fun getMethods() : Map<String , String>
 	{
-		return listOf(
-				"MUSLIM_WORLD_LEAGUE" ,
-				"EGYPTIAN" ,
-				"KARACHI" ,
-				"UMM_AL_QURA" ,
-				"DUBAI" ,
-				"MOON_SIGHTING_COMMITTEE" ,
-				"NORTH_AMERICA" ,
-				"KUWAIT" ,
-				"QATAR" ,
-				"SINGAPORE" ,
-				"FRANCE" ,
-				"RUSSIA" ,
-				"IRELAND" ,
-				"OTHER"
-					 )
+		val mapOfMethods = mutableMapOf<String , String>()
+		mapOfMethods["MUSLIM_WORLD_LEAGUE"] = "Muslim World League"
+		mapOfMethods["EGYPTIAN"] = "Egyptian General Authority of Survey"
+		mapOfMethods["KARACHI"] = "University of Islamic Sciences, Karachi"
+		mapOfMethods["UMM_AL_QURA"] = "Umm al-Qura University, Makkah"
+		mapOfMethods["DUBAI"] = "Institute of Geophysics, University of Tehran"
+		mapOfMethods["MOON_SIGHTING_COMMITTEE"] = "The Moonsighting Committee"
+		mapOfMethods["NORTH_AMERICA"] = "North America"
+		mapOfMethods["KUWAIT"] = "Kuwait"
+		mapOfMethods["QATAR"] = "Qatar"
+		mapOfMethods["SINGAPORE"] = "Singapore"
+		mapOfMethods["FRANCE"] = "France"
+		mapOfMethods["RUSSIA"] = "Russia"
+		mapOfMethods["IRELAND"] = "Ireland"
+		mapOfMethods["OTHER"] = "Other"
+
+		return mapOfMethods
 	}
 
-	//function to return the List of Madhabs
-	fun getMadhabs() : List<String>
+	//function to return the map
+	fun getAsrJuristic() : Map<String , String>
 	{
-		return listOf(
-				"SHAFI" ,
-				"HANAFI" ,
-					 )
+		val mapOfAsrJuristic = mutableMapOf<String , String>()
+		mapOfAsrJuristic["SHAFI"] = "Standard"
+		mapOfAsrJuristic["HANAFI"] = "Hanafi"
+		return mapOfAsrJuristic
 	}
 
-	//function to return the List of High Latitude Rules
-	fun getHighLatitudeRules() : List<String>
+	//function to return the map of high latitudes
+	fun getHighLatitudes() : Map<String , String>
 	{
-		return listOf(
-				"MIDDLE_OF_THE_NIGHT" ,
-				"SEVENTH_OF_THE_NIGHT" ,
-				"TWILIGHT_ANGLE" ,
-					 )
+		val mapOfHighLatitudes = mutableMapOf<String , String>()
+		mapOfHighLatitudes["MIDDLE_OF_THE_NIGHT"] = "Midnight"
+		mapOfHighLatitudes["SEVENTH_OF_THE_NIGHT"] = "One Seventh"
+		mapOfHighLatitudes["TWILIGHT_ANGLE"] = "Angle Based"
+		return mapOfHighLatitudes
 	}
 }

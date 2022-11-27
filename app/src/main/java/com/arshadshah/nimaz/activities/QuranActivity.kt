@@ -32,8 +32,42 @@ class QuranActivity : ComponentActivity()
 						topBar = {
 							TopAppBar(
 									title = {
-										Text("Quran" ,
-											 style = MaterialTheme.typography.titleLarge)
+										val route =
+											remember(navController) { mutableStateOf(navController.currentDestination?.route) }
+										navController.addOnDestinationChangedListener { _ , destination , _ ->
+											route.value = destination.route
+										}
+										if (route.value == "quran")
+										{
+											Text(text = "Quran")
+										} else if (route.value == "ayatScreen/{number}/{isSurah}/{isEnglish}")
+										{
+											val number = remember(navController) {
+												mutableStateOf(navController.currentBackStackEntry?.arguments?.getString(
+														"number"))
+											}
+											val isSurah = remember(navController) {
+												mutableStateOf(navController.currentBackStackEntry?.arguments?.getString(
+														"isSurah"))
+											}
+
+											//get the isSurah and number and show the correct title
+											navController.addOnDestinationChangedListener { _ , _ , _ ->
+												number.value =
+													navController.currentBackStackEntry?.arguments?.getString(
+															"number")
+												isSurah.value =
+													navController.currentBackStackEntry?.arguments?.getString(
+															"isSurah")
+											}
+											if (isSurah.value == "true")
+											{
+												Text(text = "Surah ${number.value}")
+											} else
+											{
+												Text(text = "Juz ${number.value}")
+											}
+										}
 									} ,
 									navigationIcon = {
 										IconButton(onClick = {

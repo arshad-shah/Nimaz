@@ -124,17 +124,17 @@ class LocationFinder
 				} else
 				{
 					latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
-					longitudeValue = sharedPreferences.getDataDouble("longitude" , 53.3498)
-					cityName = sharedPreferences.getData("location_input" , "14.0")
+					longitudeValue = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+					cityName = sharedPreferences.getData("location_input" , "Abbeyleix")
 					Log.i("Location" , "Location Found From Storage $cityName")
 				}
 			} catch (e : Exception)
 			{
 				Log.e("Geocoder" , "Geocoder has failed")
 				latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
-				longitudeValue = sharedPreferences.getDataDouble("longitude" , 53.3498)
+				longitudeValue = sharedPreferences.getDataDouble("longitude" , - 6.2603)
 				val cityNameFromStorage =
-					sharedPreferences.getData("location_input" , "14.0")
+					sharedPreferences.getData("location_input" , "Abbeyleix")
 
 				cityName = cityNameFromStorage
 				Log.i("Location" , "Location Found From value $latitude, and $longitude")
@@ -143,7 +143,7 @@ class LocationFinder
 		{
 			latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
 			longitudeValue = sharedPreferences.getDataDouble("longitude" , 53.3498)
-			cityName = sharedPreferences.getData("location_input" , "14.0")
+			cityName = sharedPreferences.getData("location_input" , "Abbeyleix")
 			Log.i("Location" , "Location Found From Storage $cityName")
 		}
 	}
