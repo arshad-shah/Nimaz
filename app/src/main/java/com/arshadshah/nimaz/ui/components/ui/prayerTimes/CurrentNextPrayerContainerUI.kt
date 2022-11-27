@@ -16,9 +16,9 @@ import com.arshadshah.nimaz.data.remote.models.CountDownTime
 
 @Composable
 fun CurrentNextPrayerContainerUI(
-    nextPrayerName : String ,
-    state : LiveData<CountDownTime> ,
-                                )
+	nextPrayerName : String ,
+	state : LiveData<CountDownTime> ,
+								)
 {
 	var countDownTime by remember { mutableStateOf(CountDownTime(0 , 0 , 0)) }
 	LaunchedEffect(key1 = state) {
@@ -28,9 +28,9 @@ fun CurrentNextPrayerContainerUI(
 	}
 	ElevatedCard(
 			modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp , 8.dp)
-                .height(IntrinsicSize.Max)
+				.fillMaxWidth()
+				.padding(0.dp , 8.dp)
+				.height(IntrinsicSize.Max)
 				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		val nextPrayerNameSentenceCase = nextPrayerName
@@ -49,8 +49,8 @@ fun CurrentNextPrayerContainerUI(
 							nextPrayerNameSentenceCase
 										 ) ,
 					modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp) ,
+						.fillMaxWidth()
+						.padding(16.dp) ,
 					textAlign = TextAlign.Center ,
 				)
 		}
@@ -58,11 +58,11 @@ fun CurrentNextPrayerContainerUI(
 }
 
 fun getTimerString(
-    hours : Int ,
-    minutes : Int ,
-    seconds : Int ,
-    nextPrayerNameSentenceCase : String ,
-                  ) : String
+	hours : Int ,
+	minutes : Int ,
+	seconds : Int ,
+	nextPrayerNameSentenceCase : String ,
+				  ) : String
 {
 	return when
 	{
