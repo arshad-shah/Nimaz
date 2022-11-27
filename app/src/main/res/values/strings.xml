@@ -15,4 +15,5 @@
     <string name="app_widget_description">This is an app widget description</string>
     <string name="title_activity_aya">AyaActivity</string>
     <string name="title_activity_quran">Quran</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 </resources>
