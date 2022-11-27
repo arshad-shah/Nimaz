@@ -68,8 +68,8 @@ fun Verse(arabic : String , paddingValues : PaddingValues)
 				fontFamily = quranFont ,
 				textAlign = TextAlign.Justify ,
 				modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp) ,
+					.padding(paddingValues)
+					.padding(16.dp) ,
 				lineHeight = 60.sp ,
 			)
 	}
