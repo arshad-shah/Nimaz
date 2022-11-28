@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
-	private const val BASE_URL = "http://178.62.35.217:8080"
+	private const val BASE_URL = "https://nimazapi.arshadshah.online"
 
 	//    const val BASE_URL = "http://192.168.0.62:8080"
 	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/"
