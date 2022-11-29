@@ -28,6 +28,7 @@ object PrayerTimesRepository
 		val highLatitudeRule : String =
 			sharedPreferences.getData("high_latitude_rule" , "TWILIGHT_ANGLE")
 		val fajrAdjustment : String = sharedPreferences.getData("fajr_adjustment" , "0")
+		val sunriseAdjustment : String = sharedPreferences.getData("sunrise_adjustment" , "0")
 		val dhuhrAdjustment : String = sharedPreferences.getData("dhuhr_adjustment" , "0")
 		val asrAdjustment : String = sharedPreferences.getData("asr_adjustment" , "0")
 		val maghribAdjustment : String = sharedPreferences.getData("maghrib_adjustment" , "0")
@@ -43,6 +44,7 @@ object PrayerTimesRepository
 		mapOfParams["madhab"] = madhab
 		mapOfParams["highLatitudeRule"] = highLatitudeRule
 		mapOfParams["fajrAdjustment"] = fajrAdjustment
+		mapOfParams["sunriseAdjustment"] = sunriseAdjustment
 		mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment
 		mapOfParams["asrAdjustment"] = asrAdjustment
 		mapOfParams["maghribAdjustment"] = maghribAdjustment

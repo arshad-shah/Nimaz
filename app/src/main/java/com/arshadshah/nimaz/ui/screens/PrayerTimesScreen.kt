@@ -37,6 +37,6 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 		LocationTimeContainer(state = locationState)
 		DatesContainer()
 		CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
-		PrayerTimesList(state = state,paddingValues = paddingValues)
+		PrayerTimesList(state = state , paddingValues = paddingValues)
 	}
 }
