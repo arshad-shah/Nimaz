@@ -27,7 +27,8 @@ fun SettingsList(
 	state : SettingValueState<Int> = rememberIntSettingState() ,
 	valueState : SettingValueState<String> = rememberStringSettingState() ,
 	title : @Composable () -> Unit ,
-	items : List<String> ,
+	description : (@Composable () -> Unit)? = null ,
+	items : Map<String , String> ,
 	icon : (@Composable () -> Unit)? = null ,
 	useSelectedValueAsSubtitle : Boolean = true ,
 	subtitle : (@Composable () -> Unit)? = null ,
@@ -44,7 +45,7 @@ fun SettingsList(
 
 	val safeSubtitle = if (state.value >= 0 && useSelectedValueAsSubtitle)
 	{
-		{ Text(text = items[state.value]) }
+		{ Text(text = items.values.elementAt(state.value)) }
 	} else subtitle
 
 	SettingsMenuLink(
@@ -62,7 +63,7 @@ fun SettingsList(
 	val onSelected : (Int) -> Unit = { selectedIndex ->
 		coroutineScope.launch {
 			state.value = selectedIndex
-			valueState.value = items[selectedIndex]
+			valueState.value = items.keys.elementAt(selectedIndex)
 		}
 	}
 
@@ -70,41 +71,55 @@ fun SettingsList(
 			shape = CardDefaults.elevatedShape ,
 			title = title ,
 			text = {
-				Column(
-						modifier = Modifier
-							.verticalScroll(rememberScrollState())
-							.fillMaxWidth()
-							.fillMaxHeight()
-					  ) {
-					items.forEachIndexed { index , item ->
-						val isSelected by rememberUpdatedState(newValue = state.value == index)
-						//if valuestate.value has a value, then set the state.value to the index of the valuestate.value
-						if (valueState.value.isNotEmpty() && valueState.value == item)
-						{
-							state.value = index
-						}
-						Row(
+				Column {
+					Row(modifier.padding(bottom = 8.dp)) {
+						description?.invoke()
+					}
+					Divider(color = MaterialTheme.colorScheme.outline)
+					Row(modifier.height(300.dp)) {
+						Column(
 								modifier = Modifier
+									.verticalScroll(rememberScrollState())
 									.fillMaxWidth()
-									.height(48.dp)
-									.selectable(
-											role = Role.RadioButton ,
+									.fillMaxHeight()
+							  ) {
+							items.forEach { (s , s2) ->
+								val isSelected by rememberUpdatedState(newValue = s == valueState.value)
+								//if valuestate.value has a value, then set the state.value to the index of the valuestate.value
+								if (isSelected)
+								{
+									state.value = items.keys.indexOf(s)
+								}
+								Row(
+										modifier = Modifier
+											.fillMaxWidth()
+											.height(48.dp)
+											.selectable(
+													role = Role.RadioButton ,
+													selected = isSelected ,
+													onClick = {
+														if (! isSelected) onSelected(items.keys.indexOf(
+																s))
+													}
+													   ) ,
+										verticalAlignment = Alignment.CenterVertically
+								   ) {
+									RadioButton(
 											selected = isSelected ,
-											onClick = { if (! isSelected) onSelected(index) }
-											   ) ,
-								verticalAlignment = Alignment.CenterVertically
-						   ) {
-							RadioButton(
-									selected = isSelected ,
-									onClick = { if (! isSelected) onSelected(index) }
-									   )
-							Text(
-									text = item ,
-									style = MaterialTheme.typography.titleMedium ,
-									modifier = Modifier.padding(start = 8.dp)
-								)
+											onClick = {
+												if (! isSelected) onSelected(items.keys.indexOf(s))
+											} ,
+											   )
+									Text(
+											text = s2 ,
+											style = MaterialTheme.typography.titleMedium ,
+											modifier = Modifier.padding(start = 8.dp) ,
+										)
+								}
+							}
 						}
 					}
+					Divider(color = MaterialTheme.colorScheme.outline)
 				}
 			} ,
 			onDismissRequest = { showDialog = false } ,
@@ -131,21 +146,56 @@ fun SettingsList(
 @Composable
 internal fun ListLinkPreview()
 {
+	//50 items
 	NimazTheme {
 		SettingsList(
-				items = listOf(
-						"Banana" ,
-						"Kiwi" ,
-						"Pineapple" ,
-						"Strawberry" ,
-						"Watermelon" ,
-						"Apple" ,
-						"Orange" ,
-						"Mango"
-							  ) ,
+				items = mapOf(
+						"1" to "Item 1" ,
+						"2" to "Item 2" ,
+						"3" to "Item 3" ,
+						"4" to "Item 4" ,
+						"5" to "Item 5" ,
+						"6" to "Item 6" ,
+						"7" to "Item 7" ,
+						"8" to "Item 8" ,
+						"9" to "Item 9" ,
+						"10" to "Item 10" ,
+						"11" to "Item 11" ,
+						"12" to "Item 12" ,
+						"13" to "Item 13" ,
+						"14" to "Item 14" ,
+						"15" to "Item 15" ,
+						"16" to "Item 16" ,
+						"17" to "Item 17" ,
+						"18" to "Item 18" ,
+						"19" to "Item 19" ,
+						"20" to "Item 20" ,
+						"21" to "Item 21" ,
+						"22" to "Item 22" ,
+						"23" to "Item 23" ,
+						"24" to "Item 24" ,
+						"25" to "Item 25" ,
+						"26" to "Item 26" ,
+						"27" to "Item 27" ,
+						"28" to "Item 28" ,
+						"29" to "Item 29" ,
+						"30" to "Item 30" ,
+						"31" to "Item 31" ,
+						"32" to "Item 32" ,
+						"33" to "Item 33" ,
+						"34" to "Item 34" ,
+						"35" to "Item 35" ,
+						"36" to "Item 36" ,
+						"37" to "Item 37" ,
+						"38" to "Item 38" ,
+						"39" to "Item 39" ,
+						"40" to "Item 40" ,
+						"41" to "Item 41" ,
+							 ) ,
 				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				title = { Text(text = "Hello") } ,
 				subtitle = { Text(text = "This is a longer text") } ,
+				description = { Text(text = "This is a description") } ,
 					)
 	}
 }

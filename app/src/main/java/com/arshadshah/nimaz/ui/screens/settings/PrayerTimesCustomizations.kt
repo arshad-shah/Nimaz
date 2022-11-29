@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
+import com.arshadshah.nimaz.ui.components.ui.settings.SettingsNumberPickerDialog
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
@@ -29,6 +30,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val highLatitudeRule : String =
 		sharedPreferences.getData("high_latitude_rule" , "TWILIGHT_ANGLE")
 	val fajrAdjustment : String = sharedPreferences.getData("fajr_adjustment" , "0")
+	val sunriseAdjustment : String = sharedPreferences.getData("sunrise_adjustment" , "0")
 	val dhuhrAdjustment : String = sharedPreferences.getData("dhuhr_adjustment" , "0")
 	val asrAdjustment : String = sharedPreferences.getData("asr_adjustment" , "0")
 	val maghribAdjustment : String = sharedPreferences.getData("maghrib_adjustment" , "0")
@@ -36,8 +38,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 
 
 	val mapOfMethods = AppConstants.getMethods()
-	val mapOfMadhabs = AppConstants.getMadhabs()
-	val mapOfHighLatitudeRules = AppConstants.getHighLatitudeRules()
+	val mapOfMadhabs = AppConstants.getAsrJuristic()
+	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
 
 	val calculationMethodState =
 		rememberPreferenceStringSettingState("calculation_method" , "IRELAND" , sharedPreferences)
@@ -67,6 +69,9 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					subtitle = {
 						Text(text = calculationMethod)
 					} ,
+					description = {
+						Text(text = "The method used to calculate the prayer times.")
+					} ,
 					items = mapOfMethods ,
 					useSelectedValueAsSubtitle = true ,
 					valueState = calculationMethodState ,
@@ -78,6 +83,9 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					} ,
 					subtitle = {
 						Text(text = madhab)
+					} ,
+					description = {
+						Text(text = "The madhab used to calculate the asr prayer times.")
 					} ,
 					items = mapOfMadhabs ,
 					useSelectedValueAsSubtitle = true ,
@@ -91,6 +99,9 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					subtitle = {
 						Text(text = highLatitudeRule)
 					} ,
+					description = {
+						Text(text = "The high latitude rule used to calculate the prayer times.")
+					} ,
 					items = mapOfHighLatitudeRules ,
 					useSelectedValueAsSubtitle = true ,
 					valueState = highLatitudeRuleState ,
@@ -100,31 +111,38 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		SettingsGroup(title = {
 			Text(text = "Prayer Angles")
 		}) {
-			SettingsList(
+
+			SettingsNumberPickerDialog(
 					title = {
 						Text(text = "Fajr Angle")
 					} ,
 					subtitle = {
 						Text(text = fajrAngle)
 					} ,
-					//list between -25 and 25 of strings
-					items = (0 .. 50).map { (it - 25).toString() } ,
+					description = {
+						Text(text = "The angle of the sun at which the Fajr prayer begins")
+					} ,
+					items = (0 .. 50).map { (it - 25) } ,
 					useSelectedValueAsSubtitle = true ,
 					valueState = fajrAngleState ,
-						)
+									  )
+
 			Divider(color = MaterialTheme.colorScheme.outline)
-			SettingsList(
+
+			SettingsNumberPickerDialog(
 					title = {
 						Text(text = "Isha Angle")
 					} ,
 					subtitle = {
 						Text(text = ishaAngle)
 					} ,
-					//list between -25 and 25 of strings
-					items = (0 .. 50).map { (it - 25).toString() } ,
+					description = {
+						Text(text = "The angle of the sun at which the Isha prayer begins")
+					} ,
+					items = (0 .. 50).map { (it - 25) } ,
 					useSelectedValueAsSubtitle = true ,
 					valueState = ishaAngleState ,
-						)
+									  )
 		}
 
 
@@ -136,13 +154,15 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				content = {
 					PrayerTimesCustomizationsLink(title = "Fajr" , fajrAdjustment)
 					Divider(color = MaterialTheme.colorScheme.outline)
+					PrayerTimesCustomizationsLink(title = "Sunrise" , sunriseAdjustment)
+					Divider(color = MaterialTheme.colorScheme.outline)
 					PrayerTimesCustomizationsLink(title = "Dhuhr" , dhuhrAdjustment)
 					Divider(color = MaterialTheme.colorScheme.outline)
 					PrayerTimesCustomizationsLink(title = "Asr" , asrAdjustment)
 					Divider(color = MaterialTheme.colorScheme.outline)
 					PrayerTimesCustomizationsLink(
 							title = "Maghrib" ,
-							maghribAdjustment.toString()
+							maghribAdjustment
 												 )
 					Divider(color = MaterialTheme.colorScheme.outline)
 					PrayerTimesCustomizationsLink(title = "Isha" , ishaAdjustment)
@@ -151,7 +171,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	}
 }
 
-//a composable using the SettingsMenuLink that opens a dialog to change the prayer times
+//a composable that opens a dialog to change the prayer times
 @Composable
 fun PrayerTimesCustomizationsLink(title : String , subtitle : String)
 {
@@ -161,15 +181,25 @@ fun PrayerTimesCustomizationsLink(title : String , subtitle : String)
 			key = "$correctedTitle$adjustmentString" ,
 			defaultValue = "0"
 													  )
-	SettingsList(
+	SettingsNumberPickerDialog(
 			title = {
 				Text(text = title)
 			} ,
 			subtitle = {
 				Text(text = subtitle)
 			} ,
-			items = (0 .. 120).toList().map { it - 60 }.map { it.toString() } ,
+			description = {
+				//if title is "Sunrise" then the description is "The time of sunrise"
+				if (title == "Sunrise")
+				{
+					Text(text = "The time of sunrise")
+				} else
+				{
+					Text(text = "Adjust the time of the $title prayer")
+				}
+			} ,
+			items = (0 .. 120).map { (it - 60) } ,
 			useSelectedValueAsSubtitle = true ,
 			valueState = storage ,
-				)
+							  )
 }

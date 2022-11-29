@@ -42,7 +42,7 @@ fun PrayerTimesList(
 			prayerTimes.currentPrayer?.let {
 				PrayerTimesListUI(modifier ,
 								  prayerTimesMap ,
-								  it.name,
+								  it.name ,
 								  paddingValues)
 			}
 		}

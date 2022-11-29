@@ -22,9 +22,9 @@ fun LocationTimeContainerUI(location : String)
 {
 	ElevatedCard(
 			modifier = Modifier
-                .padding(0.dp , 8.dp)
-                .height(IntrinsicSize.Max)
-                .shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+				.padding(0.dp , 8.dp)
+				.height(IntrinsicSize.Max)
+				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		//align items to center
 
@@ -43,8 +43,8 @@ fun LocationTimeContainerUI(location : String)
 			//vertical divider line
 			Divider(
 					modifier = Modifier
-                        .fillMaxHeight()
-                        .width(1.dp) ,
+						.fillMaxHeight()
+						.width(1.dp) ,
 					color = MaterialTheme.colorScheme.outline
 				   )
 			//only allow 50% of the width for the time text

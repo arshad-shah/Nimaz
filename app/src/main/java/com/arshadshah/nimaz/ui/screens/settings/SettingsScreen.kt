@@ -24,7 +24,6 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.Location
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 
 @Composable
@@ -33,21 +32,22 @@ fun SettingsScreen(
 	paddingValues : PaddingValues ,
 				  )
 {
-	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 	val locationFinderAuto = LocationFinderAuto()
 	val cityname =
 		rememberPreferenceStringSettingState(key = "location_input" , defaultValue = "Abbeyleix")
 
-	Column(modifier = Modifier.verticalScroll(rememberScrollState() , true)) {
+	Column(modifier = Modifier
+		.verticalScroll(rememberScrollState() , true)
+		.padding(paddingValues)) {
 		SettingsGroup(title = { Text(text = "Location") }) {
 			val storage =
-				rememberPreferenceBooleanSettingState("location_auto" , true , sharedPreferences)
+				rememberPreferenceBooleanSettingState("location_auto" , true)
 			SettingsSwitch(
 					state = storage ,
 					icon = {
 						Icon(
 								imageVector = Icons.Outlined.LocationOn ,
-								contentDescription = "Clear"
+								contentDescription = "Location"
 							)
 					} ,
 					title = {
