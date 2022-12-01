@@ -1,6 +1,4 @@
 @startuml
-'https://plantuml.com/activity-diagram-beta
-title Get Prayer times
 start
 :On Application start;
 :Check if network is available;

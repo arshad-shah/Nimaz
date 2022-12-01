@@ -1,33 +1,68 @@
 @startuml
-'https://plantuml.com/component-diagram
-title Arcitecture of NIMAZ
-
-frame "Frontend" as frontend{
-[Android]
+rectangle "Frontend" as frontend{
+[Android native application] as Android
 }
 
-frame location {
+rectangle location {
 [Geocoder]
 [Geolocation]
 }
 
-frame "Backend" as backend{
 cloud {
-  component "SpringBoot API" as server
+rectangle "Backend" as backend {
+    node "Nginx"{
+        port 80 as HTTP
+        port 443 as HTTPS
+        rectangle {
+            control "Reverse Proxy" as reverse_proxy
+        }
+    }
+
+    node "Docker network" {
+        frame "my_sql" {
+            port 3306 as mysql
+            database "quran"
+        }
+        frame "nimaz_Api"{
+            port 8000 as nimaz_api
+            [Spring Boot API]
+        }
+    }
+
+    'the nimaz_Api and my_sql are connected through docker network
+    'using port 3306
+    [Spring Boot API] --> mysql
+    mysql --> [Spring Boot API]
+
+
+    'nginx routes the request to nimaz_api using port 8080
+    [Android] --> HTTPS
+    [Android] --> HTTP
+    HTTP --> reverse_proxy
+    HTTPS --> reverse_proxy
+    reverse_proxy --> nimaz_api
+    nimaz_api --> [Spring Boot API]
+    [Spring Boot API] --> nimaz_api
+    nimaz_api --> reverse_proxy
+    reverse_proxy --> HTTPS
+    HTTPS --> [Android]
+
+    [Android] --> [Geocoder]
+    [Android] --> [Geolocation]
+    [Geocoder] --> [Android]
+    [Geolocation] --> [Android]
+
+
+
+
+    }
 }
-}
 
-frame "Persistence" as persistence{
 
-database "Database" as db{
-  component "MySQL" as mysql
-}
-}
 
-frontend --> location
+    mysql --(3306
+    HTTP --(80
+    HTTPS --(443
 
-frontend --> backend : REST
-backend --> persistence : JDBC
 
-'end
 @enduml
