@@ -68,47 +68,47 @@ fun getTimerString(
 	{
 		hours > 1 && minutes != 0 ->
 		{
-			"$hours hrs $minutes mins $seconds secs to $nextPrayerNameSentenceCase"
+			"$hours hrs $minutes mins $seconds secs until $nextPrayerNameSentenceCase"
 		}
 
 		hours > 1 && minutes == 0 ->
 		{
-			"$hours hrs to $nextPrayerNameSentenceCase"
+			"$hours hrs until $nextPrayerNameSentenceCase"
 		}
 
 		hours == 1 && minutes in 2 .. 59 ->
 		{
-			"$hours hr $minutes mins $seconds secs to $nextPrayerNameSentenceCase"
+			"$hours hr $minutes mins $seconds secs until $nextPrayerNameSentenceCase"
 		}
 
 		hours == 1 && minutes < 2 && minutes > 0 ->
 		{
-			"$hours hr $minutes mins to $nextPrayerNameSentenceCase"
+			"$hours hr $minutes mins until $nextPrayerNameSentenceCase"
 		}
 
 		hours == 1 && minutes == 0 ->
 		{
-			"$hours hr to $nextPrayerNameSentenceCase"
+			"$minutes mins until $nextPrayerNameSentenceCase"
 		}
 
 		hours == 0 && minutes in 2 .. 59 ->
 		{
-			"$minutes mins $seconds secs to $nextPrayerNameSentenceCase"
+			"$minutes mins $seconds secs until $nextPrayerNameSentenceCase"
 		}
 
 		hours == 0 && minutes < 2 && minutes > 0 ->
 		{
-			"$minutes mins $seconds seconds to $nextPrayerNameSentenceCase"
+			"$minutes mins $seconds seconds until $nextPrayerNameSentenceCase"
 		}
 
 		hours == 0 && minutes == 0 ->
 		{
-			"$seconds seconds to $nextPrayerNameSentenceCase"
+			"$seconds seconds until $nextPrayerNameSentenceCase"
 		}
 		//if there is less than 1 minute left
 		else ->
 		{
-			"$seconds seconds to $nextPrayerNameSentenceCase"
+			"$seconds seconds until $nextPrayerNameSentenceCase"
 		}
 	}
 }
