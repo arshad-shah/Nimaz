@@ -19,10 +19,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.utils.AyaEndProcesser
 
 @Composable
-fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues)
+fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues , isEnglish : Boolean)
 {
 	LazyColumn(userScrollEnabled = true , contentPadding = paddingValues) {
 		items(ayaList.size) { index ->
@@ -30,6 +31,7 @@ fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues)
 					ayaNumber = ayaList[index].ayaNumber.toString() ,
 					ayaArabic = ayaList[index].ayaArabic ,
 					ayaTranslation = ayaList[index].translation ,
+					isEnglish = isEnglish
 						 )
 		}
 	}
@@ -40,6 +42,7 @@ fun AyaListItemUI(
 	ayaNumber : String ,
 	ayaArabic : String ,
 	ayaTranslation : String ,
+	isEnglish : Boolean ,
 				 )
 {
 	ElevatedCard(
@@ -83,16 +86,31 @@ fun AyaListItemUI(
 						)
 				}
 				Spacer(modifier = Modifier.height(4.dp))
-				Text(
-						text = ayaTranslation ,
-						style = MaterialTheme.typography.bodySmall ,
-						textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
-						modifier = if (ayaNumber != "0") Modifier
-							.fillMaxWidth()
-							.padding(bottom = 4.dp) else Modifier
-							.fillMaxWidth()
-							.padding(4.dp)
-					)
+				if (!isEnglish)
+				{
+					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+						Text(
+								text = "$ayaTranslation ۔" ,
+								style = MaterialTheme.typography.bodySmall ,
+								fontFamily = urduFont ,
+								textAlign = TextAlign.Justify ,
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(start = 4.dp)
+							)
+					}
+				}
+				else
+				{
+					Text(
+							text = ayaTranslation ,
+							style = MaterialTheme.typography.bodySmall ,
+							textAlign = TextAlign.Justify ,
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(start = 4.dp)
+						)
+				}
 			}
 		}
 	}
@@ -162,6 +180,6 @@ fun AyaListItemUIPreview()
 				   )
 				   )
 
-		AyaListUI(ayaList , PaddingValues(8.dp))
+		AyaListUI(ayaList , PaddingValues(8.dp) , true)
 	}
 }

@@ -43,7 +43,7 @@ fun Verses(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
 		//check both english and urdu translations of bismillah and the arabic text
 		if (aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ")
 		{
-			text += "\t$text $ayaArabicWithEnd\n"
+			text += "\n\t$text $ayaArabicWithEnd\n"
 		} else
 		{
 			text = "$text $ayaArabicWithEnd"
@@ -65,6 +65,7 @@ fun Verse(arabic : String , paddingValues : PaddingValues)
 		Text(
 				text = arabic ,
 				style = MaterialTheme.typography.headlineMedium ,
+				color = MaterialTheme.colorScheme.onSurface ,
 				fontFamily = quranFont ,
 				textAlign = TextAlign.Justify ,
 				modifier = Modifier

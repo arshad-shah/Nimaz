@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.JuzListUI
+import es.dmoral.toasty.Toasty
 
 @Composable
 fun JuzList(
@@ -32,7 +33,11 @@ fun JuzList(
 
 		is QuranViewModel.JuzState.Error ->
 		{
-			Toast.makeText(LocalContext.current , juzState.errorMessage , Toast.LENGTH_SHORT).show()
+			JuzListUI(
+					juz = ArrayList(5) ,
+					onNavigateToAyatScreen = onNavigateToAyatScreen
+					 )
+			Toasty.error(LocalContext.current , juzState.errorMessage , Toast.LENGTH_SHORT , true).show()
 		}
 	}
 }

@@ -1,6 +1,4 @@
 @startuml
-'https://plantuml.com/activity-diagram-beta
-title Launch of the Application
 start
 :Launch the application;
 :Splash screen;
