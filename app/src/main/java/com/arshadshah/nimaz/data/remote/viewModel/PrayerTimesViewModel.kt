@@ -102,7 +102,7 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 				}
 			} else
 			{
-				_location.value = LocationState.Error("No internet")
+				_location.value = LocationState.Error("No internet connection")
 			}
 		}
 	}

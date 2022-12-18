@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import kotlinx.coroutines.launch
 
@@ -26,7 +27,6 @@ fun CustomDialog(
 	valueState : SettingValueState<String> ,
 				)
 {
-
 	val coroutineScope = rememberCoroutineScope()
 	val onSelected : (Int) -> Unit = { selectedIndex ->
 		coroutineScope.launch {

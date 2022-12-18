@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.activities
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -28,12 +29,12 @@ class QuranActivity : ComponentActivity()
 			NimazTheme {
 				val navController = rememberNavController()
 				val (menuOpen , setMenuOpen) = remember { mutableStateOf(false) }
+				val route =
+					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
 				Scaffold(
 						topBar = {
 							TopAppBar(
 									title = {
-										val route =
-											remember(navController) { mutableStateOf(navController.currentDestination?.route) }
 										navController.addOnDestinationChangedListener { _ , destination , _ ->
 											route.value = destination.route
 										}
@@ -87,17 +88,21 @@ class QuranActivity : ComponentActivity()
 										}
 									} ,
 									actions = {
-										//open the menu
-										IconButton(onClick = { setMenuOpen(true) }) {
-											Icon(
-													imageVector = Icons.Filled.MoreVert ,
-													contentDescription = "Menu"
-												)
+										//only show the menu button if the title is Quran
+										if (route.value == "quran")
+										{
+											//open the menu
+											IconButton(onClick = { setMenuOpen(true) }) {
+												Icon(
+														imageVector = Icons.Filled.MoreVert ,
+														contentDescription = "Menu"
+													)
+											}
+											MoreMenu(
+													menuOpen = menuOpen ,
+													setMenuOpen = setMenuOpen
+													)
 										}
-										MoreMenu(
-												menuOpen = menuOpen ,
-												setMenuOpen = setMenuOpen
-												)
 									}
 									 )
 						}

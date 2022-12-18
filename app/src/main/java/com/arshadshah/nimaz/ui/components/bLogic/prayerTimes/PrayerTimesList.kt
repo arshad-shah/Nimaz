@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.ListSkeletonLoader
 import com.arshadshah.nimaz.ui.components.ui.loaders.loadingShimmerEffect
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
+import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 
 
@@ -49,12 +50,9 @@ fun PrayerTimesList(
 
 		is PrayerTimesViewModel.PrayerTimesState.Error ->
 		{
-			PrayerTimesListUI(modifier , mapOf() , "" , paddingValues)
-			Toast.makeText(
-					LocalContext.current ,
-					prayerTimesState.errorMessage ,
-					Toast.LENGTH_SHORT
-						  ).show()
+			//empty map to avoid null pointer exception
+			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
+			PrayerTimesListUI(modifier , prayerTimesMap , "No connection" , paddingValues)
 		}
 	}
 }

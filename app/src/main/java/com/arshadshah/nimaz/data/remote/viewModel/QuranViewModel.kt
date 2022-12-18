@@ -1,11 +1,13 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.repositories.QuranRepository
+import com.arshadshah.nimaz.utils.location.NetworkChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
