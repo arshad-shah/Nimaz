@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,17 +48,19 @@ fun QuranScreen(
 		{
 			0 ->
 			{
+				val surahListState = remember{viewModel.surahState}.collectAsState()
 				SurahList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
-						state = viewModel.surahState.collectAsState()
+						state = surahListState
 						 )
 			}
 
 			1 ->
 			{
+				val juzListState = remember{viewModel.juzState}.collectAsState()
 				JuzList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
-						state = viewModel.juzState.collectAsState() ,
+						state = juzListState ,
 					   )
 			}
 		}

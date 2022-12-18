@@ -1,6 +1,6 @@
 @startuml
 rectangle "Frontend" as frontend{
-[Android native application] as Android
+[Android] as Android
 }
 
 rectangle location {
@@ -9,8 +9,8 @@ rectangle location {
 }
 
 cloud {
-rectangle "Backend" as backend {
-    node "Nginx"{
+rectangle "API" as backend {
+    node "Nginx Service"{
         port 80 as HTTP
         port 443 as HTTPS
         rectangle {
@@ -19,50 +19,30 @@ rectangle "Backend" as backend {
     }
 
     node "Docker network" {
-        frame "my_sql" {
+        frame "Backend Container" {
             port 3306 as mysql
             database "quran"
         }
-        frame "nimaz_Api"{
-            port 8000 as nimaz_api
-            [Spring Boot API]
+        frame "Middle Tier Container"{
+            port 8000 as nimaz_api_port
+            [Spring Boot API] as Nimaz_API
         }
     }
-
-    'the nimaz_Api and my_sql are connected through docker network
-    'using port 3306
-    [Spring Boot API] --> mysql
-    mysql --> [Spring Boot API]
-
-
-    'nginx routes the request to nimaz_api using port 8080
-    [Android] --> HTTPS
-    [Android] --> HTTP
-    HTTP --> reverse_proxy
-    HTTPS --> reverse_proxy
-    reverse_proxy --> nimaz_api
-    nimaz_api --> [Spring Boot API]
-    [Spring Boot API] --> nimaz_api
-    nimaz_api --> reverse_proxy
-    reverse_proxy --> HTTPS
-    HTTPS --> [Android]
-
-    [Android] --> [Geocoder]
-    [Android] --> [Geolocation]
-    [Geocoder] --> [Android]
-    [Geolocation] --> [Android]
-
-
-
-
-    }
+  }
 }
 
 
+' external ports
+    mysql -left-(3306
+    HTTP -up-(80
+    HTTPS -up-(443
 
-    mysql --(3306
-    HTTP --(80
-    HTTPS --(443
 
+    Android -down-> 80
+    Android <-down-> 443
+    Android <-right-> location
 
+    reverse_proxy <-down-> nimaz_api_port
+
+    Nimaz_API <-down-> mysql
 @enduml

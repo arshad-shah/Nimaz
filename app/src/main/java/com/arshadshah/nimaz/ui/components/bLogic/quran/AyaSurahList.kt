@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.Verses
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import es.dmoral.toasty.Toasty
 
 @Composable
 fun AyaSurahList(
@@ -44,7 +45,9 @@ fun AyaSurahList(
 
 			if (isList)
 			{
-				AyaListUI(ayaList = correctedAyatList , paddingValues = paddingValues)
+				AyaListUI(ayaList = correctedAyatList ,
+						  paddingValues = paddingValues ,
+						  isEnglish = isEnglish)
 			} else
 			{
 				Verses(correctedAyatList , paddingValues)
@@ -53,11 +56,8 @@ fun AyaSurahList(
 
 		is QuranViewModel.AyaSurahState.Error ->
 		{
-			Toast.makeText(
-					LocalContext.current ,
-					ayatSurahListState.errorMessage ,
-					Toast.LENGTH_SHORT
-						  ).show()
+			Toasty.error(LocalContext.current , ayatSurahListState.errorMessage , Toast.LENGTH_SHORT ,
+						 true).show()
 		}
 	}
 }

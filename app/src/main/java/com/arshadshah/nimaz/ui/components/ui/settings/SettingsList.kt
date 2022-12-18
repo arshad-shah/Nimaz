@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
@@ -33,6 +34,7 @@ fun SettingsList(
 	useSelectedValueAsSubtitle : Boolean = true ,
 	subtitle : (@Composable () -> Unit)? = null ,
 	action : (@Composable () -> Unit)? = null ,
+	height : Dp = 56.dp ,
 				)
 {
 
@@ -45,7 +47,10 @@ fun SettingsList(
 
 	val safeSubtitle = if (state.value >= 0 && useSelectedValueAsSubtitle)
 	{
-		{ Text(text = items.values.elementAt(state.value)) }
+		val key = valueState.value
+		//find the value of the key in the map
+		val value : String? = items[key]
+		{ Text(text = value!!) }
 	} else subtitle
 
 	SettingsMenuLink(
@@ -66,7 +71,6 @@ fun SettingsList(
 			valueState.value = items.keys.elementAt(selectedIndex)
 		}
 	}
-
 	AlertDialog(
 			shape = CardDefaults.elevatedShape ,
 			title = title ,

@@ -1,8 +1,7 @@
 package com.arshadshah.nimaz.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,27 +15,35 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 @Composable
 fun PrayerTimesScreen(paddingValues : PaddingValues)
 {
+	val context = LocalContext.current
+
+	// Initalising the view model
+	val viewModel = PrayerTimesViewModel(context)
+
+	// Collecting the state of the view model
+	val state = remember { viewModel.prayerTimesState }.collectAsState()
+
+	val locationState = remember { viewModel.location }.collectAsState()
+
+	val timerState = viewModel.timer
+
+
 	Column(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(8.dp)
 				.wrapContentSize(Alignment.Center) ,
 		  ) {
-		val context = LocalContext.current
+			// Calling the LocationTimeContainer composable
+			LocationTimeContainer(state = locationState)
 
-		val viewModel = PrayerTimesViewModel(context)
+			// Calling the DatesContainer composable
+			DatesContainer()
 
-		val state = viewModel.prayerTimesState.collectAsState()
+			// Calling the CurrentNextPrayerContainer composable
+			CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
 
-
-		val locationState = viewModel.location.collectAsState()
-
-		val timerState = viewModel.timer
-
-
-		LocationTimeContainer(state = locationState)
-		DatesContainer()
-		CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
-		PrayerTimesList(state = state , paddingValues = paddingValues)
-	}
+			// Calling the PrayerTimesList composable
+			PrayerTimesList(state = state , paddingValues = paddingValues)
+		}
 }

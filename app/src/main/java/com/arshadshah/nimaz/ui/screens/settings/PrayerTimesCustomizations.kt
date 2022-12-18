@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
@@ -36,23 +37,21 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val maghribAdjustment : String = sharedPreferences.getData("maghrib_adjustment" , "0")
 	val ishaAdjustment : String = sharedPreferences.getData("isha_adjustment" , "0")
 
-
 	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
 
 	val calculationMethodState =
-		rememberPreferenceStringSettingState("calculation_method" , "IRELAND" , sharedPreferences)
-	val madhabState = rememberPreferenceStringSettingState("madhab" , "HANAFI" , sharedPreferences)
+		rememberPreferenceStringSettingState("calculation_method" , "IRELAND")
+	val madhabState = rememberPreferenceStringSettingState("madhab" , "HANAFI")
 	val highLatitudeRuleState = rememberPreferenceStringSettingState(
 			"high_latitude_rule" ,
-			"TWILIGHT_ANGLE" ,
-			sharedPreferences
+			"TWILIGHT_ANGLE"
 																	)
 	val fajrAngleState =
-		rememberPreferenceStringSettingState("fajr_angle" , "14.0" , sharedPreferences)
+		rememberPreferenceStringSettingState("fajr_angle" , "14.0")
 	val ishaAngleState =
-		rememberPreferenceStringSettingState("isha_angle" , "14.0" , sharedPreferences)
+		rememberPreferenceStringSettingState("isha_angle" , "14.0" )
 
 	Column(
 			modifier = Modifier
@@ -73,8 +72,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						Text(text = "The method used to calculate the prayer times.")
 					} ,
 					items = mapOfMethods ,
-					useSelectedValueAsSubtitle = true ,
 					valueState = calculationMethodState ,
+					height = 300.dp
 						)
 			Divider(color = MaterialTheme.colorScheme.outline)
 			SettingsList(
@@ -88,9 +87,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						Text(text = "The madhab used to calculate the asr prayer times.")
 					} ,
 					items = mapOfMadhabs ,
-					useSelectedValueAsSubtitle = true ,
 					valueState = madhabState ,
+					height = 100.dp
 						)
+			//if the calculation method is not other then dont use the rest of the settings
 			Divider(color = MaterialTheme.colorScheme.outline)
 			SettingsList(
 					title = {
@@ -103,8 +103,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						Text(text = "The high latitude rule used to calculate the prayer times.")
 					} ,
 					items = mapOfHighLatitudeRules ,
-					useSelectedValueAsSubtitle = true ,
 					valueState = highLatitudeRuleState ,
+					height = 150.dp
 						)
 		}
 
@@ -123,7 +123,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						Text(text = "The angle of the sun at which the Fajr prayer begins")
 					} ,
 					items = (0 .. 50).map { (it - 25) } ,
-					useSelectedValueAsSubtitle = true ,
 					valueState = fajrAngleState ,
 									  )
 
@@ -140,7 +139,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						Text(text = "The angle of the sun at which the Isha prayer begins")
 					} ,
 					items = (0 .. 50).map { (it - 25) } ,
-					useSelectedValueAsSubtitle = true ,
 					valueState = ishaAngleState ,
 									  )
 		}
@@ -199,7 +197,6 @@ fun PrayerTimesCustomizationsLink(title : String , subtitle : String)
 				}
 			} ,
 			items = (0 .. 120).map { (it - 60) } ,
-			useSelectedValueAsSubtitle = true ,
 			valueState = storage ,
 							  )
 }
