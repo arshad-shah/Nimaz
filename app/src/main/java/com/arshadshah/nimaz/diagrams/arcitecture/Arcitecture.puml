@@ -1,33 +1,48 @@
 @startuml
-'https://plantuml.com/component-diagram
-title Arcitecture of NIMAZ
-
-frame "Frontend" as frontend{
-[Android]
+rectangle "Frontend" as frontend{
+[Android] as Android
 }
 
-frame location {
+rectangle location {
 [Geocoder]
 [Geolocation]
 }
 
-frame "Backend" as backend{
 cloud {
-  component "SpringBoot API" as server
+rectangle "API" as backend {
+    node "Nginx Service"{
+        port 80 as HTTP
+        port 443 as HTTPS
+        rectangle {
+            control "Reverse Proxy" as reverse_proxy
+        }
+    }
+
+    node "Docker network" {
+        frame "Backend Container" {
+            port 3306 as mysql
+            database "quran"
+        }
+        frame "Middle Tier Container"{
+            port 8000 as nimaz_api_port
+            [Spring Boot API] as Nimaz_API
+        }
+    }
+  }
 }
-}
 
-frame "Persistence" as persistence{
 
-database "Database" as db{
-  component "MySQL" as mysql
-}
-}
+' external ports
+    mysql -left-(3306
+    HTTP -up-(80
+    HTTPS -up-(443
 
-frontend --> location
 
-frontend --> backend : REST
-backend --> persistence : JDBC
+    Android -down-> 80
+    Android <-down-> 443
+    Android <-right-> location
 
-'end
+    reverse_proxy <-down-> nimaz_api_port
+
+    Nimaz_API <-down-> mysql
 @enduml

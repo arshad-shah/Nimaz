@@ -53,6 +53,43 @@ rectangle "Presentation Layer" as Presentation {
 }
 
 'business logic
+rectangle "Business Logic Layer" as BusinessLogic {
+    [UseCase]
+    note right
+      This is responsible for
+      processing data
+      and converting it into
+      a useful format for the
+      Component
+    end note
+
+    [Repository]
+    note right
+      This is responsible for
+      processing data
+      and converting it into
+      a useful format for the
+      Component
+    end note
+
+    [DataMapper]
+    note right
+      This is responsible for
+      processing data
+      and converting it into
+      a useful format for the
+      Component
+    end note
+
+    [Model]
+    note right
+      This is responsible for
+      processing data
+      and converting it into
+      a useful format for the
+      Component
+    end note
+}
 
 
 

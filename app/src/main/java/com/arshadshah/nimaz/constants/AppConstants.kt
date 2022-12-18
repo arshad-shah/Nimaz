@@ -6,7 +6,7 @@ object AppConstants
 	private const val BASE_URL = "https://nimazapi.arshadshah.online"
 
 	//    const val BASE_URL = "http://192.168.0.62:8080"
-	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/"
+	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/custom"
 
 	//    const val PRAYER_TIMES_BY_METHOD_URL = "$BASE_URL/prayertimes/byMethod/"
 	const val QURAN_SURAH_URL = "$BASE_URL/quran/surahs/"
@@ -18,21 +18,24 @@ object AppConstants
 	fun getMethods() : Map<String , String>
 	{
 		val mapOfMethods = mutableMapOf<String , String>()
-		mapOfMethods["MUSLIM_WORLD_LEAGUE"] = "Muslim World League"
+		mapOfMethods["MWL"] = "Muslim World League"
 		mapOfMethods["EGYPTIAN"] = "Egyptian General Authority of Survey"
 		mapOfMethods["KARACHI"] = "University of Islamic Sciences, Karachi"
-		mapOfMethods["UMM_AL_QURA"] = "Umm al-Qura University, Makkah"
-		mapOfMethods["DUBAI"] = "Institute of Geophysics, University of Tehran"
-		mapOfMethods["MOON_SIGHTING_COMMITTEE"] = "The Moonsighting Committee"
-		mapOfMethods["NORTH_AMERICA"] = "North America"
+		mapOfMethods["MAKKAH"] = "Umm al-Qura University, Makkah"
+		mapOfMethods["DUBAI"] = "Dubai"
+		mapOfMethods["ISNA"] = "Islamic Society of North America (ISNA)"
 		mapOfMethods["KUWAIT"] = "Kuwait"
+		mapOfMethods["TEHRAN"] = "Institute of Geophysics, University of Tehran"
+		mapOfMethods["SHIA"] = "Shia Ithna Ashari, Leva Institute, Qum"
+		mapOfMethods["GULF"] = "Gulf Region"
 		mapOfMethods["QATAR"] = "Qatar"
 		mapOfMethods["SINGAPORE"] = "Singapore"
 		mapOfMethods["FRANCE"] = "France"
+		mapOfMethods["TURKEY"] = "Turkey"
 		mapOfMethods["RUSSIA"] = "Russia"
+		mapOfMethods["MOONSIGHTING"] = "Moonsighting Committee"
 		mapOfMethods["IRELAND"] = "Ireland"
 		mapOfMethods["OTHER"] = "Other"
-
 		return mapOfMethods
 	}
 
