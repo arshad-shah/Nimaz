@@ -14,6 +14,13 @@ import java.time.LocalDateTime
 object PrayerTimesRepository
 {
 
+	/**
+	 * Creates a map of prayer times parameters to be used in the API call
+	 * all the parameters are taken from the user's settings
+	 * returns an ApiResponse object of type PrayerTimes
+	 * @param context the context of the application
+	 * @return ApiResponse<PrayerTimes> the response from the API call see [ApiResponse]
+	 * */
 	suspend fun getPrayerTimes(context : Context) : ApiResponse<PrayerTimes>
 	{
 
@@ -52,7 +59,7 @@ object PrayerTimesRepository
 
 		return try
 		{
-			val response = NimazServicesImpl.getPrayerTimes(mapOfParams)
+			val response = NimazServicesImpl.getPrayerTimes(context , mapOfParams)
 
 			Log.d("PrayerTimesRepository" , "getPrayerTimes: $response")
 
@@ -82,4 +89,5 @@ object PrayerTimesRepository
 			ApiResponse.Error(e.message !! , null)
 		}
 	}
+
 }

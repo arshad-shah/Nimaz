@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
@@ -19,10 +20,10 @@ import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
 @Composable
 fun QuranScreen(
 	paddingValues : PaddingValues ,
-	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 			   )
 {
-	val viewModel = QuranViewModel()
+	val viewModel = QuranViewModel(LocalContext.current)
 	//save the state of the tab
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
 	val titles = listOf("Surah" , "Juz")
@@ -48,7 +49,7 @@ fun QuranScreen(
 		{
 			0 ->
 			{
-				val surahListState = remember{viewModel.surahState}.collectAsState()
+				val surahListState = remember { viewModel.surahState }.collectAsState()
 				SurahList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = surahListState
@@ -57,7 +58,7 @@ fun QuranScreen(
 
 			1 ->
 			{
-				val juzListState = remember{viewModel.juzState}.collectAsState()
+				val juzListState = remember { viewModel.juzState }.collectAsState()
 				JuzList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = juzListState ,

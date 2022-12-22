@@ -1,16 +1,32 @@
 package com.arshadshah.nimaz.utils.network
 
+import android.content.Context
+
 
 interface NimazService
 {
 
-	suspend fun getPrayerTimes(mapOfParams : Map<String , String>) : PrayerTimeResponse
+	//auth
+	suspend fun login(username : String , password : String) : LoginResponse
 
-	suspend fun getSurahs() : ArrayList<SurahResponse>
+	suspend fun getPrayerTimes(
+		context : Context ,
+		mapOfParams : Map<String , String> ,
+							  ) : PrayerTimeResponse
 
-	suspend fun getJuzs() : ArrayList<JuzResponse>
+	suspend fun getSurahs(context : Context) : ArrayList<SurahResponse>
 
-	suspend fun getAyaForSurah(surahNumber : Int , isEnglish : Boolean) : ArrayList<AyaResponse>
+	suspend fun getJuzs(context : Context) : ArrayList<JuzResponse>
 
-	suspend fun getAyaForJuz(juzNumber : Int , isEnglish : Boolean) : ArrayList<AyaResponse>
+	suspend fun getAyaForSurah(
+		context : Context ,
+		surahNumber : Int ,
+		language : String ,
+							  ) : ArrayList<AyaResponse>
+
+	suspend fun getAyaForJuz(
+		context : Context ,
+		juzNumber : Int ,
+		language : String ,
+							) : ArrayList<AyaResponse>
 }
