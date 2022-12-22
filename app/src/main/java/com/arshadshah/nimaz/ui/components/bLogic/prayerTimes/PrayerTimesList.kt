@@ -53,6 +53,11 @@ fun PrayerTimesList(
 			//empty map to avoid null pointer exception
 			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
 			PrayerTimesListUI(modifier , prayerTimesMap , "No connection" , paddingValues)
+
+			Toasty.error(LocalContext.current ,
+						 prayerTimesState.errorMessage ,
+						 Toast.LENGTH_SHORT ,
+						 true).show()
 		}
 	}
 }

@@ -3,16 +3,23 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
-	private const val BASE_URL = "https://nimazapi.arshadshah.online"
+	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 
-	//    const val BASE_URL = "http://192.168.0.62:8080"
 	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/custom"
 
-	//    const val PRAYER_TIMES_BY_METHOD_URL = "$BASE_URL/prayertimes/byMethod/"
+	//auth
+	const val LOGIN_URL = "$BASE_URL/auth/authenticate"
+
 	const val QURAN_SURAH_URL = "$BASE_URL/quran/surahs/"
 	const val QURAN_JUZ_URL = "$BASE_URL/quran/juzs/"
-	const val QURAN_SURAH_AYAT_URL = "$BASE_URL/quran/surah/"
-	const val QURAN_JUZ_AYAT_URL = "$BASE_URL/quran/juz/"
+	const val QURAN_SURAH_AYAT_URL = "$BASE_URL/quran/surah/{surahNumber}/{translationLanguage}"
+	const val QURAN_JUZ_AYAT_URL = "$BASE_URL/quran/juz/{juzNumber}/{translationLanguage}"
+
+	const val USER_USERNAME = "user"
+	const val USER_PASSWORD = "Thisworldis100%doomed"
+
+	//pref keys
+	const val LOGIN_TOKEN = "login_token"
 
 	//function to return the map of methods
 	fun getMethods() : Map<String , String>

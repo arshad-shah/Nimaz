@@ -25,7 +25,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 @Composable
 fun JuzListUI(
 	juz : ArrayList<Juz> ,
-	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 			 )
 {
 	LazyColumn(userScrollEnabled = true) {
@@ -45,7 +45,7 @@ fun JuzListItemUI(
 	juzNumber : String ,
 	name : String ,
 	tname : String ,
-	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 	context : Context = LocalContext.current ,
 				 )
 {
@@ -60,10 +60,11 @@ fun JuzListItemUI(
 		//get the translation type from shared preferences
 		val translationType =
 			PrivateSharedPreferences(context).getData(key = "Translation" , s = "English")
-		var isEnglishType = true
-		if (translationType != "English")
+		val translation = when (translationType)
 		{
-			isEnglishType = false
+			"English" -> "english"
+			"Arabic" -> "urdu"
+			else -> "english"
 		}
 		Row(
 				modifier = Modifier
@@ -72,7 +73,7 @@ fun JuzListItemUI(
 					.clickable(
 							enabled = true
 							  ) {
-						onNavigateToAyatScreen(juzNumber , false , isEnglishType)
+						onNavigateToAyatScreen(juzNumber , false , translation)
 					}
 		   ) {
 

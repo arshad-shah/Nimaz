@@ -51,7 +51,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val fajrAngleState =
 		rememberPreferenceStringSettingState("fajr_angle" , "14.0")
 	val ishaAngleState =
-		rememberPreferenceStringSettingState("isha_angle" , "14.0" )
+		rememberPreferenceStringSettingState("isha_angle" , "14.0")
 
 	Column(
 			modifier = Modifier

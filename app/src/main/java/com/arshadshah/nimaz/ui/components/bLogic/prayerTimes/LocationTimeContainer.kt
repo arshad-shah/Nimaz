@@ -33,7 +33,7 @@ fun LocationTimeContainer(
 			LocationTimeContainerUI(
 					location = "Error" ,
 								   )
-			Toasty.error(LocalContext.current, locationState.errorMessage).show()
+			Toasty.error(LocalContext.current , locationState.errorMessage).show()
 		}
 	}
 }

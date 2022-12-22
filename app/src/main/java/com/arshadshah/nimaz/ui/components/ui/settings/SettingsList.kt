@@ -50,7 +50,7 @@ fun SettingsList(
 		val key = valueState.value
 		//find the value of the key in the map
 		val value : String? = items[key]
-		{ Text(text = value!!) }
+		{ Text(text = value !!) }
 	} else subtitle
 
 	SettingsMenuLink(

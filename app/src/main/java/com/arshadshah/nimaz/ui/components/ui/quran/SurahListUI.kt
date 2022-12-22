@@ -25,7 +25,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 @Composable
 fun SurahListUI(
 	surahs : ArrayList<Surah> ,
-	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 			   )
 {
 	LazyColumn(userScrollEnabled = true) {
@@ -53,7 +53,7 @@ fun SurahListItemUI(
 	englishNameTranslation : String ,
 	type : String ,
 	rukus : String ,
-	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 	context : Context = LocalContext.current ,
 				   )
 {
@@ -68,10 +68,11 @@ fun SurahListItemUI(
 		//get the translation type from shared preferences
 		val translationType =
 			PrivateSharedPreferences(context).getData(key = "Translation" , s = "English")
-		var isEnglishType = true
-		if (translationType != "English")
+		val language = when (translationType)
 		{
-			isEnglishType = false
+			"English" -> "english"
+			"Urdu" -> "urdu"
+			else -> "en"
 		}
 		Row(
 				modifier = Modifier
@@ -80,7 +81,7 @@ fun SurahListItemUI(
 					.clickable(
 							enabled = true ,
 							onClick = {
-								onNavigateToAyatScreen(surahNumber , true , isEnglishType)
+								onNavigateToAyatScreen(surahNumber , true , language)
 							}
 							  )
 		   ) {

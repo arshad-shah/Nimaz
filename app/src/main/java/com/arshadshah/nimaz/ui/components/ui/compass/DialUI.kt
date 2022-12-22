@@ -4,7 +4,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.runtime.Composable
 
 @Composable
-fun DialUI(){
+fun DialUI()
+{
 	ElevatedCard {
 //		import the ic_qibla_compass icon from drawable
 

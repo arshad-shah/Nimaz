@@ -22,15 +22,15 @@ fun QuranNavGraph(navController : NavController , paddingValues : PaddingValues)
 		composable("quran") {
 			QuranScreen(
 					paddingValues ,
-					onNavigateToAyatScreen = { number : String , isSurah : Boolean , isEnglish : Boolean ->
-						navController.navigate("ayatScreen/$number/$isSurah/$isEnglish")
+					onNavigateToAyatScreen = { number : String , isSurah : Boolean , language : String ->
+						navController.navigate("ayatScreen/$number/$isSurah/$language")
 					})
 		}
-		composable("ayatScreen/{number}/{isSurah}/{isEnglish}") {
+		composable("ayatScreen/{number}/{isSurah}/{language}") {
 			AyatScreen(
 					number = it.arguments?.getString("number") ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
-					isEnglish = it.arguments?.getString("isEnglish") !! ,
+					language = it.arguments?.getString("language") !! ,
 					paddingValues = paddingValues
 					  )
 		}
