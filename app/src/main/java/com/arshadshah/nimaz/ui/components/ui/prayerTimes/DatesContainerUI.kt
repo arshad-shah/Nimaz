@@ -20,9 +20,13 @@ fun DatesContainerUI(GregDate : String , islamDate : String)
 				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		Column(horizontalAlignment = Alignment.CenterHorizontally) {
-			Text(text = GregDate , Modifier.padding(vertical = 16.dp , horizontal = 8.dp))
+			Text(text = GregDate ,
+				 Modifier.padding(vertical = 16.dp , horizontal = 8.dp) ,
+				 style = MaterialTheme.typography.titleLarge)
 			Divider(color = MaterialTheme.colorScheme.outline)
-			Text(text = islamDate , Modifier.padding(16.dp))
+			Text(text = islamDate ,
+				 Modifier.padding(16.dp) ,
+				 style = MaterialTheme.typography.titleLarge)
 		}
 	}
 }

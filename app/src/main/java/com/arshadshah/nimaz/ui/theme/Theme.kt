@@ -4,12 +4,26 @@ import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
+
+@Composable
+fun ProvideDimens(
+	dimensions : Dimensions ,
+	content : @Composable () -> Unit ,
+				 )
+{
+	val dimensionSet = remember { dimensions }
+	CompositionLocalProvider(LocalAppDimens provides dimensionSet , content = content)
+}
+
+private val LocalAppDimens = staticCompositionLocalOf {
+	smallDimensions
+}
 
 private val LightColors = lightColorScheme(
 		primary = md_theme_light_primary ,
@@ -88,6 +102,12 @@ fun NimazTheme(
 		darkTheme -> DarkColors
 		else -> LightColors
 	}
+	val configuration = LocalConfiguration.current
+	//if screen is small then use small dimensions
+	val dimensions =
+		if (configuration.screenWidthDp < 360 && configuration.screenHeightDp < 700) smallDimensions else sw360Dimensions
+	val typography =
+		if (configuration.screenHeightDp > 700 || configuration.screenWidthDp < 360) TypographyMain else TypographySmall
 	val view = LocalView.current
 	if (! view.isInEditMode)
 	{
@@ -99,9 +119,12 @@ fun NimazTheme(
 		}
 	}
 
-	MaterialTheme(
-			colorScheme = colorScheme ,
-			typography = Typography ,
-			content = content
-				 )
+	ProvideDimens(dimensions) {
+		MaterialTheme(
+				colorScheme = colorScheme ,
+				shapes = nimazCardShapes() ,
+				typography = typography ,
+				content = content ,
+					 )
+	}
 }
