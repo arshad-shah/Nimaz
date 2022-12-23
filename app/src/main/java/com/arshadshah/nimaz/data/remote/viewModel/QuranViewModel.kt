@@ -7,13 +7,12 @@ import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.repositories.QuranRepository
-import com.arshadshah.nimaz.utils.location.NetworkChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class QuranViewModel : ViewModel()
+class QuranViewModel(context : Context) : ViewModel()
 {
 
 	sealed class SurahState
@@ -64,12 +63,12 @@ class QuranViewModel : ViewModel()
 
 	init
 	{
-		getSurahList()
-		getJuzList()
+		getSurahList(context)
+		getJuzList(context)
 	}
 
 
-	fun getSurahList()
+	fun getSurahList(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -89,7 +88,7 @@ class QuranViewModel : ViewModel()
 		}
 	}
 
-	fun getJuzList()
+	fun getJuzList(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -109,12 +108,12 @@ class QuranViewModel : ViewModel()
 		}
 	}
 
-	fun getAllAyaForSurah(surahNumber : Int , isEnglish : Boolean)
+	fun getAllAyaForSurah(surahNumber : Int , language : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getAyaForSurah(surahNumber , isEnglish)
+				val response = QuranRepository.getAyaForSurah(surahNumber , language)
 				if (response.data != null)
 				{
 					_ayaSurahstate.value = AyaSurahState.Success(response.data)
@@ -129,12 +128,12 @@ class QuranViewModel : ViewModel()
 		}
 	}
 
-	fun getAllAyaForJuz(juzNumber : Int , isEnglish : Boolean)
+	fun getAllAyaForJuz(juzNumber : Int , language : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getAyaForJuz(juzNumber , isEnglish)
+				val response = QuranRepository.getAyaForJuz(juzNumber , language)
 				if (response.data != null)
 				{
 					_ayaJuzstate.value = AyaJuzState.Success(response.data)

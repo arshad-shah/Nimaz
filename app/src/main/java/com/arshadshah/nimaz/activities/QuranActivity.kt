@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.activities
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -41,7 +40,7 @@ class QuranActivity : ComponentActivity()
 										if (route.value == "quran")
 										{
 											Text(text = "Quran")
-										} else if (route.value == "ayatScreen/{number}/{isSurah}/{isEnglish}")
+										} else if (route.value == "ayatScreen/{number}/{isSurah}/{language}")
 										{
 											val number = remember(navController) {
 												mutableStateOf(navController.currentBackStackEntry?.arguments?.getString(

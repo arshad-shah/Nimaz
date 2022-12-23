@@ -52,6 +52,7 @@ fun CurrentNextPrayerContainerUI(
 						.fillMaxWidth()
 						.padding(16.dp) ,
 					textAlign = TextAlign.Center ,
+					style = MaterialTheme.typography.titleLarge
 				)
 		}
 	}

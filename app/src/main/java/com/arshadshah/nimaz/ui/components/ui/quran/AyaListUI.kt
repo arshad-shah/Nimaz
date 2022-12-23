@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
@@ -20,10 +19,10 @@ import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.urduFont
-import com.arshadshah.nimaz.utils.AyaEndProcesser
+
 
 @Composable
-fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues , isEnglish : Boolean)
+fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues , language : String)
 {
 	LazyColumn(userScrollEnabled = true , contentPadding = paddingValues) {
 		items(ayaList.size) { index ->
@@ -31,7 +30,7 @@ fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues , isEngli
 					ayaNumber = ayaList[index].ayaNumber.toString() ,
 					ayaArabic = ayaList[index].ayaArabic ,
 					ayaTranslation = ayaList[index].translation ,
-					isEnglish = isEnglish
+					language = language
 						 )
 		}
 	}
@@ -42,33 +41,31 @@ fun AyaListItemUI(
 	ayaNumber : String ,
 	ayaArabic : String ,
 	ayaTranslation : String ,
-	isEnglish : Boolean ,
+	language : String ,
 				 )
 {
+	val cardBackgroundColor = if (ayaNumber == "0")
+	{
+		MaterialTheme.colorScheme.outline
+	} else
+	{
+		//use default color
+		MaterialTheme.colorScheme.surface
+	}
 	ElevatedCard(
 			modifier = Modifier
 				.padding(4.dp)
 				.fillMaxHeight()
 				.fillMaxWidth()
-				.background(color = MaterialTheme.colorScheme.surface) ,
+				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp)) ,
 			shape = RoundedCornerShape(8.dp)
 				) {
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
+					.padding(8.dp)
 		   ) {
 
-			if (ayaNumber != "0")
-			{
-				Text(
-						modifier = Modifier
-							.align(Alignment.CenterVertically)
-							.weight(0.12f)
-							.padding(start = 8.dp) ,
-						text = "$ayaNumber." ,
-						style = MaterialTheme.typography.bodySmall ,
-					)
-			}
 
 			Column(
 					modifier = Modifier
@@ -76,39 +73,38 @@ fun AyaListItemUI(
 				  ) {
 				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 					Text(
-							text = AyaEndProcesser(ayaArabic , ayaNumber.toInt()) ,
+							text = ayaArabic ,
 							style = MaterialTheme.typography.titleLarge ,
 							fontFamily = quranFont ,
 							textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth()
-								.padding(start = 4.dp)
+								.padding(4.dp)
 						)
 				}
 				Spacer(modifier = Modifier.height(4.dp))
-				if (!isEnglish)
+				if (language == "urdu")
 				{
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
 								text = "$ayaTranslation ۔" ,
-								style = MaterialTheme.typography.bodySmall ,
+								style = MaterialTheme.typography.titleSmall ,
 								fontFamily = urduFont ,
-								textAlign = TextAlign.Justify ,
+								textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
 								modifier = Modifier
 									.fillMaxWidth()
-									.padding(start = 4.dp)
+									.padding(horizontal = 4.dp)
 							)
 					}
-				}
-				else
+				} else
 				{
 					Text(
 							text = ayaTranslation ,
 							style = MaterialTheme.typography.bodySmall ,
-							textAlign = TextAlign.Justify ,
+							textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth()
-								.padding(start = 4.dp)
+								.padding(horizontal = 4.dp)
 						)
 				}
 			}
@@ -126,7 +122,7 @@ fun AyaListItemUIPreview()
 		//add the aya to the list
 		ayaList.add(
 				Aya(
-						1 ,
+						0 ,
 						"بسم الله الرحمن الرحيم" ,
 						"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
 						"Surah" ,
@@ -135,7 +131,7 @@ fun AyaListItemUIPreview()
 				   )
 		ayaList.add(
 				Aya(
-						2 ,
+						1 ,
 						"الحمد لله رب العالمين" ,
 						"All praise is due to Allah, Lord of the worlds." , "Surah" ,
 						1
@@ -143,7 +139,7 @@ fun AyaListItemUIPreview()
 				   )
 		ayaList.add(
 				Aya(
-						3 ,
+						2 ,
 						"الرحمن الرحيم" ,
 						"The Entirely Merciful, the Especially Merciful." ,
 						"Surah" ,
@@ -152,13 +148,13 @@ fun AyaListItemUIPreview()
 				   )
 		ayaList.add(
 				Aya(
-						4 , "مالك يوم الدين" , "Master of the Day of Judgment." , "Surah" ,
+						3 , "مالك يوم الدين" , "Master of the Day of Judgment." , "Surah" ,
 						1
 				   )
 				   )
 		ayaList.add(
 				Aya(
-						5 ,
+						4 ,
 						"إياك نعبد وإياك نستعين" ,
 						"You alone do we worship, and You alone do we implore for help." , "Surah" ,
 						1
@@ -166,13 +162,13 @@ fun AyaListItemUIPreview()
 				   )
 		ayaList.add(
 				Aya(
-						6 , "اهدنا الصراط المستقيم" , "Guide us to the straight path." , "Surah" ,
+						5 , "اهدنا الصراط المستقيم" , "Guide us to the straight path." , "Surah" ,
 						1
 				   )
 				   )
 		ayaList.add(
 				Aya(
-						7 ,
+						6 ,
 						"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
 						"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
 						"Surah" ,
@@ -180,6 +176,6 @@ fun AyaListItemUIPreview()
 				   )
 				   )
 
-		AyaListUI(ayaList , PaddingValues(8.dp) , true)
+		AyaListUI(ayaList , PaddingValues(8.dp) , "english")
 	}
 }

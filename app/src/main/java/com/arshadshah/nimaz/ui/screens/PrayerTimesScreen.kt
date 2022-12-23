@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,16 +36,16 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 				.padding(8.dp)
 				.wrapContentSize(Alignment.Center) ,
 		  ) {
-			// Calling the LocationTimeContainer composable
-			LocationTimeContainer(state = locationState)
+		// Calling the LocationTimeContainer composable
+		LocationTimeContainer(state = locationState)
 
-			// Calling the DatesContainer composable
-			DatesContainer()
+		// Calling the DatesContainer composable
+		DatesContainer()
 
-			// Calling the CurrentNextPrayerContainer composable
-			CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
+		// Calling the CurrentNextPrayerContainer composable
+		CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
 
-			// Calling the PrayerTimesList composable
-			PrayerTimesList(state = state , paddingValues = paddingValues)
-		}
+		// Calling the PrayerTimesList composable
+		PrayerTimesList(state = state , paddingValues = paddingValues)
+	}
 }

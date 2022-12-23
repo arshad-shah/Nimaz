@@ -50,7 +50,7 @@ fun SettingsList(
 		val key = valueState.value
 		//find the value of the key in the map
 		val value : String? = items[key]
-		{ Text(text = value!!) }
+		{ Text(text = value !!) }
 	} else subtitle
 
 	SettingsMenuLink(
@@ -72,6 +72,7 @@ fun SettingsList(
 		}
 	}
 	AlertDialog(
+			modifier = Modifier.height(height) ,
 			shape = CardDefaults.elevatedShape ,
 			title = title ,
 			text = {
