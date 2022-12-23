@@ -7,4 +7,4 @@ import kotlinx.serialization.Serializable
 data class QiblaDirectionResponse(
 	@SerialName("bearing")
 	val bearing : Double ,
-						)
+								 )
