@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -19,12 +21,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Nimaz"
         android:usesCleartextTraffic="true"
-        tools:targetApi="31">
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="tiramisu">
         <activity
             android:name=".activities.SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.Nimaz">
+            android:theme="@style/Theme.Nimaz"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -33,7 +37,8 @@
             android:name=".activities.QuranActivity"
             android:exported="false"
             android:label="@string/title_activity_quran"
-            android:theme="@style/Theme.Nimaz">
+            android:theme="@style/Theme.Nimaz"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -42,7 +47,8 @@
             android:name=".activities.Introduction"
             android:exported="false"
             android:label="@string/title_activity_introduction"
-            android:theme="@style/Theme.Nimaz">
+            android:theme="@style/Theme.Nimaz"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -50,7 +56,8 @@
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true"
-            android:theme="@style/SplashTheme">
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -61,7 +68,8 @@
             android:name=".activities.MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
-            android:theme="@style/Theme.Nimaz" />
+            android:theme="@style/Theme.Nimaz"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

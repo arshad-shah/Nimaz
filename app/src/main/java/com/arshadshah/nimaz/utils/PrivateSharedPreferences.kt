@@ -9,6 +9,22 @@ class PrivateSharedPreferences(context : Context)
 	private val sharedPreferences = context.getSharedPreferences(file , Context.MODE_PRIVATE)
 	private val editor = sharedPreferences.edit()
 
+	//instance of this class
+	companion object
+	{
+
+		private var instance : PrivateSharedPreferences? = null
+
+		fun getInstance(context : Context) : PrivateSharedPreferences
+		{
+			if (instance == null)
+			{
+				instance = PrivateSharedPreferences(context)
+			}
+			return instance !!
+		}
+	}
+
 	fun saveData(customkey : String , data : String)
 	{
 		editor.putString(customkey , data)

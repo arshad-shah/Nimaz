@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
@@ -13,7 +12,7 @@ import es.dmoral.toasty.Toasty
 
 @Composable
 fun SurahList(
-	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 	state : State<QuranViewModel.SurahState> ,
 			 )
 {

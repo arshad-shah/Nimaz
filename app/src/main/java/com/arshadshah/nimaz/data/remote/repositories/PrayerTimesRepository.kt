@@ -14,6 +14,13 @@ import java.time.LocalDateTime
 object PrayerTimesRepository
 {
 
+	/**
+	 * Creates a map of prayer times parameters to be used in the API call
+	 * all the parameters are taken from the user's settings
+	 * returns an ApiResponse object of type PrayerTimes
+	 * @param context the context of the application
+	 * @return ApiResponse<PrayerTimes> the response from the API call see [ApiResponse]
+	 * */
 	suspend fun getPrayerTimes(context : Context) : ApiResponse<PrayerTimes>
 	{
 
@@ -82,4 +89,26 @@ object PrayerTimesRepository
 			ApiResponse.Error(e.message !! , null)
 		}
 	}
+
+
+	//getQiblaDirection
+	suspend fun getQiblaDirection(context : Context) : ApiResponse<Double>
+	{
+		val sharedPreferences = PrivateSharedPreferences(context)
+		val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
+		val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+		return try
+		{
+			val response = NimazServicesImpl.getQiblaDirection(latitude , longitude)
+			ApiResponse.Success(response.bearing)
+		} catch (e : ClientRequestException)
+		{
+			ApiResponse.Error(e.message , null)
+
+		} catch (e : IOException)
+		{
+			ApiResponse.Error(e.message !! , null)
+		}
+	}
+
 }

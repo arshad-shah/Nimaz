@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
 import io.ktor.client.features.*
+import java.util.*
 
 object QuranRepository
 {
@@ -77,12 +78,15 @@ object QuranRepository
 
 	suspend fun getAyaForSurah(
 		surahNumber : Int ,
-		isEnglish : Boolean ,
+		language : String ,
 							  ) : ApiResponse<ArrayList<Aya>>
 	{
 		return try
 		{
-			val response = NimazServicesImpl.getAyaForSurah(surahNumber , isEnglish)
+			//capitalize the language
+			val languageConverted = language.uppercase(Locale.ROOT)
+			val response =
+				NimazServicesImpl.getAyaForSurah(surahNumber , languageConverted)
 			Log.d("QuranRepository" , "getAyaForSurah: $response")
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()
@@ -108,11 +112,16 @@ object QuranRepository
 		}
 	}
 
-	suspend fun getAyaForJuz(juzNumber : Int , isEnglish : Boolean) : ApiResponse<ArrayList<Aya>>
+	suspend fun getAyaForJuz(
+		juzNumber : Int ,
+		language : String ,
+							) : ApiResponse<ArrayList<Aya>>
 	{
 		return try
 		{
-			val response = NimazServicesImpl.getAyaForJuz(juzNumber , isEnglish)
+			//capitalize the language
+			val languageConverted = language.uppercase(Locale.ROOT)
+			val response = NimazServicesImpl.getAyaForJuz(juzNumber , languageConverted)
 			Log.d("QuranRepository" , "getAyaForJuz: $response")
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()

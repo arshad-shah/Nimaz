@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.CurrentNextPrayerContainerUI
-import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 
 @Composable

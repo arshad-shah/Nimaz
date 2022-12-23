@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -53,6 +54,13 @@ fun PrayerTimesList(
 			//empty map to avoid null pointer exception
 			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
 			PrayerTimesListUI(modifier , prayerTimesMap , "No connection" , paddingValues)
+
+			Log.e("PrayerTimesList" , "Error: ${prayerTimesState.errorMessage}")
+
+			Toasty.error(LocalContext.current ,
+						 prayerTimesState.errorMessage ,
+						 Toast.LENGTH_SHORT ,
+						 true).show()
 		}
 	}
 }

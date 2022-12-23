@@ -10,7 +10,34 @@ object NimazServicesImpl : NimazService
 		KtorClient.getInstance
 	}
 
-	override suspend fun getPrayerTimes(mapOfParams : Map<String , String>) : PrayerTimeResponse
+	override suspend fun login(username : String , password : String) : LoginResponse
+	{
+		val mapOfLogin = mapOf(
+				"username" to username ,
+				"password" to password
+							  )
+		return httpClient.post(AppConstants.LOGIN_URL) {
+			body = mapOfLogin
+			header("Content-Type" , "application/json")
+		}
+	}
+
+	override suspend fun getQiblaDirection(
+		latitude : Double ,
+		longitude : Double ,
+										  ) : QiblaDirectionResponse
+	{
+		return httpClient.get(AppConstants.QIBLA_URL) {
+			header("Content-Type" , "application/json")
+			parameter("latitude" , latitude)
+			parameter("longitude" , longitude)
+		}
+	}
+
+
+	override suspend fun getPrayerTimes(
+		mapOfParams : Map<String , String> ,
+									   ) : PrayerTimeResponse
 	{
 		//create a post request with stuff in body and return the response
 		return httpClient.post(AppConstants.PRAYER_TIMES_URL) {
@@ -34,25 +61,23 @@ object NimazServicesImpl : NimazService
 
 	override suspend fun getAyaForSurah(
 		surahNumber : Int ,
-		isEnglish : Boolean ,
+		language : String ,
 									   ) : ArrayList<AyaResponse>
 	{
+		val url =
+			AppConstants.QURAN_SURAH_AYAT_URL.replace("{surahNumber}" , surahNumber.toString())
+				.replace("{translationLanguage}" , language)
 		//create a get request and return the response
-		return httpClient.get(AppConstants.QURAN_SURAH_AYAT_URL) {
-			parameter("surahNumber" , surahNumber)
-			parameter("isEnglish" , isEnglish)
-		}
+		return httpClient.get(url)
 	}
 
 	override suspend fun getAyaForJuz(
 		juzNumber : Int ,
-		isEnglish : Boolean ,
+		language : String ,
 									 ) : ArrayList<AyaResponse>
 	{
-		//create a get request and return the response
-		return httpClient.get(AppConstants.QURAN_JUZ_AYAT_URL) {
-			parameter("juzNumber" , juzNumber)
-			parameter("isEnglish" , isEnglish)
-		}
+		val url = AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
+			.replace("{translationLanguage}" , language)
+		return httpClient.get(url)
 	}
 }

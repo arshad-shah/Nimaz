@@ -12,7 +12,7 @@ import es.dmoral.toasty.Toasty
 
 @Composable
 fun JuzList(
-	onNavigateToAyatScreen : (String , Boolean , Boolean) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 	state : State<QuranViewModel.JuzState> ,
 		   )
 {
@@ -37,7 +37,8 @@ fun JuzList(
 					juz = ArrayList(5) ,
 					onNavigateToAyatScreen = onNavigateToAyatScreen
 					 )
-			Toasty.error(LocalContext.current , juzState.errorMessage , Toast.LENGTH_SHORT , true).show()
+			Toasty.error(LocalContext.current , juzState.errorMessage , Toast.LENGTH_SHORT , true)
+				.show()
 		}
 	}
 }
