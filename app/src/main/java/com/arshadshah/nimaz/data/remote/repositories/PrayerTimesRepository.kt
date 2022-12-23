@@ -59,7 +59,7 @@ object PrayerTimesRepository
 
 		return try
 		{
-			val response = NimazServicesImpl.getPrayerTimes(context , mapOfParams)
+			val response = NimazServicesImpl.getPrayerTimes(mapOfParams)
 
 			Log.d("PrayerTimesRepository" , "getPrayerTimes: $response")
 
@@ -80,6 +80,27 @@ object PrayerTimesRepository
 											  )
 										 )
 			ApiResponse.Success(prayerTimes)
+		} catch (e : ClientRequestException)
+		{
+			ApiResponse.Error(e.message , null)
+
+		} catch (e : IOException)
+		{
+			ApiResponse.Error(e.message !! , null)
+		}
+	}
+
+
+	//getQiblaDirection
+	suspend fun getQiblaDirection(context : Context) : ApiResponse<Double>
+	{
+		val sharedPreferences = PrivateSharedPreferences(context)
+		val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
+		val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+		return try
+		{
+			val response = NimazServicesImpl.getQiblaDirection(latitude , longitude)
+			ApiResponse.Success(response.bearing)
 		} catch (e : ClientRequestException)
 		{
 			ApiResponse.Error(e.message , null)

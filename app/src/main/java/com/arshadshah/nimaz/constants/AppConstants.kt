@@ -15,6 +15,8 @@ object AppConstants
 	const val QURAN_SURAH_AYAT_URL = "$BASE_URL/quran/surah/{surahNumber}/{translationLanguage}"
 	const val QURAN_JUZ_AYAT_URL = "$BASE_URL/quran/juz/{juzNumber}/{translationLanguage}"
 
+	const val QIBLA_URL = "$BASE_URL/prayertimes/qibla"
+
 	const val USER_USERNAME = "user"
 	const val USER_PASSWORD = "Thisworldis100%doomed"
 
