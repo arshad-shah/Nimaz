@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -59,6 +58,9 @@ fun PrayerTimesRow(prayerName : String , prayerTime : LocalDateTime? , isHighlig
 {
 	//format the date to time based on device format
 	val formatter = DateTimeFormatter.ofPattern("hh:mm a")
+	val sentenceCase =
+		prayerName.lowercase(Locale.ROOT)
+			.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
 	Row(
 			horizontalArrangement = Arrangement.SpaceBetween ,
 			modifier = if (isHighlighted)
@@ -72,11 +74,13 @@ fun PrayerTimesRow(prayerName : String , prayerTime : LocalDateTime? , isHighlig
 					.fillMaxWidth()
 			}
 	   ) {
-		Text(text = prayerName , fontSize = 20.sp , modifier = Modifier.padding(16.dp))
+		Text(text = sentenceCase ,
+			 modifier = Modifier.padding(16.dp) ,
+			 style = MaterialTheme.typography.titleLarge)
 		Text(
 				text = prayerTime !!.format(formatter) ,
-				fontSize = 20.sp ,
-				modifier = Modifier.padding(16.dp)
+				modifier = Modifier.padding(16.dp) ,
+				style = MaterialTheme.typography.titleLarge
 			)
 	}
 }
@@ -97,14 +101,14 @@ fun PrayerTimesListUIPreview()
 	NimazTheme {
 		PrayerTimesListUI(
 				prayerTimesMap = mapOf(
-						"FAJR" to LocalDateTime.now() ,
-						"SUNRISE" to LocalDateTime.now() ,
-						"DHUHR" to LocalDateTime.now() ,
-						"ASR" to LocalDateTime.now() ,
-						"MAGHRIB" to LocalDateTime.now() ,
-						"ISHA" to LocalDateTime.now()
+						"fajr" to LocalDateTime.now() ,
+						"sunrise" to LocalDateTime.now() ,
+						"dhuhr" to LocalDateTime.now() ,
+						"asr" to LocalDateTime.now() ,
+						"maghrib" to LocalDateTime.now() ,
+						"isha" to LocalDateTime.now()
 									  ) ,
-				name = "FAJR" ,
+				name = "fajr" ,
 				paddingValues = PaddingValues(16.dp)
 						 )
 	}

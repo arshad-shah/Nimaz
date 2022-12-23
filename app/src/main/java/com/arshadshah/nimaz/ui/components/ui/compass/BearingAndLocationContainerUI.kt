@@ -1,39 +1,23 @@
-package com.arshadshah.nimaz.ui.components.ui.prayerTimes
+package com.arshadshah.nimaz.ui.components.ui.compass
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
-import com.arshadshah.nimaz.ui.theme.NimazTheme
-import kotlinx.coroutines.delay
 
 @Composable
-fun LocationTimeContainerUI(location : String)
+fun BearingAndLocationContainerUI(location : String , bearing : String)
 {
-	val (time , setTime) = remember { mutableStateOf(System.currentTimeMillis()) }
-	LaunchedEffect(true) {
-		while (true)
-		{
-			setTime(System.currentTimeMillis())
-			delay(DateUtils.SECOND_IN_MILLIS)
-		}
-	}
 	ElevatedCard(
 			modifier = Modifier
-				.padding(vertical = 8.dp , horizontal = 0.dp)
+				.padding(8.dp)
 				.height(IntrinsicSize.Max)
 				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
@@ -44,7 +28,7 @@ fun LocationTimeContainerUI(location : String)
 				modifier = Modifier.fillMaxWidth() ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
-
+			//only allow 50% of the width for the location text
 			CustomText(
 					modifier = Modifier
 						.weight(0.5f)
@@ -58,26 +42,19 @@ fun LocationTimeContainerUI(location : String)
 						.width(1.dp) ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			//only allow 50% of the width for the time text
 			CustomText(
 					modifier = Modifier
 						.weight(0.5f)
 						.padding(8.dp) ,
-					heading = "Time" ,
-					text = DateUtils.formatDateTime(LocalContext.current ,
-													time ,
-													DateUtils.FORMAT_SHOW_TIME)
+					heading = "Bearing°" , text = bearing
 					  )
 		}
 	}
 }
 
-
 @Preview
 @Composable
-fun LocationTimeContainerUIPreview()
+fun BearingAndLocationContainerUIPreview()
 {
-	NimazTheme {
-		LocationTimeContainerUI("London")
-	}
+	BearingAndLocationContainerUI(location = "Location" , bearing = "Bearing")
 }

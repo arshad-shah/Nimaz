@@ -1,6 +1,9 @@
 package com.arshadshah.nimaz.ui.components.ui.compass
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -8,13 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +37,10 @@ fun DialUI(bearing : Double , data : SensorData?)
 	val currentAngle = 0f
 	val rotateAnim = remember { Animatable(currentAngle) }
 	val target = (bearing - degree).toFloat()
+	val context = LocalContext.current
+	val vibrator = vibrate(context)
+
+	var pointingToQibla = false
 
 	LaunchedEffect(key1 = degree , key2 = pitch , key3 = roll) {
 		rotateAnim.animateTo(target , tween(300))
@@ -41,19 +49,21 @@ fun DialUI(bearing : Double , data : SensorData?)
 	ElevatedCard(modifier = Modifier
 		.fillMaxWidth()
 		.padding(16.dp)) {
-		//the dot
-		Image(
+		if (abs(target) < 5)
+		{
+			pointingToQibla = true
+			vibrator.vibrate(VibrationEffect.createOneShot(100 , VibrationEffect.DEFAULT_AMPLITUDE))
+		}
+
+		Icon(
 				painter = painterResource(id = com.arshadshah.nimaz.R.drawable.ic_dot) ,
 				contentDescription = "dot" ,
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(vertical = 8.dp)
 					.size(24.dp) ,
-				alignment = Alignment.Center ,
-				colorFilter = ColorFilter.tint(
-						if (abs(target) < 5) MaterialTheme.colorScheme.inversePrimary else Color.Red
-											  )
-			 )
+				tint = if (pointingToQibla) MaterialTheme.colorScheme.inversePrimary else Color.Red
+			)
 		//the dial
 		Image(
 				painter = painterResource(id = com.arshadshah.nimaz.R.drawable.ic_qibla_compass) ,
@@ -65,6 +75,13 @@ fun DialUI(bearing : Double , data : SensorData?)
 				alignment = Alignment.Center
 			 )
 	}
+}
+
+//a function to get the vibrator service of the device and vibrate it
+fun vibrate(context : Context) : Vibrator
+{
+	//get the vibration manager
+	return context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 }
 
 @Preview
