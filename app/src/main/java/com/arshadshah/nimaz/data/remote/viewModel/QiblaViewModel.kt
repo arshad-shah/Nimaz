@@ -1,26 +1,17 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
 import android.content.Context
-import android.content.pm.PackageManager
-import android.hardware.Sensor
-import android.hardware.SensorManager
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
-import com.arshadshah.nimaz.utils.network.NimazServicesImpl
-import com.google.android.material.snackbar.Snackbar
-import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class QiblaViewModel(context: Context): ViewModel()
+class QiblaViewModel(context : Context) : ViewModel()
 {
+
 	sealed class QiblaState
 	{
 
@@ -37,7 +28,7 @@ class QiblaViewModel(context: Context): ViewModel()
 		loadQibla(context)
 	}
 
-	fun loadQibla(context:Context)
+	fun loadQibla(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			_qiblaState.value = QiblaState.Loading

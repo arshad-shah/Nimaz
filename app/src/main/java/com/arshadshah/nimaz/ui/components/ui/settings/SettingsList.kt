@@ -72,6 +72,7 @@ fun SettingsList(
 		}
 	}
 	AlertDialog(
+			modifier = Modifier.height(height) ,
 			shape = CardDefaults.elevatedShape ,
 			title = title ,
 			text = {

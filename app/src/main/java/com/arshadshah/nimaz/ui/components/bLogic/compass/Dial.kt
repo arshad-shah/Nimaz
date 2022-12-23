@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.bLogic.compass
 
-import android.util.Log
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.data.remote.viewModel.QiblaViewModel
@@ -26,7 +25,7 @@ fun Dial(state : State<QiblaViewModel.QiblaState>)
 			dataManager.data
 				.receiveAsFlow()
 				.onEach { data = it }
-				.collect{
+				.collect {
 					// do nothing
 				}
 		}
@@ -42,13 +41,15 @@ fun Dial(state : State<QiblaViewModel.QiblaState>)
 		{
 			DialUI(0.0 , data)
 		}
+
 		is QiblaViewModel.QiblaState.Error ->
 		{
 			DialUI(0.0 , data)
 		}
+
 		is QiblaViewModel.QiblaState.Success ->
 		{
-			qiblaState.bearing?.let { DialUI(it,data) }
+			qiblaState.bearing?.let { DialUI(it , data) }
 		}
 	}
 }

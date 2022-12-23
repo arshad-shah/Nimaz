@@ -22,7 +22,10 @@ object NimazServicesImpl : NimazService
 		}
 	}
 
-	override suspend fun getQiblaDirection(latitude : Double , longitude : Double) : QiblaDirectionResponse
+	override suspend fun getQiblaDirection(
+		latitude : Double ,
+		longitude : Double ,
+										  ) : QiblaDirectionResponse
 	{
 		return httpClient.get(AppConstants.QIBLA_URL) {
 			header("Content-Type" , "application/json")
