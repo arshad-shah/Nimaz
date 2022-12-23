@@ -22,7 +22,7 @@ fun AyatScreen(
 
 	if (isSurah.toBoolean())
 	{
-		viewModel.getAllAyaForSurah(context , number !!.toInt() , language)
+		viewModel.getAllAyaForSurah(number !!.toInt() , language)
 		val ayat = remember { viewModel.ayaSurahState }.collectAsState()
 		AyaSurahList(
 				number = number.toInt() , language = language ,
@@ -32,7 +32,7 @@ fun AyatScreen(
 
 	} else
 	{
-		viewModel.getAllAyaForJuz(context , number !!.toInt() , language)
+		viewModel.getAllAyaForJuz(number !!.toInt() , language)
 		val ayat = remember { viewModel.ayaJuzstate }.collectAsState()
 		AyaJuzList(
 				number = number.toInt() ,

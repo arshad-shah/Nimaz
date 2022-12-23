@@ -73,7 +73,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getSurahs(context)
+				val response = QuranRepository.getSurahs()
 				if (response.data != null)
 				{
 					_surahState.value = SurahState.Success(response.data)
@@ -93,7 +93,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getJuzs(context)
+				val response = QuranRepository.getJuzs()
 				if (response.data != null)
 				{
 					_juzState.value = JuzState.Success(response.data)
@@ -108,12 +108,12 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun getAllAyaForSurah(context : Context , surahNumber : Int , language : String)
+	fun getAllAyaForSurah(surahNumber : Int , language : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getAyaForSurah(context , surahNumber , language)
+				val response = QuranRepository.getAyaForSurah(surahNumber , language)
 				if (response.data != null)
 				{
 					_ayaSurahstate.value = AyaSurahState.Success(response.data)
@@ -128,12 +128,12 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun getAllAyaForJuz(context : Context , juzNumber : Int , language : String)
+	fun getAllAyaForJuz(juzNumber : Int , language : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getAyaForJuz(context , juzNumber , language)
+				val response = QuranRepository.getAyaForJuz(juzNumber , language)
 				if (response.data != null)
 				{
 					_ayaJuzstate.value = AyaJuzState.Success(response.data)

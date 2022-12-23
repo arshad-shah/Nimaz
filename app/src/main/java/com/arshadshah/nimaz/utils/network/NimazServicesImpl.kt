@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.utils.network
 
-import android.content.Context
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import io.ktor.client.request.*
 
 object NimazServicesImpl : NimazService
@@ -11,9 +9,6 @@ object NimazServicesImpl : NimazService
 	private val httpClient by lazy {
 		KtorClient.getInstance
 	}
-
-	//shared preferences instance lateinit
-	private lateinit var sharedPrefs : PrivateSharedPreferences
 
 	override suspend fun login(username : String , password : String) : LoginResponse
 	{
@@ -27,83 +22,59 @@ object NimazServicesImpl : NimazService
 		}
 	}
 
+	override suspend fun getQiblaDirection(latitude : Double , longitude : Double) : QiblaDirectionResponse
+	{
+		return httpClient.get(AppConstants.QIBLA_URL) {
+			header("Content-Type" , "application/json")
+			parameter("latitude" , latitude)
+			parameter("longitude" , longitude)
+		}
+	}
+
 
 	override suspend fun getPrayerTimes(
-		context : Context ,
 		mapOfParams : Map<String , String> ,
 									   ) : PrayerTimeResponse
 	{
-		//get shared preferences instance
-		sharedPrefs = PrivateSharedPreferences.getInstance(context)
-		//get token from shared preferences
-		val token = sharedPrefs.getData(AppConstants.LOGIN_TOKEN , "")
 		//create a post request with stuff in body and return the response
 		return httpClient.post(AppConstants.PRAYER_TIMES_URL) {
 			body = mapOfParams
 			//set headers for json
 			header("Content-Type" , "application/json")
-			//add auth token
-			header("Authorization" , "Bearer $token")
 		}
 	}
 
-	override suspend fun getSurahs(context : Context) : ArrayList<SurahResponse>
+	override suspend fun getSurahs() : ArrayList<SurahResponse>
 	{
-		//get shared preferences instance
-		sharedPrefs = PrivateSharedPreferences.getInstance(context)
-		//get token from shared preferences
-		val token = sharedPrefs.getData(AppConstants.LOGIN_TOKEN , "")
 		//create a get request and return the response
-		return httpClient.get(AppConstants.QURAN_SURAH_URL) {
-			header("Authorization" , "Bearer $token")
-		}
+		return httpClient.get(AppConstants.QURAN_SURAH_URL)
 	}
 
-	override suspend fun getJuzs(context : Context) : ArrayList<JuzResponse>
+	override suspend fun getJuzs() : ArrayList<JuzResponse>
 	{
-		//get shared preferences instance
-		sharedPrefs = PrivateSharedPreferences.getInstance(context)
-		//get token from shared preferences
-		val token = sharedPrefs.getData(AppConstants.LOGIN_TOKEN , "")
 		//create a get request and return the response
-		return httpClient.get(AppConstants.QURAN_JUZ_URL) {
-			header("Authorization" , "Bearer $token")
-		}
+		return httpClient.get(AppConstants.QURAN_JUZ_URL)
 	}
 
 	override suspend fun getAyaForSurah(
-		context : Context ,
 		surahNumber : Int ,
 		language : String ,
 									   ) : ArrayList<AyaResponse>
 	{
-		//get shared preferences instance
-		sharedPrefs = PrivateSharedPreferences.getInstance(context)
-		//get token from shared preferences
-		val token = sharedPrefs.getData(AppConstants.LOGIN_TOKEN , "")
 		val url =
 			AppConstants.QURAN_SURAH_AYAT_URL.replace("{surahNumber}" , surahNumber.toString())
 				.replace("{translationLanguage}" , language)
 		//create a get request and return the response
-		return httpClient.get(url) {
-			header("Authorization" , "Bearer $token")
-		}
+		return httpClient.get(url)
 	}
 
 	override suspend fun getAyaForJuz(
-		context : Context ,
 		juzNumber : Int ,
 		language : String ,
 									 ) : ArrayList<AyaResponse>
 	{
-		//get shared preferences instance
-		sharedPrefs = PrivateSharedPreferences.getInstance(context)
-		//get token from shared preferences
-		val token = sharedPrefs.getData(AppConstants.LOGIN_TOKEN , "")
 		val url = AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
 			.replace("{translationLanguage}" , language)
-		return httpClient.get(url) {
-			header("Authorization" , "Bearer $token")
-		}
+		return httpClient.get(url)
 	}
 }

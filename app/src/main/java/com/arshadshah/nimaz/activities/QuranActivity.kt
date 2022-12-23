@@ -40,7 +40,7 @@ class QuranActivity : ComponentActivity()
 										if (route.value == "quran")
 										{
 											Text(text = "Quran")
-										} else if (route.value == "ayatScreen/{number}/{isSurah}/{isEnglish}")
+										} else if (route.value == "ayatScreen/{number}/{isSurah}/{language}")
 										{
 											val number = remember(navController) {
 												mutableStateOf(navController.currentBackStackEntry?.arguments?.getString(
