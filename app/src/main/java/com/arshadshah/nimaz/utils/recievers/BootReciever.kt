@@ -1,0 +1,35 @@
+package com.arshadshah.nimaz.utils.recievers
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.util.Log
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import java.time.LocalDateTime
+
+class BootReciever : BroadcastReceiver()
+{
+
+	override fun onReceive(context : Context , intent : Intent)
+	{
+		if (intent.action.equals(Intent.ACTION_BOOT_COMPLETED) ||
+			intent.action.equals(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+		)
+		{
+			Log.i("Boot Completed" , "Intent action from Boot Complete Received")
+			Log.i("Alarms for Adhan" , "Resetting Alarms after BootUp!")
+			val sharedPreferences = PrivateSharedPreferences(context)
+
+			val fajr = LocalDateTime.parse(sharedPreferences.getData("fajr" , "00:00"))
+			val sunrise = LocalDateTime.parse(sharedPreferences.getData("sunrise" , "00:00"))
+			val dhuhr = LocalDateTime.parse(sharedPreferences.getData("dhuhr" , "00:00"))
+			val asr = LocalDateTime.parse(sharedPreferences.getData("asr" , "00:00"))
+			val maghrib = LocalDateTime.parse(sharedPreferences.getData("maghrib" , "00:00"))
+			val isha = LocalDateTime.parse(sharedPreferences.getData("isha" , "00:00"))
+
+			CreateAlarms().exact(context , fajr , sunrise , dhuhr , asr , maghrib , isha)
+
+		}
+	}
+}
