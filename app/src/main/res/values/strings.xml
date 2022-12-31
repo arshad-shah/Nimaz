@@ -16,4 +16,11 @@
     <string name="title_activity_aya">AyaActivity</string>
     <string name="title_activity_quran">Quran</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="fajr">Fajr</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="zuhar">Dhuhr</string>
+    <string name="asar">Asr</string>
+    <string name="maghrib">Maghrib</string>
+    <string name="ishaa">Isha</string>
+    <string name="cancel">Cancel</string>
 </resources>
