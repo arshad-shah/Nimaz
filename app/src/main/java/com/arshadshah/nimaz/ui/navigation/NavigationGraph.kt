@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.activities.QuranActivity
 import com.arshadshah.nimaz.activities.SettingsActivity
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
+import com.arshadshah.nimaz.ui.screens.TodayScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -20,8 +21,11 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 {
 	NavHost(
 			navController = navController as NavHostController ,
-			startDestination = BottomNavItem.PrayerTimesScreen.screen_route
+			startDestination = BottomNavItem.TodayScreen.screen_route
 		   ) {
+		composable(BottomNavItem.TodayScreen.screen_route) {
+			TodayScreen(paddingValues = paddingValues)
+		}
 		composable(BottomNavItem.PrayerTimesScreen.screen_route) {
 			PrayerTimesScreen(paddingValues = paddingValues)
 		}
