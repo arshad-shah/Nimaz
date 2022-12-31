@@ -11,6 +11,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 fun BottomNavigationBar(navController : NavController)
 {
 	val bottomNavItems = listOf(
+			BottomNavItem.TodayScreen ,
 			BottomNavItem.PrayerTimesScreen ,
 			BottomNavItem.QiblaScreen ,
 			BottomNavItem.QuranScreen ,
@@ -26,11 +27,13 @@ fun BottomNavigationBar(navController : NavController)
 			NavigationBarItem(
 					icon = {
 						Icon(
-								painter = painterResource(id = bottomNavItem.icon) ,
+								imageVector = bottomNavItem.icon ,
 								contentDescription = null
 							)
 					} ,
-					label = { Text(text = bottomNavItem.title) } ,
+					alwaysShowLabel = false ,
+					//if selleced then show the label else dont
+					label = { Text(text = bottomNavItem.title) },
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
 						navController.navigate(bottomNavItem.screen_route) {

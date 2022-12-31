@@ -58,6 +58,7 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
 								fontFamily = quranFont ,
 								fontSize = 24.sp ,
 								lineHeight = 60.sp ,
+								color = MaterialTheme.colorScheme.onSurface ,
 								textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
 										 ) ,
 						onClick = {

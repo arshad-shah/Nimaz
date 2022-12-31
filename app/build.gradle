@@ -99,4 +99,5 @@ dependencies {
 
     //icons
     implementation("br.com.devsrsouza.compose.icons.android:feather:1.0.0")
+    implementation("br.com.devsrsouza.compose.icons.android:font-awesome:1.0.0")
 }

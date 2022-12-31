@@ -39,6 +39,9 @@ import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 import com.arshadshah.nimaz.utils.recievers.AdhanReciever
+import compose.icons.FeatherIcons
+import compose.icons.FontAwesomeIcons
+import compose.icons.feathericons.Clock
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -113,9 +116,7 @@ fun SettingsScreen(
 					onClick = onNavigateToPrayerTimeCustomizationScreen ,
 					icon = {
 						Icon(
-								imageVector =
-								//get the icon from the resources
-								ImageVector.vectorResource(id = R.drawable.ic_clock) ,
+								imageVector = FeatherIcons.Clock,
 								contentDescription = "Clock"
 							)
 					} ,
