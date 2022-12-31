@@ -2,14 +2,14 @@ package com.arshadshah.nimaz.ui.screens.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
@@ -61,86 +61,115 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		SettingsGroup(title = {
 			Text(text = "Prayer Parameters")
 		}) {
-			SettingsList(
-					title = {
-						Text(text = "Calculation Method")
-					} ,
-					subtitle = {
-						Text(text = calculationMethod)
-					} ,
-					description = {
-						Text(text = "The method used to calculate the prayer times.")
-					} ,
-					items = mapOfMethods ,
-					valueState = calculationMethodState ,
-					height = 300.dp
-						)
-			Divider(color = MaterialTheme.colorScheme.outline)
-			SettingsList(
-					title = {
-						Text(text = "Madhab")
-					} ,
-					subtitle = {
-						Text(text = madhab)
-					} ,
-					description = {
-						Text(text = "The madhab used to calculate the asr prayer times.")
-					} ,
-					items = mapOfMadhabs ,
-					valueState = madhabState ,
-					height = 100.dp
-						)
-			//if the calculation method is not other then dont use the rest of the settings
-			Divider(color = MaterialTheme.colorScheme.outline)
-			SettingsList(
-					title = {
-						Text(text = "High Latitude Rule")
-					} ,
-					subtitle = {
-						Text(text = highLatitudeRule)
-					} ,
-					description = {
-						Text(text = "The high latitude rule used to calculate the prayer times.")
-					} ,
-					items = mapOfHighLatitudeRules ,
-					valueState = highLatitudeRuleState ,
-					height = 150.dp
-						)
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsList(
+						title = {
+							Text(text = "Calculation Method")
+						} ,
+						subtitle = {
+							Text(text = calculationMethod)
+						} ,
+						description = {
+							Text(text = "The method used to calculate the prayer times.")
+						} ,
+						items = mapOfMethods ,
+						valueState = calculationMethodState ,
+						height = 500.dp
+							)
+			}
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsList(
+						title = {
+							Text(text = "Madhab")
+						} ,
+						subtitle = {
+							Text(text = madhab)
+						} ,
+						description = {
+							Text(text = "The madhab used to calculate the asr prayer times.")
+						} ,
+						items = mapOfMadhabs ,
+						valueState = madhabState ,
+						height = 300.dp
+							)
+			}
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsList(
+						title = {
+							Text(text = "High Latitude Rule")
+						} ,
+						subtitle = {
+							Text(text = highLatitudeRule)
+						} ,
+						description = {
+							Text(text = "The high latitude rule used to calculate the prayer times.")
+						} ,
+						items = mapOfHighLatitudeRules ,
+						valueState = highLatitudeRuleState ,
+						height = 350.dp
+							)
+			}
 		}
 
 		SettingsGroup(title = {
 			Text(text = "Prayer Angles")
 		}) {
 
-			SettingsNumberPickerDialog(
-					title = {
-						Text(text = "Fajr Angle")
-					} ,
-					subtitle = {
-						Text(text = fajrAngle)
-					} ,
-					description = {
-						Text(text = "The angle of the sun at which the Fajr prayer begins")
-					} ,
-					items = (0 .. 50).map { (it - 25) } ,
-					valueState = fajrAngleState ,
-									  )
-
-			Divider(color = MaterialTheme.colorScheme.outline)
-
-			SettingsNumberPickerDialog(
-					title = {
-						Text(text = "Isha Angle")
-					} ,
-					subtitle = {
-						Text(text = ishaAngle)
-					} ,
-					description = {
-						Text(text = "The angle of the sun at which the Isha prayer begins")
-					} ,
-					items = (0 .. 50).map { (it - 25) } ,
-					valueState = ishaAngleState ,
-									  )
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsNumberPickerDialog(
+						title = {
+							Text(text = "Fajr Angle")
+						} ,
+						subtitle = {
+							Text(text = fajrAngle)
+						} ,
+						description = {
+							Text(text = "The angle of the sun at which the Fajr prayer begins")
+						} ,
+						items = (0 .. 50).map { (it - 25) } ,
+						valueState = fajrAngleState ,
+										  )
+			}
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsNumberPickerDialog(
+						title = {
+							Text(text = "Isha Angle")
+						} ,
+						subtitle = {
+							Text(text = ishaAngle)
+						} ,
+						description = {
+							Text(text = "The angle of the sun at which the Isha prayer begins")
+						} ,
+						items = (0 .. 50).map { (it - 25) } ,
+						valueState = ishaAngleState ,
+										  )
+			}
 		}
 
 
@@ -150,20 +179,57 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					Text(text = "Prayer Time")
 				} ,
 				content = {
-					PrayerTimesCustomizationsLink(title = "Fajr" , fajrAdjustment)
-					Divider(color = MaterialTheme.colorScheme.outline)
-					PrayerTimesCustomizationsLink(title = "Sunrise" , sunriseAdjustment)
-					Divider(color = MaterialTheme.colorScheme.outline)
-					PrayerTimesCustomizationsLink(title = "Dhuhr" , dhuhrAdjustment)
-					Divider(color = MaterialTheme.colorScheme.outline)
-					PrayerTimesCustomizationsLink(title = "Asr" , asrAdjustment)
-					Divider(color = MaterialTheme.colorScheme.outline)
-					PrayerTimesCustomizationsLink(
-							title = "Maghrib" ,
-							maghribAdjustment
-												 )
-					Divider(color = MaterialTheme.colorScheme.outline)
-					PrayerTimesCustomizationsLink(title = "Isha" , ishaAdjustment)
+					ElevatedCard(
+							modifier = Modifier
+								.padding(8.dp)
+								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+								.fillMaxWidth()
+								) {
+						PrayerTimesCustomizationsLink(title = "Fajr" , fajrAdjustment)
+					}
+					ElevatedCard(
+							modifier = Modifier
+								.padding(8.dp)
+								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+								.fillMaxWidth()
+								) {
+						PrayerTimesCustomizationsLink(title = "Sunrise" , sunriseAdjustment)
+					}
+					ElevatedCard(
+							modifier = Modifier
+								.padding(8.dp)
+								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+								.fillMaxWidth()
+								) {
+						PrayerTimesCustomizationsLink(title = "Dhuhr" , dhuhrAdjustment)
+					}
+					ElevatedCard(
+							modifier = Modifier
+								.padding(8.dp)
+								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+								.fillMaxWidth()
+								) {
+						PrayerTimesCustomizationsLink(title = "Asr" , asrAdjustment)
+					}
+					ElevatedCard(
+							modifier = Modifier
+								.padding(8.dp)
+								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+								.fillMaxWidth()
+								) {
+						PrayerTimesCustomizationsLink(
+								title = "Maghrib" ,
+								maghribAdjustment
+													 )
+					}
+					ElevatedCard(
+							modifier = Modifier
+								.padding(8.dp)
+								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+								.fillMaxWidth()
+								) {
+						PrayerTimesCustomizationsLink(title = "Isha" , ishaAdjustment)
+					}
 				}
 					 )
 	}

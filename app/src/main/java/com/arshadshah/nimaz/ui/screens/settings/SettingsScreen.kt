@@ -66,43 +66,57 @@ fun SettingsScreen(
 		SettingsGroup(title = { Text(text = "Location") }) {
 			val storage =
 				rememberPreferenceBooleanSettingState("location_auto" , true)
-			SettingsSwitch(
-					state = storage ,
-					icon = {
-						Icon(
-								imageVector = Icons.Outlined.LocationOn ,
-								contentDescription = "Location"
-							)
-					} ,
-					title = {
-						if (storage.value)
-						{
-							Text(text = "Automatic")
-							//if the location city name is not null, then run the code
-							if (cityname.value != "")
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsSwitch(
+						state = storage ,
+						icon = {
+							Icon(
+									imageVector = Icons.Outlined.LocationOn ,
+									contentDescription = "Location"
+								)
+						} ,
+						title = {
+							if (storage.value)
 							{
-								Location().getAutomaticLocation(LocalContext.current)
+								Text(text = "Automatic")
+								//if the location city name is not null, then run the code
+								if (cityname.value != "")
+								{
+									Location().getAutomaticLocation(LocalContext.current)
+								}
+							} else
+							{
+								Text(text = "Manual")
+								locationFinderAuto.stopLocationUpdates()
 							}
-						} else
-						{
-							Text(text = "Manual")
-							locationFinderAuto.stopLocationUpdates()
+						} ,
+						subtitle = {
+							if (storage.value)
+							{
+								Text(text = cityname.value)
+							}
+						} ,
+						onCheckedChange = {
+							storage.value = it
 						}
-					} ,
-					subtitle = {
-						if (storage.value)
-						{
-							Text(text = cityname.value)
-						}
-					} ,
-					onCheckedChange = {
-						storage.value = it
-					}
-						  )
+							  )
+			}
 			if (! storage.value)
 			{
-				ManualLocationInput()
-				CoordinatesView()
+				ElevatedCard(
+						modifier = Modifier
+							.padding(8.dp)
+							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+							.fillMaxWidth()
+							) {
+					ManualLocationInput()
+				}
+					CoordinatesView()
 			}
 		}
 		ElevatedCard(
