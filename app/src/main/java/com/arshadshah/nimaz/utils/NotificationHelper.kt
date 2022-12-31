@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.utils
 
+import android.app.Notification
 import android.app.Notification.VISIBILITY_PUBLIC
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -149,7 +150,7 @@ class NotificationHelper {
 
         val builder =
             NotificationCompat.Builder(context, channel_id).apply {
-                setSmallIcon(R.drawable.ic_prayer)
+                setSmallIcon(R.mipmap.ic_launcher)
                 setContentTitle("$title at $timeFormated")
                 if (title == "Test Adhan") {
                     setContentText("This is a test Adhan")
