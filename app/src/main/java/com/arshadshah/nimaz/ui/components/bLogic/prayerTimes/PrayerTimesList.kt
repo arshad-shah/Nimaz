@@ -49,6 +49,7 @@ fun PrayerTimesList(
 			sharedPreferences.removeData("asr")
 			sharedPreferences.removeData("maghrib")
 			sharedPreferences.removeData("isha")
+			sharedPreferences.removeData("currentPrayer")
 
 			val prayerTimes = prayerTimesState.prayerTimes
 			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
@@ -66,6 +67,7 @@ fun PrayerTimesList(
 			sharedPreferences.saveData("asr", prayerTimes.asr.toString())
 			sharedPreferences.saveData("maghrib", prayerTimes.maghrib.toString())
 			sharedPreferences.saveData("isha", prayerTimes.isha.toString())
+			sharedPreferences.saveData("currentPrayer", prayerTimes.currentPrayer!!.name)
 
 
 			if (!alarmLock)

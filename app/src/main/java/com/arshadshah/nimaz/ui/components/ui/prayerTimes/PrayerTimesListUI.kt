@@ -34,7 +34,6 @@ fun PrayerTimesListUI(
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(paddingValues)
 				.padding(vertical = 8.dp)
 				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
