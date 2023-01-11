@@ -1,0 +1,188 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/app_widget_background"
+    android:clickable="true"
+    android:focusable="true"
+    android:theme="@style/Theme.Nimaz"
+    android:baselineAligned="false">
+
+    <LinearLayout
+        android:id="@+id/fajrwidgethighlight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.2"
+        android:background="@drawable/app_widget_inner_view_background"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/fajr"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/Fajr_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/fajr_time"
+            android:textColor="#C5E1A5"
+            android:textSize="14sp"
+            tools:text="3:46 am" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/zuharwidgethighlight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
+        android:background="@drawable/app_widget_inner_view_background"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/zuhar"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/Zuhar_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/Zuhar_time"
+            android:textColor="#C5E1A5"
+            android:textSize="14sp"
+            tools:text="3:46 am" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/asarwidgethighlight"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
+        android:background="@drawable/app_widget_inner_view_background"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/asar"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/Asar_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/Asar_time"
+            android:textColor="#C5E1A5"
+            android:textSize="14sp"
+            tools:text="3:46 am" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/maghribwidgethighlight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
+        android:background="@drawable/app_widget_inner_view_background"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/maghrib"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/Maghrib_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/Maghrib_time"
+            android:textColor="#C5E1A5"
+            android:textSize="14sp"
+            tools:text="3:46 am" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ishaawidgethighlight"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
+        android:background="@drawable/app_widget_inner_view_background"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/ishaa"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/Ishaa_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:fontFamily="@font/nunito"
+            android:text="@string/Ishaa_time"
+            android:textColor="#C5E1A5"
+            android:textSize="14sp"
+            tools:text="10:46 am" />
+    </LinearLayout>
+
+</LinearLayout>

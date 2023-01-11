@@ -34,7 +34,7 @@ class SettingsActivity : ComponentActivity()
 										navController.addOnDestinationChangedListener { _ , destination , _ ->
 											route.value = destination.route
 										}
-										Text(text = if (route.value == "settings") "Settings" else "Prayer Times Customizations" ,
+										Text(text = processPageTitle(route.value.toString()),
 											 style = MaterialTheme.typography.titleLarge)
 									} ,
 									navigationIcon = {
@@ -61,6 +61,17 @@ class SettingsActivity : ComponentActivity()
 					SettingsNavGraph(navController = navController , it)
 				}
 			}
+		}
+	}
+
+	fun processPageTitle(route : String) : String
+	{
+		return when (route)
+		{
+			"settings" -> "Settings"
+			"about" -> "About"
+			"PrayerTimesCustomizations" -> "Prayer Times Customization"
+			else -> "Settings"
 		}
 	}
 }

@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.arshadshah.nimaz.ui.screens.settings.About
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 
@@ -20,11 +21,20 @@ fun SettingsNavGraph(navController : NavController , paddingValues : PaddingValu
 			startDestination = "settings"
 		   ) {
 		composable("settings") {
-			SettingsScreen(onNavigateToPrayerTimeCustomizationScreen = {
+			SettingsScreen(
+			onNavigateToPrayerTimeCustomizationScreen = {
 				navController.navigate(
 						"PrayerTimesCustomizations"
 									  )
+			} ,
+			onNavigateToAboutScreen = {
+				navController.navigate(
+						"about"
+									  )
 			} , paddingValues)
+		}
+		composable("about") {
+			About(paddingValues)
 		}
 		composable("PrayerTimesCustomizations") {
 			PrayerTimesCustomizations(paddingValues)

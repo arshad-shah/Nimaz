@@ -79,6 +79,9 @@ object PermissionUtils
 			.setPositiveButton(context.getString(R.string.enable_now)) { _ , _ ->
 				context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 			}
+			.setNegativeButton(context.getString(R.string.cancel)) { dialog , _ ->
+				dialog.dismiss()
+			}
 			.show()
 	}
 
@@ -101,6 +104,9 @@ object PermissionUtils
 							   ) ,
 						requestId
 												 )
+			}
+			.setNegativeButton(context.getString(R.string.cancel)) { dialog , _ ->
+				dialog.dismiss()
 			}
 			.show()
 	}

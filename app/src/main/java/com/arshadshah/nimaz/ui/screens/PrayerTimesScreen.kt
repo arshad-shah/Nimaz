@@ -7,10 +7,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.CurrentNextPrayerContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
+import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.FeatureCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 
@@ -32,9 +33,11 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 
 	Column(
 			modifier = Modifier
-				.fillMaxSize()
-				.padding(8.dp)
-				.wrapContentSize(Alignment.Center) ,
+					.fillMaxSize()
+					.padding(paddingValues)
+					.padding(8.dp) ,
+			horizontalAlignment = Alignment.CenterHorizontally ,
+			verticalArrangement = Arrangement.SpaceEvenly
 		  ) {
 		// Calling the LocationTimeContainer composable
 		LocationTimeContainer(state = locationState)
@@ -42,10 +45,16 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 		// Calling the DatesContainer composable
 		DatesContainer()
 
-		// Calling the CurrentNextPrayerContainer composable
-		CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
-
 		// Calling the PrayerTimesList composable
-		PrayerTimesList(state = state , paddingValues = paddingValues)
+		PrayerTimesList(state = state ,timerState = timerState,viewModel = viewModel, paddingValues = paddingValues)
+
+		FeatureCard()
 	}
+}
+
+@Preview
+@Composable
+fun PrayerTimesScreenPreview()
+{
+	PrayerTimesScreen(paddingValues = PaddingValues(0.dp))
 }

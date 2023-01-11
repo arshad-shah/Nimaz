@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
-import com.arshadshah.nimaz.ui.components.ui.quran.Verses
+import com.arshadshah.nimaz.ui.components.ui.quran.Page
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
 
@@ -47,7 +47,7 @@ fun AyaSurahList(
 						  language = language)
 			} else
 			{
-				Verses(ayatSurahListState.data , paddingValues)
+				Page(ayatSurahListState.data , paddingValues)
 			}
 		}
 

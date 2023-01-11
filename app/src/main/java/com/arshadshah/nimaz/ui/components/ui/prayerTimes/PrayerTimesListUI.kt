@@ -3,12 +3,19 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.theme.NimazTheme
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.arshadshah.nimaz.data.remote.models.CountDownTime
+import com.arshadshah.nimaz.data.remote.models.PrayerTimes
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -18,13 +25,16 @@ fun PrayerTimesListUI(
 	modifier : Modifier = Modifier ,
 	prayerTimesMap : Map<String , LocalDateTime?> ,
 	name : String ,
+	timerState : LiveData<CountDownTime> ,
+	viewModel : PrayerTimesViewModel ,
+	prayertimes : PrayerTimes? ,
 	paddingValues : PaddingValues ,
 					 )
 {
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(paddingValues)
+				.padding(vertical = 8.dp)
 				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		Column {
@@ -45,7 +55,10 @@ fun PrayerTimesListUI(
 				PrayerTimesRow(
 						prayerName = key ,
 						prayerTime = value ,
-						isHighlighted = isHighlighted
+						isHighlighted = isHighlighted ,
+						timerState = timerState ,
+						prayertimes = prayertimes ,
+						viewmodel = viewModel
 							  )
 			}
 		}
@@ -54,8 +67,22 @@ fun PrayerTimesListUI(
 
 //the row for the prayer times
 @Composable
-fun PrayerTimesRow(prayerName : String , prayerTime : LocalDateTime? , isHighlighted : Boolean)
+fun PrayerTimesRow(
+	prayerName : String ,
+	prayerTime : LocalDateTime? ,
+	isHighlighted : Boolean ,
+	timerState : LiveData<CountDownTime>? ,
+	prayertimes : PrayerTimes? ,
+	viewmodel : PrayerTimesViewModel?
+				  )
 {
+	var countDownTime by remember { mutableStateOf(CountDownTime(0 , 0 , 0)) }
+	LaunchedEffect(key1 = timerState) {
+		timerState?.observeForever {
+			countDownTime = it
+		}
+	}
+	val context = LocalContext.current
 	//format the date to time based on device format
 	val formatter = DateTimeFormatter.ofPattern("hh:mm a")
 	val sentenceCase =
@@ -63,6 +90,7 @@ fun PrayerTimesRow(prayerName : String , prayerTime : LocalDateTime? , isHighlig
 			.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
 	Row(
 			horizontalArrangement = Arrangement.SpaceBetween ,
+			verticalAlignment = Alignment.CenterVertically ,
 			modifier = if (isHighlighted)
 			{
 				Modifier
@@ -77,6 +105,22 @@ fun PrayerTimesRow(prayerName : String , prayerTime : LocalDateTime? , isHighlig
 		Text(text = sentenceCase ,
 			 modifier = Modifier.padding(16.dp) ,
 			 style = MaterialTheme.typography.titleLarge)
+		if (isHighlighted){
+			val timeToNextPrayerLong =
+				prayertimes?.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())?.toInstant()
+					?.toEpochMilli()
+			val currentTime =
+				LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
+					.toEpochMilli()
+			val difference = timeToNextPrayerLong?.minus(currentTime)
+			viewmodel?.startTimer(context , difference !!)
+			Text(
+					modifier = Modifier.padding(16.dp),
+					text = " -${countDownTime.hours} : ${countDownTime.minutes} : ${countDownTime.seconds}" ,
+					textAlign = TextAlign.Center ,
+					style = MaterialTheme.typography.titleSmall
+				)
+		}
 		Text(
 				text = prayerTime !!.format(formatter) ,
 				modifier = Modifier.padding(16.dp) ,
@@ -93,23 +137,16 @@ fun getHighlightRow(prayerName : String , name : String) : Boolean
 	return prayerName == prayerNameLower
 }
 
-
 @Preview
 @Composable
-fun PrayerTimesListUIPreview()
+fun PrayerTimesRowPreview()
 {
-	NimazTheme {
-		PrayerTimesListUI(
-				prayerTimesMap = mapOf(
-						"fajr" to LocalDateTime.now() ,
-						"sunrise" to LocalDateTime.now() ,
-						"dhuhr" to LocalDateTime.now() ,
-						"asr" to LocalDateTime.now() ,
-						"maghrib" to LocalDateTime.now() ,
-						"isha" to LocalDateTime.now()
-									  ) ,
-				name = "fajr" ,
-				paddingValues = PaddingValues(16.dp)
-						 )
-	}
+	PrayerTimesRow(
+			prayerName = "FAJR" ,
+			prayerTime = LocalDateTime.now() ,
+			isHighlighted = true ,
+			timerState = null ,
+			prayertimes = null ,
+			viewmodel = null
+				  )
 }
