@@ -29,14 +29,25 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
         <receiver
+            android:name=".widgets.Nimaz"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/nimaz_info" />
+        </receiver>
+        <receiver
             android:name=".utils.recievers.BootReciever"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
-        <intent-filter>
-            <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-            <action android:name="android.intent.action.BOOT_COMPLETED" />
-        </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
         </receiver>
         <receiver
             android:name=".utils.recievers.ResetAdhansReciever"

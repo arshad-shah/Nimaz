@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.activities
 
 import android.app.NotificationManager
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -20,6 +22,8 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
+import com.arshadshah.nimaz.widgets.Nimaz
+import com.arshadshah.nimaz.widgets.updateAppWidget
 
 class MainActivity : ComponentActivity()
 {
@@ -29,6 +33,18 @@ class MainActivity : ComponentActivity()
 	override fun onCreate(savedInstanceState : Bundle?)
 	{
 		this.actionBar?.hide()
+
+		val appWidgetManager = AppWidgetManager.getInstance(this)
+		val appWidgetIds : IntArray = appWidgetManager.getAppWidgetIds(
+				ComponentName(
+						this ,
+						Nimaz::class.java
+							 )
+																	  )
+		for (appWidgetId in appWidgetIds)
+		{
+			updateAppWidget(this , appWidgetManager , appWidgetId)
+		}
 		super.onCreate(savedInstanceState)
 		val notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 		//this is used to show the full activity on the screen

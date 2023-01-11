@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
-import android.app.NotificationManager
-import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,11 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.LiveData
+import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.ListSkeletonLoader
 import com.arshadshah.nimaz.ui.components.ui.loaders.loadingShimmerEffect
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
-import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import es.dmoral.toasty.Toasty
@@ -26,6 +25,8 @@ fun PrayerTimesList(
 	modifier : Modifier = Modifier ,
 	state : State<PrayerTimesViewModel.PrayerTimesState> ,
 	paddingValues : PaddingValues ,
+	timerState : LiveData<CountDownTime> ,
+	viewModel : PrayerTimesViewModel ,
 				   )
 {
 	val context = LocalContext.current
@@ -73,10 +74,13 @@ fun PrayerTimesList(
 				sharedPreferences.saveDataBoolean("alarmLock", true)
 			}
 
-			prayerTimes.currentPrayer?.let {
+			prayerTimes.nextPrayer?.let {
 				PrayerTimesListUI(modifier ,
 								  prayerTimesMap ,
 								  it.name ,
+								  timerState,
+								  viewModel,
+								  prayerTimesState.prayerTimes,
 								  paddingValues)
 			}
 		}
@@ -85,7 +89,13 @@ fun PrayerTimesList(
 		{
 			//empty map to avoid null pointer exception
 			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
-			PrayerTimesListUI(modifier , prayerTimesMap , "No connection" , paddingValues)
+			PrayerTimesListUI(modifier ,
+							  prayerTimesMap ,
+							  "No connection" ,
+							  timerState ,
+							  viewModel ,
+							  null ,
+							  paddingValues)
 
 			Log.e("PrayerTimesList" , "Error: ${prayerTimesState.errorMessage}")
 
