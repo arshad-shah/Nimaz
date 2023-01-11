@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.CurrentNextPrayerContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
@@ -42,10 +41,7 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 		// Calling the DatesContainer composable
 		DatesContainer()
 
-		// Calling the CurrentNextPrayerContainer composable
-		CurrentNextPrayerContainer(state = state , timerState = timerState , viewModel = viewModel)
-
 		// Calling the PrayerTimesList composable
-		PrayerTimesList(state = state , paddingValues = paddingValues)
+		PrayerTimesList(state = state ,timerState = timerState,viewModel = viewModel, paddingValues = paddingValues)
 	}
 }

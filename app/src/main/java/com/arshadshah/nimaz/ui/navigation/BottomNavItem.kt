@@ -13,7 +13,6 @@ import compose.icons.feathericons.Settings
 sealed class BottomNavItem(var title : String , var icon : ImageVector , var screen_route : String)
 {
 	//today
-	object TodayScreen : BottomNavItem("Today" , FeatherIcons.Calendar , "today")
 	object PrayerTimesScreen :
 		BottomNavItem("Prayer" , Icons.Prayer , "prayer_times_screen")
 	object QiblaScreen : BottomNavItem("Qibla" , FeatherIcons.Compass , "qibla_screen")
