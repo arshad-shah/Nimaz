@@ -18,19 +18,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.delay
 
 @Composable
 fun LocationTimeContainerUI(location : String)
 {
-	val (time , setTime) = remember { mutableStateOf(System.currentTimeMillis()) }
-	LaunchedEffect(true) {
-		while (true)
-		{
-			setTime(System.currentTimeMillis())
-			delay(DateUtils.SECOND_IN_MILLIS)
-		}
-	}
+	val context = LocalContext.current
+	val sharedPreferences = PrivateSharedPreferences(context)
 	ElevatedCard(
 			modifier = Modifier
 				.padding(vertical = 8.dp , horizontal = 0.dp)
@@ -63,10 +58,8 @@ fun LocationTimeContainerUI(location : String)
 					modifier = Modifier
 						.weight(0.5f)
 						.padding(8.dp) ,
-					heading = "Time" ,
-					text = DateUtils.formatDateTime(LocalContext.current ,
-													time ,
-													DateUtils.FORMAT_SHOW_TIME)
+					heading = "Current Prayer" ,
+					text = sharedPreferences.getData("currentPrayer" , "Fajr").lowercase().replaceFirstChar { it.uppercase() }
 					  )
 		}
 	}
