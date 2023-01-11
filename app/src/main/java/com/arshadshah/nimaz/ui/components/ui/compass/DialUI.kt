@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +24,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.bLogic.compass.SensorData
+import com.arshadshah.nimaz.ui.components.ui.icons.Dot
+import com.arshadshah.nimaz.ui.components.ui.icons.QiblaCompassMain
 import kotlin.math.abs
 
 @SuppressLint("UnrememberedMutableState")
@@ -56,7 +59,7 @@ fun DialUI(bearing : Double , data : SensorData?)
 		}
 
 		Icon(
-				painter = painterResource(id = com.arshadshah.nimaz.R.drawable.ic_dot) ,
+				imageVector = Icons.Dot ,
 				contentDescription = "dot" ,
 				modifier = Modifier
 					.fillMaxWidth()
@@ -66,7 +69,7 @@ fun DialUI(bearing : Double , data : SensorData?)
 			)
 		//the dial
 		Image(
-				painter = painterResource(id = com.arshadshah.nimaz.R.drawable.ic_qibla_compass) ,
+				imageVector = Icons.QiblaCompassMain ,
 				contentDescription = "Compass" ,
 				modifier = Modifier
 					.rotate(rotateAnim.value)

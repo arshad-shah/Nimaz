@@ -28,12 +28,11 @@ class SplashActivity : ComponentActivity()
 
 		super.onCreate(savedInstanceState)
 		lifecycleScope.launchWhenCreated {
-			delay(2000)
+			delay(1000)
 			val loginToken =
 				NimazServicesImpl.login(AppConstants.USER_USERNAME , AppConstants.USER_PASSWORD)
 			val sharedPref = PrivateSharedPreferences(this@SplashActivity)
 			sharedPref.saveData(AppConstants.LOGIN_TOKEN , loginToken.token)
-			Log.d("SplashActivity" , "onCreate: $loginToken")
 
 			val intent = Intent(this@SplashActivity , MainActivity::class.java)
 			startActivity(intent)

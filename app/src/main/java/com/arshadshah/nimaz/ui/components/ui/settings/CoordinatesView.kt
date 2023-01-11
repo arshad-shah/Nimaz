@@ -1,8 +1,15 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
@@ -16,12 +23,26 @@ fun CoordinatesView()
 	val latitudeRounded = String.format("%.4f" , latitude)
 	val longitudeRounded = String.format("%.4f" , longitude)
 
-	SettingsMenuLink(
-			title = { Text(text = "Latitude") } ,
-			subtitle = { Text(text = latitudeRounded) } ,
-			onClick = {})
-	SettingsMenuLink(
-			title = { Text(text = "Longitude") } ,
-			subtitle = { Text(text = longitudeRounded) } ,
-			onClick = {})
+	ElevatedCard(
+			modifier = Modifier
+				.padding(8.dp)
+				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+				.fillMaxWidth()
+				) {
+		SettingsMenuLink(
+				title = { Text(text = "Latitude") } ,
+				subtitle = { Text(text = latitudeRounded) } ,
+				onClick = {})
+	}
+	ElevatedCard(
+			modifier = Modifier
+				.padding(8.dp)
+				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+				.fillMaxWidth()
+				) {
+		SettingsMenuLink(
+				title = { Text(text = "Longitude") } ,
+				subtitle = { Text(text = longitudeRounded) } ,
+				onClick = {})
+	}
 }
