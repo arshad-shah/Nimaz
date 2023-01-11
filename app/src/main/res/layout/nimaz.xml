@@ -1,4 +1,4 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget"
@@ -7,19 +7,17 @@
     android:background="@drawable/app_widget_background"
     android:clickable="true"
     android:focusable="true"
-    android:theme="@style/Theme.Nimaz">
+    android:theme="@style/Theme.Nimaz"
+    android:baselineAligned="false">
 
     <LinearLayout
         android:id="@+id/fajrwidgethighlight"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
         android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -30,7 +28,7 @@
             android:fontFamily="@font/nunito"
             android:text="@string/fajr"
             android:textColor="#000000"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -41,23 +39,20 @@
             android:layout_margin="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/fajr_time"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
-            android:textStyle="bold"
             tools:text="3:46 am" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/zuharwidgethighlight"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
         android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/fajrwidgethighlight"
-        app:layout_constraintTop_toTopOf="@+id/fajrwidgethighlight">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -68,7 +63,7 @@
             android:fontFamily="@font/nunito"
             android:text="@string/zuhar"
             android:textColor="#000000"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -79,23 +74,20 @@
             android:layout_margin="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Zuhar_time"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
-            android:textStyle="bold"
             tools:text="3:46 am" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/asarwidgethighlight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
         android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/zuharwidgethighlight"
-        app:layout_constraintTop_toTopOf="@+id/zuharwidgethighlight">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -106,7 +98,7 @@
             android:fontFamily="@font/nunito"
             android:text="@string/asar"
             android:textColor="#000000"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -117,23 +109,20 @@
             android:layout_margin="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Asar_time"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
-            android:textStyle="bold"
             tools:text="3:46 am" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/maghribwidgethighlight"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
         android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/asarwidgethighlight"
-        app:layout_constraintTop_toTopOf="@+id/asarwidgethighlight">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -144,7 +133,7 @@
             android:fontFamily="@font/nunito"
             android:text="@string/maghrib"
             android:textColor="#000000"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -155,26 +144,21 @@
             android:layout_margin="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Maghrib_time"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
-            android:textStyle="bold"
             tools:text="3:46 am" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ishaawidgethighlight"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="1dp"
+        android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
         android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/maghribwidgethighlight"
-        app:layout_constraintTop_toTopOf="@+id/maghribwidgethighlight">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -185,7 +169,7 @@
             android:fontFamily="@font/nunito"
             android:text="@string/ishaa"
             android:textColor="#000000"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -196,10 +180,9 @@
             android:layout_margin="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Ishaa_time"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
-            android:textStyle="bold"
             tools:text="10:46 am" />
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
