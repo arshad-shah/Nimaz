@@ -29,114 +29,116 @@ fun AuthorDetails()
 	//it is created as part of my final year project for my BSc in Computer Science.
 	//it is a free and open source project that I hope will be useful to many people. I hope you enjoy it.
 	ElevatedCard(
-		modifier = Modifier
-			.padding(8.dp)
-			.fillMaxWidth() ,
-		shape = RoundedCornerShape(8.dp) ,
-		content = {
-			Column(
-					modifier = Modifier
-						.padding(16.dp)
-						.fillMaxWidth() ,
-				  ) {
-				Text(
-						modifier = Modifier.fillMaxWidth() ,
-						text = "Author Details" ,
-						style = MaterialTheme.typography.titleLarge ,
-						textAlign = TextAlign.Center
-					)
-				Divider(
-						modifier = Modifier.padding(8.dp) ,
-						color = MaterialTheme.colorScheme.outline,
-						thickness = 1.dp
-					)
-				AuthorCustomText(
-						rowModifier = Modifier.padding(8.dp) ,
-						labelModifier = Modifier.fillMaxWidth(0.3f) ,
-						textModifier = Modifier.fillMaxWidth() ,
-						label = "Designed By:" ,
-						text = "Arshad Shah",
-						labelStyle = MaterialTheme.typography.labelLarge ,
-						textStyle = MaterialTheme.typography.bodyMedium
-					)
-				AuthorCustomText(
-						rowModifier = Modifier.padding(8.dp) ,
-						labelModifier = Modifier.fillMaxWidth(0.3f) ,
-						textModifier = Modifier.fillMaxWidth() ,
-						label = "Developed By:" ,
-						text = "Arshad Shah",
-						labelStyle = MaterialTheme.typography.labelLarge ,
-						textStyle = MaterialTheme.typography.bodyMedium
-								)
-				AuthorCustomText(
-						rowModifier = Modifier.padding(8.dp) ,
-						labelModifier = Modifier.fillMaxWidth(0.3f) ,
-						textModifier = Modifier.fillMaxWidth() ,
-						label = "Occupation:" ,
-						text = "Associate Software Engineer",
-						labelStyle = MaterialTheme.typography.labelLarge ,
-						textStyle = MaterialTheme.typography.bodyMedium
-								)
-				AuthorCustomText(
-						rowModifier = Modifier.padding(8.dp) ,
-						labelModifier = Modifier.fillMaxWidth(0.3f) ,
-						textModifier = Modifier.fillMaxWidth() ,
-						label = "Company:" ,
-						text = "HMHco \n(Houghton Mifflin Harcourt)",
-						labelStyle = MaterialTheme.typography.labelLarge ,
-						textStyle = MaterialTheme.typography.bodyMedium
-								)
-				Divider(
-						modifier = Modifier.padding(8.dp) ,
-						color = MaterialTheme.colorScheme.outline,
-						thickness = 1.dp
-					)
-				//links
-				Text(
-						modifier = Modifier.fillMaxWidth() ,
-						text = "Links" ,
-						style = MaterialTheme.typography.titleLarge ,
-						textAlign = TextAlign.Center
-					)
-				AuthorLinks()
-				Divider(
-						modifier = Modifier.padding(8.dp) ,
-						color = MaterialTheme.colorScheme.outline,
-						thickness = 1.dp
-					)
-				Text(
-						modifier = Modifier.padding(8.dp) ,
-						text = "Loves to code, create, and learn new things." ,
-						style = MaterialTheme.typography.bodyMedium ,
-					)
-				Text(
-						modifier = Modifier.padding(8.dp) ,
-						text = "Nimaz is a project that I created to learn more about Android development and to help others learn about Islam." ,
-						style = MaterialTheme.typography.bodyMedium ,
-					)
-				Text(
-						modifier = Modifier.padding(8.dp) ,
-						text = "It is created as part of my final year project for my BSc in Computer Science." ,
-						style = MaterialTheme.typography.bodyMedium ,
-					)
-				Text(
-						modifier = Modifier.padding(8.dp) ,
-						text = "It is a free, Ad-free and open source project that I hope will be useful to many people.I hope you enjoy it." ,
-						style = MaterialTheme.typography.bodyMedium ,
-					)
-			}
-		} ,
-	)
+			modifier = Modifier
+				.padding(8.dp)
+				.fillMaxWidth() ,
+			shape = RoundedCornerShape(8.dp) ,
+			content = {
+				Column(
+						modifier = Modifier
+							.padding(16.dp)
+							.fillMaxWidth() ,
+					  ) {
+					Text(
+							modifier = Modifier.fillMaxWidth() ,
+							text = "Author Details" ,
+							style = MaterialTheme.typography.titleLarge ,
+							textAlign = TextAlign.Center
+						)
+					Divider(
+							modifier = Modifier.padding(8.dp) ,
+							color = MaterialTheme.colorScheme.outline ,
+							thickness = 1.dp
+						   )
+					AuthorCustomText(
+							rowModifier = Modifier.padding(8.dp) ,
+							labelModifier = Modifier.fillMaxWidth(0.3f) ,
+							textModifier = Modifier.fillMaxWidth() ,
+							label = "Designed By:" ,
+							text = "Arshad Shah" ,
+							labelStyle = MaterialTheme.typography.labelLarge ,
+							textStyle = MaterialTheme.typography.bodyMedium
+									)
+					AuthorCustomText(
+							rowModifier = Modifier.padding(8.dp) ,
+							labelModifier = Modifier.fillMaxWidth(0.3f) ,
+							textModifier = Modifier.fillMaxWidth() ,
+							label = "Developed By:" ,
+							text = "Arshad Shah" ,
+							labelStyle = MaterialTheme.typography.labelLarge ,
+							textStyle = MaterialTheme.typography.bodyMedium
+									)
+					AuthorCustomText(
+							rowModifier = Modifier.padding(8.dp) ,
+							labelModifier = Modifier.fillMaxWidth(0.3f) ,
+							textModifier = Modifier.fillMaxWidth() ,
+							label = "Occupation:" ,
+							text = "Associate Software Engineer" ,
+							labelStyle = MaterialTheme.typography.labelLarge ,
+							textStyle = MaterialTheme.typography.bodyMedium
+									)
+					AuthorCustomText(
+							rowModifier = Modifier.padding(8.dp) ,
+							labelModifier = Modifier.fillMaxWidth(0.3f) ,
+							textModifier = Modifier.fillMaxWidth() ,
+							label = "Company:" ,
+							text = "HMHco \n(Houghton Mifflin Harcourt)" ,
+							labelStyle = MaterialTheme.typography.labelLarge ,
+							textStyle = MaterialTheme.typography.bodyMedium
+									)
+					Divider(
+							modifier = Modifier.padding(8.dp) ,
+							color = MaterialTheme.colorScheme.outline ,
+							thickness = 1.dp
+						   )
+					//links
+					Text(
+							modifier = Modifier.fillMaxWidth() ,
+							text = "Links" ,
+							style = MaterialTheme.typography.titleLarge ,
+							textAlign = TextAlign.Center
+						)
+					AuthorLinks()
+					Divider(
+							modifier = Modifier.padding(8.dp) ,
+							color = MaterialTheme.colorScheme.outline ,
+							thickness = 1.dp
+						   )
+					Text(
+							modifier = Modifier.padding(8.dp) ,
+							text = "Loves to code, create, and learn new things." ,
+							style = MaterialTheme.typography.bodyMedium ,
+						)
+					Text(
+							modifier = Modifier.padding(8.dp) ,
+							text = "Nimaz is a project that I created to learn more about Android development and to help others learn about Islam." ,
+							style = MaterialTheme.typography.bodyMedium ,
+						)
+					Text(
+							modifier = Modifier.padding(8.dp) ,
+							text = "It is created as part of my final year project for my BSc in Computer Science." ,
+							style = MaterialTheme.typography.bodyMedium ,
+						)
+					Text(
+							modifier = Modifier.padding(8.dp) ,
+							text = "It is a free, Ad-free and open source project that I hope will be useful to many people.I hope you enjoy it." ,
+							style = MaterialTheme.typography.bodyMedium ,
+						)
+				}
+			} ,
+				)
 }
 
 @Composable
-fun AuthorCustomText(rowModifier: Modifier,
-					 labelModifier: Modifier,
-					 textModifier:Modifier,
-					 label: String ,
-					 text : String,
-					 labelStyle: TextStyle,
-					 textStyle: TextStyle)
+fun AuthorCustomText(
+	rowModifier : Modifier ,
+	labelModifier : Modifier ,
+	textModifier : Modifier ,
+	label : String ,
+	text : String ,
+	labelStyle : TextStyle ,
+	textStyle : TextStyle ,
+					)
 {
 	Row(
 			modifier = rowModifier ,
@@ -152,7 +154,7 @@ fun AuthorCustomText(rowModifier: Modifier,
 						style = textStyle ,
 					)
 			}
-		)
+	   )
 }
 
 

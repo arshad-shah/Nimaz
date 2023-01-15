@@ -103,8 +103,11 @@ fun SettingsList(
 													role = Role.RadioButton ,
 													selected = isSelected ,
 													onClick = {
-														if (! isSelected) onSelected(items.keys.indexOf(
-																s))
+														if (! isSelected) onSelected(
+																items.keys.indexOf(
+																		s
+																				  )
+																					)
 													}
 													   ) ,
 										verticalAlignment = Alignment.CenterVertically

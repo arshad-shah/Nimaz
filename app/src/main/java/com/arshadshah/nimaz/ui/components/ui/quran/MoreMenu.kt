@@ -49,21 +49,24 @@ fun MoreMenu(
 					//then show a toast message
 					if (pageTypeState.value == "Page (Experimental)")
 					{
-						Toasty.info(context ,
-									"Translation is disabled for Page View" ,
-									Toasty.LENGTH_SHORT ,
-									true).show()
+						Toasty.info(
+								context ,
+								"Translation is disabled for Page View" ,
+								Toasty.LENGTH_SHORT ,
+								true
+								   ).show()
 					} else
 					{
 						setShowDialog2(true)
 						setMenuOpen(false)
 					}
 				} , text = {
-					Text(text = "Translation"
+					Text(
+							text = "Translation"
 							//if page type is page then show text color as grey
 							//else show it as black
-						 ,
-						 color = if (pageTypeState.value == "Page (Experimental)") Color.Gray else MaterialTheme.colorScheme.onBackground
+							,
+							color = if (pageTypeState.value == "Page (Experimental)") Color.Gray else MaterialTheme.colorScheme.onBackground
 						)
 				})
 			}

@@ -31,7 +31,7 @@ fun PrayerTimesList(
 {
 	val context = LocalContext.current
 	val sharedPreferences = PrivateSharedPreferences(context)
-	val alarmLock = sharedPreferences.getDataBoolean("alarmLock", false)
+	val alarmLock = sharedPreferences.getDataBoolean("alarmLock" , false)
 	when (val prayerTimesState = state.value)
 	{
 		is PrayerTimesViewModel.PrayerTimesState.Loading ->
@@ -61,29 +61,39 @@ fun PrayerTimesList(
 			prayerTimesMap["isha"] = prayerTimes.isha
 
 			//save the prayer times in shared preferences
-			sharedPreferences.saveData("fajr", prayerTimes.fajr.toString())
-			sharedPreferences.saveData("sunrise", prayerTimes.sunrise.toString())
-			sharedPreferences.saveData("dhuhr", prayerTimes.dhuhr.toString())
-			sharedPreferences.saveData("asr", prayerTimes.asr.toString())
-			sharedPreferences.saveData("maghrib", prayerTimes.maghrib.toString())
-			sharedPreferences.saveData("isha", prayerTimes.isha.toString())
-			sharedPreferences.saveData("currentPrayer", prayerTimes.currentPrayer!!.name)
+			sharedPreferences.saveData("fajr" , prayerTimes.fajr.toString())
+			sharedPreferences.saveData("sunrise" , prayerTimes.sunrise.toString())
+			sharedPreferences.saveData("dhuhr" , prayerTimes.dhuhr.toString())
+			sharedPreferences.saveData("asr" , prayerTimes.asr.toString())
+			sharedPreferences.saveData("maghrib" , prayerTimes.maghrib.toString())
+			sharedPreferences.saveData("isha" , prayerTimes.isha.toString())
+			sharedPreferences.saveData("currentPrayer" , prayerTimes.currentPrayer !!.name)
 
 
-			if (!alarmLock)
+			if (! alarmLock)
 			{
-				CreateAlarms().exact(context , prayerTimes.fajr!!,prayerTimes.sunrise!!,prayerTimes.dhuhr!!,prayerTimes.asr!!,prayerTimes.maghrib!!,prayerTimes.isha!!)
-				sharedPreferences.saveDataBoolean("alarmLock", true)
+				CreateAlarms().exact(
+						context ,
+						prayerTimes.fajr !! ,
+						prayerTimes.sunrise !! ,
+						prayerTimes.dhuhr !! ,
+						prayerTimes.asr !! ,
+						prayerTimes.maghrib !! ,
+						prayerTimes.isha !!
+									)
+				sharedPreferences.saveDataBoolean("alarmLock" , true)
 			}
 
 			prayerTimes.nextPrayer?.let {
-				PrayerTimesListUI(modifier ,
-								  prayerTimesMap ,
-								  it.name ,
-								  timerState,
-								  viewModel,
-								  prayerTimesState.prayerTimes,
-								  paddingValues)
+				PrayerTimesListUI(
+						modifier ,
+						prayerTimesMap ,
+						it.name ,
+						timerState ,
+						viewModel ,
+						prayerTimesState.prayerTimes ,
+						paddingValues
+								 )
 			}
 		}
 
@@ -91,20 +101,24 @@ fun PrayerTimesList(
 		{
 			//empty map to avoid null pointer exception
 			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
-			PrayerTimesListUI(modifier ,
-							  prayerTimesMap ,
-							  "No connection" ,
-							  timerState ,
-							  viewModel ,
-							  null ,
-							  paddingValues)
+			PrayerTimesListUI(
+					modifier ,
+					prayerTimesMap ,
+					"No connection" ,
+					timerState ,
+					viewModel ,
+					null ,
+					paddingValues
+							 )
 
 			Log.e("PrayerTimesList" , "Error: ${prayerTimesState.errorMessage}")
 
-			Toasty.error(LocalContext.current ,
-						 prayerTimesState.errorMessage ,
-						 Toast.LENGTH_SHORT ,
-						 true).show()
+			Toasty.error(
+					LocalContext.current ,
+					prayerTimesState.errorMessage ,
+					Toast.LENGTH_SHORT ,
+					true
+						).show()
 		}
 	}
 }

@@ -1,9 +1,7 @@
 package com.arshadshah.nimaz.activities
 
-import android.app.NotificationManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,15 +11,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.Location
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.updateAppWidget
 
@@ -46,7 +41,6 @@ class MainActivity : ComponentActivity()
 			updateAppWidget(this , appWidgetManager , appWidgetId)
 		}
 		super.onCreate(savedInstanceState)
-		val notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 		//this is used to show the full activity on the screen
 		setContent {
 			NimazTheme {
