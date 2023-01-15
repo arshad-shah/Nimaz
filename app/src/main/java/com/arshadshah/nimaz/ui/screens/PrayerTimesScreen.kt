@@ -33,9 +33,9 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 
 	Column(
 			modifier = Modifier
-					.fillMaxSize()
-					.padding(paddingValues)
-					.padding(8.dp) ,
+				.fillMaxSize()
+				.padding(paddingValues)
+				.padding(8.dp) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.SpaceEvenly
 		  ) {
@@ -46,7 +46,12 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 		DatesContainer()
 
 		// Calling the PrayerTimesList composable
-		PrayerTimesList(state = state ,timerState = timerState,viewModel = viewModel, paddingValues = paddingValues)
+		PrayerTimesList(
+				state = state ,
+				timerState = timerState ,
+				viewModel = viewModel ,
+				paddingValues = paddingValues
+					   )
 
 		FeatureCard()
 	}

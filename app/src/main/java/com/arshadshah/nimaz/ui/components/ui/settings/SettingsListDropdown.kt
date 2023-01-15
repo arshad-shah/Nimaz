@@ -103,8 +103,10 @@ internal fun SettingsListDropdownPreview()
 				title = { Text(text = "Title") } ,
 				items = listOf("Item 1" , "Item 2" , "Item 3") ,
 				icon = {
-					Icon(imageVector = Icons.Outlined.ArrowDropDown ,
-						 contentDescription = null)
+					Icon(
+							imageVector = Icons.Outlined.ArrowDropDown ,
+							contentDescription = null
+						)
 				} ,
 				subtitle = { Text(text = "Subtitle") }
 							)

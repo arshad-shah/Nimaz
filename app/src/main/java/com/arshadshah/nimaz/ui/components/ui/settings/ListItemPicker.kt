@@ -92,9 +92,11 @@ fun <T> ListItemPicker(
 										adjustTarget = { target ->
 											val coercedTarget = target % halfNumbersColumnHeightPx
 											val coercedAnchors =
-												listOf(- halfNumbersColumnHeightPx ,
-													   0f ,
-													   halfNumbersColumnHeightPx)
+												listOf(
+														- halfNumbersColumnHeightPx ,
+														0f ,
+														halfNumbersColumnHeightPx
+													  )
 											val coercedPoint =
 												coercedAnchors.minByOrNull { abs(it - coercedTarget) } !!
 											val base =
@@ -104,10 +106,12 @@ fun <T> ListItemPicker(
 																   ).endState.value
 
 								val result = list.elementAt(
-										getItemIndexForOffset(list ,
-															  value ,
-															  endValue ,
-															  halfNumbersColumnHeightPx)
+										getItemIndexForOffset(
+												list ,
+												value ,
+												endValue ,
+												halfNumbersColumnHeightPx
+															 )
 														   )
 								onValueChange(result)
 								animatedOffset.snapTo(0f)
@@ -134,8 +138,12 @@ fun <T> ListItemPicker(
 									text = label(list.elementAt(indexOfElement - 1)) ,
 									modifier = baseLabelModifier
 										.offset(y = - halfNumbersColumnHeight)
-										.alpha(maxOf(minimumAlpha ,
-													 coercedAnimatedOffset / halfNumbersColumnHeightPx))
+										.alpha(
+												maxOf(
+														minimumAlpha ,
+														coercedAnimatedOffset / halfNumbersColumnHeightPx
+													 )
+											  )
 								 )
 						Label(
 								text = label(list.elementAt(indexOfElement)) ,
@@ -152,8 +160,12 @@ fun <T> ListItemPicker(
 									text = label(list.elementAt(indexOfElement + 1)) ,
 									modifier = baseLabelModifier
 										.offset(y = halfNumbersColumnHeight)
-										.alpha(maxOf(minimumAlpha ,
-													 - coercedAnimatedOffset / halfNumbersColumnHeightPx))
+										.alpha(
+												maxOf(
+														minimumAlpha ,
+														- coercedAnimatedOffset / halfNumbersColumnHeightPx
+													 )
+											  )
 								 )
 					}
 				}

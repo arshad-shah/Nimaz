@@ -6,7 +6,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arshadshah.nimaz.ui.components.bLogic.settings.AuthorDetails
-import com.arshadshah.nimaz.ui.components.bLogic.settings.AuthorLinks
 
 @Composable
 fun About(paddingValues : PaddingValues)
@@ -14,7 +13,9 @@ fun About(paddingValues : PaddingValues)
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
-				.padding(paddingValues).fillMaxWidth().fillMaxHeight()
+				.padding(paddingValues)
+				.fillMaxWidth()
+				.fillMaxHeight()
 		  ) {
 		AuthorDetails()
 	}

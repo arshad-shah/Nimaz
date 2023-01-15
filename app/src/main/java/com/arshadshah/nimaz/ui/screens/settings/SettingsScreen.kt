@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
@@ -22,10 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
@@ -38,9 +34,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
-import com.arshadshah.nimaz.utils.recievers.AdhanReciever
 import compose.icons.FeatherIcons
-import compose.icons.FontAwesomeIcons
 import compose.icons.feathericons.Clock
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
@@ -60,9 +54,11 @@ fun SettingsScreen(
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
-	Column(modifier = Modifier
-		.verticalScroll(rememberScrollState() , true)
-		.padding(paddingValues)) {
+	Column(
+			modifier = Modifier
+				.verticalScroll(rememberScrollState() , true)
+				.padding(paddingValues)
+		  ) {
 		SettingsGroup(title = { Text(text = "Location") }) {
 			val storage =
 				rememberPreferenceBooleanSettingState("location_auto" , true)
@@ -116,7 +112,7 @@ fun SettingsScreen(
 							) {
 					ManualLocationInput()
 				}
-					CoordinatesView()
+				CoordinatesView()
 			}
 		}
 		ElevatedCard(
@@ -130,7 +126,7 @@ fun SettingsScreen(
 					onClick = onNavigateToPrayerTimeCustomizationScreen ,
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.Clock,
+								imageVector = FeatherIcons.Clock ,
 								contentDescription = "Clock"
 							)
 					} ,
@@ -140,12 +136,12 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			//get all the prayer times from the shared preferences
-			val fajr = LocalDateTime.parse(sharedPreferences.getData("fajr", "00:00"))
-			val sunrise = LocalDateTime.parse(sharedPreferences.getData("sunrise", "00:00"))
-			val dhuhr = LocalDateTime.parse(sharedPreferences.getData("dhuhr", "00:00"))
-			val asr = LocalDateTime.parse(sharedPreferences.getData("asr", "00:00"))
-			val maghrib = LocalDateTime.parse(sharedPreferences.getData("maghrib", "00:00"))
-			val isha = LocalDateTime.parse(sharedPreferences.getData("isha", "00:00"))
+			val fajr = LocalDateTime.parse(sharedPreferences.getData("fajr" , "00:00"))
+			val sunrise = LocalDateTime.parse(sharedPreferences.getData("sunrise" , "00:00"))
+			val dhuhr = LocalDateTime.parse(sharedPreferences.getData("dhuhr" , "00:00"))
+			val asr = LocalDateTime.parse(sharedPreferences.getData("asr" , "00:00"))
+			val maghrib = LocalDateTime.parse(sharedPreferences.getData("maghrib" , "00:00"))
+			val isha = LocalDateTime.parse(sharedPreferences.getData("isha" , "00:00"))
 
 			ElevatedCard(
 					modifier = Modifier
@@ -156,8 +152,17 @@ fun SettingsScreen(
 				SettingsMenuLink(
 						title = { Text(text = "Force Reset Alarms") } ,
 						onClick = {
-							CreateAlarms().exact(context , fajr , sunrise , dhuhr , asr , maghrib , isha)
-							Toasty.success(context , "Alarms Reset" , Toast.LENGTH_SHORT , true).show()
+							CreateAlarms().exact(
+									context ,
+									fajr ,
+									sunrise ,
+									dhuhr ,
+									asr ,
+									maghrib ,
+									isha
+												)
+							Toasty.success(context , "Alarms Reset" , Toast.LENGTH_SHORT , true)
+								.show()
 						} ,
 						icon = {
 							Icon(
@@ -179,17 +184,35 @@ fun SettingsScreen(
 						//we are goping to set the alarm in next 10 seconds
 						subtitle = { Text(text = "Alarm will be set in 10 seconds") } ,
 						onClick = {
-							val zuharAdhan = "android.resource://" + context.packageName + "/" + R.raw.zuhar
+							val zuharAdhan =
+								"android.resource://" + context.packageName + "/" + R.raw.zuhar
 							//create notification channels
 							val notificationHelper = NotificationHelper()
 							//fajr
-							notificationHelper.createNotificationChannel(context ,
-																		 NotificationManager.IMPORTANCE_MAX , true , "Test_channel" , "A test channel for adhan" , "Test_Channel" , zuharAdhan)
+							notificationHelper.createNotificationChannel(
+									context ,
+									NotificationManager.IMPORTANCE_MAX ,
+									true ,
+									"Test_channel" ,
+									"A test channel for adhan" ,
+									"Test_Channel" ,
+									zuharAdhan
+																		)
 							val timeToNotify = LocalDateTime.now().plusSeconds(10).toInstant(
-									ZoneOffset.UTC).toEpochMilli()
-							val testPendingIntent = CreateAlarms().createPendingIntent(context ,1006, 2006, timeToNotify, "Test Adhan", "Test_Channel")
-							Alarms().setExactAlarm(context, timeToNotify, testPendingIntent)
-							Toasty.success(context , "Test Alarm set" , Toast.LENGTH_SHORT , true).show()
+									ZoneOffset.UTC
+																							)
+								.toEpochMilli()
+							val testPendingIntent = CreateAlarms().createPendingIntent(
+									context ,
+									1006 ,
+									2006 ,
+									timeToNotify ,
+									"Test Adhan" ,
+									"Test_Channel"
+																					  )
+							Alarms().setExactAlarm(context , timeToNotify , testPendingIntent)
+							Toasty.success(context , "Test Alarm set" , Toast.LENGTH_SHORT , true)
+								.show()
 						} ,
 						icon = {
 							Icon(
@@ -213,7 +236,10 @@ fun SettingsScreen(
 							//open the notification settings
 							val intent = Intent()
 							intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-							intent.putExtra("android.provider.extra.APP_PACKAGE" , context.packageName)
+							intent.putExtra(
+									"android.provider.extra.APP_PACKAGE" ,
+									context.packageName
+										   )
 							context.startActivity(intent)
 						} ,
 						icon = {

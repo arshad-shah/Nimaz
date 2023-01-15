@@ -28,7 +28,7 @@ fun QuranScreen(
 	val viewModel = QuranViewModel(LocalContext.current)
 	//save the state of the tab
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
-	val titles = listOf("Sura" , "Juz", "My Quran")
+	val titles = listOf("Sura" , "Juz" , "My Quran")
 	Column(modifier = Modifier.padding(paddingValues)) {
 
 		TabRow(selectedTabIndex = selectedTab) {

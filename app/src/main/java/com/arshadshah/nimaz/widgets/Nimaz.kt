@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.widgets
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.appwidget.AppWidgetManager
@@ -8,11 +7,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import androidx.compose.runtime.*
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -59,12 +55,12 @@ internal fun updateAppWidget(
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 	//get the prayer times from the shared preferences
-	val fajr = LocalDateTime.parse(sharedPreferences.getData("fajr", "00:00"))
-	val sunrise = LocalDateTime.parse(sharedPreferences.getData("sunrise", "00:00"))
-	val dhuhr = LocalDateTime.parse(sharedPreferences.getData("dhuhr", "00:00"))
-	val asr = LocalDateTime.parse(sharedPreferences.getData("asr", "00:00"))
-	val maghrib = LocalDateTime.parse(sharedPreferences.getData("maghrib", "00:00"))
-	val isha = LocalDateTime.parse(sharedPreferences.getData("isha", "00:00"))
+	val fajr = LocalDateTime.parse(sharedPreferences.getData("fajr" , "00:00"))
+	val sunrise = LocalDateTime.parse(sharedPreferences.getData("sunrise" , "00:00"))
+	val dhuhr = LocalDateTime.parse(sharedPreferences.getData("dhuhr" , "00:00"))
+	val asr = LocalDateTime.parse(sharedPreferences.getData("asr" , "00:00"))
+	val maghrib = LocalDateTime.parse(sharedPreferences.getData("maghrib" , "00:00"))
+	val isha = LocalDateTime.parse(sharedPreferences.getData("isha" , "00:00"))
 	// Construct the RemoteViews object
 	val views = RemoteViews(context.packageName , R.layout.nimaz)
 
@@ -81,7 +77,10 @@ internal fun updateAppWidget(
 	views.setTextViewText(R.id.Fajr_time , fajrTime.format(DateTimeFormatter.ofPattern("HH:mm")))
 	views.setTextViewText(R.id.Zuhar_time , dhuhrTime.format(DateTimeFormatter.ofPattern("HH:mm")))
 	views.setTextViewText(R.id.Asar_time , asrTime.format(DateTimeFormatter.ofPattern("HH:mm")))
-	views.setTextViewText(R.id.Maghrib_time , maghribTime.format(DateTimeFormatter.ofPattern("HH:mm")))
+	views.setTextViewText(
+			R.id.Maghrib_time ,
+			maghribTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+						 )
 	views.setTextViewText(R.id.Ishaa_time , ishaTime.format(DateTimeFormatter.ofPattern("HH:mm")))
 
 	views.setOnClickPendingIntent(R.id.widget , pendingIntent)

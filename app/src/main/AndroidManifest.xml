@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.arshadshah.nimaz">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Always include this permission -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Include only if your app benefits from precise location access. -->
@@ -12,7 +11,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.SET_ALARM" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
@@ -53,12 +52,12 @@
             android:name=".utils.recievers.ResetAdhansReciever"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.SET_ALARM" />
+            android:permission="com.android.alarm.permission.SET_ALARM" />
         <receiver
             android:name=".utils.recievers.AdhanReciever"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.SET_ALARM" />
+            android:permission="com.android.alarm.permission.SET_ALARM" />
 
         <activity
             android:name=".activities.SettingsActivity"
