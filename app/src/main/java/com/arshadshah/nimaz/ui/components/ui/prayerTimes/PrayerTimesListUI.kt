@@ -12,7 +12,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
@@ -73,7 +72,7 @@ fun PrayerTimesRow(
 	isHighlighted : Boolean ,
 	timerState : LiveData<CountDownTime>? ,
 	prayertimes : PrayerTimes? ,
-	viewmodel : PrayerTimesViewModel?
+	viewmodel : PrayerTimesViewModel? ,
 				  )
 {
 	var countDownTime by remember { mutableStateOf(CountDownTime(0 , 0 , 0)) }
@@ -102,10 +101,13 @@ fun PrayerTimesRow(
 					.fillMaxWidth()
 			}
 	   ) {
-		Text(text = sentenceCase ,
-			 modifier = Modifier.padding(16.dp) ,
-			 style = MaterialTheme.typography.titleLarge)
-		if (isHighlighted){
+		Text(
+				text = sentenceCase ,
+				modifier = Modifier.padding(16.dp) ,
+				style = MaterialTheme.typography.titleLarge
+			)
+		if (isHighlighted)
+		{
 			val timeToNextPrayerLong =
 				prayertimes?.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())?.toInstant()
 					?.toEpochMilli()
@@ -115,7 +117,7 @@ fun PrayerTimesRow(
 			val difference = timeToNextPrayerLong?.minus(currentTime)
 			viewmodel?.startTimer(context , difference !!)
 			Text(
-					modifier = Modifier.padding(16.dp),
+					modifier = Modifier.padding(16.dp) ,
 					text = " -${countDownTime.hours} : ${countDownTime.minutes} : ${countDownTime.seconds}" ,
 					textAlign = TextAlign.Center ,
 					style = MaterialTheme.typography.titleSmall

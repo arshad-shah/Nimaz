@@ -32,8 +32,10 @@ fun AyaSurahList(
 		{
 			//get the translation type from shared preferences
 			val pageType =
-				PrivateSharedPreferences(LocalContext.current).getData(key = "PageType" ,
-																	   s = "List")
+				PrivateSharedPreferences(LocalContext.current).getData(
+						key = "PageType" ,
+						s = "List"
+																	  )
 			var isList = true
 			if (pageType != "List")
 			{
@@ -42,9 +44,11 @@ fun AyaSurahList(
 
 			if (isList)
 			{
-				AyaListUI(ayaList = ayatSurahListState.data ,
-						  paddingValues = paddingValues ,
-						  language = language)
+				AyaListUI(
+						ayaList = ayatSurahListState.data ,
+						paddingValues = paddingValues ,
+						language = language
+						 )
 			} else
 			{
 				Page(ayatSurahListState.data , paddingValues)
@@ -53,10 +57,12 @@ fun AyaSurahList(
 
 		is QuranViewModel.AyaSurahState.Error ->
 		{
-			Toasty.error(LocalContext.current ,
-						 ayatSurahListState.errorMessage ,
-						 Toast.LENGTH_SHORT ,
-						 true).show()
+			Toasty.error(
+					LocalContext.current ,
+					ayatSurahListState.errorMessage ,
+					Toast.LENGTH_SHORT ,
+					true
+						).show()
 		}
 	}
 }

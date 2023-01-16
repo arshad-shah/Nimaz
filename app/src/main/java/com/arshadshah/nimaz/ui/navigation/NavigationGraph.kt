@@ -9,8 +9,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.arshadshah.nimaz.activities.NamesOfAllah
 import com.arshadshah.nimaz.activities.QuranActivity
 import com.arshadshah.nimaz.activities.SettingsActivity
+import com.arshadshah.nimaz.activities.Tasbih
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
 
@@ -23,8 +25,26 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 			startDestination = BottomNavItem.PrayerTimesScreen.screen_route
 		   ) {
 		composable(BottomNavItem.PrayerTimesScreen.screen_route) {
-			PrayerTimesScreen(paddingValues = paddingValues)
+			PrayerTimesScreen(
+					paddingValues = paddingValues ,
+					onNavigateToTasbihScreen = { arabic : String ->
+						navController.navigate("tasbih/$arabic")
+					} ,
+					onNavigateToNames = {
+						navController.navigate("names")
+					}
+							 )
 		}
+
+		activity("tasbih/{arabic}") {
+			//pass the arabic string to the tasbih activity
+			this.activityClass = Tasbih::class
+		}
+
+		activity("names") {
+			this.activityClass = NamesOfAllah::class
+		}
+
 		composable(BottomNavItem.QiblaScreen.screen_route) {
 			QiblaScreen(paddingValues)
 		}

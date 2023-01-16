@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.bLogic.compass.SensorData
@@ -49,9 +48,11 @@ fun DialUI(bearing : Double , data : SensorData?)
 		rotateAnim.animateTo(target , tween(300))
 	}
 
-	ElevatedCard(modifier = Modifier
-		.fillMaxWidth()
-		.padding(16.dp)) {
+	ElevatedCard(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(16.dp)
+				) {
 		if (abs(target) < 5)
 		{
 			pointingToQibla = true

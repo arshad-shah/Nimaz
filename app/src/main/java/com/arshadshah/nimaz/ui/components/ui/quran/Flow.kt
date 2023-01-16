@@ -24,25 +24,26 @@ import kotlin.math.max
  * @param lastLineMainAxisAlignment Overrides the main axis alignment of the last row.
  */
 @Composable
-public fun FlowRow(
-	modifier: Modifier = Modifier ,
-	mainAxisSize: SizeMode = SizeMode.Wrap ,
-	mainAxisAlignment: FlowMainAxisAlignment = FlowMainAxisAlignment.Start ,
-	mainAxisSpacing: Dp = 0.dp ,
-	crossAxisAlignment: FlowCrossAxisAlignment = FlowCrossAxisAlignment.Start ,
-	crossAxisSpacing: Dp = 0.dp ,
-	lastLineMainAxisAlignment: FlowMainAxisAlignment = mainAxisAlignment ,
-	content: @Composable () -> Unit
-				  ) {
+fun FlowRow(
+	modifier : Modifier = Modifier ,
+	mainAxisSize : SizeMode = SizeMode.Wrap ,
+	mainAxisAlignment : FlowMainAxisAlignment = FlowMainAxisAlignment.Start ,
+	mainAxisSpacing : Dp = 0.dp ,
+	crossAxisAlignment : FlowCrossAxisAlignment = FlowCrossAxisAlignment.Start ,
+	crossAxisSpacing : Dp = 0.dp ,
+	lastLineMainAxisAlignment : FlowMainAxisAlignment = mainAxisAlignment ,
+	content : @Composable () -> Unit ,
+		   )
+{
 	Flow(
-			modifier = modifier,
-			orientation = LayoutOrientation.Horizontal,
-			mainAxisSize = mainAxisSize,
-			mainAxisAlignment = mainAxisAlignment,
-			mainAxisSpacing = mainAxisSpacing,
-			crossAxisAlignment = crossAxisAlignment,
-			crossAxisSpacing = crossAxisSpacing,
-			lastLineMainAxisAlignment = lastLineMainAxisAlignment,
+			modifier = modifier ,
+			orientation = LayoutOrientation.Horizontal ,
+			mainAxisSize = mainAxisSize ,
+			mainAxisAlignment = mainAxisAlignment ,
+			mainAxisSpacing = mainAxisSpacing ,
+			crossAxisAlignment = crossAxisAlignment ,
+			crossAxisSpacing = crossAxisSpacing ,
+			lastLineMainAxisAlignment = lastLineMainAxisAlignment ,
 			content = content
 		)
 }
@@ -62,25 +63,26 @@ public fun FlowRow(
  * @param lastLineMainAxisAlignment Overrides the main axis alignment of the last column.
  */
 @Composable
-public fun FlowColumn(
-	modifier: Modifier = Modifier,
-	mainAxisSize: SizeMode = SizeMode.Wrap,
-	mainAxisAlignment: FlowMainAxisAlignment = FlowMainAxisAlignment.Start,
-	mainAxisSpacing: Dp = 0.dp,
-	crossAxisAlignment: FlowCrossAxisAlignment = FlowCrossAxisAlignment.Start,
-	crossAxisSpacing: Dp = 0.dp,
-	lastLineMainAxisAlignment: FlowMainAxisAlignment = mainAxisAlignment,
-	content: @Composable () -> Unit
-					 ) {
+fun FlowColumn(
+	modifier : Modifier = Modifier ,
+	mainAxisSize : SizeMode = SizeMode.Wrap ,
+	mainAxisAlignment : FlowMainAxisAlignment = FlowMainAxisAlignment.Start ,
+	mainAxisSpacing : Dp = 0.dp ,
+	crossAxisAlignment : FlowCrossAxisAlignment = FlowCrossAxisAlignment.Start ,
+	crossAxisSpacing : Dp = 0.dp ,
+	lastLineMainAxisAlignment : FlowMainAxisAlignment = mainAxisAlignment ,
+	content : @Composable () -> Unit ,
+			  )
+{
 	Flow(
-			modifier = modifier,
-			orientation = LayoutOrientation.Vertical,
-			mainAxisSize = mainAxisSize,
-			mainAxisAlignment = mainAxisAlignment,
-			mainAxisSpacing = mainAxisSpacing,
-			crossAxisAlignment = crossAxisAlignment,
-			crossAxisSpacing = crossAxisSpacing,
-			lastLineMainAxisAlignment = lastLineMainAxisAlignment,
+			modifier = modifier ,
+			orientation = LayoutOrientation.Vertical ,
+			mainAxisSize = mainAxisSize ,
+			mainAxisAlignment = mainAxisAlignment ,
+			mainAxisSpacing = mainAxisSpacing ,
+			crossAxisAlignment = crossAxisAlignment ,
+			crossAxisSpacing = crossAxisSpacing ,
+			lastLineMainAxisAlignment = lastLineMainAxisAlignment ,
 			content = content
 		)
 }
@@ -88,44 +90,50 @@ public fun FlowColumn(
 /**
  * Used to specify the alignment of a layout's children, in cross axis direction.
  */
-public enum class FlowCrossAxisAlignment {
+enum class FlowCrossAxisAlignment
+{
+
 	/**
 	 * Place children such that their center is in the middle of the cross axis.
 	 */
-	Center,
+	Center ,
+
 	/**
 	 * Place children such that their start edge is aligned to the start edge of the cross axis.
 	 */
-	Start,
+	Start ,
+
 	/**
 	 * Place children such that their end edge is aligned to the end edge of the cross axis.
 	 */
-	End,
+	End ,
 }
 
-public typealias FlowMainAxisAlignment = MainAxisAlignment
+typealias FlowMainAxisAlignment = MainAxisAlignment
 
 /**
  * Layout model that arranges its children in a horizontal or vertical flow.
  */
 @Composable
 private fun Flow(
-	modifier: Modifier,
-	orientation: LayoutOrientation,
-	mainAxisSize: SizeMode,
-	mainAxisAlignment: FlowMainAxisAlignment,
-	mainAxisSpacing: Dp,
-	crossAxisAlignment: FlowCrossAxisAlignment,
-	crossAxisSpacing: Dp,
-	lastLineMainAxisAlignment: FlowMainAxisAlignment,
-	content: @Composable () -> Unit
-				) {
+	modifier : Modifier ,
+	orientation : LayoutOrientation ,
+	mainAxisSize : SizeMode ,
+	mainAxisAlignment : FlowMainAxisAlignment ,
+	mainAxisSpacing : Dp ,
+	crossAxisAlignment : FlowCrossAxisAlignment ,
+	crossAxisSpacing : Dp ,
+	lastLineMainAxisAlignment : FlowMainAxisAlignment ,
+	content : @Composable () -> Unit ,
+				)
+{
 	fun Placeable.mainAxisSize() =
 		if (orientation == LayoutOrientation.Horizontal) width else height
+
 	fun Placeable.crossAxisSize() =
 		if (orientation == LayoutOrientation.Horizontal) height else width
 
-	Layout(content, modifier) { measurables, outerConstraints ->
+	Layout(content , modifier) { measurables , outerConstraints ->
 		val sequences = mutableListOf<List<Placeable>>()
 		val crossAxisSizes = mutableListOf<Int>()
 		val crossAxisPositions = mutableListOf<Int>()
@@ -137,22 +145,26 @@ private fun Flow(
 		var currentMainAxisSize = 0
 		var currentCrossAxisSize = 0
 
-		val constraints = OrientationIndependentConstraints(outerConstraints, orientation)
+		val constraints = OrientationIndependentConstraints(outerConstraints , orientation)
 
-		val childConstraints = if (orientation == LayoutOrientation.Horizontal) {
+		val childConstraints = if (orientation == LayoutOrientation.Horizontal)
+		{
 			Constraints(maxWidth = constraints.mainAxisMax)
-		} else {
+		} else
+		{
 			Constraints(maxHeight = constraints.mainAxisMax)
 		}
 
 		// Return whether the placeable can be added to the current sequence.
-		fun canAddToCurrentSequence(placeable: Placeable) =
+		fun canAddToCurrentSequence(placeable : Placeable) =
 			currentSequence.isEmpty() || currentMainAxisSize + mainAxisSpacing.roundToPx() +
 					placeable.mainAxisSize() <= constraints.mainAxisMax
 
 		// Store current sequence information and start a new sequence.
-		fun startNewSequence() {
-			if (sequences.isNotEmpty()) {
+		fun startNewSequence()
+		{
+			if (sequences.isNotEmpty())
+			{
 				crossAxisSpace += crossAxisSpacing.roundToPx()
 			}
 			sequences += currentSequence.toList()
@@ -160,109 +172,124 @@ private fun Flow(
 			crossAxisPositions += crossAxisSpace
 
 			crossAxisSpace += currentCrossAxisSize
-			mainAxisSpace = max(mainAxisSpace, currentMainAxisSize)
+			mainAxisSpace = max(mainAxisSpace , currentMainAxisSize)
 
 			currentSequence.clear()
 			currentMainAxisSize = 0
 			currentCrossAxisSize = 0
 		}
 
-		for (measurable in measurables) {
+		for (measurable in measurables)
+		{
 			// Ask the child for its preferred size.
 			val placeable = measurable.measure(childConstraints)
 
 			// Start a new sequence if there is not enough space.
-			if (!canAddToCurrentSequence(placeable)) startNewSequence()
+			if (! canAddToCurrentSequence(placeable)) startNewSequence()
 
 			// Add the child to the current sequence.
-			if (currentSequence.isNotEmpty()) {
+			if (currentSequence.isNotEmpty())
+			{
 				currentMainAxisSize += mainAxisSpacing.roundToPx()
 			}
 			currentSequence.add(placeable)
 			currentMainAxisSize += placeable.mainAxisSize()
-			currentCrossAxisSize = max(currentCrossAxisSize, placeable.crossAxisSize())
+			currentCrossAxisSize = max(currentCrossAxisSize , placeable.crossAxisSize())
 		}
 
 		if (currentSequence.isNotEmpty()) startNewSequence()
 
 		val mainAxisLayoutSize = if (constraints.mainAxisMax != Constraints.Infinity &&
 			mainAxisSize == SizeMode.Expand
-		) {
+		)
+		{
 			constraints.mainAxisMax
-		} else {
-			max(mainAxisSpace, constraints.mainAxisMin)
+		} else
+		{
+			max(mainAxisSpace , constraints.mainAxisMin)
 		}
-		val crossAxisLayoutSize = max(crossAxisSpace, constraints.crossAxisMin)
+		val crossAxisLayoutSize = max(crossAxisSpace , constraints.crossAxisMin)
 
-		val layoutWidth = if (orientation == LayoutOrientation.Horizontal) {
+		val layoutWidth = if (orientation == LayoutOrientation.Horizontal)
+		{
 			mainAxisLayoutSize
-		} else {
+		} else
+		{
 			crossAxisLayoutSize
 		}
-		val layoutHeight = if (orientation == LayoutOrientation.Horizontal) {
+		val layoutHeight = if (orientation == LayoutOrientation.Horizontal)
+		{
 			crossAxisLayoutSize
-		} else {
+		} else
+		{
 			mainAxisLayoutSize
 		}
 
-		layout(layoutWidth, layoutHeight) {
-			sequences.forEachIndexed { i, placeables ->
+		layout(layoutWidth , layoutHeight) {
+			sequences.forEachIndexed { i , placeables ->
 				val childrenMainAxisSizes = IntArray(placeables.size) { j ->
 					placeables[j].mainAxisSize() +
 							if (j < placeables.lastIndex) mainAxisSpacing.roundToPx() else 0
 				}
-				val alignment = if (i < sequences.lastIndex) {
+				val alignment = if (i < sequences.lastIndex)
+				{
 					mainAxisAlignment
-				} else {
+				} else
+				{
 					lastLineMainAxisAlignment
 				}
 
 				val mainAxisPositions = IntArray(childrenMainAxisSizes.size) { 0 }
-				when (orientation) {
+				when (orientation)
+				{
 					LayoutOrientation.Horizontal -> with(alignment.toHorizontalArrangement()) {
 						arrange(
-								mainAxisLayoutSize,
-								childrenMainAxisSizes,
-								layoutDirection,
+								mainAxisLayoutSize ,
+								childrenMainAxisSizes ,
+								layoutDirection ,
 								mainAxisPositions
 							   )
 					}
 					LayoutOrientation.Vertical -> with(alignment.toVerticalArrangement()) {
-						arrange(mainAxisLayoutSize, childrenMainAxisSizes, mainAxisPositions)
+						arrange(mainAxisLayoutSize , childrenMainAxisSizes , mainAxisPositions)
 					}
 				}
 
-				placeables.forEachIndexed { j, placeable ->
+				placeables.forEachIndexed { j , placeable ->
 					val crossAxisSize = placeable.crossAxisSize()
-					val crossAxis = when (crossAxisAlignment) {
+					val crossAxis = when (crossAxisAlignment)
+					{
 						FlowCrossAxisAlignment.Start -> 0
 						FlowCrossAxisAlignment.End ->
 							crossAxisSizes[i] - crossAxisSize
 						FlowCrossAxisAlignment.Center ->
 							Alignment.Center.align(
-									IntSize.Zero,
+									IntSize.Zero ,
 									IntSize(
-											width = 0,
+											width = 0 ,
 											height = crossAxisSizes[i] - crossAxisSize
-										   ),
+										   ) ,
 									LayoutDirection.Ltr
 												  ).y
 					}
 
 					val crossAxisPosition = crossAxisPositions[i] + crossAxis
-					if (orientation == LayoutOrientation.Horizontal) {
+					if (orientation == LayoutOrientation.Horizontal)
+					{
 						placeable.place(
-								x = mainAxisPositions[j],
+								x = mainAxisPositions[j] ,
 								y = crossAxisPosition
 									   )
-					} else {
+					} else
+					{
 						placeable.place(
-								x = when (layoutDirection) {
+								x = when (layoutDirection)
+								{
 									LayoutDirection.Ltr ->
 										crossAxisPosition
 									LayoutDirection.Rtl ->
 										crossAxisLayoutSize - crossAxisPosition - crossAxisSize
-								},
+								} ,
 								y = mainAxisPositions[j]
 									   )
 					}
@@ -273,7 +300,8 @@ private fun Flow(
 }
 
 private fun FlowMainAxisAlignment.toHorizontalArrangement() =
-	when (this) {
+	when (this)
+	{
 		FlowMainAxisAlignment.Center -> Arrangement.Center
 		FlowMainAxisAlignment.Start -> Arrangement.Start
 		FlowMainAxisAlignment.End -> Arrangement.End
@@ -283,7 +311,8 @@ private fun FlowMainAxisAlignment.toHorizontalArrangement() =
 	}
 
 private fun FlowMainAxisAlignment.toVerticalArrangement() =
-	when (this) {
+	when (this)
+	{
 		FlowMainAxisAlignment.Center -> Arrangement.Center
 		FlowMainAxisAlignment.Start -> Arrangement.Top
 		FlowMainAxisAlignment.End -> Arrangement.Bottom
@@ -296,12 +325,15 @@ private fun FlowMainAxisAlignment.toVerticalArrangement() =
  * Used to specify how a layout chooses its own size when multiple behaviors are possible.
  */
 // TODO(popam): remove this when Flow is reworked
-public enum class SizeMode {
+enum class SizeMode
+{
+
 	/**
 	 * Minimize the amount of free space by wrapping the children,
 	 * subject to the incoming layout constraints.
 	 */
-	Wrap,
+	Wrap ,
+
 	/**
 	 * Maximize the amount of free space by expanding to fill the available space,
 	 * subject to the incoming layout constraints.
@@ -312,33 +344,35 @@ public enum class SizeMode {
 /**
  * Used to specify the alignment of a layout's children, in main axis direction.
  */
-public enum class MainAxisAlignment {
+enum class MainAxisAlignment
+{
+
 	/**
 	 * Place children such that they are as close as possible to the middle of the main axis.
 	 */
-	Center,
+	Center ,
 
 	/**
 	 * Place children such that they are as close as possible to the start of the main axis.
 	 */
-	Start,
+	Start ,
 
 	/**
 	 * Place children such that they are as close as possible to the end of the main axis.
 	 */
-	End,
+	End ,
 
 	/**
 	 * Place children such that they are spaced evenly across the main axis, including free
 	 * space before the first child and after the last child.
 	 */
-	SpaceEvenly,
+	SpaceEvenly ,
 
 	/**
 	 * Place children such that they are spaced evenly across the main axis, without free
 	 * space before the first child or after the last child.
 	 */
-	SpaceBetween,
+	SpaceBetween ,
 
 	/**
 	 * Place children such that they are spaced evenly across the main axis, including free

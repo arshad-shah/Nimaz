@@ -22,16 +22,16 @@ fun SettingsNavGraph(navController : NavController , paddingValues : PaddingValu
 		   ) {
 		composable("settings") {
 			SettingsScreen(
-			onNavigateToPrayerTimeCustomizationScreen = {
-				navController.navigate(
-						"PrayerTimesCustomizations"
-									  )
-			} ,
-			onNavigateToAboutScreen = {
-				navController.navigate(
-						"about"
-									  )
-			} , paddingValues)
+					onNavigateToPrayerTimeCustomizationScreen = {
+						navController.navigate(
+								"PrayerTimesCustomizations"
+											  )
+					} ,
+					onNavigateToAboutScreen = {
+						navController.navigate(
+								"about"
+											  )
+					} , paddingValues)
 		}
 		composable("about") {
 			About(paddingValues)

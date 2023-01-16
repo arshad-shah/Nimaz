@@ -3,7 +3,10 @@ package com.arshadshah.nimaz.ui.components.bLogic.settings
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +28,10 @@ fun AuthorLinks()
 
 	ElevatedCard(modifier = Modifier.padding(8.dp)) {
 		Row(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalArrangement = Arrangement.SpaceEvenly,
-				verticalAlignment = Alignment.CenterVertically) {
+				modifier = Modifier.fillMaxWidth() ,
+				horizontalArrangement = Arrangement.SpaceEvenly ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
 			//website link
 			LinkButton(
 					icon = {
@@ -37,7 +41,8 @@ fun AuthorLinks()
 							)
 					} ,
 					onClick = {
-						val intent = Intent(Intent.ACTION_VIEW , Uri.parse("https://arshadshah.com"))
+						val intent =
+							Intent(Intent.ACTION_VIEW , Uri.parse("https://arshadshah.com"))
 						context.startActivity(intent)
 					}
 					  )
@@ -51,7 +56,10 @@ fun AuthorLinks()
 							)
 					} ,
 					onClick = {
-						val intent = Intent(Intent.ACTION_VIEW , Uri.parse("https://www.linkedin.com/in/arshadshah"))
+						val intent = Intent(
+								Intent.ACTION_VIEW ,
+								Uri.parse("https://www.linkedin.com/in/arshadshah")
+										   )
 						context.startActivity(intent)
 					}
 					  )
@@ -64,7 +72,8 @@ fun AuthorLinks()
 							)
 					} ,
 					onClick = {
-						val intent = Intent(Intent.ACTION_SENDTO , Uri.parse("mailto: info@arshadshah.com"))
+						val intent =
+							Intent(Intent.ACTION_SENDTO , Uri.parse("mailto: info@arshadshah.com"))
 						context.startActivity(intent)
 					}
 					  )
@@ -78,7 +87,7 @@ fun AuthorLinks()
 					onClick = {
 						//open github link
 						val urlIntent = Intent(
-								Intent.ACTION_VIEW,
+								Intent.ACTION_VIEW ,
 								Uri.parse("https://github.com/arshad-shah")
 											  )
 						context.startActivity(urlIntent)
@@ -93,14 +102,17 @@ fun AuthorLinks()
 fun LinkButton(
 	icon : @Composable () -> Unit ,
 	onClick : () -> Unit ,
-		)
+			  )
 {
 	IconButton(
-			modifier = Modifier.padding(4.dp).size(48.dp) ,
-			onClick = onClick,
-			colors = IconButtonDefaults.filledIconButtonColors())
+			modifier = Modifier
+				.padding(4.dp)
+				.size(48.dp) ,
+			onClick = onClick ,
+			colors = IconButtonDefaults.filledIconButtonColors()
+			  )
 	{
-			icon()
+		icon()
 	}
 }
 

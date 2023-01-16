@@ -34,8 +34,10 @@ class SettingsActivity : ComponentActivity()
 										navController.addOnDestinationChangedListener { _ , destination , _ ->
 											route.value = destination.route
 										}
-										Text(text = processPageTitle(route.value.toString()),
-											 style = MaterialTheme.typography.titleLarge)
+										Text(
+												text = processPageTitle(route.value.toString()) ,
+												style = MaterialTheme.typography.titleLarge
+											)
 									} ,
 									navigationIcon = {
 										IconButton(onClick = {
