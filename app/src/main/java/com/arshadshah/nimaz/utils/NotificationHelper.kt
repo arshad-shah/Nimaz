@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.utils
 
-import android.Manifest
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.app.Notification.VISIBILITY_PUBLIC
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,14 +9,12 @@ import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color.GREEN
 import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.arshadshah.nimaz.R
@@ -132,6 +129,7 @@ class NotificationHelper
 	 * @param title the title of the notification
 	 * @param notification_id The id of the Notification ( Unique Integer)
 	 */
+	@SuppressLint("MissingPermission")
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	fun createNotification(
 		context : Context ,
@@ -177,20 +175,6 @@ class NotificationHelper
 				setAutoCancel(true)
 			}
 		with(NotificationManagerCompat.from(context)) {
-			if (ActivityCompat.checkSelfPermission(
-						context ,
-						Manifest.permission.POST_NOTIFICATIONS
-												  ) != PackageManager.PERMISSION_GRANTED
-			)
-			{
-				//ask for permission
-				ActivityCompat.requestPermissions(
-						context as Activity ,
-						arrayOf(Manifest.permission.POST_NOTIFICATIONS) ,
-						1
-												 )
-				return
-			}
 			notify(notification_id , builder.build())
 		}
 		Log.i("Notifications" , "Notification $title Successfully Displayed")

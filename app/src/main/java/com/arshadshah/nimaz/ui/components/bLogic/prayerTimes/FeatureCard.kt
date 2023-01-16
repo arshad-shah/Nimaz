@@ -4,7 +4,13 @@ import androidx.compose.runtime.Composable
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.FeatureCardUI
 
 @Composable
-fun FeatureCard()
+fun FeatureCard(
+	onNavigateToTasbihScreen : (String) -> Unit ,
+	onNavigateToNames : () -> Unit ,
+			   )
 {
-	FeatureCardUI()
+	FeatureCardUI(
+			onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
+			onNavigateToNames = onNavigateToNames ,
+				 )
 }
