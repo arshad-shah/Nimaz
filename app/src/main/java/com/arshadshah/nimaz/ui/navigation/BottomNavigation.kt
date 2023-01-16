@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.navigation
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -32,7 +31,7 @@ fun BottomNavigationBar(navController : NavController)
 					} ,
 					alwaysShowLabel = false ,
 					//if selleced then show the label else dont
-					label = { Text(text = bottomNavItem.title) },
+					label = { Text(text = bottomNavItem.title) } ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
 						navController.navigate(bottomNavItem.screen_route) {

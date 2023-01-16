@@ -23,6 +23,7 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 
 	sealed class PrayerTimesState
 	{
+
 		object Loading : PrayerTimesState()
 		data class Success(val prayerTimes : PrayerTimes?) : PrayerTimesState()
 		data class Error(val errorMessage : String) : PrayerTimesState()
@@ -35,6 +36,7 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 	//location state
 	sealed class LocationState
 	{
+
 		object Loading : LocationState()
 		data class Success(val location : String) : LocationState()
 		data class Error(val errorMessage : String) : LocationState()

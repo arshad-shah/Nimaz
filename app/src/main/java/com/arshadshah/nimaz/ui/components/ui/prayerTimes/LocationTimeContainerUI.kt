@@ -1,15 +1,11 @@
 package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -19,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import kotlinx.coroutines.delay
 
 @Composable
 fun LocationTimeContainerUI(location : String)
@@ -59,7 +54,8 @@ fun LocationTimeContainerUI(location : String)
 						.weight(0.5f)
 						.padding(8.dp) ,
 					heading = "Current Prayer" ,
-					text = sharedPreferences.getData("currentPrayer" , "Fajr").lowercase().replaceFirstChar { it.uppercase() }
+					text = sharedPreferences.getData("currentPrayer" , "Fajr").lowercase()
+						.replaceFirstChar { it.uppercase() }
 					  )
 		}
 	}

@@ -10,15 +10,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.urduFont
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 
 @Composable
@@ -52,6 +55,12 @@ fun AyaListItemUI(
 		//use default color
 		MaterialTheme.colorScheme.surface
 	}
+	val context = LocalContext.current
+
+	//get font size from shared preferences#
+	val sharedPreferences = PrivateSharedPreferences(context)
+	val arabicFontSize = sharedPreferences.getDataFloat("ArabicFontSize")
+	val translationFontSize = sharedPreferences.getDataFloat("TranslationFontSize")
 	ElevatedCard(
 			modifier = Modifier
 				.padding(4.dp)
@@ -75,6 +84,7 @@ fun AyaListItemUI(
 					Text(
 							text = ayaArabic ,
 							style = MaterialTheme.typography.titleLarge ,
+							fontSize = arabicFontSize.sp ,
 							fontFamily = quranFont ,
 							textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
@@ -89,6 +99,7 @@ fun AyaListItemUI(
 						Text(
 								text = "$ayaTranslation ۔" ,
 								style = MaterialTheme.typography.titleSmall ,
+								fontSize = translationFontSize.sp ,
 								fontFamily = urduFont ,
 								textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
 								modifier = Modifier
@@ -101,6 +112,7 @@ fun AyaListItemUI(
 					Text(
 							text = ayaTranslation ,
 							style = MaterialTheme.typography.bodySmall ,
+							fontSize = translationFontSize.sp ,
 							textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth()

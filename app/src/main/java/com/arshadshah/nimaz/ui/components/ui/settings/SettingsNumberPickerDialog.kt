@@ -74,9 +74,11 @@ fun SettingsNumberPickerDialog(
 						description?.invoke()
 					}
 					Divider(color = MaterialTheme.colorScheme.outline)
-					Row(modifier.fillMaxWidth() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.Center) {
+					Row(
+							modifier.fillMaxWidth() ,
+							verticalAlignment = Alignment.CenterVertically ,
+							horizontalArrangement = Arrangement.Center
+					   ) {
 						NumberPicker(
 								modifier = modifier ,
 								value = if (items.size == 51) valueState.value.toDouble()

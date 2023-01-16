@@ -17,32 +17,32 @@ val urduFont = FontFamily(Font(R.font.urdu))
 val TypographyMain = Typography(
 		displayLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 96.sp
 								) ,
 		displayMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 60.sp
 								 ) ,
 		displaySmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 48.sp
 								) ,
 		headlineLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 34.sp
 								 ) ,
 		headlineMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 24.sp
 								  ) ,
 		headlineSmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 20.sp
 								 ) ,
 		bodyLarge = TextStyle(
@@ -62,32 +62,32 @@ val TypographyMain = Typography(
 							 ) ,
 		titleLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 20.sp
 							  ) ,
 		titleMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 16.sp
 							   ) ,
 		titleSmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 14.sp
 							  ) ,
 		labelLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 14.sp
 							  ) ,
 		labelMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 12.sp
 							   ) ,
 		labelSmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 10.sp
 							  ) ,
 							   )
@@ -96,32 +96,32 @@ val TypographyMain = Typography(
 val TypographySmall = Typography(
 		displayLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 70.sp
 								) ,
 		displayMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 46.sp
 								 ) ,
 		displaySmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 34.sp
 								) ,
 		headlineLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 22.sp
 								 ) ,
 		headlineMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 18.sp
 								  ) ,
 		headlineSmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 14.sp
 								 ) ,
 		bodyLarge = TextStyle(
@@ -141,32 +141,32 @@ val TypographySmall = Typography(
 							 ) ,
 		titleLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 14.sp
 							  ) ,
 		titleMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 12.sp
 							   ) ,
 		titleSmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 10.sp
 							  ) ,
 		labelLarge = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 10.sp
 							  ) ,
 		labelMedium = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 8.sp
 							   ) ,
 		labelSmall = TextStyle(
 				fontFamily = nunito ,
-				fontWeight = FontWeight.Bold ,
+				fontWeight = FontWeight.Normal ,
 				fontSize = 6.sp
 							  ) ,
 								)

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -34,9 +33,20 @@ class SplashActivity : ComponentActivity()
 			val sharedPref = PrivateSharedPreferences(this@SplashActivity)
 			sharedPref.saveData(AppConstants.LOGIN_TOKEN , loginToken.token)
 
-			val intent = Intent(this@SplashActivity , MainActivity::class.java)
-			startActivity(intent)
-			finish()
+			//get the first time flag
+			val firstTime = sharedPref.getDataBoolean("isFirstInstall" , true)
+
+			if (firstTime)
+			{
+				val intent = Intent(this@SplashActivity , Introduction::class.java)
+				startActivity(intent)
+				finish()
+			} else
+			{
+				val intent = Intent(this@SplashActivity , MainActivity::class.java)
+				startActivity(intent)
+				finish()
+			}
 		}
 	}
 }

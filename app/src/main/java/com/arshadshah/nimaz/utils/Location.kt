@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 
 class Location
 {
+
 	//function to get automatic location
 	fun getAutomaticLocation(context : Context)
 	{

@@ -11,12 +11,12 @@ class ResetAdhansReciever : BroadcastReceiver()
 
 	override fun onReceive(context : Context , intent : Intent)
 	{
-		val fajr = intent.extras!!.getLong("fajrTime")
-		val sunrise = intent.extras!!.getLong("sunriseTime")
-		val zuhar = intent.extras!!.getLong("zuharTime")
-		val asar = intent.extras!!.getLong("asarTime")
-		val maghrib = intent.extras!!.getLong("maghribTime")
-		val ishaa = intent.extras!!.getLong("ishaaTime")
+		val fajr = intent.extras !!.getLong("fajrTime")
+		val sunrise = intent.extras !!.getLong("sunriseTime")
+		val zuhar = intent.extras !!.getLong("zuharTime")
+		val asar = intent.extras !!.getLong("asarTime")
+		val maghrib = intent.extras !!.getLong("maghribTime")
+		val ishaa = intent.extras !!.getLong("ishaaTime")
 
 		//create alarms
 		CreateAlarms().scheduleAlarms(context , fajr , sunrise , zuhar , asar , maghrib , ishaa)

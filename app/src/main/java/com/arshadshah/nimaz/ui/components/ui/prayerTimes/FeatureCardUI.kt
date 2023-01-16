@@ -3,42 +3,45 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.components.ui.icons.NineNine
+import com.arshadshah.nimaz.ui.components.ui.icons.PlusMinusTasbih
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.ExternalLink
 import compose.icons.feathericons.Github
-import compose.icons.feathericons.Linkedin
 import compose.icons.feathericons.Mail
 
+
 @Composable
-fun FeatureCardUI()
+fun FeatureCardUI(onNavigateToTasbihScreen : (String) -> Unit , onNavigateToNames : () -> Unit)
 {
 
 	val context = LocalContext.current
 
-	ElevatedCard() {
+	ElevatedCard {
 		Row(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalArrangement = Arrangement.SpaceEvenly,
-				verticalAlignment = Alignment.CenterVertically) {
+				modifier = Modifier.fillMaxWidth() ,
+				horizontalArrangement = Arrangement.SpaceEvenly ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
 			//website link
 			LinkButton(
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.ExternalLink ,
-								contentDescription = "Portfolio Website Link" ,
+								imageVector = Icons.PlusMinusTasbih ,
+								contentDescription = "Tasbih" ,
 							)
 					} ,
 					onClick = {
-						val intent = Intent(Intent.ACTION_VIEW , Uri.parse("https://arshadshah.com"))
-						context.startActivity(intent)
+						onNavigateToTasbihScreen(" ")
 					}
 					  )
 
@@ -46,13 +49,13 @@ fun FeatureCardUI()
 			LinkButton(
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.Linkedin ,
-								contentDescription = "LinkedIn Link" ,
+								modifier = Modifier.size(24.dp) ,
+								imageVector = Icons.NineNine ,
+								contentDescription = "Names of Allah" ,
 							)
 					} ,
 					onClick = {
-						val intent = Intent(Intent.ACTION_VIEW , Uri.parse("https://www.linkedin.com/in/arshadshah"))
-						context.startActivity(intent)
+						onNavigateToNames()
 					}
 					  )
 			//email link
@@ -64,7 +67,8 @@ fun FeatureCardUI()
 							)
 					} ,
 					onClick = {
-						val intent = Intent(Intent.ACTION_SENDTO , Uri.parse("mailto: info@arshadshah.com"))
+						val intent =
+							Intent(Intent.ACTION_SENDTO , Uri.parse("mailto: info@arshadshah.com"))
 						context.startActivity(intent)
 					}
 					  )
@@ -75,14 +79,7 @@ fun FeatureCardUI()
 								contentDescription = "Github"
 							)
 					} ,
-					onClick = {
-						//open github link
-						val urlIntent = Intent(
-								Intent.ACTION_VIEW ,
-								Uri.parse("https://github.com/arshad-shah")
-											  )
-						context.startActivity(urlIntent)
-					}
+					onClick = {}
 					  )
 
 		}
@@ -96,9 +93,12 @@ fun LinkButton(
 			  )
 {
 	IconButton(
-			modifier = Modifier.padding(4.dp).size(48.dp) ,
-			onClick = onClick,
-			colors = IconButtonDefaults.filledIconButtonColors())
+			modifier = Modifier
+				.padding(4.dp)
+				.size(48.dp) ,
+			onClick = onClick ,
+			colors = IconButtonDefaults.filledIconButtonColors()
+			  )
 	{
 		icon()
 	}

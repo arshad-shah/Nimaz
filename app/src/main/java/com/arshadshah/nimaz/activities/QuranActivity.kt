@@ -43,22 +43,30 @@ class QuranActivity : ComponentActivity()
 										} else if (route.value == "ayatScreen/{number}/{isSurah}/{language}")
 										{
 											val number = remember(navController) {
-												mutableStateOf(navController.currentBackStackEntry?.arguments?.getString(
-														"number"))
+												mutableStateOf(
+														navController.currentBackStackEntry?.arguments?.getString(
+																"number"
+																												 )
+															  )
 											}
 											val isSurah = remember(navController) {
-												mutableStateOf(navController.currentBackStackEntry?.arguments?.getString(
-														"isSurah"))
+												mutableStateOf(
+														navController.currentBackStackEntry?.arguments?.getString(
+																"isSurah"
+																												 )
+															  )
 											}
 
 											//get the isSurah and number and show the correct title
 											navController.addOnDestinationChangedListener { _ , _ , _ ->
 												number.value =
 													navController.currentBackStackEntry?.arguments?.getString(
-															"number")
+															"number"
+																											 )
 												isSurah.value =
 													navController.currentBackStackEntry?.arguments?.getString(
-															"isSurah")
+															"isSurah"
+																											 )
 											}
 											if (isSurah.value == "true")
 											{
