@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
@@ -16,7 +15,11 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContain
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 
 @Composable
-fun PrayerTimesScreen(paddingValues : PaddingValues)
+fun PrayerTimesScreen(
+	paddingValues : PaddingValues ,
+	onNavigateToTasbihScreen : (String) -> Unit ,
+	onNavigateToNames : () -> Unit ,
+					 )
 {
 	val context = LocalContext.current
 
@@ -53,13 +56,9 @@ fun PrayerTimesScreen(paddingValues : PaddingValues)
 				paddingValues = paddingValues
 					   )
 
-		FeatureCard()
+		FeatureCard(
+				onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
+				onNavigateToNames = onNavigateToNames
+				   )
 	}
-}
-
-@Preview
-@Composable
-fun PrayerTimesScreenPreview()
-{
-	PrayerTimesScreen(paddingValues = PaddingValues(0.dp))
 }

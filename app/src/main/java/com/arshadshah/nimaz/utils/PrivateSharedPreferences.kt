@@ -5,8 +5,10 @@ import android.content.Context
 class PrivateSharedPreferences(context : Context)
 {
 
-	private val file = "com.arshadshah.nimaz.preferencesData"
-	private val sharedPreferences = context.getSharedPreferences(file , Context.MODE_PRIVATE)
+	private val sharedPreferences = context.getSharedPreferences(
+			"com.arshadshah.nimaz.SharedPreferences" ,
+			Context.MODE_PRIVATE
+																)
 	private val editor = sharedPreferences.edit()
 
 	fun saveData(customkey : String , data : String)

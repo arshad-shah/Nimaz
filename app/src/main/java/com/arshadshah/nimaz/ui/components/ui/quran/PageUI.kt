@@ -25,12 +25,17 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
 
 @Composable
 fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
+
+	//get font size from shared preferences#
+	val sharedPreferences = PrivateSharedPreferences(context)
+	val arabicFontSize = sharedPreferences.getDataFloat("ArabicFontSize")
 	Verses(
 			modifier = Modifier
 				.padding(paddingValues)
@@ -59,7 +64,7 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
 						maxLines = 2 ,
 						style = TextStyle(
 								fontFamily = quranFont ,
-								fontSize = 24.sp ,
+								fontSize = arabicFontSize.sp ,
 								lineHeight = 60.sp ,
 								color = MaterialTheme.colorScheme.onSurface ,
 								textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
