@@ -37,11 +37,11 @@ class MainActivity : ComponentActivity()
 			if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
 			{
 				appUpdateManager.startUpdateFlowForResult(
-					appUpdateInfo,
-					AppUpdateType.IMMEDIATE,
-					this,
-					REQUEST_CODE
-				)
+						appUpdateInfo ,
+						AppUpdateType.IMMEDIATE ,
+						this ,
+						REQUEST_CODE
+														 )
 			}
 		}
 	}
@@ -73,7 +73,8 @@ class MainActivity : ComponentActivity()
 		appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
 			if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
 				&& appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-			) {
+			)
+			{
 				// Request the update.
 				appUpdateManager.startUpdateFlowForResult(
 						appUpdateInfo ,

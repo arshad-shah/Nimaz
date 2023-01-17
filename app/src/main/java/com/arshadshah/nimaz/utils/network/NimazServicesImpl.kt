@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.utils.network
 
 import com.arshadshah.nimaz.constants.AppConstants
+import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 
 object NimazServicesImpl : NimazService
 {
@@ -16,10 +18,13 @@ object NimazServicesImpl : NimazService
 				"username" to username ,
 				"password" to password
 							  )
-		return httpClient.post(AppConstants.LOGIN_URL) {
-			body = mapOfLogin
+		val response : LoginResponse = httpClient.request(AppConstants.LOGIN_URL) {
+			method = HttpMethod.Post
+			setBody(mapOfLogin)
 			header("Content-Type" , "application/json")
-		}
+		}.body() !!
+
+		return response
 	}
 
 	override suspend fun getQiblaDirection(
@@ -27,11 +32,16 @@ object NimazServicesImpl : NimazService
 		longitude : Double ,
 										  ) : QiblaDirectionResponse
 	{
-		return httpClient.get(AppConstants.QIBLA_URL) {
+		val response : QiblaDirectionResponse = httpClient.request(AppConstants.QIBLA_URL) {
+			method = HttpMethod.Get
 			header("Content-Type" , "application/json")
-			parameter("latitude" , latitude)
-			parameter("longitude" , longitude)
-		}
+			url {
+				parameters.append("latitude" , latitude.toString())
+				parameters.append("longitude" , longitude.toString())
+			}
+		}.body() !!
+
+		return response
 	}
 
 
@@ -40,23 +50,35 @@ object NimazServicesImpl : NimazService
 									   ) : PrayerTimeResponse
 	{
 		//create a post request with stuff in body and return the response
-		return httpClient.post(AppConstants.PRAYER_TIMES_URL) {
-			body = mapOfParams
-			//set headers for json
+		val response : PrayerTimeResponse = httpClient.request(AppConstants.PRAYER_TIMES_URL) {
+			method = HttpMethod.Post
+			setBody(mapOfParams)
 			header("Content-Type" , "application/json")
-		}
+		}.body() !!
+
+		return response
 	}
 
 	override suspend fun getSurahs() : ArrayList<SurahResponse>
 	{
 		//create a get request and return the response
-		return httpClient.get(AppConstants.QURAN_SURAH_URL)
+		val response : ArrayList<SurahResponse> = httpClient.request(AppConstants.QURAN_SURAH_URL) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
+
+		return response
 	}
 
 	override suspend fun getJuzs() : ArrayList<JuzResponse>
 	{
 		//create a get request and return the response
-		return httpClient.get(AppConstants.QURAN_JUZ_URL)
+		val response : ArrayList<JuzResponse> = httpClient.request(AppConstants.QURAN_JUZ_URL) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
+
+		return response
 	}
 
 	override suspend fun getAyaForSurah(
@@ -68,7 +90,12 @@ object NimazServicesImpl : NimazService
 			AppConstants.QURAN_SURAH_AYAT_URL.replace("{surahNumber}" , surahNumber.toString())
 				.replace("{translationLanguage}" , language)
 		//create a get request and return the response
-		return httpClient.get(url)
+		val response : ArrayList<AyaResponse> = httpClient.request(url) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
+
+		return response
 	}
 
 	override suspend fun getAyaForJuz(
@@ -78,6 +105,12 @@ object NimazServicesImpl : NimazService
 	{
 		val url = AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
 			.replace("{translationLanguage}" , language)
-		return httpClient.get(url)
+		//create a get request and return the response
+		val response : ArrayList<AyaResponse> = httpClient.request(url) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
+
+		return response
 	}
 }

@@ -7,7 +7,7 @@ import com.arshadshah.nimaz.data.remote.models.Prayertime
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import java.io.IOException
 import java.time.LocalDateTime
 
