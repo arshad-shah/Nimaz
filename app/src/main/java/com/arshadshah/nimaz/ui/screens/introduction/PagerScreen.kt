@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 					.fillMaxWidth(0.5f)
 					.fillMaxHeight(0.7f) ,
 				imageVector = onBoardingPage.image ,
-				contentDescription = "Pager Image"
+				contentDescription = "Pager Image" ,
+				colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
 			 )
 		Text(
 				modifier = Modifier
@@ -74,7 +76,7 @@ fun FinishButton(
 	   ) {
 		AnimatedVisibility(
 				modifier = Modifier.fillMaxWidth() ,
-				visible = pagerState.currentPage == 5
+				visible = pagerState.currentPage == 6
 						  ) {
 			Button(
 					onClick = onClick ,

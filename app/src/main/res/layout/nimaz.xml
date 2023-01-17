@@ -1,14 +1,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/app_widget_background"
+    android:baselineAligned="false"
     android:clickable="true"
     android:focusable="true"
-    android:theme="@style/Theme.Nimaz"
-    android:baselineAligned="false">
+    android:theme="@style/Theme.Nimaz">
 
     <LinearLayout
         android:id="@+id/fajrwidgethighlight"

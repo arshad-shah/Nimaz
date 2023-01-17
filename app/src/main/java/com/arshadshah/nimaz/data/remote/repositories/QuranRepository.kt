@@ -6,7 +6,7 @@ import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import java.util.*
 
 object QuranRepository

@@ -1,9 +1,15 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
@@ -18,13 +24,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
+import com.arshadshah.nimaz.ui.components.ui.icons.Prayer
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.BookOpen
-import compose.icons.feathericons.Clock
-import compose.icons.feathericons.Compass
-import compose.icons.feathericons.MapPin
+import compose.icons.feathericons.*
 
 sealed class OnBoardingPage(
 	val image : ImageVector ,
@@ -35,7 +39,7 @@ sealed class OnBoardingPage(
 {
 
 	object First : OnBoardingPage(
-			image = FeatherIcons.Clock ,
+			image = Icons.Prayer ,
 			title = "Nimaz" ,
 			description = "Nimaz is a muslim lifestyle companion app that helps you keep track of your daily prayers." ,
 								 )
@@ -206,4 +210,80 @@ sealed class OnBoardingPage(
 							  )
 			}
 								 )
+
+	//a page to ask for the battery optimization exemption
+	@SuppressLint("BatteryLife")
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+	object Seventh : OnBoardingPage(
+			image = FeatherIcons.Battery ,
+			title = "Battery Optimization" ,
+			description = "Nimaz needs to be exempted from battery optimization to work properly." ,
+			extra = {
+				val context = LocalContext.current
+				//get shared preference
+				val sharedpref = PrivateSharedPreferences(context)
+
+				//battery optimization exemption
+				val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+				val isbatteryOptimizationExempted =
+					powerManager.isIgnoringBatteryOptimizations(context.packageName)
+				//the state of the switch
+				val state = rememberPreferenceBooleanSettingState(
+						"battery_optimization" ,
+						isbatteryOptimizationExempted
+																 )
+				SettingsSwitch(
+						state = state ,
+						onCheckedChange = {
+							if (it)
+							{
+								//if the switch is checked, then we need to ask for the battery optimization exemption
+								//and save the value in the shared preferences
+								sharedpref.saveDataBoolean("battery_optimization" , true)
+								val intent = Intent()
+								intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+								intent.data = Uri.parse("package:" + context.packageName)
+								context.startActivity(intent)
+							} else
+							{
+								//if its unchecked, then we need to remove the battery optimization exemption
+								//and remove the value from the shared preferences
+								sharedpref.removeData("battery_optimization")
+							}
+						} ,
+						title = {
+							Text(text = "Allow Battery Optimization")
+						} ,
+						subtitle = {
+							//if the permission is granted, show a checkmark and text saying "Allowed"
+							if (isbatteryOptimizationExempted)
+							{
+								Row {
+									Icon(
+											imageVector = Icons.Filled.CheckCircle ,
+											contentDescription = "Battery Optimization Allowed"
+										)
+									Text(text = "Allowed")
+								}
+							} else
+							{
+								//if the permission is not granted, show a notification icon and text saying "Not Allowed"
+								Row {
+									Icon(
+											imageVector = Icons.Filled.Close ,
+											contentDescription = "Battery Optimization Not Allowed"
+										)
+									Text(text = "Not Allowed")
+								}
+							}
+						} ,
+						icon = {
+							Icon(
+									imageVector = FeatherIcons.Battery ,
+									contentDescription = "Battery Optimization"
+								)
+						}
+							  )
+			}
+								   )
 }

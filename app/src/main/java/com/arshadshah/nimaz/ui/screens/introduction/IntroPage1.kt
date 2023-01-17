@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ fun IntroPage1()
 			OnBoardingPage.Fourth ,
 			OnBoardingPage.Fifth ,
 			OnBoardingPage.Sixth ,
+			OnBoardingPage.Seventh ,
 					  )
 
 	val pagerState = rememberPagerState()
@@ -49,6 +51,8 @@ fun IntroPage1()
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
 					.padding(16.dp) ,
+				activeColor = MaterialTheme.colorScheme.secondary ,
+				inactiveColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 								)
 		FinishButton(
 				modifier = Modifier.weight(1f) ,
