@@ -4,10 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,7 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 
@@ -24,68 +23,60 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 {
 	Column(
 			modifier = Modifier
-				.fillMaxWidth() ,
+				.fillMaxWidth()
+				.fillMaxHeight(),
 			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Top
+			verticalArrangement = Arrangement.Center
 		  ) {
+
+		Text(
+				modifier = Modifier
+					.fillMaxWidth() ,
+				text = onBoardingPage.title ,
+				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
+				fontWeight = FontWeight.Bold ,
+				textAlign = TextAlign.Center
+			)
+
 		Image(
 				modifier = Modifier
 					.fillMaxWidth(0.5f)
-					.fillMaxHeight(0.7f) ,
+					.fillMaxHeight(0.6f) ,
 				imageVector = onBoardingPage.image ,
 				contentDescription = "Pager Image" ,
 				colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
 			 )
 		Text(
 				modifier = Modifier
-					.fillMaxWidth() ,
-				text = onBoardingPage.title ,
-				fontSize = MaterialTheme.typography.titleMedium.fontSize ,
-				fontWeight = FontWeight.Bold ,
-				textAlign = TextAlign.Center
-			)
-		Text(
-				modifier = Modifier
 					.fillMaxWidth()
 					.padding(horizontal = 40.dp)
-					.padding(top = 20.dp) ,
+					.padding(top = 20.dp, bottom = 20.dp) ,
 				text = onBoardingPage.description ,
 				fontSize = MaterialTheme.typography.bodyMedium.fontSize ,
 				fontWeight = FontWeight.Medium ,
 				textAlign = TextAlign.Center
 			)
-		//the extra functionality compose
-		onBoardingPage.extra.invoke()
+		//if onBoardingPage.extra is not {} then show the extra content
+		if(onBoardingPage.extra != {})
+		{
+			ElevatedCard(
+					modifier = Modifier.padding(8.dp) ,
+						) {
+				//the extra functionality compose
+				onBoardingPage.extra.invoke()
+			}
+		}
 	}
 }
 
-@ExperimentalAnimationApi
-@ExperimentalPagerApi
+@Preview
 @Composable
-fun FinishButton(
-	modifier : Modifier ,
-	pagerState : PagerState ,
-	onClick : () -> Unit ,
-				)
+fun PagerScreenPreview()
 {
-	Row(
-			modifier = modifier
-				.padding(horizontal = 40.dp) ,
-			verticalAlignment = Alignment.Top ,
-			horizontalArrangement = Arrangement.Center
-	   ) {
-		AnimatedVisibility(
-				modifier = Modifier.fillMaxWidth() ,
-				visible = pagerState.currentPage == 6
-						  ) {
-			Button(
-					onClick = onClick ,
-					colors = ButtonDefaults.buttonColors(
-							contentColor = Color.White
-														)
-				  ) {
-				Text(text = "Finish")
-			}
-		}
+	val pages = listOf(
+			OnBoardingPage.Fourth ,
+					  )
+	NimazTheme {
+		PagerScreen(pages[0])
 	}
 }
