@@ -149,7 +149,7 @@ fun FontSizeDialog(showDialog3 : (Boolean) -> Unit)
 					Slider(
 							value = arabicFontSizeState.value ,
 							onValueChange = { arabicFontSizeState.value = it } ,
-							valueRange = 20f .. 40f ,
+							valueRange = 24f .. 40f ,
 							steps = 5 ,
 							modifier = Modifier.width(300.dp)
 						  )
