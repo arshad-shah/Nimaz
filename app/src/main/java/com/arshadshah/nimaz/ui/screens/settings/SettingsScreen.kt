@@ -19,6 +19,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
@@ -49,6 +51,7 @@ fun SettingsScreen(
 {
 	val context = LocalContext.current
 	val locationFinderAuto = LocationFinderAuto()
+
 	val cityname =
 		rememberPreferenceStringSettingState(key = "location_input" , defaultValue = "Abbeyleix")
 
@@ -59,6 +62,7 @@ fun SettingsScreen(
 				.verticalScroll(rememberScrollState() , true)
 				.padding(paddingValues)
 		  ) {
+
 		SettingsGroup(title = { Text(text = "Location") }) {
 			val storage =
 				rememberPreferenceBooleanSettingState("location_auto" , true)

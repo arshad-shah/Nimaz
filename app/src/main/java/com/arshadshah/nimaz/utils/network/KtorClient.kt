@@ -1,23 +1,27 @@
 package com.arshadshah.nimaz.utils.network
 
 import io.ktor.client.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.engine.android.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 
 
 object KtorClient
 {
 
-	private val client = HttpClient {
-		install(JsonFeature) {
-			serializer = KotlinxSerializer(
-					kotlinx.serialization.json.Json {
+	private val client = HttpClient(Android) {
+		//install json serializer
+		install(ContentNegotiation) {
+			json(
+					json = Json {
 						ignoreUnknownKeys = true
 						isLenient = true
+						allowSpecialFloatingPointValues = true
+						useArrayPolymorphism = true
 					}
-										  )
+				)
 		}
 	}
-
 	val getInstance = client
 }

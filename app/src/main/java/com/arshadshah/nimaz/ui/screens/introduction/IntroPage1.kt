@@ -1,29 +1,23 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
-import android.content.Intent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.activities.Introduction
-import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 
 
-@OptIn(ExperimentalPagerApi::class , ExperimentalAnimationApi::class)
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun IntroPage1()
 {
-	val context = LocalContext.current
 	val pages = listOf(
 			OnBoardingPage.First ,
 			OnBoardingPage.Second ,
@@ -31,6 +25,7 @@ fun IntroPage1()
 			OnBoardingPage.Fourth ,
 			OnBoardingPage.Fifth ,
 			OnBoardingPage.Sixth ,
+			OnBoardingPage.Seventh ,
 					  )
 
 	val pagerState = rememberPagerState()
@@ -48,19 +43,21 @@ fun IntroPage1()
 				pagerState = pagerState ,
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
-					.padding(16.dp) ,
+					.padding(20.dp) ,
+				activeColor = MaterialTheme.colorScheme.secondary ,
+				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
+				indicatorWidth =12.dp ,
+				indicatorHeight = 12.dp
 								)
-		FinishButton(
-				modifier = Modifier.weight(1f) ,
-				pagerState = pagerState ,
-				onClick = {
-					//save the lock to storage
-					val sharedPref = PrivateSharedPreferences(context)
-					sharedPref.saveDataBoolean("isFirstInstall" , false)
-					context.startActivity(Intent(context , MainActivity::class.java))
-					//remove the activity from the back stack
-					(context as Introduction).finish()
-				}
-					)
+
+	}
+}
+
+@Preview
+@Composable
+fun IntroPage1Preview()
+{
+	NimazTheme {
+		IntroPage1()
 	}
 }
