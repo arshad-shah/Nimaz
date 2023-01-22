@@ -18,6 +18,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
@@ -73,7 +75,8 @@ fun AyaListItemUI(
 				 )
 {
 
-	val mediaRecorder = MediaRecorder()
+	//create a new speech recognizer
+	val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(LocalContext.current)
 
 	val cardBackgroundColor = if (ayaNumber == "0")
 	{
@@ -92,6 +95,8 @@ fun AyaListItemUI(
 
 	//mutable ayaArabic state so that we can change it when the user clicks on the mic button
 	val ayaArabicState = remember { mutableStateOf(ayaArabic) }
+
+	val isRecording = remember { mutableStateOf(false) }
 
 	ElevatedCard(
 			modifier = Modifier
@@ -164,13 +169,27 @@ fun AyaListItemUI(
 								val permission = ContextCompat.checkSelfPermission(context , Manifest.permission.RECORD_AUDIO)
 								if (permission == PackageManager.PERMISSION_GRANTED)
 								{
-									//start recording
-									val surahNumber = sharedPreferences.getDataInt("SurahNumber")
-									val ayaNumber = sharedPreferences.getDataInt("AyaNumber")
-									val fileName = "$surahNumber-$ayaNumber.wav"
-									val file = File(context.getExternalFilesDir(null) , fileName)
-									startRecording(file, mediaRecorder)
-									Toasty.info(context , "Recording started" , Toast.LENGTH_SHORT , true).show()
+									if (!isRecording.value)
+									{
+										convertAudioToText(context, speechRecognizer){
+											val errors = ErrorDetector().errorDetector(ayaArabic, it)
+											Toasty.success(context , errors).show()
+											Log.d("AyaListItemUI" , errors.toString())
+											ayaArabicState.value = errors.toString()
+										}
+										Toasty.info(
+												context ,
+												"Recording started" ,
+												Toast.LENGTH_SHORT ,
+												true
+												   ).show()
+										isRecording.value = true
+									}
+									else{
+										speechRecognizer.stopListening()
+										Toasty.info(context , "Recording stopped" , Toast.LENGTH_SHORT , true).show()
+										isRecording.value = false
+									}
 								} else
 								{
 									//request permission
@@ -182,74 +201,32 @@ fun AyaListItemUI(
 							.padding(4.dp)
 							.align(Alignment.End)
 					) {
-					Icon(
-							imageVector = FeatherIcons.Mic ,
-							contentDescription = "Record Audio" ,
-							tint = MaterialTheme.colorScheme.onSurface
-						)
-				}
-
-				//an icon button that stops recording audio in a wav file and saves it to the device storage
-				IconButton(
-						onClick = {
-								stopRecording(mediaRecorder)
-								Toasty.info(context , "Recording stopped" , Toast.LENGTH_SHORT , true).show()
-						} ,
-						enabled = true ,
-						modifier = Modifier
-							.padding(4.dp)
-							.align(Alignment.End)
-					) {
-					Icon(
-							imageVector = FeatherIcons.MicOff ,
-							contentDescription = "Stop Recording Audio" ,
-							tint = MaterialTheme.colorScheme.onSurface
-						)
+					if (isRecording.value)
+					{
+						Icon(
+								imageVector = FeatherIcons.MicOff ,
+								contentDescription = "Stop recording" ,
+								tint = Color.Red
+							)
+					} else
+					{
+						Icon(
+								imageVector = FeatherIcons.Mic ,
+								contentDescription = "Record audio" ,
+							)
+					}
 				}
 			}
 		}
 	}
 }
 
-//the function responsible for starting the recording, it is called when the user holds down the record button
-fun startRecording(file: File, recorder : MediaRecorder)
-{
-	//create a new media recorder
-	val mediaRecorder = MediaRecorder()
-	//set the audio source to the microphone
-	mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-	//set the output format to wav
-	mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-	//set the audio encoder to amr
-	mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-	//set the output file to the file we created
-	mediaRecorder.setOutputFile(file.absolutePath)
-	//start recording
-	mediaRecorder.prepare()
-	mediaRecorder.start()
-}
-
-//the function responsible for stopping the recording, it is called when the user releases the record button
-fun stopRecording(mediaRecorder : MediaRecorder)
-{
-	//stop recording
-	mediaRecorder.stop()
-	//release the media recorder
-	mediaRecorder.release()
-}
-
 //the function responsible for converting the audio file to text
-fun convertAudioToText(context : Context , file : File) : String
+fun convertAudioToText(context : Context, speechRecognizer: SpeechRecognizer , callback: (String) -> Unit)
 {
-
-	//the text that will be returned
-	var text = ""
-
 	if(ContextCompat.checkSelfPermission(context , Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
 		checkPermission()
 	}else{
-		//create a new speech recognizer
-		val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
 		//create a new speech recognizer intent
 		val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
 		//set the language to arabic
@@ -258,34 +235,38 @@ fun convertAudioToText(context : Context , file : File) : String
 		//set the speech recognizer intent to the speech recognizer
 		//we are using the speech recognizer to convert the audio file to text
 		speechRecognizer.setRecognitionListener(object : RecognitionListener {
-			override fun onReadyForSpeech(params : Bundle?) {}
-			override fun onBeginningOfSpeech() {}
+			override fun onReadyForSpeech(params : Bundle?) {
+				Log.d("newText" , "onReadyForSpeech")
+			}
+			override fun onBeginningOfSpeech() {
+				Log.d("newText" , "onBeginningOfSpeech")
+			}
 			override fun onRmsChanged(rmsdB : Float) {}
 			override fun onBufferReceived(buffer : ByteArray?) {}
-			override fun onEndOfSpeech() {}
+			override fun onEndOfSpeech() {
+				Log.d("newText" , "onEndOfSpeech")
+			}
 			override fun onError(error : Int) {
-				Log.d("SpeechRecognizer" , "onError: $error")
+				Log.d("newText" , "onError: $error")
 			}
 			override fun onResults(results : Bundle?) {
 
-				Log.d("newText" , "onResults: $results")
+				Log.d("newText" , "onResults: ${results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)}")
 				//get the results
 				val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-				//get the first result
-				text = data?.get(0) ?: ""
+				callback(data?.get(0) ?: "")
 			}
-			override fun onPartialResults(partialResults : Bundle?) {}
-			override fun onEvent(eventType : Int , params : Bundle?) {}
+			override fun onPartialResults(partialResults : Bundle?) {
+				Log.d("newText" , "onPartialResults: $partialResults")
+			}
+			override fun onEvent(eventType : Int , params : Bundle?) {
+				Log.d("newText" , "onEvent: $eventType")
+			}
 		})
 
-		//give the speech recognizer the audio file
-		val uri = Uri.fromFile(file)
-		speechRecognizerIntent.data = uri
-
+		//start listening to the audio using the speech recognizer
+		speechRecognizer.startListening(speechRecognizerIntent)
 	}
-
-	//return the result
-	return text
 }
 
 private fun checkPermission()

@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
@@ -39,8 +40,12 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
+				.fillMaxHeight()
+				.wrapContentSize(Alignment.Center)
 				.padding(16.dp)
-				.padding(paddingValues)
+				.padding(paddingValues),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.SpaceBetween
 		  ) {
 		//lap text
 		Text(
@@ -48,12 +53,15 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 					.align(Alignment.CenterHorizontally) ,
 				text = "Loop ${lap.value}" , style = MaterialTheme.typography.bodyMedium
 			)
+		//large count text
 		Text(
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally) ,
 				text = count.value.toString() ,
-				style = MaterialTheme.typography.displayMedium
+				style = MaterialTheme.typography.displayMedium,
+				fontSize = 100.sp
 			)
+		Spacer(modifier = Modifier.height(16.dp))
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -66,7 +74,9 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 					verticalArrangement = Arrangement.Center
 				  ) {
 				ElevatedButton(
-						contentPadding = PaddingValues(16.dp) ,
+						modifier = Modifier
+							.fillMaxWidth()
+							.height(90.dp) ,
 						onClick = {
 							count.value ++
 							lapCountCounter.value ++
@@ -81,9 +91,9 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 										   ).show()
 							}
 						}) {
-					Icon(imageVector = FeatherIcons.Plus , contentDescription = "Add")
+					Icon(imageVector = FeatherIcons.Plus , contentDescription = "Add", modifier = Modifier.size(52.dp))
 				}
-				Spacer(modifier = Modifier.height(16.dp))
+				Spacer(modifier = Modifier.height(32.dp))
 				ElevatedButton(
 						contentPadding = PaddingValues(16.dp) ,
 						onClick = {
@@ -107,6 +117,7 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 				}
 			}
 		}
+		Spacer(modifier = Modifier.height(32.dp))
 		Row(
 				modifier = Modifier.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
