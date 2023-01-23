@@ -45,8 +45,8 @@ fun IntroPage1()
 					.align(Alignment.CenterHorizontally)
 					.padding(20.dp) ,
 				activeColor = MaterialTheme.colorScheme.secondary ,
-				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
-				indicatorWidth =12.dp ,
+				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f) ,
+				indicatorWidth = 12.dp ,
 				indicatorHeight = 12.dp
 								)
 

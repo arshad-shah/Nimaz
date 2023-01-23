@@ -1,9 +1,9 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
-import android.util.Log
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
 import io.ktor.client.plugins.*
@@ -17,7 +17,6 @@ object QuranRepository
 		return try
 		{
 			val response = NimazServicesImpl.getSurahs()
-			Log.d("QuranRepository" , "getSurahs: $response")
 			//create an array list of surah from the response
 			val surahs = ArrayList<Surah>()
 			for (surahResponse in response)
@@ -35,6 +34,9 @@ object QuranRepository
 								 )
 				surahs.add(surah)
 			}
+			val datastore = LocalDataStore.getDataStore()
+
+			datastore.saveAllSurah(surahs)
 			ApiResponse.Success(surahs)
 		} catch (e : ClientRequestException)
 		{
@@ -51,7 +53,6 @@ object QuranRepository
 		return try
 		{
 			val response = NimazServicesImpl.getJuzs()
-			Log.d("QuranRepository" , "getJuzs: $response")
 			//create an array list of surah from the response
 			val Juzs = ArrayList<Juz>()
 			for (juzResponse in response)
@@ -64,6 +65,8 @@ object QuranRepository
 							 )
 				Juzs.add(juz)
 			}
+			val datastore = LocalDataStore.getDataStore()
+			datastore.saveAllJuz(Juzs)
 			ApiResponse.Success(Juzs)
 		} catch (e : ClientRequestException)
 		{
@@ -87,7 +90,6 @@ object QuranRepository
 			val languageConverted = language.uppercase(Locale.ROOT)
 			val response =
 				NimazServicesImpl.getAyaForSurah(surahNumber , languageConverted)
-			Log.d("QuranRepository" , "getAyaForSurah: $response")
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()
 			for (ayaResponse in response)
@@ -122,7 +124,6 @@ object QuranRepository
 			//capitalize the language
 			val languageConverted = language.uppercase(Locale.ROOT)
 			val response = NimazServicesImpl.getAyaForJuz(juzNumber , languageConverted)
-			Log.d("QuranRepository" , "getAyaForJuz: $response")
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()
 			for (ayaResponse in response)

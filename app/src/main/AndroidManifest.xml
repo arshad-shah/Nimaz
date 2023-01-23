@@ -11,13 +11,12 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <queries>
         <intent>
-            <action
-                android:name="android.speech.RecognitionService" />
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 
@@ -92,8 +91,7 @@
             android:exported="false"
             android:label="@string/title_activity_quran"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz">
-        </activity>
+            android:theme="@style/Theme.Nimaz"></activity>
         <activity
             android:name=".activities.Introduction"
             android:exported="false"

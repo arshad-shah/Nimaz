@@ -43,8 +43,8 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 				.fillMaxHeight()
 				.wrapContentSize(Alignment.Center)
 				.padding(16.dp)
-				.padding(paddingValues),
-			horizontalAlignment = Alignment.CenterHorizontally,
+				.padding(paddingValues) ,
+			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.SpaceBetween
 		  ) {
 		//lap text
@@ -58,7 +58,7 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally) ,
 				text = count.value.toString() ,
-				style = MaterialTheme.typography.displayMedium,
+				style = MaterialTheme.typography.displayMedium ,
 				fontSize = 100.sp
 			)
 		Spacer(modifier = Modifier.height(16.dp))
@@ -91,7 +91,11 @@ fun TasbihDefaultScreen(paddingValues : PaddingValues)
 										   ).show()
 							}
 						}) {
-					Icon(imageVector = FeatherIcons.Plus , contentDescription = "Add", modifier = Modifier.size(52.dp))
+					Icon(
+							imageVector = FeatherIcons.Plus ,
+							contentDescription = "Add" ,
+							modifier = Modifier.size(52.dp)
+						)
 				}
 				Spacer(modifier = Modifier.height(32.dp))
 				ElevatedButton(
