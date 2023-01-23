@@ -1,9 +1,9 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
 import android.content.Context
-import android.util.Log
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.models.Prayertime
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
@@ -23,6 +23,9 @@ object PrayerTimesRepository
 	 * */
 	suspend fun getPrayerTimes(context : Context) : ApiResponse<PrayerTimes>
 	{
+
+		//get the database
+		val datastore = LocalDataStore.getDataStore()
 
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
@@ -61,8 +64,6 @@ object PrayerTimesRepository
 		{
 			val response = NimazServicesImpl.getPrayerTimes(mapOfParams)
 
-			Log.d("PrayerTimesRepository" , "getPrayerTimes: $response")
-
 			val prayerTimes = PrayerTimes(
 					fajr = LocalDateTime.parse(response.fajr) ,
 					sunrise = LocalDateTime.parse(response.sunrise) ,
@@ -79,6 +80,8 @@ object PrayerTimesRepository
 							time = LocalDateTime.parse(response.currentPrayer.time)
 											  )
 										 )
+			datastore.deleteAllPrayerTimes()
+			datastore.saveAllPrayerTimes(prayerTimes)
 			ApiResponse.Success(prayerTimes)
 		} catch (e : ClientRequestException)
 		{

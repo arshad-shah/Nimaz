@@ -39,7 +39,8 @@ class LocationFinderAuto
 	{
 		getLocationCallback(context)
 		fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
-		val locationRequest = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY , 72000).build()
+		val locationRequest =
+			LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY , 72000).build()
 		fusedLocationProviderClient !!.requestLocationUpdates(
 				locationRequest ,
 				locationCallback !! ,

@@ -5,9 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaRecorder
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -18,7 +15,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -47,7 +43,6 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.Mic
 import compose.icons.feathericons.MicOff
 import es.dmoral.toasty.Toasty
-import java.io.File
 
 
 @Composable
@@ -165,42 +160,54 @@ fun AyaListItemUI(
 				//TODO: IN Progress
 				IconButton(
 						onClick = {
-								//start recording
-								val permission = ContextCompat.checkSelfPermission(context , Manifest.permission.RECORD_AUDIO)
-								if (permission == PackageManager.PERMISSION_GRANTED)
+							//start recording
+							val permission = ContextCompat.checkSelfPermission(
+									context ,
+									Manifest.permission.RECORD_AUDIO
+																			  )
+							if (permission == PackageManager.PERMISSION_GRANTED)
+							{
+								if (! isRecording.value)
 								{
-									if (!isRecording.value)
-									{
-										convertAudioToText(context, speechRecognizer){
-											val errors = ErrorDetector().errorDetector(ayaArabic, it)
-											Toasty.success(context , errors).show()
-											Log.d("AyaListItemUI" , errors.toString())
-											ayaArabicState.value = errors.toString()
-										}
-										Toasty.info(
-												context ,
-												"Recording started" ,
-												Toast.LENGTH_SHORT ,
-												true
-												   ).show()
-										isRecording.value = true
+									convertAudioToText(context , speechRecognizer) {
+										val errors = ErrorDetector().errorDetector(ayaArabic , it)
+										Toasty.success(context , errors).show()
+										Log.d("AyaListItemUI" , errors.toString())
+										ayaArabicState.value = errors.toString()
 									}
-									else{
-										speechRecognizer.stopListening()
-										Toasty.info(context , "Recording stopped" , Toast.LENGTH_SHORT , true).show()
-										isRecording.value = false
-									}
+									Toasty.info(
+											context ,
+											"Recording started" ,
+											Toast.LENGTH_SHORT ,
+											true
+											   ).show()
+									isRecording.value = true
 								} else
 								{
-									//request permission
-									ActivityCompat.requestPermissions(context as Activity , arrayOf(Manifest.permission.RECORD_AUDIO) , 1)
+									speechRecognizer.stopListening()
+									Toasty.info(
+											context ,
+											"Recording stopped" ,
+											Toast.LENGTH_SHORT ,
+											true
+											   ).show()
+									isRecording.value = false
 								}
+							} else
+							{
+								//request permission
+								ActivityCompat.requestPermissions(
+										context as Activity ,
+										arrayOf(Manifest.permission.RECORD_AUDIO) ,
+										1
+																 )
+							}
 						} ,
 						enabled = true ,
 						modifier = Modifier
 							.padding(4.dp)
 							.align(Alignment.End)
-					) {
+						  ) {
 					if (isRecording.value)
 					{
 						Icon(
@@ -222,47 +229,95 @@ fun AyaListItemUI(
 }
 
 //the function responsible for converting the audio file to text
-fun convertAudioToText(context : Context, speechRecognizer: SpeechRecognizer , callback: (String) -> Unit)
+fun convertAudioToText(
+	context : Context ,
+	speechRecognizer : SpeechRecognizer ,
+	callback : (String) -> Unit ,
+					  )
 {
-	if(ContextCompat.checkSelfPermission(context , Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+	if (ContextCompat.checkSelfPermission(
+				context ,
+				Manifest.permission.RECORD_AUDIO
+										 ) != PackageManager.PERMISSION_GRANTED
+	)
+	{
 		checkPermission()
-	}else{
+	} else
+	{
 		//create a new speech recognizer intent
 		val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
 		//set the language to arabic
-		speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL , RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+		speechRecognizerIntent.putExtra(
+				RecognizerIntent.EXTRA_LANGUAGE_MODEL ,
+				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+									   )
 		speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE , "ar")
 		//set the speech recognizer intent to the speech recognizer
 		//we are using the speech recognizer to convert the audio file to text
-		speechRecognizer.setRecognitionListener(object : RecognitionListener {
-			override fun onReadyForSpeech(params : Bundle?) {
-				Log.d("newText" , "onReadyForSpeech")
-			}
-			override fun onBeginningOfSpeech() {
-				Log.d("newText" , "onBeginningOfSpeech")
-			}
-			override fun onRmsChanged(rmsdB : Float) {}
-			override fun onBufferReceived(buffer : ByteArray?) {}
-			override fun onEndOfSpeech() {
-				Log.d("newText" , "onEndOfSpeech")
-			}
-			override fun onError(error : Int) {
-				Log.d("newText" , "onError: $error")
-			}
-			override fun onResults(results : Bundle?) {
+		speechRecognizer.setRecognitionListener(object : RecognitionListener
+												{
+													override fun onReadyForSpeech(params : Bundle?)
+													{
+														Log.d("newText" , "onReadyForSpeech")
+													}
 
-				Log.d("newText" , "onResults: ${results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)}")
-				//get the results
-				val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-				callback(data?.get(0) ?: "")
-			}
-			override fun onPartialResults(partialResults : Bundle?) {
-				Log.d("newText" , "onPartialResults: $partialResults")
-			}
-			override fun onEvent(eventType : Int , params : Bundle?) {
-				Log.d("newText" , "onEvent: $eventType")
-			}
-		})
+													override fun onBeginningOfSpeech()
+													{
+														Log.d("newText" , "onBeginningOfSpeech")
+													}
+
+													override fun onRmsChanged(rmsdB : Float)
+													{
+													}
+
+													override fun onBufferReceived(buffer : ByteArray?)
+													{
+													}
+
+													override fun onEndOfSpeech()
+													{
+														Log.d("newText" , "onEndOfSpeech")
+													}
+
+													override fun onError(error : Int)
+													{
+														Log.d("newText" , "onError: $error")
+													}
+
+													override fun onResults(results : Bundle?)
+													{
+
+														Log.d(
+																"newText" ,
+																"onResults: ${
+																	results?.getStringArrayList(
+																			SpeechRecognizer.RESULTS_RECOGNITION
+																							   )
+																}"
+															 )
+														//get the results
+														val data = results?.getStringArrayList(
+																SpeechRecognizer.RESULTS_RECOGNITION
+																							  )
+														callback(data?.get(0) ?: "")
+													}
+
+													override fun onPartialResults(partialResults : Bundle?)
+													{
+														Log.d(
+																"newText" ,
+																"onPartialResults: $partialResults"
+															 )
+													}
+
+													override fun onEvent(
+														eventType : Int ,
+														params : Bundle? ,
+																		)
+													{
+														Log.d("newText" , "onEvent: $eventType")
+													}
+												})
 
 		//start listening to the audio using the speech recognizer
 		speechRecognizer.startListening(speechRecognizerIntent)
@@ -277,7 +332,6 @@ private fun checkPermission()
 			100000
 									 )
 }
-
 
 
 @Preview

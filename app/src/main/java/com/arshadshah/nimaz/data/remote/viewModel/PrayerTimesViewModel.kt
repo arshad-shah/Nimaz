@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.LocationFinder
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class PrayerTimesViewModel(context : Context) : ViewModel()
 {
@@ -63,13 +65,22 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = PrayerTimesRepository.getPrayerTimes(context)
-				if (response.data != null)
+				val dataStore = LocalDataStore.getDataStore()
+				val prayerTimes = dataStore.getAllPrayerTimes()
+				val day = prayerTimes.timestamp?.dayOfYear
+				if (prayerTimes != null && day != LocalDateTime.now().dayOfYear)
 				{
-					_prayerTimesState.value = PrayerTimesState.Success(response.data)
+					_prayerTimesState.value = PrayerTimesState.Success(prayerTimes)
 				} else
 				{
-					_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+					val response = PrayerTimesRepository.getPrayerTimes(context)
+					if (response.data != null)
+					{
+						_prayerTimesState.value = PrayerTimesState.Success(response.data)
+					} else
+					{
+						_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+					}
 				}
 			} catch (e : Exception)
 			{

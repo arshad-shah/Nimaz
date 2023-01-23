@@ -12,25 +12,27 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.screens.NamesOfAllah
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Pause
 import compose.icons.feathericons.Play
 import compose.icons.feathericons.StopCircle
-import com.arshadshah.nimaz.R
 
 class NamesOfAllah : ComponentActivity()
 {
 
 	private val mediaPlayer = MediaPlayer()
 
-	override fun onDestroy() {
+	override fun onDestroy()
+	{
 		super.onDestroy()
 		mediaPlayer.release()
 	}
 
-	override fun onPause() {
+	override fun onPause()
+	{
 		super.onPause()
 		mediaPlayer.release()
 	}
@@ -58,38 +60,43 @@ class NamesOfAllah : ComponentActivity()
 										}
 									} ,
 									//buttons for play and pause and stop
-									 actions = {
-										 if (isPlaying.value) {
-											 IconButton(onClick = {
-												 mediaPlayer.stop()
-												 mediaPlayer.reset()
-												 prepareMediaPlayer(this@NamesOfAllah)
-												 isPlaying.value = false
-											 }
-													   ) {
-												 Icon(
-														 imageVector = FeatherIcons.StopCircle ,
-														 contentDescription = "Back"
-													 )
-											 }
-										 }
+									actions = {
+										if (isPlaying.value)
+										{
+											IconButton(onClick = {
+												mediaPlayer.stop()
+												mediaPlayer.reset()
+												prepareMediaPlayer(this@NamesOfAllah)
+												isPlaying.value = false
+											}
+													  ) {
+												Icon(
+														imageVector = FeatherIcons.StopCircle ,
+														contentDescription = "Back"
+													)
+											}
+										}
 										IconButton(onClick = {
-											if (!mediaPlayer.isPlaying) {
+											if (! mediaPlayer.isPlaying)
+											{
 												//start the audio
 												mediaPlayer.start()
 												isPlaying.value = true
-											}else {
+											} else
+											{
 												mediaPlayer.pause()
 												isPlaying.value = false
 											}
 										}
-										) {
-											if (isPlaying.value) {
+												  ) {
+											if (isPlaying.value)
+											{
 												Icon(
 														imageVector = FeatherIcons.Pause ,
 														contentDescription = "Pause"
 													)
-											} else {
+											} else
+											{
 												Icon(
 														imageVector = FeatherIcons.Play ,
 														contentDescription = "Play"
@@ -97,7 +104,7 @@ class NamesOfAllah : ComponentActivity()
 											}
 										}
 
-									 }
+									}
 									 )
 						} ,
 						) {
@@ -109,9 +116,9 @@ class NamesOfAllah : ComponentActivity()
 	}
 
 
-
-	private fun prepareMediaPlayer(context: Context) {
-		val myUri: Uri =
+	private fun prepareMediaPlayer(context : Context)
+	{
+		val myUri : Uri =
 			Uri.parse("android.resource://" + context.packageName + "/" + R.raw.asmaulhusna)
 		mediaPlayer.apply {
 			setAudioAttributes(
@@ -120,7 +127,7 @@ class NamesOfAllah : ComponentActivity()
 						.setUsage(AudioAttributes.USAGE_MEDIA)
 						.build()
 							  )
-			setDataSource(context, myUri)
+			setDataSource(context , myUri)
 			prepare()
 		}
 	}
