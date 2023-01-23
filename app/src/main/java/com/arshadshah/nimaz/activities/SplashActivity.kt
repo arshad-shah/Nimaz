@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
 import kotlinx.coroutines.delay
@@ -32,6 +33,8 @@ class SplashActivity : ComponentActivity()
 				NimazServicesImpl.login(AppConstants.USER_USERNAME , AppConstants.USER_PASSWORD)
 			val sharedPref = PrivateSharedPreferences(this@SplashActivity)
 			sharedPref.saveData(AppConstants.LOGIN_TOKEN , loginToken.token)
+
+			LocalDataStore.init(this@SplashActivity)
 
 			//get the first time flag
 			val firstTime = sharedPref.getDataBoolean("isFirstInstall" , true)

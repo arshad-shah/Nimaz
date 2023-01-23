@@ -1,22 +1,19 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 
 @Composable
 fun PagerScreen(onBoardingPage : OnBoardingPage)
@@ -24,7 +21,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.fillMaxHeight(),
+				.fillMaxHeight() ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {
@@ -50,14 +47,14 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(horizontal = 40.dp)
-					.padding(top = 20.dp, bottom = 20.dp) ,
+					.padding(top = 20.dp , bottom = 20.dp) ,
 				text = onBoardingPage.description ,
 				fontSize = MaterialTheme.typography.bodyMedium.fontSize ,
 				fontWeight = FontWeight.Medium ,
 				textAlign = TextAlign.Center
 			)
 		//if onBoardingPage.extra is not {} then show the extra content
-		if(onBoardingPage.extra != {})
+		if (onBoardingPage.extra != {})
 		{
 			ElevatedCard(
 					modifier = Modifier.padding(8.dp) ,

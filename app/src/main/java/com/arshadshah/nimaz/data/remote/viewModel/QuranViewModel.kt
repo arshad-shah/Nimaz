@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.repositories.QuranRepository
+import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,19 +68,26 @@ class QuranViewModel(context : Context) : ViewModel()
 		getJuzList(context)
 	}
 
-
 	fun getSurahList(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getSurahs()
-				if (response.data != null)
+				val dataStore = LocalDataStore.getDataStore()
+				val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<Surah>
+				if (surahList != null)
 				{
-					_surahState.value = SurahState.Success(response.data)
+					_surahState.value = SurahState.Success(surahList)
 				} else
 				{
-					_surahState.value = SurahState.Error(response.message !!)
+					val response = QuranRepository.getSurahs()
+					if (response.data != null)
+					{
+						_surahState.value = SurahState.Success(response.data)
+					} else
+					{
+						_surahState.value = SurahState.Error(response.message !!)
+					}
 				}
 			} catch (e : Exception)
 			{
@@ -93,13 +101,21 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val response = QuranRepository.getJuzs()
-				if (response.data != null)
+				val dataStore = LocalDataStore.getDataStore()
+				val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<Juz>
+				if (juzList != null)
 				{
-					_juzState.value = JuzState.Success(response.data)
+					_juzState.value = JuzState.Success(juzList)
 				} else
 				{
-					_juzState.value = JuzState.Error(response.message !!)
+					val response = QuranRepository.getJuzs()
+					if (response.data != null)
+					{
+						_juzState.value = JuzState.Success(response.data)
+					} else
+					{
+						_juzState.value = JuzState.Error(response.message !!)
+					}
 				}
 			} catch (e : Exception)
 			{

@@ -15,8 +15,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 69
-        versionName '1.5.0'
+        versionCode 70
+        versionName '1.5.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -113,4 +113,6 @@ dependencies {
 
     implementation "com.google.android.play:app-update:$app_update_version"
     implementation "com.google.android.play:app-update-ktx:$app_update_version"
+
+    implementation 'com.google.code.gson:gson:2.9.0'
 }

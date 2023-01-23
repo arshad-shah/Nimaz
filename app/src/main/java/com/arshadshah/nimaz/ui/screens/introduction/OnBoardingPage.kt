@@ -45,6 +45,7 @@ sealed class OnBoardingPage(
 	val extra : @Composable () -> Unit = {} ,
 						   )
 {
+
 	object First : OnBoardingPage(
 			image = Icons.Prayer ,
 			title = "Assalamu alaikum" ,
@@ -61,7 +62,7 @@ sealed class OnBoardingPage(
 			image = FeatherIcons.BookOpen ,
 			title = "Quran" ,
 			description = "Quran with urdu and english translations." ,
-								  )
+								 )
 
 	//the Notification permission page
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -164,7 +165,7 @@ sealed class OnBoardingPage(
 								  )
 				}
 			}
-								 )
+								  )
 
 	//the location permission page
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -318,7 +319,8 @@ sealed class OnBoardingPage(
 						}
 							  )
 			}
-								   )
+								 )
+
 	object Seventh : OnBoardingPage(
 			image = FeatherIcons.CheckCircle ,
 			title = "Onboarding Complete" ,
