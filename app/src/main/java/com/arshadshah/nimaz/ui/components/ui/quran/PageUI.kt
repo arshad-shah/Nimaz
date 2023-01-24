@@ -134,7 +134,8 @@ fun PageUIPreview()
 					"بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ,
 					"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
 					"Surah" ,
-					1
+					1 ,
+					"ENGLISH"
 			   )
 			   )
 	ayaList.add(
@@ -142,7 +143,8 @@ fun PageUIPreview()
 					1 ,
 					"ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ ﴿٢﴾" ,
 					"All praise is due to Allah, Lord of the worlds." , "Surah" ,
-					1
+					1 ,
+					"ENGLISH"
 			   )
 			   )
 	ayaList.add(
@@ -151,7 +153,8 @@ fun PageUIPreview()
 					"ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾" ,
 					"The Entirely Merciful, the Especially Merciful." ,
 					"Surah" ,
-					1
+					1 ,
+					"ENGLISH"
 			   )
 			   )
 	ayaList.add(
@@ -160,7 +163,8 @@ fun PageUIPreview()
 					"مَـٰلِكِ يَوْمِ ٱلدِّينِ ﴿٤﴾" ,
 					"Master of the Day of Judgment." ,
 					"Surah" ,
-					1
+					1 ,
+					"ENGLISH"
 			   )
 			   )
 	ayaList.add(
@@ -168,7 +172,8 @@ fun PageUIPreview()
 					4 ,
 					"إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ﴿٥﴾" ,
 					"You alone do we worship, and You alone do we implore for help." , "Surah" ,
-					1
+					1 ,
+					"ENGLISH"
 			   )
 			   )
 	ayaList.add(
@@ -177,7 +182,8 @@ fun PageUIPreview()
 					"ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ ﴿٦﴾" ,
 					"Guide us to the straight path." ,
 					"Surah" ,
-					1
+					1 ,
+					"ENGLISH"
 			   )
 			   )
 	ayaList.add(
@@ -186,7 +192,8 @@ fun PageUIPreview()
 					"صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ ﴿٧﴾" ,
 					"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
 					"Surah" ,
-					1
+					1 ,
+					"ENGLISH"
 			   )
 			   )
 	NimazTheme(darkTheme = true) {
