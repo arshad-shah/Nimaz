@@ -74,15 +74,17 @@ class QuranViewModel(context : Context) : ViewModel()
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
-				val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<Surah>
-				if (surahList != null)
+				val surahAvailable = dataStore.countSurah()
+				if (surahAvailable > 0)
 				{
+					val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<Surah>
 					_surahState.value = SurahState.Success(surahList)
 				} else
 				{
 					val response = QuranRepository.getSurahs()
 					if (response.data != null)
 					{
+						dataStore.saveAllSurah(response.data)
 						_surahState.value = SurahState.Success(response.data)
 					} else
 					{
@@ -102,15 +104,17 @@ class QuranViewModel(context : Context) : ViewModel()
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
-				val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<Juz>
-				if (juzList != null)
+				val juzAvailable = dataStore.countJuz()
+				if (juzAvailable > 0)
 				{
+					val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<Juz>
 					_juzState.value = JuzState.Success(juzList)
 				} else
 				{
 					val response = QuranRepository.getJuzs()
 					if (response.data != null)
 					{
+						dataStore.saveAllJuz(response.data)
 						_juzState.value = JuzState.Success(response.data)
 					} else
 					{
@@ -129,6 +133,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
+				val dataStore = LocalDataStore.getDataStore()
 				val response = QuranRepository.getAyaForSurah(surahNumber , language)
 				if (response.data != null)
 				{

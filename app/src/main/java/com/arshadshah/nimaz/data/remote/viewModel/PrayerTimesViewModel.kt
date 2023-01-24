@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.remote.viewModel
 
 import android.content.Context
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 class PrayerTimesViewModel(context : Context) : ViewModel()
 {
@@ -66,22 +67,52 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
-				val prayerTimes = dataStore.getAllPrayerTimes()
-				val day = prayerTimes.timestamp?.dayOfYear
-				if (prayerTimes != null && day != LocalDateTime.now().dayOfYear)
+				val prayerTimesAvailable = dataStore.countPrayerTimes()
+				if (prayerTimesAvailable > 0)
 				{
-					_prayerTimesState.value = PrayerTimesState.Success(prayerTimes)
+
+					val localPrayerTimes = dataStore.getAllPrayerTimes()
+					Log.d("PrayerTimesViewModel" , "loadPrayerTimes: $localPrayerTimes")
+					val localTimesNull = localPrayerTimes.timestamp == null
+					//if timestamp is from today then the data is valid and we can use it
+					val localTimesExpired =
+						localPrayerTimes.timestamp?.toLocalDate() != LocalDate.now()
+
+					if (localTimesNull ||
+						//check if the prayer times are not from today
+						localTimesExpired
+					)
+					{
+						val response = PrayerTimesRepository.getPrayerTimes(context)
+						if (response.data != null)
+						{
+							dataStore.deleteAllPrayerTimes()
+							dataStore.saveAllPrayerTimes(response.data)
+							_prayerTimesState.value = PrayerTimesState.Success(response.data)
+						} else
+						{
+							_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+						}
+					} else
+					{
+						_prayerTimesState.value = PrayerTimesState.Success(localPrayerTimes)
+					}
+
 				} else
 				{
 					val response = PrayerTimesRepository.getPrayerTimes(context)
 					if (response.data != null)
 					{
+						Log.d("PrayerTimesViewModel" , "loadPrayerTimesRemote: $response")
+						dataStore.deleteAllPrayerTimes()
+						dataStore.saveAllPrayerTimes(response.data)
 						_prayerTimesState.value = PrayerTimesState.Success(response.data)
 					} else
 					{
 						_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
 					}
 				}
+
 			} catch (e : Exception)
 			{
 				_prayerTimesState.value =
