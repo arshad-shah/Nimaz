@@ -11,4 +11,5 @@ data class LocalAya(
 	val translation : String ,
 	val ayaType : String , //surah or juz
 	val numberOfType : Int , //surah number or juz number
+	val translationLanguage : String ,
 				   )
