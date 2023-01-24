@@ -23,10 +23,10 @@ Nimaz is an android app that helps you keep track of your prayer times and stay 
 To install the app, please follow the instructions on the app store where you will download the app from.
 
 # Support
-If you have any questions or issues with the app, please contact us at [email address]. We will be happy to assist you.
+If you have any questions or issues with the app, please contact us at info@arshadshah.com. We will be happy to assist you.
 
 # Contributing
-If you would like to contribute to the development of the app, please contact us at [email address]. We welcome all contributions, including bug reports, feature requests, and code contributions.
+If you would like to contribute to the development of the app, please contact us at info@arshadshah.com. We welcome all contributions, including bug reports, feature requests, and code contributions.
 
 # License
 The app is licensed under the [insert license]. Please see the [insert link] for more information.
