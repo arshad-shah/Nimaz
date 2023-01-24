@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.data.remote.repositories
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
 import io.ktor.client.plugins.*
@@ -34,9 +33,6 @@ object QuranRepository
 								 )
 				surahs.add(surah)
 			}
-			val datastore = LocalDataStore.getDataStore()
-
-			datastore.saveAllSurah(surahs)
 			ApiResponse.Success(surahs)
 		} catch (e : ClientRequestException)
 		{
@@ -65,8 +61,6 @@ object QuranRepository
 							 )
 				Juzs.add(juz)
 			}
-			val datastore = LocalDataStore.getDataStore()
-			datastore.saveAllJuz(Juzs)
 			ApiResponse.Success(Juzs)
 		} catch (e : ClientRequestException)
 		{
@@ -100,6 +94,7 @@ object QuranRepository
 						ayaResponse.translation ,
 						"Surah" ,
 						surahNumber ,
+						languageConverted
 							 )
 				ayas.add(aya)
 			}
@@ -134,6 +129,7 @@ object QuranRepository
 						ayaResponse.translation ,
 						"Juz" ,
 						juzNumber ,
+						languageConverted
 							 )
 				ayas.add(aya)
 			}

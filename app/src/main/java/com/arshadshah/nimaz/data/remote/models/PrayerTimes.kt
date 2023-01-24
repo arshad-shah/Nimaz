@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.data.remote.models
 import java.time.LocalDateTime
 
 data class PrayerTimes(
-	val timestamp : LocalDateTime? = null ,
+	val timestamp : LocalDateTime? ,
 	val fajr : LocalDateTime? ,
 	val sunrise : LocalDateTime? ,
 	val dhuhr : LocalDateTime? ,

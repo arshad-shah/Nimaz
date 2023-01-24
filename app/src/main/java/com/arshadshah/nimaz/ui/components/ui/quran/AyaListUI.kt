@@ -348,7 +348,8 @@ fun AyaListItemUIPreview()
 						"بسم الله الرحمن الرحيم" ,
 						"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
 						"Surah" ,
-						1
+						1 ,
+						"ENGLISH"
 				   )
 				   )
 		ayaList.add(
@@ -356,7 +357,8 @@ fun AyaListItemUIPreview()
 						1 ,
 						"الحمد لله رب العالمين" ,
 						"All praise is due to Allah, Lord of the worlds." , "Surah" ,
-						1
+						1 ,
+						"ENGLISH"
 				   )
 				   )
 		ayaList.add(
@@ -364,14 +366,15 @@ fun AyaListItemUIPreview()
 						2 ,
 						"الرحمن الرحيم" ,
 						"The Entirely Merciful, the Especially Merciful." ,
-						"Surah" ,
-						1
+						"Surah" , 1 ,
+						"ENGLISH"
 				   )
 				   )
 		ayaList.add(
 				Aya(
 						3 , "مالك يوم الدين" , "Master of the Day of Judgment." , "Surah" ,
-						1
+						1 ,
+						"ENGLISH"
 				   )
 				   )
 		ayaList.add(
@@ -379,13 +382,15 @@ fun AyaListItemUIPreview()
 						4 ,
 						"إياك نعبد وإياك نستعين" ,
 						"You alone do we worship, and You alone do we implore for help." , "Surah" ,
-						1
+						1 ,
+						"ENGLISH"
 				   )
 				   )
 		ayaList.add(
 				Aya(
 						5 , "اهدنا الصراط المستقيم" , "Guide us to the straight path." , "Surah" ,
-						1
+						1 ,
+						"ENGLISH"
 				   )
 				   )
 		ayaList.add(
@@ -394,7 +399,8 @@ fun AyaListItemUIPreview()
 						"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
 						"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
 						"Surah" ,
-						1
+						1 ,
+						"ENGLISH"
 				   )
 				   )
 
