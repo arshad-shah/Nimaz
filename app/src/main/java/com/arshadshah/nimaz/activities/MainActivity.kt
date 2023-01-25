@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.updateAppWidget
@@ -51,6 +52,8 @@ class MainActivity : ComponentActivity()
 	override fun onCreate(savedInstanceState : Bundle?)
 	{
 		this.actionBar?.hide()
+
+		LocalDataStore.init(this@MainActivity)
 
 		val appWidgetManager = AppWidgetManager.getInstance(this)
 		val appWidgetIds : IntArray = appWidgetManager.getAppWidgetIds(
@@ -90,8 +93,6 @@ class MainActivity : ComponentActivity()
 		setContent {
 			NimazTheme {
 				val navController = rememberNavController()
-				Location().getAutomaticLocation(this)
-
 				Scaffold(
 						bottomBar = { BottomNavigationBar(navController = navController) }
 						) { it ->
