@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.activities.NamesOfAllah
 import com.arshadshah.nimaz.activities.QuranActivity
 import com.arshadshah.nimaz.activities.SettingsActivity
 import com.arshadshah.nimaz.activities.Tasbih
+import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
 
@@ -25,15 +26,24 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 			startDestination = BottomNavItem.PrayerTimesScreen.screen_route
 		   ) {
 		composable(BottomNavItem.PrayerTimesScreen.screen_route) {
-			PrayerTimesScreen(
-					paddingValues = paddingValues ,
-					onNavigateToTasbihScreen = { arabic : String ->
-						navController.navigate("tasbih/$arabic")
-					} ,
-					onNavigateToNames = {
-						navController.navigate("names")
-					}
-							 )
+			PrayerTimesScreen(paddingValues = paddingValues)
+		}
+
+		composable(BottomNavItem.QiblaScreen.screen_route) {
+			QiblaScreen(paddingValues)
+		}
+		activity(BottomNavItem.QuranScreen.screen_route) {
+			this.activityClass = QuranActivity::class
+		}
+		composable(BottomNavItem.MoreScreen.screen_route) {
+			MoreScreen(paddingValues,
+					   onNavigateToTasbihScreen = { arabic : String ->
+						   navController.navigate("tasbih/$arabic")
+					   },
+					   onNavigateToNames = {
+						   navController.navigate("names")
+					   }
+					  )
 		}
 
 		activity("tasbih/{arabic}") {
@@ -45,12 +55,7 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 			this.activityClass = NamesOfAllah::class
 		}
 
-		composable(BottomNavItem.QiblaScreen.screen_route) {
-			QiblaScreen(paddingValues)
-		}
-		activity(BottomNavItem.QuranScreen.screen_route) {
-			this.activityClass = QuranActivity::class
-		}
+
 		activity(BottomNavItem.SettingsScreen.screen_route) {
 			this.activityClass = SettingsActivity::class
 		}
