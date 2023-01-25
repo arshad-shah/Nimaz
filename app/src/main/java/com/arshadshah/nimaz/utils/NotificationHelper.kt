@@ -19,6 +19,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
+import com.arshadshah.nimaz.constants.AppConstants
 import java.text.DateFormat
 import java.util.*
 
@@ -78,7 +79,7 @@ class NotificationHelper
 			longArrayOf(100 , 200 , 300 , 400 , 500 , 400 , 300 , 200 , 400)
 		// 3
 		notificationManager.createNotificationChannel(channel)
-		Log.i("Notifications" , "Notification Channel $name Successfully created")
+		Log.d(AppConstants.NOTIFICATION_TAG , "Notification Channel $name Successfully created")
 	}
 
 
@@ -117,7 +118,7 @@ class NotificationHelper
 			longArrayOf(100 , 200 , 300 , 400 , 500 , 400 , 300 , 200 , 400)
 		// 3
 		notificationManager.createNotificationChannel(channel)
-		Log.i("Notifications" , "Notification Channel $name Successfully created")
+		Log.d(AppConstants.NOTIFICATION_TAG , "Notification Channel $name Successfully created")
 	}
 
 
@@ -177,6 +178,6 @@ class NotificationHelper
 		with(NotificationManagerCompat.from(context)) {
 			notify(notification_id , builder.build())
 		}
-		Log.i("Notifications" , "Notification $title Successfully Displayed")
+		Log.d(AppConstants.NOTIFICATION_TAG , "Notification $title Successfully Displayed")
 	}
 }

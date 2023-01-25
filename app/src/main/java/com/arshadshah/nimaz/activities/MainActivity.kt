@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -27,21 +29,21 @@ import com.google.android.play.core.install.model.UpdateAvailability
 class MainActivity : ComponentActivity()
 {
 
-	val REQUEST_CODE = 100
-
 	//on resume to check if the update is stalled
 	override fun onResume()
 	{
 		super.onResume()
+		Log.d(AppConstants.MAIN_ACTIVITY_TAG , "onResume:  called")
 		val appUpdateManager = AppUpdateManagerFactory.create(this)
 		appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
 			if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
 			{
+				Log.d(AppConstants.MAIN_ACTIVITY_TAG , "onResume:  update is stalled")
 				appUpdateManager.startUpdateFlowForResult(
 						appUpdateInfo ,
 						AppUpdateType.IMMEDIATE ,
 						this ,
-						REQUEST_CODE
+						AppConstants.APP_UPDATE_REQUEST_CODE
 														 )
 			}
 		}
@@ -54,6 +56,7 @@ class MainActivity : ComponentActivity()
 		this.actionBar?.hide()
 
 		LocalDataStore.init(this@MainActivity)
+		Log.d(AppConstants.MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
 
 		val appWidgetManager = AppWidgetManager.getInstance(this)
 		val appWidgetIds : IntArray = appWidgetManager.getAppWidgetIds(
@@ -66,6 +69,7 @@ class MainActivity : ComponentActivity()
 		{
 			updateAppWidget(this , appWidgetManager , appWidgetId)
 		}
+		Log.d(AppConstants.MAIN_ACTIVITY_TAG , "onCreate:  app widget updated")
 
 		val appUpdateManager = AppUpdateManagerFactory.create(this)
 
@@ -78,12 +82,13 @@ class MainActivity : ComponentActivity()
 				&& appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
 			)
 			{
+				Log.d(AppConstants.MAIN_ACTIVITY_TAG , "onCreate:  update is available and immediate is allowed")
 				// Request the update.
 				appUpdateManager.startUpdateFlowForResult(
 						appUpdateInfo ,
 						AppUpdateType.IMMEDIATE ,
 						this ,
-						REQUEST_CODE
+						AppConstants.APP_UPDATE_REQUEST_CODE
 														 )
 
 			}

@@ -18,8 +18,8 @@ class BootReciever : BroadcastReceiver()
 			intent.action.equals(Intent.ACTION_LOCKED_BOOT_COMPLETED)
 		)
 		{
-			Log.i("Boot Completed" , "Intent action from Boot Complete Received")
-			Log.i("Alarms for Adhan" , "Resetting Alarms after BootUp!")
+			Log.d(AppConstants.BOOT_RECEIVER_TAG , "Boot Completed")
+			Log.d(AppConstants.BOOT_RECEIVER_TAG, "Resetting Alarms after BootUp!")
 
 
 			//TODO: get these from the database instead of shared preferences
@@ -34,6 +34,8 @@ class BootReciever : BroadcastReceiver()
 			val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA, "00:00"))
 
 			CreateAlarms().exact(context , fajr , sunrise , dhuhr , asr , maghrib , isha)
+
+			Log.d(AppConstants.BOOT_RECEIVER_TAG, "Alarms Reset after BootUp!")
 
 		}
 	}
