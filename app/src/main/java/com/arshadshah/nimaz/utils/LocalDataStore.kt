@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.utils
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.AppDatabase
 import com.arshadshah.nimaz.data.local.DataStore
 
@@ -15,6 +17,7 @@ object LocalDataStore
 		{
 			val db = Room.databaseBuilder(context , AppDatabase::class.java , "database").build()
 			dataStore = DataStore(db)
+			Log.d(AppConstants.DATA_STORE_TAG , "DataStore initialized")
 		}
 	}
 
