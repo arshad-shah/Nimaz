@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.utils
 
 import android.content.Context
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.location.LocationFinder
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 
@@ -17,8 +18,8 @@ class Location
 		//get the location
 		locationFinderAuto.getLocations(context , requestCode = 1)
 
-		val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
-		val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
 		//get the location name
 		val locationFinder = LocationFinder()
 		locationFinder.findCityName(context , latitude = latitude , longitude = longitude)

@@ -10,26 +10,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun CoordinatesView()
 {
 	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
-	val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
-	val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+	val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+	val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
 
 	//if a value was changed then set a flag to true so that prayer times can be recalculated
 	//and the flag can be set to false again
 	when
 	{
-		latitude != sharedPreferences.getDataDouble("latitude" , 53.3498) ->
+		latitude != sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498) ->
 		{
-			sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+			sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, true)
 		}
-		longitude != sharedPreferences.getDataDouble("longitude" , - 6.2603) ->
+		longitude != sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603) ->
 		{
-			sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+			sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, true)
 		}
 	}
 

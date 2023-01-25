@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -49,12 +50,13 @@ fun LocationTimeContainerUI(location : String)
 					color = MaterialTheme.colorScheme.outline
 				   )
 			//only allow 50% of the width for the time text
+			//TODO: FIX THIS as we need to use values that are dynamic with different states
 			CustomText(
 					modifier = Modifier
 						.weight(0.5f)
 						.padding(8.dp) ,
 					heading = "Current Prayer" ,
-					text = sharedPreferences.getData("currentPrayer" , "Fajr").lowercase()
+					text = sharedPreferences.getData(AppConstants.CURRENT_PRAYER , "Fajr").lowercase()
 						.replaceFirstChar { it.uppercase() }
 					  )
 		}

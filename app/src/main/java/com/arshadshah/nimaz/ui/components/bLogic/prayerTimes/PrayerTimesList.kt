@@ -9,6 +9,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.ListSkeletonLoader
@@ -31,7 +32,7 @@ fun PrayerTimesList(
 {
 	val context = LocalContext.current
 	val sharedPreferences = PrivateSharedPreferences(context)
-	val alarmLock = sharedPreferences.getDataBoolean("alarmLock" , false)
+	val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 	when (val prayerTimesState = state.value)
 	{
 		is PrayerTimesViewModel.PrayerTimesState.Loading ->
@@ -43,13 +44,13 @@ fun PrayerTimesList(
 		{
 
 			//delete previous values from shared preferences
-			sharedPreferences.removeData("fajr")
-			sharedPreferences.removeData("sunrise")
-			sharedPreferences.removeData("dhuhr")
-			sharedPreferences.removeData("asr")
-			sharedPreferences.removeData("maghrib")
-			sharedPreferences.removeData("isha")
-			sharedPreferences.removeData("currentPrayer")
+			sharedPreferences.removeData(AppConstants.FAJR)
+			sharedPreferences.removeData(AppConstants.SUNRISE)
+			sharedPreferences.removeData(AppConstants.DHUHR)
+			sharedPreferences.removeData(AppConstants.ASR)
+			sharedPreferences.removeData(AppConstants.MAGHRIB)
+			sharedPreferences.removeData(AppConstants.ISHA)
+			sharedPreferences.removeData(AppConstants.CURRENT_PRAYER)
 
 			val prayerTimes = prayerTimesState.prayerTimes
 			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
@@ -61,13 +62,15 @@ fun PrayerTimesList(
 			prayerTimesMap["isha"] = prayerTimes.isha
 
 			//save the prayer times in shared preferences
-			sharedPreferences.saveData("fajr" , prayerTimes.fajr.toString())
-			sharedPreferences.saveData("sunrise" , prayerTimes.sunrise.toString())
-			sharedPreferences.saveData("dhuhr" , prayerTimes.dhuhr.toString())
-			sharedPreferences.saveData("asr" , prayerTimes.asr.toString())
-			sharedPreferences.saveData("maghrib" , prayerTimes.maghrib.toString())
-			sharedPreferences.saveData("isha" , prayerTimes.isha.toString())
-			sharedPreferences.saveData("currentPrayer" , prayerTimes.currentPrayer !!.name)
+			sharedPreferences.saveData(AppConstants.FAJR , prayerTimes.fajr.toString())
+			sharedPreferences.saveData(AppConstants.SUNRISE , prayerTimes.sunrise.toString())
+			sharedPreferences.saveData(AppConstants.DHUHR , prayerTimes.dhuhr.toString())
+			sharedPreferences.saveData(AppConstants.ASR , prayerTimes.asr.toString())
+			sharedPreferences.saveData(AppConstants.MAGHRIB , prayerTimes.maghrib.toString())
+			sharedPreferences.saveData(AppConstants.ISHA , prayerTimes.isha.toString())
+			sharedPreferences.saveData(AppConstants.CURRENT_PRAYER ,
+									   prayerTimes.currentPrayer?.name.toString()
+									  )
 
 
 			if (! alarmLock)
@@ -81,7 +84,7 @@ fun PrayerTimesList(
 						prayerTimes.maghrib !! ,
 						prayerTimes.isha !!
 									)
-				sharedPreferences.saveDataBoolean("alarmLock" , true)
+				sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 			}
 
 			prayerTimes.nextPrayer?.let {

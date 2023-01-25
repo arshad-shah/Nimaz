@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.arshadshah.nimaz.activities.Introduction
 import com.arshadshah.nimaz.activities.MainActivity
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.icons.Prayer
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
@@ -96,7 +97,7 @@ sealed class OnBoardingPage(
 					//the state of the switch
 					val state =
 						rememberPreferenceBooleanSettingState(
-								"notificationAllowed" ,
+								AppConstants.NOTIFICATION_ALLOWED ,
 								notificationEnabled
 															 )
 					SettingsSwitch(
@@ -127,7 +128,7 @@ sealed class OnBoardingPage(
 								{
 									//if its unchecked, then we need to remove the notification permission
 									//and remove the value from the shared preferences
-									sharedpref.removeData("notificationAllowed")
+									sharedpref.removeData(AppConstants.NOTIFICATION_ALLOWED)
 								}
 							} ,
 							title = {
@@ -188,7 +189,7 @@ sealed class OnBoardingPage(
 				val sharedpref = PrivateSharedPreferences(context)
 				//the state of the switch
 				val state =
-					rememberPreferenceBooleanSettingState("location_auto" , permissionGranted)
+					rememberPreferenceBooleanSettingState(AppConstants.LOCATION_TYPE, permissionGranted)
 				SettingsSwitch(
 						state = state ,
 						onCheckedChange = {
@@ -206,7 +207,7 @@ sealed class OnBoardingPage(
 							{
 								//if its unchecked, then we need to remove the location permission
 								//and remove the value from the shared preferences
-								sharedpref.removeData("locationAllowed")
+								sharedpref.removeData(AppConstants.LOCATION_TYPE)
 							}
 						} ,
 						title = {
@@ -263,7 +264,7 @@ sealed class OnBoardingPage(
 					powerManager.isIgnoringBatteryOptimizations(context.packageName)
 				//the state of the switch
 				val state = rememberPreferenceBooleanSettingState(
-						"battery_optimization" ,
+						AppConstants.BATTERY_OPTIMIZATION ,
 						isbatteryOptimizationExempted
 																 )
 				SettingsSwitch(
@@ -273,7 +274,7 @@ sealed class OnBoardingPage(
 							{
 								//if the switch is checked, then we need to ask for the battery optimization exemption
 								//and save the value in the shared preferences
-								sharedpref.saveDataBoolean("battery_optimization" , true)
+								sharedpref.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION, true)
 								val intent = Intent()
 								intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 								intent.data = Uri.parse("package:" + context.packageName)
@@ -282,7 +283,7 @@ sealed class OnBoardingPage(
 							{
 								//if its unchecked, then we need to remove the battery optimization exemption
 								//and remove the value from the shared preferences
-								sharedpref.removeData("battery_optimization")
+								sharedpref.removeData(AppConstants.BATTERY_OPTIMIZATION)
 							}
 						} ,
 						title = {
@@ -331,7 +332,7 @@ sealed class OnBoardingPage(
 				Button(
 						onClick = {
 							val sharedPref = PrivateSharedPreferences(context)
-							sharedPref.saveDataBoolean("isFirstInstall" , false)
+							sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
 							context.startActivity(Intent(context , MainActivity::class.java))
 							//remove the activity from the back stack
 							(context as Introduction).finish()
