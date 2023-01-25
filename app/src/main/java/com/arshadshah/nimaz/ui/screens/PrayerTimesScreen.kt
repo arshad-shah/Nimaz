@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.FeatureCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun PrayerTimesScreen(
@@ -32,7 +33,6 @@ fun PrayerTimesScreen(
 	val locationState = remember { viewModel.location }.collectAsState()
 
 	val timerState = viewModel.timer
-
 
 	Column(
 			modifier = Modifier
