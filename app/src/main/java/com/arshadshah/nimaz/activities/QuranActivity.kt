@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.navigation.QuranNavGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -34,8 +35,8 @@ class QuranActivity : ComponentActivity()
 					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
 
 				val sharedPreferences = PrivateSharedPreferences(this)
-				sharedPreferences.saveDataFloat("ArabicFontSize" , 24f)
-				sharedPreferences.saveDataFloat("TranslationFontSize" , 16f)
+				sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE, 24f)
+				sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16f)
 				Scaffold(
 						topBar = {
 							TopAppBar(

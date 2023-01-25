@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
@@ -32,9 +33,9 @@ fun MoreMenu(
 	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 
 	val pageTypeState =
-		rememberPreferenceStringSettingState("PageType" , "List" , sharedPreferences)
+		rememberPreferenceStringSettingState(AppConstants.PAGE_TYPE , "List" , sharedPreferences)
 	val translationState =
-		rememberPreferenceStringSettingState("Translation" , "English" , sharedPreferences)
+		rememberPreferenceStringSettingState(AppConstants.TRANSLATION_LANGUAGE , "English" , sharedPreferences)
 
 	val items1 : List<String> = listOf("List" , "Page (Experimental)")
 	val items2 : List<String> = listOf("English" , "Urdu")
@@ -47,12 +48,12 @@ fun MoreMenu(
 
 
 	val arabicFontSizeState = rememberPreferenceFloatSettingState(
-			"ArabicFontSize",
+			AppConstants.ARABIC_FONT_SIZE,
 			24f,
 			sharedPreferences
 																 )
 	val translationFontSizeState = rememberPreferenceFloatSettingState(
-			"TranslationFontSize",
+			AppConstants.TRANSLATION_FONT_SIZE,
 			16f,
 			sharedPreferences
 																	  )

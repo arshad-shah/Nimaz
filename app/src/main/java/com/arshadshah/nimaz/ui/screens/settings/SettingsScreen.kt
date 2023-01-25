@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.*
@@ -51,14 +52,14 @@ fun SettingsScreen(
 	val locationFinderAuto = LocationFinderAuto()
 
 	val cityname =
-		rememberPreferenceStringSettingState(key = "location_input" , defaultValue = "Abbeyleix")
+		rememberPreferenceStringSettingState(AppConstants.LOCATION_INPUT, "Abbeyleix")
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
 	//if any of the settings are changed, set the flag to true so that the prayer times can be updated
-	if (cityname.value != sharedPreferences.getData("location_input" , "Abbeyleix"))
+	if (cityname.value != sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Abbeyleix"))
 	{
-		sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+		sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, true)
 	}
 
 	Column(
@@ -69,7 +70,7 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Location") }) {
 			val storage =
-				rememberPreferenceBooleanSettingState("location_auto" , true)
+				rememberPreferenceBooleanSettingState(AppConstants.LOCATION_TYPE, true)
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
@@ -107,7 +108,7 @@ fun SettingsScreen(
 						} ,
 						onCheckedChange = {
 							storage.value = it
-							sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+							sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, true)
 						}
 							  )
 			}
@@ -145,12 +146,12 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			//get all the prayer times from the shared preferences
-			val fajr = LocalDateTime.parse(sharedPreferences.getData("fajr" , "00:00"))
-			val sunrise = LocalDateTime.parse(sharedPreferences.getData("sunrise" , "00:00"))
-			val dhuhr = LocalDateTime.parse(sharedPreferences.getData("dhuhr" , "00:00"))
-			val asr = LocalDateTime.parse(sharedPreferences.getData("asr" , "00:00"))
-			val maghrib = LocalDateTime.parse(sharedPreferences.getData("maghrib" , "00:00"))
-			val isha = LocalDateTime.parse(sharedPreferences.getData("isha" , "00:00"))
+			val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR, "00:00"))
+			val sunrise = LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE, "00:00"))
+			val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR, "00:00"))
+			val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR, "00:00"))
+			val maghrib = LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB, "00:00"))
+			val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA, "00:00"))
 
 			ElevatedCard(
 					modifier = Modifier

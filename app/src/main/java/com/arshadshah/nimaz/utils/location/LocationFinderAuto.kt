@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Looper
 import androidx.core.app.ComponentActivity
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.android.gms.location.*
 
@@ -26,8 +27,8 @@ class LocationFinderAuto
 			{
 				for (location in p0.locations)
 				{
-					sharedPreferences.saveDataDouble("latitude" , location.latitude)
-					sharedPreferences.saveDataDouble("longitude" , location.longitude)
+					sharedPreferences.saveDataDouble(AppConstants.LATITUDE, location.latitude)
+					sharedPreferences.saveDataDouble(AppConstants.LONGITUDE, location.longitude)
 				}
 			}
 		}

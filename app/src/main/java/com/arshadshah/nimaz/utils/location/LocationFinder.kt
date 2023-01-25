@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.util.Log
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import java.util.*
 
@@ -30,26 +31,24 @@ class LocationFinder
 	 */
 	fun findLongAndLan(context : Context , name : String)
 	{
+		val sharedPreferences = PrivateSharedPreferences(context)
 		// city name
 		if (name == "No Network")
 		{
 			val isNetworkAvailable = NetworkChecker().networkCheck(context)
 			if (isNetworkAvailable)
 			{
-				val sharedPreferences = PrivateSharedPreferences(context)
-				val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
-				val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+				val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+				val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
 				findCityName(context , latitude , longitude)
 			} else
 			{
-				val sharedPreferences = PrivateSharedPreferences(context)
-				sharedPreferences.saveData("location_input" , "No Network")
+				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , "No Network")
 			}
 		} else
 		{
 			val gcd = Geocoder(context , Locale.getDefault())
 
-			val sharedPreferences = PrivateSharedPreferences(context)
 			val isNetworkAvailable = NetworkChecker().networkCheck(context)
 			if (isNetworkAvailable)
 			{
@@ -62,36 +61,36 @@ class LocationFinder
 						cityName = addresses[0].locality
 						latitudeValue = addresses[0].latitude
 						longitudeValue = addresses[0].longitude
-						sharedPreferences.saveData("location_input" , cityName)
-						sharedPreferences.saveDataDouble("latitude" , latitudeValue)
-						sharedPreferences.saveDataDouble("longitude" , longitudeValue)
+						sharedPreferences.saveData(AppConstants.LOCATION_INPUT , cityName)
+						sharedPreferences.saveDataDouble(AppConstants.LATITUDE , latitudeValue)
+						sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , longitudeValue)
 
 						Log.i("Location" , "Location Found From value $cityName")
 					} else
 					{
 						latitudeValue =
-							sharedPreferences.getDataDouble("latitude" , 53.3498)
+							sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 						longitudeValue =
-							sharedPreferences.getDataDouble("longitude" , - 6.2603)
+							sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 						cityName =
-							sharedPreferences.getData("location_input" , "Abbeyleix")
+							sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 						Log.i("Location" , "Location Found From Storage $cityName")
 					}
 				} catch (e : Exception)
 				{
 					Log.e("Geocoder" , "Geocoder has failed")
-					latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
-					longitudeValue = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+					latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+					longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 					val cityNameFromStorage =
-						sharedPreferences.getData("location_input" , "Abbeyleix")
+						sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 					cityName = cityNameFromStorage
 					Log.i("Location" , "Location Found From Storage $cityName")
 				}
 			} else
 			{
-				latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
-				longitudeValue = sharedPreferences.getDataDouble("longitude" , - 6.2603)
-				cityName = sharedPreferences.getData("location_input" , "Abbeyleix")
+				latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+				longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+				cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 				Log.i("Location" , "Location Found From Storage $cityName")
 			}
 		}
@@ -118,32 +117,32 @@ class LocationFinder
 				if (addresses.isNotEmpty())
 				{
 					cityName = addresses[0].locality
-					sharedPreferences.saveData("location_input" , cityName)
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , cityName)
 
 					Log.i("Location" , "Location Found From value $latitude, and $longitude")
 				} else
 				{
-					latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
-					longitudeValue = sharedPreferences.getDataDouble("longitude" , - 6.2603)
-					cityName = sharedPreferences.getData("location_input" , "Abbeyleix")
+					latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+					longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+					cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 					Log.i("Location" , "Location Found From Storage $cityName")
 				}
 			} catch (e : Exception)
 			{
 				Log.e("Geocoder" , "Geocoder has failed")
-				latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
-				longitudeValue = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+				latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+				longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				val cityNameFromStorage =
-					sharedPreferences.getData("location_input" , "Abbeyleix")
+					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 
 				cityName = cityNameFromStorage
 				Log.i("Location" , "Location Found From value $latitude, and $longitude")
 			}
 		} else
 		{
-			latitudeValue = sharedPreferences.getDataDouble("latitude" , 53.3498)
-			longitudeValue = sharedPreferences.getDataDouble("longitude" , 53.3498)
-			cityName = sharedPreferences.getData("location_input" , "Abbeyleix")
+			latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+			longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+			cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 			Log.i("Location" , "Location Found From Storage $cityName")
 		}
 	}

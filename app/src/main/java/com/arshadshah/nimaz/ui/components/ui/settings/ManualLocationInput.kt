@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -20,7 +21,7 @@ fun ManualLocationInput()
 	//get laitude and longitude from private shared preferences
 	val sharedPreferences = PrivateSharedPreferences(context)
 	val cityName = rememberPreferenceStringSettingState(
-			key = "location_input" ,
+			key = AppConstants.LOCATION_INPUT ,
 			defaultValue = "Abbeyleix" ,
 			sharedPreferences
 													   )

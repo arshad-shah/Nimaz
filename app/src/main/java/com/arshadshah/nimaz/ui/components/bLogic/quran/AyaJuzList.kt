@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
@@ -34,7 +35,7 @@ fun AyaJuzList(
 			//get the translation type from shared preferences
 			val pageType =
 				PrivateSharedPreferences(LocalContext.current).getData(
-						key = "PageType" ,
+						key = AppConstants.PAGE_TYPE ,
 						s = "List"
 																	  )
 			var isList = true
