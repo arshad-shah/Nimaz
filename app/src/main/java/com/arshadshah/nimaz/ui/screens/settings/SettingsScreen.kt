@@ -55,6 +55,12 @@ fun SettingsScreen(
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
+	//if any of the settings are changed, set the flag to true so that the prayer times can be updated
+	if (cityname.value != sharedPreferences.getData("location_input" , "Abbeyleix"))
+	{
+		sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+	}
+
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
@@ -101,6 +107,7 @@ fun SettingsScreen(
 						} ,
 						onCheckedChange = {
 							storage.value = it
+							sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
 						}
 							  )
 			}

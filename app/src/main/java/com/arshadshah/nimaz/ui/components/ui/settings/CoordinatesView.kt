@@ -19,6 +19,20 @@ fun CoordinatesView()
 	val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
 	val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
 
+	//if a value was changed then set a flag to true so that prayer times can be recalculated
+	//and the flag can be set to false again
+	when
+	{
+		latitude != sharedPreferences.getDataDouble("latitude" , 53.3498) ->
+		{
+			sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+		}
+		longitude != sharedPreferences.getDataDouble("longitude" , - 6.2603) ->
+		{
+			sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+		}
+	}
+
 	//round the latitude and longitude to 4 decimal places
 	val latitudeRounded = String.format("%.4f" , latitude)
 	val longitudeRounded = String.format("%.4f" , longitude)
