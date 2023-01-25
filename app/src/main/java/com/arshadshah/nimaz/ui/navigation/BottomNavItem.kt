@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.ui.icons.Prayer
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Book
@@ -14,9 +15,8 @@ sealed class BottomNavItem(var title : String , var icon : ImageVector , var scr
 
 	//today
 	object PrayerTimesScreen :
-		BottomNavItem("Prayer" , Icons.Prayer , "prayer_times_screen")
-
-	object QiblaScreen : BottomNavItem("Qibla" , FeatherIcons.Compass , "qibla_screen")
-	object QuranScreen : BottomNavItem("Quran" , FeatherIcons.Book , "quran_screen")
-	object SettingsScreen : BottomNavItem("Settings" , FeatherIcons.Settings , "settings_screen")
+		BottomNavItem(AppConstants.PRAYER_TIMES_SCREEN_TITLE, Icons.Prayer , AppConstants.PRAYER_TIMES_SCREEN_ROUTE)
+	object QiblaScreen : BottomNavItem( AppConstants.QIBLA_SCREEN_TITLE , FeatherIcons.Compass , AppConstants.QIBLA_SCREEN_ROUTE)
+	object QuranScreen : BottomNavItem( AppConstants.QURAN_SCREEN_TITLE , FeatherIcons.Book , AppConstants.QURAN_SCREEN_ROUTE)
+	object SettingsScreen : BottomNavItem( AppConstants.SETTINGS_SCREEN_TITLE , FeatherIcons.Settings , AppConstants.SETTINGS_SCREEN_ROUTE)
 }

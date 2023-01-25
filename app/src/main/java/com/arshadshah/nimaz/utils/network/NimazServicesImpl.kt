@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.utils.network
 
+import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlin.math.log
 
 object NimazServicesImpl : NimazService
 {
@@ -24,6 +26,7 @@ object NimazServicesImpl : NimazService
 			header("Content-Type" , "application/json")
 		}.body() !!
 
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "login: $response")
 		return response
 	}
 
@@ -41,6 +44,8 @@ object NimazServicesImpl : NimazService
 			}
 		}.body() !!
 
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getQiblaDirection: $response")
+
 		return response
 	}
 
@@ -56,6 +61,8 @@ object NimazServicesImpl : NimazService
 			header("Content-Type" , "application/json")
 		}.body() !!
 
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getPrayerTimes: $response")
+
 		return response
 	}
 
@@ -67,6 +74,8 @@ object NimazServicesImpl : NimazService
 			header("Content-Type" , "application/json")
 		}.body() !!
 
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getSurahs: $response")
+
 		return response
 	}
 
@@ -77,6 +86,8 @@ object NimazServicesImpl : NimazService
 			method = HttpMethod.Get
 			header("Content-Type" , "application/json")
 		}.body() !!
+
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getJuzs: $response")
 
 		return response
 	}
@@ -95,6 +106,8 @@ object NimazServicesImpl : NimazService
 			header("Content-Type" , "application/json")
 		}.body() !!
 
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForSurah: $response")
+
 		return response
 	}
 
@@ -110,6 +123,8 @@ object NimazServicesImpl : NimazService
 			method = HttpMethod.Get
 			header("Content-Type" , "application/json")
 		}.body() !!
+
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForJuz: $response")
 
 		return response
 	}

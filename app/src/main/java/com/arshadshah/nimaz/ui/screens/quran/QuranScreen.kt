@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
 import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
@@ -51,7 +53,9 @@ fun QuranScreen(
 		{
 			0 ->
 			{
+				Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG , "Surah Screen")
 				val surahListState = remember { viewModel.surahState }.collectAsState()
+				Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG , "surahListState.value = ${surahListState.value}")
 				SurahList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = surahListState
@@ -60,7 +64,9 @@ fun QuranScreen(
 
 			1 ->
 			{
+				Log.d(AppConstants.QURAN_JUZ_SCREEN_TAG , "Juz Screen")
 				val juzListState = remember { viewModel.juzState }.collectAsState()
+				Log.d(AppConstants.QURAN_JUZ_SCREEN_TAG , "juzListState.value = ${juzListState.value}")
 				JuzList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = juzListState ,
