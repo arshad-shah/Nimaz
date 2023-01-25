@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.activities
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -34,9 +35,14 @@ class QuranActivity : ComponentActivity()
 				val route =
 					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
 
+				Log.d(AppConstants.QURAN_SCREEN_TAG , "onCreate: ${navController.currentDestination?.route}")
+
 				val sharedPreferences = PrivateSharedPreferences(this)
 				sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE, 24f)
 				sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16f)
+				Log.d(AppConstants.QURAN_SCREEN_TAG , "onCreate: ${sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)}")
+				Log.d(AppConstants.QURAN_SCREEN_TAG , "onCreate: ${sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)}")
+
 				Scaffold(
 						topBar = {
 							TopAppBar(

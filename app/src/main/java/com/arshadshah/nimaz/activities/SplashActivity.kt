@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +29,7 @@ class SplashActivity : ComponentActivity()
 
 		super.onCreate(savedInstanceState)
 		lifecycleScope.launchWhenCreated {
-			delay(1000)
+			delay(AppConstants.SPLASH_SCREEN_DURATION)
 			val loginToken =
 				NimazServicesImpl.login(AppConstants.USER_USERNAME , AppConstants.USER_PASSWORD)
 			val sharedPref = PrivateSharedPreferences(this@SplashActivity)
@@ -41,11 +42,13 @@ class SplashActivity : ComponentActivity()
 
 			if (firstTime)
 			{
+				Log.d(AppConstants.SPLASH_SCREEN_TAG, "First time install launching setup activity")
 				val intent = Intent(this@SplashActivity , Introduction::class.java)
 				startActivity(intent)
 				finish()
 			} else
 			{
+				Log.d(AppConstants.SPLASH_SCREEN_TAG, "Not first time returning to main activity")
 				val intent = Intent(this@SplashActivity , MainActivity::class.java)
 				startActivity(intent)
 				finish()

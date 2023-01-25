@@ -1,12 +1,13 @@
 package com.arshadshah.nimaz.utils
 
 import android.content.Context
+import com.arshadshah.nimaz.constants.AppConstants
 
 class PrivateSharedPreferences(context : Context)
 {
 
 	private val sharedPreferences = context.getSharedPreferences(
-			"com.arshadshah.nimaz.SharedPreferences" ,
+			AppConstants.PREFERENCES_FILE_NAME ,
 			Context.MODE_PRIVATE
 																)
 	private val editor = sharedPreferences.edit()

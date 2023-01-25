@@ -20,6 +20,9 @@ object AppConstants
 	const val USER_USERNAME = "user"
 	const val USER_PASSWORD = "Thisworldis100%doomed"
 
+
+	//Preferences file name
+	const val PREFERENCES_FILE_NAME = "com.arshadshah.nimaz.SharedPreferences"
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"
 	const val ARABIC_FONT_SIZE = "ArabicFontSize"
@@ -57,6 +60,65 @@ object AppConstants
 	const val BATTERY_OPTIMIZATION = "batteryOptimization"
 	//channelLock
 	const val CHANNEL_LOCK = "channelLock"
+
+	//splash screen
+	const val SPLASH_SCREEN_DURATION = 2000L
+	//main activity app update request code
+	const val APP_UPDATE_REQUEST_CODE = 100
+
+	// bottom nav item titles
+	const val PRAYER_TIMES_SCREEN_TITLE = "Prayer"
+	const val QIBLA_SCREEN_TITLE = "Qibla"
+	const val QURAN_SCREEN_TITLE = "Quran"
+	const val SETTINGS_SCREEN_TITLE = "Settings"
+
+	//bottom nav item routes
+	const val PRAYER_TIMES_SCREEN_ROUTE = "prayer_times_screen"
+	const val QIBLA_SCREEN_ROUTE = "qibla_screen"
+	const val QURAN_SCREEN_ROUTE = "quran_screen"
+	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
+
+	//Logging tags
+
+	//logging tags
+	const val TAG = "Nimaz"
+	//splash screen tag
+	const val SPLASH_SCREEN_TAG = "$TAG: SplashScreen"
+
+	//main activity tag
+	const val MAIN_ACTIVITY_TAG = "$TAG: MainActivity"
+
+	//Qibla compass screen tag
+	const val QIBLA_COMPASS_SCREEN_TAG = "$TAG: QiblaCompassScreen"
+
+	//Quran screen tag
+	const val QURAN_SCREEN_TAG = "$TAG: QuranScreen"
+	//Quran screen tag
+	const val QURAN_SURAH_SCREEN_TAG = "$TAG: QuranSurahScreen"
+	//Quran screen tag
+	const val QURAN_JUZ_SCREEN_TAG = "$TAG: QuranJuzScreen"
+
+	//error detector tag
+	const val ERROR_DETECTOR_TAG = "$TAG: ErrorDetector"
+
+	//notification Tag
+	const val NOTIFICATION_TAG = "$TAG: Notification"
+
+	//data store tag
+	const val DATA_STORE_TAG = "$TAG: DataStore"
+
+	//ResetAdhansReciever
+	const val RESET_ADHANS_RECEIVER_TAG = "$TAG: ResetAdhansReciever"
+
+	//BootReciever
+	const val BOOT_RECEIVER_TAG = "$TAG: BootReciever"
+
+	//AdhanReciever
+	const val ADHAN_RECEIVER_TAG = "$TAG: AdhanReciever"
+
+	//NimazServicesImpl
+	const val NIMAZ_SERVICES_IMPL_TAG = "$TAG: NimazServicesImpl"
+
 
 	//function to return the map of methods
 	fun getMethods() : Map<String , String>

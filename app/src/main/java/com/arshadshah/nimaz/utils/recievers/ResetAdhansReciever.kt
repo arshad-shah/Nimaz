@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 
 class ResetAdhansReciever : BroadcastReceiver()
@@ -21,6 +22,6 @@ class ResetAdhansReciever : BroadcastReceiver()
 		//create alarms
 		CreateAlarms().scheduleAlarms(context , fajr , sunrise , zuhar , asar , maghrib , ishaa)
 
-		Log.i("Alarm Reset" , "All alarms reset")
+		Log.d(AppConstants.RESET_ADHANS_RECEIVER_TAG , "Alarms for Adhan Reset!")
 	}
 }
