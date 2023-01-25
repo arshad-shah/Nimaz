@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class PrayerTimesViewModel(context : Context) : ViewModel()
 {
@@ -78,9 +79,13 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 					val localTimesExpired =
 						localPrayerTimes.timestamp?.toLocalDate() != LocalDate.now()
 
+					//check if the next prayer time has passed
+					val nextPrayerPassed = localPrayerTimes.nextPrayer?.time?.isBefore(LocalDateTime.now())
+
 					if (localTimesNull ||
 						//check if the prayer times are not from today
-						localTimesExpired
+						localTimesExpired ||
+						nextPrayerPassed == true
 					)
 					{
 						val response = PrayerTimesRepository.getPrayerTimes(context)
