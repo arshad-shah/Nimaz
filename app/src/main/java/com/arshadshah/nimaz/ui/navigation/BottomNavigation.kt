@@ -13,6 +13,7 @@ fun BottomNavigationBar(navController : NavController)
 			BottomNavItem.PrayerTimesScreen ,
 			BottomNavItem.QiblaScreen ,
 			BottomNavItem.QuranScreen ,
+			BottomNavItem.MoreScreen ,
 			BottomNavItem.SettingsScreen
 							   )
 	BottomAppBar(

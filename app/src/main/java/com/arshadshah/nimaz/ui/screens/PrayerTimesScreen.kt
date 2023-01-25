@@ -18,8 +18,6 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,
-	onNavigateToTasbihScreen : (String) -> Unit ,
-	onNavigateToNames : () -> Unit ,
 					 )
 {
 	val context = LocalContext.current
@@ -55,10 +53,5 @@ fun PrayerTimesScreen(
 				viewModel = viewModel ,
 				paddingValues = paddingValues
 					   )
-
-		FeatureCard(
-				onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
-				onNavigateToNames = onNavigateToNames
-				   )
 	}
 }

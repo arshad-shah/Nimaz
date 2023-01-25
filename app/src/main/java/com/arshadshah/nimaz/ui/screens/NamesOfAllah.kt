@@ -76,6 +76,7 @@ fun NamesOfAllahRow(
 					.padding(8.dp) ,
 		   ) {
 			Text(
+					modifier = Modifier.padding(start = 8.dp) ,
 					text = "${index + 1}." ,
 					style = MaterialTheme.typography.titleLarge ,
 					color = MaterialTheme.colorScheme.onSurface ,
@@ -91,7 +92,7 @@ fun NamesOfAllahRow(
 							.padding(4.dp)
 							.fillMaxWidth() ,
 						text = englishName ,
-						style = MaterialTheme.typography.titleSmall ,
+						style = MaterialTheme.typography.titleMedium ,
 						color = MaterialTheme.colorScheme.onSurface ,
 					)
 				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -112,7 +113,7 @@ fun NamesOfAllahRow(
 							.padding(4.dp)
 							.fillMaxWidth() ,
 						text = translationName ,
-						style = MaterialTheme.typography.titleSmall ,
+						style = MaterialTheme.typography.titleLarge ,
 						color = MaterialTheme.colorScheme.onSurface ,
 					)
 			}
