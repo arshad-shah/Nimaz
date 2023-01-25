@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
@@ -35,7 +36,7 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
 
 	//get font size from shared preferences#
 	val sharedPreferences = PrivateSharedPreferences(context)
-	val arabicFontSize = sharedPreferences.getDataFloat("ArabicFontSize")
+	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
 	Verses(
 			modifier = Modifier
 				.padding(paddingValues)

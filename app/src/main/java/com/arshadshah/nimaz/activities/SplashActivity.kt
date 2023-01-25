@@ -37,7 +37,7 @@ class SplashActivity : ComponentActivity()
 			LocalDataStore.init(this@SplashActivity)
 
 			//get the first time flag
-			val firstTime = sharedPref.getDataBoolean("isFirstInstall" , true)
+			val firstTime = sharedPref.getDataBoolean(AppConstants.IS_FIRST_INSTALL , true)
 
 			if (firstTime)
 			{

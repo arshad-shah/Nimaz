@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.recievers.AdhanReciever
@@ -71,11 +72,11 @@ class CreateAlarms
 		channelIshaa = context.getString(R.string.ishaa)
 		CoroutineScope(Dispatchers.IO).launch {
 			val sharedPreferences = PrivateSharedPreferences(context)
-			val channelLock = sharedPreferences.getDataBoolean("channelLock" , false)
+			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK, false)
 			if (! channelLock)
 			{
 				createAllNotificationChannels(context)
-				sharedPreferences.saveDataBoolean("channelLock" , true)
+				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK, true)
 			}
 			//convert the local date time to milliseconds
 			val fajrTime = fajr.toInstant(ZoneOffset.UTC).toEpochMilli()

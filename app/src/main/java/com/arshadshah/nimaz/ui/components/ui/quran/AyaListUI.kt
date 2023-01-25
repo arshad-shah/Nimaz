@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.arshadshah.nimaz.activities.QuranActivity
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
@@ -85,8 +86,8 @@ fun AyaListItemUI(
 
 	//get font size from shared preferences#
 	val sharedPreferences = PrivateSharedPreferences(context)
-	val arabicFontSize = sharedPreferences.getDataFloat("ArabicFontSize")
-	val translationFontSize = sharedPreferences.getDataFloat("TranslationFontSize")
+	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
+	val translationFontSize = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
 
 	//mutable ayaArabic state so that we can change it when the user clicks on the mic button
 	val ayaArabicState = remember { mutableStateOf(ayaArabic) }

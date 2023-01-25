@@ -22,6 +22,41 @@ object AppConstants
 
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"
+	const val ARABIC_FONT_SIZE = "ArabicFontSize"
+	const val TRANSLATION_FONT_SIZE = "TranslationFontSize"
+	const val IS_FIRST_INSTALL = "isFirstInstall"
+	const val LATITUDE = "latitude"
+	const val LONGITUDE = "longitude"
+	const val FAJR_ANGLE = "fajr_angle"
+	const val ISHA_ANGLE = "isha_angle"
+	const val CALCULATION_METHOD = "calculation_method"
+	const val MADHAB = "madhab"
+	const val HIGH_LATITUDE_RULE = "high_latitude_rule"
+	const val FAJR_ADJUSTMENT = "fajr_adjustment"
+	const val SUNRISE_ADJUSTMENT = "sunrise_adjustment"
+	const val DHUHR_ADJUSTMENT = "dhuhr_adjustment"
+	const val ASR_ADJUSTMENT = "asr_adjustment"
+	const val MAGHRIB_ADJUSTMENT = "maghrib_adjustment"
+	const val ISHA_ADJUSTMENT = "isha_adjustment"
+	const val LOCATION_TYPE = "location_type"
+	const val LOCATION_INPUT = "location_input"
+	const val RECALCULATE_PRAYER_TIMES = "recalculate_prayer_times"
+	const val ALARM_LOCK = "alarmLock"
+	const val FAJR = "fajr"
+	const val SUNRISE = "sunrise"
+	const val DHUHR = "dhuhr"
+	const val ASR = "asr"
+	const val MAGHRIB = "maghrib"
+	const val ISHA = "isha"
+	const val CURRENT_PRAYER = "currentPrayer"
+	const val PAGE_TYPE = "PageType"
+	const val TRANSLATION_LANGUAGE = "Translation"
+	//notificationAllowed
+	const val NOTIFICATION_ALLOWED = "notificationAllowed"
+	//battery_optimization
+	const val BATTERY_OPTIMIZATION = "batteryOptimization"
+	//channelLock
+	const val CHANNEL_LOCK = "channelLock"
 
 	//function to return the map of methods
 	fun getMethods() : Map<String , String>

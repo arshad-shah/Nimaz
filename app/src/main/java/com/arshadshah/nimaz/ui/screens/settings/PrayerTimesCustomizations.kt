@@ -32,32 +32,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
 
 	val calculationMethodState =
-		rememberPreferenceStringSettingState("calculation_method" , "IRELAND")
-	val madhabState = rememberPreferenceStringSettingState("madhab" , "HANAFI")
-	val highLatitudeRuleState = rememberPreferenceStringSettingState(
-			"high_latitude_rule" ,
-			"TWILIGHT_ANGLE"
-																	)
+		rememberPreferenceStringSettingState(AppConstants.CALCULATION_METHOD , "IRELAND" , sharedPreferences)
+	val madhabState = rememberPreferenceStringSettingState(AppConstants.MADHAB , "SHAFI" , sharedPreferences)
+	val highLatitudeRuleState = rememberPreferenceStringSettingState(AppConstants.HIGH_LATITUDE_RULE , "MIDDLE_OF_THE_NIGHT" , sharedPreferences)
 	val fajrAngleState =
-		rememberPreferenceStringSettingState("fajr_angle" , "14")
+		rememberPreferenceStringSettingState(AppConstants.FAJR_ANGLE, "18" , sharedPreferences)
 	val ishaAngleState =
-		rememberPreferenceStringSettingState("isha_angle" , "14")
+		rememberPreferenceStringSettingState(AppConstants.ISHA_ANGLE, "18" , sharedPreferences)
 
-	val fajrAdjustment = rememberPreferenceStringSettingState(
-		key = "fajr_adjustment" ,
-		defaultValue = "0"
-	)
-	val sunriseAdjustment = rememberPreferenceStringSettingState(
-		key = "sunrise_adjustment" ,
-		defaultValue = "0"
-	)
-	val dhuhrAdjustment = rememberPreferenceStringSettingState(key = "dhuhr_adjustment" , defaultValue = "0")
-	val asrAdjustment = rememberPreferenceStringSettingState(key = "asr_adjustment" , defaultValue = "0")
-	val maghribAdjustment = rememberPreferenceStringSettingState(
-		key = "maghrib_adjustment" ,
-		defaultValue = "0"
-	)
-	val ishaAdjustment = rememberPreferenceStringSettingState(key = "isha_adjustment" , defaultValue = "0")
+	val fajrAdjustment = rememberPreferenceStringSettingState(AppConstants.FAJR_ADJUSTMENT, "0" , sharedPreferences)
+	val sunriseAdjustment = rememberPreferenceStringSettingState(AppConstants.SUNRISE_ADJUSTMENT, "0" , sharedPreferences)
+	val dhuhrAdjustment = rememberPreferenceStringSettingState(AppConstants.DHUHR_ADJUSTMENT, "0" , sharedPreferences)
+	val asrAdjustment = rememberPreferenceStringSettingState(AppConstants.ASR_ADJUSTMENT, "0" , sharedPreferences)
+	val maghribAdjustment = rememberPreferenceStringSettingState(AppConstants.MAGHRIB_ADJUSTMENT, "0" , sharedPreferences)
+	val ishaAdjustment = rememberPreferenceStringSettingState(AppConstants.ISHA_ADJUSTMENT, "0" , sharedPreferences)
 
 	//call this : sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
 	//whenever a setting is changed to recalculate the prayer times
@@ -74,7 +62,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				   ishaAdjustment.value
 				  )
 	{
-		sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+		sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES , true)
 	}
 
 
