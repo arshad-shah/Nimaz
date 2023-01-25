@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
@@ -69,7 +70,7 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val prayerTimesAvailable = dataStore.countPrayerTimes()
-				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean("recalculate_prayer_times", false)
+				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, false)
 
 				if (prayerTimesAvailable > 0 && !isSettingsUpdated)
 				{
@@ -113,7 +114,7 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 						//if recalculate_prayer_times is true then set it to false
 						if (isSettingsUpdated)
 						{
-							PrivateSharedPreferences(context).saveDataBoolean("recalculate_prayer_times", false)
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, false)
 						}
 						Log.d("PrayerTimesViewModel" , "loadPrayerTimesRemote: ${response.data}")
 						dataStore.deleteAllPrayerTimes()
@@ -138,8 +139,8 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			val sharedPreferences = PrivateSharedPreferences(context)
-			val locationAuto = sharedPreferences.getDataBoolean("location_auto" , true)
-			val locationInput = sharedPreferences.getData("location_input" , "Abbeyleix")
+			val locationAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
+			val locationInput = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Abbeyleix")
 			if (NetworkChecker().networkCheck(context))
 			{
 				if (locationAuto)

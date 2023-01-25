@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.remote.repositories
 
 import android.content.Context
 import android.util.Log
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.models.Prayertime
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -25,21 +26,21 @@ object PrayerTimesRepository
 	{
 
 		val sharedPreferences = PrivateSharedPreferences(context)
-		val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
-		val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
-		val fajrAngle : String = sharedPreferences.getData("fajr_angle" , "14.0")
-		val ishaAngle : String = sharedPreferences.getData("isha_angle" , "14.0")
+		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , -6.2603)
+		val fajrAngle : String = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
+		val ishaAngle : String = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
 		val calculationMethod : String =
-			sharedPreferences.getData("calculation_method" , "IRELAND")
-		val madhab : String = sharedPreferences.getData("madhab" , "HANAFI")
+			sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
+		val madhab : String = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
 		val highLatitudeRule : String =
-			sharedPreferences.getData("high_latitude_rule" , "TWILIGHT_ANGLE")
-		val fajrAdjustment : String = sharedPreferences.getData("fajr_adjustment" , "0")
-		val sunriseAdjustment : String = sharedPreferences.getData("sunrise_adjustment" , "0")
-		val dhuhrAdjustment : String = sharedPreferences.getData("dhuhr_adjustment" , "0")
-		val asrAdjustment : String = sharedPreferences.getData("asr_adjustment" , "0")
-		val maghribAdjustment : String = sharedPreferences.getData("maghrib_adjustment" , "0")
-		val ishaAdjustment : String = sharedPreferences.getData("isha_adjustment" , "0")
+			sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
+		val fajrAdjustment : String = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
+		val sunriseAdjustment : String = sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
+		val dhuhrAdjustment : String = sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
+		val asrAdjustment : String = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT , "0")
+		val maghribAdjustment : String = sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
+		val ishaAdjustment : String = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
 
 		val mapOfParams = mutableMapOf<String , String>()
 		mapOfParams["latitude"] = latitude.toString()
@@ -95,8 +96,8 @@ object PrayerTimesRepository
 	suspend fun getQiblaDirection(context : Context) : ApiResponse<Double>
 	{
 		val sharedPreferences = PrivateSharedPreferences(context)
-		val latitude = sharedPreferences.getDataDouble("latitude" , 53.3498)
-		val longitude = sharedPreferences.getDataDouble("longitude" , - 6.2603)
+		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , -6.2603)
 		return try
 		{
 			val response = NimazServicesImpl.getQiblaDirection(latitude , longitude)

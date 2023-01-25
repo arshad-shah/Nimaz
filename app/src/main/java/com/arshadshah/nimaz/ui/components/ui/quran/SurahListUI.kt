@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -67,7 +68,7 @@ fun SurahListItemUI(
 				) {
 		//get the translation type from shared preferences
 		val translationType =
-			PrivateSharedPreferences(context).getData(key = "Translation" , s = "English")
+			PrivateSharedPreferences(context).getData(key = AppConstants.TRANSLATION_LANGUAGE , s = "English")
 		val language = when (translationType)
 		{
 			"English" -> "english"
