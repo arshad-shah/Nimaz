@@ -70,12 +70,14 @@ object AppConstants
 	const val PRAYER_TIMES_SCREEN_TITLE = "Prayer"
 	const val QIBLA_SCREEN_TITLE = "Qibla"
 	const val QURAN_SCREEN_TITLE = "Quran"
+	const val MORE_SCREEN_TITLE = "More"
 	const val SETTINGS_SCREEN_TITLE = "Settings"
 
 	//bottom nav item routes
 	const val PRAYER_TIMES_SCREEN_ROUTE = "prayer_times_screen"
 	const val QIBLA_SCREEN_ROUTE = "qibla_screen"
 	const val QURAN_SCREEN_ROUTE = "quran_screen"
+	const val MORE_SCREEN_ROUTE = "more_screen"
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
 
 	//Logging tags
