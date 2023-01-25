@@ -10,6 +10,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
@@ -25,19 +26,6 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 {
 	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
-	val fajrAngle : String = sharedPreferences.getData("fajr_angle" , "14.0")
-	val ishaAngle : String = sharedPreferences.getData("isha_angle" , "14.0")
-	val calculationMethod : String =
-		sharedPreferences.getData("calculation_method" , "IRELAND")
-	val madhab : String = sharedPreferences.getData("madhab" , "HANAFI")
-	val highLatitudeRule : String =
-		sharedPreferences.getData("high_latitude_rule" , "TWILIGHT_ANGLE")
-	val fajrAdjustment : String = sharedPreferences.getData("fajr_adjustment" , "0")
-	val sunriseAdjustment : String = sharedPreferences.getData("sunrise_adjustment" , "0")
-	val dhuhrAdjustment : String = sharedPreferences.getData("dhuhr_adjustment" , "0")
-	val asrAdjustment : String = sharedPreferences.getData("asr_adjustment" , "0")
-	val maghribAdjustment : String = sharedPreferences.getData("maghrib_adjustment" , "0")
-	val ishaAdjustment : String = sharedPreferences.getData("isha_adjustment" , "0")
 
 	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
@@ -51,9 +39,45 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			"TWILIGHT_ANGLE"
 																	)
 	val fajrAngleState =
-		rememberPreferenceStringSettingState("fajr_angle" , "14.0")
+		rememberPreferenceStringSettingState("fajr_angle" , "14")
 	val ishaAngleState =
-		rememberPreferenceStringSettingState("isha_angle" , "14.0")
+		rememberPreferenceStringSettingState("isha_angle" , "14")
+
+	val fajrAdjustment = rememberPreferenceStringSettingState(
+		key = "fajr_adjustment" ,
+		defaultValue = "0"
+	)
+	val sunriseAdjustment = rememberPreferenceStringSettingState(
+		key = "sunrise_adjustment" ,
+		defaultValue = "0"
+	)
+	val dhuhrAdjustment = rememberPreferenceStringSettingState(key = "dhuhr_adjustment" , defaultValue = "0")
+	val asrAdjustment = rememberPreferenceStringSettingState(key = "asr_adjustment" , defaultValue = "0")
+	val maghribAdjustment = rememberPreferenceStringSettingState(
+		key = "maghrib_adjustment" ,
+		defaultValue = "0"
+	)
+	val ishaAdjustment = rememberPreferenceStringSettingState(key = "isha_adjustment" , defaultValue = "0")
+
+	//call this : sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+	//whenever a setting is changed to recalculate the prayer times
+	LaunchedEffect(calculationMethodState.value,
+				   madhabState.value,
+				   highLatitudeRuleState.value,
+				   fajrAngleState.value,
+				   ishaAngleState.value,
+				   fajrAdjustment.value,
+				   sunriseAdjustment.value,
+				   dhuhrAdjustment.value,
+				   asrAdjustment.value,
+				   maghribAdjustment.value,
+				   ishaAdjustment.value
+				  )
+	{
+		sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
+	}
+
+
 
 	Column(
 			modifier = Modifier
@@ -74,7 +98,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							Text(text = "Calculation Method")
 						} ,
 						subtitle = {
-							Text(text = calculationMethod)
+							Text(text = calculationMethodState.value)
 						} ,
 						description = {
 							Text(text = "The method used to calculate the prayer times.")
@@ -95,7 +119,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							Text(text = "Madhab")
 						} ,
 						subtitle = {
-							Text(text = madhab)
+							Text(text = madhabState.value)
 						} ,
 						description = {
 							Text(text = "The madhab used to calculate the asr prayer times.")
@@ -116,7 +140,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							Text(text = "High Latitude Rule")
 						} ,
 						subtitle = {
-							Text(text = highLatitudeRule)
+							Text(text = highLatitudeRuleState.value)
 						} ,
 						description = {
 							Text(text = "The high latitude rule used to calculate the prayer times.")
@@ -143,7 +167,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							Text(text = "Fajr Angle")
 						} ,
 						subtitle = {
-							Text(text = fajrAngle)
+							Text(text = fajrAngleState.value)
 						} ,
 						description = {
 							Text(text = "The angle of the sun at which the Fajr prayer begins")
@@ -163,7 +187,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							Text(text = "Isha Angle")
 						} ,
 						subtitle = {
-							Text(text = ishaAngle)
+							Text(text = ishaAngleState.value)
 						} ,
 						description = {
 							Text(text = "The angle of the sun at which the Isha prayer begins")
@@ -187,7 +211,19 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
-						PrayerTimesCustomizationsLink(title = "Fajr" , fajrAdjustment)
+						SettingsNumberPickerDialog(
+								title = {
+									Text(text = "Fajr Time")
+								} ,
+								subtitle = {
+									Text(text = fajrAdjustment.value)
+								} ,
+								description = {
+										Text(text = "Adjust the time of the Fajr prayer")
+								} ,
+								items = (0 .. 120).map { (it - 60) } ,
+								valueState = fajrAdjustment ,
+												  )
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -195,7 +231,19 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
-						PrayerTimesCustomizationsLink(title = "Sunrise" , sunriseAdjustment)
+						SettingsNumberPickerDialog(
+								title = {
+									Text(text = "Sunrise Time")
+								} ,
+								subtitle = {
+									Text(text = sunriseAdjustment.value)
+								} ,
+								description = {
+										Text(text = "Adjust the time of the Sunrise prayer")
+								} ,
+								items = (0 .. 120).map { (it - 60) } ,
+								valueState = sunriseAdjustment ,
+												  )
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -203,7 +251,19 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
-						PrayerTimesCustomizationsLink(title = "Dhuhr" , dhuhrAdjustment)
+						SettingsNumberPickerDialog(
+								title = {
+									Text(text = "Dhuhr Time")
+								} ,
+								subtitle = {
+									Text(text = dhuhrAdjustment.value)
+								} ,
+								description = {
+										Text(text = "Adjust the time of the Dhuhr prayer")
+								} ,
+								items = (0 .. 120).map { (it - 60) } ,
+								valueState = dhuhrAdjustment ,
+												  )
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -211,7 +271,19 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
-						PrayerTimesCustomizationsLink(title = "Asr" , asrAdjustment)
+						SettingsNumberPickerDialog(
+								title = {
+									Text(text = "Asr Time")
+								} ,
+								subtitle = {
+									Text(text = asrAdjustment.value)
+								} ,
+								description = {
+										Text(text = "Adjust the time of the Asr prayer")
+								} ,
+								items = (0 .. 120).map { (it - 60) } ,
+								valueState = asrAdjustment ,
+												  )
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -219,10 +291,19 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
-						PrayerTimesCustomizationsLink(
-								title = "Maghrib" ,
-								maghribAdjustment
-													 )
+						SettingsNumberPickerDialog(
+								title = {
+									Text(text = "Maghrib Time")
+								} ,
+								subtitle = {
+									Text(text = maghribAdjustment.value)
+								} ,
+								description = {
+										Text(text = "Adjust the time of the Maghrib prayer")
+								} ,
+								items = (0 .. 120).map { (it - 60) } ,
+								valueState = maghribAdjustment ,
+												  )
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -230,41 +311,21 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
-						PrayerTimesCustomizationsLink(title = "Isha" , ishaAdjustment)
+						SettingsNumberPickerDialog(
+								title = {
+									Text(text = "Isha Time")
+								} ,
+								subtitle = {
+									Text(text = ishaAdjustment.value)
+								} ,
+								description = {
+										Text(text = "Adjust the time of the Isha prayer")
+								} ,
+								items = (0 .. 120).map { (it - 60) } ,
+								valueState = ishaAdjustment ,
+												  )
 					}
 				}
 					 )
 	}
-}
-
-//a composable that opens a dialog to change the prayer times
-@Composable
-fun PrayerTimesCustomizationsLink(title : String , subtitle : String)
-{
-	val correctedTitle = title.replaceFirstChar { it.lowercase() }
-	val adjustmentString = "_adjustment"
-	val storage = rememberPreferenceStringSettingState(
-			key = "$correctedTitle$adjustmentString" ,
-			defaultValue = "0"
-													  )
-	SettingsNumberPickerDialog(
-			title = {
-				Text(text = title)
-			} ,
-			subtitle = {
-				Text(text = subtitle)
-			} ,
-			description = {
-				//if title is "Sunrise" then the description is "The time of sunrise"
-				if (title == "Sunrise")
-				{
-					Text(text = "The time of sunrise")
-				} else
-				{
-					Text(text = "Adjust the time of the $title prayer")
-				}
-			} ,
-			items = (0 .. 120).map { (it - 60) } ,
-			valueState = storage ,
-							  )
 }

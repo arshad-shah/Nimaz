@@ -69,7 +69,9 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val prayerTimesAvailable = dataStore.countPrayerTimes()
-				if (prayerTimesAvailable > 0)
+				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean("recalculate_prayer_times", false)
+
+				if (prayerTimesAvailable > 0 && !isSettingsUpdated)
 				{
 
 					val localPrayerTimes = dataStore.getAllPrayerTimes()
@@ -108,7 +110,12 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 					val response = PrayerTimesRepository.getPrayerTimes(context)
 					if (response.data != null)
 					{
-						Log.d("PrayerTimesViewModel" , "loadPrayerTimesRemote: $response")
+						//if recalculate_prayer_times is true then set it to false
+						if (isSettingsUpdated)
+						{
+							PrivateSharedPreferences(context).saveDataBoolean("recalculate_prayer_times", false)
+						}
+						Log.d("PrayerTimesViewModel" , "loadPrayerTimesRemote: ${response.data}")
 						dataStore.deleteAllPrayerTimes()
 						dataStore.saveAllPrayerTimes(response.data)
 						_prayerTimesState.value = PrayerTimesState.Success(response.data)
