@@ -1,5 +1,51 @@
 <resources>
 
+    <string-array name="tasbeeharabic">
+        <item> سُبْحَانَ اللَّه </item>
+        <item>اَلْحَمْدُلِلَّه </item>
+        <item>لَا إِلَهَ إِلَّااللَّه </item>
+        <item>اَللََّهُ اَكْبَرْ </item>
+        <item>اَسْتَغْفِرُاللَّه </item>
+        <item>اللَّهُـمَّ أَنْـتَ السَّلاَمُ،  وَمِـنْكَ السَّلاَمُ،  تَبَارَكْتَ يَا ذَا الجَـلاَلِ وَالإِكْـرَامِ</item>
+        <item>اَللَّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ ﴿﴾
+</item>
+        <item>لاَ إلَهَ إلاَّ اللّهُ وَحْـدَهُ لاَ شَـرِيكَ لَهُ، لَهُ المُـلْكُ ولَهُ الحَمْـدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ﴿﴾</item>
+        <item>اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ ﴿﴾ اللَّهُمَّ بَارِكْ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ ﴿﴾</item>
+    </string-array>
+
+    <string-array name="tasbeehTranslation">
+        <item>Glorious is Allah.</item>
+        <item>All Praises are due to Allah. </item>
+        <item>ّThere is no god except Allah</item>
+        <item>Allah is the greatest.</item>
+        <item>I ask Allah to forgive me. </item>
+        <item>O Allah! You are peace and from You comes peace. Blessed are You, O owner of Majesty and Honour.ِ</item>
+        <item>Allah – there is no deity except Him, the Ever-Living, the Sustainer of ALL existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is [presently] before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.</item>
+        <item>None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, and He is over all things omnipotent.</item>
+        <item>O Allah, let Your Blessings come upon Muhammad (Peace Be Upon Him) and the family of Muhammad (Peace Be Upon Him), as you have blessed Ibrahim and his family. Truly, You are Praiseworthy and Glorious. Allah, bless Muhammad and the family of Muhammad, as you have blessed Ibrahim and his family. Truly, You are Praiseworthy and Glorious.
+        </item>
+    </string-array>
+
+    <string-array name="tasbeehTransliteration">
+        <item> Subhan Allah </item>
+        <item>Alhamdulillah</item>
+        <item>La ilaha illa Allah</item>
+        <item>Allahu Akbar </item>
+        <item>Astaghfirullah</item>
+        <item>Allahumma antas’salam; Wa-minkas salam; Taba’rakhta ya dhal’jalaali wal-ikram.ِ</item>
+        <item> Allahu la-ilaaha illaa’hu wal haiyul qai-yoom;
+Laa-ta’khudhuhoo sinatu’oo walaa na’woom;
+Lahoo ma-fis’samaawaati wama fil ard;
+Man dhal’ladhi yashfa’u in’dahoo illa be-idh’nihi;
+Ya-lamu ma-baina ai’deehim wama khal-fahum;
+Wa-laa yuhee’toona be-shai-im-min il-mihee illa be’maa shaa;
+Wasi’aa kursi’yuhus samaa-waati wal arda;
+Wa-laa yaoo’duhoo hif’Dhuhumaa wa-huwal ali’yyul adheem.</item>
+        <item>Laa-ilaha illal-lah; Wah dahu laa-sharee kalah; Lahul mulku wa-lahul hamd; Wa-huwa ala kulee shay’in qadeer;</item>
+        <item>Allahumma SalliI Ala Muhammadiw Wa Ala Aali Muhammadin Kamaa Sal’laita Ala Ibrahima Wa Ala Aali Ibrahima Inna’ka Hamidum Majid. Allahumma Baarik Ala Muhammadiw Wa Ala Aali Muhammadin Kamaa Baarakta Ala Ibrahima Wa Ala Aali Ibrahima Inna’ka Hamidum Majid.
+        </item>
+    </string-array>
+
     <string-array name="English">
 
 

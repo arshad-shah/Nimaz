@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
+import com.arshadshah.nimaz.ui.screens.ShahadahScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -43,6 +44,9 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 					   onNavigateToListOfTasbeeh = {
 						   navController.navigate("listoftasbeeh")
 					   },
+					   onNavigateToShadah = {
+						   navController.navigate("shahadah")
+					   },
 					  )
 		}
 
@@ -59,6 +63,9 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 			this.activityClass = ListOfTasbeeh::class
 		}
 
+		activity("shahadah") {
+			this.activityClass = ShahadahActivity::class
+		}
 
 		activity(BottomNavItem.SettingsScreen.screen_route) {
 			this.activityClass = SettingsActivity::class
