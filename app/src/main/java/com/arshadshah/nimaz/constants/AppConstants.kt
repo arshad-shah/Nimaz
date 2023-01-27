@@ -17,6 +17,9 @@ object AppConstants
 
 	const val QIBLA_URL = "$BASE_URL/prayertimes/qibla"
 
+	const val DUA_CHAPTERS_URL = "$BASE_URL/Duas/chapters"
+	const val DUA_CHAPTER_URL = "$BASE_URL/Duas/chapter/{chapterId}"
+
 	const val USER_USERNAME = "user"
 	const val USER_PASSWORD = "Thisworldis100%doomed"
 

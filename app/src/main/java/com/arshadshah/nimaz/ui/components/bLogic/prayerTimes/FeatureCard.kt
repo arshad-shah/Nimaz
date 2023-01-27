@@ -1,24 +1,24 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.ui.icons.NineNine
 import com.arshadshah.nimaz.ui.components.ui.icons.PlusMinusTasbih
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowRight
 import compose.icons.feathericons.Github
-import compose.icons.feathericons.Mail
-
+import compose.icons.feathericons.List
 
 
 @Composable
@@ -26,10 +26,10 @@ fun FeatureCard(
 	onNavigateToTasbihScreen : (String) -> Unit ,
 	onNavigateToNames : () -> Unit ,
 	paddingValues : PaddingValues ,
+	onNavigateToListOfTasbeeh : () -> Unit ,
+	onNavigateToShadah : () -> Unit ,
 			   )
 {
-
-	val context = LocalContext.current
 	Column(
 			modifier = Modifier.fillMaxWidth().padding(paddingValues) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
@@ -54,7 +54,7 @@ fun FeatureCard(
 		LinkButton(
 				icon = {
 					Icon(
-							modifier = Modifier.size(48.dp) ,
+							modifier = Modifier.size(28.dp) ,
 							imageVector = Icons.NineNine ,
 							contentDescription = "Names of Allah" ,
 						)
@@ -68,22 +68,27 @@ fun FeatureCard(
 		LinkButton(
 				icon = {
 					Icon(modifier = Modifier.size(48.dp),
-							imageVector = FeatherIcons.Mail ,
-							contentDescription = "Email Link" ,
+							imageVector = FeatherIcons.List ,
+							contentDescription = "Duas" ,
 						)
 				} ,
 				onClick = {
+					onNavigateToListOfTasbeeh()
 				},
-				title = "List of Tasbih" ,
+				title = "Duas" ,
 				  )
 		LinkButton(
 				icon = {
-					Icon(modifier = Modifier.size(48.dp),
-							imageVector = FeatherIcons.Github ,
-							contentDescription = "Github"
+					//get the icon from drawable folder
+					Icon(
+							modifier = Modifier.size(48.dp) ,
+							painter = painterResource(id = R.drawable.shahadah) ,
+							contentDescription = "Shadah" ,
 						)
 				} ,
-				onClick = {},
+				onClick = {
+					onNavigateToShadah()
+				},
 				title = "Shahadah"
 				  )
 

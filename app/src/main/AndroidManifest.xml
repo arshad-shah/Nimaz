@@ -32,7 +32,16 @@
         android:theme="@style/Theme.Nimaz"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
-
+        <activity
+            android:name=".activities.ShahadahActivity"
+            android:exported="false"
+            android:label="@string/title_activity_shahadah"
+            android:theme="@style/Theme.Nimaz" />
+        <activity
+            android:name=".activities.ListOfTasbeeh"
+            android:exported="false"
+            android:label="@string/title_activity_list_of_tasbeeh"
+            android:theme="@style/Theme.Nimaz" />
         <activity
             android:name=".activities.NamesOfAllah"
             android:exported="false"
@@ -91,7 +100,7 @@
             android:exported="false"
             android:label="@string/title_activity_quran"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz"></activity>
+            android:theme="@style/Theme.Nimaz" />
         <activity
             android:name=".activities.Introduction"
             android:exported="false"
