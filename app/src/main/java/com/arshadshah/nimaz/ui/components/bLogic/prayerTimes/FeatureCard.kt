@@ -69,13 +69,13 @@ fun FeatureCard(
 				icon = {
 					Icon(modifier = Modifier.size(48.dp),
 							imageVector = FeatherIcons.List ,
-							contentDescription = "List of Tasbeeh" ,
+							contentDescription = "Duas" ,
 						)
 				} ,
 				onClick = {
 					onNavigateToListOfTasbeeh()
 				},
-				title = "List of Tasbih" ,
+				title = "Duas" ,
 				  )
 		LinkButton(
 				icon = {
