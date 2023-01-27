@@ -128,4 +128,34 @@ object NimazServicesImpl : NimazService
 
 		return response
 	}
+
+//get all the chapters for duas from api
+	override suspend fun getChapters() : ArrayList<ChaptersResponse>
+	{
+		//create a get request and return the response
+		val response : ArrayList<ChaptersResponse> = httpClient.request(AppConstants.DUA_CHAPTERS_URL) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
+
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getChapters: $response")
+
+		return response
+	}
+
+	override suspend fun getDuasForChapter(
+		chapterId : Int ,
+										  ) : ChaptersResponse
+	{
+		val url = AppConstants.DUA_CHAPTER_URL.replace("{chapterId}" , chapterId.toString())
+		//create a get request and return the response
+		val response : ChaptersResponse = httpClient.request(url) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
+
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getDuasForChapter: $response")
+
+		return response
+	}
 }

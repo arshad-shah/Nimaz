@@ -8,12 +8,14 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.FeatureCard
 fun MoreScreen(
 	paddingValues : PaddingValues ,
 	onNavigateToTasbihScreen : (String) -> Unit ,
-	onNavigateToNames : () -> Unit
+	onNavigateToNames : () -> Unit ,
+	onNavigateToListOfTasbeeh : () -> Unit
 			  )
 {
 	FeatureCard(
 			paddingValues = paddingValues ,
 			onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
-			onNavigateToNames = onNavigateToNames
+			onNavigateToNames = onNavigateToNames,
+			onNavigateToListOfTasbeeh = onNavigateToListOfTasbeeh
 			   )
 }

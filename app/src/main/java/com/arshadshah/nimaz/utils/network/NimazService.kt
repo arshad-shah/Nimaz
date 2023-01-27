@@ -30,4 +30,12 @@ interface NimazService
 		latitude : Double ,
 		longitude : Double ,
 								 ) : QiblaDirectionResponse
+
+	//get duas chapters
+	suspend fun getChapters() : ArrayList<ChaptersResponse>
+
+	//get duas for chapter
+	suspend fun getDuasForChapter(
+		chapterId : Int ,
+								 ) : ChaptersResponse
 }
