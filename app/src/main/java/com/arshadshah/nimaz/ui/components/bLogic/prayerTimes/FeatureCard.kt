@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
@@ -17,6 +15,7 @@ import com.arshadshah.nimaz.ui.components.ui.icons.PlusMinusTasbih
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowRight
 import compose.icons.feathericons.Github
+import compose.icons.feathericons.List
 import compose.icons.feathericons.Mail
 
 
@@ -26,6 +25,7 @@ fun FeatureCard(
 	onNavigateToTasbihScreen : (String) -> Unit ,
 	onNavigateToNames : () -> Unit ,
 	paddingValues : PaddingValues ,
+	onNavigateToListOfTasbeeh : () -> Unit ,
 			   )
 {
 
@@ -68,11 +68,12 @@ fun FeatureCard(
 		LinkButton(
 				icon = {
 					Icon(modifier = Modifier.size(48.dp),
-							imageVector = FeatherIcons.Mail ,
-							contentDescription = "Email Link" ,
+							imageVector = FeatherIcons.List ,
+							contentDescription = "List of Tasbeeh" ,
 						)
 				} ,
 				onClick = {
+					onNavigateToListOfTasbeeh()
 				},
 				title = "List of Tasbih" ,
 				  )

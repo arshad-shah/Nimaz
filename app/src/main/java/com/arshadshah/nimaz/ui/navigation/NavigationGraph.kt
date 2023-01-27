@@ -9,10 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.arshadshah.nimaz.activities.NamesOfAllah
-import com.arshadshah.nimaz.activities.QuranActivity
-import com.arshadshah.nimaz.activities.SettingsActivity
-import com.arshadshah.nimaz.activities.Tasbih
+import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
@@ -42,7 +39,10 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 					   },
 					   onNavigateToNames = {
 						   navController.navigate("names")
-					   }
+					   },
+					   onNavigateToListOfTasbeeh = {
+						   navController.navigate("listoftasbeeh")
+					   },
 					  )
 		}
 
@@ -53,6 +53,10 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 
 		activity("names") {
 			this.activityClass = NamesOfAllah::class
+		}
+
+		activity("listoftasbeeh") {
+			this.activityClass = ListOfTasbeeh::class
 		}
 
 

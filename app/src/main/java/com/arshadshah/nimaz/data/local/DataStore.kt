@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.data.local
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.arshadshah.nimaz.data.local.models.*
 import com.arshadshah.nimaz.data.remote.models.*
 import java.time.LocalDateTime
@@ -11,6 +13,7 @@ class DataStore(db : AppDatabase)
 	private val juzDao = db.juz
 	private val surahDao = db.surah
 	private val prayerTimesDao = db.prayerTimes
+	private val duaDao = db.dua
 
 	//get all the ayas of a surah
 	suspend fun getAyasOfSurah(surahNumber : Int) =
@@ -54,6 +57,25 @@ class DataStore(db : AppDatabase)
 
 	//get the count of all prayer times
 	suspend fun countPrayerTimes() = prayerTimesDao.count()
+
+	//get all the chapters
+	suspend fun getAllChapters() = duaDao.getAllChapters().map { it.toChapter() }
+
+	//get duas of a chapter by chapter id
+	suspend fun getDuasOfChapter(chapterId : Int) = duaDao.getDuasOfChapter(chapterId).toChapter()
+
+	//count
+	suspend fun countChapters() = duaDao.countChapters()
+
+	//count
+	suspend fun countDuas() = duaDao.countDuas()
+
+	//save all chapters
+	suspend fun saveAllChapters(chapters : ArrayList<Chapter>) =
+		duaDao.saveChapters(chapters.map { it.toLocalChapter() })
+
+	//save one chapter
+	suspend fun saveChapter(chapter : Chapter) = duaDao.saveDuas(chapter.toLocalChapter())
 }
 
 private fun Aya.toLocalAya() = LocalAya(
@@ -148,3 +170,39 @@ private fun LocalPrayerTimes.toPrayerTimes() = PrayerTimes(
 				LocalDateTime.parse(currentPrayer.time) ,
 								  ) ,
 														  )
+
+//duas
+private fun Dua.toLocalDua() = LocalDua(
+		_id = _id ,
+		chapter_id = chapter_id ,
+		favourite = favourite ,
+		arabic_dua = arabic_dua ,
+		arabic_reference = arabic_reference ,
+		english_translation = english_translation ,
+		english_reference = english_reference ,
+									   )
+
+private fun LocalDua.toDua() = Dua(
+		_id = _id ,
+		chapter_id = chapter_id ,
+		favourite = favourite ,
+		arabic_dua = arabic_dua ,
+		arabic_reference = arabic_reference ,
+		english_translation = english_translation ,
+		english_reference = english_reference ,
+								  )
+
+
+private fun Chapter.toLocalChapter() = LocalChapter(
+		_id = _id ,
+		arabic_title = arabic_title ,
+		english_title = english_title ,
+		duas = duas.map { it.toLocalDua() } ,
+												   )
+
+private fun LocalChapter.toChapter() = Chapter(
+		_id = _id ,
+		arabic_title = arabic_title ,
+		english_title = english_title ,
+		duas = duas.map { it.toDua() } as ArrayList<Dua> ,
+											  )
