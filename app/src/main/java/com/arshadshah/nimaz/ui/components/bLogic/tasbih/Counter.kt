@@ -1,14 +1,12 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
-import android.widget.ImageButton
-import androidx.compose.foundation.Image
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.BottomSheetScaffoldState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -17,24 +15,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Edit
-import compose.icons.feathericons.Minus
 import compose.icons.feathericons.Plus
 import es.dmoral.toasty.Toasty
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Counter()
+fun Counter(
+	vibrator : Vibrator ,
+	paddingValues : PaddingValues ,
+	vibrationAllowed : MutableState<Boolean>
+		   )
 {
 
 	//count should not go below 0
@@ -54,7 +50,7 @@ fun Counter()
 				.fillMaxWidth()
 				.fillMaxHeight()
 				.padding(16.dp)
-				.padding(bottom = 196.dp),
+				.padding(paddingValues),
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Top
 		  ) {
@@ -131,10 +127,24 @@ fun Counter()
 							shape = RoundedCornerShape(8.dp)
 						   )
 					.clickable {
+						if (vibrationAllowed.value)
+						{
+							vibrator.vibrate(VibrationEffect.createOneShot(50 , VibrationEffect.DEFAULT_AMPLITUDE))
+						}else{
+							//can't vibrate
+							vibrator.cancel()
+						}
 						count.value ++
 						lapCountCounter.value ++
 						if (lapCountCounter.value == objective.value.toInt())
 						{
+							if (vibrationAllowed.value)
+							{
+								vibrator.vibrate(VibrationEffect.createOneShot(200 , VibrationEffect.DEFAULT_AMPLITUDE))
+							}else{
+								//can't vibrate
+								vibrator.cancel()
+							}
 							lap.value ++
 							lapCountCounter.value = 0
 							Toasty
@@ -215,15 +225,5 @@ fun Counter()
 					}
 				}
 				   )
-	}
-}
-
-//preview of the counter
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview()
-{
-	NimazTheme {
-		Counter()
 	}
 }
