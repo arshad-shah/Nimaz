@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.screens.settings
 
 import android.app.NotificationManager
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,11 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -280,6 +276,56 @@ fun SettingsScreen(
 							Icon(
 									imageVector = FeatherIcons.Settings ,
 									contentDescription = "Settings for notification"
+								)
+						} ,
+								)
+			}
+		}
+
+		SettingsGroup(title = { Text(text = "Legal") }) {
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsMenuLink(
+						title = { Text(text = "Privacy Policy") } ,
+						onClick = {
+							//open the privacy policy in the browser
+							val url = "https://nimaz.arshadshah.com/static/media/Privacy%20Policy.06ada0df63d36ef44b56.pdf"
+							val i = Intent(Intent.ACTION_VIEW)
+							i.data = Uri.parse(url)
+							context.startActivity(i)
+						} ,
+						icon = {
+							Icon(
+									imageVector = FeatherIcons.Lock,
+									contentDescription = "Privacy Policy"
+								)
+						} ,
+								)
+			}
+
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				SettingsMenuLink(
+						title = { Text(text = "Terms and Conditions") } ,
+						onClick = {
+							//open the terms and conditions in the browser
+							val url = "https://nimaz.arshadshah.com/static/media/Terms%20and%20Condition.c2cb253a0ddd3b258abf.pdf"
+							val i = Intent(Intent.ACTION_VIEW)
+							i.data = Uri.parse(url)
+							context.startActivity(i)
+						} ,
+						icon = {
+							Icon(
+									imageVector = FeatherIcons.File,
+									contentDescription = "Privacy Policy"
 								)
 						} ,
 								)

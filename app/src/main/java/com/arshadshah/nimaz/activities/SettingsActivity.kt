@@ -76,6 +76,7 @@ class SettingsActivity : ComponentActivity()
 			"settings" -> "Settings"
 			"about" -> "About"
 			"PrayerTimesCustomizations" -> "Prayer Times Customization"
+			"privacyPolicy" -> "Privacy Policy"
 			else -> "Settings"
 		}
 	}
