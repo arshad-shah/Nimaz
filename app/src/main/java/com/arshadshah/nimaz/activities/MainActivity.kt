@@ -2,24 +2,25 @@ package com.arshadshah.nimaz.activities
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.updateAppWidget
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -94,6 +95,7 @@ class MainActivity : ComponentActivity()
 			}
 		}
 		super.onCreate(savedInstanceState)
+
 		//this is used to show the full activity on the screen
 		setContent {
 			NimazTheme {
@@ -105,21 +107,6 @@ class MainActivity : ComponentActivity()
 				}
 			}
 		}
-	}
-}
-
-//this is a main component to show everything else
-@RequiresApi(Build.VERSION_CODES.S)
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview(modifier : Modifier = Modifier)
-{
-	val navController = rememberNavController()
-	Scaffold(
-			bottomBar = { BottomNavigationBar(navController = navController) }
-			) { it ->
-		NavigationGraph(navController = navController , it)
 	}
 }
 

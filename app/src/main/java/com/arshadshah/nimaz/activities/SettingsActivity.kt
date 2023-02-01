@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.activities
 
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -44,6 +45,8 @@ class SettingsActivity : ComponentActivity()
 											//if nav destination is quran screen then finish activity
 											if (navController.currentDestination?.route == "settings")
 											{
+												//set the result to ok
+												setResult(Activity.RESULT_OK)
 												finish()
 											} else
 											{

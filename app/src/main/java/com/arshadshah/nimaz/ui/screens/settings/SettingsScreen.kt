@@ -19,6 +19,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +38,7 @@ import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Clock
+import compose.icons.feathericons.*
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -49,7 +51,6 @@ fun SettingsScreen(
 				  )
 {
 	val context = LocalContext.current
-	val locationFinderAuto = LocationFinderAuto()
 
 	val cityname =
 		rememberPreferenceStringSettingState(AppConstants.LOCATION_INPUT, "Abbeyleix")
@@ -60,6 +61,25 @@ fun SettingsScreen(
 	if (cityname.value != sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Abbeyleix"))
 	{
 		sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, true)
+	}
+
+	//values for coordinates that are mutable
+	val longitude = remember { mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE, 0.0)) }
+	val latitude = remember { mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE, 0.0)) }
+	val locationName = remember { mutableStateOf(sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Abbeyleix")) }
+
+	//a listner callback that is called when the location is found
+	val locationFoundCallback = { longitudeValue : Double, latitudeValue : Double ->
+		longitude.value = longitudeValue
+		latitude.value = latitudeValue
+	}
+
+	//a callback that is called when using mauual location
+	val locationFoundCallbackManual = { longitudeValue : Double, latitudeValue : Double, name : String ->
+		longitude.value = longitudeValue
+		latitude.value = latitudeValue
+		locationName.value = name
+		sharedPreferences.saveData(AppConstants.LOCATION_INPUT, name)
 	}
 
 	Column(
@@ -81,7 +101,7 @@ fun SettingsScreen(
 						state = storage ,
 						icon = {
 							Icon(
-									imageVector = Icons.Outlined.LocationOn ,
+									imageVector = FeatherIcons.MapPin ,
 									contentDescription = "Location"
 								)
 						} ,
@@ -92,18 +112,19 @@ fun SettingsScreen(
 								//if the location city name is not null, then run the code
 								if (cityname.value != "")
 								{
-									Location().getAutomaticLocation(LocalContext.current)
+									Location().getAutomaticLocation(LocalContext.current , locationFoundCallback, locationFoundCallbackManual)
 								}
 							} else
 							{
 								Text(text = "Manual")
+								val locationFinderAuto = LocationFinderAuto()
 								locationFinderAuto.stopLocationUpdates()
 							}
 						} ,
 						subtitle = {
 							if (storage.value)
 							{
-								Text(text = cityname.value)
+								Text(text = locationName.value)
 							}
 						} ,
 						onCheckedChange = {
@@ -120,9 +141,12 @@ fun SettingsScreen(
 							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							) {
-					ManualLocationInput()
+					ManualLocationInput(locationFoundCallbackManual)
 				}
-				CoordinatesView()
+				CoordinatesView(
+						longitude = longitude ,
+						latitude = latitude
+							  )
 			}
 		}
 		ElevatedCard(
@@ -176,7 +200,7 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = Icons.Filled.Notifications ,
+									imageVector = FeatherIcons.Bell ,
 									contentDescription = "Notifications"
 								)
 						} ,
@@ -226,7 +250,7 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = Icons.Filled.Notifications ,
+									imageVector = FeatherIcons.Bell,
 									contentDescription = "Back"
 								)
 						} ,
@@ -254,7 +278,7 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = Icons.Filled.Settings ,
+									imageVector = FeatherIcons.Settings ,
 									contentDescription = "Settings for notification"
 								)
 						} ,
@@ -278,7 +302,7 @@ fun SettingsScreen(
 					} ,
 					icon = {
 						Icon(
-								imageVector = Icons.Filled.Info ,
+								imageVector = FeatherIcons.Info ,
 								contentDescription = "About"
 							)
 					} ,
