@@ -7,8 +7,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,12 +26,13 @@ fun FeatureCard(
 	paddingValues : PaddingValues ,
 	onNavigateToListOfTasbeeh : () -> Unit ,
 	onNavigateToShadah : () -> Unit ,
+	onNavigateToZakat : () -> Unit ,
 			   )
 {
 	Column(
-			modifier = Modifier.fillMaxWidth().padding(paddingValues) ,
+			modifier = Modifier.fillMaxSize().padding(paddingValues) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.SpaceEvenly
+			verticalArrangement = Arrangement.Center
 		  ) {
 		//website link
 		LinkButton(
@@ -77,6 +76,21 @@ fun FeatureCard(
 				},
 				title = "Duas" ,
 				  )
+		//TODO: IN PROGRESS
+//		LinkButton(
+//				icon = {
+//					//get the icon from drawable folder
+//					Icon(
+//							modifier = Modifier.size(48.dp) ,
+//							imageVector = FeatherIcons.Github ,
+//							contentDescription = "Zakat Calculator" ,
+//						)
+//				} ,
+//				onClick = {
+//					onNavigateToZakat()
+//				},
+//				title = "Zakah Calculator"
+//				  )
 		LinkButton(
 				icon = {
 					//get the icon from drawable folder
