@@ -158,72 +158,71 @@ fun AyaListItemUI(
 				//the file name is the surah number and aya number
 				//button is only visible if the user has granted the app the RECORD_AUDIO permission
 				//if the user has not granted the permission, the button is not visible
-				//TODO: IN Progress
-				IconButton(
-						onClick = {
-							//start recording
-							val permission = ContextCompat.checkSelfPermission(
-									context ,
-									Manifest.permission.RECORD_AUDIO
-																			  )
-							if (permission == PackageManager.PERMISSION_GRANTED)
-							{
-								if (! isRecording.value)
-								{
-									convertAudioToText(context , speechRecognizer) {
-										val errors = ErrorDetector().errorDetector(ayaArabic , it)
-										Toasty.success(context , errors).show()
-										Log.d("AyaListItemUI" , errors.toString())
-										ayaArabicState.value = errors.toString()
-									}
-									Toasty.info(
-											context ,
-											"Recording started" ,
-											Toast.LENGTH_SHORT ,
-											true
-											   ).show()
-									isRecording.value = true
-								} else
-								{
-									speechRecognizer.stopListening()
-									Toasty.info(
-											context ,
-											"Recording stopped" ,
-											Toast.LENGTH_SHORT ,
-											true
-											   ).show()
-									isRecording.value = false
-								}
-							} else
-							{
-								//request permission
-								ActivityCompat.requestPermissions(
-										context as Activity ,
-										arrayOf(Manifest.permission.RECORD_AUDIO) ,
-										1
-																 )
-							}
-						} ,
-						enabled = true ,
-						modifier = Modifier
-							.padding(4.dp)
-							.align(Alignment.End)
-						  ) {
-					if (isRecording.value)
-					{
-						Icon(
-								imageVector = FeatherIcons.MicOff ,
-								contentDescription = "Stop recording" ,
-								tint = Color.Red
-							)
-					} else
-					{
-						Icon(
-								imageVector = FeatherIcons.Mic ,
-								contentDescription = "Record audio" ,
-							)
-					}
-				}
+//				IconButton(
+//						onClick = {
+//							//start recording
+//							val permission = ContextCompat.checkSelfPermission(
+//									context ,
+//									Manifest.permission.RECORD_AUDIO
+//																			  )
+//							if (permission == PackageManager.PERMISSION_GRANTED)
+//							{
+//								if (! isRecording.value)
+//								{
+//									convertAudioToText(context , speechRecognizer) {
+//										val errors = ErrorDetector().errorDetector(ayaArabic , it)
+//										Toasty.success(context , errors).show()
+//										Log.d("AyaListItemUI" , errors.toString())
+//										ayaArabicState.value = errors.toString()
+//									}
+//									Toasty.info(
+//											context ,
+//											"Recording started" ,
+//											Toast.LENGTH_SHORT ,
+//											true
+//											   ).show()
+//									isRecording.value = true
+//								} else
+//								{
+//									speechRecognizer.stopListening()
+//									Toasty.info(
+//											context ,
+//											"Recording stopped" ,
+//											Toast.LENGTH_SHORT ,
+//											true
+//											   ).show()
+//									isRecording.value = false
+//								}
+//							} else
+//							{
+//								//request permission
+//								ActivityCompat.requestPermissions(
+//										context as Activity ,
+//										arrayOf(Manifest.permission.RECORD_AUDIO) ,
+//										1
+//																 )
+//							}
+//						} ,
+//						enabled = true ,
+//						modifier = Modifier
+//							.padding(4.dp)
+//							.align(Alignment.End)
+//						  ) {
+//					if (isRecording.value)
+//					{
+//						Icon(
+//								imageVector = FeatherIcons.MicOff ,
+//								contentDescription = "Stop recording" ,
+//								tint = Color.Red
+//							)
+//					} else
+//					{
+//						Icon(
+//								imageVector = FeatherIcons.Mic ,
+//								contentDescription = "Record audio" ,
+//							)
+//					}
+//				}
 			}
 		}
 	}

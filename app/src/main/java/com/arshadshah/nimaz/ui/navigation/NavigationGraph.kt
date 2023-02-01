@@ -1,10 +1,6 @@
 package com.arshadshah.nimaz.ui.navigation
 
-import android.content.Intent
 import android.os.Build
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -12,7 +8,6 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.*
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
@@ -52,6 +47,9 @@ fun NavigationGraph(
 					   onNavigateToShadah = {
 						   navController.navigate("shahadah")
 					   },
+					   onNavigateToZakat = {
+						   navController.navigate("Zakat")
+					   },
 					  )
 		}
 
@@ -66,6 +64,10 @@ fun NavigationGraph(
 
 		activity("listoftasbeeh") {
 			this.activityClass = ListOfTasbeeh::class
+		}
+
+		activity("Zakat") {
+			this.activityClass = ZakatCalculator::class
 		}
 
 		activity("shahadah") {
