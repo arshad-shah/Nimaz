@@ -85,6 +85,8 @@ dependencies {
 
     implementation "com.google.firebase:firebase-crashlytics:$firebase_crashlytics_version"
     implementation "com.google.firebase:firebase-analytics:$firebase_analytics_version"
+    implementation platform('com.google.firebase:firebase-bom:31.2.0')
+    implementation 'com.google.firebase:firebase-auth-ktx'
 
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 

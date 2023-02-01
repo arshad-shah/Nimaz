@@ -1,8 +1,11 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
+import android.app.Activity
 import android.app.NotificationManager
 import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,20 +17,22 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.activities.EmailPasswordActivity
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
+import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.NotificationHelper
@@ -37,19 +42,25 @@ import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Clock
+import compose.icons.feathericons.LogIn
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+
 
 @Composable
 fun SettingsScreen(
 	onNavigateToPrayerTimeCustomizationScreen : () -> Unit ,
 	onNavigateToAboutScreen : () -> Unit ,
 	paddingValues : PaddingValues ,
+	viewModel : SettingsViewModel = SettingsViewModel() ,
 				  )
 {
 	val context = LocalContext.current
-	val locationFinderAuto = LocationFinderAuto()
+
+	val isLoggedIn = viewModel.loginUiState.collectAsState().value
+
+	val user = viewModel.userStateFlow.collectAsState()
 
 	val cityname =
 		rememberPreferenceStringSettingState(AppConstants.LOCATION_INPUT, "Abbeyleix")
@@ -62,11 +73,43 @@ fun SettingsScreen(
 		sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, true)
 	}
 
+	val activityResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+		if (result.resultCode == Activity.RESULT_OK) {
+			viewModel.checkLogin()
+		}
+	}
+
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
 				.padding(paddingValues)
 		  ) {
+
+		when(isLoggedIn){
+			is SettingsViewModel.LoginState.Success -> {
+				Profile(user, viewModel)
+			}
+			is SettingsViewModel.LoginState.Error -> {
+				ElevatedCard {
+					//login card
+					SettingsMenuLink(title = {
+						Text(text = "Login or Signup")
+					},
+									 icon = {
+										 Icon(
+												 imageVector = FeatherIcons.LogIn ,
+												 contentDescription = "Login or signup"
+											 )
+									 },
+									 onClick = {
+										 activityResult.launch(Intent(context, EmailPasswordActivity::class.java))
+									 })
+				}
+			}
+			is SettingsViewModel.LoginState.Loading -> {
+				CircularLoaderCard()
+			}
+		}
 
 		SettingsGroup(title = { Text(text = "Location") }) {
 			val storage =
@@ -97,6 +140,7 @@ fun SettingsScreen(
 							} else
 							{
 								Text(text = "Manual")
+								val locationFinderAuto = LocationFinderAuto()
 								locationFinderAuto.stopLocationUpdates()
 							}
 						} ,
