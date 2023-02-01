@@ -141,6 +141,14 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 			val sharedPreferences = PrivateSharedPreferences(context)
 			val locationAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
 			val locationInput = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Abbeyleix")
+			//callback for location
+			val locationFoundCallbackManual = { longitudeValue : Double, latitudeValue : Double, name : String ->
+				//save location
+				sharedPreferences.saveData(AppConstants.LOCATION_INPUT, name)
+				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE, longitudeValue)
+				sharedPreferences.saveDataDouble(AppConstants.LATITUDE, latitudeValue)
+
+			}
 			if (NetworkChecker().networkCheck(context))
 			{
 				if (locationAuto)
@@ -148,11 +156,20 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 					val locationfinder = LocationFinder()
 					val latitude = locationfinder.latitudeValue
 					val longitude = locationfinder.longitudeValue
-					locationfinder.findCityName(context , latitude , longitude)
+					locationfinder.findCityName(
+							context ,
+							latitude ,
+							longitude ,
+							locationFoundCallbackManual
+											   )
 					_location.value = LocationState.Success(locationfinder.cityName)
 				} else
 				{
-					Location().getManualLocation(locationInput , context)
+					Location().getManualLocation(
+							locationInput ,
+							context ,
+							locationFoundCallbackManual
+												)
 					_location.value = LocationState.Success(locationInput)
 				}
 			} else

@@ -29,7 +29,11 @@ class LocationFinder
 	 * @param context context of the application
 	 * @param name Name of the city
 	 */
-	fun findLongAndLan(context : Context , name : String)
+	fun findLongAndLan(
+		context : Context ,
+		name : String ,
+		locationFoundCallbackManual : (Double , Double , String) -> Unit
+					  )
 	{
 		val sharedPreferences = PrivateSharedPreferences(context)
 		// city name
@@ -40,7 +44,7 @@ class LocationFinder
 			{
 				val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
 				val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-				findCityName(context , latitude , longitude)
+				findCityName(context , latitude , longitude , locationFoundCallbackManual)
 			} else
 			{
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , "No Network")
@@ -61,6 +65,7 @@ class LocationFinder
 						cityName = addresses[0].locality
 						latitudeValue = addresses[0].latitude
 						longitudeValue = addresses[0].longitude
+						locationFoundCallbackManual(latitudeValue , longitudeValue , cityName)
 						sharedPreferences.saveData(AppConstants.LOCATION_INPUT , cityName)
 						sharedPreferences.saveDataDouble(AppConstants.LATITUDE , latitudeValue)
 						sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , longitudeValue)
@@ -102,7 +107,12 @@ class LocationFinder
 	 * @author Arshad Shah
 	 * @param context context of the application
 	 */
-	fun findCityName(context : Context , latitude : Double , longitude : Double)
+	fun findCityName(
+		context : Context ,
+		latitude : Double ,
+		longitude : Double ,
+		locationFoundCallbackManual : (Double , Double , String) -> Unit
+					)
 	{
 		// city name
 		val gcd = Geocoder(context , Locale.getDefault())
@@ -117,6 +127,9 @@ class LocationFinder
 				if (addresses.isNotEmpty())
 				{
 					cityName = addresses[0].locality
+					latitudeValue = latitude
+					longitudeValue = longitude
+					locationFoundCallbackManual(latitudeValue , longitudeValue , cityName)
 					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , cityName)
 
 					Log.i("Location" , "Location Found From value $latitude, and $longitude")
