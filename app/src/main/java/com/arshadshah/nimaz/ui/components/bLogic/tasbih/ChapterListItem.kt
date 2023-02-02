@@ -42,16 +42,6 @@ fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , )
 			Column(
 					modifier = Modifier.weight(1f).padding(end = 8.dp),
 				  ){
-				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-					Text(
-							text = chapter.arabic_title ,
-							style = MaterialTheme.typography.titleLarge,
-							fontFamily = quranFont ,
-							modifier = Modifier
-								.padding(4.dp)
-								.fillMaxWidth()
-						)
-				}
 				Text(
 						text = chapter.english_title,
 						style = MaterialTheme.typography.titleLarge,
