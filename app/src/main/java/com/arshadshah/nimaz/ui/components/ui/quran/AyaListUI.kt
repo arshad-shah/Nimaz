@@ -14,12 +14,10 @@ import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,7 +48,31 @@ import es.dmoral.toasty.Toasty
 fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues , language : String)
 {
 
-	LazyColumn(userScrollEnabled = true , contentPadding = paddingValues) {
+	//if a new item is viewed, then scroll to that item
+	val sharedPref = LocalContext.current.getSharedPreferences("quran" , 0)
+	val listState = rememberLazyListState()
+	val type = ayaList[0].ayaType
+	val number = ayaList[0].numberOfType
+	val visibleItemIndex = remember { mutableStateOf(sharedPref.getInt("visibleItemIndex-${type}-${number}" , -1)) }
+
+	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
+	LaunchedEffect(listState.firstVisibleItemIndex)
+	{
+		sharedPref.edit().putInt("visibleItemIndex-${type}-${number}" , listState.firstVisibleItemIndex).apply()
+	}
+
+	//when we reopen the app, we want to scroll to the last item viewed
+	LaunchedEffect(visibleItemIndex.value)
+	{
+		if (visibleItemIndex.value != -1)
+		{
+			listState.scrollToItem(visibleItemIndex.value)
+			//set the value back to -1 so that we don't scroll to the same item again
+			visibleItemIndex.value = -1
+		}
+	}
+
+	LazyColumn(userScrollEnabled = true , contentPadding = paddingValues, state = listState) {
 		items(ayaList.size) { index ->
 			AyaListItemUI(
 					ayaNumber = ayaList[index].ayaNumber.toString() ,
