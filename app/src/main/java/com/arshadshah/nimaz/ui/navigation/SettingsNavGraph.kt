@@ -10,7 +10,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.ui.screens.settings.About
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
-import com.arshadshah.nimaz.ui.screens.settings.PrivacyPolicy
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
