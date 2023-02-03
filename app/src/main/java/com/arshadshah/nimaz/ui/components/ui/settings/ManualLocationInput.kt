@@ -32,10 +32,10 @@ fun ManualLocationInput(locationFoundCallbackManual : (Double , Double , String)
 	//onclick open dialog
 	SettingsMenuLink(
 			title = { Text(text = "Edit Location") } ,
-					 subtitle = { Text(text = cityName.value) } ,
-					 onClick = {
-						 showDialog.value = true
-					 },
+			subtitle = { Text(text = cityName.value) } ,
+			onClick = {
+				showDialog.value = true
+			} ,
 			icon = { Icon(imageVector = FeatherIcons.Edit , contentDescription = "Location") }
 					)
 
@@ -58,7 +58,11 @@ fun ManualLocationInput(locationFoundCallbackManual : (Double , Double , String)
 			confirmButton = {
 				Button(onClick = {
 					//get Manual location
-					Location().getManualLocation(name = cityName.value , context = context, locationFoundCallbackManual = locationFoundCallbackManual)
+					Location().getManualLocation(
+							name = cityName.value ,
+							context = context ,
+							locationFoundCallbackManual = locationFoundCallbackManual
+												)
 					showDialog.value = false
 				}) { Text(text = "Confirm") }
 			} ,

@@ -19,7 +19,7 @@ class LocationFinderAuto
 	 */
 	private fun getLocationCallback(
 		context : Context ,
-		listener : (Latitude : Double , Longitude : Double) -> Unit
+		listener : (Latitude : Double , Longitude : Double) -> Unit ,
 								   )
 	{
 		//get the preferences file for the app
@@ -47,10 +47,10 @@ class LocationFinderAuto
 	@SuppressLint("MissingPermission")
 	private fun setUpLocationListener(
 		context : Context ,
-		listener : (Latitude : Double , Longitude : Double) -> Unit
+		listener : (Latitude : Double , Longitude : Double) -> Unit ,
 									 )
 	{
-		getLocationCallback(context, listener)
+		getLocationCallback(context , listener)
 		fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 		val locationRequest =
 			LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY , 72000).build()
@@ -64,7 +64,7 @@ class LocationFinderAuto
 	fun getLocations(
 		context : Context ,
 		requestCode : Int ,
-		listener : (Latitude : Double , Longitude : Double) -> Unit
+		listener : (Latitude : Double , Longitude : Double) -> Unit ,
 					)
 	{
 		when
@@ -75,7 +75,7 @@ class LocationFinderAuto
 				{
 					PermissionUtils.isLocationEnabled(context) ->
 					{
-						setUpLocationListener(context, listener)
+						setUpLocationListener(context , listener)
 					}
 
 					else ->

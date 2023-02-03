@@ -5,7 +5,6 @@ import com.arshadshah.nimaz.constants.AppConstants
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlin.math.log
 
 object NimazServicesImpl : NimazService
 {
@@ -129,14 +128,15 @@ object NimazServicesImpl : NimazService
 		return response
 	}
 
-//get all the chapters for duas from api
+	//get all the chapters for duas from api
 	override suspend fun getChapters() : ArrayList<ChaptersResponse>
 	{
 		//create a get request and return the response
-		val response : ArrayList<ChaptersResponse> = httpClient.request(AppConstants.DUA_CHAPTERS_URL) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : ArrayList<ChaptersResponse> =
+			httpClient.request(AppConstants.DUA_CHAPTERS_URL) {
+				method = HttpMethod.Get
+				header("Content-Type" , "application/json")
+			}.body() !!
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getChapters: $response")
 

@@ -5,9 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Aya")
 data class LocalAya(
-	//a primary key that is auto generated
+		//a primary key that is auto generated
 	@PrimaryKey(autoGenerate = true)
-	val id : Int = 0,
+	val id : Int = 0 ,
 	val ayaNumber : Int ,
 	val ayaArabic : String ,
 	val translation : String ,

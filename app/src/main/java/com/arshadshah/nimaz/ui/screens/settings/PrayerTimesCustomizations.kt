@@ -9,7 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
@@ -31,34 +32,59 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
 
 	val calculationMethodState =
-		rememberPreferenceStringSettingState(AppConstants.CALCULATION_METHOD , "IRELAND" , sharedPreferences)
-	val madhabState = rememberPreferenceStringSettingState(AppConstants.MADHAB , "SHAFI" , sharedPreferences)
-	val highLatitudeRuleState = rememberPreferenceStringSettingState(AppConstants.HIGH_LATITUDE_RULE , "MIDDLE_OF_THE_NIGHT" , sharedPreferences)
+		rememberPreferenceStringSettingState(
+				AppConstants.CALCULATION_METHOD ,
+				"IRELAND" ,
+				sharedPreferences
+											)
+	val madhabState =
+		rememberPreferenceStringSettingState(AppConstants.MADHAB , "SHAFI" , sharedPreferences)
+	val highLatitudeRuleState = rememberPreferenceStringSettingState(
+			AppConstants.HIGH_LATITUDE_RULE ,
+			"MIDDLE_OF_THE_NIGHT" ,
+			sharedPreferences
+																	)
 	val fajrAngleState =
-		rememberPreferenceStringSettingState(AppConstants.FAJR_ANGLE, "18" , sharedPreferences)
+		rememberPreferenceStringSettingState(AppConstants.FAJR_ANGLE , "18" , sharedPreferences)
 	val ishaAngleState =
-		rememberPreferenceStringSettingState(AppConstants.ISHA_ANGLE, "18" , sharedPreferences)
+		rememberPreferenceStringSettingState(AppConstants.ISHA_ANGLE , "18" , sharedPreferences)
 
-	val fajrAdjustment = rememberPreferenceStringSettingState(AppConstants.FAJR_ADJUSTMENT, "0" , sharedPreferences)
-	val sunriseAdjustment = rememberPreferenceStringSettingState(AppConstants.SUNRISE_ADJUSTMENT, "0" , sharedPreferences)
-	val dhuhrAdjustment = rememberPreferenceStringSettingState(AppConstants.DHUHR_ADJUSTMENT, "0" , sharedPreferences)
-	val asrAdjustment = rememberPreferenceStringSettingState(AppConstants.ASR_ADJUSTMENT, "0" , sharedPreferences)
-	val maghribAdjustment = rememberPreferenceStringSettingState(AppConstants.MAGHRIB_ADJUSTMENT, "0" , sharedPreferences)
-	val ishaAdjustment = rememberPreferenceStringSettingState(AppConstants.ISHA_ADJUSTMENT, "0" , sharedPreferences)
+	val fajrAdjustment =
+		rememberPreferenceStringSettingState(AppConstants.FAJR_ADJUSTMENT , "0" , sharedPreferences)
+	val sunriseAdjustment = rememberPreferenceStringSettingState(
+			AppConstants.SUNRISE_ADJUSTMENT ,
+			"0" ,
+			sharedPreferences
+																)
+	val dhuhrAdjustment = rememberPreferenceStringSettingState(
+			AppConstants.DHUHR_ADJUSTMENT ,
+			"0" ,
+			sharedPreferences
+															  )
+	val asrAdjustment =
+		rememberPreferenceStringSettingState(AppConstants.ASR_ADJUSTMENT , "0" , sharedPreferences)
+	val maghribAdjustment = rememberPreferenceStringSettingState(
+			AppConstants.MAGHRIB_ADJUSTMENT ,
+			"0" ,
+			sharedPreferences
+																)
+	val ishaAdjustment =
+		rememberPreferenceStringSettingState(AppConstants.ISHA_ADJUSTMENT , "0" , sharedPreferences)
 
 	//call this : sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
 	//whenever a setting is changed to recalculate the prayer times
-	LaunchedEffect(calculationMethodState.value,
-				   madhabState.value,
-				   highLatitudeRuleState.value,
-				   fajrAngleState.value,
-				   ishaAngleState.value,
-				   fajrAdjustment.value,
-				   sunriseAdjustment.value,
-				   dhuhrAdjustment.value,
-				   asrAdjustment.value,
-				   maghribAdjustment.value,
-				   ishaAdjustment.value
+	LaunchedEffect(
+			calculationMethodState.value ,
+			madhabState.value ,
+			highLatitudeRuleState.value ,
+			fajrAngleState.value ,
+			ishaAngleState.value ,
+			fajrAdjustment.value ,
+			sunriseAdjustment.value ,
+			dhuhrAdjustment.value ,
+			asrAdjustment.value ,
+			maghribAdjustment.value ,
+			ishaAdjustment.value
 				  )
 	{
 		sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES , true)
@@ -206,7 +232,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									Text(text = fajrAdjustment.value)
 								} ,
 								description = {
-										Text(text = "Adjust the time of the Fajr prayer")
+									Text(text = "Adjust the time of the Fajr prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
 								valueState = fajrAdjustment ,
@@ -226,7 +252,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									Text(text = sunriseAdjustment.value)
 								} ,
 								description = {
-										Text(text = "Adjust the time of the Sunrise prayer")
+									Text(text = "Adjust the time of the Sunrise prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
 								valueState = sunriseAdjustment ,
@@ -246,7 +272,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									Text(text = dhuhrAdjustment.value)
 								} ,
 								description = {
-										Text(text = "Adjust the time of the Dhuhr prayer")
+									Text(text = "Adjust the time of the Dhuhr prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
 								valueState = dhuhrAdjustment ,
@@ -266,7 +292,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									Text(text = asrAdjustment.value)
 								} ,
 								description = {
-										Text(text = "Adjust the time of the Asr prayer")
+									Text(text = "Adjust the time of the Asr prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
 								valueState = asrAdjustment ,
@@ -286,7 +312,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									Text(text = maghribAdjustment.value)
 								} ,
 								description = {
-										Text(text = "Adjust the time of the Maghrib prayer")
+									Text(text = "Adjust the time of the Maghrib prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
 								valueState = maghribAdjustment ,
@@ -306,7 +332,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									Text(text = ishaAdjustment.value)
 								} ,
 								description = {
-										Text(text = "Adjust the time of the Isha prayer")
+									Text(text = "Adjust the time of the Isha prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
 								valueState = ishaAdjustment ,

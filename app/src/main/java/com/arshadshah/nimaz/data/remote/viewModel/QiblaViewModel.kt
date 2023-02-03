@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.*
 
 class QiblaViewModel(context : Context) : ViewModel()
 {
@@ -38,10 +37,12 @@ class QiblaViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val qiblaCount = dataStore.countQiblaDirections()
-				if (qiblaCount > 0){
+				if (qiblaCount > 0)
+				{
 					val qibla = dataStore.getQiblaDirection()
 					_qiblaState.value = QiblaState.Success(qibla)
-				}else{
+				} else
+				{
 					val response = PrayerTimesRepository.getQiblaDirection(context)
 					if (response.data != null)
 					{

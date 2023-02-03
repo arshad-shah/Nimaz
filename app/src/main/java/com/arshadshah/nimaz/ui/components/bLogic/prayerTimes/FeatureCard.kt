@@ -30,7 +30,9 @@ fun FeatureCard(
 			   )
 {
 	Column(
-			modifier = Modifier.fillMaxSize().padding(paddingValues) ,
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(paddingValues) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {
@@ -38,14 +40,14 @@ fun FeatureCard(
 		LinkButton(
 				icon = {
 					Icon(
-							modifier = Modifier.size(48.dp),
+							modifier = Modifier.size(48.dp) ,
 							imageVector = Icons.PlusMinusTasbih ,
 							contentDescription = "Tasbih" ,
 						)
 				} ,
 				onClick = {
 					onNavigateToTasbihScreen(" ")
-				},
+				} ,
 				title = "Tasbih" ,
 				  )
 
@@ -60,20 +62,21 @@ fun FeatureCard(
 				} ,
 				onClick = {
 					onNavigateToNames()
-				},
+				} ,
 				title = "Names of Allah" ,
 				  )
 		//email link
 		LinkButton(
 				icon = {
-					Icon(modifier = Modifier.size(48.dp),
+					Icon(
+							modifier = Modifier.size(48.dp) ,
 							imageVector = FeatherIcons.List ,
 							contentDescription = "Duas" ,
 						)
 				} ,
 				onClick = {
 					onNavigateToListOfTasbeeh()
-				},
+				} ,
 				title = "Duas" ,
 				  )
 		//TODO: IN PROGRESS
@@ -102,7 +105,7 @@ fun FeatureCard(
 				} ,
 				onClick = {
 					onNavigateToShadah()
-				},
+				} ,
 				title = "Shahadah"
 				  )
 
@@ -114,19 +117,22 @@ fun FeatureCard(
 fun LinkButton(
 	icon : @Composable () -> Unit ,
 	onClick : () -> Unit ,
-	title: String = "" ,
+	title : String = "" ,
 			  )
 {
 	ElevatedCard(
 			modifier = Modifier
-				.padding(8.dp).fillMaxWidth() ,
+				.padding(8.dp)
+				.fillMaxWidth() ,
 			onClick = onClick
 				) {
 		Row(
-				modifier = Modifier.fillMaxWidth().padding(8.dp) ,
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(8.dp) ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
-		   ){
+		   ) {
 			IconButton(
 					onClick = onClick ,
 					enabled = true ,
@@ -135,8 +141,8 @@ fun LinkButton(
 
 			Text(
 					text = title ,
-					modifier = Modifier.padding(start = 8.dp),
-					style = MaterialTheme.typography.titleLarge,
+					modifier = Modifier.padding(start = 8.dp) ,
+					style = MaterialTheme.typography.titleLarge ,
 				)
 			//an icon of arrow to indicate that it is a link
 			Icon(
@@ -159,7 +165,7 @@ fun LinkButtonPreview()
 						contentDescription = "Github"
 					)
 			} ,
-			onClick = {},
+			onClick = {} ,
 			title = "Github"
 			  )
 }

@@ -39,7 +39,7 @@ fun PrayerTimesScreen(
 			verticalArrangement = Arrangement.SpaceEvenly
 		  ) {
 		// Calling the LocationTimeContainer composable
-		LocationTimeContainer(state = locationState, prayerTimesState = state)
+		LocationTimeContainer(state = locationState , prayerTimesState = state)
 
 		// Calling the DatesContainer composable
 		DatesContainer()

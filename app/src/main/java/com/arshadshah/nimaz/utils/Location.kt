@@ -12,7 +12,7 @@ class Location
 	fun getAutomaticLocation(
 		context : Context ,
 		listener : (Latitude : Double , Longitude : Double) -> Unit ,
-		locationFoundCallbackManual : (Double , Double , String) -> Unit
+		locationFoundCallbackManual : (Double , Double , String) -> Unit ,
 							)
 	{
 		//get laitude and longitude from private shared preferences
@@ -20,24 +20,33 @@ class Location
 		//use locationfinderauto
 		val locationFinderAuto = LocationFinderAuto()
 		//get the location
-		locationFinderAuto.getLocations(context , requestCode = 1, listener = listener)
+		locationFinderAuto.getLocations(context , requestCode = 1 , listener = listener)
 
-		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 		//get the location name
 		val locationFinder = LocationFinder()
-		locationFinder.findCityName(context , latitude = latitude , longitude = longitude,locationFoundCallbackManual = locationFoundCallbackManual)
+		locationFinder.findCityName(
+				context ,
+				latitude = latitude ,
+				longitude = longitude ,
+				locationFoundCallbackManual = locationFoundCallbackManual
+								   )
 	}
 
 	fun getManualLocation(
 		name : String ,
 		context : Context ,
-		locationFoundCallbackManual : (Double , Double , String) -> Unit
+		locationFoundCallbackManual : (Double , Double , String) -> Unit ,
 						 )
 	{
 		//use locationfinderauto
 		val locationFinderManual = LocationFinder()
 		//get the location
-		locationFinderManual.findLongAndLan(context = context , name = name,locationFoundCallbackManual = locationFoundCallbackManual)
+		locationFinderManual.findLongAndLan(
+				context = context ,
+				name = name ,
+				locationFoundCallbackManual = locationFoundCallbackManual
+										   )
 	}
 }

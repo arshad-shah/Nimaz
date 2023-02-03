@@ -70,9 +70,12 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val prayerTimesAvailable = dataStore.countPrayerTimes()
-				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, false)
+				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean(
+						AppConstants.RECALCULATE_PRAYER_TIMES ,
+						false
+																						)
 
-				if (prayerTimesAvailable > 0 && !isSettingsUpdated)
+				if (prayerTimesAvailable > 0 && ! isSettingsUpdated)
 				{
 
 					val localPrayerTimes = dataStore.getAllPrayerTimes()
@@ -83,7 +86,8 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 						localPrayerTimes.timestamp?.toLocalDate() != LocalDate.now()
 
 					//check if the next prayer time has passed
-					val nextPrayerPassed = localPrayerTimes.nextPrayer?.time?.isBefore(LocalDateTime.now())
+					val nextPrayerPassed =
+						localPrayerTimes.nextPrayer?.time?.isBefore(LocalDateTime.now())
 
 					if (localTimesNull ||
 						//check if the prayer times are not from today
@@ -114,7 +118,10 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 						//if recalculate_prayer_times is true then set it to false
 						if (isSettingsUpdated)
 						{
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, false)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.RECALCULATE_PRAYER_TIMES ,
+									false
+																			 )
 						}
 						Log.d("PrayerTimesViewModel" , "loadPrayerTimesRemote: ${response.data}")
 						dataStore.deleteAllPrayerTimes()
@@ -139,16 +146,17 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			val sharedPreferences = PrivateSharedPreferences(context)
-			val locationAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
-			val locationInput = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Abbeyleix")
+			val locationAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE , true)
+			val locationInput = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 			//callback for location
-			val locationFoundCallbackManual = { longitudeValue : Double, latitudeValue : Double, name : String ->
-				//save location
-				sharedPreferences.saveData(AppConstants.LOCATION_INPUT, name)
-				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE, longitudeValue)
-				sharedPreferences.saveDataDouble(AppConstants.LATITUDE, latitudeValue)
+			val locationFoundCallbackManual =
+				{ longitudeValue : Double , latitudeValue : Double , name : String ->
+					//save location
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , name)
+					sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , longitudeValue)
+					sharedPreferences.saveDataDouble(AppConstants.LATITUDE , latitudeValue)
 
-			}
+				}
 			if (NetworkChecker().networkCheck(context))
 			{
 				if (locationAuto)

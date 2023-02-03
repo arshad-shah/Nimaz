@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.network.NimazServicesImpl
 import kotlinx.coroutines.delay
 
 @SuppressLint("CustomSplashScreen")
@@ -39,13 +38,16 @@ class SplashActivity : ComponentActivity()
 
 			if (firstTime)
 			{
-				Log.d(AppConstants.SPLASH_SCREEN_TAG, "First time install launching setup activity")
+				Log.d(
+						AppConstants.SPLASH_SCREEN_TAG ,
+						"First time install launching setup activity"
+					 )
 				val intent = Intent(this@SplashActivity , Introduction::class.java)
 				startActivity(intent)
 				finish()
 			} else
 			{
-				Log.d(AppConstants.SPLASH_SCREEN_TAG, "Not first time returning to main activity")
+				Log.d(AppConstants.SPLASH_SCREEN_TAG , "Not first time returning to main activity")
 				val intent = Intent(this@SplashActivity , MainActivity::class.java)
 				startActivity(intent)
 				finish()

@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.collections.ArrayList
 
 class QuranViewModel(context : Context) : ViewModel()
 {
@@ -137,11 +136,13 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val languageConverted = language.uppercase(Locale.ROOT)
-				val areAyatAvailable = dataStore.countSurahAyat(surahNumber, languageConverted)
-				if(areAyatAvailable > 0){
-					val surahAyatList = dataStore.getAyasOfSurah(surahNumber, languageConverted)
+				val areAyatAvailable = dataStore.countSurahAyat(surahNumber , languageConverted)
+				if (areAyatAvailable > 0)
+				{
+					val surahAyatList = dataStore.getAyasOfSurah(surahNumber , languageConverted)
 					_ayaSurahstate.value = AyaSurahState.Success(surahAyatList as ArrayList<Aya>)
-				}else{
+				} else
+				{
 					val response = QuranRepository.getAyaForSurah(surahNumber , language)
 					if (response.data != null)
 					{
@@ -166,9 +167,10 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val languageConverted = language.uppercase(Locale.ROOT)
-				val areAyatAvailable = dataStore.countJuzAyat(juzNumber, languageConverted)
-				if(areAyatAvailable > 0){
-					val listOfJuzAyat = dataStore.getAyasOfJuz(juzNumber, languageConverted)
+				val areAyatAvailable = dataStore.countJuzAyat(juzNumber , languageConverted)
+				if (areAyatAvailable > 0)
+				{
+					val listOfJuzAyat = dataStore.getAyasOfJuz(juzNumber , languageConverted)
 					_ayaJuzstate.value = AyaJuzState.Success(listOfJuzAyat as ArrayList<Aya>)
 				}
 				val response = QuranRepository.getAyaForJuz(juzNumber , language)
