@@ -71,7 +71,7 @@ class Tasbih : ComponentActivity()
 				//buit if the count is 0, the selected item and indexSelected will be reset
 				LaunchedEffect(key1 = selected.value, key2 = indexSelected.value, key3 = reset.value) {
 					//if the count is 0, then the selected item will be reset
-					if (count.value == 0 && reset.value)
+					if (count.value == 0 && reset.value == true)
 					{
 						selected.value = false
 						indexSelected.value = -1
