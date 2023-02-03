@@ -29,7 +29,7 @@ fun BearingAndLocationContainer(state : State<QiblaViewModel.QiblaState>)
 		is QiblaViewModel.QiblaState.Success ->
 		{
 			//get the location
-			val location = sharedPref.getData(AppConstants.LOCATION_INPUT, "Abbeyleix")
+			val location = sharedPref.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 			//round the bearing to 2 decimal places
 			val bearing = qiblaState.bearing !!.toString().substring(0 , 5)
 			//show the bearing and location

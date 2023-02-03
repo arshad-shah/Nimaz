@@ -6,7 +6,6 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
-import com.arshadshah.nimaz.ui.components.ui.quran.JuzListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.SurahListUI
 import es.dmoral.toasty.Toasty
 

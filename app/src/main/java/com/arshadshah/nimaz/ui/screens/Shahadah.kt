@@ -18,11 +18,13 @@ import com.arshadshah.nimaz.ui.theme.quranFont
 fun ShahadahScreen(paddingValues : PaddingValues)
 {
 
-	Column (
-			modifier = Modifier.padding(paddingValues).fillMaxSize() ,
+	Column(
+			modifier = Modifier
+				.padding(paddingValues)
+				.fillMaxSize() ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
-			){
+		  ) {
 
 		ElevatedCard(
 				modifier = Modifier

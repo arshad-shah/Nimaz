@@ -31,8 +31,7 @@ fun SettingsNavGraph(navController : NavController , paddingValues : PaddingValu
 						navController.navigate(
 								"about"
 											  )
-					}
-					,
+					} ,
 					paddingValues = paddingValues)
 		}
 		composable("about") {

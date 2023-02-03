@@ -72,11 +72,11 @@ class CreateAlarms
 		channelIshaa = context.getString(R.string.ishaa)
 		CoroutineScope(Dispatchers.IO).launch {
 			val sharedPreferences = PrivateSharedPreferences(context)
-			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK, false)
+			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK , false)
 			if (! channelLock)
 			{
 				createAllNotificationChannels(context)
-				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK, true)
+				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK , true)
 			}
 			//convert the local date time to milliseconds
 			val fajrTime = fajr.toInstant(ZoneOffset.UTC).toEpochMilli()

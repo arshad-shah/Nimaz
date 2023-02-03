@@ -34,22 +34,23 @@ fun NavigationGraph(
 			this.activityClass = QuranActivity::class
 		}
 		composable(BottomNavItem.MoreScreen.screen_route) {
-			MoreScreen(paddingValues,
-					   onNavigateToTasbihScreen = { arabic : String ->
-						   navController.navigate("tasbih/$arabic")
-					   },
-					   onNavigateToNames = {
-						   navController.navigate("names")
-					   },
-					   onNavigateToListOfTasbeeh = {
-						   navController.navigate("listoftasbeeh")
-					   },
-					   onNavigateToShadah = {
-						   navController.navigate("shahadah")
-					   },
-					   onNavigateToZakat = {
-						   navController.navigate("Zakat")
-					   },
+			MoreScreen(
+					paddingValues ,
+					onNavigateToTasbihScreen = { arabic : String ->
+						navController.navigate("tasbih/$arabic")
+					} ,
+					onNavigateToNames = {
+						navController.navigate("names")
+					} ,
+					onNavigateToListOfTasbeeh = {
+						navController.navigate("listoftasbeeh")
+					} ,
+					onNavigateToShadah = {
+						navController.navigate("shahadah")
+					} ,
+					onNavigateToZakat = {
+						navController.navigate("Zakat")
+					} ,
 					  )
 		}
 

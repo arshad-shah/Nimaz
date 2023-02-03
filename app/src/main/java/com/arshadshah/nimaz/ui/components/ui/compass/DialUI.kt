@@ -22,15 +22,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.bLogic.compass.SensorData
 import com.arshadshah.nimaz.ui.components.ui.icons.Dot
 import com.arshadshah.nimaz.ui.components.ui.icons.QiblaCompassMain
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -66,8 +62,7 @@ fun DialUI(bearing : Double , data : SensorData?)
 			rotateAnim.animateTo(0f , tween(100))
 			//stop the animation
 			rotateAnim.stop()
-		}
-		else
+		} else
 		{
 			//start the animation
 			rotateAnim.animateTo(target , tween(200))
@@ -75,10 +70,12 @@ fun DialUI(bearing : Double , data : SensorData?)
 	}
 
 	LaunchedEffect(pointingToQibla) {
-		if (pointingToQibla) {
+		if (pointingToQibla)
+		{
 			//create a single shot vibration
-			vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
-		} else {
+			vibrator.vibrate(VibrationEffect.createOneShot(100 , VibrationEffect.DEFAULT_AMPLITUDE))
+		} else
+		{
 			vibrator.cancel()
 		}
 	}
@@ -95,7 +92,7 @@ fun DialUI(bearing : Double , data : SensorData?)
 					.fillMaxWidth()
 					.align(Alignment.CenterHorizontally) ,
 				text = directionToTurn ,
-			 style = MaterialTheme.typography.headlineMedium,
+				style = MaterialTheme.typography.headlineMedium ,
 				textAlign = TextAlign.Center
 			)
 

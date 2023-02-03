@@ -27,7 +27,7 @@ object PrayerTimesRepository
 
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , -6.2603)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 		val fajrAngle : String = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 		val ishaAngle : String = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
 		val calculationMethod : String =
@@ -36,10 +36,13 @@ object PrayerTimesRepository
 		val highLatitudeRule : String =
 			sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
 		val fajrAdjustment : String = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
-		val sunriseAdjustment : String = sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
-		val dhuhrAdjustment : String = sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
+		val sunriseAdjustment : String =
+			sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
+		val dhuhrAdjustment : String =
+			sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
 		val asrAdjustment : String = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT , "0")
-		val maghribAdjustment : String = sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
+		val maghribAdjustment : String =
+			sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
 		val ishaAdjustment : String = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
 
 		val mapOfParams = mutableMapOf<String , String>()
@@ -97,7 +100,7 @@ object PrayerTimesRepository
 	{
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , -6.2603)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 		return try
 		{
 			val response = NimazServicesImpl.getQiblaDirection(latitude , longitude)

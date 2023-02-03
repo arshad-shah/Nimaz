@@ -56,12 +56,12 @@ internal fun updateAppWidget(
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 	//get the prayer times from the shared preferences
-	val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR, "00:00"))
-	val sunrise = LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE, "00:00"))
-	val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR, "00:00"))
-	val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR, "00:00"))
-	val maghrib = LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB, "00:00"))
-	val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA, "00:00"))
+	val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR , "00:00"))
+	val sunrise = LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE , "00:00"))
+	val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR , "00:00"))
+	val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR , "00:00"))
+	val maghrib = LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB , "00:00"))
+	val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA , "00:00"))
 	// Construct the RemoteViews object
 	val views = RemoteViews(context.packageName , R.layout.nimaz)
 

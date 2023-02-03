@@ -1,9 +1,7 @@
 package com.arshadshah.nimaz.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.PrimaryKey
 import androidx.room.Query
-import java.time.LocalDateTime
 
 @Dao
 interface QiblaDao

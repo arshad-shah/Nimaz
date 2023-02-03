@@ -26,44 +26,49 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 	//if a new item is viewed, then scroll to that item
 	val sharedPref = context.getSharedPreferences("dua" , 0)
 	val listState = rememberLazyListState()
-	val visibleItemIndex = remember { mutableStateOf(sharedPref.getInt("visibleItemIndexDua-${chapterId}" , -1)) }
+	val visibleItemIndex =
+		remember { mutableStateOf(sharedPref.getInt("visibleItemIndexDua-${chapterId}" , - 1)) }
 
 	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
 	LaunchedEffect(listState.firstVisibleItemIndex)
 	{
-		sharedPref.edit().putInt("visibleItemIndexDua-${chapterId}" , listState.firstVisibleItemIndex).apply()
+		sharedPref.edit()
+			.putInt("visibleItemIndexDua-${chapterId}" , listState.firstVisibleItemIndex).apply()
 	}
 
 	//when we reopen the app, we want to scroll to the last item viewed
 	LaunchedEffect(visibleItemIndex.value)
 	{
-		if (visibleItemIndex.value != -1)
+		if (visibleItemIndex.value != - 1)
 		{
 			listState.scrollToItem(visibleItemIndex.value)
 			//set the value back to -1 so that we don't scroll to the same item again
-			visibleItemIndex.value = -1
+			visibleItemIndex.value = - 1
 		}
 	}
 
 	when (val duas = duaState.value)
 	{
-		is DuaViewModel.DuaState.Loading -> {
+		is DuaViewModel.DuaState.Loading ->
+		{
 			CircularLoaderCard()
 
 		}
+
 		is DuaViewModel.DuaState.Success ->
 		{
 			LazyColumn(
 					contentPadding = paddingValues ,
-					state = listState,
-					content ={
-				items(duas.duaList.duas.size)
-				{
-					DuaListItem(dua = duas.duaList.duas[it])
-				}
-			})
+					state = listState ,
+					content = {
+						items(duas.duaList.duas.size)
+						{
+							DuaListItem(dua = duas.duaList.duas[it])
+						}
+					})
 
 		}
+
 		is DuaViewModel.DuaState.Error ->
 		{
 			Toasty.error(context , duas.error).show()

@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import java.util.Currency
+import java.util.*
 
 @Composable
 fun ZakatCalculatorScreen(paddingValues : PaddingValues)
@@ -57,66 +57,67 @@ fun ZakatCalculatorScreen(paddingValues : PaddingValues)
 		val payablesValue = payables.value.toDoubleOrNull() ?: 0.0
 		val othersValue = others.value.toDoubleOrNull() ?: 0.0
 
-		val total = moneyValue + goldValue + silverValue + investmentsValue + propertiesValue + businessValue + agricultureValue + cattleValue + preciousStonesValue + payablesValue + othersValue
+		val total =
+			moneyValue + goldValue + silverValue + investmentsValue + propertiesValue + businessValue + agricultureValue + cattleValue + preciousStonesValue + payablesValue + othersValue
 
 		result.value = "Your Zakat is ${total * 0.025}"
 	}
 
-	LazyColumn (
+	LazyColumn(
 			contentPadding = paddingValues ,
-			){
-		item{
-			Category("Money", money.value, onMoneyChange)
+			  ) {
+		item {
+			Category("Money" , money.value , onMoneyChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Gold", gold.value, onGoldChange)
+			Category("Gold" , gold.value , onGoldChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Silver", silver.value, onSilverChange)
+			Category("Silver" , silver.value , onSilverChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Investments", investments.value, onInvestmentsChange)
+			Category("Investments" , investments.value , onInvestmentsChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Properties", properties.value, onPropertiesChange)
+			Category("Properties" , properties.value , onPropertiesChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Business", business.value, onBusinessChange)
+			Category("Business" , business.value , onBusinessChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Agriculture", agriculture.value, onAgricultureChange)
+			Category("Agriculture" , agriculture.value , onAgricultureChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Cattle", cattle.value, onCattleChange)
+			Category("Cattle" , cattle.value , onCattleChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Precious Stones", preciousStones.value, onPreciousStonesChange)
+			Category("Precious Stones" , preciousStones.value , onPreciousStonesChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Payables", payables.value, onPayablesChange)
+			Category("Payables" , payables.value , onPayablesChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
 				   )
-			Category("Others", others.value, onOthersChange)
+			Category("Others" , others.value , onOthersChange)
 			Divider(
 					modifier = Modifier.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.outline
@@ -126,11 +127,15 @@ fun ZakatCalculatorScreen(paddingValues : PaddingValues)
 			Button(
 					modifier = Modifier
 						.padding(16.dp)
-						.fillMaxWidth(),
+						.fillMaxWidth() ,
 					onClick = {
 						onCalculate()
 					}) {
-				Text("Calculate", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+				Text(
+						"Calculate" ,
+						modifier = Modifier.padding(16.dp) ,
+						style = MaterialTheme.typography.titleLarge
+					)
 			}
 		}
 	}
@@ -140,27 +145,27 @@ fun ZakatCalculatorScreen(paddingValues : PaddingValues)
 //one Category with a label and a outlined text field it returns its value as the current users local currency
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Category(label : String ,value: String, onValueChange : (String) -> Unit)
+fun Category(label : String , value : String , onValueChange : (String) -> Unit)
 {
 	Row(
 			modifier = Modifier
 				.padding(8.dp)
-				.fillMaxWidth(),
-			horizontalArrangement = Arrangement.SpaceBetween,
+				.fillMaxWidth() ,
+			horizontalArrangement = Arrangement.SpaceBetween ,
 			verticalAlignment = Alignment.CenterVertically
 	   ) {
-		Text(text = label, style = MaterialTheme.typography.titleMedium)
+		Text(text = label , style = MaterialTheme.typography.titleMedium)
 		//a text field that returns the value as the current users local currency
 		// current users local currency
-		val currencySymbol = Currency.getInstance(java.util.Locale.getDefault()).symbol
+		val currencySymbol = Currency.getInstance(Locale.getDefault()).symbol
 		OutlinedTextField(
 				value = value ,
 				onValueChange = onValueChange ,
 				modifier = Modifier
 					//reduce size of the text field so that it accommodates the 100000,
-					.width(100.dp),
+					.width(100.dp) ,
 				trailingIcon = {
-					Text(text = currencySymbol, style = MaterialTheme.typography.titleLarge)
+					Text(text = currencySymbol , style = MaterialTheme.typography.titleLarge)
 				} ,
 				//only allow numbers
 				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number) ,

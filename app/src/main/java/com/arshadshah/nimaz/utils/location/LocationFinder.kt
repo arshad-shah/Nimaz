@@ -32,7 +32,7 @@ class LocationFinder
 	fun findLongAndLan(
 		context : Context ,
 		name : String ,
-		locationFoundCallbackManual : (Double , Double , String) -> Unit
+		locationFoundCallbackManual : (Double , Double , String) -> Unit ,
 					  )
 	{
 		val sharedPreferences = PrivateSharedPreferences(context)
@@ -42,8 +42,8 @@ class LocationFinder
 			val isNetworkAvailable = NetworkChecker().networkCheck(context)
 			if (isNetworkAvailable)
 			{
-				val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-				val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+				val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+				val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				findCityName(context , latitude , longitude , locationFoundCallbackManual)
 			} else
 			{
@@ -85,7 +85,8 @@ class LocationFinder
 				{
 					Log.e("Geocoder" , "Geocoder has failed")
 					latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-					longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+					longitudeValue =
+						sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 					val cityNameFromStorage =
 						sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 					cityName = cityNameFromStorage
@@ -111,7 +112,7 @@ class LocationFinder
 		context : Context ,
 		latitude : Double ,
 		longitude : Double ,
-		locationFoundCallbackManual : (Double , Double , String) -> Unit
+		locationFoundCallbackManual : (Double , Double , String) -> Unit ,
 					)
 	{
 		// city name
@@ -136,7 +137,8 @@ class LocationFinder
 				} else
 				{
 					latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-					longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+					longitudeValue =
+						sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 					cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
 					Log.i("Location" , "Location Found From Storage $cityName")
 				}

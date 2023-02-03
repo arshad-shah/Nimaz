@@ -32,21 +32,30 @@ fun Counter(
 	paddingValues : PaddingValues ,
 	vibrationAllowed : MutableState<Boolean> ,
 	count : MutableState<Int> ,
-	reset : MutableState<Boolean>
+	reset : MutableState<Boolean> ,
 		   )
 {
 
 	//get all the values from the shared preferences
 
 	val context = LocalContext.current
-	val objective = remember { mutableStateOf(context.getSharedPreferences("tasbih" , 0).getString("objective" , "33")!!) }
+	val objective = remember {
+		mutableStateOf(
+				context.getSharedPreferences("tasbih" , 0).getString("objective" , "33") !!
+					  )
+	}
 
 	var showResetDialog by remember { mutableStateOf(false) }
 	var showObjectiveDialog by remember { mutableStateOf(false) }
 
 	//lap counter
-	val lap = remember { mutableStateOf(context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)) }
-	val lapCountCounter = remember { mutableStateOf(context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)) }
+	val lap =
+		remember { mutableStateOf(context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)) }
+	val lapCountCounter = remember {
+		mutableStateOf(
+				context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)
+					  )
+	}
 
 	//persist all the values in shared preferences if the activity is destroyed
 	LaunchedEffect(key1 = count.value , key2 = objective.value , key3 = lap.value)
@@ -54,11 +63,13 @@ fun Counter(
 		//save the count
 		context.getSharedPreferences("tasbih" , 0).edit().putInt("count" , count.value).apply()
 		//save the objective
-		context.getSharedPreferences("tasbih" , 0).edit().putString("objective" , objective.value).apply()
+		context.getSharedPreferences("tasbih" , 0).edit().putString("objective" , objective.value)
+			.apply()
 		//save the lap
 		context.getSharedPreferences("tasbih" , 0).edit().putInt("lap" , lap.value).apply()
 		//save the lap count counter
-		context.getSharedPreferences("tasbih" , 0).edit().putInt("lapCountCounter" , lapCountCounter.value).apply()
+		context.getSharedPreferences("tasbih" , 0).edit()
+			.putInt("lapCountCounter" , lapCountCounter.value).apply()
 	}
 
 	Column(
@@ -66,7 +77,7 @@ fun Counter(
 				.fillMaxWidth()
 				.fillMaxHeight()
 				.padding(16.dp)
-				.padding(paddingValues),
+				.padding(paddingValues) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Top
 		  ) {
@@ -75,7 +86,7 @@ fun Counter(
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally) ,
 				text = "Loop ${lap.value}" ,
-				style = MaterialTheme.typography.bodyMedium,
+				style = MaterialTheme.typography.bodyMedium ,
 				color = MaterialTheme.colorScheme.onSurface
 			)
 		//large count text
@@ -84,7 +95,7 @@ fun Counter(
 					.align(Alignment.CenterHorizontally) ,
 				text = count.value.toString() ,
 				style = MaterialTheme.typography.displayMedium ,
-				fontSize = 100.sp,
+				fontSize = 100.sp ,
 				color = MaterialTheme.colorScheme.onSurface
 			)
 
@@ -94,41 +105,45 @@ fun Counter(
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			ElevatedButton(
-					modifier = Modifier.shadow(5.dp, RoundedCornerShape(50)) ,
+					modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
 					onClick = {
-				//if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
-				if (count.value > 0)
-				{
-					Toasty.info(
-							context ,
-							"Objective can only be changed when the tasbih count is 0" ,
-							Toasty.LENGTH_SHORT
-							   ).show()
-				} else
-				{
-					showObjectiveDialog = true
-				}
-			}) {
+						//if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
+						if (count.value > 0)
+						{
+							Toasty.info(
+									context ,
+									"Objective can only be changed when the tasbih count is 0" ,
+									Toasty.LENGTH_SHORT
+									   ).show()
+						} else
+						{
+							showObjectiveDialog = true
+						}
+					}) {
 				Row(
 						horizontalArrangement = Arrangement.SpaceBetween ,
 						verticalAlignment = Alignment.CenterVertically
 				   ) {
 					Text(
 							modifier = Modifier.padding(16.dp) ,
-							text = objective.value,
-							style = MaterialTheme.typography.titleLarge,
+							text = objective.value ,
+							style = MaterialTheme.typography.titleLarge ,
 							fontSize = 26.sp
 						)
 					Icon(imageVector = FeatherIcons.Edit , contentDescription = "Edit")
 				}
 			}
 			ElevatedButton(
-					modifier = Modifier.shadow(5.dp, RoundedCornerShape(50)) ,
+					modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
 					contentPadding = PaddingValues(16.dp) ,
 					onClick = {
 						showResetDialog = true
 					}) {
-				Icon(imageVector = Icons.Filled.Refresh , contentDescription = "Reset", modifier = Modifier.size(48.dp))
+				Icon(
+						imageVector = Icons.Filled.Refresh ,
+						contentDescription = "Reset" ,
+						modifier = Modifier.size(48.dp)
+					)
 			}
 		}
 
@@ -193,9 +208,9 @@ fun Counter(
 			//center the icon in the Row
 			Icon(
 					modifier = Modifier
-						.size(100.dp),
+						.size(100.dp) ,
 					imageVector = FeatherIcons.Plus ,
-					contentDescription = "Tasbih Plus",
+					contentDescription = "Tasbih Plus" ,
 					tint = MaterialTheme.colorScheme.onSurface
 				)
 		}
@@ -206,7 +221,12 @@ fun Counter(
 		AlertDialog(
 				onDismissRequest = { showResetDialog = false } ,
 				title = { Text(text = "Reset Counter") } ,
-				text = { Text(text = "Are you sure you want to reset the counter?",style = MaterialTheme.typography.titleLarge) } ,
+				text = {
+					Text(
+							text = "Are you sure you want to reset the counter?" ,
+							style = MaterialTheme.typography.titleLarge
+						)
+				} ,
 				confirmButton = {
 					Button(onClick = {
 						count.value = 0
@@ -217,12 +237,12 @@ fun Counter(
 
 						showResetDialog = false
 					}) {
-						Text(text = "Reset", style = MaterialTheme.typography.titleLarge)
+						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = { showResetDialog = false }) {
-						Text(text = "Cancel", style = MaterialTheme.typography.titleLarge)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
 					}
 				}
 				   )
@@ -243,12 +263,16 @@ fun Counter(
 							keyboardOptions = KeyboardOptions(
 									keyboardType = KeyboardType.Number ,
 									imeAction = ImeAction.Done ,
-															 ),
-							label = { Text(text = "Objective", style = MaterialTheme.typography.titleLarge) } ,
+															 ) ,
+							label = {
+								Text(
+										text = "Objective" ,
+										style = MaterialTheme.typography.titleLarge
+									)
+							} ,
 							modifier = Modifier
 								.fillMaxWidth()
-								.padding(horizontal = 16.dp)
-							,
+								.padding(horizontal = 16.dp) ,
 							keyboardActions = KeyboardActions(
 									onDone = {
 										if (objective.value.toInt() > 0)
@@ -261,7 +285,7 @@ fun Counter(
 														context ,
 														"Objective must be greater than 0" ,
 														Toasty.LENGTH_SHORT
-													 )
+													  )
 												.show()
 										}
 									})
@@ -271,12 +295,12 @@ fun Counter(
 					Button(onClick = {
 						showObjectiveDialog = false
 					}) {
-						Text(text = "Set", style = MaterialTheme.typography.titleLarge)
+						Text(text = "Set" , style = MaterialTheme.typography.titleLarge)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = { showObjectiveDialog = false }) {
-						Text(text = "Cancel",style = MaterialTheme.typography.titleLarge)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
 					}
 				}
 				   )

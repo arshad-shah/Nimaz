@@ -31,7 +31,7 @@ fun TasbihListNavGraph(navController : NavController , paddingValues : PaddingVa
 			DuaList(
 					chapterId = it.arguments?.getString("chapterId")?.toInt() ?: 0 ,
 					paddingValues = paddingValues
-					  )
+				   )
 		}
 	}
 }

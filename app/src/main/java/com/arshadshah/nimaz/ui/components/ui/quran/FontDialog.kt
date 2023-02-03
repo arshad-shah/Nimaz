@@ -5,17 +5,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceFloatSettingState
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlin.math.roundToInt
 
 
 @Composable
-fun FontSizeDialog(showDialog3 : (Boolean) -> Unit, arabicFontSizeState: SettingValueState<Float>, translationFontSizeState: SettingValueState<Float>)
+fun FontSizeDialog(
+	showDialog3 : (Boolean) -> Unit ,
+	arabicFontSizeState : SettingValueState<Float> ,
+	translationFontSizeState : SettingValueState<Float> ,
+				  )
 {
 	//a dialog with two sliders to control the font size of quran
 	//after the user selects the font size then save it in shared preferences
@@ -28,7 +28,7 @@ fun FontSizeDialog(showDialog3 : (Boolean) -> Unit, arabicFontSizeState: Setting
 			title = { Text(text = "Font") } ,
 			text = {
 				Column(
-						verticalArrangement = Arrangement.SpaceBetween,
+						verticalArrangement = Arrangement.SpaceBetween ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
 					Row(
@@ -37,7 +37,7 @@ fun FontSizeDialog(showDialog3 : (Boolean) -> Unit, arabicFontSizeState: Setting
 								.wrapContentHeight() ,
 							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.SpaceBetween
-					   ){
+					   ) {
 						Text(text = "Arabic Font")
 						Spacer(modifier = Modifier.width(8.dp))
 						//round this value to make it clean and easy to read
@@ -57,7 +57,7 @@ fun FontSizeDialog(showDialog3 : (Boolean) -> Unit, arabicFontSizeState: Setting
 								.wrapContentHeight() ,
 							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.SpaceBetween
-					   ){
+					   ) {
 						Text(text = "Translation Font")
 						//a text to show the font value of the translation
 						//round this value to make it clean and easy to read

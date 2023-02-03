@@ -2,21 +2,16 @@ package com.arshadshah.nimaz.activities
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -83,7 +78,10 @@ class MainActivity : ComponentActivity()
 				&& appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
 			)
 			{
-				Log.d(AppConstants.MAIN_ACTIVITY_TAG , "onCreate:  update is available and immediate is allowed")
+				Log.d(
+						AppConstants.MAIN_ACTIVITY_TAG ,
+						"onCreate:  update is available and immediate is allowed"
+					 )
 				// Request the update.
 				appUpdateManager.startUpdateFlowForResult(
 						appUpdateInfo ,

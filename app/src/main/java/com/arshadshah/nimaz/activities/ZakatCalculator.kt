@@ -23,7 +23,7 @@ class ZakatCalculator : ComponentActivity()
 							TopAppBar(
 									title = {
 										Text(text = "Zakat Calculator")
-									},
+									} ,
 									navigationIcon = {
 										IconButton(onClick = {
 											finish()
@@ -34,9 +34,10 @@ class ZakatCalculator : ComponentActivity()
 												)
 										}
 									} ,
-								 )
+									 )
 						}
-						) {it
+						) {
+					it
 					ZakatCalculatorScreen(it)
 				}
 
