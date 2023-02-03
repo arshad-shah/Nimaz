@@ -68,7 +68,10 @@ fun SurahListItemUI(
 				) {
 		//get the translation type from shared preferences
 		val translationType =
-			PrivateSharedPreferences(context).getData(key = AppConstants.TRANSLATION_LANGUAGE , s = "English")
+			PrivateSharedPreferences(context).getData(
+					key = AppConstants.TRANSLATION_LANGUAGE ,
+					s = "English"
+													 )
 		val language = when (translationType)
 		{
 			"English" -> "english"

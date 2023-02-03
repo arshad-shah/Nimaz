@@ -11,10 +11,12 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManualLocationInput()
+fun ManualLocationInput(locationFoundCallbackManual : (Double , Double , String) -> Unit)
 {
 
 	val context = LocalContext.current
@@ -28,11 +30,14 @@ fun ManualLocationInput()
 	val showDialog = remember { mutableStateOf(false) }
 	//show manual location input
 	//onclick open dialog
-	SettingsMenuLink(title = { Text(text = "Edit Location") } ,
-					 subtitle = { Text(text = cityName.value) } ,
-					 onClick = {
-						 showDialog.value = true
-					 })
+	SettingsMenuLink(
+			title = { Text(text = "Edit Location") } ,
+			subtitle = { Text(text = cityName.value) } ,
+			onClick = {
+				showDialog.value = true
+			} ,
+			icon = { Icon(imageVector = FeatherIcons.Edit , contentDescription = "Location") }
+					)
 
 	if (! showDialog.value) return
 	//text input field
@@ -53,7 +58,11 @@ fun ManualLocationInput()
 			confirmButton = {
 				Button(onClick = {
 					//get Manual location
-					Location().getManualLocation(name = cityName.value , context = context)
+					Location().getManualLocation(
+							name = cityName.value ,
+							context = context ,
+							locationFoundCallbackManual = locationFoundCallbackManual
+												)
 					showDialog.value = false
 				}) { Text(text = "Confirm") }
 			} ,

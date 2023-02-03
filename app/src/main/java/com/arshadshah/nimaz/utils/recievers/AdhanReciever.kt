@@ -28,7 +28,7 @@ class AdhanReciever : BroadcastReceiver()
 		val diff = current_time - Time_of_alarm
 		val graceP = 60000 * 2
 
-		Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Alarm for $title is being executed!")
+		Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Alarm for $title is being executed!")
 		// check if it is time to notify
 		if (diff in 1 until graceP)
 		{
@@ -58,11 +58,12 @@ class AdhanReciever : BroadcastReceiver()
 					Time_of_alarm
 												   )
 
-			Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Alarm for $title is Successfully executed!")
+			Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Alarm for $title is Successfully executed!")
 		} // end of if
 		else
 		{
-			Log.d(AppConstants.ADHAN_RECEIVER_TAG,
+			Log.d(
+					AppConstants.ADHAN_RECEIVER_TAG ,
 					"Notification for $title is not executed! The time has passed"
 				 )
 		}

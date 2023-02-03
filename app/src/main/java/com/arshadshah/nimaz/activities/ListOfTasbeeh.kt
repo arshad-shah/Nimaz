@@ -31,18 +31,17 @@ class ListOfTasbeeh : ComponentActivity()
 						topBar = {
 							TopAppBar(
 									title = {
-											navController.addOnDestinationChangedListener { _ , destination , _ ->
-												route.value = destination.route
-											}
-											//if the route is chapterList then show the title "Categories" else show the title "Dua List"
-											if (route.value == "chapterList")
-											{
-												Text(text = "Categories")
-											}
-											else
-											{
-												Text(text = "Dua List")
-											}
+										navController.addOnDestinationChangedListener { _ , destination , _ ->
+											route.value = destination.route
+										}
+										//if the route is chapterList then show the title "Categories" else show the title "Dua List"
+										if (route.value == "chapterList")
+										{
+											Text(text = "Categories")
+										} else
+										{
+											Text(text = "Dua List")
+										}
 									} ,
 									navigationIcon = {
 										IconButton(onClick = {
@@ -60,12 +59,13 @@ class ListOfTasbeeh : ComponentActivity()
 													contentDescription = "Back"
 												)
 										}
-									} ,
-								  )
+									}
+									 )
 						}
 
-						) {it
-					TasbihListNavGraph(navController = navController , paddingValues = it )
+						) {
+					it
+					TasbihListNavGraph(navController = navController , paddingValues = it)
 				}
 			}
 		}

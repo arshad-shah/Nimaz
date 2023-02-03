@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.*
 
 class QuranViewModel(context : Context) : ViewModel()
 {
@@ -134,13 +135,23 @@ class QuranViewModel(context : Context) : ViewModel()
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
-				val response = QuranRepository.getAyaForSurah(surahNumber , language)
-				if (response.data != null)
+				val languageConverted = language.uppercase(Locale.ROOT)
+				val areAyatAvailable = dataStore.countSurahAyat(surahNumber , languageConverted)
+				if (areAyatAvailable > 0)
 				{
-					_ayaSurahstate.value = AyaSurahState.Success(response.data)
+					val surahAyatList = dataStore.getAyasOfSurah(surahNumber , languageConverted)
+					_ayaSurahstate.value = AyaSurahState.Success(surahAyatList as ArrayList<Aya>)
 				} else
 				{
-					_ayaSurahstate.value = AyaSurahState.Error(response.message !!)
+					val response = QuranRepository.getAyaForSurah(surahNumber , language)
+					if (response.data != null)
+					{
+						dataStore.insertAyats(response.data)
+						_ayaSurahstate.value = AyaSurahState.Success(response.data)
+					} else
+					{
+						_ayaSurahstate.value = AyaSurahState.Error(response.message !!)
+					}
 				}
 			} catch (e : Exception)
 			{
@@ -154,9 +165,18 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
+				val dataStore = LocalDataStore.getDataStore()
+				val languageConverted = language.uppercase(Locale.ROOT)
+				val areAyatAvailable = dataStore.countJuzAyat(juzNumber , languageConverted)
+				if (areAyatAvailable > 0)
+				{
+					val listOfJuzAyat = dataStore.getAyasOfJuz(juzNumber , languageConverted)
+					_ayaJuzstate.value = AyaJuzState.Success(listOfJuzAyat as ArrayList<Aya>)
+				}
 				val response = QuranRepository.getAyaForJuz(juzNumber , language)
 				if (response.data != null)
 				{
+					dataStore.insertAyats(response.data)
 					_ayaJuzstate.value = AyaJuzState.Success(response.data)
 				} else
 				{

@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.data.local
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.arshadshah.nimaz.data.local.models.*
 import com.arshadshah.nimaz.data.remote.models.*
 import java.time.LocalDateTime
@@ -14,19 +12,47 @@ class DataStore(db : AppDatabase)
 	private val surahDao = db.surah
 	private val prayerTimesDao = db.prayerTimes
 	private val duaDao = db.dua
+	private val qiblaDao = db.qibla
+
+	//get qibla
+	suspend fun getQiblaDirection() : Double
+	{
+		return qiblaDao.getQiblaDirection()
+	}
+
+	//set qibla
+	suspend fun setQiblaDirection(direction : Double)
+	{
+		qiblaDao.setQiblaDirection(
+				LocalDateTime.now().toEpochSecond(
+						LocalDateTime.now().atOffset(java.time.ZoneOffset.UTC).offset
+												 ) , direction
+								  )
+	}
+
+	//count qibla direction
+	suspend fun countQiblaDirections() : Int
+	{
+		return qiblaDao.countQiblaDirections()
+	}
 
 	//get all the ayas of a surah
-	suspend fun getAyasOfSurah(surahNumber : Int) =
-		ayaDao.getAyasOfSurah(surahNumber).map { it.toAya() }
+	suspend fun getAyasOfSurah(surahNumber : Int , translationLanguage : String) =
+		ayaDao.getAyasOfSurah(surahNumber , translationLanguage).map { it.toAya() }
 
 	//get all the ayas of a juz
-	suspend fun getAyasOfJuz(juzNumber : Int) = ayaDao.getAyasOfJuz(juzNumber).map { it.toAya() }
+	suspend fun getAyasOfJuz(juzNumber : Int , translationLanguage : String) =
+		ayaDao.getAyasOfJuz(juzNumber , translationLanguage).map { it.toAya() }
 
 	//insert all the ayas
-	suspend fun insert(aya : List<Aya>) = ayaDao.insert(aya.map { it.toLocalAya() })
+	suspend fun insertAyats(aya : List<Aya>) = ayaDao.insert(aya.map { it.toLocalAya() })
 
 	//count the number of ayas
-	suspend fun countAyat() = ayaDao.count()
+	suspend fun countSurahAyat(surahNumber : Int , translationLanguage : String) =
+		ayaDao.countSurahAya(surahNumber , translationLanguage)
+
+	suspend fun countJuzAyat(juzNumber : Int , translationLanguage : String) =
+		ayaDao.countJuzAya(juzNumber , translationLanguage)
 
 
 	//get all juz
@@ -79,6 +105,7 @@ class DataStore(db : AppDatabase)
 }
 
 private fun Aya.toLocalAya() = LocalAya(
+		id = 0 ,
 		ayaNumber = ayaNumber ,
 		ayaArabic = ayaArabic ,
 		translation = translation ,

@@ -26,6 +26,7 @@ object AppConstants
 
 	//Preferences file name
 	const val PREFERENCES_FILE_NAME = "com.arshadshah.nimaz.SharedPreferences"
+
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"
 	const val ARABIC_FONT_SIZE = "ArabicFontSize"
@@ -57,15 +58,19 @@ object AppConstants
 	const val CURRENT_PRAYER = "currentPrayer"
 	const val PAGE_TYPE = "PageType"
 	const val TRANSLATION_LANGUAGE = "Translation"
+
 	//notificationAllowed
 	const val NOTIFICATION_ALLOWED = "notificationAllowed"
+
 	//battery_optimization
 	const val BATTERY_OPTIMIZATION = "batteryOptimization"
+
 	//channelLock
 	const val CHANNEL_LOCK = "channelLock"
 
 	//splash screen
 	const val SPLASH_SCREEN_DURATION = 2000L
+
 	//main activity app update request code
 	const val APP_UPDATE_REQUEST_CODE = 100
 
@@ -87,6 +92,7 @@ object AppConstants
 
 	//logging tags
 	const val TAG = "Nimaz"
+
 	//splash screen tag
 	const val SPLASH_SCREEN_TAG = "$TAG: SplashScreen"
 
@@ -98,8 +104,10 @@ object AppConstants
 
 	//Quran screen tag
 	const val QURAN_SCREEN_TAG = "$TAG: QuranScreen"
+
 	//Quran screen tag
 	const val QURAN_SURAH_SCREEN_TAG = "$TAG: QuranSurahScreen"
+
 	//Quran screen tag
 	const val QURAN_JUZ_SCREEN_TAG = "$TAG: QuranJuzScreen"
 

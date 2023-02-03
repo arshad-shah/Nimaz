@@ -77,6 +77,9 @@ class SensorDataManager(context : Context) : SensorEventListener
 
 	override fun onAccuracyChanged(sensor : Sensor? , accuracy : Int)
 	{
+		Log.d("SensorDataManager" , "onAccuracyChanged")
+		Log.d("SensorDataManager" , "sensor: $sensor")
+		Log.d("SensorDataManager" , "accuracy: $accuracy")
 	}
 }
 

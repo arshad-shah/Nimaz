@@ -19,4 +19,4 @@ data class DuaResponse(
 	val englishTranslation : String ,
 	@SerialName("english_reference")
 	val englishReference : String ,
-			  )
+					  )

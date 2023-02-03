@@ -26,7 +26,7 @@
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/nunito"
             android:text="@string/fajr"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -61,7 +61,7 @@
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/nunito"
             android:text="@string/zuhar"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -96,7 +96,7 @@
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/nunito"
             android:text="@string/asar"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -131,7 +131,7 @@
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/nunito"
             android:text="@string/maghrib"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -167,7 +167,7 @@
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/nunito"
             android:text="@string/ishaa"
-            android:textColor="#000000"
+            android:textColor="#C5E1A5"
             android:textSize="14sp"
             android:textStyle="bold" />
 

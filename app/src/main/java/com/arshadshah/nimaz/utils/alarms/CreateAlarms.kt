@@ -72,11 +72,11 @@ class CreateAlarms
 		channelIshaa = context.getString(R.string.ishaa)
 		CoroutineScope(Dispatchers.IO).launch {
 			val sharedPreferences = PrivateSharedPreferences(context)
-			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK, false)
+			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK , false)
 			if (! channelLock)
 			{
 				createAllNotificationChannels(context)
-				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK, true)
+				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK , true)
 			}
 			//convert the local date time to milliseconds
 			val fajrTime = fajr.toInstant(ZoneOffset.UTC).toEpochMilli()
@@ -263,8 +263,14 @@ class CreateAlarms
 		Alarms().setAlarm(context , resetPendingIntent)
 	}
 
-	private fun createAllNotificationChannels(context : Context)
+	fun createAllNotificationChannels(context : Context)
 	{
+		channelFajr = context.getString(R.string.fajr)
+		channelSunrise = context.getString(R.string.sunrise)
+		channelZuhar = context.getString(R.string.zuhar)
+		channelAsar = context.getString(R.string.asar)
+		channelMaghrib = context.getString(R.string.maghrib)
+		channelIshaa = context.getString(R.string.ishaa)
 		// notification description
 		val descFajr = "Fajr Prayer Notification"
 		val descSunrise = "Sunrise Notification"

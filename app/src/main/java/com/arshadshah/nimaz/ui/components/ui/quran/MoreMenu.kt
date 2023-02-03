@@ -1,26 +1,21 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
-import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
-import kotlin.math.roundToInt
 
 @Composable
 fun MoreMenu(
@@ -35,7 +30,11 @@ fun MoreMenu(
 	val pageTypeState =
 		rememberPreferenceStringSettingState(AppConstants.PAGE_TYPE , "List" , sharedPreferences)
 	val translationState =
-		rememberPreferenceStringSettingState(AppConstants.TRANSLATION_LANGUAGE , "English" , sharedPreferences)
+		rememberPreferenceStringSettingState(
+				AppConstants.TRANSLATION_LANGUAGE ,
+				"English" ,
+				sharedPreferences
+											)
 
 	val items1 : List<String> = listOf("List" , "Page (Experimental)")
 	val items2 : List<String> = listOf("English" , "Urdu")
@@ -48,13 +47,13 @@ fun MoreMenu(
 
 
 	val arabicFontSizeState = rememberPreferenceFloatSettingState(
-			AppConstants.ARABIC_FONT_SIZE,
-			24f,
+			AppConstants.ARABIC_FONT_SIZE ,
+			24f ,
 			sharedPreferences
 																 )
 	val translationFontSizeState = rememberPreferenceFloatSettingState(
-			AppConstants.TRANSLATION_FONT_SIZE,
-			16f,
+			AppConstants.TRANSLATION_FONT_SIZE ,
+			16f ,
 			sharedPreferences
 																	  )
 
@@ -120,7 +119,7 @@ fun MoreMenu(
 					)
 	} else if (showDialog3)
 	{
-		FontSizeDialog(setShowDialog3, arabicFontSizeState, translationFontSizeState)
+		FontSizeDialog(setShowDialog3 , arabicFontSizeState , translationFontSizeState)
 	} else
 	{
 		return

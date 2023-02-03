@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.data.local.models.LocalChapter
 @Dao
 interface DuaDao
 {
+
 	//get all the chapters
 	@Query("SELECT * FROM Chapter")
 	suspend fun getAllChapters() : List<LocalChapter>

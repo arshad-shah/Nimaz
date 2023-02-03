@@ -34,7 +34,7 @@ fun AyaSurahList(
 			//get the translation type from shared preferences
 			val pageType =
 				PrivateSharedPreferences(LocalContext.current).getData(
-						key =  AppConstants.PAGE_TYPE ,
+						key = AppConstants.PAGE_TYPE ,
 						s = "List"
 																	  )
 			var isList = true

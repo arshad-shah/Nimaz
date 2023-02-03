@@ -10,16 +10,12 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.updateAppWidget
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -82,7 +78,10 @@ class MainActivity : ComponentActivity()
 				&& appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
 			)
 			{
-				Log.d(AppConstants.MAIN_ACTIVITY_TAG , "onCreate:  update is available and immediate is allowed")
+				Log.d(
+						AppConstants.MAIN_ACTIVITY_TAG ,
+						"onCreate:  update is available and immediate is allowed"
+					 )
 				// Request the update.
 				appUpdateManager.startUpdateFlowForResult(
 						appUpdateInfo ,
@@ -94,6 +93,7 @@ class MainActivity : ComponentActivity()
 			}
 		}
 		super.onCreate(savedInstanceState)
+
 		//this is used to show the full activity on the screen
 		setContent {
 			NimazTheme {
@@ -105,21 +105,6 @@ class MainActivity : ComponentActivity()
 				}
 			}
 		}
-	}
-}
-
-//this is a main component to show everything else
-@RequiresApi(Build.VERSION_CODES.S)
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview(modifier : Modifier = Modifier)
-{
-	val navController = rememberNavController()
-	Scaffold(
-			bottomBar = { BottomNavigationBar(navController = navController) }
-			) { it ->
-		NavigationGraph(navController = navController , it)
 	}
 }
 
