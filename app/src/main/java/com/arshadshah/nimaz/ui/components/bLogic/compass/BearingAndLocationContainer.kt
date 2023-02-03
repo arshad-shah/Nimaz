@@ -38,6 +38,7 @@ fun BearingAndLocationContainer(state : State<QiblaViewModel.QiblaState>)
 
 		is QiblaViewModel.QiblaState.Error ->
 		{
+			BearingAndLocationContainerUI(location = "Error" , bearing = "Error")
 			Toasty.error(LocalContext.current , qiblaState.errorMessage).show()
 		}
 	}

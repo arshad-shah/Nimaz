@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.*
 
 class QiblaViewModel(context : Context) : ViewModel()
 {
@@ -34,13 +36,21 @@ class QiblaViewModel(context : Context) : ViewModel()
 			_qiblaState.value = QiblaState.Loading
 			try
 			{
-				val response = PrayerTimesRepository.getQiblaDirection(context)
-				if (response.data != null)
-				{
-					_qiblaState.value = QiblaState.Success(response.data)
-				} else
-				{
-					_qiblaState.value = QiblaState.Error(response.message !!)
+				val dataStore = LocalDataStore.getDataStore()
+				val qiblaCount = dataStore.countQiblaDirections()
+				if (qiblaCount > 0){
+					val qibla = dataStore.getQiblaDirection()
+					_qiblaState.value = QiblaState.Success(qibla)
+				}else{
+					val response = PrayerTimesRepository.getQiblaDirection(context)
+					if (response.data != null)
+					{
+						dataStore.setQiblaDirection(response.data)
+						_qiblaState.value = QiblaState.Success(response.data)
+					} else
+					{
+						_qiblaState.value = QiblaState.Error(response.message !!)
+					}
 				}
 			} catch (e : Exception)
 			{
