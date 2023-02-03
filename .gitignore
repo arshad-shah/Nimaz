@@ -16,3 +16,4 @@ local.properties
 google-services.json
 *.aab
 *.apk
+/.idea/deploymentTargetDropDown.xml

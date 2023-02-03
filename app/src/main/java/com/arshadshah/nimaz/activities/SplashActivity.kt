@@ -30,10 +30,7 @@ class SplashActivity : ComponentActivity()
 		super.onCreate(savedInstanceState)
 		lifecycleScope.launchWhenCreated {
 			delay(AppConstants.SPLASH_SCREEN_DURATION)
-			val loginToken =
-				NimazServicesImpl.login(AppConstants.USER_USERNAME , AppConstants.USER_PASSWORD)
 			val sharedPref = PrivateSharedPreferences(this@SplashActivity)
-			sharedPref.saveData(AppConstants.LOGIN_TOKEN , loginToken.token)
 
 			LocalDataStore.init(this@SplashActivity)
 

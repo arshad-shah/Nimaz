@@ -15,18 +15,21 @@ interface AyaDao
 	suspend fun getAllAyas() : List<LocalAya>
 
 	//get all the ayas of a surah
-	@Query("SELECT * FROM Aya WHERE ayaType = 'surah' AND numberOfType = :surahNumber")
-	suspend fun getAyasOfSurah(surahNumber : Int) : List<LocalAya>
+	@Query("SELECT * FROM Aya WHERE ayaType = 'Surah' AND numberOfType = :surahNumber AND translationLanguage = :translationLanguage")
+	suspend fun getAyasOfSurah(surahNumber : Int, translationLanguage: String) : List<LocalAya>
 
 	//get all the ayas of a juz
-	@Query("SELECT * FROM Aya WHERE ayaType = 'juz' AND numberOfType = :juzNumber")
-	suspend fun getAyasOfJuz(juzNumber : Int) : List<LocalAya>
+	@Query("SELECT * FROM Aya WHERE ayaType = 'Juz' AND numberOfType = :juzNumber AND translationLanguage = :translationLanguage")
+	suspend fun getAyasOfJuz(juzNumber : Int, translationLanguage: String) : List<LocalAya>
 
 	//insert all the ayas
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(aya : List<LocalAya>)
 
 	//count the number of ayas
-	@Query("SELECT COUNT(*) FROM Aya")
-	suspend fun count() : Int
+	@Query("SELECT COUNT(*) FROM Aya WHERE ayaType = 'Juz' AND  numberOfType = :juzNumber AND translationLanguage = :translationLanguage")
+	suspend fun countJuzAya(juzNumber : Int, translationLanguage: String) : Int
+
+	@Query("SELECT COUNT(*) FROM Aya WHERE ayaType = 'Surah' AND numberOfType = :surahNumber AND translationLanguage = :translationLanguage")
+	suspend fun countSurahAya(surahNumber : Int, translationLanguage: String) : Int
 }
