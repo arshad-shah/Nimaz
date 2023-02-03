@@ -35,13 +35,22 @@ class QuranActivity : ComponentActivity()
 				val route =
 					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
 
-				Log.d(AppConstants.QURAN_SCREEN_TAG , "onCreate: ${navController.currentDestination?.route}")
+				Log.d(
+						AppConstants.QURAN_SCREEN_TAG ,
+						"onCreate: ${navController.currentDestination?.route}"
+					 )
 
 				val sharedPreferences = PrivateSharedPreferences(this)
-				sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE, 24f)
-				sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16f)
-				Log.d(AppConstants.QURAN_SCREEN_TAG , "onCreate: ${sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)}")
-				Log.d(AppConstants.QURAN_SCREEN_TAG , "onCreate: ${sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)}")
+				sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE , 24f)
+				sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE , 16f)
+				Log.d(
+						AppConstants.QURAN_SCREEN_TAG ,
+						"onCreate: ${sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)}"
+					 )
+				Log.d(
+						AppConstants.QURAN_SCREEN_TAG ,
+						"onCreate: ${sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)}"
+					 )
 
 				Scaffold(
 						topBar = {

@@ -4,20 +4,20 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.activity
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
-import com.arshadshah.nimaz.ui.screens.ShahadahScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun NavigationGraph(navController : NavController , paddingValues : PaddingValues)
+fun NavigationGraph(
+	navController : NavController ,
+	paddingValues : PaddingValues ,
+				   )
 {
 	NavHost(
 			navController = navController as NavHostController ,
@@ -34,19 +34,23 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 			this.activityClass = QuranActivity::class
 		}
 		composable(BottomNavItem.MoreScreen.screen_route) {
-			MoreScreen(paddingValues,
-					   onNavigateToTasbihScreen = { arabic : String ->
-						   navController.navigate("tasbih/$arabic")
-					   },
-					   onNavigateToNames = {
-						   navController.navigate("names")
-					   },
-					   onNavigateToListOfTasbeeh = {
-						   navController.navigate("listoftasbeeh")
-					   },
-					   onNavigateToShadah = {
-						   navController.navigate("shahadah")
-					   },
+			MoreScreen(
+					paddingValues ,
+					onNavigateToTasbihScreen = { arabic : String ->
+						navController.navigate("tasbih/$arabic")
+					} ,
+					onNavigateToNames = {
+						navController.navigate("names")
+					} ,
+					onNavigateToListOfTasbeeh = {
+						navController.navigate("listoftasbeeh")
+					} ,
+					onNavigateToShadah = {
+						navController.navigate("shahadah")
+					} ,
+					onNavigateToZakat = {
+						navController.navigate("Zakat")
+					} ,
 					  )
 		}
 
@@ -61,6 +65,10 @@ fun NavigationGraph(navController : NavController , paddingValues : PaddingValue
 
 		activity("listoftasbeeh") {
 			this.activityClass = ListOfTasbeeh::class
+		}
+
+		activity("Zakat") {
+			this.activityClass = ZakatCalculator::class
 		}
 
 		activity("shahadah") {

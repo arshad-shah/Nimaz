@@ -68,7 +68,7 @@ sealed class OnBoardingPage(
 	//the Notification permission page
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Fourth : OnBoardingPage(
-			image = FeatherIcons.BookOpen ,
+			image = FeatherIcons.Bell ,
 			title = "Notifications" ,
 			description = "Enable Notifications for Nimaz to get Prayer alerts in the form of Adhan." ,
 			extra = {
@@ -189,7 +189,10 @@ sealed class OnBoardingPage(
 				val sharedpref = PrivateSharedPreferences(context)
 				//the state of the switch
 				val state =
-					rememberPreferenceBooleanSettingState(AppConstants.LOCATION_TYPE, permissionGranted)
+					rememberPreferenceBooleanSettingState(
+							AppConstants.LOCATION_TYPE ,
+							permissionGranted
+														 )
 				SettingsSwitch(
 						state = state ,
 						onCheckedChange = {
@@ -274,7 +277,7 @@ sealed class OnBoardingPage(
 							{
 								//if the switch is checked, then we need to ask for the battery optimization exemption
 								//and save the value in the shared preferences
-								sharedpref.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION, true)
+								sharedpref.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , true)
 								val intent = Intent()
 								intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 								intent.data = Uri.parse("package:" + context.packageName)

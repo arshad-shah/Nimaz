@@ -7,8 +7,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,25 +26,28 @@ fun FeatureCard(
 	paddingValues : PaddingValues ,
 	onNavigateToListOfTasbeeh : () -> Unit ,
 	onNavigateToShadah : () -> Unit ,
+	onNavigateToZakat : () -> Unit ,
 			   )
 {
 	Column(
-			modifier = Modifier.fillMaxWidth().padding(paddingValues) ,
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(paddingValues) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.SpaceEvenly
+			verticalArrangement = Arrangement.Center
 		  ) {
 		//website link
 		LinkButton(
 				icon = {
 					Icon(
-							modifier = Modifier.size(48.dp),
+							modifier = Modifier.size(48.dp) ,
 							imageVector = Icons.PlusMinusTasbih ,
 							contentDescription = "Tasbih" ,
 						)
 				} ,
 				onClick = {
 					onNavigateToTasbihScreen(" ")
-				},
+				} ,
 				title = "Tasbih" ,
 				  )
 
@@ -61,22 +62,38 @@ fun FeatureCard(
 				} ,
 				onClick = {
 					onNavigateToNames()
-				},
+				} ,
 				title = "Names of Allah" ,
 				  )
 		//email link
 		LinkButton(
 				icon = {
-					Icon(modifier = Modifier.size(48.dp),
+					Icon(
+							modifier = Modifier.size(48.dp) ,
 							imageVector = FeatherIcons.List ,
 							contentDescription = "Duas" ,
 						)
 				} ,
 				onClick = {
 					onNavigateToListOfTasbeeh()
-				},
+				} ,
 				title = "Duas" ,
 				  )
+		//TODO: IN PROGRESS
+//		LinkButton(
+//				icon = {
+//					//get the icon from drawable folder
+//					Icon(
+//							modifier = Modifier.size(48.dp) ,
+//							imageVector = FeatherIcons.Github ,
+//							contentDescription = "Zakat Calculator" ,
+//						)
+//				} ,
+//				onClick = {
+//					onNavigateToZakat()
+//				},
+//				title = "Zakah Calculator"
+//				  )
 		LinkButton(
 				icon = {
 					//get the icon from drawable folder
@@ -88,7 +105,7 @@ fun FeatureCard(
 				} ,
 				onClick = {
 					onNavigateToShadah()
-				},
+				} ,
 				title = "Shahadah"
 				  )
 
@@ -100,19 +117,22 @@ fun FeatureCard(
 fun LinkButton(
 	icon : @Composable () -> Unit ,
 	onClick : () -> Unit ,
-	title: String = "" ,
+	title : String = "" ,
 			  )
 {
 	ElevatedCard(
 			modifier = Modifier
-				.padding(8.dp).fillMaxWidth() ,
+				.padding(8.dp)
+				.fillMaxWidth() ,
 			onClick = onClick
 				) {
 		Row(
-				modifier = Modifier.fillMaxWidth().padding(8.dp) ,
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(8.dp) ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
-		   ){
+		   ) {
 			IconButton(
 					onClick = onClick ,
 					enabled = true ,
@@ -121,8 +141,8 @@ fun LinkButton(
 
 			Text(
 					text = title ,
-					modifier = Modifier.padding(start = 8.dp),
-					style = MaterialTheme.typography.titleLarge,
+					modifier = Modifier.padding(start = 8.dp) ,
+					style = MaterialTheme.typography.titleLarge ,
 				)
 			//an icon of arrow to indicate that it is a link
 			Icon(
@@ -145,7 +165,7 @@ fun LinkButtonPreview()
 						contentDescription = "Github"
 					)
 			} ,
-			onClick = {},
+			onClick = {} ,
 			title = "Github"
 			  )
 }

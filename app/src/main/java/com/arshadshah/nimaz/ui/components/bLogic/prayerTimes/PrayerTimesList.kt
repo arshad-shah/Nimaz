@@ -68,8 +68,9 @@ fun PrayerTimesList(
 			sharedPreferences.saveData(AppConstants.ASR , prayerTimes.asr.toString())
 			sharedPreferences.saveData(AppConstants.MAGHRIB , prayerTimes.maghrib.toString())
 			sharedPreferences.saveData(AppConstants.ISHA , prayerTimes.isha.toString())
-			sharedPreferences.saveData(AppConstants.CURRENT_PRAYER ,
-									   prayerTimes.currentPrayer?.name.toString()
+			sharedPreferences.saveData(
+					AppConstants.CURRENT_PRAYER ,
+					prayerTimes.currentPrayer?.name.toString()
 									  )
 
 

@@ -22,13 +22,15 @@ import com.arshadshah.nimaz.ui.theme.quranFont
 fun DuaListItem(dua : Dua)
 {
 	ElevatedCard(
-			modifier = Modifier.fillMaxWidth().padding(8.dp)
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(8.dp)
 				) {
-		Column (
+		Column(
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(8.dp)
-				){
+			  ) {
 			CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 				Text(
 						text = dua.arabic_dua ,
@@ -41,19 +43,19 @@ fun DuaListItem(dua : Dua)
 					)
 			}
 			Text(
-					text = dua.english_translation,
-					style = MaterialTheme.typography.titleMedium,
+					text = dua.english_translation ,
+					style = MaterialTheme.typography.titleMedium ,
 					modifier = Modifier
 						.padding(4.dp)
-						.fillMaxWidth(),
+						.fillMaxWidth() ,
 				)
 			Row {
 				Text(
-						text = "Reference: ${dua.english_reference}",
-						style = MaterialTheme.typography.titleSmall,
+						text = "Reference: ${dua.english_reference}" ,
+						style = MaterialTheme.typography.titleSmall ,
 						modifier = Modifier
 							.padding(4.dp)
-							.fillMaxWidth(),
+							.fillMaxWidth() ,
 					)
 			}
 		}
@@ -65,6 +67,14 @@ fun DuaListItem(dua : Dua)
 @Composable
 fun DuaListItemPreview()
 {
-	val dua = Dua(1, 1, 0, "اللهم صل على محمد وآل محمد", "O Allah, send blessings on Muhammad and the family of Muhammad", "O Allah, send blessings on Muhammad and the family of Muhammad", "Sahih Muslim")
+	val dua = Dua(
+			1 ,
+			1 ,
+			0 ,
+			"اللهم صل على محمد وآل محمد" ,
+			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
+			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
+			"Sahih Muslim"
+				 )
 	DuaListItem(dua)
 }

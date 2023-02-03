@@ -21,7 +21,7 @@ class ShahadahActivity : ComponentActivity()
 				Scaffold(
 						topBar = {
 							TopAppBar(
-									title = { Text(text = "Shahadah") },
+									title = { Text(text = "Shahadah") } ,
 									navigationIcon = {
 										IconButton(onClick = {
 											finish()
@@ -34,7 +34,8 @@ class ShahadahActivity : ComponentActivity()
 									}
 									 )
 						}
-						) {it
+						) {
+					it
 					ShahadahScreen(it)
 
 				}

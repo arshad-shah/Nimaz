@@ -9,6 +9,7 @@ import java.io.IOException
 
 object DuaRepository
 {
+
 	/**
 	 * Get all the chapters of dua from the API
 	 * */
@@ -18,7 +19,7 @@ object DuaRepository
 		{
 			val response = NimazServicesImpl.getChapters()
 			//reponse contains a list of chapters where each chapter has a list of dua
-		//arraylist of chapters
+			//arraylist of chapters
 			val chapters = ArrayList<Chapter>()
 			for (chapterResponse in response)
 			{
@@ -26,20 +27,30 @@ object DuaRepository
 				val duas = ArrayList<Dua>()
 				for (duaResponse in chapterResponse.duas)
 				{
-					duas.add(Dua(
-							duaResponse.id,
-							duaResponse.chapterId,
-							duaResponse.favourite,
-							duaResponse.arabicDua,
-							duaResponse.arabicReference,
-							duaResponse.englishTranslation,
-							duaResponse.englishReference))
+					duas.add(
+							Dua(
+									duaResponse.id ,
+									duaResponse.chapterId ,
+									duaResponse.favourite ,
+									duaResponse.arabicDua ,
+									duaResponse.arabicReference ,
+									duaResponse.englishTranslation ,
+									duaResponse.englishReference
+							   )
+							)
 				}
 				//add the chapter to the list
-				chapters.add(Chapter(chapterResponse.id, chapterResponse.arabicTitle, chapterResponse.englishTitle, duas))
+				chapters.add(
+						Chapter(
+								chapterResponse.id ,
+								chapterResponse.arabicTitle ,
+								chapterResponse.englishTitle ,
+								duas
+							   )
+							)
 			}
 			ApiResponse.Success(chapters)
-		}catch (e : ClientRequestException)
+		} catch (e : ClientRequestException)
 		{
 			ApiResponse.Error(e.message , null)
 

@@ -10,10 +10,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.FeatureCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun PrayerTimesScreen(
@@ -41,7 +39,7 @@ fun PrayerTimesScreen(
 			verticalArrangement = Arrangement.SpaceEvenly
 		  ) {
 		// Calling the LocationTimeContainer composable
-		LocationTimeContainer(state = locationState)
+		LocationTimeContainer(state = locationState , prayerTimesState = state)
 
 		// Calling the DatesContainer composable
 		DatesContainer()

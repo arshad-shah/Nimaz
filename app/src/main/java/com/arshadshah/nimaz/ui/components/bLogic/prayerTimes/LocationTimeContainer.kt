@@ -10,6 +10,7 @@ import es.dmoral.toasty.Toasty
 @Composable
 fun LocationTimeContainer(
 	state : State<PrayerTimesViewModel.LocationState> ,
+	prayerTimesState : State<PrayerTimesViewModel.PrayerTimesState> ,
 						 )
 {
 	when (val locationState = state.value)
@@ -18,6 +19,7 @@ fun LocationTimeContainer(
 		{
 			LocationTimeContainerUI(
 					location = "Loading..." ,
+					prayerTimesState = prayerTimesState ,
 								   )
 		}
 
@@ -25,6 +27,7 @@ fun LocationTimeContainer(
 		{
 			LocationTimeContainerUI(
 					location = locationState.location ,
+					prayerTimesState = prayerTimesState ,
 								   )
 		}
 
@@ -32,6 +35,7 @@ fun LocationTimeContainer(
 		{
 			LocationTimeContainerUI(
 					location = "Error" ,
+					prayerTimesState = prayerTimesState ,
 								   )
 			Toasty.error(LocalContext.current , locationState.errorMessage).show()
 		}

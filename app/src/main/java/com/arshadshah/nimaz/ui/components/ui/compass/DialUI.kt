@@ -14,19 +14,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.bLogic.compass.SensorData
 import com.arshadshah.nimaz.ui.components.ui.icons.Dot
 import com.arshadshah.nimaz.ui.components.ui.icons.QiblaCompassMain
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlin.math.abs
 
+@OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun DialUI(bearing : Double , data : SensorData?)
@@ -40,12 +43,41 @@ fun DialUI(bearing : Double , data : SensorData?)
 	val rotateAnim = remember { Animatable(currentAngle) }
 	val target = (bearing - degree).toFloat()
 	val context = LocalContext.current
-	val vibrator = vibrate(context)
+	val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
-	var pointingToQibla = false
+	val pointingToQibla = abs(target) < 5f
 
-	LaunchedEffect(key1 = degree , key2 = pitch , key3 = roll) {
-		rotateAnim.animateTo(target , tween(300))
+	val directionToTurn = when
+	{
+		abs(target) < 5f -> "You are facing the Qibla"
+		target > 0f -> "Turn Right"
+		else -> "Turn Left"
+	}
+
+	//if the user is facing the qibla, vibrate the phone and show a message to the user and stop the vibration after 1 second and stop animating the dial until the user turns away from the qibla
+	LaunchedEffect(key1 = target) {
+		if (abs(target) < 5f)
+		{
+			//animate to 0f
+			rotateAnim.animateTo(0f , tween(100))
+			//stop the animation
+			rotateAnim.stop()
+		} else
+		{
+			//start the animation
+			rotateAnim.animateTo(target , tween(200))
+		}
+	}
+
+	LaunchedEffect(pointingToQibla) {
+		if (pointingToQibla)
+		{
+			//create a single shot vibration
+			vibrator.vibrate(VibrationEffect.createOneShot(100 , VibrationEffect.DEFAULT_AMPLITUDE))
+		} else
+		{
+			vibrator.cancel()
+		}
 	}
 
 	ElevatedCard(
@@ -53,11 +85,16 @@ fun DialUI(bearing : Double , data : SensorData?)
 				.fillMaxWidth()
 				.padding(16.dp)
 				) {
-		if (abs(target) < 5)
-		{
-			pointingToQibla = true
-			vibrator.vibrate(VibrationEffect.createOneShot(100 , VibrationEffect.DEFAULT_AMPLITUDE))
-		}
+
+		Text(
+				modifier = Modifier
+					.padding(16.dp)
+					.fillMaxWidth()
+					.align(Alignment.CenterHorizontally) ,
+				text = directionToTurn ,
+				style = MaterialTheme.typography.headlineMedium ,
+				textAlign = TextAlign.Center
+			)
 
 		Icon(
 				imageVector = Icons.Dot ,
@@ -79,18 +116,4 @@ fun DialUI(bearing : Double , data : SensorData?)
 				alignment = Alignment.Center
 			 )
 	}
-}
-
-//a function to get the vibrator service of the device and vibrate it
-fun vibrate(context : Context) : Vibrator
-{
-	//get the vibration manager
-	return context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-}
-
-@Preview
-@Composable
-fun DialUIPreview()
-{
-	DialUI(bearing = 0.0 , data = null)
 }
