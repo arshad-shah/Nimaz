@@ -33,10 +33,10 @@ fun SurahList(
 
 		is QuranViewModel.SurahState.Error ->
 		{
-			JuzListUI(
-					juz = ArrayList(5) ,
+			SurahListUI(
+					surahs = ArrayList() ,
 					onNavigateToAyatScreen = onNavigateToAyatScreen
-					 )
+					   )
 			Toasty.error(LocalContext.current , surahState.errorMessage).show()
 		}
 	}

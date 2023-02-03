@@ -68,7 +68,7 @@ sealed class OnBoardingPage(
 	//the Notification permission page
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Fourth : OnBoardingPage(
-			image = FeatherIcons.BookOpen ,
+			image = FeatherIcons.Bell ,
 			title = "Notifications" ,
 			description = "Enable Notifications for Nimaz to get Prayer alerts in the form of Adhan." ,
 			extra = {
