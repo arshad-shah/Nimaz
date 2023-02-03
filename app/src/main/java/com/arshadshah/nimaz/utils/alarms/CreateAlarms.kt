@@ -263,8 +263,14 @@ class CreateAlarms
 		Alarms().setAlarm(context , resetPendingIntent)
 	}
 
-	private fun createAllNotificationChannels(context : Context)
+	fun createAllNotificationChannels(context : Context)
 	{
+		channelFajr = context.getString(R.string.fajr)
+		channelSunrise = context.getString(R.string.sunrise)
+		channelZuhar = context.getString(R.string.zuhar)
+		channelAsar = context.getString(R.string.asar)
+		channelMaghrib = context.getString(R.string.maghrib)
+		channelIshaa = context.getString(R.string.ishaa)
 		// notification description
 		val descFajr = "Fajr Prayer Notification"
 		val descSunrise = "Sunrise Notification"
