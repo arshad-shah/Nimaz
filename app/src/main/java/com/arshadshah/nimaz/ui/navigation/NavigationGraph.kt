@@ -8,9 +8,13 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.*
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
+import com.arshadshah.nimaz.ui.screens.settings.About
+import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
+import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -75,8 +79,25 @@ fun NavigationGraph(
 			this.activityClass = ShahadahActivity::class
 		}
 
-		activity(BottomNavItem.SettingsScreen.screen_route) {
-			this.activityClass = SettingsActivity::class
+		composable(BottomNavItem.SettingsScreen.screen_route) {
+			SettingsScreen(
+					onNavigateToPrayerTimeCustomizationScreen = {
+						navController.navigate(
+								AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
+											  )
+					} ,
+					onNavigateToAboutScreen = {
+						navController.navigate(
+								AppConstants.ABOUT_SCREEN_ROUTE
+											  )
+					} ,
+					paddingValues = paddingValues)
+		}
+		composable(AppConstants.ABOUT_SCREEN_ROUTE) {
+			About(paddingValues)
+		}
+		composable(AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
+			PrayerTimesCustomizations(paddingValues)
 		}
 	}
 }
