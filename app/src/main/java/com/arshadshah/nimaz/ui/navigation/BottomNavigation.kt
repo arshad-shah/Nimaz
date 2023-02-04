@@ -16,10 +16,10 @@ fun BottomNavigationBar(navController : NavController)
 			BottomNavItem.MoreScreen ,
 			BottomNavItem.SettingsScreen
 							   )
-	BottomAppBar(
+	NavigationBar(
 			containerColor = MaterialTheme.colorScheme.surface ,
-			contentColor = MaterialTheme.colorScheme.secondary
-				) {
+				  contentColor = MaterialTheme.colorScheme.secondary
+				 ) {
 		val navBackStackEntry by navController.currentBackStackEntryAsState()
 		val currentRoute = navBackStackEntry?.destination?.route
 		bottomNavItems.forEach { bottomNavItem ->
@@ -31,7 +31,6 @@ fun BottomNavigationBar(navController : NavController)
 							)
 					} ,
 					alwaysShowLabel = false ,
-					//if selleced then show the label else dont
 					label = { Text(text = bottomNavItem.title) } ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {

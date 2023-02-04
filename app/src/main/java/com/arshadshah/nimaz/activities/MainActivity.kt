@@ -8,14 +8,20 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.updateAppWidget
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -98,13 +104,68 @@ class MainActivity : ComponentActivity()
 		setContent {
 			NimazTheme {
 				val navController = rememberNavController()
+				val route =
+					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
+				navController.addOnDestinationChangedListener { _ , destination , _ ->
+					route.value = destination.route
+				}
 				Scaffold(
-						bottomBar = { BottomNavigationBar(navController = navController) }
+						topBar = {
+								 //only add this if the route is not BottomNavItem.SettingsScreen.route
+								 if (checkRoute(route.value.toString()))
+								 {
+									 TopAppBar(
+											 title = {
+												 Text(
+														 text = processPageTitle(route.value.toString()),
+														 style = MaterialTheme.typography.titleMedium
+													  )
+											 },
+											 navigationIcon = {
+												 IconButton(onClick = { navController.navigateUp() }) {
+													 Icon(
+															 imageVector = Icons.Default.ArrowBack ,
+															 contentDescription = "Back"
+														  )
+												 }
+											 }
+											  )
+								 }
+						},
+						bottomBar = {
+							//if the route is BottomNavItem.SettingsScreen then dont show this
+							if (!checkRoute(route.value.toString()))
+							{
+								BottomNavigationBar(navController = navController)
+							}
+						}
 						) { it ->
 					NavigationGraph(navController = navController , it)
 				}
 			}
 		}
 	}
-}
+	fun processPageTitle(route : String) : String
+	{
+		return when (route)
+		{
+			AppConstants.SETTINGS_SCREEN_ROUTE -> "Settings"
+			AppConstants.ABOUT_SCREEN_ROUTE -> "About"
+			AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE -> "Prayer Times Customization"
+			else -> "Settings"
+		}
+	}
 
+	//a fuinction to check a givenm route and return a boolean
+	fun checkRoute(route : String) : Boolean
+	{
+		val routeToCheck = listOf(
+				AppConstants.SETTINGS_SCREEN_ROUTE ,
+				AppConstants.ABOUT_SCREEN_ROUTE ,
+				AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
+								 )
+		//if the route is in the list then return true
+		return routeToCheck.contains(route)
+	}
+
+}

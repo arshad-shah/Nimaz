@@ -86,7 +86,10 @@ object AppConstants
 	const val QIBLA_SCREEN_ROUTE = "qibla_screen"
 	const val QURAN_SCREEN_ROUTE = "quran_screen"
 	const val MORE_SCREEN_ROUTE = "more_screen"
+
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
+	const val PRAYER_TIMES_SETTINGS_SCREEN_ROUTE = "prayer_times_settings_screen"
+	const val ABOUT_SCREEN_ROUTE = "about_screen"
 
 	//Logging tags
 
@@ -98,6 +101,8 @@ object AppConstants
 
 	//main activity tag
 	const val MAIN_ACTIVITY_TAG = "$TAG: MainActivity"
+
+	const val PRAYER_TIMES_SCREEN_TAG = "$TAG: PrayerTimesFragment"
 
 	//Qibla compass screen tag
 	const val QIBLA_COMPASS_SCREEN_TAG = "$TAG: QiblaCompassScreen"
