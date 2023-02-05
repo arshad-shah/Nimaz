@@ -130,12 +130,6 @@ fun SettingsScreen(
 								locationFinderAuto.stopLocationUpdates()
 							}
 						} ,
-						subtitle = {
-							if (storage.value)
-							{
-								Text(text = locationName.value)
-							}
-						} ,
 						onCheckedChange = {
 							storage.value = it
 							sharedPreferences.saveDataBoolean(
