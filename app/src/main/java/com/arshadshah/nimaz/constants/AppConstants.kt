@@ -68,9 +68,6 @@ object AppConstants
 	//channelLock
 	const val CHANNEL_LOCK = "channelLock"
 
-	//splash screen
-	const val SPLASH_SCREEN_DURATION = 2000L
-
 	//main activity app update request code
 	const val APP_UPDATE_REQUEST_CODE = 100
 
@@ -85,8 +82,18 @@ object AppConstants
 	const val PRAYER_TIMES_SCREEN_ROUTE = "prayer_times_screen"
 	const val QIBLA_SCREEN_ROUTE = "qibla_screen"
 	const val QURAN_SCREEN_ROUTE = "quran_screen"
+	const val QURAN_AYA_SCREEN_ROUTE = "ayatScreen/{number}/{isSurah}/{language}"
 	const val MORE_SCREEN_ROUTE = "more_screen"
+	const val SHAHADAH_SCREEN_ROUTE = "shahadah_screen"
+
+	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen"
+	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}"
+	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{arabic}"
+	const val NAMESOFALLAH_SCREEN_ROUTE = "namesofallah_screen"
+
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
+	const val PRAYER_TIMES_SETTINGS_SCREEN_ROUTE = "prayer_times_settings_screen"
+	const val ABOUT_SCREEN_ROUTE = "about_screen"
 
 	//Logging tags
 
@@ -98,6 +105,8 @@ object AppConstants
 
 	//main activity tag
 	const val MAIN_ACTIVITY_TAG = "$TAG: MainActivity"
+
+	const val PRAYER_TIMES_SCREEN_TAG = "$TAG: PrayerTimesFragment"
 
 	//Qibla compass screen tag
 	const val QIBLA_COMPASS_SCREEN_TAG = "$TAG: QiblaCompassScreen"

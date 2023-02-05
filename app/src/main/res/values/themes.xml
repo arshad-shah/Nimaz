@@ -13,11 +13,13 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="SplashTheme" parent="Theme.Nimaz">
-        <item name="android:windowBackground">@drawable/bg_splash</item>
+    <style name="SplashTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@drawable/bg_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
         <item name="colorPrimary">?attr/colorPrimary</item>
         <item name="colorPrimaryDark">?attr/colorPrimaryVariant</item>
         <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="postSplashScreenTheme">@style/Theme.Nimaz</item>
     </style>
 
     <style name="Theme.Nimaz.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
