@@ -10,6 +10,12 @@ fun rememberBooleanSettingState(defaultValue : Boolean = false) : SettingValueSt
 }
 
 @Composable
+fun rememberDoubleSettingState(defaultValue : Double = 0.0) : SettingValueState<Double>
+{
+	return remember { InMemoryDoubleSettingValueState(defaultValue) }
+}
+
+@Composable
 fun rememberFloatSettingState(defaultValue : Float = 0f) : SettingValueState<Float>
 {
 	return remember { InMemoryFloatSettingValueState(defaultValue) }
@@ -74,6 +80,18 @@ internal class InMemoryFloatSettingValueState(private val defaultValue : Float) 
 {
 
 	override var value : Float by mutableStateOf(defaultValue)
+	override fun reset()
+	{
+		value = defaultValue
+	}
+}
+
+//double
+internal class InMemoryDoubleSettingValueState(private val defaultValue : Double) :
+	SettingValueState<Double>
+{
+
+	override var value : Double by mutableStateOf(defaultValue)
 	override fun reset()
 	{
 		value = defaultValue
