@@ -32,6 +32,8 @@ import androidx.core.app.ActivityCompat
 import com.arshadshah.nimaz.activities.Introduction
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.AUTO_LOCATION_PERMISSION_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.NOTIFICATION_PERMISSION_REQUEST_CODE
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.icons.Prayer
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
@@ -110,7 +112,7 @@ sealed class OnBoardingPage(
 										ActivityCompat.requestPermissions(
 												context as Activity ,
 												arrayOf(Manifest.permission.ACCESS_NOTIFICATION_POLICY) ,
-												1
+												NOTIFICATION_PERMISSION_REQUEST_CODE
 																		 )
 									} else
 									{
@@ -204,7 +206,7 @@ sealed class OnBoardingPage(
 												Manifest.permission.ACCESS_FINE_LOCATION ,
 												Manifest.permission.ACCESS_COARSE_LOCATION
 											   ) ,
-										2
+										AUTO_LOCATION_PERMISSION_REQUEST_CODE
 																 )
 							} else
 							{
