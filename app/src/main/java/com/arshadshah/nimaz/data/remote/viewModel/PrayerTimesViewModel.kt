@@ -5,7 +5,10 @@ import android.os.CountDownTimer
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
@@ -73,7 +76,10 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 				{
 
 					val localPrayerTimes = dataStore.getAllPrayerTimes()
-					Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel", "loadPrayerTimes: $localPrayerTimes")
+					Log.d(
+							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							"loadPrayerTimes: $localPrayerTimes"
+						 )
 					val localTimesNull = localPrayerTimes.timestamp == null
 					//if timestamp is from today then the data is valid and we can use it
 					val localTimesExpired =
@@ -138,7 +144,10 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 									false
 																			 )
 						}
-						Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" , "loadPrayerTimesRemote: ${response.data}")
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadPrayerTimesRemote: ${response.data}"
+							 )
 						dataStore.deleteAllPrayerTimes()
 						dataStore.saveAllPrayerTimes(response.data)
 						_prayerTimesState.update {
@@ -164,7 +173,10 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 
 			} catch (e : Exception)
 			{
-				Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" , "loadPrayerTimes: ${e.message}")
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadPrayerTimes: ${e.message}"
+					 )
 				_prayerTimesState.update {
 					it.copy(
 							isLoading = mutableStateOf(false) ,
@@ -188,12 +200,23 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 							location = mutableStateOf(null) ,
 						   )
 				}
-				Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" , "loadLocation: loading...")
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadLocation: loading..."
+					 )
 				val sharedPreferences = PrivateSharedPreferences(context)
-				val locationAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE , true)
-				val locationName = mutableStateOf(sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix"))
-				val latitude = mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.0))
-				val longitude = mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE , -7.0))
+				val locationAuto =
+					sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE , true)
+				val locationName = mutableStateOf(
+						sharedPreferences.getData(
+								AppConstants.LOCATION_INPUT ,
+								"Abbeyleix"
+												 )
+												 )
+				val latitude =
+					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.0))
+				val longitude =
+					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 7.0))
 				//callback for location
 				val locationFoundCallbackManual =
 					{ longitudeValue : Double , latitudeValue : Double , name : String ->
@@ -202,7 +225,7 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 						latitude.value = latitudeValue
 						longitude.value = longitudeValue
 					}
-				val listener = {latitudeValue : Double , longitudeValue : Double ->
+				val listener = { latitudeValue : Double , longitudeValue : Double ->
 					//save location
 					latitude.value = latitudeValue
 					longitude.value = longitudeValue
@@ -212,8 +235,15 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 				{
 					if (locationAuto)
 					{
-						Location().getAutomaticLocation(context,listener, locationFoundCallbackManual)
-						Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" , "loadLocation: auto")
+						Location().getAutomaticLocation(
+								context ,
+								listener ,
+								locationFoundCallbackManual
+													   )
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadLocation: auto"
+							 )
 						_prayerTimesState.update {
 							it.copy(
 									location = mutableStateOf(locationName.value) ,
@@ -226,7 +256,10 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 								context ,
 								locationFoundCallbackManual
 													)
-						Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" , "loadLocation: manual")
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadLocation: manual"
+							 )
 						_prayerTimesState.update {
 							it.copy(
 									location = mutableStateOf(locationName.value) ,
@@ -235,16 +268,22 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 					}
 				} else
 				{
-					Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" , "loadLocation: no network")
+					Log.d(
+							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							"loadLocation: no network"
+						 )
 					_prayerTimesState.update {
 						it.copy(
 								location = mutableStateOf(null) ,
 							   )
 					}
 				}
-			}catch (e : Exception)
+			} catch (e : Exception)
 			{
-				Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" , "loadLocation: ${e.message}")
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadLocation: ${e.message}"
+					 )
 				_prayerTimesState.update {
 					it.copy(
 							location = mutableStateOf(null) ,

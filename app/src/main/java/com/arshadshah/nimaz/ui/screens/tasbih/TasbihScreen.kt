@@ -11,24 +11,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.Counter
+import com.arshadshah.nimaz.ui.theme.quranFont
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Minus
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import com.arshadshah.nimaz.ui.theme.quranFont
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterialApi::class , ExperimentalMaterial3Api::class)
@@ -105,7 +107,8 @@ fun TasbihScreen(paddingValues : PaddingValues)
 			backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background ,
 			contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onBackground ,
 			modifier = Modifier
-				.shadow(16.dp , CardDefaults.elevatedShape).padding(paddingValues) ,
+				.shadow(16.dp , CardDefaults.elevatedShape)
+				.padding(paddingValues) ,
 			topBar = {
 				TopAppBar(
 						title = { } ,
@@ -175,7 +178,7 @@ fun TasbihScreen(paddingValues : PaddingValues)
 			sheetPeekHeight = 200.dp ,
 					   ) {
 		it
-		Counter(vibrator , it , vibrationAllowed , count , reset,showResetDialog)
+		Counter(vibrator , it , vibrationAllowed , count , reset , showResetDialog)
 	}
 }
 

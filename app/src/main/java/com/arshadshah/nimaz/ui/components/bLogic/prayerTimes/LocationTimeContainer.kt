@@ -10,8 +10,8 @@ fun LocationTimeContainer(
 	currentTimeName : String? ,
 						 )
 {
-		if (currentTimeName != null && location.value != null)
-		{
-			LocationTimeContainerUI(location = location.value!!, currentTimeName = currentTimeName)
-		}
+	if (currentTimeName != null && location.value != null)
+	{
+		LocationTimeContainerUI(location = location.value !! , currentTimeName = currentTimeName)
+	}
 }

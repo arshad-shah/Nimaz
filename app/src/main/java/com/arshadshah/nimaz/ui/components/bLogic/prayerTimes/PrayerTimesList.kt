@@ -47,12 +47,12 @@ fun PrayerTimesList(
 	prayerTimesMap["isha"] = prayerTimes.value?.isha
 
 	//save the prayer times in shared preferences
-	sharedPreferences.saveData(AppConstants.FAJR , prayerTimesMap["fajr"]!!.toString())
-	sharedPreferences.saveData(AppConstants.SUNRISE , prayerTimesMap["sunrise"]!!.toString())
-	sharedPreferences.saveData(AppConstants.DHUHR , prayerTimesMap["dhuhr"]!!.toString())
-	sharedPreferences.saveData(AppConstants.ASR , prayerTimesMap["asr"]!!.toString())
-	sharedPreferences.saveData(AppConstants.MAGHRIB , prayerTimesMap["maghrib"]!!.toString())
-	sharedPreferences.saveData(AppConstants.ISHA , prayerTimesMap["isha"]!!.toString())
+	sharedPreferences.saveData(AppConstants.FAJR , prayerTimesMap["fajr"] !!.toString())
+	sharedPreferences.saveData(AppConstants.SUNRISE , prayerTimesMap["sunrise"] !!.toString())
+	sharedPreferences.saveData(AppConstants.DHUHR , prayerTimesMap["dhuhr"] !!.toString())
+	sharedPreferences.saveData(AppConstants.ASR , prayerTimesMap["asr"] !!.toString())
+	sharedPreferences.saveData(AppConstants.MAGHRIB , prayerTimesMap["maghrib"] !!.toString())
+	sharedPreferences.saveData(AppConstants.ISHA , prayerTimesMap["isha"] !!.toString())
 	sharedPreferences.saveData(
 			AppConstants.CURRENT_PRAYER ,
 			prayerTimes.value?.currentPrayer?.name !!
@@ -63,15 +63,23 @@ fun PrayerTimesList(
 	{
 		CreateAlarms().exact(
 				context ,
-				prayerTimesMap["fajr"]!! ,
-				prayerTimesMap["sunrise"]!! ,
-				prayerTimesMap["dhuhr"]!! ,
-				prayerTimesMap["asr"]!! ,
-				prayerTimesMap["maghrib"]!! ,
-				prayerTimesMap["isha"]!! ,
+				prayerTimesMap["fajr"] !! ,
+				prayerTimesMap["sunrise"] !! ,
+				prayerTimesMap["dhuhr"] !! ,
+				prayerTimesMap["asr"] !! ,
+				prayerTimesMap["maghrib"] !! ,
+				prayerTimesMap["isha"] !! ,
 							)
 		sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 	}
 
-	PrayerTimesListUI(modifier = modifier, paddingValues = paddingValues , timerState = timerState , viewModel = viewModel, name= prayerTimes.value?.nextPrayer?.name!!, prayerTimesMap = prayerTimesMap, prayertimes = prayerTimes.value)
+	PrayerTimesListUI(
+			modifier = modifier ,
+			paddingValues = paddingValues ,
+			timerState = timerState ,
+			viewModel = viewModel ,
+			name = prayerTimes.value?.nextPrayer?.name !! ,
+			prayerTimesMap = prayerTimesMap ,
+			prayertimes = prayerTimes.value
+					 )
 }
