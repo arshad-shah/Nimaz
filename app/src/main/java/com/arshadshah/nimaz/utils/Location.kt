@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.utils
 
 import android.content.Context
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.AUTO_LOCATION_PERMISSION_REQUEST_CODE
 import com.arshadshah.nimaz.utils.location.LocationFinder
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 
@@ -20,7 +21,7 @@ class Location
 		//use locationfinderauto
 		val locationFinderAuto = LocationFinderAuto()
 		//get the location
-		locationFinderAuto.getLocations(context , requestCode = 1 , listener = listener)
+		locationFinderAuto.getLocations(context , requestCode = AUTO_LOCATION_PERMISSION_REQUEST_CODE , listener = listener)
 
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
