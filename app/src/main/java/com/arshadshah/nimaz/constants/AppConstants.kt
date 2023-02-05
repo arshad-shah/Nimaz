@@ -58,18 +58,66 @@ object AppConstants
 	const val CURRENT_PRAYER = "currentPrayer"
 	const val PAGE_TYPE = "PageType"
 	const val TRANSLATION_LANGUAGE = "Translation"
-
-	//notificationAllowed
 	const val NOTIFICATION_ALLOWED = "notificationAllowed"
-
-	//battery_optimization
 	const val BATTERY_OPTIMIZATION = "batteryOptimization"
-
-	//channelLock
 	const val CHANNEL_LOCK = "channelLock"
 
-	//main activity app update request code
+	//codes
 	const val APP_UPDATE_REQUEST_CODE = 100
+
+	//notification channel ids
+	const val FAJR_CHANNEL_ID = "fajr_channel_id"
+	const val SUNRISE_CHANNEL_ID = "sunrise_channel_id"
+	const val DHUHR_CHANNEL_ID = "dhuhr_channel_id"
+	const val ASR_CHANNEL_ID = "asr_channel_id"
+	const val MAGHRIB_CHANNEL_ID = "maghrib_channel_id"
+	const val ISHA_CHANNEL_ID = "isha_channel_id"
+
+	const val FAJR_NOTIFY_ID = 2000
+	const val SUNRISE_NOTIFY_ID = 2001
+	const val DHUHR_NOTIFY_ID = 2002
+	const val ASR_NOTIFY_ID = 2003
+	const val MAGHRIB_NOTIFY_ID = 2004
+	const val ISHA_NOTIFY_ID = 2005
+
+	const val FAJR_PI_REQUEST_CODE = 1000
+	const val SUNRISE_PI_REQUEST_CODE = 1001
+	const val DHUHR_PI_REQUEST_CODE = 1002
+	const val ASR_PI_REQUEST_CODE = 1003
+	const val MAGHRIB_PI_REQUEST_CODE = 1004
+	const val ISHA_PI_REQUEST_CODE = 1005
+
+	//channels titles
+	const val CHANNEL_FAJR = "Fajr"
+	const val CHANNEL_SUNRISE = "Sunrise"
+	const val CHANNEL_ZUHAR = "Zuhar"
+	const val CHANNEL_ASAR = "Asar"
+	const val CHANNEL_MAGHRIB = "Maghrib"
+	const val CHANNEL_ISHAA = "Ishaa"
+
+	//channel descriptions
+	const val CHANNEL_DESC = "Prayer Adhan Notification"
+	const val CHANNEL_DESC_FAJR = "Fajr $CHANNEL_DESC"
+	const val CHANNEL_DESC_SUNRISE = "Sunrise $CHANNEL_DESC"
+	const val CHANNEL_DESC_ZUHAR = "Zuhar $CHANNEL_DESC"
+	const val CHANNEL_DESC_ASAR = "Asar $CHANNEL_DESC"
+	const val CHANNEL_DESC_MAGHRIB = "Maghrib $CHANNEL_DESC"
+	const val CHANNEL_DESC_ISHAA = "Ishaa $CHANNEL_DESC"
+
+
+	//pending intent request codes
+	const val RESET_PENDING_INTENT_REQUEST_CODE = 7
+	//widget pending intent request codes
+	const val WIDGET_PENDING_INTENT_REQUEST_CODE = 9
+	//notification pending intent request codes
+	const val NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 8
+	//auto location permission request code
+	const val AUTO_LOCATION_PERMISSION_REQUEST_CODE = 10
+	//notification permission request code
+	const val NOTIFICATION_PERMISSION_REQUEST_CODE = 11
+
+
+
 
 	// bottom nav item titles
 	const val PRAYER_TIMES_SCREEN_TITLE = "Prayer"

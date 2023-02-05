@@ -20,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.NOTIFICATION_PENDING_INTENT_REQUEST_CODE
 import java.text.DateFormat
 import java.util.*
 
@@ -149,27 +150,31 @@ class NotificationHelper
 								.FLAG_ACTIVITY_CLEAR_TASK
 			}
 		val notificationPendingIntent : PendingIntent =
-			PendingIntent.getActivity(context , 8 , notificationIntent , FLAG_IMMUTABLE)
+			PendingIntent.getActivity(context , NOTIFICATION_PENDING_INTENT_REQUEST_CODE, notificationIntent , FLAG_IMMUTABLE)
 
 		val time = Date(Time_of_alarm)
 		//convert the time to a date
 		val formatter = DateFormat.getTimeInstance((DateFormat.SHORT))
 		val timeFormated = formatter.format(time)
 
-
 		val builder =
 			NotificationCompat.Builder(context , channel_id).apply {
 				setSmallIcon(R.mipmap.ic_launcher)
 				setContentTitle("$title at $timeFormated")
-				if (title == "Test Adhan")
+				when (title)
 				{
-					setContentText("This is a test Adhan")
-				} else if (title == "Sunrise" || title == "شروق")
-				{
-					setContentText("The sun is rising!!")
-				} else
-				{
-					setContentText("It is time to pray $title")
+					"Test Adhan" ->
+					{
+						setContentText("This is a test Adhan")
+					}
+					"Sunrise" , "شروق" ->
+					{
+						setContentText("The sun is rising!!")
+					}
+					else ->
+					{
+						setContentText("It is time to pray $title")
+					}
 				}
 				priority = NotificationCompat.PRIORITY_HIGH
 				setContentIntent(notificationPendingIntent)
