@@ -8,16 +8,22 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
@@ -58,7 +64,7 @@ class MainActivity : ComponentActivity()
 		}
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class)
+	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class)
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
 	{
@@ -117,52 +123,59 @@ class MainActivity : ComponentActivity()
 					route.value = destination.route
 				}
 				val (menuOpen , setMenuOpen) = remember { mutableStateOf(false) }
+				val CustomAnimation = remember { CustomAnimation() }
 				Scaffold(
 						topBar = {
-								 //only add this if the route is not BottomNavItem.SettingsScreen.route
-								 if (checkRoute(route.value.toString()))
-								 {
-									 TopAppBar(
-											 title = {
-												 Text(
-														 text = processPageTitle(route.value.toString()),
-														 style = MaterialTheme.typography.titleMedium
-													  )
-											 },
-											 navigationIcon = {
-												 IconButton(onClick = { navController.navigateUp() }) {
-													 Icon(
-															 imageVector = Icons.Default.ArrowBack ,
-															 contentDescription = "Back"
-														  )
-												 }
-											 },
-											 actions = {
-												 //only show the menu button if the title is Quran
-												 if (route.value == QURAN_SCREEN_ROUTE)
-												 {
-													 //open the menu
-													 IconButton(onClick = { setMenuOpen(true) }) {
+									 AnimatedVisibility(
+											 visible = checkRoute(route.value.toString()),
+											 enter = CustomAnimation.fadeIn(duration = 300),
+											 exit = CustomAnimation.fadeOut(duration = 300),
+											 content = {
+
+										 TopAppBar(
+												 title = {
+													 Text(
+															 text = processPageTitle(route.value.toString()) ,
+															 style = MaterialTheme.typography.titleMedium
+														 )
+												 } ,
+												 navigationIcon = {
+													 IconButton(onClick = { navController.navigateUp() }) {
 														 Icon(
-																 imageVector = Icons.Filled.MoreVert ,
-																 contentDescription = "Menu"
+																 imageVector = Icons.Default.ArrowBack ,
+																 contentDescription = "Back"
 															 )
 													 }
-													 MoreMenu(
-															 menuOpen = menuOpen ,
-															 setMenuOpen = setMenuOpen
-															 )
+												 } ,
+												 actions = {
+													 //only show the menu button if the title is Quran
+													 if (route.value == QURAN_SCREEN_ROUTE)
+													 {
+														 //open the menu
+														 IconButton(onClick = { setMenuOpen(true) }) {
+															 Icon(
+																	 imageVector = Icons.Filled.MoreVert ,
+																	 contentDescription = "Menu"
+																 )
+														 }
+														 MoreMenu(
+																 menuOpen = menuOpen ,
+																 setMenuOpen = setMenuOpen
+																 )
+													 }
 												 }
-											 }
-											  )
+												  )
 								 }
+													   )
 						},
 						bottomBar = {
-							//if the route is BottomNavItem.SettingsScreen then dont show this
-							if (!checkRoute(route.value.toString()))
-							{
-								BottomNavigationBar(navController = navController)
-							}
+								AnimatedVisibility(
+										visible = !checkRoute(route.value.toString()),
+										enter = CustomAnimation.fadeIn(duration = 300),
+										exit = CustomAnimation.fadeOut(duration = 300),
+										content = {
+											BottomNavigationBar(navController = navController)
+										})
 						}
 						) { it ->
 					NavigationGraph(navController = navController , it)
@@ -180,6 +193,8 @@ class MainActivity : ComponentActivity()
 			QURAN_SCREEN_ROUTE -> "Quran"
 			QURAN_AYA_SCREEN_ROUTE -> "Aya"
 			SHAHADAH_SCREEN_ROUTE -> "Shahadah"
+			CHAPTERS_SCREEN_ROUTE -> "Categories of Dua"
+			CHAPTER_SCREEN_ROUTE -> "Dua"
 			else -> "Settings"
 		}
 	}
@@ -193,10 +208,27 @@ class MainActivity : ComponentActivity()
 				PRAYER_TIMES_SETTINGS_SCREEN_ROUTE,
 				QURAN_SCREEN_ROUTE,
 				QURAN_AYA_SCREEN_ROUTE,
-				SHAHADAH_SCREEN_ROUTE
+				SHAHADAH_SCREEN_ROUTE,
+				CHAPTERS_SCREEN_ROUTE,
+				CHAPTER_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
 	}
 
+}
+
+class CustomAnimation
+{
+	fun fadeIn(duration : Int) : EnterTransition =
+			expandVertically(
+					expandFrom = Alignment.Top ,
+					animationSpec = tween(durationMillis = duration)
+							)
+
+	fun fadeOut(duration : Int) : ExitTransition =
+			shrinkVertically(
+					shrinkTowards = Alignment.Top ,
+					animationSpec = tween(durationMillis = duration)
+							)
 }
