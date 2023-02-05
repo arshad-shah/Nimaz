@@ -25,12 +25,6 @@ interface NimazService
 		language : String ,
 							) : ArrayList<AyaResponse>
 
-	//get qibla direction
-	suspend fun getQiblaDirection(
-		latitude : Double ,
-		longitude : Double ,
-								 ) : QiblaDirectionResponse
-
 	//get duas chapters
 	suspend fun getChapters() : ArrayList<ChaptersResponse>
 
