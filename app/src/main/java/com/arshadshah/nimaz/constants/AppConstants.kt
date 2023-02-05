@@ -93,6 +93,7 @@ object AppConstants
 
 	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen"
 	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}"
+	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{arabic}"
 
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
 	const val PRAYER_TIMES_SETTINGS_SCREEN_ROUTE = "prayer_times_settings_screen"

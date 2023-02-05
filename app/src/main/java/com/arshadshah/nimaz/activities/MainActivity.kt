@@ -30,6 +30,7 @@ import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
@@ -195,6 +196,7 @@ class MainActivity : ComponentActivity()
 			SHAHADAH_SCREEN_ROUTE -> "Shahadah"
 			CHAPTERS_SCREEN_ROUTE -> "Categories of Dua"
 			CHAPTER_SCREEN_ROUTE -> "Dua"
+			TASBIH_SCREEN_ROUTE -> "Tasbih"
 			else -> "Settings"
 		}
 	}
@@ -210,7 +212,8 @@ class MainActivity : ComponentActivity()
 				QURAN_AYA_SCREEN_ROUTE,
 				SHAHADAH_SCREEN_ROUTE,
 				CHAPTERS_SCREEN_ROUTE,
-				CHAPTER_SCREEN_ROUTE
+				CHAPTER_SCREEN_ROUTE,
+				TASBIH_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
