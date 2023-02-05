@@ -11,13 +11,11 @@ import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
-import com.arshadshah.nimaz.ui.screens.MoreScreen
-import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
-import com.arshadshah.nimaz.ui.screens.QiblaScreen
-import com.arshadshah.nimaz.ui.screens.ShahadahScreen
+import com.arshadshah.nimaz.ui.screens.*
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.About
@@ -89,7 +87,7 @@ fun NavigationGraph(
 											  )
 					} ,
 					onNavigateToNames = {
-						navController.navigate("names")
+						navController.navigate(NAMESOFALLAH_SCREEN_ROUTE)
 					} ,
 					onNavigateToListOfTasbeeh = {
 						navController.navigate(CHAPTERS_SCREEN_ROUTE)
@@ -107,8 +105,8 @@ fun NavigationGraph(
 			TasbihScreen(paddingValues = paddingValues)
 		}
 
-		activity("names") {
-			this.activityClass = NamesOfAllah::class
+		composable(NAMESOFALLAH_SCREEN_ROUTE) {
+			NamesOfAllah(paddingValues = paddingValues)
 		}
 
 		composable(CHAPTERS_SCREEN_ROUTE) {
