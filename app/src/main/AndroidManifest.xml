@@ -30,7 +30,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Nimaz"
+        android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
 
@@ -38,26 +38,6 @@
             android:name=".activities.ZakatCalculator"
             android:exported="false"
             android:label="@string/title_activity_zakat_calculator"
-            android:theme="@style/Theme.Nimaz" />
-        <activity
-            android:name=".activities.ShahadahActivity"
-            android:exported="false"
-            android:label="@string/title_activity_shahadah"
-            android:theme="@style/Theme.Nimaz" />
-        <activity
-            android:name=".activities.ListOfTasbeeh"
-            android:exported="false"
-            android:label="@string/title_activity_list_of_tasbeeh"
-            android:theme="@style/Theme.Nimaz" />
-        <activity
-            android:name=".activities.NamesOfAllah"
-            android:exported="false"
-            android:label="@string/title_activity_names_of_allah"
-            android:theme="@style/Theme.Nimaz" />
-        <activity
-            android:name=".activities.Tasbih"
-            android:exported="false"
-            android:label="@string/title_activity_tasbih"
             android:theme="@style/Theme.Nimaz" />
 
         <receiver
@@ -91,23 +71,6 @@
             android:enabled="true"
             android:exported="true"
             android:permission="com.android.alarm.permission.SET_ALARM" />
-
-        <activity
-            android:name=".activities.SettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_settings"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".activities.QuranActivity"
-            android:exported="false"
-            android:label="@string/title_activity_quran"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz" />
         <activity
             android:name=".activities.Introduction"
             android:exported="false"
@@ -119,7 +82,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".activities.SplashActivity"
+            android:name=".activities.RoutingActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">

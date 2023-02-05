@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.data.remote.viewModel
 import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,11 +16,11 @@ import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.location.LocationFinder
 import com.arshadshah.nimaz.utils.location.NetworkChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,40 +28,32 @@ import java.time.LocalDateTime
 class PrayerTimesViewModel(context : Context) : ViewModel()
 {
 
-	sealed class PrayerTimesState
-	{
-
-		object Loading : PrayerTimesState()
-		data class Success(val prayerTimes : PrayerTimes?) : PrayerTimesState()
-		data class Error(val errorMessage : String) : PrayerTimesState()
-	}
+	data class PrayerTimesState(
+		val isLoading : MutableState<Boolean> = mutableStateOf(false) ,
+		val isLoaded : MutableState<Boolean> = mutableStateOf(false) ,
+		val prayerTimes : MutableState<PrayerTimes?> = mutableStateOf(null) ,
+		val error : MutableState<String?> = mutableStateOf(null) ,
+		val location : MutableState<String?> = mutableStateOf(null) ,
+							   )
 
 	private var _prayerTimesState =
-		MutableStateFlow<PrayerTimesState>(PrayerTimesState.Loading)
+		MutableStateFlow(PrayerTimesState())
 	val prayerTimesState = _prayerTimesState.asStateFlow()
-
-	//location state
-	sealed class LocationState
-	{
-
-		object Loading : LocationState()
-		data class Success(val location : String) : LocationState()
-		data class Error(val errorMessage : String) : LocationState()
-	}
-
-	private var _location = MutableStateFlow(LocationState.Loading as LocationState)
-	val location = _location.asStateFlow()
 
 	private var countDownTimer : CountDownTimer? = null
 
 	private val _countDownTimeState = MutableLiveData<CountDownTime>()
 	val timer : LiveData<CountDownTime> = _countDownTimeState
 
-
-	init
+	//function to reload the UI state
+	fun reload(context : Context)
 	{
-		loadLocation(context)
-		loadPrayerTimes(context)
+		viewModelScope.launch(Dispatchers.IO) {
+			//load the location
+			loadLocation(context)
+			//load the prayer times
+			loadPrayerTimes(context)
+		}
 	}
 
 	//load prayer times again
@@ -68,6 +62,9 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
+				_prayerTimesState.update {
+					it.copy(isLoading = mutableStateOf(true))
+				}
 				val dataStore = LocalDataStore.getDataStore()
 				val prayerTimesAvailable = dataStore.countPrayerTimes()
 				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean(
@@ -79,7 +76,10 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 				{
 
 					val localPrayerTimes = dataStore.getAllPrayerTimes()
-					Log.d("PrayerTimesViewModel" , "loadPrayerTimes: $localPrayerTimes")
+					Log.d(
+							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							"loadPrayerTimes: $localPrayerTimes"
+						 )
 					val localTimesNull = localPrayerTimes.timestamp == null
 					//if timestamp is from today then the data is valid and we can use it
 					val localTimesExpired =
@@ -100,14 +100,35 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 						{
 							dataStore.deleteAllPrayerTimes()
 							dataStore.saveAllPrayerTimes(response.data)
-							_prayerTimesState.value = PrayerTimesState.Success(response.data)
+							_prayerTimesState.update {
+								it.copy(
+										isLoading = mutableStateOf(false) ,
+										isLoaded = mutableStateOf(true) ,
+										prayerTimes = mutableStateOf(response.data) ,
+										error = mutableStateOf(null)
+									   )
+							}
 						} else
 						{
-							_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+							_prayerTimesState.update {
+								it.copy(
+										isLoading = mutableStateOf(false) ,
+										isLoaded = mutableStateOf(false) ,
+										prayerTimes = mutableStateOf(null) ,
+										error = mutableStateOf(response.message)
+									   )
+							}
 						}
 					} else
 					{
-						_prayerTimesState.value = PrayerTimesState.Success(localPrayerTimes)
+						_prayerTimesState.update {
+							it.copy(
+									isLoading = mutableStateOf(false) ,
+									isLoaded = mutableStateOf(true) ,
+									prayerTimes = mutableStateOf(localPrayerTimes) ,
+									error = mutableStateOf(null)
+								   )
+						}
 					}
 
 				} else
@@ -123,20 +144,47 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 									false
 																			 )
 						}
-						Log.d("PrayerTimesViewModel" , "loadPrayerTimesRemote: ${response.data}")
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadPrayerTimesRemote: ${response.data}"
+							 )
 						dataStore.deleteAllPrayerTimes()
 						dataStore.saveAllPrayerTimes(response.data)
-						_prayerTimesState.value = PrayerTimesState.Success(response.data)
+						_prayerTimesState.update {
+							it.copy(
+									isLoading = mutableStateOf(false) ,
+									isLoaded = mutableStateOf(true) ,
+									prayerTimes = mutableStateOf(response.data) ,
+									error = mutableStateOf(null)
+								   )
+						}
 					} else
 					{
-						_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+						_prayerTimesState.update {
+							it.copy(
+									isLoading = mutableStateOf(false) ,
+									isLoaded = mutableStateOf(false) ,
+									prayerTimes = mutableStateOf(null) ,
+									error = mutableStateOf(response.message)
+								   )
+						}
 					}
 				}
 
 			} catch (e : Exception)
 			{
-				_prayerTimesState.value =
-					PrayerTimesState.Error(e.message ?: "Unknown error")
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadPrayerTimes: ${e.message}"
+					 )
+				_prayerTimesState.update {
+					it.copy(
+							isLoading = mutableStateOf(false) ,
+							isLoaded = mutableStateOf(false) ,
+							prayerTimes = mutableStateOf(null) ,
+							error = mutableStateOf(e.message)
+						   )
+				}
 			}
 		}
 	}
@@ -145,48 +193,105 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 	fun loadLocation(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			val sharedPreferences = PrivateSharedPreferences(context)
-			val locationAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE , true)
-			val locationInput = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
-			//callback for location
-			val locationFoundCallbackManual =
-				{ longitudeValue : Double , latitudeValue : Double , name : String ->
-					//save location
-					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , name)
-					sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , longitudeValue)
-					sharedPreferences.saveDataDouble(AppConstants.LATITUDE , latitudeValue)
-
-				}
-			if (NetworkChecker().networkCheck(context))
+			try
 			{
-				if (locationAuto)
+				_prayerTimesState.update {
+					it.copy(
+							location = mutableStateOf(null) ,
+						   )
+				}
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadLocation: loading..."
+					 )
+				val sharedPreferences = PrivateSharedPreferences(context)
+				val locationAuto =
+					sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE , true)
+				val locationName = mutableStateOf(
+						sharedPreferences.getData(
+								AppConstants.LOCATION_INPUT ,
+								"Abbeyleix"
+												 )
+												 )
+				val latitude =
+					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.0))
+				val longitude =
+					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 7.0))
+				//callback for location
+				val locationFoundCallbackManual =
+					{ longitudeValue : Double , latitudeValue : Double , name : String ->
+						//save location
+						locationName.value = name
+						latitude.value = latitudeValue
+						longitude.value = longitudeValue
+					}
+				val listener = { latitudeValue : Double , longitudeValue : Double ->
+					//save location
+					latitude.value = latitudeValue
+					longitude.value = longitudeValue
+				}
+
+				if (NetworkChecker().networkCheck(context))
 				{
-					val locationfinder = LocationFinder()
-					val latitude = locationfinder.latitudeValue
-					val longitude = locationfinder.longitudeValue
-					locationfinder.findCityName(
-							context ,
-							latitude ,
-							longitude ,
-							locationFoundCallbackManual
-											   )
-					_location.value = LocationState.Success(locationfinder.cityName)
+					if (locationAuto)
+					{
+						Location().getAutomaticLocation(
+								context ,
+								listener ,
+								locationFoundCallbackManual
+													   )
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadLocation: auto"
+							 )
+						_prayerTimesState.update {
+							it.copy(
+									location = mutableStateOf(locationName.value) ,
+								   )
+						}
+					} else
+					{
+						Location().getManualLocation(
+								locationName.value ,
+								context ,
+								locationFoundCallbackManual
+													)
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadLocation: manual"
+							 )
+						_prayerTimesState.update {
+							it.copy(
+									location = mutableStateOf(locationName.value) ,
+								   )
+						}
+					}
 				} else
 				{
-					Location().getManualLocation(
-							locationInput ,
-							context ,
-							locationFoundCallbackManual
-												)
-					_location.value = LocationState.Success(locationInput)
+					Log.d(
+							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							"loadLocation: no network"
+						 )
+					_prayerTimesState.update {
+						it.copy(
+								location = mutableStateOf(null) ,
+							   )
+					}
 				}
-			} else
+			} catch (e : Exception)
 			{
-				_location.value = LocationState.Error("No internet connection")
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadLocation: ${e.message}"
+					 )
+				_prayerTimesState.update {
+					it.copy(
+							location = mutableStateOf(null) ,
+						   )
+				}
 			}
 		}
 	}
-
 
 	fun startTimer(context : Context , timeToNextPrayer : Long)
 	{

@@ -73,14 +73,14 @@ fun SettingsScreen(
 	}
 
 	//a listner callback that is called when the location is found
-	val locationFoundCallback = { longitudeValue : Double , latitudeValue : Double ->
+	val locationFoundCallback = { latitudeValue : Double , longitudeValue : Double ->
 		longitude.value = longitudeValue
 		latitude.value = latitudeValue
 	}
 
 	//a callback that is called when using mauual location
 	val locationFoundCallbackManual =
-		{ longitudeValue : Double , latitudeValue : Double , name : String ->
+		{ latitudeValue : Double , longitudeValue : Double , name : String ->
 			longitude.value = longitudeValue
 			latitude.value = latitudeValue
 			locationName.value = name
@@ -128,12 +128,6 @@ fun SettingsScreen(
 								Text(text = "Manual")
 								val locationFinderAuto = LocationFinderAuto()
 								locationFinderAuto.stopLocationUpdates()
-							}
-						} ,
-						subtitle = {
-							if (storage.value)
-							{
-								Text(text = locationName.value)
 							}
 						} ,
 						onCheckedChange = {
