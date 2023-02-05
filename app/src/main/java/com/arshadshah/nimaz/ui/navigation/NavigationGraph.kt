@@ -9,6 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.MoreScreen
@@ -20,6 +22,8 @@ import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.About
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
+import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
+import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -80,7 +84,7 @@ fun NavigationGraph(
 						navController.navigate("names")
 					} ,
 					onNavigateToListOfTasbeeh = {
-						navController.navigate("listoftasbeeh")
+						navController.navigate(CHAPTERS_SCREEN_ROUTE)
 					} ,
 					onNavigateToShadah = {
 						navController.navigate(SHAHADAH_SCREEN_ROUTE)
@@ -100,8 +104,25 @@ fun NavigationGraph(
 			this.activityClass = NamesOfAllah::class
 		}
 
-		activity("listoftasbeeh") {
-			this.activityClass = ListOfTasbeeh::class
+		composable(CHAPTERS_SCREEN_ROUTE) {
+			ChapterList(
+					paddingValues ,
+					onNavigateToChapter = { chapterId : Int ->
+						//replace CHAPTER_SCREEN_ROUTE with the actual route and pass the chapterId
+						navController.navigate(
+								CHAPTER_SCREEN_ROUTE.replace(
+										"{chapterId}" ,
+										chapterId.toString()
+															  )
+											  )
+					}
+					   )
+		}
+		composable(CHAPTER_SCREEN_ROUTE) {
+			DuaList(
+					chapterId = it.arguments?.getString("chapterId")?.toInt() ?: 0 ,
+					paddingValues = paddingValues
+				   )
 		}
 
 		activity("Zakat") {
