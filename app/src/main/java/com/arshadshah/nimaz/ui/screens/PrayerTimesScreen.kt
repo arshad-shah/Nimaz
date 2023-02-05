@@ -2,12 +2,14 @@ package com.arshadshah.nimaz.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LifecycleObserver
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
@@ -39,16 +41,14 @@ fun PrayerTimesScreen(
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "state: ${state.value}")
 
 	//if its not loaded yet, show a loading screen
- 	if (state.value.isLoading.value || state.value.prayerTimes.value == null)
+	if (state.value.isLoading.value || state.value.prayerTimes.value == null)
 	{
 		CircularLoaderCard()
-	}
-	else if (state.value.error.value != null)
+	} else if (state.value.error.value != null)
 	{
 		//if there is an error, show an error screen
-		Toasty.error(context , state.value.error.value!!).show()
-	}
-	else
+		Toasty.error(context , state.value.error.value !!).show()
+	} else
 	{
 		Column(
 				modifier = Modifier
@@ -59,7 +59,10 @@ fun PrayerTimesScreen(
 				verticalArrangement = Arrangement.SpaceEvenly
 			  ) {
 			// Calling the LocationTimeContainer composable
-			LocationTimeContainer(location = state.value.location, currentTimeName = state.value.prayerTimes.value?.currentPrayer?.name)
+			LocationTimeContainer(
+					location = state.value.location ,
+					currentTimeName = state.value.prayerTimes.value?.currentPrayer?.name
+								 )
 
 			// Calling the DatesContainer composable
 			DatesContainer()

@@ -8,7 +8,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 @Composable
 fun rememberPreferenceDoubleSettingState(
 	key : String ,
-	defaultValue : Double = 0.0,
+	defaultValue : Double = 0.0 ,
 	preferences : PrivateSharedPreferences = PrivateSharedPreferences(LocalContext.current) ,
 										) : DoublePreferenceSettingValueState
 {
@@ -24,7 +24,7 @@ fun rememberPreferenceDoubleSettingState(
 class DoublePreferenceSettingValueState(
 	private val preferences : PrivateSharedPreferences ,
 	val key : String ,
-	val defaultValue : Double = 0.0,
+	val defaultValue : Double = 0.0 ,
 									   ) : SettingValueState<Double>
 {
 

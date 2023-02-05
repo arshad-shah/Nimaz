@@ -53,14 +53,14 @@ fun NavigationGraph(
 										"{number}" ,
 										number
 															  )
-										.replace(
-												"{isSurah}" ,
-												isSurah.toString()
-												)
-										.replace(
-												"{language}" ,
-												language
-												)
+									.replace(
+											"{isSurah}" ,
+											isSurah.toString()
+											)
+									.replace(
+											"{language}" ,
+											language
+											)
 											  )
 					})
 		}
@@ -118,7 +118,7 @@ fun NavigationGraph(
 								CHAPTER_SCREEN_ROUTE.replace(
 										"{chapterId}" ,
 										chapterId.toString()
-															  )
+															)
 											  )
 					}
 					   )

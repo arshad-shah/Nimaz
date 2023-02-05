@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.constants
 
-import androidx.compose.runtime.Composable
-
 object AppConstants
 {
 

@@ -221,13 +221,13 @@ fun Counter(
 
 						reset.value = true
 
-						showResetDialog.value  = false
+						showResetDialog.value = false
 					}) {
 						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
 					}
 				} ,
 				dismissButton = {
-					TextButton(onClick = { showResetDialog.value  = false }) {
+					TextButton(onClick = { showResetDialog.value = false }) {
 						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
 					}
 				}

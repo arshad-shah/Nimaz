@@ -18,13 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
@@ -158,106 +156,107 @@ class MainActivity : ComponentActivity()
 				val CustomAnimation = remember { CustomAnimation() }
 				Scaffold(
 						topBar = {
-									 AnimatedVisibility(
-											 visible = checkRoute(route.value.toString()),
-											 enter = CustomAnimation.fadeIn(duration = 300),
-											 exit = CustomAnimation.fadeOut(duration = 300),
-											 content = {
+							AnimatedVisibility(
+									visible = checkRoute(route.value.toString()) ,
+									enter = CustomAnimation.fadeIn(duration = 300) ,
+									exit = CustomAnimation.fadeOut(duration = 300) ,
+									content = {
 
-										 TopAppBar(
-												 title = {
-													 Text(
-															 text = processPageTitle(route.value.toString()) ,
-															 style = MaterialTheme.typography.titleMedium
-														 )
-												 } ,
-												 navigationIcon = {
-													 IconButton(onClick = { navController.navigateUp() }) {
-														 Icon(
-																 imageVector = Icons.Default.ArrowBack ,
-																 contentDescription = "Back"
-															 )
-													 }
-												 } ,
-												 actions = {
-													 //only show the menu button if the title is Quran
-													 if (route.value == QURAN_SCREEN_ROUTE)
-													 {
-														 //open the menu
-														 IconButton(onClick = { setMenuOpen(true) }) {
-															 Icon(
-																	 imageVector = Icons.Filled.MoreVert ,
-																	 contentDescription = "Menu"
-																 )
-														 }
-														 MoreMenu(
-																 menuOpen = menuOpen ,
-																 setMenuOpen = setMenuOpen
-																 )
-													 }else if (route.value == NAMESOFALLAH_SCREEN_ROUTE){
-														 if (!isStopped.value)
-														 {
-															 IconButton(onClick = {
-																 mediaPlayer.stop()
-																 mediaPlayer.reset()
-																 prepareMediaPlayer(this@MainActivity)
-																 isPlaying.value = false
-																 isPaused.value = false
-																 isStopped.value = true
-															 }
-																	   ) {
-																 Icon(
-																		 imageVector = FeatherIcons.StopCircle ,
-																		 contentDescription = "Stop playing"
-																	 )
-															 }
-														 }
-														 IconButton(onClick = {
-															 if (isPlaying.value.not())
-															 {
-																 //start the audio
-																 mediaPlayer.start()
-																 isPlaying.value = true
-																 isPaused.value = false
-																 isStopped.value = false
-															 } else
-															 {
-																 mediaPlayer.pause()
-																 isPlaying.value = false
-																 isPaused.value = true
-																 isStopped.value = false
-															 }
-														 }
-																   ) {
-															 if (isPlaying.value)
-															 {
-																 Icon(
-																		 imageVector = FeatherIcons.Pause ,
-																		 contentDescription = "Pause playing"
-																	 )
-															 } else
-															 {
-																 Icon(
-																		 imageVector = FeatherIcons.Play ,
-																		 contentDescription = "Play"
-																	 )
-															 }
-														 }
+										TopAppBar(
+												title = {
+													Text(
+															text = processPageTitle(route.value.toString()) ,
+															style = MaterialTheme.typography.titleMedium
+														)
+												} ,
+												navigationIcon = {
+													IconButton(onClick = { navController.navigateUp() }) {
+														Icon(
+																imageVector = Icons.Default.ArrowBack ,
+																contentDescription = "Back"
+															)
+													}
+												} ,
+												actions = {
+													//only show the menu button if the title is Quran
+													if (route.value == QURAN_SCREEN_ROUTE)
+													{
+														//open the menu
+														IconButton(onClick = { setMenuOpen(true) }) {
+															Icon(
+																	imageVector = Icons.Filled.MoreVert ,
+																	contentDescription = "Menu"
+																)
+														}
+														MoreMenu(
+																menuOpen = menuOpen ,
+																setMenuOpen = setMenuOpen
+																)
+													} else if (route.value == NAMESOFALLAH_SCREEN_ROUTE)
+													{
+														if (! isStopped.value)
+														{
+															IconButton(onClick = {
+																mediaPlayer.stop()
+																mediaPlayer.reset()
+																prepareMediaPlayer(this@MainActivity)
+																isPlaying.value = false
+																isPaused.value = false
+																isStopped.value = true
+															}
+																	  ) {
+																Icon(
+																		imageVector = FeatherIcons.StopCircle ,
+																		contentDescription = "Stop playing"
+																	)
+															}
+														}
+														IconButton(onClick = {
+															if (isPlaying.value.not())
+															{
+																//start the audio
+																mediaPlayer.start()
+																isPlaying.value = true
+																isPaused.value = false
+																isStopped.value = false
+															} else
+															{
+																mediaPlayer.pause()
+																isPlaying.value = false
+																isPaused.value = true
+																isStopped.value = false
+															}
+														}
+																  ) {
+															if (isPlaying.value)
+															{
+																Icon(
+																		imageVector = FeatherIcons.Pause ,
+																		contentDescription = "Pause playing"
+																	)
+															} else
+															{
+																Icon(
+																		imageVector = FeatherIcons.Play ,
+																		contentDescription = "Play"
+																	)
+															}
+														}
 
-													 }
-												 }
-												  )
-								 }
-													   )
-						},
+													}
+												}
+												 )
+									}
+											  )
+						} ,
 						bottomBar = {
-								AnimatedVisibility(
-										visible = !checkRoute(route.value.toString()),
-										enter = CustomAnimation.fadeIn(duration = 300),
-										exit = CustomAnimation.fadeOut(duration = 300),
-										content = {
-											BottomNavigationBar(navController = navController)
-										})
+							AnimatedVisibility(
+									visible = ! checkRoute(route.value.toString()) ,
+									enter = CustomAnimation.fadeIn(duration = 300) ,
+									exit = CustomAnimation.fadeOut(duration = 300) ,
+									content = {
+										BottomNavigationBar(navController = navController)
+									})
 						}
 						) { it ->
 					NavigationGraph(navController = navController , it)
@@ -265,6 +264,7 @@ class MainActivity : ComponentActivity()
 			}
 		}
 	}
+
 	fun processPageTitle(route : String) : String
 	{
 		return when (route)
@@ -289,13 +289,13 @@ class MainActivity : ComponentActivity()
 		val routeToCheck = listOf(
 				SETTINGS_SCREEN_ROUTE ,
 				ABOUT_SCREEN_ROUTE ,
-				PRAYER_TIMES_SETTINGS_SCREEN_ROUTE,
-				QURAN_SCREEN_ROUTE,
-				QURAN_AYA_SCREEN_ROUTE,
-				SHAHADAH_SCREEN_ROUTE,
-				CHAPTERS_SCREEN_ROUTE,
-				CHAPTER_SCREEN_ROUTE,
-				TASBIH_SCREEN_ROUTE,
+				PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ,
+				QURAN_SCREEN_ROUTE ,
+				QURAN_AYA_SCREEN_ROUTE ,
+				SHAHADAH_SCREEN_ROUTE ,
+				CHAPTERS_SCREEN_ROUTE ,
+				CHAPTER_SCREEN_ROUTE ,
+				TASBIH_SCREEN_ROUTE ,
 				NAMESOFALLAH_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
@@ -322,15 +322,16 @@ class MainActivity : ComponentActivity()
 
 class CustomAnimation
 {
+
 	fun fadeIn(duration : Int) : EnterTransition =
-			expandVertically(
-					expandFrom = Alignment.Top ,
-					animationSpec = tween(durationMillis = duration)
-							)
+		expandVertically(
+				expandFrom = Alignment.Top ,
+				animationSpec = tween(durationMillis = duration)
+						)
 
 	fun fadeOut(duration : Int) : ExitTransition =
-			shrinkVertically(
-					shrinkTowards = Alignment.Top ,
-					animationSpec = tween(durationMillis = duration)
-							)
+		shrinkVertically(
+				shrinkTowards = Alignment.Top ,
+				animationSpec = tween(durationMillis = duration)
+						)
 }
