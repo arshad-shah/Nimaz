@@ -89,7 +89,7 @@ object AppConstants
 	const val QURAN_SCREEN_ROUTE = "quran_screen"
 	const val QURAN_AYA_SCREEN_ROUTE = "ayatScreen/{number}/{isSurah}/{language}"
 	const val MORE_SCREEN_ROUTE = "more_screen"
-
+	const val SHAHADAH_SCREEN_ROUTE = "shahadah_screen"
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
 	const val PRAYER_TIMES_SETTINGS_SCREEN_ROUTE = "prayer_times_settings_screen"
 	const val ABOUT_SCREEN_ROUTE = "about_screen"
