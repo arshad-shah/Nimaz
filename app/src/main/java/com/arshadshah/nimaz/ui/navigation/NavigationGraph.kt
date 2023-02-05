@@ -9,9 +9,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
+import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
+import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.About
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
@@ -34,9 +37,37 @@ fun NavigationGraph(
 		composable(BottomNavItem.QiblaScreen.screen_route) {
 			QiblaScreen(paddingValues)
 		}
-		activity(BottomNavItem.QuranScreen.screen_route) {
-			this.activityClass = QuranActivity::class
+		composable(BottomNavItem.QuranScreen.screen_route) {
+			QuranScreen(
+					paddingValues ,
+					onNavigateToAyatScreen = { number : String , isSurah : Boolean , language : String ->
+						//replace the placeholder with the actual route
+						navController.navigate(
+								QURAN_AYA_SCREEN_ROUTE.replace(
+										"{number}" ,
+										number
+															  )
+										.replace(
+												"{isSurah}" ,
+												isSurah.toString()
+												)
+										.replace(
+												"{language}" ,
+												language
+												)
+											  )
+					})
 		}
+		composable(QURAN_AYA_SCREEN_ROUTE) {
+			AyatScreen(
+					number = it.arguments?.getString("number") ,
+					isSurah = it.arguments?.getString("isSurah") !! ,
+					language = it.arguments?.getString("language") !! ,
+					paddingValues = paddingValues
+					  )
+		}
+
+
 		composable(BottomNavItem.MoreScreen.screen_route) {
 			MoreScreen(
 					paddingValues ,
