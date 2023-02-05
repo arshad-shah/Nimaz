@@ -12,7 +12,7 @@ import com.arshadshah.nimaz.data.local.models.*
 		TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalQibla::class] ,
+		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class] ,
 //		TODO: update version number when database changes
 		version = 1 ,
 		exportSchema = false
@@ -25,5 +25,4 @@ abstract class AppDatabase : RoomDatabase()
 	abstract val surah : SurahDao
 	abstract val prayerTimes : PrayerTimesDao
 	abstract val dua : DuaDao
-	abstract val qibla : QiblaDao
 }

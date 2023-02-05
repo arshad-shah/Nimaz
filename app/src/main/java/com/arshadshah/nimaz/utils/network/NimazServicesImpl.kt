@@ -29,26 +29,6 @@ object NimazServicesImpl : NimazService
 		return response
 	}
 
-	override suspend fun getQiblaDirection(
-		latitude : Double ,
-		longitude : Double ,
-										  ) : QiblaDirectionResponse
-	{
-		val response : QiblaDirectionResponse = httpClient.request(AppConstants.QIBLA_URL) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-			url {
-				parameters.append("latitude" , latitude.toString())
-				parameters.append("longitude" , longitude.toString())
-			}
-		}.body() !!
-
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getQiblaDirection: $response")
-
-		return response
-	}
-
-
 	override suspend fun getPrayerTimes(
 		mapOfParams : Map<String , String> ,
 									   ) : PrayerTimeResponse
