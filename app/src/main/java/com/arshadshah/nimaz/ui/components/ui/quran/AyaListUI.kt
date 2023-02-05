@@ -26,9 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.arshadshah.nimaz.activities.QuranActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -246,109 +243,109 @@ fun AyaListItemUI(
 }
 
 //the function responsible for converting the audio file to text
-fun convertAudioToText(
-	context : Context ,
-	speechRecognizer : SpeechRecognizer ,
-	callback : (String) -> Unit ,
-					  )
-{
-	if (ContextCompat.checkSelfPermission(
-				context ,
-				Manifest.permission.RECORD_AUDIO
-										 ) != PackageManager.PERMISSION_GRANTED
-	)
-	{
-		checkPermission()
-	} else
-	{
-		//create a new speech recognizer intent
-		val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-		//set the language to arabic
-		speechRecognizerIntent.putExtra(
-				RecognizerIntent.EXTRA_LANGUAGE_MODEL ,
-				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-									   )
-		speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE , "ar")
-		//set the speech recognizer intent to the speech recognizer
-		//we are using the speech recognizer to convert the audio file to text
-		speechRecognizer.setRecognitionListener(object : RecognitionListener
-												{
-													override fun onReadyForSpeech(params : Bundle?)
-													{
-														Log.d("newText" , "onReadyForSpeech")
-													}
-
-													override fun onBeginningOfSpeech()
-													{
-														Log.d("newText" , "onBeginningOfSpeech")
-													}
-
-													override fun onRmsChanged(rmsdB : Float)
-													{
-													}
-
-													override fun onBufferReceived(buffer : ByteArray?)
-													{
-													}
-
-													override fun onEndOfSpeech()
-													{
-														Log.d("newText" , "onEndOfSpeech")
-													}
-
-													override fun onError(error : Int)
-													{
-														Log.d("newText" , "onError: $error")
-													}
-
-													override fun onResults(results : Bundle?)
-													{
-
-														Log.d(
-																"newText" ,
-																"onResults: ${
-																	results?.getStringArrayList(
-																			SpeechRecognizer.RESULTS_RECOGNITION
-																							   )
-																}"
-															 )
-														//get the results
-														val data = results?.getStringArrayList(
-																SpeechRecognizer.RESULTS_RECOGNITION
-																							  )
-														callback(data?.get(0) ?: "")
-													}
-
-													override fun onPartialResults(partialResults : Bundle?)
-													{
-														Log.d(
-																"newText" ,
-																"onPartialResults: $partialResults"
-															 )
-													}
-
-													override fun onEvent(
-														eventType : Int ,
-														params : Bundle? ,
-																		)
-													{
-														Log.d("newText" , "onEvent: $eventType")
-													}
-												})
-
-		//start listening to the audio using the speech recognizer
-		speechRecognizer.startListening(speechRecognizerIntent)
-	}
-}
-
-private fun checkPermission()
-{
-	ActivityCompat.requestPermissions(
-			QuranActivity() ,
-			arrayOf(Manifest.permission.RECORD_AUDIO) ,
-			100000
-									 )
-}
+//fun convertAudioToText(
+//	context : Context ,
+//	speechRecognizer : SpeechRecognizer ,
+//	callback : (String) -> Unit ,
+//					  )
+//{
+//	if (ContextCompat.checkSelfPermission(
+//				context ,
+//				Manifest.permission.RECORD_AUDIO
+//										 ) != PackageManager.PERMISSION_GRANTED
+//	)
+//	{
+//		checkPermission()
+//	} else
+//	{
+//		//create a new speech recognizer intent
+//		val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+//		//set the language to arabic
+//		speechRecognizerIntent.putExtra(
+//				RecognizerIntent.EXTRA_LANGUAGE_MODEL ,
+//				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+//									   )
+//		speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE , "ar")
+//		//set the speech recognizer intent to the speech recognizer
+//		//we are using the speech recognizer to convert the audio file to text
+//		speechRecognizer.setRecognitionListener(object : RecognitionListener
+//												{
+//													override fun onReadyForSpeech(params : Bundle?)
+//													{
+//														Log.d("newText" , "onReadyForSpeech")
+//													}
+//
+//													override fun onBeginningOfSpeech()
+//													{
+//														Log.d("newText" , "onBeginningOfSpeech")
+//													}
+//
+//													override fun onRmsChanged(rmsdB : Float)
+//													{
+//													}
+//
+//													override fun onBufferReceived(buffer : ByteArray?)
+//													{
+//													}
+//
+//													override fun onEndOfSpeech()
+//													{
+//														Log.d("newText" , "onEndOfSpeech")
+//													}
+//
+//													override fun onError(error : Int)
+//													{
+//														Log.d("newText" , "onError: $error")
+//													}
+//
+//													override fun onResults(results : Bundle?)
+//													{
+//
+//														Log.d(
+//																"newText" ,
+//																"onResults: ${
+//																	results?.getStringArrayList(
+//																			SpeechRecognizer.RESULTS_RECOGNITION
+//																							   )
+//																}"
+//															 )
+//														//get the results
+//														val data = results?.getStringArrayList(
+//																SpeechRecognizer.RESULTS_RECOGNITION
+//																							  )
+//														callback(data?.get(0) ?: "")
+//													}
+//
+//													override fun onPartialResults(partialResults : Bundle?)
+//													{
+//														Log.d(
+//																"newText" ,
+//																"onPartialResults: $partialResults"
+//															 )
+//													}
+//
+//													override fun onEvent(
+//														eventType : Int ,
+//														params : Bundle? ,
+//																		)
+//													{
+//														Log.d("newText" , "onEvent: $eventType")
+//													}
+//												})
+//
+//		//start listening to the audio using the speech recognizer
+//		speechRecognizer.startListening(speechRecognizerIntent)
+//	}
+//}
+//
+//private fun checkPermission()
+//{
+//	ActivityCompat.requestPermissions(
+//			QuranActivity() ,
+//			arrayOf(Manifest.permission.RECORD_AUDIO) ,
+//			100000
+//									 )
+//}
 
 
 @Preview

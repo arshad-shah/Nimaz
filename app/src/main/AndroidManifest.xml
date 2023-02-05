@@ -92,12 +92,6 @@
             android:exported="true"
             android:permission="com.android.alarm.permission.SET_ALARM" />
         <activity
-            android:name=".activities.QuranActivity"
-            android:exported="false"
-            android:label="@string/title_activity_quran"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz" />
-        <activity
             android:name=".activities.Introduction"
             android:exported="false"
             android:label="@string/title_activity_introduction"
