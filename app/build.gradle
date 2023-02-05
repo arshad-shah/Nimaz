@@ -73,8 +73,13 @@ dependencies {
     implementation "androidx.datastore:datastore-core:$datastore_core_version"
     implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
     implementation "androidx.navigation:navigation-compose:$nav_version"
+    implementation 'androidx.test:monitor:1.6.1'
+    implementation 'androidx.test.ext:junit-ktx:1.1.5'
+    implementation 'androidx.test:runner:1.5.2'
+
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$compose_version")
 
     //ktor
     implementation "io.ktor:ktor-client-core:$ktor_version"
@@ -89,13 +94,15 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 
     testImplementation "junit:junit:$junit_version"
+    //mockito
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+    //Robolectric environment
+    testImplementation "androidx.test:core:$test_core_version"
+    testImplementation "org.robolectric:robolectric:$robolectric_version"
     androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
     androidTestImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
-
-    //mockito
-    testImplementation "org.mockito:mockito-core:$mockito_version"
 
     implementation "com.google.android.gms:play-services-location:$play_services_location_version"
 

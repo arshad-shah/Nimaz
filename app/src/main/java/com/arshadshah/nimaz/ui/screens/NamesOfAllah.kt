@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -41,6 +42,11 @@ fun NamesOfAllah(paddingValues : PaddingValues)
 	//the names are in the same order in all three arrays
 	//so the first name in English is the same as the first name in Arabic and the first name in translation
 	LazyColumn(
+			//assign a tag to the column
+			//this is used for testing
+			//the tag is used to find the column in the hierarchy
+			modifier = Modifier
+				.fillMaxSize().testTag("NamesOfAllah") ,
 			contentPadding = paddingValues
 			  ) {
 		items(englishNames.size) { index ->
