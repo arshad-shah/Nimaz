@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
@@ -22,6 +23,7 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
@@ -177,6 +179,7 @@ class MainActivity : ComponentActivity()
 			PRAYER_TIMES_SETTINGS_SCREEN_ROUTE -> "Prayer Times Customization"
 			QURAN_SCREEN_ROUTE -> "Quran"
 			QURAN_AYA_SCREEN_ROUTE -> "Aya"
+			SHAHADAH_SCREEN_ROUTE -> "Shahadah"
 			else -> "Settings"
 		}
 	}
@@ -189,7 +192,8 @@ class MainActivity : ComponentActivity()
 				ABOUT_SCREEN_ROUTE ,
 				PRAYER_TIMES_SETTINGS_SCREEN_ROUTE,
 				QURAN_SCREEN_ROUTE,
-				QURAN_AYA_SCREEN_ROUTE
+				QURAN_AYA_SCREEN_ROUTE,
+				SHAHADAH_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)

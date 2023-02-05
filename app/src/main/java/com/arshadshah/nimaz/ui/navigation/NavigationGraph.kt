@@ -10,9 +10,11 @@ import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
+import com.arshadshah.nimaz.ui.screens.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.About
@@ -81,7 +83,7 @@ fun NavigationGraph(
 						navController.navigate("listoftasbeeh")
 					} ,
 					onNavigateToShadah = {
-						navController.navigate("shahadah")
+						navController.navigate(SHAHADAH_SCREEN_ROUTE)
 					} ,
 					onNavigateToZakat = {
 						navController.navigate("Zakat")
@@ -106,8 +108,8 @@ fun NavigationGraph(
 			this.activityClass = ZakatCalculator::class
 		}
 
-		activity("shahadah") {
-			this.activityClass = ShahadahActivity::class
+		composable(SHAHADAH_SCREEN_ROUTE) {
+			ShahadahScreen(paddingValues)
 		}
 
 		composable(BottomNavItem.SettingsScreen.screen_route) {
