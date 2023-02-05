@@ -67,7 +67,7 @@ fun JuzListItemUI(
 		val translation = when (translationType)
 		{
 			"English" -> "english"
-			"Arabic" -> "urdu"
+			"Urdu" -> "urdu"
 			else -> "english"
 		}
 		Row(

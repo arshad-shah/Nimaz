@@ -12,29 +12,6 @@ class DataStore(db : AppDatabase)
 	private val surahDao = db.surah
 	private val prayerTimesDao = db.prayerTimes
 	private val duaDao = db.dua
-	private val qiblaDao = db.qibla
-
-	//get qibla
-	suspend fun getQiblaDirection() : Double
-	{
-		return qiblaDao.getQiblaDirection()
-	}
-
-	//set qibla
-	suspend fun setQiblaDirection(direction : Double)
-	{
-		qiblaDao.setQiblaDirection(
-				LocalDateTime.now().toEpochSecond(
-						LocalDateTime.now().atOffset(java.time.ZoneOffset.UTC).offset
-												 ) , direction
-								  )
-	}
-
-	//count qibla direction
-	suspend fun countQiblaDirections() : Int
-	{
-		return qiblaDao.countQiblaDirections()
-	}
 
 	//get all the ayas of a surah
 	suspend fun getAyasOfSurah(surahNumber : Int , translationLanguage : String) =

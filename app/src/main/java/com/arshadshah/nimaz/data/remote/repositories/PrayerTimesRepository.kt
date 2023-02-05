@@ -93,26 +93,4 @@ object PrayerTimesRepository
 			ApiResponse.Error(e.message !! , null)
 		}
 	}
-
-
-	//getQiblaDirection
-	suspend fun getQiblaDirection(context : Context) : ApiResponse<Double>
-	{
-		val sharedPreferences = PrivateSharedPreferences(context)
-		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
-		return try
-		{
-			val response = NimazServicesImpl.getQiblaDirection(latitude , longitude)
-			ApiResponse.Success(response.bearing)
-		} catch (e : ClientRequestException)
-		{
-			ApiResponse.Error(e.message , null)
-
-		} catch (e : IOException)
-		{
-			ApiResponse.Error(e.message !! , null)
-		}
-	}
-
 }
