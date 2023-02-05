@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +31,7 @@ fun Counter(
 	vibrationAllowed : MutableState<Boolean> ,
 	count : MutableState<Int> ,
 	reset : MutableState<Boolean> ,
+	showResetDialog : MutableState<Boolean> ,
 		   )
 {
 
@@ -45,7 +44,6 @@ fun Counter(
 					  )
 	}
 
-	var showResetDialog by remember { mutableStateOf(false) }
 	var showObjectiveDialog by remember { mutableStateOf(false) }
 
 	//lap counter
@@ -121,7 +119,7 @@ fun Counter(
 						}
 					}) {
 				Row(
-						horizontalArrangement = Arrangement.SpaceBetween ,
+						horizontalArrangement = Arrangement.Start ,
 						verticalAlignment = Alignment.CenterVertically
 				   ) {
 					Text(
@@ -132,18 +130,6 @@ fun Counter(
 						)
 					Icon(imageVector = FeatherIcons.Edit , contentDescription = "Edit")
 				}
-			}
-			ElevatedButton(
-					modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
-					contentPadding = PaddingValues(16.dp) ,
-					onClick = {
-						showResetDialog = true
-					}) {
-				Icon(
-						imageVector = Icons.Filled.Refresh ,
-						contentDescription = "Reset" ,
-						modifier = Modifier.size(48.dp)
-					)
 			}
 		}
 
@@ -216,10 +202,10 @@ fun Counter(
 		}
 	}
 
-	if (showResetDialog)
+	if (showResetDialog.value)
 	{
 		AlertDialog(
-				onDismissRequest = { showResetDialog = false } ,
+				onDismissRequest = { showResetDialog.value = false } ,
 				title = { Text(text = "Reset Counter") } ,
 				text = {
 					Text(
@@ -235,13 +221,13 @@ fun Counter(
 
 						reset.value = true
 
-						showResetDialog = false
+						showResetDialog.value  = false
 					}) {
 						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
 					}
 				} ,
 				dismissButton = {
-					TextButton(onClick = { showResetDialog = false }) {
+					TextButton(onClick = { showResetDialog.value  = false }) {
 						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
 					}
 				}

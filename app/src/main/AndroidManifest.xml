@@ -44,11 +44,6 @@
             android:exported="false"
             android:label="@string/title_activity_names_of_allah"
             android:theme="@style/Theme.Nimaz" />
-        <activity
-            android:name=".activities.Tasbih"
-            android:exported="false"
-            android:label="@string/title_activity_tasbih"
-            android:theme="@style/Theme.Nimaz" />
 
         <receiver
             android:name=".widgets.Nimaz"

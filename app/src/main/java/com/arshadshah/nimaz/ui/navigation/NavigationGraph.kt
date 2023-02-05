@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.MoreScreen
 import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.QiblaScreen
@@ -24,6 +25,7 @@ import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
+import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -78,7 +80,13 @@ fun NavigationGraph(
 			MoreScreen(
 					paddingValues ,
 					onNavigateToTasbihScreen = { arabic : String ->
-						navController.navigate("tasbih/$arabic")
+						//replace the placeholder with the actual route TASBIH_SCREEN_ROUTE
+						navController.navigate(
+								TASBIH_SCREEN_ROUTE.replace(
+										"{arabic}" ,
+										arabic
+														   )
+											  )
 					} ,
 					onNavigateToNames = {
 						navController.navigate("names")
@@ -95,9 +103,8 @@ fun NavigationGraph(
 					  )
 		}
 
-		activity("tasbih/{arabic}") {
-			//pass the arabic string to the tasbih activity
-			this.activityClass = Tasbih::class
+		composable(TASBIH_SCREEN_ROUTE) {
+			TasbihScreen(paddingValues = paddingValues)
 		}
 
 		activity("names") {
