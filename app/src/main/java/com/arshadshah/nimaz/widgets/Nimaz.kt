@@ -53,7 +53,12 @@ internal fun updateAppWidget(
 {
 
 	val intent = Intent(context , MainActivity::class.java)
-	val pendingIntent = PendingIntent.getActivity(context , WIDGET_PENDING_INTENT_REQUEST_CODE , intent , FLAG_IMMUTABLE)
+	val pendingIntent = PendingIntent.getActivity(
+			context ,
+			WIDGET_PENDING_INTENT_REQUEST_CODE ,
+			intent ,
+			FLAG_IMMUTABLE
+												 )
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 	//get the prayer times from the shared preferences

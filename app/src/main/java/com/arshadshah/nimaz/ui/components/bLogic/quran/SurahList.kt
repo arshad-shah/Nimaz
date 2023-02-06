@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.loaders.BigcardLoader
-import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.loaders.loadingShimmerEffect
 import com.arshadshah.nimaz.ui.components.ui.quran.SurahListUI
 import es.dmoral.toasty.Toasty

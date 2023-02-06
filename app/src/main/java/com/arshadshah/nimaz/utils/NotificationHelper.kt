@@ -150,7 +150,12 @@ class NotificationHelper
 								.FLAG_ACTIVITY_CLEAR_TASK
 			}
 		val notificationPendingIntent : PendingIntent =
-			PendingIntent.getActivity(context , NOTIFICATION_PENDING_INTENT_REQUEST_CODE, notificationIntent , FLAG_IMMUTABLE)
+			PendingIntent.getActivity(
+					context ,
+					NOTIFICATION_PENDING_INTENT_REQUEST_CODE ,
+					notificationIntent ,
+					FLAG_IMMUTABLE
+									 )
 
 		val time = Date(Time_of_alarm)
 		//convert the time to a date
@@ -167,10 +172,12 @@ class NotificationHelper
 					{
 						setContentText("This is a test Adhan")
 					}
+
 					"Sunrise" , "شروق" ->
 					{
 						setContentText("The sun is rising!!")
 					}
+
 					else ->
 					{
 						setContentText("It is time to pray $title")

@@ -9,10 +9,18 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ComponentActivity
 import androidx.core.content.ContextCompat
 import com.arshadshah.nimaz.R
+import com.google.accompanist.permissions.*
 
 
 object PermissionUtils
@@ -110,4 +118,110 @@ object PermissionUtils
 			}
 			.show()
 	}
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun FeatureThatRequiresLocationPermission(
+	locationPermissionState : MultiplePermissionsState ,
+	checked : MutableState<Boolean> ,
+										 )
+{
+
+	val descToShow = remember { mutableStateOf("") }
+	val showRationale = remember { mutableStateOf(false) }
+	//check if location permission is granted
+	if (locationPermissionState.allPermissionsGranted)
+	{
+		checked.value = true
+	} else
+	{
+		if (locationPermissionState.shouldShowRationale)
+		{
+			showRationale.value = true
+			descToShow.value =
+				"Location permission is required to get accurate prayer times. Please allow location permission."
+
+		} else
+		{
+			showRationale.value = false
+			descToShow.value =
+				"Location permission is required to get accurate prayer times the system will revert to using manual location without updates."
+		}
+	}
+
+	if (showRationale.value)
+	{
+		//permission not granted
+		//show dialog
+		AlertDialog(
+				onDismissRequest = { locationPermissionState.launchMultiplePermissionRequest() } ,
+				title = { Text(text = "Location Permission Required") } ,
+				text = { Text(text = descToShow.value) } ,
+				confirmButton = {
+					Button(onClick = { locationPermissionState.launchMultiplePermissionRequest() }) {
+						Text(text = "Allow")
+					}
+				} ,
+				dismissButton = {
+					Button(onClick = { locationPermissionState.launchMultiplePermissionRequest() }) {
+						Text(text = "Cancel")
+					}
+				}
+				   )
+	}
+}
+
+//feature that requires notification permission
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun FeatureThatRequiresNotificationPermission(
+	notificationPermissionState : PermissionState ,
+	isChecked : MutableState<Boolean> ,
+											 )
+{
+
+	val descToShow = remember { mutableStateOf("") }
+	val showRationale = remember { mutableStateOf(false) }
+	//check if notification permission is granted
+	if (notificationPermissionState.status.isGranted)
+	{
+		isChecked.value = true
+	} else
+	{
+		//rationale
+		if (notificationPermissionState.status.shouldShowRationale)
+		{
+			showRationale.value = true
+			descToShow.value =
+				"Notification permission is required to deliver adhan notifications. Please allow notification permission."
+		} else
+		{
+			showRationale.value = false
+			descToShow.value =
+				"Notification permission is required to deliver adhan notifications, Nimaz will not be able to show adhan notifications if it is denied."
+		}
+	}
+
+	if (showRationale.value)
+	{
+		//permission not granted
+		//show dialog
+		AlertDialog(
+				onDismissRequest = { notificationPermissionState.launchPermissionRequest() } ,
+				title = { Text(text = "Notification Permission Required") } ,
+				text = { Text(text = descToShow.value) } ,
+				confirmButton = {
+					Button(onClick = { notificationPermissionState.launchPermissionRequest() }) {
+						Text(text = "Allow")
+					}
+				} ,
+				dismissButton = {
+					Button(onClick = { notificationPermissionState.launchPermissionRequest() }) {
+						Text(text = "Cancel")
+					}
+				}
+				   )
+	}
+
 }

@@ -107,16 +107,18 @@ object AppConstants
 
 	//pending intent request codes
 	const val RESET_PENDING_INTENT_REQUEST_CODE = 7
+
 	//widget pending intent request codes
 	const val WIDGET_PENDING_INTENT_REQUEST_CODE = 9
+
 	//notification pending intent request codes
 	const val NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 8
+
 	//auto location permission request code
 	const val AUTO_LOCATION_PERMISSION_REQUEST_CODE = 10
+
 	//notification permission request code
 	const val NOTIFICATION_PERMISSION_REQUEST_CODE = 11
-
-
 
 
 	// bottom nav item titles
