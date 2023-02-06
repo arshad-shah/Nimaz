@@ -37,14 +37,15 @@ fun PrayerTimesList(
 							"DHUHR" to LocalDateTime.now() ,
 							"ASR" to LocalDateTime.now() ,
 							"MAGHRIB" to LocalDateTime.now() ,
-							"ISHA" to LocalDateTime.now(),
+							"ISHA" to LocalDateTime.now() ,
 										  ) ,
 					name = "" ,
 					state = state ,
 					countDownTime = countDownTime ,
 					loading = true ,
-						 )
+							 )
 		}
+
 		is PrayerTimesViewModel.PrayerTimesState.Error ->
 		{
 			PrayerTimesListUI(
@@ -53,8 +54,9 @@ fun PrayerTimesList(
 					state = state ,
 					countDownTime = countDownTime ,
 					loading = false ,
-						 )
+							 )
 		}
+
 		is PrayerTimesViewModel.PrayerTimesState.Success ->
 		{
 			val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
@@ -70,13 +72,13 @@ fun PrayerTimesList(
 			val prayerTimes = state.prayerTimes
 			//Map<String , LocalDateTime?>
 			val prayerTimesMap = mapOf(
-				"fajr" to prayerTimes.fajr ,
-				"sunrise" to prayerTimes.sunrise ,
-				"dhuhr" to prayerTimes.dhuhr ,
-				"asr" to prayerTimes.asr ,
-				"maghrib" to prayerTimes.maghrib ,
-				"isha" to prayerTimes.isha ,
-															)
+					"fajr" to prayerTimes.fajr ,
+					"sunrise" to prayerTimes.sunrise ,
+					"dhuhr" to prayerTimes.dhuhr ,
+					"asr" to prayerTimes.asr ,
+					"maghrib" to prayerTimes.maghrib ,
+					"isha" to prayerTimes.isha ,
+									  )
 
 			currentPrayerName.value = prayerTimes.currentPrayer?.name !!
 
@@ -95,7 +97,7 @@ fun PrayerTimesList(
 			sharedPreferences.saveData(AppConstants.ISHA , prayerTimesMap["isha"] !!.toString())
 			sharedPreferences.saveData(
 					AppConstants.CURRENT_PRAYER ,
-					prayerTimes.currentPrayer?.name !!
+					prayerTimes.currentPrayer.name
 									  )
 
 
@@ -119,14 +121,18 @@ fun PrayerTimesList(
 				}
 			}
 			val timeToNextPrayerLong =
-				state.prayerTimes.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())?.toInstant()
+				state.prayerTimes.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())
+					?.toInstant()
 					?.toEpochMilli()
 			val currentTime =
 				LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
 					.toEpochMilli()
 
 			val difference = timeToNextPrayerLong?.minus(currentTime)
-			handleEvent(LocalContext.current, PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!))
+			handleEvent(
+					LocalContext.current ,
+					PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
+					   )
 			PrayerTimesListUI(
 					name = prayerTimes.nextPrayer?.name ?: "" ,
 					prayerTimesMap = prayerTimesMap ,

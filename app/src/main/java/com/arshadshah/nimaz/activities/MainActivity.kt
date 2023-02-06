@@ -21,7 +21,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
@@ -32,6 +31,7 @@ import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
@@ -42,6 +42,7 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.updateAppWidget
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -146,7 +147,7 @@ class MainActivity : ComponentActivity()
 				val isPlaying = remember { mutableStateOf(false) }
 				val isPaused = remember { mutableStateOf(false) }
 				val isStopped = remember { mutableStateOf(true) }
-				val navController = rememberNavController()
+				val navController = rememberAnimatedNavController()
 				val route =
 					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
 				navController.addOnDestinationChangedListener { _ , destination , _ ->
@@ -158,8 +159,8 @@ class MainActivity : ComponentActivity()
 						topBar = {
 							AnimatedVisibility(
 									visible = checkRoute(route.value.toString()) ,
-									enter = CustomAnimation.fadeIn(duration = 300) ,
-									exit = CustomAnimation.fadeOut(duration = 300) ,
+									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
+									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION) ,
 									content = {
 
 										TopAppBar(
@@ -252,8 +253,8 @@ class MainActivity : ComponentActivity()
 						bottomBar = {
 							AnimatedVisibility(
 									visible = ! checkRoute(route.value.toString()) ,
-									enter = CustomAnimation.fadeIn(duration = 300) ,
-									exit = CustomAnimation.fadeOut(duration = 300) ,
+									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
+									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION) ,
 									content = {
 										BottomNavigationBar(navController = navController)
 									})

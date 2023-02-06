@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -54,9 +54,9 @@ fun PrayerTimesListUI(
 						prayerName = key ,
 						prayerTime = value ,
 						isHighlighted = isHighlighted ,
-						state = state,
-						countDownTime = countDownTime,
-						loading = loading,
+						state = state ,
+						countDownTime = countDownTime ,
+						loading = loading ,
 							  )
 			}
 		}
@@ -98,7 +98,7 @@ fun PrayerTimesRow(
 				modifier = Modifier
 					.padding(16.dp)
 					.placeholder(
-							visible =loading ,
+							visible = loading ,
 							color = MaterialTheme.colorScheme.outline ,
 							shape = RoundedCornerShape(4.dp) ,
 							highlight = PlaceholderHighlight.shimmer(
@@ -113,7 +113,7 @@ fun PrayerTimesRow(
 					modifier = Modifier
 						.padding(16.dp)
 						.placeholder(
-								visible = loading,
+								visible = loading ,
 								color = MaterialTheme.colorScheme.outline ,
 								shape = RoundedCornerShape(4.dp) ,
 								highlight = PlaceholderHighlight.shimmer(
@@ -130,7 +130,7 @@ fun PrayerTimesRow(
 				modifier = Modifier
 					.padding(16.dp)
 					.placeholder(
-							visible = loading,
+							visible = loading ,
 							color = MaterialTheme.colorScheme.outline ,
 							shape = RoundedCornerShape(4.dp) ,
 							highlight = PlaceholderHighlight.shimmer(
