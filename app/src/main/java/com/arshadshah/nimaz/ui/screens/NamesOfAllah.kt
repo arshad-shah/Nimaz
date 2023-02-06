@@ -46,7 +46,8 @@ fun NamesOfAllah(paddingValues : PaddingValues)
 			//this is used for testing
 			//the tag is used to find the column in the hierarchy
 			modifier = Modifier
-				.fillMaxSize().testTag("NamesOfAllah") ,
+				.fillMaxSize()
+				.testTag("NamesOfAllah") ,
 			contentPadding = paddingValues
 			  ) {
 		items(englishNames.size) { index ->

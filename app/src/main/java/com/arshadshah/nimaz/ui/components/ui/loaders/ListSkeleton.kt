@@ -93,6 +93,7 @@ fun BigCardSkeletonLoader(brush : Brush)
 		}
 	}
 }
+
 @Composable
 @Preview(showBackground = true)
 fun ShimmerPreview()
