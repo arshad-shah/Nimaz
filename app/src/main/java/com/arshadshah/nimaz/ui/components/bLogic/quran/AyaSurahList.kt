@@ -2,25 +2,12 @@ package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.components.ui.loaders.BigcardLoader
-import com.arshadshah.nimaz.ui.components.ui.loaders.loadingShimmerEffect
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.Page
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -38,19 +25,29 @@ fun AyaSurahList(
 	{
 		is QuranViewModel.AyaSurahState.Loading ->
 		{
-			LazyColumn(userScrollEnabled = true) {
-				items(6) { index ->
-					ElevatedCard(
-							modifier = Modifier
-								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-								.fillMaxWidth()
-								.background(color = MaterialTheme.colorScheme.surface) ,
-							shape = RoundedCornerShape(8.dp)
-								) {
-						BigcardLoader(brush = loadingShimmerEffect())
-					}
-				}
+			//get the translation type from shared preferences
+			val pageType =
+				PrivateSharedPreferences(LocalContext.current).getData(
+						key = AppConstants.PAGE_TYPE ,
+						s = "List"
+																	  )
+			var isList = true
+			if (pageType != "List")
+			{
+				isList = false
+			}
+
+			if (isList)
+			{
+				AyaListUI(
+						ayaList = ArrayList(6) ,
+						paddingValues = paddingValues ,
+						language = language ,
+						loading = true
+						 )
+			} else
+			{
+				Page(ArrayList(10) , paddingValues , loading = true)
 			}
 		}
 
@@ -73,11 +70,12 @@ fun AyaSurahList(
 				AyaListUI(
 						ayaList = ayatSurahListState.data ,
 						paddingValues = paddingValues ,
-						language = language
+						language = language ,
+						loading = false
 						 )
 			} else
 			{
-				Page(ayatSurahListState.data , paddingValues)
+				Page(ayatSurahListState.data , paddingValues , false)
 			}
 		}
 

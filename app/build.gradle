@@ -124,6 +124,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:$accompanist_pager_version"
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
+    implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_placeholder_material_version"
 
     implementation "com.google.android.play:app-update:$app_update_version"
     implementation "com.google.android.play:app-update-ktx:$app_update_version"

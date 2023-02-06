@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
-import android.speech.SpeechRecognizer
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
@@ -20,50 +20,82 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 
 @Composable
-fun AyaListUI(ayaList : ArrayList<Aya> , paddingValues : PaddingValues , language : String)
+fun AyaListUI(
+	ayaList : ArrayList<Aya> ,
+	paddingValues : PaddingValues ,
+	language : String ,
+	loading : Boolean ,
+			 )
 {
 
-	//if a new item is viewed, then scroll to that item
-	val sharedPref = LocalContext.current.getSharedPreferences("quran" , 0)
-	val listState = rememberLazyListState()
-	val type = ayaList[0].ayaType
-	val number = ayaList[0].numberOfType
-	val visibleItemIndex =
-		remember { mutableStateOf(sharedPref.getInt("visibleItemIndex-${type}-${number}" , - 1)) }
-
-	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-	LaunchedEffect(listState.firstVisibleItemIndex)
+	if (loading)
 	{
-		sharedPref.edit()
-			.putInt("visibleItemIndex-${type}-${number}" , listState.firstVisibleItemIndex).apply()
-	}
-
-	//when we reopen the app, we want to scroll to the last item viewed
-	LaunchedEffect(visibleItemIndex.value)
-	{
-		if (visibleItemIndex.value != - 1)
-		{
-			listState.scrollToItem(visibleItemIndex.value)
-			//set the value back to -1 so that we don't scroll to the same item again
-			visibleItemIndex.value = - 1
+		LazyColumn(contentPadding = paddingValues) {
+			items(ayaList.size) { index ->
+				AyaListItemUI(
+						ayaNumber = "1" ,
+						ayaArabic = "بسم الله الرحمن الرحيم" ,
+						ayaTranslation = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+						language = "english" ,
+						loading = loading
+							 )
+			}
 		}
-	}
+	} else
+	{
+		//if a new item is viewed, then scroll to that item
+		val sharedPref = LocalContext.current.getSharedPreferences("quran" , 0)
+		val listState = rememberLazyListState()
+		val type = ayaList[0].ayaType
+		val number = ayaList[0].numberOfType
+		val visibleItemIndex =
+			remember {
+				mutableStateOf(
+						sharedPref.getInt(
+								"visibleItemIndex-${type}-${number}" ,
+								- 1
+										 )
+							  )
+			}
 
-	LazyColumn(userScrollEnabled = true , contentPadding = paddingValues , state = listState) {
-		items(ayaList.size) { index ->
-			AyaListItemUI(
-					ayaNumber = ayaList[index].ayaNumber.toString() ,
-					ayaArabic = ayaList[index].ayaArabic ,
-					ayaTranslation = ayaList[index].translation ,
-					language = language
-						 )
+		//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
+		LaunchedEffect(listState.firstVisibleItemIndex)
+		{
+			sharedPref.edit()
+				.putInt("visibleItemIndex-${type}-${number}" , listState.firstVisibleItemIndex)
+				.apply()
+		}
+
+		//when we reopen the app, we want to scroll to the last item viewed
+		LaunchedEffect(visibleItemIndex.value)
+		{
+			if (visibleItemIndex.value != - 1)
+			{
+				listState.scrollToItem(visibleItemIndex.value)
+				//set the value back to -1 so that we don't scroll to the same item again
+				visibleItemIndex.value = - 1
+			}
+		}
+
+		LazyColumn(userScrollEnabled = true , contentPadding = paddingValues , state = listState) {
+			items(ayaList.size) { index ->
+				AyaListItemUI(
+						ayaNumber = ayaList[index].ayaNumber.toString() ,
+						ayaArabic = ayaList[index].ayaArabic ,
+						ayaTranslation = ayaList[index].translation ,
+						language = language ,
+						loading = loading
+							 )
+			}
 		}
 	}
 }
@@ -74,11 +106,12 @@ fun AyaListItemUI(
 	ayaArabic : String ,
 	ayaTranslation : String ,
 	language : String ,
+	loading : Boolean ,
 				 )
 {
 
 	//create a new speech recognizer
-	val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(LocalContext.current)
+//	val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(LocalContext.current)
 
 	val cardBackgroundColor = if (ayaNumber == "0")
 	{
@@ -98,7 +131,7 @@ fun AyaListItemUI(
 	//mutable ayaArabic state so that we can change it when the user clicks on the mic button
 	val ayaArabicState = remember { mutableStateOf(ayaArabic) }
 
-	val isRecording = remember { mutableStateOf(false) }
+//	val isRecording = remember { mutableStateOf(false) }
 
 	ElevatedCard(
 			modifier = Modifier
@@ -129,6 +162,14 @@ fun AyaListItemUI(
 							modifier = Modifier
 								.fillMaxWidth()
 								.padding(4.dp)
+								.placeholder(
+										visible = loading ,
+										color = MaterialTheme.colorScheme.outline ,
+										shape = RoundedCornerShape(4.dp) ,
+										highlight = PlaceholderHighlight.shimmer(
+												highlightColor = Color.White ,
+																				)
+											)
 						)
 				}
 				Spacer(modifier = Modifier.height(4.dp))
@@ -144,9 +185,18 @@ fun AyaListItemUI(
 								modifier = Modifier
 									.fillMaxWidth()
 									.padding(horizontal = 4.dp)
+									.placeholder(
+											visible = loading ,
+											color = MaterialTheme.colorScheme.outline ,
+											shape = RoundedCornerShape(4.dp) ,
+											highlight = PlaceholderHighlight.shimmer(
+													highlightColor = Color.White ,
+																					)
+												)
 							)
 					}
-				} else
+				}
+				if (language == "english")
 				{
 					Text(
 							text = ayaTranslation ,
@@ -156,6 +206,14 @@ fun AyaListItemUI(
 							modifier = Modifier
 								.fillMaxWidth()
 								.padding(horizontal = 4.dp)
+								.placeholder(
+										visible = loading ,
+										color = MaterialTheme.colorScheme.outline ,
+										shape = RoundedCornerShape(4.dp) ,
+										highlight = PlaceholderHighlight.shimmer(
+												highlightColor = Color.White ,
+																				)
+											)
 						)
 				}
 				//an icon button that starts recording audio in a wav file and saves it to the device storage
@@ -342,74 +400,89 @@ fun AyaListItemUI(
 
 @Preview
 @Composable
+fun AyaListUIPreview()
+{
+	//make 10 LocalAya
+	val ayaList = ArrayList<Aya>()
+	//add the aya to the list
+	ayaList.add(
+			Aya(
+					0 ,
+					"بسم الله الرحمن الرحيم" ,
+					"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+					"Surah" ,
+					1 ,
+					"ENGLISH"
+			   )
+			   )
+	ayaList.add(
+			Aya(
+					1 ,
+					"الحمد لله رب العالمين" ,
+					"All praise is due to Allah, Lord of the worlds." , "Surah" ,
+					1 ,
+					"ENGLISH"
+			   )
+			   )
+	ayaList.add(
+			Aya(
+					2 ,
+					"الرحمن الرحيم" ,
+					"The Entirely Merciful, the Especially Merciful." ,
+					"Surah" , 1 ,
+					"ENGLISH"
+			   )
+			   )
+	ayaList.add(
+			Aya(
+					3 , "مالك يوم الدين" , "Master of the Day of Judgment." , "Surah" ,
+					1 ,
+					"ENGLISH"
+			   )
+			   )
+	ayaList.add(
+			Aya(
+					4 ,
+					"إياك نعبد وإياك نستعين" ,
+					"You alone do we worship, and You alone do we implore for help." , "Surah" ,
+					1 ,
+					"ENGLISH"
+			   )
+			   )
+	ayaList.add(
+			Aya(
+					5 , "اهدنا الصراط المستقيم" , "Guide us to the straight path." , "Surah" ,
+					1 ,
+					"ENGLISH"
+			   )
+			   )
+	ayaList.add(
+			Aya(
+					6 ,
+					"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
+					"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
+					"Surah" ,
+					1 ,
+					"ENGLISH"
+			   )
+			   )
+
+	AyaListUI(ayaList , PaddingValues(8.dp) , "english" , true)
+}
+
+
+//aya list item preview
+@Preview
+@Composable
 fun AyaListItemUIPreview()
 {
-	NimazTheme {
-		//make 10 LocalAya
-		val ayaList = ArrayList<Aya>()
-		//add the aya to the list
-		ayaList.add(
-				Aya(
-						0 ,
-						"بسم الله الرحمن الرحيم" ,
-						"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-						"Surah" ,
-						1 ,
-						"ENGLISH"
-				   )
-				   )
-		ayaList.add(
-				Aya(
-						1 ,
-						"الحمد لله رب العالمين" ,
-						"All praise is due to Allah, Lord of the worlds." , "Surah" ,
-						1 ,
-						"ENGLISH"
-				   )
-				   )
-		ayaList.add(
-				Aya(
-						2 ,
-						"الرحمن الرحيم" ,
-						"The Entirely Merciful, the Especially Merciful." ,
-						"Surah" , 1 ,
-						"ENGLISH"
-				   )
-				   )
-		ayaList.add(
-				Aya(
-						3 , "مالك يوم الدين" , "Master of the Day of Judgment." , "Surah" ,
-						1 ,
-						"ENGLISH"
-				   )
-				   )
-		ayaList.add(
-				Aya(
-						4 ,
-						"إياك نعبد وإياك نستعين" ,
-						"You alone do we worship, and You alone do we implore for help." , "Surah" ,
-						1 ,
-						"ENGLISH"
-				   )
-				   )
-		ayaList.add(
-				Aya(
-						5 , "اهدنا الصراط المستقيم" , "Guide us to the straight path." , "Surah" ,
-						1 ,
-						"ENGLISH"
-				   )
-				   )
-		ayaList.add(
-				Aya(
-						6 ,
-						"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
-						"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
-						"Surah" ,
-						1 ,
-						"ENGLISH"
-				   )
-				   )
-
-		AyaListUI(ayaList , PaddingValues(8.dp) , "english")
-	}
+	val aya = Aya(
+			0 ,
+			"بسم الله الرحمن الرحيم" ,
+			"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+			"Surah" ,
+			1 ,
+			"ENGLISH"
+				 )
+	AyaListItemUI(aya.ayaNumber.toString() , aya.ayaArabic , aya.translation , "english" , false)
 }
