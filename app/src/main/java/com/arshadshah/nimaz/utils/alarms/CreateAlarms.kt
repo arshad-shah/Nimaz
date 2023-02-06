@@ -50,6 +50,7 @@ import java.util.*
 
 class CreateAlarms
 {
+
 	fun exact(
 		context : Context ,
 		fajr : LocalDateTime ,
@@ -159,48 +160,48 @@ class CreateAlarms
 		// Set up the pending intents for each alarm
 		val pendingIntent1 = createPendingIntent(
 				context ,
-				FAJR_PI_REQUEST_CODE,
-				FAJR_NOTIFY_ID,
+				FAJR_PI_REQUEST_CODE ,
+				FAJR_NOTIFY_ID ,
 				fajr ,
 				CHANNEL_FAJR ,
 				FAJR_CHANNEL_ID
 												)
 		val pendingIntent2 = createPendingIntent(
 				context ,
-				SUNRISE_PI_REQUEST_CODE,
-				SUNRISE_NOTIFY_ID,
+				SUNRISE_PI_REQUEST_CODE ,
+				SUNRISE_NOTIFY_ID ,
 				sunrise ,
 				CHANNEL_SUNRISE ,
 				SUNRISE_CHANNEL_ID
 												)
 		val pendingIntent3 = createPendingIntent(
 				context ,
-				DHUHR_PI_REQUEST_CODE,
-				DHUHR_NOTIFY_ID,
+				DHUHR_PI_REQUEST_CODE ,
+				DHUHR_NOTIFY_ID ,
 				dhuhr ,
 				CHANNEL_ZUHAR ,
 				DHUHR_CHANNEL_ID
 												)
 		val pendingIntent4 = createPendingIntent(
 				context ,
-				ASR_PI_REQUEST_CODE,
-				ASR_NOTIFY_ID,
+				ASR_PI_REQUEST_CODE ,
+				ASR_NOTIFY_ID ,
 				asr ,
 				CHANNEL_ASAR ,
 				ASR_CHANNEL_ID
 												)
 		val pendingIntent5 = createPendingIntent(
 				context ,
-				MAGHRIB_PI_REQUEST_CODE,
-				MAGHRIB_NOTIFY_ID,
+				MAGHRIB_PI_REQUEST_CODE ,
+				MAGHRIB_NOTIFY_ID ,
 				maghrib ,
 				CHANNEL_MAGHRIB ,
 				MAGHRIB_CHANNEL_ID
 												)
 		val pendingIntent6 = createPendingIntent(
 				context ,
-				ISHA_PI_REQUEST_CODE,
-				ISHA_NOTIFY_ID,
+				ISHA_PI_REQUEST_CODE ,
+				ISHA_NOTIFY_ID ,
 				ishaa ,
 				CHANNEL_ISHAA ,
 				ISHA_CHANNEL_ID
@@ -267,8 +268,8 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				CHANNEL_FAJR,
-				CHANNEL_DESC_FAJR,
+				CHANNEL_FAJR ,
+				CHANNEL_DESC_FAJR ,
 				FAJR_CHANNEL_ID ,
 				fajrAdhan
 													)
@@ -278,7 +279,7 @@ class CreateAlarms
 				NotificationManager.IMPORTANCE_DEFAULT ,
 				false ,
 				CHANNEL_SUNRISE ,
-				CHANNEL_DESC_SUNRISE,
+				CHANNEL_DESC_SUNRISE ,
 				SUNRISE_CHANNEL_ID
 													)
 		//zuhar
@@ -286,8 +287,8 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				CHANNEL_ZUHAR,
-				CHANNEL_DESC_ZUHAR,
+				CHANNEL_ZUHAR ,
+				CHANNEL_DESC_ZUHAR ,
 				DHUHR_CHANNEL_ID ,
 				zuharAdhan
 													)
@@ -296,8 +297,8 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				CHANNEL_ASAR,
-				CHANNEL_DESC_ASAR,
+				CHANNEL_ASAR ,
+				CHANNEL_DESC_ASAR ,
 				ASR_CHANNEL_ID ,
 				asarAdhan
 													)
@@ -307,7 +308,7 @@ class CreateAlarms
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
 				CHANNEL_MAGHRIB ,
-				CHANNEL_DESC_MAGHRIB,
+				CHANNEL_DESC_MAGHRIB ,
 				MAGHRIB_CHANNEL_ID ,
 				maghribAdhan
 													)
@@ -317,7 +318,7 @@ class CreateAlarms
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
 				CHANNEL_ISHAA ,
-				CHANNEL_DESC_ISHAA,
+				CHANNEL_DESC_ISHAA ,
 				ISHA_CHANNEL_ID ,
 				ishaaAdhan
 													)

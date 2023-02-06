@@ -2,13 +2,18 @@ package com.arshadshah.nimaz.utils
 
 import kotlin.math.*
 
-class Qibla {
+class Qibla
+{
+
 	//an object that holds the latitude and longitude of Makkah
-	private object MAKKAH {
+	private object MAKKAH
+	{
+
 		val latitude = 21.4225241
 		val longitude = 39.8261818
 	}
-	fun calculateQiblaDirection(latitude: Double, longitude: Double) : Double
+
+	fun calculateQiblaDirection(latitude : Double , longitude : Double) : Double
 	{
 		// Equation from "Spherical Trigonometry For the use of colleges and schools" page 50
 		val longitudeDelta =
