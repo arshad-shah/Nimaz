@@ -2,11 +2,13 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,6 +17,9 @@ import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -28,6 +33,7 @@ fun PrayerTimesListUI(
 	viewModel : PrayerTimesViewModel ,
 	prayertimes : PrayerTimes? ,
 	paddingValues : PaddingValues ,
+	state : State<PrayerTimesViewModel.PrayerTimesState> ,
 					 )
 {
 	ElevatedCard(
@@ -57,7 +63,8 @@ fun PrayerTimesListUI(
 						isHighlighted = isHighlighted ,
 						timerState = timerState ,
 						prayertimes = prayertimes ,
-						viewmodel = viewModel
+						viewmodel = viewModel ,
+						state = state
 							  )
 			}
 		}
@@ -73,6 +80,7 @@ fun PrayerTimesRow(
 	timerState : LiveData<CountDownTime>? ,
 	prayertimes : PrayerTimes? ,
 	viewmodel : PrayerTimesViewModel? ,
+	state : State<PrayerTimesViewModel.PrayerTimesState> ,
 				  )
 {
 	var countDownTime by remember { mutableStateOf(CountDownTime(0 , 0 , 0)) }
@@ -103,7 +111,16 @@ fun PrayerTimesRow(
 	   ) {
 		Text(
 				text = sentenceCase ,
-				modifier = Modifier.padding(16.dp) ,
+				modifier = Modifier
+					.padding(16.dp)
+					.placeholder(
+							visible = state.value.isLoading.value || state.value.prayerTimes.value == null ,
+							color = MaterialTheme.colorScheme.outline ,
+							shape = RoundedCornerShape(4.dp) ,
+							highlight = PlaceholderHighlight.shimmer(
+									highlightColor = Color.White ,
+																	)
+								) ,
 				style = MaterialTheme.typography.titleLarge
 			)
 		if (isHighlighted)
@@ -117,7 +134,16 @@ fun PrayerTimesRow(
 			val difference = timeToNextPrayerLong?.minus(currentTime)
 			viewmodel?.startTimer(context , difference !!)
 			Text(
-					modifier = Modifier.padding(16.dp) ,
+					modifier = Modifier
+						.padding(16.dp)
+						.placeholder(
+								visible = state.value.isLoading.value || state.value.prayerTimes.value == null ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									) ,
 					text = " -${countDownTime.hours} : ${countDownTime.minutes} : ${countDownTime.seconds}" ,
 					textAlign = TextAlign.Center ,
 					style = MaterialTheme.typography.titleSmall
@@ -125,7 +151,16 @@ fun PrayerTimesRow(
 		}
 		Text(
 				text = prayerTime !!.format(formatter) ,
-				modifier = Modifier.padding(16.dp) ,
+				modifier = Modifier
+					.padding(16.dp)
+					.placeholder(
+							visible = state.value.isLoading.value || state.value.prayerTimes.value == null ,
+							color = MaterialTheme.colorScheme.outline ,
+							shape = RoundedCornerShape(4.dp) ,
+							highlight = PlaceholderHighlight.shimmer(
+									highlightColor = Color.White ,
+																	)
+								) ,
 				style = MaterialTheme.typography.titleLarge
 			)
 	}
@@ -149,6 +184,7 @@ fun PrayerTimesRowPreview()
 			isHighlighted = true ,
 			timerState = null ,
 			prayertimes = null ,
-			viewmodel = null
+			viewmodel = null ,
+			state = remember { mutableStateOf(PrayerTimesViewModel.PrayerTimesState()) }
 				  )
 }

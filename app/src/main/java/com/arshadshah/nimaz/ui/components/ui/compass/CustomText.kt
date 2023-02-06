@@ -19,16 +19,24 @@ import androidx.compose.ui.unit.dp
  * @param text the Text composable component
  * */
 @Composable
-fun CustomText(modifier : Modifier , heading : String , text : String)
+fun CustomText(
+	modifier : Modifier ,
+	headingModifier : Modifier = Modifier ,
+	textModifier : Modifier = Modifier ,
+	heading : String ,
+	text : String ,
+			  )
 {
 	Column(modifier = modifier , horizontalAlignment = Alignment.CenterHorizontally) {
 		Text(
+				modifier = headingModifier ,
 				text = heading ,
 				textAlign = TextAlign.Center ,
 				style = MaterialTheme.typography.titleSmall
 			)
 		Spacer(modifier = Modifier.padding(4.dp))
 		Text(
+				modifier = textModifier ,
 				text = text ,
 				textAlign = TextAlign.Center ,
 				style = MaterialTheme.typography.titleLarge

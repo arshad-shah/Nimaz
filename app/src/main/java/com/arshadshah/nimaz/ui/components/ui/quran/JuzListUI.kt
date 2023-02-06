@@ -16,22 +16,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun JuzListUI(
 	juz : ArrayList<Juz> ,
 	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	loading : Boolean ,
 			 )
 {
 	LazyColumn(userScrollEnabled = true) {
 		items(juz.size) { index ->
 			JuzListItemUI(
+					loading = loading ,
 					juzNumber = juz[index].number.toString() ,
 					name = juz[index].name ,
 					tname = juz[index].tname ,
@@ -48,6 +54,7 @@ fun JuzListItemUI(
 	tname : String ,
 	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 	context : Context = LocalContext.current ,
+	loading : Boolean ,
 				 )
 {
 	ElevatedCard(
@@ -84,7 +91,15 @@ fun JuzListItemUI(
 			Text(
 					modifier = Modifier
 						.align(Alignment.CenterVertically)
-						.weight(0.10f) ,
+						.weight(0.10f)
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									) ,
 					text = "$juzNumber." ,
 					style = MaterialTheme.typography.bodyLarge
 				)
@@ -99,9 +114,30 @@ fun JuzListItemUI(
 				Text(
 						text = name ,
 						style = MaterialTheme.typography.titleLarge ,
-						fontFamily = quranFont
+						fontFamily = quranFont ,
+						modifier = Modifier
+							.padding(vertical = 4.dp)
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
 					)
-				Text(text = tname , style = MaterialTheme.typography.titleSmall)
+				Text(
+						text = tname ,
+						style = MaterialTheme.typography.titleSmall ,
+						modifier = Modifier.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+													   )
+					)
 			}
 			//an arrow right icon
 			Icon(
@@ -111,6 +147,14 @@ fun JuzListItemUI(
 						.align(Alignment.CenterVertically)
 						.weight(0.10f)
 						.fillMaxWidth()
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
 				)
 		}
 	}

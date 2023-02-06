@@ -6,9 +6,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.data.remote.viewModel.DuaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.DuaListItem
-import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import es.dmoral.toasty.Toasty
 
 @Composable
@@ -51,7 +51,26 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 	{
 		is DuaViewModel.DuaState.Loading ->
 		{
-			CircularLoaderCard()
+			LazyColumn(
+					contentPadding = paddingValues ,
+					state = listState ,
+					content = {
+						items(3)
+						{
+							DuaListItem(
+									dua = Dua(
+											- 1 ,
+											- 1 ,
+											- 1 ,
+											"" ,
+											"" ,
+											"" ,
+											"" ,
+											 ) ,
+									loading = true
+									   )
+						}
+					})
 
 		}
 
@@ -63,7 +82,7 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 					content = {
 						items(duas.duaList.duas.size)
 						{
-							DuaListItem(dua = duas.duaList.duas[it])
+							DuaListItem(dua = duas.duaList.duas[it] , loading = false)
 						}
 					})
 
