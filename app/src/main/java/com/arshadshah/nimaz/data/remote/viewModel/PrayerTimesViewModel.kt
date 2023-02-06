@@ -12,7 +12,6 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.NetworkChecker
@@ -20,14 +19,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalDateTime
 
-class PrayerTimesViewModel() : ViewModel()
+class PrayerTimesViewModel : ViewModel()
 {
 
 	sealed class PrayerTimesState
 	{
+
 		object Loading : PrayerTimesState()
 		data class Success(val prayerTimes : PrayerTimes) : PrayerTimesState()
 		data class Error(val error : String) : PrayerTimesState()
@@ -35,6 +33,7 @@ class PrayerTimesViewModel() : ViewModel()
 
 	sealed class LocationState
 	{
+
 		object Loading : LocationState()
 		data class Success(val location : String) : LocationState()
 		data class Error(val error : String) : LocationState()
@@ -55,19 +54,20 @@ class PrayerTimesViewModel() : ViewModel()
 	//event that starts the timer
 	sealed class PrayerTimesEvent
 	{
+
 		class Start(val timeToNextPrayer : Long) : PrayerTimesEvent()
 		object RELOAD : PrayerTimesEvent()
 	}
 
 	//function to handle the timer event
-	fun handleEvent(context:Context , event : PrayerTimesEvent)
+	fun handleEvent(context : Context , event : PrayerTimesEvent)
 	{
 		when (event)
 		{
 			is PrayerTimesEvent.Start ->
 			{
 				//this takes a timeToNextPrayer in milliseconds as a parameter on event
-				startTimer(context,event.timeToNextPrayer)
+				startTimer(context , event.timeToNextPrayer)
 			}
 			//event to reload the prayer times
 			is PrayerTimesEvent.RELOAD ->
@@ -144,9 +144,9 @@ class PrayerTimesViewModel() : ViewModel()
 //
 //				} else
 //				{
-					val response = PrayerTimesRepository.getPrayerTimes(context)
-					if (response.data != null)
-					{
+				val response = PrayerTimesRepository.getPrayerTimes(context)
+				if (response.data != null)
+				{
 //						//if recalculate_prayer_times is true then set it to false
 //						if (isSettingsUpdated)
 //						{
@@ -161,11 +161,11 @@ class PrayerTimesViewModel() : ViewModel()
 //							 )
 //						dataStore.deleteAllPrayerTimes()
 //						dataStore.saveAllPrayerTimes(response.data)
-						_prayerTimesState.value = PrayerTimesState.Success(response.data)
-					} else
-					{
-						_prayerTimesState.value = PrayerTimesState.Error(response.message!!)
-					}
+					_prayerTimesState.value = PrayerTimesState.Success(response.data)
+				} else
+				{
+					_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+				}
 //				}
 
 			} catch (e : Exception)
@@ -174,7 +174,7 @@ class PrayerTimesViewModel() : ViewModel()
 						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 						"loadPrayerTimes: ${e.message}"
 					 )
-				_prayerTimesState.value = PrayerTimesState.Error(e.message!!)
+				_prayerTimesState.value = PrayerTimesState.Error(e.message !!)
 			}
 		}
 	}
@@ -230,7 +230,7 @@ class PrayerTimesViewModel() : ViewModel()
 								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 								"loadLocation: auto"
 							 )
-						_locationState.value = LocationState.Success(locationName.value )
+						_locationState.value = LocationState.Success(locationName.value)
 					} else
 					{
 						Location().getManualLocation(
@@ -242,7 +242,7 @@ class PrayerTimesViewModel() : ViewModel()
 								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 								"loadLocation: manual"
 							 )
-						_locationState.value = LocationState.Success(locationName.value )
+						_locationState.value = LocationState.Success(locationName.value)
 					}
 				} else
 				{
@@ -258,12 +258,12 @@ class PrayerTimesViewModel() : ViewModel()
 						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 						"loadLocation: ${e.message}"
 					 )
-				_locationState.value = LocationState.Error(e.message!!)
+				_locationState.value = LocationState.Error(e.message !!)
 			}
 		}
 	}
 
-	fun startTimer(context : Context,timeToNextPrayer : Long)
+	fun startTimer(context : Context , timeToNextPrayer : Long)
 	{
 		countDownTimer?.cancel()
 		countDownTimer = object : CountDownTimer(timeToNextPrayer , 1000)
