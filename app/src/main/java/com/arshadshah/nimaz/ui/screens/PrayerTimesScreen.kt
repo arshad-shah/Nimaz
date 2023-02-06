@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -19,11 +18,9 @@ import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.loaders.ItemSkeleton
 import com.arshadshah.nimaz.ui.components.ui.loaders.ListSkeletonLoader
 import com.arshadshah.nimaz.ui.components.ui.loaders.loadingShimmerEffect
-import com.arshadshah.nimaz.ui.components.ui.prayerTimes.LocationTimeContainerUI
 import es.dmoral.toasty.Toasty
 
 @Composable
@@ -54,7 +51,7 @@ fun PrayerTimesScreen(
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(paddingValues)
-					.padding(8.dp),
+					.padding(8.dp) ,
 				horizontalAlignment = Alignment.CenterHorizontally ,
 				verticalArrangement = Arrangement.SpaceEvenly
 			  ) {
