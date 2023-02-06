@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -27,10 +28,13 @@ import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
 
 @Composable
-fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
+fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Boolean)
 {
 	val context = LocalContext.current
 
@@ -49,7 +53,16 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
 				ClickableText(
 						modifier = if (isNotBismillah)
 						{
-							Modifier.wrapContentWidth(align = Alignment.End)
+							Modifier
+								.wrapContentWidth(align = Alignment.End)
+								.placeholder(
+										visible = loading ,
+										color = MaterialTheme.colorScheme.outline ,
+										shape = RoundedCornerShape(4.dp) ,
+										highlight = PlaceholderHighlight.shimmer(
+												highlightColor = Color.White ,
+																				)
+											)
 						} else
 						{
 							Modifier
@@ -59,6 +72,14 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues)
 										MaterialTheme.colorScheme.outline ,
 										RoundedCornerShape(8.dp)
 									   )
+								.placeholder(
+										visible = loading ,
+										color = MaterialTheme.colorScheme.outline ,
+										shape = RoundedCornerShape(4.dp) ,
+										highlight = PlaceholderHighlight.shimmer(
+												highlightColor = Color.White ,
+																				)
+											)
 						} ,
 						text = AnnotatedString(aya.ayaArabic) ,
 						softWrap = true ,
@@ -198,7 +219,7 @@ fun PageUIPreview()
 			   )
 			   )
 	NimazTheme(darkTheme = true) {
-		Page(ayaList , PaddingValues())
+		Page(ayaList , PaddingValues() , true)
 	}
 
 }
