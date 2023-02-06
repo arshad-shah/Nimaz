@@ -73,6 +73,8 @@ dependencies {
     implementation "androidx.datastore:datastore-core:$datastore_core_version"
     implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
     implementation "androidx.navigation:navigation-compose:$nav_version"
+
+
     implementation 'androidx.test:monitor:1.6.1'
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
     implementation 'androidx.test:runner:1.5.2'
@@ -124,6 +126,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:$accompanist_pager_version"
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
+    implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_placeholder_material_version"
 
     implementation "com.google.android.play:app-update:$app_update_version"
     implementation "com.google.android.play:app-update-ktx:$app_update_version"

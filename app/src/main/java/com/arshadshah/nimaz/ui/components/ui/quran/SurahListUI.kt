@@ -16,22 +16,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun SurahListUI(
 	surahs : ArrayList<Surah> ,
 	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	loading : Boolean ,
 			   )
 {
 	LazyColumn(userScrollEnabled = true) {
 		items(surahs.size) { index ->
 			SurahListItemUI(
+					loading = loading ,
 					surahNumber = surahs[index].number.toString() ,
 					surahAyaAmount = surahs[index].numberOfAyahs.toString() ,
 					surahName = surahs[index].name ,
@@ -56,6 +62,7 @@ fun SurahListItemUI(
 	rukus : String ,
 	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 	context : Context = LocalContext.current ,
+	loading : Boolean ,
 				   )
 {
 	ElevatedCard(
@@ -76,7 +83,7 @@ fun SurahListItemUI(
 		{
 			"English" -> "english"
 			"Urdu" -> "urdu"
-			else -> "en"
+			else -> "english"
 		}
 		Row(
 				modifier = Modifier
@@ -93,7 +100,15 @@ fun SurahListItemUI(
 			Text(
 					modifier = Modifier
 						.align(Alignment.CenterVertically)
-						.weight(0.15f) ,
+						.weight(0.15f)
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									) ,
 					text = "$surahNumber." ,
 					style = MaterialTheme.typography.bodyLarge
 				)
@@ -104,14 +119,46 @@ fun SurahListItemUI(
 						.align(Alignment.CenterVertically)
 						.weight(0.50f)
 				  ) {
-				Text(text = englishName , style = MaterialTheme.typography.titleSmall)
+				Text(
+						text = englishName ,
+						style = MaterialTheme.typography.titleSmall ,
+						modifier = Modifier.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+													   )
+					)
 				//apply quran font
 				Text(
 						text = surahName ,
 						style = MaterialTheme.typography.titleLarge ,
-						fontFamily = quranFont
+						fontFamily = quranFont ,
+						modifier = Modifier
+							.padding(vertical = 4.dp)
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
 					)
-				Text(text = englishNameTranslation , style = MaterialTheme.typography.titleSmall)
+				Text(
+						text = englishNameTranslation ,
+						style = MaterialTheme.typography.titleSmall ,
+						modifier = Modifier.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+													   )
+					)
 			}
 
 			Column(
@@ -126,6 +173,14 @@ fun SurahListItemUI(
 						modifier = Modifier
 							.padding(4.dp)
 							.fillMaxWidth()
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
 					)
 				Text(
 						text = "Ayat: $surahAyaAmount" ,
@@ -133,6 +188,14 @@ fun SurahListItemUI(
 						modifier = Modifier
 							.padding(4.dp)
 							.fillMaxWidth()
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
 					)
 				Text(
 						text = "Ruku: $rukus" ,
@@ -140,6 +203,14 @@ fun SurahListItemUI(
 						modifier = Modifier
 							.padding(4.dp)
 							.fillMaxWidth()
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
 					)
 			}
 			//an arrow right icon
@@ -150,6 +221,14 @@ fun SurahListItemUI(
 						.align(Alignment.CenterVertically)
 						.weight(0.05f)
 						.fillMaxWidth()
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
 				)
 		}
 	}

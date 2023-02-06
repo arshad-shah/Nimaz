@@ -5,9 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.arshadshah.nimaz.data.remote.viewModel.DuaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.ChapterListItem
-import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import es.dmoral.toasty.Toasty
 
 @Composable
@@ -46,7 +46,26 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 	{
 		is DuaViewModel.ChapterState.Loading ->
 		{
-			CircularLoaderCard()
+			LazyColumn(
+					contentPadding = paddingValues ,
+					state = listState
+					  )
+			{
+				items(8)
+				{
+					ChapterListItem(
+							chapter = Chapter(
+									_id = 0 ,
+									arabic_title = "Loading" ,
+									english_title = "Loading" ,
+									duas = ArrayList(6)
+											 ) ,
+							onNavigateToChapter = onNavigateToChapter ,
+							loading = true
+								   )
+				}
+			}
+
 		}
 
 		is DuaViewModel.ChapterState.Success ->
@@ -60,7 +79,8 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 				{
 					ChapterListItem(
 							chapter = chapters.chapterList[it] ,
-							onNavigateToChapter = onNavigateToChapter
+							onNavigateToChapter = onNavigateToChapter ,
+							loading = false
 								   )
 				}
 			}
