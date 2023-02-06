@@ -1,11 +1,11 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -20,7 +20,6 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import java.util.*
-import kotlin.reflect.KFunction1
 
 @Composable
 fun LocationTimeContainer(
@@ -39,11 +38,12 @@ fun LocationTimeContainer(
 					location = "Loading"
 					   )
 		}
+
 		is PrayerTimesViewModel.LocationState.Success ->
 		{
 			val currentPrayerNameSentenceCase = currentPrayerName.value
 				.substring(0 , 1)
-				.uppercase(Locale.ROOT)+ currentPrayerName.value
+				.uppercase(Locale.ROOT) + currentPrayerName.value
 				.substring(1).lowercase(Locale.ROOT)
 
 			ContainerUI(
@@ -52,6 +52,7 @@ fun LocationTimeContainer(
 					location = location.location
 					   )
 		}
+
 		is PrayerTimesViewModel.LocationState.Error ->
 		{
 			ContainerUI(
@@ -68,7 +69,8 @@ fun ContainerUI(
 	currentPrayerNameSentenceCase : String ,
 	isLoading : Boolean ,
 	location : String ,
-			   ){
+			   )
+{
 	val context = LocalContext.current
 	ElevatedCard(
 			modifier = Modifier
@@ -86,7 +88,7 @@ fun ContainerUI(
 						.weight(0.5f)
 						.padding(8.dp) ,
 					textModifier = Modifier.placeholder(
-							visible = isLoading,
+							visible = isLoading ,
 							color = MaterialTheme.colorScheme.outline ,
 							shape = RoundedCornerShape(4.dp) ,
 							highlight = PlaceholderHighlight.shimmer(

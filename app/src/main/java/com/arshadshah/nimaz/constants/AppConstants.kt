@@ -27,6 +27,9 @@ object AppConstants
 	//Preferences file name
 	const val PREFERENCES_FILE_NAME = "com.arshadshah.nimaz.SharedPreferences"
 
+	//animation duration
+	const val SCREEN_ANIMATION_DURATION = 500
+
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"
 	const val ARABIC_FONT_SIZE = "ArabicFontSize"

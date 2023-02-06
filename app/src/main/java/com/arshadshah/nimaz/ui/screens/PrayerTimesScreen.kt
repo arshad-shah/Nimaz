@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.lifecycleScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
@@ -20,7 +19,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,
-	viewModel : PrayerTimesViewModel = PrayerTimesViewModel()
+	viewModel : PrayerTimesViewModel = PrayerTimesViewModel() ,
 					 )
 {
 	val context = LocalContext.current
