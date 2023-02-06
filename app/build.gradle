@@ -127,6 +127,8 @@ dependencies {
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
     implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_placeholder_material_version"
+    //accompanion navigation animation
+    implementation "com.google.accompanist:accompanist-navigation-animation:$accompanist_navigation_animation_version"
 
     implementation "com.google.android.play:app-update:$app_update_version"
     implementation "com.google.android.play:app-update-ktx:$app_update_version"

@@ -2,17 +2,23 @@ package com.arshadshah.nimaz.ui.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.navigation.*
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.activity
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.*
@@ -24,7 +30,10 @@ import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 
+@OptIn(ExperimentalAnimationApi::class)
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun NavigationGraph(
@@ -32,13 +41,257 @@ fun NavigationGraph(
 	paddingValues : PaddingValues ,
 				   )
 {
-	NavHost(
+
+	AnimatedNavHost(
 			navController = navController as NavHostController ,
-			startDestination = BottomNavItem.PrayerTimesScreen.screen_route
-		   ) {
-		composable(BottomNavItem.PrayerTimesScreen.screen_route) {
-			PrayerTimesScreen(paddingValues = paddingValues)
-		}
+			startDestination = BottomNavItem.PrayerTimesScreen.screen_route ,
+			enterTransition = {
+				when (initialState.destination.route)
+				{
+					BottomNavItem.PrayerTimesScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.QiblaScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.QuranScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.MoreScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.SettingsScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					QURAN_AYA_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					CHAPTER_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					CHAPTERS_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					TASBIH_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					NAMESOFALLAH_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					SHAHADAH_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					else -> EnterTransition.None
+				}
+			} ,
+			exitTransition = {
+				when (targetState.destination.route)
+				{
+					BottomNavItem.PrayerTimesScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.QiblaScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.QuranScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.MoreScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.SettingsScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					QURAN_AYA_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					CHAPTER_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					CHAPTERS_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					TASBIH_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					NAMESOFALLAH_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					SHAHADAH_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					else -> ExitTransition.None
+				}
+			} ,
+			popEnterTransition = {
+				when (initialState.destination.route)
+				{
+					BottomNavItem.PrayerTimesScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.QiblaScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.QuranScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.MoreScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.SettingsScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					QURAN_AYA_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					CHAPTER_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					CHAPTERS_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					TASBIH_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					NAMESOFALLAH_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					SHAHADAH_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					else -> EnterTransition.None
+				}
+			} ,
+			popExitTransition = {
+				when (targetState.destination.route)
+				{
+					BottomNavItem.PrayerTimesScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.QiblaScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.QuranScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.MoreScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.SettingsScreen.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					QURAN_AYA_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					CHAPTER_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					CHAPTERS_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					TASBIH_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					NAMESOFALLAH_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					SHAHADAH_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					else -> ExitTransition.None
+				}
+			}
+				   ) {
+		composable(BottomNavItem.PrayerTimesScreen.screen_route)
+		{ PrayerTimesScreen(paddingValues = paddingValues) }
 
 		composable(BottomNavItem.QiblaScreen.screen_route) {
 			QiblaScreen(paddingValues)
