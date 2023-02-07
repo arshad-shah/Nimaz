@@ -1,12 +1,11 @@
 package com.arshadshah.nimaz.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.constants.AppConstants
@@ -21,9 +20,15 @@ fun QiblaScreen(paddingValues : PaddingValues)
 	val viewModel = QiblaViewModel(context)
 
 	val state = remember { viewModel.qiblaState }.collectAsState()
-	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG, "QiblaScreen: ${state.value}")
+	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "QiblaScreen: ${state.value}")
 
-	Column(modifier = Modifier.padding(paddingValues)) {
+	Column(
+			modifier = Modifier
+				.padding(paddingValues)
+				.fillMaxSize() ,
+			horizontalAlignment = Alignment.CenterHorizontally ,
+			verticalArrangement = Arrangement.Center
+		  ) {
 		BearingAndLocationContainer(state)
 		Dial(state = state)
 	}

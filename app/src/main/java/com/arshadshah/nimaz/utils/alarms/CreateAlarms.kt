@@ -6,6 +6,37 @@ import android.content.Context
 import android.content.Intent
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.ASR_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.ASR_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.ASR_PI_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_ASAR
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_ASAR
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_FAJR
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_ISHAA
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_MAGHRIB
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_SUNRISE
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_ZUHAR
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_FAJR
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_ISHAA
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_MAGHRIB
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_SUNRISE
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_ZUHAR
+import com.arshadshah.nimaz.constants.AppConstants.DHUHR_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.DHUHR_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.DHUHR_PI_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.FAJR_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.FAJR_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.FAJR_PI_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.ISHA_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.ISHA_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.ISHA_PI_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_PI_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.RESET_PENDING_INTENT_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_PI_REQUEST_CODE
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.recievers.AdhanReciever
@@ -20,40 +51,6 @@ import java.util.*
 class CreateAlarms
 {
 
-	// notification channelid
-	val FAJR_CHANNEL_ID = "fajr_channel_id"
-	val SUNRISE_CHANNEL_ID = "sunrise_channel_id"
-	val ZUHAR_CHANNEL_ID = "zuhar_channel_id"
-	val ASAR_CHANNEL_ID = "asar_channel_id"
-	val MAGHRIB_CHANNEL_ID = "maghrib_channel_id"
-	val ISHAA_CHANNEL_ID = "ishaa_channel_id"
-
-
-	//notification id
-	val fajrNotifyId = 2000
-	val sunriseNotifyId = 2001
-	val zuharNotifyId = 2002
-	val asarNotifyId = 2003
-	val maghribNotifyId = 2004
-	val ishaaNotifyId = 2005
-
-	val fajrPIRequestCode = 1000
-	val sunrisePIRequestCode = 1001
-	val dhuhrPIRequestCode = 1002
-	val asrPIRequestCode = 1003
-	val maghribPIRequestCode = 1004
-	val ishaPIRequestCode = 1005
-
-
-	// notification title
-	lateinit var channelFajr : String
-	lateinit var channelSunrise : String
-	lateinit var channelZuhar : String
-	lateinit var channelAsar : String
-	lateinit var channelMaghrib : String
-	lateinit var channelIshaa : String
-
-
 	fun exact(
 		context : Context ,
 		fajr : LocalDateTime ,
@@ -64,19 +61,13 @@ class CreateAlarms
 		ishaa : LocalDateTime ,
 			 )
 	{
-		channelFajr = context.getString(R.string.fajr)
-		channelSunrise = context.getString(R.string.sunrise)
-		channelZuhar = context.getString(R.string.zuhar)
-		channelAsar = context.getString(R.string.asar)
-		channelMaghrib = context.getString(R.string.maghrib)
-		channelIshaa = context.getString(R.string.ishaa)
 		CoroutineScope(Dispatchers.IO).launch {
 			val sharedPreferences = PrivateSharedPreferences(context)
-			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK, false)
+			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK , false)
 			if (! channelLock)
 			{
 				createAllNotificationChannels(context)
-				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK, true)
+				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK , true)
 			}
 			//convert the local date time to milliseconds
 			val fajrTime = fajr.toInstant(ZoneOffset.UTC).toEpochMilli()
@@ -169,51 +160,51 @@ class CreateAlarms
 		// Set up the pending intents for each alarm
 		val pendingIntent1 = createPendingIntent(
 				context ,
-				fajrPIRequestCode ,
-				fajrNotifyId ,
+				FAJR_PI_REQUEST_CODE ,
+				FAJR_NOTIFY_ID ,
 				fajr ,
-				channelFajr ,
+				CHANNEL_FAJR ,
 				FAJR_CHANNEL_ID
 												)
 		val pendingIntent2 = createPendingIntent(
 				context ,
-				sunrisePIRequestCode ,
-				sunriseNotifyId ,
+				SUNRISE_PI_REQUEST_CODE ,
+				SUNRISE_NOTIFY_ID ,
 				sunrise ,
-				channelSunrise ,
+				CHANNEL_SUNRISE ,
 				SUNRISE_CHANNEL_ID
 												)
 		val pendingIntent3 = createPendingIntent(
 				context ,
-				dhuhrPIRequestCode ,
-				zuharNotifyId ,
+				DHUHR_PI_REQUEST_CODE ,
+				DHUHR_NOTIFY_ID ,
 				dhuhr ,
-				channelZuhar ,
-				ZUHAR_CHANNEL_ID
+				CHANNEL_ZUHAR ,
+				DHUHR_CHANNEL_ID
 												)
 		val pendingIntent4 = createPendingIntent(
 				context ,
-				asrPIRequestCode ,
-				asarNotifyId ,
+				ASR_PI_REQUEST_CODE ,
+				ASR_NOTIFY_ID ,
 				asr ,
-				channelAsar ,
-				ASAR_CHANNEL_ID
+				CHANNEL_ASAR ,
+				ASR_CHANNEL_ID
 												)
 		val pendingIntent5 = createPendingIntent(
 				context ,
-				maghribPIRequestCode ,
-				maghribNotifyId ,
+				MAGHRIB_PI_REQUEST_CODE ,
+				MAGHRIB_NOTIFY_ID ,
 				maghrib ,
-				channelMaghrib ,
+				CHANNEL_MAGHRIB ,
 				MAGHRIB_CHANNEL_ID
 												)
 		val pendingIntent6 = createPendingIntent(
 				context ,
-				ishaPIRequestCode ,
-				ishaaNotifyId ,
+				ISHA_PI_REQUEST_CODE ,
+				ISHA_NOTIFY_ID ,
 				ishaa ,
-				channelIshaa ,
-				ISHAA_CHANNEL_ID
+				CHANNEL_ISHAA ,
+				ISHA_CHANNEL_ID
 												)
 
 
@@ -257,22 +248,14 @@ class CreateAlarms
 				putExtra("ishaaTime" , ishaaAlarm)
 			}
 		val resetPendingIntent = PendingIntent.getBroadcast(
-				context , 7 , resetIntent ,
+				context , RESET_PENDING_INTENT_REQUEST_CODE , resetIntent ,
 				PendingIntent.FLAG_IMMUTABLE
 														   )
 		Alarms().setAlarm(context , resetPendingIntent)
 	}
 
-	private fun createAllNotificationChannels(context : Context)
+	fun createAllNotificationChannels(context : Context)
 	{
-		// notification description
-		val descFajr = "Fajr Prayer Notification"
-		val descSunrise = "Sunrise Notification"
-		val descZuhar = "Zuhar Prayer Notification"
-		val descAsar = "Asar Prayer Notification"
-		val descMaghrib = "Maghrib Prayer Notification"
-		val descIshaa = "Ishaa Prayer Notification"
-
 		val fajrAdhan = "android.resource://" + context.packageName + "/" + R.raw.fajr
 		val zuharAdhan = "android.resource://" + context.packageName + "/" + R.raw.zuhar
 		val asarAdhan = "android.resource://" + context.packageName + "/" + R.raw.asar
@@ -285,8 +268,8 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				channelFajr ,
-				descFajr ,
+				CHANNEL_FAJR ,
+				CHANNEL_DESC_FAJR ,
 				FAJR_CHANNEL_ID ,
 				fajrAdhan
 													)
@@ -295,8 +278,8 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_DEFAULT ,
 				false ,
-				channelSunrise ,
-				descSunrise ,
+				CHANNEL_SUNRISE ,
+				CHANNEL_DESC_SUNRISE ,
 				SUNRISE_CHANNEL_ID
 													)
 		//zuhar
@@ -304,9 +287,9 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				channelZuhar ,
-				descZuhar ,
-				ZUHAR_CHANNEL_ID ,
+				CHANNEL_ZUHAR ,
+				CHANNEL_DESC_ZUHAR ,
+				DHUHR_CHANNEL_ID ,
 				zuharAdhan
 													)
 		//asar
@@ -314,9 +297,9 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				channelAsar ,
-				descAsar ,
-				ASAR_CHANNEL_ID ,
+				CHANNEL_ASAR ,
+				CHANNEL_DESC_ASAR ,
+				ASR_CHANNEL_ID ,
 				asarAdhan
 													)
 		//maghrib
@@ -324,8 +307,8 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				channelMaghrib ,
-				descMaghrib ,
+				CHANNEL_MAGHRIB ,
+				CHANNEL_DESC_MAGHRIB ,
 				MAGHRIB_CHANNEL_ID ,
 				maghribAdhan
 													)
@@ -334,9 +317,9 @@ class CreateAlarms
 				context ,
 				NotificationManager.IMPORTANCE_MAX ,
 				true ,
-				channelIshaa ,
-				descIshaa ,
-				ISHAA_CHANNEL_ID ,
+				CHANNEL_ISHAA ,
+				CHANNEL_DESC_ISHAA ,
+				ISHA_CHANNEL_ID ,
 				ishaaAdhan
 													)
 

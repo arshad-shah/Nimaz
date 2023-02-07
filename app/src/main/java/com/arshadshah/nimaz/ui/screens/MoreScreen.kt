@@ -10,14 +10,16 @@ fun MoreScreen(
 	onNavigateToTasbihScreen : (String) -> Unit ,
 	onNavigateToNames : () -> Unit ,
 	onNavigateToListOfTasbeeh : () -> Unit ,
-	onNavigateToShadah : () -> Unit
+	onNavigateToShadah : () -> Unit ,
+	onNavigateToZakat : () -> Unit ,
 			  )
 {
 	FeatureCard(
 			paddingValues = paddingValues ,
 			onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
-			onNavigateToNames = onNavigateToNames,
-			onNavigateToListOfTasbeeh = onNavigateToListOfTasbeeh,
-			onNavigateToShadah = onNavigateToShadah
+			onNavigateToNames = onNavigateToNames ,
+			onNavigateToListOfTasbeeh = onNavigateToListOfTasbeeh ,
+			onNavigateToShadah = onNavigateToShadah ,
+			onNavigateToZakat = onNavigateToZakat
 			   )
 }

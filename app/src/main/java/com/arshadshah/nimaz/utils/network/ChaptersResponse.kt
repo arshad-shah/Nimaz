@@ -12,5 +12,5 @@ data class ChaptersResponse(
 	@SerialName("english_title")
 	val englishTitle : String ,
 	@SerialName("duas")
-	val duas: List<DuaResponse>,
-	)
+	val duas : List<DuaResponse> ,
+						   )

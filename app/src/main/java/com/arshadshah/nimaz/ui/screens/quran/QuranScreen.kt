@@ -55,7 +55,10 @@ fun QuranScreen(
 			{
 				Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG , "Surah Screen")
 				val surahListState = remember { viewModel.surahState }.collectAsState()
-				Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG , "surahListState.value = ${surahListState.value}")
+				Log.d(
+						AppConstants.QURAN_SURAH_SCREEN_TAG ,
+						"surahListState.value = ${surahListState.value}"
+					 )
 				SurahList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = surahListState
@@ -66,7 +69,10 @@ fun QuranScreen(
 			{
 				Log.d(AppConstants.QURAN_JUZ_SCREEN_TAG , "Juz Screen")
 				val juzListState = remember { viewModel.juzState }.collectAsState()
-				Log.d(AppConstants.QURAN_JUZ_SCREEN_TAG , "juzListState.value = ${juzListState.value}")
+				Log.d(
+						AppConstants.QURAN_JUZ_SCREEN_TAG ,
+						"juzListState.value = ${juzListState.value}"
+					 )
 				JuzList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = juzListState ,

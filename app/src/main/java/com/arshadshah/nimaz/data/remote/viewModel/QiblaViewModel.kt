@@ -3,7 +3,9 @@ package com.arshadshah.nimaz.data.remote.viewModel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.Qibla
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,14 +36,11 @@ class QiblaViewModel(context : Context) : ViewModel()
 			_qiblaState.value = QiblaState.Loading
 			try
 			{
-				val response = PrayerTimesRepository.getQiblaDirection(context)
-				if (response.data != null)
-				{
-					_qiblaState.value = QiblaState.Success(response.data)
-				} else
-				{
-					_qiblaState.value = QiblaState.Error(response.message !!)
-				}
+				val sharedPreferences = PrivateSharedPreferences(context)
+				val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+				val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+				val qiblaBearing = Qibla().calculateQiblaDirection(latitude , longitude)
+				_qiblaState.value = QiblaState.Success(qiblaBearing)
 			} catch (e : Exception)
 			{
 				_qiblaState.value = QiblaState.Error(e.message.toString())

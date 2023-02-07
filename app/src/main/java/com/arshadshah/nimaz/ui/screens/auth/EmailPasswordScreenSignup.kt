@@ -1,89 +1,89 @@
 package com.arshadshah.nimaz.ui.screens.auth
 
-import android.app.Activity
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.data.remote.viewModel.AuthViewModel
 import com.arshadshah.nimaz.ui.components.ui.general.Banner
 import com.arshadshah.nimaz.ui.components.ui.general.BannerVariant
 import com.arshadshah.nimaz.ui.components.ui.general.EmailTextField
+import com.arshadshah.nimaz.ui.components.ui.general.PasswordTextField
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.auth.AuthDataSanitizers
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Eye
-import compose.icons.feathericons.EyeOff
+import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailPasswordScreenSignup(paddingValues : PaddingValues,)
+fun EmailPasswordScreenSignup(paddingValues : PaddingValues , navController : NavHostController , )
 {
 
 	val viewmodel = AuthViewModel()
 
 	val dataSanitizer = AuthDataSanitizers()
 
+	val context = LocalContext.current
+
 	val email = remember { mutableStateOf("") }
 	val password = remember { mutableStateOf("") }
 	//confirm password
 	val confirmPassword = remember { mutableStateOf("") }
 
-	val isEmailValid = remember { mutableStateOf(true) }
-
-	//passwords match
-	val passwordsMatch = remember { mutableStateOf(true) }
-
 	//password is strong
 	val passwordStrength = remember { mutableStateOf("") }
+
+
 
 	//success and error messages
 	val errorMessage = remember { mutableStateOf("") }
 
 	val coroutineScope = rememberCoroutineScope()
-	val onConfirmPasswordChanged : (String) -> Unit = {
-		confirmPassword.value = it
-		coroutineScope.launch {
-			passwordsMatch.value = dataSanitizer.passwordsMatch(password.value, it)
-		}
-	}
-
-	val onPasswordChanged : (String) -> Unit = {
-		password.value = it
-		coroutineScope.launch {
-			passwordStrength.value = dataSanitizer.passwordStrength(it)
-		}
-	}
 
 	//hide and show password
 	val hidePassword = remember { mutableStateOf(true) }
 	val hideConfirmPassword = remember { mutableStateOf(true) }
 
+	val onPasswordVisibilityChanged : () -> Unit = {
+		coroutineScope.launch {
+			hidePassword.value = !hidePassword.value
+		}
+	}
+
+	val onConfirmPasswordVisibilityChanged : () -> Unit = {
+		coroutineScope.launch {
+			hideConfirmPassword.value = !hideConfirmPassword.value
+		}
+	}
+
+	//functions to check if password is strong
+	val checkPasswordStrength : (String) -> Unit = {
+		coroutineScope.launch {
+			passwordStrength.value = dataSanitizer.passwordStrength(it)
+		}
+	}
+
+	//each time the password changes check if it is strong
+	LaunchedEffect(password.value) {
+		checkPasswordStrength(password.value)
+	}
+
 //	password focuser when enter is pressed on email
 	val passwordFocusRequester = remember { FocusRequester() }
 	val confirmPasswordFocusRequester = remember { FocusRequester() }
 
-	val context = LocalContext.current
-
 	//a function to signup and finish activity
 	val signup = {
 		viewmodel.createAccount(email.value, password.value)
-		//finish activity
-		val activity = context as Activity
-		//set the result to ok
-		activity.setResult(Activity.RESULT_OK)
-		activity.finish()
+		navController.navigateUp()
 	}
 
 	//a form to sign up a user with error handling for signup
@@ -91,106 +91,50 @@ fun EmailPasswordScreenSignup(paddingValues : PaddingValues,)
 		.padding(paddingValues)
 		.padding(8.dp)
 		.fillMaxSize() ,
-		   horizontalAlignment = Alignment.CenterHorizontally ,
-		   verticalArrangement = Arrangement.Center) {
-		//title
-		Text(
-			text = "Sign Up",
-			style = MaterialTheme.typography.headlineLarge,
-			modifier = Modifier.padding(bottom = 16.dp)
-		)
-
+		   horizontalAlignment = Alignment.CenterHorizontally) {
 		EmailTextField(
 				modifier = Modifier
-			.fillMaxWidth()
-			.padding(top = 16.dp) ,
+					.fillMaxWidth()
+					.padding(top = 16.dp) ,
 				email = email,
 				onEmailDone = { passwordFocusRequester.requestFocus() } ,
-				isError =!isEmailValid.value)
-		OutlinedTextField(
-				singleLine = true,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(top = 16.dp , bottom = 16.dp)
-					.focusable(enabled = true)
-					.focusRequester(passwordFocusRequester),
-				value = password.value ,
-				onValueChange = { onPasswordChanged(it) } ,
-				label = { Text("Password") } ,
-				isError = errorMessage.value.isNotEmpty() ,
-				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password) ,
-				//on done focus on password
-				keyboardActions = KeyboardActions(onDone = { confirmPasswordFocusRequester.requestFocus() }) ,
-				visualTransformation = if (hidePassword.value) PasswordVisualTransformation() else VisualTransformation.None ,
-				trailingIcon = {
-				//an icon to show and hide the password
-				IconButton(onClick = {
-					hidePassword.value = !hidePassword.value
-				}) {
-//					/if the password is hidden show the eye icon but only if the password is not empty
-					if (hidePassword.value && password.value.isNotEmpty()) {
-						Icon(
-								imageVector = FeatherIcons.Eye ,
-								contentDescription = "Show Password"
-							   )
-					}
-					else {
-						//if the password is not hidden show the eye icon but only if the password is not empty
-						if (password.value.isNotEmpty() && !hidePassword.value) {
-							Icon(
-									imageVector = FeatherIcons.EyeOff ,
-									contentDescription = "Hide Password"
-								   )
-						}
-					}
-				}
-			}
-		)
+				isError = errorMessage.value.isNotEmpty()
+					  )
 
-		//show the password strength
-		if (passwordStrength.value.isNotEmpty()) {
-			Banner(title = passwordStrength.value, variant = BannerVariant.Info)
-		}
+		PasswordTextField(
+				label = "Password" ,
+				password = password.value,
+				showRequirements = true,
+				error = false,
+				onPasswordChange =  { password.value = it } ,
+				passwordErrorMessage =  errorMessage.value ,
+				hidePassword =  hidePassword.value ,
+				onPasswordVisibilityChanged = { onPasswordVisibilityChanged() } ,
+				passwordFocusRequester = passwordFocusRequester ,
+				onPasswordDone = { confirmPasswordFocusRequester.requestFocus() } ,
+				signup = true,
+						 )
 
-		OutlinedTextField(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(top = 16.dp , bottom = 16.dp)
-					//this is focused when enter is pressed on the email field
-					.focusable(enabled = true)
-					.focusRequester(confirmPasswordFocusRequester),
-				singleLine = true,
-			value = confirmPassword.value,
-			onValueChange = { onConfirmPasswordChanged(it) },
-			label = { Text("Confirm Password") },
-			isError = errorMessage.value.isNotEmpty() || !passwordsMatch.value,
-				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password) ,
-				//on done focus on password
-				keyboardActions = KeyboardActions(onDone = { signup() }) ,
-			visualTransformation = if (hideConfirmPassword.value) PasswordVisualTransformation() else VisualTransformation.None,
-			trailingIcon = {
-				//an icon to show and hide the password
-				IconButton(onClick = {
-					hideConfirmPassword.value = !hideConfirmPassword.value
-				}) {
-					//if the password is hidden show the eye icon but only if the password is not empty
-					if (hideConfirmPassword.value && confirmPassword.value.isNotEmpty()) {
-						Icon(
-							imageVector = FeatherIcons.Eye,
-							contentDescription = "Show Password"
-						)
-					}else{
-						//if the password is not hidden show the eye icon but only if the password is not empty
-						if (!hideConfirmPassword.value && confirmPassword.value.isNotEmpty()) {
-							Icon(
-								imageVector = FeatherIcons.EyeOff,
-								contentDescription = "Show Password"
-							)
-						}
-					}
-				}
-			}
-		)
+		PasswordTextField(
+				label = "Confirm Password" ,
+				password = confirmPassword.value ,
+				showRequirements = false,
+				error = password.value != confirmPassword.value && confirmPassword.value.isNotEmpty(),
+				helperText = if (password.value == confirmPassword.value && confirmPassword.value.isNotEmpty()) "Passwords match" else if(password.value != confirmPassword.value && confirmPassword.value.isNotEmpty()) "Passwords do not match" else "",
+				onPasswordChange =  { confirmPassword.value = it } ,
+				passwordErrorMessage =  errorMessage.value ,
+				hidePassword = hideConfirmPassword.value ,
+				onPasswordVisibilityChanged = { onConfirmPasswordVisibilityChanged() } ,
+				passwordFocusRequester = confirmPasswordFocusRequester ,
+				onPasswordDone = {
+								 if( email.value.isNotEmpty() && password.value.isNotEmpty() && confirmPassword.value.isNotEmpty() && password.value == confirmPassword.value){
+									 signup()
+								 }else{
+									 Toasty.error(context, "Please fill all the fields correctly", Toasty.LENGTH_SHORT).show()
+								 }
+				} ,
+				signup = true,
+						 )
 
 		if (errorMessage.value.isNotEmpty()) {
 			Banner(title = errorMessage.value, variant = BannerVariant.Error)
@@ -202,22 +146,10 @@ fun EmailPasswordScreenSignup(paddingValues : PaddingValues,)
 			.size(48.dp) ,
 			   shape = MaterialTheme.shapes.medium ,
 				onClick = {
-					if(email.value.isNotEmpty() && password.value.isNotEmpty() && confirmPassword.value.isNotEmpty() && passwordsMatch.value){
-						//use signup function
 						signup()
-					}else if(email.value.isEmpty()){
-						errorMessage.value = "Email cannot be empty"
-					}else if(password.value.isEmpty()){
-						errorMessage.value = "Password cannot be empty"
-					}else if(confirmPassword.value.isEmpty()){
-						errorMessage.value = "Confirm Password cannot be empty"
-					}else if(!passwordsMatch.value){
-						errorMessage.value = "Passwords do not match"
-					}else{
-						errorMessage.value = "Something went wrong"
-					}
-		}) {
-			Text(text = "Sign Up")
+		}, enabled = email.value.isNotEmpty() && password.value.isNotEmpty() && confirmPassword.value.isNotEmpty() && password.value == confirmPassword.value
+			  ) {
+			Text(text = "Sign Up",style = MaterialTheme.typography.titleMedium)
 		}
 	}
 }
@@ -227,6 +159,9 @@ fun EmailPasswordScreenSignup(paddingValues : PaddingValues,)
 @Composable
 fun DefaultPreviewSignup() {
 	NimazTheme {
-		EmailPasswordScreenSignup(paddingValues = PaddingValues(16.dp))
+		EmailPasswordScreenSignup(
+				paddingValues = PaddingValues(16.dp) ,
+				navController = rememberNavController()
+								 )
 	}
 }

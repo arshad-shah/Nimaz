@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.CheckCircle
 import compose.icons.feathericons.Mail
 import kotlinx.coroutines.launch
 
@@ -39,12 +38,34 @@ fun EmailTextField(
 		}
 	}
 	OutlinedTextField(
+			//color the text field green if the email is valid and not empty and the error flag is false
+			colors = if(!isError && isEmailValid.value && email.value.isNotEmpty() )
+						{
+							TextFieldDefaults.outlinedTextFieldColors(
+									focusedBorderColor = Color(0xFF025314) ,
+									unfocusedBorderColor = Color(0xFF025314) ,
+									)
+						}
+						else
+						{
+							TextFieldDefaults.outlinedTextFieldColors()
+						},
 			singleLine = true ,
 			modifier = modifier,
 			isError = isError || !isEmailValid.value,
 			value = email.value ,
 			onValueChange = { onEmailChanged(it) } ,
-			label = { Text("Email") } ,
+			label = {
+				if(!isError && isEmailValid.value && email.value.isNotEmpty() )
+				{
+					//color and background the label green if the email is valid and not empty and the error flag is false
+					Text("Email" , color = Color(0xFF025314))
+				}
+				else
+				{
+					Text("Email")
+				}
+					} ,
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email) ,
 			//on done focus on password
 			keyboardActions = KeyboardActions(onDone = { onEmailDone() }) ,
@@ -53,18 +74,18 @@ fun EmailTextField(
 						  Icon(
 								  imageVector = FeatherIcons.Mail ,
 								  contentDescription = "Email" ,
+								  tint = if(!isError && isEmailValid.value && email.value.isNotEmpty() )
+								  {
+									  Color(0xFF025314)
+								  }else if(isError || !isEmailValid.value)
+								  {
+									  MaterialTheme.colorScheme.error
+								  }
+								  else
+								  {
+									  MaterialTheme.colorScheme.onSurface
+								  },
 								  )
-			},
-			trailingIcon = {
-				if (isEmailValid.value && email.value.isNotEmpty())
-				{
-					//if email is valid show a check icon
-					Icon(
-							imageVector = FeatherIcons.CheckCircle ,
-							contentDescription = "Email is valid" ,
-							tint = Color.Green ,
-							)
-				}
 			}
 					 )
 }

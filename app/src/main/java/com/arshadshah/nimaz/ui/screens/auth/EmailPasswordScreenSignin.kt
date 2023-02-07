@@ -1,10 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.auth
 
-import android.app.Activity
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -13,23 +9,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.data.remote.viewModel.AuthViewModel
 import com.arshadshah.nimaz.ui.components.ui.general.Banner
 import com.arshadshah.nimaz.ui.components.ui.general.BannerVariant
 import com.arshadshah.nimaz.ui.components.ui.general.EmailTextField
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Eye
-import compose.icons.feathericons.EyeOff
+import com.arshadshah.nimaz.ui.components.ui.general.PasswordTextField
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailPasswordScreenSignin(
-	paddingValues : PaddingValues , onNavigateToSignup : () -> Unit
+	paddingValues : PaddingValues ,
+	onNavigateToSignup : () -> Unit ,
+	navController : NavHostController ,
+	onNavigateToPasswordReset : () -> Unit
 							 )
 {
 	val viewmodel = AuthViewModel()
@@ -54,17 +50,10 @@ fun EmailPasswordScreenSignin(
 		passwordFocusRequester.requestFocus()
 	}
 
-	val context = LocalContext.current
-
 	//function to call the login in viewmodel and finish the activity
 	val onLogin : () -> Unit = {
 		viewmodel.login(email.value , password.value)
-		//finish the activity this component is in
-		//finish activity
-		val activity = context as Activity
-		//set the result to ok
-		activity.setResult(Activity.RESULT_OK)
-		activity.finish()
+		navController.navigateUp()
 	}
 
 	//a form to sign in a user with error handling
@@ -74,63 +63,41 @@ fun EmailPasswordScreenSignin(
 				.padding(8.dp)
 				.fillMaxSize() ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Center
 		  ) {
-		//title
-		Text(
-			text = "Sign in",
-			style = MaterialTheme.typography.headlineLarge,
-			modifier = Modifier.padding(bottom = 16.dp)
-		)
 		EmailTextField(
 			modifier = Modifier
-			.fillMaxWidth()
-			.padding(top = 16.dp) ,
+				.fillMaxWidth()
+				.padding(top = 16.dp) ,
 			email = email,
 			onEmailDone = onEmailDone,
 			isError = emailErrorMessage.value.isNotEmpty() ,
 					  )
-		OutlinedTextField(
+		PasswordTextField(
+				label = "Password" ,
+				password = password.value ,
+				showRequirements = false ,
+				onPasswordChange =  { password.value = it } ,
+				passwordErrorMessage =  passwordErrorMessage.value ,
+				hidePassword =  hidePassword.value ,
+				onPasswordVisibilityChanged = { onPasswordVisibilityChanged() } ,
+				passwordFocusRequester = passwordFocusRequester ,
+				onPasswordDone = { onLogin() } ,
+				error = passwordErrorMessage.value.isNotEmpty() ,
+				signup = false ,
+						 )
+
+		//forgot password
+		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top = 16.dp , bottom = 16.dp)
-					//this is focused when enter is pressed on the email field
-					.focusable(enabled = true)
-					.focusRequester(passwordFocusRequester),
-				singleLine = true,
-				value = password.value ,
-				onValueChange = { password.value = it } ,
-				label = { Text("Password") } ,
-				isError = passwordErrorMessage.value.isNotEmpty() ,
-				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password) ,
-				//on done sign in
-				keyboardActions = KeyboardActions(onDone = { onLogin() }) ,
-				//if the hide password is true then show the password text else show the eye icon and hide the password and vice versa
-				visualTransformation = if (hidePassword.value) PasswordVisualTransformation() else VisualTransformation.None ,
-				trailingIcon = {
-					//an icon to show and hide the password
-					IconButton(onClick = {
-						onPasswordVisibilityChanged()
-					}) {
-//					/if the password is hidden show the eye icon but only if the password is not empty
-						if (hidePassword.value && password.value.isNotEmpty()) {
-							Icon(
-									imageVector = FeatherIcons.Eye ,
-									contentDescription = "Show Password"
-								)
-						}
-						else {
-							//if the password is not hidden show the eye icon but only if the password is not empty
-							if (password.value.isNotEmpty() && !hidePassword.value) {
-								Icon(
-										imageVector = FeatherIcons.EyeOff ,
-										contentDescription = "Hide Password"
-									)
-							}
-						}
-					}
-				}
-						 )
+					.padding(top = 16.dp) ,
+				horizontalArrangement = Arrangement.End ,
+			) {
+			TextButton(
+					onClick = { onNavigateToPasswordReset() } ,
+					content = { Text(text = "Forgot Password?" , style = MaterialTheme.typography.titleMedium) } ,
+					  )
+		}
 
 		//error message
 		if (errorMessage.value.isNotEmpty() || emailErrorMessage.value.isNotEmpty() || passwordErrorMessage.value.isNotEmpty()) {
@@ -163,7 +130,7 @@ fun EmailPasswordScreenSignin(
 					}
 		}
 			  ) {
-			Text("Sign In", style = MaterialTheme.typography.titleLarge)
+			Text("Sign In")
 		}
 
 		Row(
@@ -174,13 +141,13 @@ fun EmailPasswordScreenSignin(
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			Text(text = "Don't have an account? ")
-			Button(
+			TextButton(
 					shape = MaterialTheme.shapes.medium ,
 					onClick = {
 				onNavigateToSignup()
 			}
 				  ) {
-				Text("Sign Up",style = MaterialTheme.typography.titleLarge)
+				Text("Sign Up",style = MaterialTheme.typography.titleMedium)
 			}
 		}
 	}

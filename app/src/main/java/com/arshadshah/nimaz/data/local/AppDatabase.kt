@@ -6,9 +6,14 @@ import androidx.room.TypeConverters
 import com.arshadshah.nimaz.data.local.dao.*
 import com.arshadshah.nimaz.data.local.models.*
 
-@TypeConverters(LocalPrayertimeConverter::class , TimestampTypeConvertor::class, TypeConvertorForListOfDuas::class)
+@TypeConverters(
+		LocalPrayertimeConverter::class ,
+		TimestampTypeConvertor::class ,
+		TypeConvertorForListOfDuas::class
+			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class, LocalDua::class, LocalChapter::class] ,
+		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class] ,
+//		TODO: update version number when database changes
 		version = 1 ,
 		exportSchema = false
 		 )

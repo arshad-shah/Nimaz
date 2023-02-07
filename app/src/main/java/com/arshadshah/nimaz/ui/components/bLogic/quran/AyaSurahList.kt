@@ -8,7 +8,6 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.Page
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -26,7 +25,30 @@ fun AyaSurahList(
 	{
 		is QuranViewModel.AyaSurahState.Loading ->
 		{
-			CircularLoaderCard()
+			//get the translation type from shared preferences
+			val pageType =
+				PrivateSharedPreferences(LocalContext.current).getData(
+						key = AppConstants.PAGE_TYPE ,
+						s = "List"
+																	  )
+			var isList = true
+			if (pageType != "List")
+			{
+				isList = false
+			}
+
+			if (isList)
+			{
+				AyaListUI(
+						ayaList = ArrayList(6) ,
+						paddingValues = paddingValues ,
+						language = language ,
+						loading = true
+						 )
+			} else
+			{
+				Page(ArrayList(10) , paddingValues , loading = true)
+			}
 		}
 
 		is QuranViewModel.AyaSurahState.Success ->
@@ -34,7 +56,7 @@ fun AyaSurahList(
 			//get the translation type from shared preferences
 			val pageType =
 				PrivateSharedPreferences(LocalContext.current).getData(
-						key =  AppConstants.PAGE_TYPE ,
+						key = AppConstants.PAGE_TYPE ,
 						s = "List"
 																	  )
 			var isList = true
@@ -48,11 +70,12 @@ fun AyaSurahList(
 				AyaListUI(
 						ayaList = ayatSurahListState.data ,
 						paddingValues = paddingValues ,
-						language = language
+						language = language ,
+						loading = false
 						 )
 			} else
 			{
-				Page(ayatSurahListState.data , paddingValues)
+				Page(ayatSurahListState.data , paddingValues , false)
 			}
 		}
 

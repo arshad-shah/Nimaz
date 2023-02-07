@@ -26,6 +26,10 @@ object AppConstants
 
 	//Preferences file name
 	const val PREFERENCES_FILE_NAME = "com.arshadshah.nimaz.SharedPreferences"
+
+	//animation duration
+	const val SCREEN_ANIMATION_DURATION = 500
+
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"
 	const val ARABIC_FONT_SIZE = "ArabicFontSize"
@@ -57,17 +61,65 @@ object AppConstants
 	const val CURRENT_PRAYER = "currentPrayer"
 	const val PAGE_TYPE = "PageType"
 	const val TRANSLATION_LANGUAGE = "Translation"
-	//notificationAllowed
 	const val NOTIFICATION_ALLOWED = "notificationAllowed"
-	//battery_optimization
 	const val BATTERY_OPTIMIZATION = "batteryOptimization"
-	//channelLock
 	const val CHANNEL_LOCK = "channelLock"
 
-	//splash screen
-	const val SPLASH_SCREEN_DURATION = 2000L
-	//main activity app update request code
+	//codes
 	const val APP_UPDATE_REQUEST_CODE = 100
+
+	//notification channel ids
+	const val FAJR_CHANNEL_ID = "fajr_channel_id"
+	const val SUNRISE_CHANNEL_ID = "sunrise_channel_id"
+	const val DHUHR_CHANNEL_ID = "dhuhr_channel_id"
+	const val ASR_CHANNEL_ID = "asr_channel_id"
+	const val MAGHRIB_CHANNEL_ID = "maghrib_channel_id"
+	const val ISHA_CHANNEL_ID = "isha_channel_id"
+
+	const val FAJR_NOTIFY_ID = 2000
+	const val SUNRISE_NOTIFY_ID = 2001
+	const val DHUHR_NOTIFY_ID = 2002
+	const val ASR_NOTIFY_ID = 2003
+	const val MAGHRIB_NOTIFY_ID = 2004
+	const val ISHA_NOTIFY_ID = 2005
+
+	const val FAJR_PI_REQUEST_CODE = 1000
+	const val SUNRISE_PI_REQUEST_CODE = 1001
+	const val DHUHR_PI_REQUEST_CODE = 1002
+	const val ASR_PI_REQUEST_CODE = 1003
+	const val MAGHRIB_PI_REQUEST_CODE = 1004
+	const val ISHA_PI_REQUEST_CODE = 1005
+
+	//channels titles
+	const val CHANNEL_FAJR = "Fajr"
+	const val CHANNEL_SUNRISE = "Sunrise"
+	const val CHANNEL_ZUHAR = "Zuhar"
+	const val CHANNEL_ASAR = "Asar"
+	const val CHANNEL_MAGHRIB = "Maghrib"
+	const val CHANNEL_ISHAA = "Ishaa"
+
+	//channel descriptions
+	const val CHANNEL_DESC = "Prayer Adhan Notification"
+	const val CHANNEL_DESC_FAJR = "Fajr $CHANNEL_DESC"
+	const val CHANNEL_DESC_SUNRISE = "Sunrise $CHANNEL_DESC"
+	const val CHANNEL_DESC_ZUHAR = "Zuhar $CHANNEL_DESC"
+	const val CHANNEL_DESC_ASAR = "Asar $CHANNEL_DESC"
+	const val CHANNEL_DESC_MAGHRIB = "Maghrib $CHANNEL_DESC"
+	const val CHANNEL_DESC_ISHAA = "Ishaa $CHANNEL_DESC"
+
+
+	//pending intent request codes
+	const val RESET_PENDING_INTENT_REQUEST_CODE = 7
+
+	//widget pending intent request codes
+	const val WIDGET_PENDING_INTENT_REQUEST_CODE = 9
+
+	//notification pending intent request codes
+	const val NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 8
+
+	//auto location permission request code
+	const val AUTO_LOCATION_PERMISSION_REQUEST_CODE = 10
+
 
 	// bottom nav item titles
 	const val PRAYER_TIMES_SCREEN_TITLE = "Prayer"
@@ -80,26 +132,47 @@ object AppConstants
 	const val PRAYER_TIMES_SCREEN_ROUTE = "prayer_times_screen"
 	const val QIBLA_SCREEN_ROUTE = "qibla_screen"
 	const val QURAN_SCREEN_ROUTE = "quran_screen"
+	const val QURAN_AYA_SCREEN_ROUTE = "ayatScreen/{number}/{isSurah}/{language}"
 	const val MORE_SCREEN_ROUTE = "more_screen"
+	const val SHAHADAH_SCREEN_ROUTE = "shahadah_screen"
+
+	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen"
+	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}"
+	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{arabic}"
+	const val NAMESOFALLAH_SCREEN_ROUTE = "namesofallah_screen"
+
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
+	const val PRAYER_TIMES_SETTINGS_SCREEN_ROUTE = "prayer_times_settings_screen"
+	const val ABOUT_SCREEN_ROUTE = "about_screen"
+	const val LOGIN_SCREEN_ROUTE = "login_screen"
+	const val REGISTER_SCREEN_ROUTE = "register_screen"
+	const val FORGOT_PASSWORD_SCREEN_ROUTE = "forgot_password_screen"
+	const val PROFILE_SCREEN_ROUTE = "profile_screen"
+	const val CHANGE_PASSWORD_SCREEN_ROUTE = "change_password_screen"
+	const val UPDATE_DETAILS_SCREEN_ROUTE = "change_email_screen"
 
 	//Logging tags
 
 	//logging tags
 	const val TAG = "Nimaz"
+
 	//splash screen tag
 	const val SPLASH_SCREEN_TAG = "$TAG: SplashScreen"
 
 	//main activity tag
 	const val MAIN_ACTIVITY_TAG = "$TAG: MainActivity"
 
+	const val PRAYER_TIMES_SCREEN_TAG = "$TAG: PrayerTimesFragment"
+
 	//Qibla compass screen tag
 	const val QIBLA_COMPASS_SCREEN_TAG = "$TAG: QiblaCompassScreen"
 
 	//Quran screen tag
 	const val QURAN_SCREEN_TAG = "$TAG: QuranScreen"
+
 	//Quran screen tag
 	const val QURAN_SURAH_SCREEN_TAG = "$TAG: QuranSurahScreen"
+
 	//Quran screen tag
 	const val QURAN_JUZ_SCREEN_TAG = "$TAG: QuranJuzScreen"
 

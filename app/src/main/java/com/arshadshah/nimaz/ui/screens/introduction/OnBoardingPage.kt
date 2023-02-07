@@ -2,11 +2,8 @@ package com.arshadshah.nimaz.ui.screens.introduction
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
@@ -24,11 +21,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import com.arshadshah.nimaz.activities.Introduction
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
@@ -36,6 +35,13 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.ui.icons.Prayer
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
+import com.arshadshah.nimaz.utils.location.FeatureThatRequiresNotificationPermission
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 
@@ -66,109 +72,142 @@ sealed class OnBoardingPage(
 								 )
 
 	//the Notification permission page
+	@OptIn(ExperimentalPermissionsApi::class)
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Fourth : OnBoardingPage(
-			image = FeatherIcons.BookOpen ,
+			image = FeatherIcons.Bell ,
 			title = "Notifications" ,
 			description = "Enable Notifications for Nimaz to get Prayer alerts in the form of Adhan." ,
 			extra = {
-				//if the android version 13 or above then show this
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-				{
-					val context = LocalContext.current
-					//ask for notification permission
-					val permissionGranted = ActivityCompat.checkSelfPermission(
-							context ,
-							Manifest.permission.ACCESS_NOTIFICATION_POLICY
-																			  ) == PackageManager.PERMISSION_GRANTED
-					val notificationManager =
-						context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-					//check if this apps notifications are enabled
-					val notificationEnabled = if (permissionGranted)
-					{
+				val context = LocalContext.current
+				//get shared preference
+				val sharedpref = PrivateSharedPreferences(context)
+				//notification permission state
+				val notificationPermissionState =
+					rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
 
-						notificationManager.areNotificationsEnabled()
+				val isChecked =
+					remember { mutableStateOf(notificationPermissionState.status.isGranted) }
+
+				//the state of the switch
+				val state =
+					rememberPreferenceBooleanSettingState(
+							AppConstants.NOTIFICATION_ALLOWED ,
+							notificationPermissionState.status.isGranted
+														 )
+
+				if (isChecked.value)
+				{
+					FeatureThatRequiresNotificationPermission(
+							notificationPermissionState ,
+							isChecked
+															 )
+				}
+
+				//a laucnhed affect to check if the user has granted the notification permission
+				LaunchedEffect(notificationPermissionState.status.isGranted) {
+					if (notificationPermissionState.status.isGranted)
+					{
+						//if the user has granted the notification permission then set the state of the switch to true
+						state.value = true
+						//set the isChecked to true
+						isChecked.value = true
+
+						val sharedPreferences = PrivateSharedPreferences(context)
+						val channelLock =
+							sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK , false)
+						if (! channelLock)
+						{
+							CreateAlarms().createAllNotificationChannels(context)
+							sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK , true)
+						}
+
+						sharedpref.saveDataBoolean(AppConstants.NOTIFICATION_ALLOWED , true)
 					} else
 					{
-						false
+						//if the user has not granted the notification permission then set the state of the switch to false
+						state.value = false
+						//set the isChecked to false
+						isChecked.value = false
 					}
-					//get shared preference
-					val sharedpref = PrivateSharedPreferences(context)
-					//the state of the switch
-					val state =
-						rememberPreferenceBooleanSettingState(
-								AppConstants.NOTIFICATION_ALLOWED ,
-								notificationEnabled
-															 )
-					SettingsSwitch(
-							state = state ,
-							onCheckedChange = {
-								if (it)
+				}
+
+				SettingsSwitch(
+						state = state ,
+						onCheckedChange = {
+							if (it)
+							{
+								//if its android 13 or above then check if the notification permission is granted else take the user to the notification settings
+								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
 								{
-									if (! permissionGranted)
+									if (notificationPermissionState.status.isGranted)
 									{
-										ActivityCompat.requestPermissions(
-												context as Activity ,
-												arrayOf(Manifest.permission.ACCESS_NOTIFICATION_POLICY) ,
-												1
-																		 )
+										//if the permission is granted, then save the value in the shared preferences
+										sharedpref.saveDataBoolean(
+												AppConstants.NOTIFICATION_ALLOWED ,
+												true
+																  )
 									} else
 									{
-										//if the permission is granted then enable the notifications for this app
-										//open the notification settings
-										val intent = Intent()
-										intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-										intent.putExtra(
-												"android.provider.extra.APP_PACKAGE" ,
-												context.packageName
-													   )
-										context.startActivity(intent)
+										notificationPermissionState.launchPermissionRequest()
 									}
 								} else
 								{
-									//if its unchecked, then we need to remove the notification permission
-									//and remove the value from the shared preferences
-									sharedpref.removeData(AppConstants.NOTIFICATION_ALLOWED)
+									//take the user to the notification settings
+									val intent = Intent()
+									intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+									intent.putExtra(
+											"android.provider.extra.APP_PACKAGE" ,
+											context.packageName
+												   )
+									context.startActivity(intent)
 								}
-							} ,
-							title = {
-								Text(text = "Allow Notifications")
-							} ,
-							subtitle = {
-								//if the permission is granted, show a checkmark and text saying "Allowed"
-								if (notificationEnabled)
-								{
-									Row {
-										Icon(
-												imageVector = Icons.Filled.CheckCircle ,
-												contentDescription = "Notifications Allowed"
-											)
-										Text(text = "Allowed")
-									}
-								} else
-								{
-									//if the permission is not granted, show a notification icon and text saying "Not Allowed"
-									Row {
-										Icon(
-												imageVector = Icons.Filled.Close ,
-												contentDescription = "Notifications Not Allowed"
-											)
-										Text(text = "Not Allowed")
-									}
-								}
-							} ,
-							icon = {
-								Icon(
-										imageVector = Icons.Filled.Notifications ,
-										contentDescription = "Notifications"
-									)
+							} else
+							{
+								isChecked.value = false
+								//if its unchecked, then we need to remove the notification permission
+								//and remove the value from the shared preferences
+								sharedpref.removeData(AppConstants.NOTIFICATION_ALLOWED)
 							}
-								  )
-				}
+						} ,
+						title = {
+							Text(text = "Allow Notifications")
+						} ,
+						subtitle = {
+							//if the permission is granted, show a checkmark and text saying "Allowed"
+							if (isChecked.value)
+							{
+								Row {
+									Icon(
+											imageVector = Icons.Filled.CheckCircle ,
+											contentDescription = "Notifications Allowed"
+										)
+									Text(text = "Allowed")
+								}
+							} else
+							{
+								//if the permission is not granted, show a notification icon and text saying "Not Allowed"
+								Row {
+									Icon(
+											imageVector = Icons.Filled.Close ,
+											contentDescription = "Notifications Not Allowed"
+										)
+									Text(text = "Not Allowed")
+								}
+							}
+						} ,
+						icon = {
+							Icon(
+									imageVector = Icons.Filled.Notifications ,
+									contentDescription = "Notifications"
+								)
+						}
+							  )
 			}
 								  )
 
 	//the location permission page
+	@OptIn(ExperimentalPermissionsApi::class)
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Fifth : OnBoardingPage(
 			image = FeatherIcons.MapPin ,
@@ -176,33 +215,59 @@ sealed class OnBoardingPage(
 			description = "Nimaz can use your location to get accurate prayer times. You can also use manual location." ,
 			extra = {
 				val context = LocalContext.current
-				//ask for location permission
-				val permissionGranted = ActivityCompat.checkSelfPermission(
-						context ,
-						Manifest.permission.ACCESS_FINE_LOCATION
-																		  ) == PackageManager.PERMISSION_GRANTED ||
-						ActivityCompat.checkSelfPermission(
-								context ,
-								Manifest.permission.ACCESS_COARSE_LOCATION
-														  ) == PackageManager.PERMISSION_GRANTED
-				//get shared preference
 				val sharedpref = PrivateSharedPreferences(context)
+				//location permission state
+				val locationPermissionState = rememberMultiplePermissionsState(
+						permissions = listOf(
+								Manifest.permission.ACCESS_COARSE_LOCATION ,
+								Manifest.permission.ACCESS_FINE_LOCATION
+											)
+																			  )
 				//the state of the switch
 				val state =
-					rememberPreferenceBooleanSettingState(AppConstants.LOCATION_TYPE, permissionGranted)
+					rememberPreferenceBooleanSettingState(
+							AppConstants.LOCATION_TYPE ,
+							locationPermissionState.allPermissionsGranted
+														 )
+
+				val checked =
+					remember { mutableStateOf(locationPermissionState.allPermissionsGranted) }
+				//call FeatureThatRequiresLocationPermission() when the switch is checked
+				if (checked.value)
+				{
+					FeatureThatRequiresLocationPermission(locationPermissionState , checked)
+				}
+
+				//a laucnhed affect to check if the user has granted the notification permission
+				LaunchedEffect(locationPermissionState.allPermissionsGranted) {
+					if (locationPermissionState.allPermissionsGranted)
+					{
+						//if the user has granted the notification permission then set the state of the switch to true
+						state.value = true
+						//set the isChecked to true
+						checked.value = true
+					} else
+					{
+						//if the user has not granted the notification permission then set the state of the switch to false
+						state.value = false
+						//set the isChecked to false
+						checked.value = false
+					}
+				}
+
 				SettingsSwitch(
 						state = state ,
 						onCheckedChange = {
 							if (it)
 							{
-								ActivityCompat.requestPermissions(
-										context as Activity ,
-										arrayOf(
-												Manifest.permission.ACCESS_FINE_LOCATION ,
-												Manifest.permission.ACCESS_COARSE_LOCATION
-											   ) ,
-										2
-																 )
+								if (locationPermissionState.allPermissionsGranted)
+								{
+									sharedpref.saveDataBoolean(AppConstants.LOCATION_TYPE , true)
+								} else
+								{
+									locationPermissionState.launchMultiplePermissionRequest()
+									sharedpref.saveDataBoolean(AppConstants.LOCATION_TYPE , true)
+								}
 							} else
 							{
 								//if its unchecked, then we need to remove the location permission
@@ -215,7 +280,7 @@ sealed class OnBoardingPage(
 						} ,
 						subtitle = {
 							//if the permission is granted, show a checkmark and text saying "Allowed"
-							if (permissionGranted)
+							if (checked.value)
 							{
 								Row {
 									Icon(
@@ -252,7 +317,7 @@ sealed class OnBoardingPage(
 	object Sixth : OnBoardingPage(
 			image = FeatherIcons.Battery ,
 			title = "Battery Optimization" ,
-			description = "Nimaz needs to be exempted from battery optimization to work properly." ,
+			description = "Nimaz needs to be exempted from battery optimization to show adhan notifications." ,
 			extra = {
 				val context = LocalContext.current
 				//get shared preference
@@ -262,11 +327,29 @@ sealed class OnBoardingPage(
 				val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 				val isbatteryOptimizationExempted =
 					powerManager.isIgnoringBatteryOptimizations(context.packageName)
+				val isChecked = remember { mutableStateOf(isbatteryOptimizationExempted) }
 				//the state of the switch
 				val state = rememberPreferenceBooleanSettingState(
 						AppConstants.BATTERY_OPTIMIZATION ,
 						isbatteryOptimizationExempted
 																 )
+
+				//a laucnhed affect to check if the user has granted the notification permission
+				LaunchedEffect(isbatteryOptimizationExempted) {
+					if (isbatteryOptimizationExempted)
+					{
+						//if the user has granted the notification permission then set the state of the switch to true
+						state.value = true
+						//set the isChecked to true
+						isChecked.value = true
+					} else
+					{
+						//if the user has not granted the notification permission then set the state of the switch to false
+						state.value = false
+						//set the isChecked to false
+						isChecked.value = false
+					}
+				}
 				SettingsSwitch(
 						state = state ,
 						onCheckedChange = {
@@ -274,7 +357,7 @@ sealed class OnBoardingPage(
 							{
 								//if the switch is checked, then we need to ask for the battery optimization exemption
 								//and save the value in the shared preferences
-								sharedpref.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION, true)
+								sharedpref.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , true)
 								val intent = Intent()
 								intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 								intent.data = Uri.parse("package:" + context.packageName)
@@ -291,7 +374,7 @@ sealed class OnBoardingPage(
 						} ,
 						subtitle = {
 							//if the permission is granted, show a checkmark and text saying "Allowed"
-							if (isbatteryOptimizationExempted)
+							if (isChecked.value)
 							{
 								Row {
 									Icon(

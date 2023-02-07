@@ -34,6 +34,9 @@ class AuthViewModel : ViewModel() {
 		checkLoginState()
 	}
 
+	//events to be called from the view
+
+
 	private fun checkLoginState() {
 		viewModelScope.launch(Dispatchers.IO) {
 			_isLoggedIn.value = accountService.isLoggedin()
@@ -67,6 +70,19 @@ class AuthViewModel : ViewModel() {
 				if (error == null) {
 					checkLoginState()
 					_loginUiState.value = LoginUiState.Success("Account Created")
+				} else {
+					_loginUiState.value = LoginUiState.Error(error.message!!)
+				}
+			}
+		}
+	}
+
+	//forgot password
+	fun sendPasswordResetEmail(email: String) {
+		viewModelScope.launch(Dispatchers.IO) {
+			accountService.sendPasswordResetEmail(email) { error ->
+				if (error == null) {
+					_loginUiState.value = LoginUiState.Success("Email Sent")
 				} else {
 					_loginUiState.value = LoginUiState.Error(error.message!!)
 				}

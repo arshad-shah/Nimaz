@@ -1,37 +1,53 @@
 package com.arshadshah.nimaz.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.FeatureCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,
+	viewModel : PrayerTimesViewModel = PrayerTimesViewModel() ,
 					 )
 {
 	val context = LocalContext.current
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-	// Initalising the view model
-	val viewModel = PrayerTimesViewModel(context)
+	lifecycle.addObserver(LifecycleEventObserver { _ , event ->
+		if (event == Lifecycle.Event.ON_RESUME)
+		{
+			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
+		}
+	})
 
 	// Collecting the state of the view model
-	val state = remember { viewModel.prayerTimesState }.collectAsState()
+	val state by remember { viewModel.prayerTimesState }.collectAsState()
+	val locationState by remember { viewModel.locationState }.collectAsState()
+	val timer = viewModel.timer
 
-	val locationState = remember { viewModel.location }.collectAsState()
+	val currentPrayerName = remember {
+		mutableStateOf("Loading...")
+	}
 
-	val timerState = viewModel.timer
+	//reload the data when the screen is resumed
+	LaunchedEffect(Unit) {
+		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
+	}
 
+	//log all the states
+	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "state: $state")
 	Column(
 			modifier = Modifier
 				.fillMaxSize()
@@ -41,7 +57,10 @@ fun PrayerTimesScreen(
 			verticalArrangement = Arrangement.SpaceEvenly
 		  ) {
 		// Calling the LocationTimeContainer composable
-		LocationTimeContainer(state = locationState)
+		LocationTimeContainer(
+				currentPrayerName = currentPrayerName ,
+				locationState = locationState ,
+							 )
 
 		// Calling the DatesContainer composable
 		DatesContainer()
@@ -49,9 +68,9 @@ fun PrayerTimesScreen(
 		// Calling the PrayerTimesList composable
 		PrayerTimesList(
 				state = state ,
-				timerState = timerState ,
-				viewModel = viewModel ,
-				paddingValues = paddingValues
+				timer = timer ,
+				handleEvent = viewModel::handleEvent ,
+				currentPrayerName = currentPrayerName ,
 					   )
 	}
 }

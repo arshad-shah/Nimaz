@@ -35,6 +35,13 @@ class AccountServiceImpl: AccountService
 			.addOnCompleteListener { onResult(it.exception) }
 	}
 
+	//forgot password
+	override fun sendPasswordResetEmail(email : String , onResult : (Throwable?) -> Unit)
+	{
+		Firebase.auth.sendPasswordResetEmail(email)
+			.addOnCompleteListener { onResult(it.exception) }
+	}
+
 	override fun getUser(onResult : (FirebaseUser?) -> Unit)
 	{
 		onResult(Firebase.auth.currentUser)

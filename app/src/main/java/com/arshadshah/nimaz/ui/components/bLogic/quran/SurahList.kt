@@ -5,8 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.components.ui.loaders.CircularLoaderCard
-import com.arshadshah.nimaz.ui.components.ui.quran.JuzListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.SurahListUI
 import es.dmoral.toasty.Toasty
 
@@ -20,23 +18,29 @@ fun SurahList(
 	{
 		is QuranViewModel.SurahState.Loading ->
 		{
-			CircularLoaderCard()
+			SurahListUI(
+					surahs = ArrayList(6) ,
+					onNavigateToAyatScreen = onNavigateToAyatScreen ,
+					loading = true
+					   )
 		}
 
 		is QuranViewModel.SurahState.Success ->
 		{
 			SurahListUI(
 					surahs = surahState.data !! ,
-					onNavigateToAyatScreen = onNavigateToAyatScreen
+					onNavigateToAyatScreen = onNavigateToAyatScreen ,
+					loading = false
 					   )
 		}
 
 		is QuranViewModel.SurahState.Error ->
 		{
-			JuzListUI(
-					juz = ArrayList(5) ,
-					onNavigateToAyatScreen = onNavigateToAyatScreen
-					 )
+			SurahListUI(
+					surahs = ArrayList(6) ,
+					onNavigateToAyatScreen = onNavigateToAyatScreen ,
+					loading = true
+					   )
 			Toasty.error(LocalContext.current , surahState.errorMessage).show()
 		}
 	}

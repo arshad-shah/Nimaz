@@ -1,48 +1,65 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.ui.Modifier
+import android.content.Context
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.ui.components.ui.loaders.ListSkeletonLoader
-import com.arshadshah.nimaz.ui.components.ui.loaders.loadingShimmerEffect
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
+import kotlin.reflect.KFunction2
 
 
 @Composable
 fun PrayerTimesList(
-	modifier : Modifier = Modifier ,
-	state : State<PrayerTimesViewModel.PrayerTimesState> ,
-	paddingValues : PaddingValues ,
-	timerState : LiveData<CountDownTime> ,
-	viewModel : PrayerTimesViewModel ,
+	state : PrayerTimesViewModel.PrayerTimesState ,
+	timer : LiveData<CountDownTime> ,
+	handleEvent : KFunction2<Context , PrayerTimesViewModel.PrayerTimesEvent , Unit> ,
+	currentPrayerName : MutableState<String> ,
 				   )
 {
 	val context = LocalContext.current
 	val sharedPreferences = PrivateSharedPreferences(context)
-	val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-	when (val prayerTimesState = state.value)
+	var countDownTime by remember { mutableStateOf(CountDownTime(0 , 0 , 0)) }
+
+	when (state)
 	{
 		is PrayerTimesViewModel.PrayerTimesState.Loading ->
 		{
-			ListSkeletonLoader(brush = loadingShimmerEffect())
+			PrayerTimesListUI(
+					prayerTimesMap = mapOf(
+							"FAJR" to LocalDateTime.now() ,
+							"DHUHR" to LocalDateTime.now() ,
+							"ASR" to LocalDateTime.now() ,
+							"MAGHRIB" to LocalDateTime.now() ,
+							"ISHA" to LocalDateTime.now() ,
+										  ) ,
+					name = "" ,
+					state = state ,
+					countDownTime = countDownTime ,
+					loading = true ,
+							 )
+		}
+
+		is PrayerTimesViewModel.PrayerTimesState.Error ->
+		{
+			PrayerTimesListUI(
+					prayerTimesMap = mapOf() ,
+					name = "" ,
+					state = state ,
+					countDownTime = countDownTime ,
+					loading = false ,
+							 )
 		}
 
 		is PrayerTimesViewModel.PrayerTimesState.Success ->
 		{
-
+			val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 			//delete previous values from shared preferences
 			sharedPreferences.removeData(AppConstants.FAJR)
 			sharedPreferences.removeData(AppConstants.SUNRISE)
@@ -52,24 +69,35 @@ fun PrayerTimesList(
 			sharedPreferences.removeData(AppConstants.ISHA)
 			sharedPreferences.removeData(AppConstants.CURRENT_PRAYER)
 
-			val prayerTimes = prayerTimesState.prayerTimes
-			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
-			prayerTimesMap["fajr"] = prayerTimes !!.fajr
-			prayerTimesMap["sunrise"] = prayerTimes.sunrise
-			prayerTimesMap["dhuhr"] = prayerTimes.dhuhr
-			prayerTimesMap["asr"] = prayerTimes.asr
-			prayerTimesMap["maghrib"] = prayerTimes.maghrib
-			prayerTimesMap["isha"] = prayerTimes.isha
+			val prayerTimes = state.prayerTimes
+			//Map<String , LocalDateTime?>
+			val prayerTimesMap = mapOf(
+					"fajr" to prayerTimes.fajr ,
+					"sunrise" to prayerTimes.sunrise ,
+					"dhuhr" to prayerTimes.dhuhr ,
+					"asr" to prayerTimes.asr ,
+					"maghrib" to prayerTimes.maghrib ,
+					"isha" to prayerTimes.isha ,
+									  )
+
+			currentPrayerName.value = prayerTimes.currentPrayer?.name !!
 
 			//save the prayer times in shared preferences
-			sharedPreferences.saveData(AppConstants.FAJR , prayerTimes.fajr.toString())
-			sharedPreferences.saveData(AppConstants.SUNRISE , prayerTimes.sunrise.toString())
-			sharedPreferences.saveData(AppConstants.DHUHR , prayerTimes.dhuhr.toString())
-			sharedPreferences.saveData(AppConstants.ASR , prayerTimes.asr.toString())
-			sharedPreferences.saveData(AppConstants.MAGHRIB , prayerTimes.maghrib.toString())
-			sharedPreferences.saveData(AppConstants.ISHA , prayerTimes.isha.toString())
-			sharedPreferences.saveData(AppConstants.CURRENT_PRAYER ,
-									   prayerTimes.currentPrayer?.name.toString()
+			sharedPreferences.saveData(AppConstants.FAJR , prayerTimesMap["fajr"] !!.toString())
+			sharedPreferences.saveData(
+					AppConstants.SUNRISE ,
+					prayerTimesMap["sunrise"] !!.toString()
+									  )
+			sharedPreferences.saveData(AppConstants.DHUHR , prayerTimesMap["dhuhr"] !!.toString())
+			sharedPreferences.saveData(AppConstants.ASR , prayerTimesMap["asr"] !!.toString())
+			sharedPreferences.saveData(
+					AppConstants.MAGHRIB ,
+					prayerTimesMap["maghrib"] !!.toString()
+									  )
+			sharedPreferences.saveData(AppConstants.ISHA , prayerTimesMap["isha"] !!.toString())
+			sharedPreferences.saveData(
+					AppConstants.CURRENT_PRAYER ,
+					prayerTimes.currentPrayer.name
 									  )
 
 
@@ -77,51 +105,42 @@ fun PrayerTimesList(
 			{
 				CreateAlarms().exact(
 						context ,
-						prayerTimes.fajr !! ,
-						prayerTimes.sunrise !! ,
-						prayerTimes.dhuhr !! ,
-						prayerTimes.asr !! ,
-						prayerTimes.maghrib !! ,
-						prayerTimes.isha !!
+						prayerTimesMap["fajr"] !! ,
+						prayerTimesMap["sunrise"] !! ,
+						prayerTimesMap["dhuhr"] !! ,
+						prayerTimesMap["asr"] !! ,
+						prayerTimesMap["maghrib"] !! ,
+						prayerTimesMap["isha"] !! ,
 									)
 				sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 			}
 
-			prayerTimes.nextPrayer?.let {
-				PrayerTimesListUI(
-						modifier ,
-						prayerTimesMap ,
-						it.name ,
-						timerState ,
-						viewModel ,
-						prayerTimesState.prayerTimes ,
-						paddingValues
-								 )
+			LaunchedEffect(key1 = timer) {
+				timer.observeForever {
+					countDownTime = it
+				}
 			}
-		}
+			val timeToNextPrayerLong =
+				state.prayerTimes.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())
+					?.toInstant()
+					?.toEpochMilli()
+			val currentTime =
+				LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
+					.toEpochMilli()
 
-		is PrayerTimesViewModel.PrayerTimesState.Error ->
-		{
-			//empty map to avoid null pointer exception
-			val prayerTimesMap = mutableMapOf<String , LocalDateTime?>()
-			PrayerTimesListUI(
-					modifier ,
-					prayerTimesMap ,
-					"No connection" ,
-					timerState ,
-					viewModel ,
-					null ,
-					paddingValues
-							 )
-
-			Log.e("PrayerTimesList" , "Error: ${prayerTimesState.errorMessage}")
-
-			Toasty.error(
+			val difference = timeToNextPrayerLong?.minus(currentTime)
+			handleEvent(
 					LocalContext.current ,
-					prayerTimesState.errorMessage ,
-					Toast.LENGTH_SHORT ,
-					true
-						).show()
+					PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
+					   )
+			PrayerTimesListUI(
+					name = prayerTimes.nextPrayer?.name ?: "" ,
+					prayerTimesMap = prayerTimesMap ,
+					state = state ,
+					countDownTime = countDownTime ,
+					loading = false ,
+							 )
 		}
 	}
+
 }

@@ -10,6 +10,7 @@ import android.widget.RemoteViews
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.WIDGET_PENDING_INTENT_REQUEST_CODE
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -52,16 +53,21 @@ internal fun updateAppWidget(
 {
 
 	val intent = Intent(context , MainActivity::class.java)
-	val pendingIntent = PendingIntent.getActivity(context , 9 , intent , FLAG_IMMUTABLE)
+	val pendingIntent = PendingIntent.getActivity(
+			context ,
+			WIDGET_PENDING_INTENT_REQUEST_CODE ,
+			intent ,
+			FLAG_IMMUTABLE
+												 )
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 	//get the prayer times from the shared preferences
-	val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR, "00:00"))
-	val sunrise = LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE, "00:00"))
-	val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR, "00:00"))
-	val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR, "00:00"))
-	val maghrib = LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB, "00:00"))
-	val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA, "00:00"))
+	val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR , "00:00"))
+	val sunrise = LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE , "00:00"))
+	val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR , "00:00"))
+	val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR , "00:00"))
+	val maghrib = LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB , "00:00"))
+	val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA , "00:00"))
 	// Construct the RemoteViews object
 	val views = RemoteViews(context.packageName , R.layout.nimaz)
 

@@ -1,22 +1,7 @@
 package com.arshadshah.nimaz.utils.auth
 
-import android.util.Patterns
-
 class AuthDataSanitizers
 {
-	//email validation
-	fun emailIsValid(email : String) : Boolean
-	{
-		return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-	}
-
-
-	//password and confirm password must match
-	fun passwordsMatch(password : String, confirmPassword : String) : Boolean
-	{
-		return password == confirmPassword
-	}
-
 	fun passwordStrength(password : String) : String
 	{
 		//8 characters long and contains a number and a special character and an uppercase letter

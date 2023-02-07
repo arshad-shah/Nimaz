@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.remote.viewModel
 import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,55 +12,80 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.location.LocationFinder
 import com.arshadshah.nimaz.utils.location.NetworkChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalDateTime
 
-class PrayerTimesViewModel(context : Context) : ViewModel()
+class PrayerTimesViewModel : ViewModel()
 {
 
 	sealed class PrayerTimesState
 	{
 
 		object Loading : PrayerTimesState()
-		data class Success(val prayerTimes : PrayerTimes?) : PrayerTimesState()
-		data class Error(val errorMessage : String) : PrayerTimesState()
+		data class Success(val prayerTimes : PrayerTimes) : PrayerTimesState()
+		data class Error(val error : String) : PrayerTimesState()
 	}
 
-	private var _prayerTimesState =
-		MutableStateFlow<PrayerTimesState>(PrayerTimesState.Loading)
-	val prayerTimesState = _prayerTimesState.asStateFlow()
-
-	//location state
 	sealed class LocationState
 	{
 
 		object Loading : LocationState()
 		data class Success(val location : String) : LocationState()
-		data class Error(val errorMessage : String) : LocationState()
+		data class Error(val error : String) : LocationState()
 	}
 
-	private var _location = MutableStateFlow(LocationState.Loading as LocationState)
-	val location = _location.asStateFlow()
+	private val _locationState = MutableStateFlow(LocationState.Loading as LocationState)
+	val locationState = _locationState.asStateFlow()
+
+	private var _prayerTimesState =
+		MutableStateFlow(PrayerTimesState.Loading as PrayerTimesState)
+	val prayerTimesState = _prayerTimesState.asStateFlow()
 
 	private var countDownTimer : CountDownTimer? = null
 
 	private val _countDownTimeState = MutableLiveData<CountDownTime>()
 	val timer : LiveData<CountDownTime> = _countDownTimeState
 
-
-	init
+	//event that starts the timer
+	sealed class PrayerTimesEvent
 	{
-		loadLocation(context)
-		loadPrayerTimes(context)
+
+		class Start(val timeToNextPrayer : Long) : PrayerTimesEvent()
+		object RELOAD : PrayerTimesEvent()
+	}
+
+	//function to handle the timer event
+	fun handleEvent(context : Context , event : PrayerTimesEvent)
+	{
+		when (event)
+		{
+			is PrayerTimesEvent.Start ->
+			{
+				//this takes a timeToNextPrayer in milliseconds as a parameter on event
+				startTimer(context , event.timeToNextPrayer)
+			}
+			//event to reload the prayer times
+			is PrayerTimesEvent.RELOAD ->
+			{
+				reload(context)
+			}
+		}
+	}
+
+	//function to reload the UI state
+	fun reload(context : Context)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			//load the location
+			loadLocation(context)
+			//load the prayer times
+			loadPrayerTimes(context)
+		}
 	}
 
 	//load prayer times again
@@ -68,68 +94,87 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val dataStore = LocalDataStore.getDataStore()
-				val prayerTimesAvailable = dataStore.countPrayerTimes()
-				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, false)
-
-				if (prayerTimesAvailable > 0 && !isSettingsUpdated)
+				_prayerTimesState.value = PrayerTimesState.Loading
+				//FIXME: this is a temporary fix to the issue of the app not loading the prayer times timer correctly
+				//it does not save the prayer times yet. it just loads them from the api
+//				val dataStore = LocalDataStore.getDataStore()
+//				val prayerTimesAvailable = dataStore.countPrayerTimes()
+//				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean(
+//						AppConstants.RECALCULATE_PRAYER_TIMES ,
+//						false
+//																						)
+//
+//				if (prayerTimesAvailable > 0 && !isSettingsUpdated)
+//				{
+//
+//					val localPrayerTimes = dataStore.getAllPrayerTimes()
+//					Log.d(
+//							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+//							"loadPrayerTimes: $localPrayerTimes"
+//						 )
+//					val localTimesNull = localPrayerTimes.timestamp == null
+//					//if timestamp is from today then the data is valid and we can use it
+//					val localTimesExpired =
+//						localPrayerTimes.timestamp?.toLocalDate() != LocalDate.now()
+//
+//					//check if the next prayer time has passed
+//					val nextPrayerPassed =
+//						localPrayerTimes.nextPrayer?.time?.isBefore(LocalDateTime.now())
+//
+//					if (localTimesNull ||
+//						//check if the prayer times are not from today
+//						localTimesExpired ||
+//						nextPrayerPassed == true
+//					)
+//					{
+//						val response = PrayerTimesRepository.getPrayerTimes(context)
+//						if (response.data != null)
+//						{
+//							dataStore.deleteAllPrayerTimes()
+//							dataStore.saveAllPrayerTimes(response.data)
+//							_prayerTimesState.value = PrayerTimesState.Success(response.data)
+//						} else
+//						{
+//							_prayerTimesState.value = PrayerTimesState.Error(response.message!!)
+//						}
+//					} else
+//					{
+//						_prayerTimesState.value = PrayerTimesState.Success(localPrayerTimes)
+//					}
+//
+//				} else
+//				{
+				val response = PrayerTimesRepository.getPrayerTimes(context)
+				if (response.data != null)
 				{
-
-					val localPrayerTimes = dataStore.getAllPrayerTimes()
-					Log.d("PrayerTimesViewModel" , "loadPrayerTimes: $localPrayerTimes")
-					val localTimesNull = localPrayerTimes.timestamp == null
-					//if timestamp is from today then the data is valid and we can use it
-					val localTimesExpired =
-						localPrayerTimes.timestamp?.toLocalDate() != LocalDate.now()
-
-					//check if the next prayer time has passed
-					val nextPrayerPassed = localPrayerTimes.nextPrayer?.time?.isBefore(LocalDateTime.now())
-
-					if (localTimesNull ||
-						//check if the prayer times are not from today
-						localTimesExpired ||
-						nextPrayerPassed == true
-					)
-					{
-						val response = PrayerTimesRepository.getPrayerTimes(context)
-						if (response.data != null)
-						{
-							dataStore.deleteAllPrayerTimes()
-							dataStore.saveAllPrayerTimes(response.data)
-							_prayerTimesState.value = PrayerTimesState.Success(response.data)
-						} else
-						{
-							_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
-						}
-					} else
-					{
-						_prayerTimesState.value = PrayerTimesState.Success(localPrayerTimes)
-					}
-
+//						//if recalculate_prayer_times is true then set it to false
+//						if (isSettingsUpdated)
+//						{
+//							PrivateSharedPreferences(context).saveDataBoolean(
+//									AppConstants.RECALCULATE_PRAYER_TIMES ,
+//									false
+//																			 )
+//						}
+//						Log.d(
+//								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+//								"loadPrayerTimesRemote: ${response.data}"
+//							 )
+//						dataStore.deleteAllPrayerTimes()
+//						dataStore.saveAllPrayerTimes(response.data)
+					_prayerTimesState.value = PrayerTimesState.Success(response.data)
 				} else
 				{
-					val response = PrayerTimesRepository.getPrayerTimes(context)
-					if (response.data != null)
-					{
-						//if recalculate_prayer_times is true then set it to false
-						if (isSettingsUpdated)
-						{
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES, false)
-						}
-						Log.d("PrayerTimesViewModel" , "loadPrayerTimesRemote: ${response.data}")
-						dataStore.deleteAllPrayerTimes()
-						dataStore.saveAllPrayerTimes(response.data)
-						_prayerTimesState.value = PrayerTimesState.Success(response.data)
-					} else
-					{
-						_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
-					}
+					_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
 				}
+//				}
 
 			} catch (e : Exception)
 			{
-				_prayerTimesState.value =
-					PrayerTimesState.Error(e.message ?: "Unknown error")
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadPrayerTimes: ${e.message}"
+					 )
+				_prayerTimesState.value = PrayerTimesState.Error(e.message !!)
 			}
 		}
 	}
@@ -138,33 +183,89 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 	fun loadLocation(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			val sharedPreferences = PrivateSharedPreferences(context)
-			val locationAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
-			val locationInput = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Abbeyleix")
-			if (NetworkChecker().networkCheck(context))
+			try
 			{
-				if (locationAuto)
+				_locationState.value = LocationState.Loading
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadLocation: loading..."
+					 )
+				val sharedPreferences = PrivateSharedPreferences(context)
+				val locationAuto =
+					sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE , true)
+				val locationName = mutableStateOf(
+						sharedPreferences.getData(
+								AppConstants.LOCATION_INPUT ,
+								"Abbeyleix"
+												 )
+												 )
+				val latitude =
+					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.0))
+				val longitude =
+					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 7.0))
+				//callback for location
+				val locationFoundCallbackManual =
+					{ longitudeValue : Double , latitudeValue : Double , name : String ->
+						//save location
+						locationName.value = name
+						latitude.value = latitudeValue
+						longitude.value = longitudeValue
+					}
+				val listener = { latitudeValue : Double , longitudeValue : Double ->
+					//save location
+					latitude.value = latitudeValue
+					longitude.value = longitudeValue
+				}
+
+				if (NetworkChecker().networkCheck(context))
 				{
-					val locationfinder = LocationFinder()
-					val latitude = locationfinder.latitudeValue
-					val longitude = locationfinder.longitudeValue
-					locationfinder.findCityName(context , latitude , longitude)
-					_location.value = LocationState.Success(locationfinder.cityName)
+					if (locationAuto)
+					{
+						Location().getAutomaticLocation(
+								context ,
+								listener ,
+								locationFoundCallbackManual
+													   )
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadLocation: auto"
+							 )
+						_locationState.value = LocationState.Success(locationName.value)
+					} else
+					{
+						Location().getManualLocation(
+								locationName.value ,
+								context ,
+								locationFoundCallbackManual
+													)
+						Log.d(
+								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+								"loadLocation: manual"
+							 )
+						_locationState.value = LocationState.Success(locationName.value)
+					}
 				} else
 				{
-					Location().getManualLocation(locationInput , context)
-					_location.value = LocationState.Success(locationInput)
+					Log.d(
+							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							"loadLocation: no network"
+						 )
+					_locationState.value = LocationState.Error("No network")
 				}
-			} else
+			} catch (e : Exception)
 			{
-				_location.value = LocationState.Error("No internet connection")
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadLocation: ${e.message}"
+					 )
+				_locationState.value = LocationState.Error(e.message !!)
 			}
 		}
 	}
 
-
 	fun startTimer(context : Context , timeToNextPrayer : Long)
 	{
+		countDownTimer?.cancel()
 		countDownTimer = object : CountDownTimer(timeToNextPrayer , 1000)
 		{
 			override fun onTick(millisUntilFinished : Long)
@@ -189,7 +290,7 @@ class PrayerTimesViewModel(context : Context) : ViewModel()
 
 			override fun onFinish()
 			{
-				loadPrayerTimes(context)
+				reload(context)
 			}
 		}.start()
 	}
