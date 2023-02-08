@@ -19,7 +19,7 @@ fun Dial(state : State<QiblaViewModel.QiblaState>)
 
 	DisposableEffect(Unit) {
 		val dataManager = SensorDataManager(context)
-		dataManager.init()
+		dataManager.init(context)
 
 		val job = scope.launch {
 			dataManager.data

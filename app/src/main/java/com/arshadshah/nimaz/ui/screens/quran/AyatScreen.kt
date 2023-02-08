@@ -28,11 +28,11 @@ fun AyatScreen(
 	sharedPreferences.saveDataFloat(
 			customkey = AppConstants.ARABIC_FONT_SIZE ,
 			data = 24.0f
-									)
+								   )
 	sharedPreferences.saveDataFloat(
 			customkey = AppConstants.TRANSLATION_FONT_SIZE ,
 			data = 16.0f
-									)
+								   )
 
 
 	Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: $number $isSurah $language")

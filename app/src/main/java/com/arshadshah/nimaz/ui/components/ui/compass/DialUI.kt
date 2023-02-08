@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.ui.compass
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.animation.core.Animatable
@@ -11,10 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +32,11 @@ import kotlin.math.abs
 @Composable
 fun DialUI(bearing : Double , data : SensorData?)
 {
+
+	val hasSensor =
+		LocalContext.current.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && LocalContext.current.packageManager.hasSystemFeature(
+				PackageManager.FEATURE_SENSOR_COMPASS
+																																								 )
 	val yaw by derivedStateOf { (data?.yaw ?: 0f) }
 	val pitch by derivedStateOf { (data?.pitch ?: 0f) }
 	val roll by derivedStateOf { (data?.roll ?: 0f) }
@@ -83,7 +86,7 @@ fun DialUI(bearing : Double , data : SensorData?)
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(16.dp)
+				.padding(16.dp) ,
 				) {
 
 		Text(
