@@ -4,13 +4,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
@@ -54,7 +52,6 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 						modifier = if (isNotBismillah)
 						{
 							Modifier
-								.wrapContentWidth(align = Alignment.End)
 								.placeholder(
 										visible = loading ,
 										color = MaterialTheme.colorScheme.outline ,
@@ -86,7 +83,8 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 						maxLines = 2 ,
 						style = TextStyle(
 								fontFamily = quranFont ,
-								fontSize = arabicFontSize.sp ,
+								//if arabic font size is not set then use default font size
+								fontSize = if (arabicFontSize == 0f) 24.sp else arabicFontSize.sp ,
 								lineHeight = 60.sp ,
 								color = MaterialTheme.colorScheme.onSurface ,
 								textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
@@ -219,7 +217,7 @@ fun PageUIPreview()
 			   )
 			   )
 	NimazTheme(darkTheme = true) {
-		Page(ayaList , PaddingValues() , true)
+		Page(ayaList , PaddingValues() , false)
 	}
 
 }
