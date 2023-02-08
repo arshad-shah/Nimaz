@@ -47,14 +47,12 @@ fun MoreMenu(
 
 
 	val arabicFontSizeState = rememberPreferenceFloatSettingState(
-			AppConstants.ARABIC_FONT_SIZE ,
-			24f ,
-			sharedPreferences
+			key = AppConstants.ARABIC_FONT_SIZE ,
+			defaultValue = 24f
 																 )
 	val translationFontSizeState = rememberPreferenceFloatSettingState(
-			AppConstants.TRANSLATION_FONT_SIZE ,
-			16f ,
-			sharedPreferences
+			key = AppConstants.TRANSLATION_FONT_SIZE ,
+			defaultValue = 16f
 																	  )
 
 	DropdownMenu(

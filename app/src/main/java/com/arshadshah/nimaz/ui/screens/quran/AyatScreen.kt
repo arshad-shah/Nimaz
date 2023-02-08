@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.AyaJuzList
 import com.arshadshah.nimaz.ui.components.bLogic.quran.AyaSurahList
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun AyatScreen(
@@ -21,6 +22,18 @@ fun AyatScreen(
 {
 	val context = LocalContext.current
 	val viewModel = QuranViewModel(context)
+
+	val sharedPreferences = PrivateSharedPreferences(context)
+
+	sharedPreferences.saveDataFloat(
+			customkey = AppConstants.ARABIC_FONT_SIZE ,
+			data = 24.0f
+								   )
+	sharedPreferences.saveDataFloat(
+			customkey = AppConstants.TRANSLATION_FONT_SIZE ,
+			data = 16.0f
+								   )
+
 
 	Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: $number $isSurah $language")
 
