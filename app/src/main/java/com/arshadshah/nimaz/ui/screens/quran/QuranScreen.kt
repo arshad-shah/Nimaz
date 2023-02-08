@@ -20,6 +20,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
 import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
+import com.arshadshah.nimaz.ui.screens.learning.TeacherView
 
 @Composable
 fun QuranScreen(
@@ -30,7 +31,7 @@ fun QuranScreen(
 	val viewModel = QuranViewModel(LocalContext.current)
 	//save the state of the tab
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
-	val titles = listOf("Sura" , "Juz")
+	val titles = listOf("Sura" , "Juz", "My Quran")
 	Column(modifier = Modifier.padding(paddingValues)) {
 
 		TabRow(selectedTabIndex = selectedTab) {
@@ -77,6 +78,10 @@ fun QuranScreen(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = juzListState ,
 					   )
+			}
+			2 ->
+			{
+				TeacherView()
 			}
 		}
 	}

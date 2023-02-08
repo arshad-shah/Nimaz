@@ -34,6 +34,7 @@ fun PrayerTimesList(
 			PrayerTimesListUI(
 					prayerTimesMap = mapOf(
 							"FAJR" to LocalDateTime.now() ,
+							"SUNRISE" to LocalDateTime.now(),
 							"DHUHR" to LocalDateTime.now() ,
 							"ASR" to LocalDateTime.now() ,
 							"MAGHRIB" to LocalDateTime.now() ,

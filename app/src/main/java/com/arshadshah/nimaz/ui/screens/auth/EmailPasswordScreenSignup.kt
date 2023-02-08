@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.ui.screens.auth
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +38,14 @@ fun EmailPasswordScreenSignup(paddingValues : PaddingValues , navController : Na
 	val context = LocalContext.current
 
 	val email = remember { mutableStateOf("") }
+	val role = listOf("Student" , "Teacher")
+	val selectedRole = remember { mutableStateOf(0) }
+	val menuExpanded = remember { mutableStateOf(false) }
+
+	//name
+	val name = remember { mutableStateOf("") }
+
+
 	val password = remember { mutableStateOf("") }
 	//confirm password
 	val confirmPassword = remember { mutableStateOf("") }
@@ -82,7 +94,7 @@ fun EmailPasswordScreenSignup(paddingValues : PaddingValues , navController : Na
 
 	//a function to signup and finish activity
 	val signup = {
-		viewmodel.createAccount(email.value, password.value)
+		viewmodel.createAccount(email.value, password.value, name.value, role[selectedRole.value])
 		navController.navigateUp()
 	}
 
@@ -92,6 +104,35 @@ fun EmailPasswordScreenSignup(paddingValues : PaddingValues , navController : Na
 		.padding(8.dp)
 		.fillMaxSize() ,
 		   horizontalAlignment = Alignment.CenterHorizontally) {
+		Card(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(top = 16.dp)
+					.clickable { menuExpanded.value = !menuExpanded.value } ,
+			) {
+			Row(modifier = Modifier
+				.fillMaxWidth()
+				.padding(16.dp) ,
+				horizontalArrangement = Arrangement.SpaceBetween ,
+				verticalAlignment = Alignment.CenterVertically) {
+				Text(text = role[selectedRole.value] )
+				Icon(imageVector = Icons.Default.ArrowDropDown , contentDescription = "Role" )
+			}
+		}
+		//dropdown menu for role
+		DropdownMenu(
+				modifier = Modifier
+					.padding(top = 16.dp) ,
+				expanded = menuExpanded.value ,
+				onDismissRequest = { } ,
+					) {
+			role.forEachIndexed { index , role ->
+				DropdownMenuItem(onClick = {
+					selectedRole.value = index
+					menuExpanded.value = false
+				}, text = { Text(text = role) })
+			}
+		}
 		EmailTextField(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -100,7 +141,18 @@ fun EmailPasswordScreenSignup(paddingValues : PaddingValues , navController : Na
 				onEmailDone = { passwordFocusRequester.requestFocus() } ,
 				isError = errorMessage.value.isNotEmpty()
 					  )
-
+		
+		//outlined text field for name
+		OutlinedTextField(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(top = 16.dp) ,
+				value = name.value ,
+				onValueChange = { name.value = it } ,
+				label = { Text(text = "Name" ) } ,
+				singleLine = true ,
+				leadingIcon = { Icon(imageVector = Icons.Default.Person , contentDescription = "Name") } ,
+						 )
 		PasswordTextField(
 				label = "Password" ,
 				password = password.value,

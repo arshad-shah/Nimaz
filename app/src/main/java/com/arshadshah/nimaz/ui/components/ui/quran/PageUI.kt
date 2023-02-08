@@ -1,10 +1,7 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +42,7 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 			modifier = Modifier
 				.padding(paddingValues)
 				.padding(4.dp)
+				.fillMaxSize()
 		  ) {
 		AyaList.forEach { aya ->
 			val isNotBismillah =
@@ -219,7 +217,7 @@ fun PageUIPreview()
 			   )
 			   )
 	NimazTheme(darkTheme = true) {
-		Page(ayaList , PaddingValues() , true)
+		Page(ayaList , PaddingValues() , false)
 	}
 
 }

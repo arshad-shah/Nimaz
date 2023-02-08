@@ -6,10 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
@@ -23,14 +20,7 @@ fun PrayerTimesScreen(
 					 )
 {
 	val context = LocalContext.current
-	val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-	lifecycle.addObserver(LifecycleEventObserver { _ , event ->
-		if (event == Lifecycle.Event.ON_RESUME)
-		{
-			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
-		}
-	})
 
 	// Collecting the state of the view model
 	val state by remember { viewModel.prayerTimesState }.collectAsState()

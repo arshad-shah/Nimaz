@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
@@ -99,28 +101,42 @@ fun SettingsScreen(
 
 		when(isLoggedIn){
 			is SettingsViewModel.LoginState.Success -> {
-				Profile(user, viewModel)
+				Profile(user) {
+					viewModel.logout()
+					Toasty.success(context , "Logged out successfully" , Toast.LENGTH_SHORT , true)
+						.show()
+				}
 			}
 			is SettingsViewModel.LoginState.Error -> {
-				ElevatedCard {
-					ElevatedButton(onClick ={onNavigateToSignin()}) {
-						Row {
-							Icon(
-									imageVector = FeatherIcons.LogIn ,
-									contentDescription = "Login"
-								)
-							Text(text = "Login")
-						}
-					}
+				SettingsGroup(
+						modifier = Modifier
+							.fillMaxWidth() ,
+						title = { Text(text = "Account") }) {
+					ElevatedCard(
+							modifier = Modifier
+								.padding(8.dp)
+								.fillMaxWidth()
+								) {
+						Row(
+								modifier = Modifier
+									.padding(16.dp)
+									.fillMaxWidth() ,
+								horizontalArrangement = Arrangement.SpaceBetween ,
+								verticalAlignment = Alignment.CenterVertically ,
+						   ) {
+							TextButton(
+									border = BorderStroke(1.dp , MaterialTheme.colorScheme.primary) ,
+									shape = MaterialTheme.shapes.medium ,
+									onClick = { onNavigateToSignin() }) {
+								Text(text = "Login" , style = MaterialTheme.typography.titleLarge)
+							}
+							Text(text = "or" , style = MaterialTheme.typography.headlineMedium)
 
-					ElevatedCard {
-						ElevatedButton(onClick ={onNavigateToSignup()}) {
-							Row {
-								Icon(
-										imageVector = FeatherIcons.UserPlus ,
-										contentDescription = "Signup"
-									)
-								Text(text = "Signup")
+							TextButton(
+									border = BorderStroke(1.dp , MaterialTheme.colorScheme.primary) ,
+									shape = MaterialTheme.shapes.medium ,
+									onClick = { onNavigateToSignup() }) {
+								Text(text = "Signup" , style = MaterialTheme.typography.titleLarge)
 							}
 						}
 					}

@@ -11,14 +11,16 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.utils.auth.AccountServiceImpl
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.LogOut
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Profile(user : State<SettingsViewModel.UserState> , viewModel : SettingsViewModel)
+fun Profile(
+	user : State<SettingsViewModel.UserState> ,
+	logout : () -> Unit
+		   )
 {
 	val context = LocalContext.current
 
@@ -36,7 +38,7 @@ fun Profile(user : State<SettingsViewModel.UserState> , viewModel : SettingsView
 						.padding(8.dp)
 						.shadow(8.dp) ,
 					onClick = {
-						viewModel.logout()
+						logout()
 					}
 						) {
 				Row(
@@ -46,11 +48,11 @@ fun Profile(user : State<SettingsViewModel.UserState> , viewModel : SettingsView
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
-					Text(text = currentUser.data?.email !!)
+					Text(text = currentUser.data?.email!!, style = MaterialTheme.typography.titleMedium)
 					//logout icon button
 					IconButton(
 							onClick = {
-								viewModel.logout()
+								logout()
 								Toasty.success(context , "Logged out successfully" , Toast.LENGTH_SHORT , true).show()
 							}
 							  ) {

@@ -2,10 +2,7 @@ package com.arshadshah.nimaz.ui.screens.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -29,6 +26,8 @@ fun EmailPasswordScreenSignin(
 							 )
 {
 	val viewmodel = AuthViewModel()
+	val loginUiState = remember{ viewmodel.loginUiState }.collectAsState()
+
 	val email = remember { mutableStateOf("") }
 	val password = remember { mutableStateOf("") }
 
@@ -48,12 +47,6 @@ fun EmailPasswordScreenSignin(
 	val passwordFocusRequester = remember { FocusRequester() }
 	val onEmailDone : () -> Unit = {
 		passwordFocusRequester.requestFocus()
-	}
-
-	//function to call the login in viewmodel and finish the activity
-	val onLogin : () -> Unit = {
-		viewmodel.login(email.value , password.value)
-		navController.navigateUp()
 	}
 
 	//a form to sign in a user with error handling
@@ -81,7 +74,7 @@ fun EmailPasswordScreenSignin(
 				hidePassword =  hidePassword.value ,
 				onPasswordVisibilityChanged = { onPasswordVisibilityChanged() } ,
 				passwordFocusRequester = passwordFocusRequester ,
-				onPasswordDone = { onLogin() } ,
+				onPasswordDone = { viewmodel.login(email.value , password.value) } ,
 				error = passwordErrorMessage.value.isNotEmpty() ,
 				signup = false ,
 						 )
@@ -91,7 +84,7 @@ fun EmailPasswordScreenSignin(
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(top = 16.dp) ,
-				horizontalArrangement = Arrangement.End ,
+				horizontalArrangement = Arrangement.Start ,
 			) {
 			TextButton(
 					onClick = { onNavigateToPasswordReset() } ,
@@ -107,8 +100,6 @@ fun EmailPasswordScreenSignin(
 		   message = errorMessage.value + emailErrorMessage.value + passwordErrorMessage.value ,
 				  )
 		}
-
-
 		Button(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -118,7 +109,8 @@ fun EmailPasswordScreenSignin(
 				onClick = {
 					//if the email and password are not empty then sign in the user
 					if (email.value.isNotEmpty() && password.value.isNotEmpty()){
-						onLogin()
+						viewmodel.login(email.value , password.value)
+						navController.navigateUp()
 						//finish the activity
 					}else if (email.value.isEmpty()){
 						//if the email or password is empty then show an error message
@@ -128,19 +120,26 @@ fun EmailPasswordScreenSignin(
 					}else{
 						errorMessage.value = "Email and password cannot be empty"
 					}
-		}
+				}
 			  ) {
-			Text("Sign In")
+			Row(
+					modifier = Modifier.fillMaxSize() ,
+					horizontalArrangement = Arrangement.Center ,
+					verticalAlignment = Alignment.CenterVertically ,
+			   ) {
+				//else show the sign in text
+				Text(text = "Sign In" , style = MaterialTheme.typography.titleMedium)
+			}
 		}
 
 		Row(
 				modifier = Modifier
 					.padding(16.dp)
 					.fillMaxWidth(),
-				horizontalArrangement = Arrangement.SpaceBetween ,
+				horizontalArrangement = Arrangement.Start ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
-			Text(text = "Don't have an account? ")
+			Text(text = "Don't have an account? ", style = MaterialTheme.typography.titleMedium)
 			TextButton(
 					shape = MaterialTheme.shapes.medium ,
 					onClick = {

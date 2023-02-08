@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
@@ -33,7 +32,7 @@ fun LocationTimeContainer(
 		is PrayerTimesViewModel.LocationState.Loading ->
 		{
 			ContainerUI(
-					currentPrayerNameSentenceCase = "" ,
+					currentPrayerNameSentenceCase = "Fajr" ,
 					isLoading = true ,
 					location = "Loading"
 					   )
@@ -71,7 +70,6 @@ fun ContainerUI(
 	location : String ,
 			   )
 {
-	val context = LocalContext.current
 	ElevatedCard(
 			modifier = Modifier
 				.padding(vertical = 8.dp , horizontal = 0.dp)
