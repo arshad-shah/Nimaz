@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BearingAndLocationContainerUI(location : String , bearing : String)
+fun BearingAndLocationContainerUI(location : String , heading : String)
 {
 	ElevatedCard(
 			modifier = Modifier
@@ -46,7 +46,7 @@ fun BearingAndLocationContainerUI(location : String , bearing : String)
 					modifier = Modifier
 						.weight(0.5f)
 						.padding(8.dp) ,
-					heading = "Bearing°" , text = bearing
+					heading = "Heading" , text = heading
 					  )
 		}
 	}
@@ -56,5 +56,5 @@ fun BearingAndLocationContainerUI(location : String , bearing : String)
 @Composable
 fun BearingAndLocationContainerUIPreview()
 {
-	BearingAndLocationContainerUI(location = "Location" , bearing = "Bearing")
+	BearingAndLocationContainerUI(location = "Location" , heading = "Heading")
 }
