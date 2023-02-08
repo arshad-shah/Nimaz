@@ -1,11 +1,13 @@
 package com.arshadshah.nimaz.ui.components.bLogic.compass
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.channels.Channel
 
 class SensorDataManager(context : Context) : SensorEventListener
@@ -17,17 +19,28 @@ class SensorDataManager(context : Context) : SensorEventListener
 		context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 	}
 
-	fun init()
+	fun init(context : Context)
 	{
-		Log.d("SensorDataManager" , "init")
-		accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-		magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+		val packageManager = context.packageManager
+		//check if device has sensors
+		if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && packageManager.hasSystemFeature(
+					PackageManager.FEATURE_SENSOR_COMPASS
+																														   )
+		)
+		{
+			Log.d("SensorDataManager" , "No sensors")
+			Toasty.error(context , "No sensors found on device" , Toasty.LENGTH_LONG).show()
+		} else
+		{
+			Log.d("SensorDataManager" , "init")
+			accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+			magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
-		sensorManager.registerListener(this , accelerometer , SensorManager.SENSOR_DELAY_UI)
-		sensorManager.registerListener(this , magnetometer , SensorManager.SENSOR_DELAY_UI)
+			sensorManager.registerListener(this , accelerometer , SensorManager.SENSOR_DELAY_UI)
+			sensorManager.registerListener(this , magnetometer , SensorManager.SENSOR_DELAY_UI)
+		}
 	}
 
-	private var currentDegree = 0.0f
 	private var lastAccelerometer = FloatArray(3)
 	private var lastMagnetometer = FloatArray(3)
 	private var lastAccelerometerSet = false
@@ -77,6 +90,7 @@ class SensorDataManager(context : Context) : SensorEventListener
 
 	override fun onAccuracyChanged(sensor : Sensor? , accuracy : Int)
 	{
+
 		Log.d("SensorDataManager" , "onAccuracyChanged")
 		Log.d("SensorDataManager" , "sensor: $sensor")
 		Log.d("SensorDataManager" , "accuracy: $accuracy")
