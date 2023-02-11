@@ -33,6 +33,7 @@ object PrayerTimesRepository
 		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 		val fajrAngle : String = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 		val ishaAngle : String = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
+		val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
 		val calculationMethod : String =
 			sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
 		val madhab : String = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
@@ -54,6 +55,7 @@ object PrayerTimesRepository
 		mapOfParams["date"] = LocalDateTime.now().toString()
 		mapOfParams["fajrAngle"] = fajrAngle
 		mapOfParams["ishaAngle"] = ishaAngle
+		mapOfParams["ishaInterval"] = ishaInterval
 		mapOfParams["method"] = calculationMethod
 		mapOfParams["madhab"] = madhab
 		mapOfParams["highLatitudeRule"] = highLatitudeRule
@@ -142,25 +144,40 @@ object PrayerTimesRepository
 		}
 	}
 
+
+	suspend fun updatePrayerTimes(mapOfParameters : Map<String , String>) : ApiResponse<PrayerTimes>
+	{
+		val dataStore = LocalDataStore.getDataStore()
+		val prayerTimesResponse = NimazServicesImpl.getPrayerTimes(mapOfParameters)
+		val prayerTimes = mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse)
+		runBlocking {
+			//delete all the prayer times from the local database
+			dataStore.deleteAllPrayerTimes()
+			//insert the prayer times into the local database
+			dataStore.saveAllPrayerTimes(prayerTimes)
+		}
+		return ApiResponse.Success(prayerTimes)
+	}
+
 	//a function to map a prayer times response to a prayer times object
 	private fun mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse : PrayerTimeResponse) : PrayerTimes
 	{
 		return PrayerTimes(
-			timestamp = LocalDateTime.now() ,
-			LocalDateTime.parse(prayerTimesResponse.fajr) ,
-			LocalDateTime.parse(prayerTimesResponse.sunrise) ,
-			LocalDateTime.parse(prayerTimesResponse.dhuhr) ,
-			LocalDateTime.parse(prayerTimesResponse.asr) ,
-			LocalDateTime.parse(prayerTimesResponse.maghrib) ,
-			LocalDateTime.parse(prayerTimesResponse.isha) ,
-			Prayertime(
-				name = prayerTimesResponse.nextPrayer.name ,
-				time = LocalDateTime.parse(prayerTimesResponse.nextPrayer.time)
-			),
-			Prayertime(
-				name = prayerTimesResponse.currentPrayer.name ,
-				time = LocalDateTime.parse(prayerTimesResponse.currentPrayer.time)
-			)
-		)
+				timestamp = LocalDateTime.now() ,
+				LocalDateTime.parse(prayerTimesResponse.fajr) ,
+				LocalDateTime.parse(prayerTimesResponse.sunrise) ,
+				LocalDateTime.parse(prayerTimesResponse.dhuhr) ,
+				LocalDateTime.parse(prayerTimesResponse.asr) ,
+				LocalDateTime.parse(prayerTimesResponse.maghrib) ,
+				LocalDateTime.parse(prayerTimesResponse.isha) ,
+				Prayertime(
+						name = prayerTimesResponse.nextPrayer.name ,
+						time = LocalDateTime.parse(prayerTimesResponse.nextPrayer.time)
+						  ) ,
+				Prayertime(
+						name = prayerTimesResponse.currentPrayer.name ,
+						time = LocalDateTime.parse(prayerTimesResponse.currentPrayer.time)
+						  )
+						  )
 	}
 }

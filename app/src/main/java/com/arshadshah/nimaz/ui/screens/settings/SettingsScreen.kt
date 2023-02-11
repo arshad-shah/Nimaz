@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.*
@@ -47,6 +48,7 @@ fun SettingsScreen(
 				  )
 {
 	val context = LocalContext.current
+	val prayerTimesViewModel = PrayerTimesViewModel()
 	val sharedPreferences = PrivateSharedPreferences(context)
 	//values for coordinates that are mutable
 	val longitude =
@@ -64,13 +66,6 @@ fun SettingsScreen(
 
 	val cityname =
 		rememberPreferenceStringSettingState(AppConstants.LOCATION_INPUT , "Abbeyleix")
-
-
-	//if any of the settings are changed, set the flag to true so that the prayer times can be updated
-	if (cityname.value != sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix"))
-	{
-		sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES , true)
-	}
 
 	//a listner callback that is called when the location is found
 	val locationFoundCallback = { latitudeValue : Double , longitudeValue : Double ->
@@ -132,10 +127,11 @@ fun SettingsScreen(
 						} ,
 						onCheckedChange = {
 							storage.value = it
-							sharedPreferences.saveDataBoolean(
-									AppConstants.RECALCULATE_PRAYER_TIMES ,
-									true
-															 )
+							prayerTimesViewModel.handleEvent(context,PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+									AppConstants.getDefaultParametersForMethod(
+											sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
+																			  )
+																															 ))
 						}
 							  )
 			}
@@ -147,7 +143,7 @@ fun SettingsScreen(
 							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							) {
-					ManualLocationInput(locationFoundCallbackManual)
+					ManualLocationInput(locationFoundCallbackManual, prayerTimesViewModel::handleEvent)
 				}
 				CoordinatesView(
 						longitude = longitude ,
