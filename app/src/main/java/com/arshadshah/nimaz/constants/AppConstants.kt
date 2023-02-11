@@ -226,21 +226,6 @@ object AppConstants
 		val mapOfDefaultParameters = mutableMapOf<String , String>()
 		when(method)
 		{
-			//		mapOfParams["latitude"] = latitude.toString()
-			//		mapOfParams["longitude"] = longitude.toString()
-			//		mapOfParams["date"] = LocalDateTime.now().toString()
-			//		mapOfParams["fajrAngle"] = fajrAngleState.value
-			//		mapOfParams["ishaAngle"] = ishaAngleState.value
-			//		mapOfParams["ishaInterval"] = ishaIntervalState.value
-			//		mapOfParams["method"] = calculationMethodState.value
-			//		mapOfParams["madhab"] = madhabState.value
-			//		mapOfParams["highLatitudeRule"] = highLatitudeRuleState.value
-			//		mapOfParams["fajrAdjustment"] = fajrAdjustment.value
-			//		mapOfParams["sunriseAdjustment"] = sunriseAdjustment.value
-			//		mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment.value
-			//		mapOfParams["asrAdjustment"] = asrAdjustment.value
-			//		mapOfParams["maghribAdjustment"] = maghribAdjustment.value
-			//		mapOfParams["ishaAdjustment"] = ishaAdjustment.value
 			"MWL" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
