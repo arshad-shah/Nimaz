@@ -11,25 +11,38 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
+import com.arshadshah.nimaz.constants.AppConstants.getDefaultParametersForMethod
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
+import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsNumberPickerDialog
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import java.time.LocalDateTime
 
 @Composable
 fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 {
-	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
+	val context = LocalContext.current
+	val sharedPreferences = PrivateSharedPreferences(context)
 
 	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
+	val defaultValuesForMethod = remember {
+		mutableStateOf(getDefaultParametersForMethod("IRELAND"))
+	}
 
 	val calculationMethodState =
 		rememberPreferenceStringSettingState(
@@ -45,9 +58,13 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			sharedPreferences
 																	)
 	val fajrAngleState =
-		rememberPreferenceStringSettingState(AppConstants.FAJR_ANGLE , "18" , sharedPreferences)
+		rememberPreferenceStringSettingState(FAJR_ANGLE , "18" , sharedPreferences)
 	val ishaAngleState =
 		rememberPreferenceStringSettingState(AppConstants.ISHA_ANGLE , "18" , sharedPreferences)
+
+	//isha interval
+	val ishaIntervalState =
+		rememberPreferenceStringSettingState(AppConstants.ISHA_INTERVAL , "0" , sharedPreferences)
 
 	val fajrAdjustment =
 		rememberPreferenceStringSettingState(AppConstants.FAJR_ADJUSTMENT , "0" , sharedPreferences)
@@ -71,8 +88,39 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val ishaAdjustment =
 		rememberPreferenceStringSettingState(AppConstants.ISHA_ADJUSTMENT , "0" , sharedPreferences)
 
-	//call this : sharedPreferences.saveDataBoolean("recalculate_prayer_times" , true)
-	//whenever a setting is changed to recalculate the prayer times
+
+	val ishaaAngleVisible = remember {
+		mutableStateOf(true)
+	}
+
+	//if the calculation method is MAKKAH, QATAR, or GULF then the Isha angle is not visible
+	if (calculationMethodState.value == "MAKKAH" || calculationMethodState.value == "QATAR" || calculationMethodState.value == "GULF")
+	{
+		ishaAngleState.value = "0"
+		ishaaAngleVisible.value = false
+	}
+	else
+	{
+		ishaaAngleVisible.value = true
+	}
+
+	//whenever the calculation method is changed, the default values for that method are loaded and the values are set to the state
+	LaunchedEffect(calculationMethodState.value)
+	{
+		defaultValuesForMethod.value = getDefaultParametersForMethod(calculationMethodState.value)
+		fajrAngleState.value = defaultValuesForMethod.value["fajrAngle"].toString()
+		ishaAngleState.value = defaultValuesForMethod.value["ishaAngle"].toString()
+		madhabState.value = defaultValuesForMethod.value["madhab"].toString()
+		ishaIntervalState.value = defaultValuesForMethod.value["ishaInterval"].toString()
+		highLatitudeRuleState.value = defaultValuesForMethod.value["highLatitudeRule"].toString()
+		fajrAdjustment.value = defaultValuesForMethod.value["fajrAdjustment"].toString()
+		sunriseAdjustment.value = defaultValuesForMethod.value["sunriseAdjustment"].toString()
+		dhuhrAdjustment.value = defaultValuesForMethod.value["dhuhrAdjustment"].toString()
+		asrAdjustment.value = defaultValuesForMethod.value["asrAdjustment"].toString()
+		maghribAdjustment.value = defaultValuesForMethod.value["maghribAdjustment"].toString()
+		ishaAdjustment.value = defaultValuesForMethod.value["ishaAdjustment"].toString()
+	}
+
 	LaunchedEffect(
 			calculationMethodState.value ,
 			madhabState.value ,
@@ -87,10 +135,29 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			ishaAdjustment.value
 				  )
 	{
-		sharedPreferences.saveDataBoolean(AppConstants.RECALCULATE_PRAYER_TIMES , true)
+		val prayerTimesViewModel = PrayerTimesViewModel()
+		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+		//then pass it to the UPDATE_PRAYERTIMES event
+		val mapOfParams = mutableMapOf<String , String>()
+		mapOfParams["latitude"] = latitude.toString()
+		mapOfParams["longitude"] = longitude.toString()
+		mapOfParams["date"] = LocalDateTime.now().toString()
+		mapOfParams["fajrAngle"] = fajrAngleState.value
+		mapOfParams["ishaAngle"] = ishaAngleState.value
+		mapOfParams["ishaInterval"] = ishaIntervalState.value
+		mapOfParams["method"] = calculationMethodState.value
+		mapOfParams["madhab"] = madhabState.value
+		mapOfParams["highLatitudeRule"] = highLatitudeRuleState.value
+		mapOfParams["fajrAdjustment"] = fajrAdjustment.value
+		mapOfParams["sunriseAdjustment"] = sunriseAdjustment.value
+		mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment.value
+		mapOfParams["asrAdjustment"] = asrAdjustment.value
+		mapOfParams["maghribAdjustment"] = maghribAdjustment.value
+		mapOfParams["ishaAdjustment"] = ishaAdjustment.value
+		//then pass it to the UPDATE_PRAYERTIMES event
+		prayerTimesViewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(mapOfParams))
 	}
-
-
 
 	Column(
 			modifier = Modifier
@@ -189,25 +256,41 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						valueState = fajrAngleState ,
 										  )
 			}
-			ElevatedCard(
-					modifier = Modifier
-						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-						.fillMaxWidth()
-						) {
-				SettingsNumberPickerDialog(
-						title = {
-							Text(text = "Isha Angle")
-						} ,
-						subtitle = {
-							Text(text = ishaAngleState.value)
-						} ,
-						description = {
-							Text(text = "The angle of the sun at which the Isha prayer begins")
-						} ,
-						items = (0 .. 50).map { (it - 25) } ,
-						valueState = ishaAngleState ,
-										  )
+			if(ishaaAngleVisible.value){
+				ElevatedCard(
+						modifier = Modifier
+							.padding(8.dp)
+							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+							.fillMaxWidth()
+							) {
+					SettingsNumberPickerDialog(
+							title = {
+								Text(text = "Isha Angle")
+							} ,
+							subtitle = {
+								Text(text = ishaAngleState.value)
+							} ,
+							description = {
+								Text(text = "The angle of the sun at which the Isha prayer begins")
+							} ,
+							items = (0 .. 50).map { (it - 25) } ,
+							valueState = ishaAngleState ,
+											  )
+				}
+			}else{
+				ElevatedCard(
+						modifier = Modifier
+							.padding(8.dp)
+							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+							.fillMaxWidth()
+							) {
+					SettingsMenuLink(
+							modifier = Modifier.padding(8.dp) ,
+							title = {Text(text = "Isha Interval of ${ishaIntervalState.value} Minutes")} ,
+							subtitle = {Text(text = "The interval of time after Maghrib at which the Isha prayer begins")} ,
+							onClick = { } ,
+									)
+				}
 			}
 		}
 
@@ -340,5 +423,13 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					}
 				}
 					 )
+	}
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+	NimazTheme {
+		PrayerTimesCustomizations(paddingValues = PaddingValues(16.dp))
 	}
 }
