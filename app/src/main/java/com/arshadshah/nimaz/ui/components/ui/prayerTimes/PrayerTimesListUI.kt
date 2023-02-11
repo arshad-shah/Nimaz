@@ -64,6 +64,7 @@ fun PrayerTimesListUI(
 }
 
 //the row for the prayer times
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrayerTimesRow(
 	prayerName : String ,
@@ -123,7 +124,7 @@ fun PrayerTimesRow(
 					text = " -${countDownTime.hours} : ${countDownTime.minutes} : ${countDownTime.seconds}" ,
 					textAlign = TextAlign.Center ,
 					style = MaterialTheme.typography.titleSmall
-				)
+											   )
 		}
 		Text(
 				text = prayerTime !!.format(formatter) ,

@@ -1,14 +1,16 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
 import android.content.Context
-import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.models.Prayertime
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
+import com.arshadshah.nimaz.utils.network.PrayerTimeResponse
 import io.ktor.client.plugins.*
+import kotlinx.coroutines.runBlocking
 import java.io.IOException
 import java.time.LocalDateTime
 
@@ -25,6 +27,7 @@ object PrayerTimesRepository
 	suspend fun getPrayerTimes(context : Context) : ApiResponse<PrayerTimes>
 	{
 
+		val dataStore = LocalDataStore.getDataStore()
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
@@ -63,27 +66,72 @@ object PrayerTimesRepository
 
 		return try
 		{
-			val response = NimazServicesImpl.getPrayerTimes(mapOfParams)
+			val prayerTimesAvailable = dataStore.countPrayerTimes() > 0
+			if(prayerTimesAvailable){
+				val prayerTimesLocal = dataStore.getAllPrayerTimes()
+				//check if the next prayer time is in the future
+				val nextPrayerTime = prayerTimesLocal.nextPrayer?.time
+				val currentTime = prayerTimesLocal.currentPrayer?.time
+				//if it is in the future return the prayer times from the database
+				if(nextPrayerTime?.isAfter(LocalDateTime.now()) == true && currentTime?.isBefore(LocalDateTime.now()) == true){
+					ApiResponse.Success(dataStore.getAllPrayerTimes())
+				}else{
+					//map the Prayertime object to a map of names
+					val prayerTimesToMapped = dataStore.getAllPrayerTimes()
+					val mapConverted = mapOf(
+							"FAJR" to prayerTimesToMapped.fajr,
+							"SUNRISE" to prayerTimesToMapped.sunrise,
+							"DHUHR" to prayerTimesToMapped.dhuhr,
+							"ASR" to prayerTimesToMapped.asr,
+							"MAGHRIB" to prayerTimesToMapped.maghrib,
+							"ISHA" to prayerTimesToMapped.isha
+											)
+					val nextPrayerTimeName = prayerTimesToMapped.nextPrayer?.name
 
-			val prayerTimes = PrayerTimes(
-					timestamp = LocalDateTime.now() ,
-					fajr = LocalDateTime.parse(response.fajr) ,
-					sunrise = LocalDateTime.parse(response.sunrise) ,
-					dhuhr = LocalDateTime.parse(response.dhuhr) ,
-					asr = LocalDateTime.parse(response.asr) ,
-					maghrib = LocalDateTime.parse(response.maghrib) ,
-					isha = LocalDateTime.parse(response.isha) ,
-					nextPrayer = Prayertime(
-							name = response.nextPrayer.name ,
-							time = LocalDateTime.parse(response.nextPrayer.time)
-										   ) ,
-					currentPrayer = Prayertime(
-							name = response.currentPrayer.name ,
-							time = LocalDateTime.parse(response.currentPrayer.time)
-											  )
-										 )
-			Log.d("PrayerTimesRepository" , "getPrayerTimes: $prayerTimes")
-			ApiResponse.Success(prayerTimes)
+					//find out the next prayer time from the map
+					//for example if the nextPrayerTimeName is DHUHR we return the time for ASR as the next prayer time from the map
+					//we can use the index of the nextPrayerTimeName to get the next prayer time
+					val nextPrayerTimeIndex = mapConverted.keys.indexOf(nextPrayerTimeName)
+					val nextPrayerTimeFromMap = mapConverted.values.elementAt(nextPrayerTimeIndex + 1)
+					val nextPrayerNameFromMap = mapConverted.keys.elementAt(nextPrayerTimeIndex + 1)
+
+
+					val newNextPrayerTime = Prayertime(
+							name = nextPrayerNameFromMap,
+							time = nextPrayerTimeFromMap
+													  )
+
+					//find out the new current prayer time from the map
+					//for example if the nextPrayerTimeName is DHUHR we return the time for DHUHR as the current prayer time from the map
+					//we can use the index of the nextPrayerTimeName to get the current prayer time
+					val currentPrayerTimeIndex = mapConverted.keys.indexOf(nextPrayerTimeName)
+					val currentPrayerTimeFromMap = mapConverted.values.elementAt(currentPrayerTimeIndex)
+					val currentPrayerNameFromMap = mapConverted.keys.elementAt(currentPrayerTimeIndex)
+
+					val newCurrentPrayerTime = Prayertime(
+							name = currentPrayerNameFromMap,
+							time = currentPrayerTimeFromMap
+														  )
+
+					//delete all the prayer times from the local database
+					dataStore.deleteAllPrayerTimes()
+					val newPrayerTimesObject = prayerTimesToMapped.copy(nextPrayer = newNextPrayerTime, currentPrayer = newCurrentPrayerTime)
+					//insert the prayer times into the local database
+					dataStore.saveAllPrayerTimes(newPrayerTimesObject)
+
+					ApiResponse.Success(newPrayerTimesObject)
+				}
+			}else{
+				val prayerTimesResponse = NimazServicesImpl.getPrayerTimes(mapOfParams)
+				val prayerTimes = mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse)
+				runBlocking {
+					//delete all the prayer times from the local database
+					dataStore.deleteAllPrayerTimes()
+					//insert the prayer times into the local database
+					dataStore.saveAllPrayerTimes(prayerTimes)
+				}
+				ApiResponse.Success(prayerTimes)
+			}
 		} catch (e : ClientRequestException)
 		{
 			ApiResponse.Error(e.message , null)
@@ -92,5 +140,27 @@ object PrayerTimesRepository
 		{
 			ApiResponse.Error(e.message !! , null)
 		}
+	}
+
+	//a function to map a prayer times response to a prayer times object
+	private fun mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse : PrayerTimeResponse) : PrayerTimes
+	{
+		return PrayerTimes(
+			timestamp = LocalDateTime.now() ,
+			LocalDateTime.parse(prayerTimesResponse.fajr) ,
+			LocalDateTime.parse(prayerTimesResponse.sunrise) ,
+			LocalDateTime.parse(prayerTimesResponse.dhuhr) ,
+			LocalDateTime.parse(prayerTimesResponse.asr) ,
+			LocalDateTime.parse(prayerTimesResponse.maghrib) ,
+			LocalDateTime.parse(prayerTimesResponse.isha) ,
+			Prayertime(
+				name = prayerTimesResponse.nextPrayer.name ,
+				time = LocalDateTime.parse(prayerTimesResponse.nextPrayer.time)
+			),
+			Prayertime(
+				name = prayerTimesResponse.currentPrayer.name ,
+				time = LocalDateTime.parse(prayerTimesResponse.currentPrayer.time)
+			)
+		)
 	}
 }

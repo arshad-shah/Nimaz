@@ -1,9 +1,6 @@
 package com.arshadshah.nimaz.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 
 
@@ -11,7 +8,8 @@ import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 interface PrayerTimesDao
 {
 
-	@Query("SELECT * FROM prayer_times WHERE timeStamp = (SELECT MAX(timeStamp) FROM prayer_times)")
+	//get prayers with most recent timestamp
+	@Query("SELECT * FROM prayer_times WHERE timestamp = (SELECT MAX(timestamp) FROM prayer_times)")
 	suspend fun getPrayerTimes() : LocalPrayerTimes
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
