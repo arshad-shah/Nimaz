@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -32,7 +33,7 @@ fun IntroPage1()
 
 	Column(modifier = Modifier.fillMaxSize()) {
 		HorizontalPager(
-				modifier = Modifier.weight(10f) ,
+				modifier = Modifier.weight(10f).testTag("introPager") ,
 				count = pages.size ,
 				state = pagerState ,
 				verticalAlignment = Alignment.Top
@@ -43,7 +44,7 @@ fun IntroPage1()
 				pagerState = pagerState ,
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
-					.padding(20.dp) ,
+					.padding(20.dp).testTag("introPagerIndicator") ,
 				activeColor = MaterialTheme.colorScheme.secondary ,
 				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f) ,
 				indicatorWidth = 12.dp ,
