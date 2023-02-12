@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class JuzResponse(
-	@SerialName("juznumberdata")
+	@SerialName("juzNumber")
 	val number : Int ,
 	@SerialName("name")
 	val name : String ,

@@ -57,6 +57,8 @@ class PrayerTimesViewModel : ViewModel()
 
 		class Start(val timeToNextPrayer : Long) : PrayerTimesEvent()
 		object RELOAD : PrayerTimesEvent()
+		//get updated prayertimes if parameters change in settings
+		class UPDATE_PRAYERTIMES(val mapOfParameters: Map<String, String>) : PrayerTimesEvent()
 	}
 
 	//function to handle the timer event
@@ -74,6 +76,15 @@ class PrayerTimesViewModel : ViewModel()
 			{
 				reload(context)
 			}
+			//event to update the prayer times
+			is PrayerTimesEvent.UPDATE_PRAYERTIMES ->
+			{
+				updatePrayerTimes(event.mapOfParameters)
+			}
+
+			else ->
+			{
+			}
 		}
 	}
 
@@ -88,6 +99,33 @@ class PrayerTimesViewModel : ViewModel()
 		}
 	}
 
+	//function to update the prayer times
+	fun updatePrayerTimes(mapOfParameters : Map<String, String>)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_prayerTimesState.value = PrayerTimesState.Loading
+				val response = PrayerTimesRepository.updatePrayerTimes(mapOfParameters)
+				if (response.data != null)
+				{
+					_prayerTimesState.value = PrayerTimesState.Success(response.data)
+				} else
+				{
+					_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+				}
+
+			} catch (e : Exception)
+			{
+				Log.d(
+						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						"loadPrayerTimes: ${e.message}"
+					 )
+				_prayerTimesState.value = PrayerTimesState.Error(e.message !!)
+			}
+		}
+	}
+
 	//load prayer times again
 	fun loadPrayerTimes(context : Context)
 	{
@@ -95,78 +133,14 @@ class PrayerTimesViewModel : ViewModel()
 			try
 			{
 				_prayerTimesState.value = PrayerTimesState.Loading
-				//FIXME: this is a temporary fix to the issue of the app not loading the prayer times timer correctly
-				//it does not save the prayer times yet. it just loads them from the api
-//				val dataStore = LocalDataStore.getDataStore()
-//				val prayerTimesAvailable = dataStore.countPrayerTimes()
-//				val isSettingsUpdated = PrivateSharedPreferences(context).getDataBoolean(
-//						AppConstants.RECALCULATE_PRAYER_TIMES ,
-//						false
-//																						)
-//
-//				if (prayerTimesAvailable > 0 && !isSettingsUpdated)
-//				{
-//
-//					val localPrayerTimes = dataStore.getAllPrayerTimes()
-//					Log.d(
-//							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-//							"loadPrayerTimes: $localPrayerTimes"
-//						 )
-//					val localTimesNull = localPrayerTimes.timestamp == null
-//					//if timestamp is from today then the data is valid and we can use it
-//					val localTimesExpired =
-//						localPrayerTimes.timestamp?.toLocalDate() != LocalDate.now()
-//
-//					//check if the next prayer time has passed
-//					val nextPrayerPassed =
-//						localPrayerTimes.nextPrayer?.time?.isBefore(LocalDateTime.now())
-//
-//					if (localTimesNull ||
-//						//check if the prayer times are not from today
-//						localTimesExpired ||
-//						nextPrayerPassed == true
-//					)
-//					{
-//						val response = PrayerTimesRepository.getPrayerTimes(context)
-//						if (response.data != null)
-//						{
-//							dataStore.deleteAllPrayerTimes()
-//							dataStore.saveAllPrayerTimes(response.data)
-//							_prayerTimesState.value = PrayerTimesState.Success(response.data)
-//						} else
-//						{
-//							_prayerTimesState.value = PrayerTimesState.Error(response.message!!)
-//						}
-//					} else
-//					{
-//						_prayerTimesState.value = PrayerTimesState.Success(localPrayerTimes)
-//					}
-//
-//				} else
-//				{
-				val response = PrayerTimesRepository.getPrayerTimes(context)
-				if (response.data != null)
-				{
-//						//if recalculate_prayer_times is true then set it to false
-//						if (isSettingsUpdated)
-//						{
-//							PrivateSharedPreferences(context).saveDataBoolean(
-//									AppConstants.RECALCULATE_PRAYER_TIMES ,
-//									false
-//																			 )
-//						}
-//						Log.d(
-//								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-//								"loadPrayerTimesRemote: ${response.data}"
-//							 )
-//						dataStore.deleteAllPrayerTimes()
-//						dataStore.saveAllPrayerTimes(response.data)
-					_prayerTimesState.value = PrayerTimesState.Success(response.data)
-				} else
-				{
-					_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
-				}
-//				}
+					val response = PrayerTimesRepository.getPrayerTimes(context)
+					if (response.data != null)
+					{
+						_prayerTimesState.value = PrayerTimesState.Success(response.data)
+					} else
+					{
+						_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+					}
 
 			} catch (e : Exception)
 			{

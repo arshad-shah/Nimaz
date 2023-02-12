@@ -144,76 +144,154 @@ fun Verses(modifier : Modifier , content : @Composable () -> Unit)
 @Composable
 fun PageUIPreview()
 {
-
 	//make 10 LocalAya
 	val ayaList = ArrayList<Aya>()
 	//add the aya to the list
 	ayaList.add(
 			Aya(
+					id = 0 ,
 					0 ,
-					"بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ,
+					"بسم الله الرحمن الرحيم" ,
 					"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+					0 ,
+					0 ,
+					true ,
+					false ,
+					"note" ,
+					"audioFileLocation" ,
+					false ,
+					"sajdaType" ,
+					0 ,
+					0 ,
 					"Surah" ,
 					1 ,
-					"ENGLISH"
+					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
+					id = 0 ,
 					1 ,
-					"ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ ﴿٢﴾" ,
-					"All praise is due to Allah, Lord of the worlds." , "Surah" ,
+					"الحمد لله رب العالمين" ,
+					"All praise is due to Allah, Lord of the worlds." ,
+					0 ,
+					0 ,
+					true ,
+					false ,
+					"note" ,
+					"audioFileLocation" ,
+					false ,
+					"sajdaType" ,
+					0 ,
+					0 ,
+					"Surah" ,
 					1 ,
-					"ENGLISH"
+					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
+					id = 0 ,
 					2 ,
-					"ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾" ,
+					"الرحمن الرحيم" ,
 					"The Entirely Merciful, the Especially Merciful." ,
+					0 ,
+					0 ,
+					true ,
+					false ,
+					"note" ,
+					"audioFileLocation" ,
+					false ,
+					"sajdaType" ,
+					0 ,
+					0 ,
 					"Surah" ,
 					1 ,
-					"ENGLISH"
+					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
+					id = 0 ,
 					3 ,
-					"مَـٰلِكِ يَوْمِ ٱلدِّينِ ﴿٤﴾" ,
+					"مالك يوم الدين" ,
 					"Master of the Day of Judgment." ,
+					0 ,
+					0 ,
+					true ,
+					false ,
+					"note" ,
+					"audioFileLocation" ,
+					false ,
+					"sajdaType" ,
+					0 ,
+					0 ,
 					"Surah" ,
 					1 ,
-					"ENGLISH"
+					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
+					id = 0 ,
 					4 ,
-					"إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ﴿٥﴾" ,
-					"You alone do we worship, and You alone do we implore for help." , "Surah" ,
+					"إياك نعبد وإياك نستعين" ,
+					"You alone do we worship, and You alone do we implore for help." ,
+					0 ,
+					0 ,
+					true ,
+					false ,
+					"note" ,
+					"audioFileLocation" ,
+					false ,
+					"sajdaType" ,
+					0 ,
+					0 ,
+					"Surah" ,
 					1 ,
-					"ENGLISH"
+					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
+					id = 0 ,
 					5 ,
-					"ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ ﴿٦﴾" ,
+					"اهدنا الصراط المستقيم" ,
 					"Guide us to the straight path." ,
+					0 ,
+					0 ,
+					true ,
+					false ,
+					"note" ,
+					"audioFileLocation" ,
+					false ,
+					"sajdaType" ,
+					0 ,
+					0 ,
 					"Surah" ,
 					1 ,
-					"ENGLISH"
+					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
+					id = 0 ,
 					6 ,
-					"صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ ﴿٧﴾" ,
+					"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
 					"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
+					0 ,
+					0 ,
+					true ,
+					false ,
+					"note" ,
+					"audioFileLocation" ,
+					false ,
+					"sajdaType" ,
+					0 ,
+					0 ,
 					"Surah" ,
 					1 ,
-					"ENGLISH"
+					"ENGLISH" ,
 			   )
 			   )
 	NimazTheme(darkTheme = true) {
