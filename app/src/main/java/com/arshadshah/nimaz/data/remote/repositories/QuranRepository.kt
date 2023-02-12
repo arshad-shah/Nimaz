@@ -88,13 +88,40 @@ object QuranRepository
 			val ayas = ArrayList<Aya>()
 			for (ayaResponse in response)
 			{
+				//	var ayaNumber: Int,
+				//	var ayaArabic: String,
+				//	var ayaTranslation: String,
+				//	var suraNumber: Int,
+				//	var ayaNumberInSurah: Int,
+				//	var bookmark: Boolean,
+				//	var favorite: Boolean,
+				//	var note: String,
+				//	var audioFileLocation: String,
+				//	var sajda: Boolean,
+				//	var sajdaType: String,
+				//	var ruku: Int,
+				//	var juzNumber: Int,
+				//	val ayaType : String , //surah or juz
+				//	val numberOfType : Int , //surah number or juz number
+				//	val TranslationLanguage : String ,
 				val aya = Aya(
+						id = 0,
 						ayaResponse.number ,
 						ayaResponse.arabic ,
 						ayaResponse.translation ,
+						ayaResponse.surahNumber ,
+						ayaResponse.ayaNumberInSurah ,
+						false ,
+						false ,
+						ayaResponse.note ,
+						ayaResponse.audioFileLocation ,
+						ayaResponse.sajda ,
+						ayaResponse.sajdaType ,
+						ayaResponse.ruku ,
+						ayaResponse.juzNumber ,
 						"Surah" ,
 						surahNumber ,
-						languageConverted
+						languageConverted ,
 							 )
 				ayas.add(aya)
 			}
@@ -124,12 +151,23 @@ object QuranRepository
 			for (ayaResponse in response)
 			{
 				val aya = Aya(
+						id = 0,
 						ayaResponse.number ,
 						ayaResponse.arabic ,
 						ayaResponse.translation ,
+						ayaResponse.surahNumber ,
+						ayaResponse.ayaNumberInSurah ,
+						false ,
+						false ,
+						ayaResponse.note ,
+						ayaResponse.audioFileLocation ,
+						ayaResponse.sajda ,
+						ayaResponse.sajdaType ,
+						ayaResponse.ruku ,
+						ayaResponse.juzNumber ,
 						"Juz" ,
 						juzNumber ,
-						languageConverted
+						languageConverted ,
 							 )
 				ayas.add(aya)
 			}

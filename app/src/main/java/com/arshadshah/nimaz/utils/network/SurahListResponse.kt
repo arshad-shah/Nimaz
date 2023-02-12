@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SurahResponse(
-	@SerialName("suranumberdata")
+	@SerialName("suraNumber")
 	val number : Int ,
-	@SerialName("aya")
+	@SerialName("ayaAmount")
 	val numberOfAyahs : Int ,
 	@SerialName("start")
 	val startAya : Int ,
