@@ -39,6 +39,7 @@ object AppConstants
 	const val LONGITUDE = "longitude"
 	const val FAJR_ANGLE = "fajr_angle"
 	const val ISHA_ANGLE = "isha_angle"
+	const val ISHA_INTERVAL = "isha_interval"
 	const val CALCULATION_METHOD = "calculation_method"
 	const val MADHAB = "madhab"
 	const val HIGH_LATITUDE_RULE = "high_latitude_rule"
@@ -50,7 +51,6 @@ object AppConstants
 	const val ISHA_ADJUSTMENT = "isha_adjustment"
 	const val LOCATION_TYPE = "location_type"
 	const val LOCATION_INPUT = "location_input"
-	const val RECALCULATE_PRAYER_TIMES = "recalculate_prayer_times"
 	const val ALARM_LOCK = "alarmLock"
 	const val FAJR = "fajr"
 	const val SUNRISE = "sunrise"
@@ -218,6 +218,283 @@ object AppConstants
 		mapOfMethods["IRELAND"] = "Ireland"
 		mapOfMethods["OTHER"] = "Other"
 		return mapOfMethods
+	}
+
+	//get the default parameters for the prayer times method
+	fun getDefaultParametersForMethod(method : String) : Map<String , String>
+	{
+		val mapOfDefaultParameters = mutableMapOf<String , String>()
+		when(method)
+		{
+			"MWL" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "17"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"EGYPTIAN" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "19.5"
+				mapOfDefaultParameters["ishaAngle"] = "17.5"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"KARACHI" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "18"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"MAKKAH" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18.5"
+				mapOfDefaultParameters["ishaAngle"] = "0"
+				mapOfDefaultParameters["ishaInterval"] = "90"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"DUBAI" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18.2"
+				mapOfDefaultParameters["ishaAngle"] = "18.2"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"ISNA" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "15"
+				mapOfDefaultParameters["ishaAngle"] = "15"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"KUWAIT" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "17.5"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"TEHRAN" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "17.7"
+				mapOfDefaultParameters["ishaAngle"] = "14"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"SHIA" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "16"
+				mapOfDefaultParameters["ishaAngle"] = "14"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"GULF" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "19.5"
+				mapOfDefaultParameters["ishaAngle"] = "0"
+				mapOfDefaultParameters["ishaInterval"] = "90"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"QATAR" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "0"
+				mapOfDefaultParameters["ishaInterval"] = "90"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"SINGAPORE" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "20"
+				mapOfDefaultParameters["ishaAngle"] = "18"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"FRANCE" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "12"
+				mapOfDefaultParameters["ishaAngle"] = "12"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"TURKEY" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "17"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"RUSSIA" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "16"
+				mapOfDefaultParameters["ishaAngle"] = "15"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"MOONSIGHTING" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "18"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"IRELAND" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "13.5"
+				mapOfDefaultParameters["ishaAngle"] = "13.5"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+			"OTHER" ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "0"
+				mapOfDefaultParameters["ishaAngle"] = "0"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "0"
+				mapOfDefaultParameters["sunriseAdjustment"] = "0"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "0"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "0"
+				mapOfDefaultParameters["ishaAdjustment"] = "0"
+			}
+			else ->
+			{
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "17"
+				mapOfDefaultParameters["ishaInterval"] = "0"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
+				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
+				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["maghribAdjustment"] = "2"
+				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+			}
+
+		}
+		return mapOfDefaultParameters
 	}
 
 	//function to return the map

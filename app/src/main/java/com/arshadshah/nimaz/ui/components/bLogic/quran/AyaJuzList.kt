@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.Page
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
+import kotlin.reflect.KFunction1
 
 @Composable
 fun AyaJuzList(
@@ -19,6 +20,8 @@ fun AyaJuzList(
 	number : Int ,
 	language : String ,
 	state : State<QuranViewModel.AyaJuzState> ,
+	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
+	ayaState : State<QuranViewModel.AyaState> ,
 			  )
 {
 	when (val ayatJuzListState = state.value)
@@ -43,7 +46,9 @@ fun AyaJuzList(
 						ayaList = ArrayList(6) ,
 						paddingValues = paddingValues ,
 						language = language ,
-						loading = true
+						loading = true ,
+						handleEvents = handleEvents ,
+						ayaState = ayaState ,
 						 )
 			} else
 			{
@@ -72,7 +77,9 @@ fun AyaJuzList(
 						ayaList = ayatJuzListState.data ,
 						paddingValues = paddingValues ,
 						language = language ,
-						loading = false
+						loading = false ,
+						handleEvents = handleEvents ,
+						ayaState = ayaState ,
 						 )
 			} else
 			{

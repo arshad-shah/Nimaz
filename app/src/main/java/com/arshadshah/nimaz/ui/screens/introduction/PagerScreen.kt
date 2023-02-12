@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,14 +22,15 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.fillMaxHeight() ,
+				.fillMaxHeight().testTag("pagerScreen") ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {
 
 		Text(
 				modifier = Modifier
-					.fillMaxWidth() ,
+					.fillMaxWidth()
+					.testTag("pagerScreenTitle"),
 				text = onBoardingPage.title ,
 				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
 				fontWeight = FontWeight.Bold ,
@@ -38,7 +40,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 		Image(
 				modifier = Modifier
 					.fillMaxWidth(0.5f)
-					.fillMaxHeight(0.6f) ,
+					.fillMaxHeight(0.6f)
+					.testTag("pagerScreenImage"),
 				imageVector = onBoardingPage.image ,
 				contentDescription = "Pager Image" ,
 				colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
@@ -47,7 +50,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(horizontal = 40.dp)
-					.padding(top = 20.dp , bottom = 20.dp) ,
+					.padding(top = 20.dp , bottom = 20.dp)
+					.testTag("pagerScreenDescription"),
 				text = onBoardingPage.description ,
 				fontSize = MaterialTheme.typography.bodyMedium.fontSize ,
 				fontWeight = FontWeight.Medium ,
@@ -57,7 +61,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 		if (onBoardingPage.extra != {})
 		{
 			ElevatedCard(
-					modifier = Modifier.padding(8.dp) ,
+					modifier = Modifier.padding(8.dp)
+						.testTag("pagerScreenExtra") ,
 						) {
 				//the extra functionality compose
 				onBoardingPage.extra.invoke()

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -8,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -16,7 +18,10 @@ import compose.icons.feathericons.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManualLocationInput(locationFoundCallbackManual : (Double , Double , String) -> Unit)
+fun ManualLocationInput(
+	locationFoundCallbackManual : (Double , Double , String) -> Unit ,
+	reloadPrayerTimes : (Context , PrayerTimesViewModel.PrayerTimesEvent) -> Unit ,
+					   )
 {
 
 	val context = LocalContext.current
@@ -63,6 +68,12 @@ fun ManualLocationInput(locationFoundCallbackManual : (Double , Double , String)
 							context = context ,
 							locationFoundCallbackManual = locationFoundCallbackManual
 												)
+					//reload prayer times
+					reloadPrayerTimes(context,PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+							AppConstants.getDefaultParametersForMethod(
+									sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
+																	  )
+																													 ))
 					showDialog.value = false
 				}) { Text(text = "Confirm") }
 			} ,

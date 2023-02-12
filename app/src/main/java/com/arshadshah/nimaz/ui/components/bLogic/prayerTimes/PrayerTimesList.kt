@@ -34,6 +34,7 @@ fun PrayerTimesList(
 			PrayerTimesListUI(
 					prayerTimesMap = mapOf(
 							"FAJR" to LocalDateTime.now() ,
+							"SUNRISE" to LocalDateTime.now() ,
 							"DHUHR" to LocalDateTime.now() ,
 							"ASR" to LocalDateTime.now() ,
 							"MAGHRIB" to LocalDateTime.now() ,
@@ -80,7 +81,11 @@ fun PrayerTimesList(
 					"isha" to prayerTimes.isha ,
 									  )
 
-			currentPrayerName.value = prayerTimes.currentPrayer?.name !!
+			if(prayerTimes.currentPrayer?.name == "SUNRISE"){
+				currentPrayerName.value = "DUHA"
+			}else{
+				currentPrayerName.value = prayerTimes.currentPrayer?.name !!
+			}
 
 			//save the prayer times in shared preferences
 			sharedPreferences.saveData(AppConstants.FAJR , prayerTimesMap["fajr"] !!.toString())

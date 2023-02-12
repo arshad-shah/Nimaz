@@ -1,9 +1,6 @@
 package com.arshadshah.nimaz.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.arshadshah.nimaz.data.local.models.LocalAya
 
 @Dao
@@ -22,8 +19,19 @@ interface AyaDao
 	@Query("SELECT * FROM Aya WHERE ayaType = 'Juz' AND numberOfType = :juzNumber AND translationLanguage = :translationLanguage")
 	suspend fun getAyasOfJuz(juzNumber : Int , translationLanguage : String) : List<LocalAya>
 
-	//insert all the ayas
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	//bookmark an aya
+	@Query("UPDATE Aya SET bookmark = :bookmark WHERE id = :id")
+	suspend fun bookmarkAya(id: Int, bookmark : Boolean)
+
+	//favorite an aya
+	@Query("UPDATE Aya SET favorite = :favorite WHERE id = :id")
+	suspend fun favoriteAya(id : Int , favorite : Boolean)
+
+	//add a note to an aya
+	@Query("UPDATE Aya SET note = :note WHERE id = :id")
+	suspend fun addNoteToAya(id : Int , note : String)
+
+	@Insert(entity = LocalAya::class, onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(aya : List<LocalAya>)
 
 	//count the number of ayas
