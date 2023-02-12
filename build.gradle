@@ -49,6 +49,7 @@ buildscript {
         classpath "com.google.gms:google-services:$google_services_version"
         classpath "com.google.firebase:firebase-crashlytics-gradle:$firebase_crashlytics_gradle_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.mockito:mockito-core:$mockito_version"
     }
     repositories {
         mavenCentral()

@@ -49,6 +49,18 @@ class QuranViewModel(context : Context) : ViewModel()
 		data class Error(val errorMessage : String) : AyaJuzState()
 	}
 
+	//aya features state
+	sealed class AyaState
+	{
+
+		object Loading : AyaState()
+		object Success : AyaState()
+		data class Error(val errorMessage : String) : AyaState()
+	}
+
+	private var _ayaState = MutableStateFlow(AyaState.Loading as AyaState)
+	val ayaState = _ayaState.asStateFlow()
+
 	private var _ayaJuzstate = MutableStateFlow(AyaJuzState.Loading as AyaJuzState)
 	val ayaJuzstate = _ayaJuzstate.asStateFlow()
 
@@ -186,6 +198,89 @@ class QuranViewModel(context : Context) : ViewModel()
 			} catch (e : Exception)
 			{
 				_ayaJuzstate.value = AyaJuzState.Error(e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	//events to bookmark an aya, favorite an aya, add a note to an aya
+	sealed class AyaEvent
+	{
+		data class BookmarkAya(val id : Int, val bookmark : Boolean) : AyaEvent()
+		data class FavoriteAya(val id : Int, val favorite : Boolean) : AyaEvent()
+		data class AddNoteToAya(val id : Int, val note : String) : AyaEvent()
+	}
+
+	//events handler
+	fun handleAyaEvent(ayaEvent : AyaEvent)
+	{
+		when (ayaEvent)
+		{
+			is AyaEvent.BookmarkAya ->
+			{
+				bookmarkAya(ayaEvent.id, ayaEvent.bookmark)
+			}
+			is AyaEvent.FavoriteAya ->
+			{
+				favoriteAya(ayaEvent.id, ayaEvent.favorite)
+			}
+			is AyaEvent.AddNoteToAya ->
+			{
+				addNoteToAya(ayaEvent.id, ayaEvent.note)
+			}
+
+			else ->
+			{
+			}
+		}
+	}
+
+	//bookmark an aya
+	fun bookmarkAya(id : Int, bookmark : Boolean)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_ayaState.value = AyaState.Loading
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.bookmarkAya(id, bookmark)
+				_ayaState.value = AyaState.Success
+			} catch (e : Exception)
+			{
+				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	//favorite an aya
+	fun favoriteAya(id: Int, favorite : Boolean)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_ayaState.value = AyaState.Loading
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.favoriteAya( id, favorite)
+				_ayaState.value = AyaState.Success
+			} catch (e : Exception)
+			{
+				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	//add a note to an aya
+	fun addNoteToAya(id: Int, note : String)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_ayaState.value = AyaState.Loading
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.addNoteToAya(id, note)
+				_ayaState.value = AyaState.Success
+			} catch (e : Exception)
+			{
+				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
 			}
 		}
 	}

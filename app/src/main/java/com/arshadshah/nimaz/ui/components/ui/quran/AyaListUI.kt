@@ -1,31 +1,37 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Bookmark
+import kotlin.reflect.KFunction1
 
 
 @Composable
@@ -34,19 +40,34 @@ fun AyaListUI(
 	paddingValues : PaddingValues ,
 	language : String ,
 	loading : Boolean ,
+	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
+	ayaState : State<QuranViewModel.AyaState> ,
 			 )
 {
+
+	//map the ayaList to a mutable list so that we can change the values of the ayaList
+	val listOfAya = ayaList.map { it.copy() }
+	val ayaListRemembered = remember { mutableStateListOf<Aya>() }
+
+	//swap the list
+	ayaListRemembered.swapList(listOfAya)
+
+	//function to swap the list
+	//we need to do this because we want to change the values of the ayaList
+	val updateList = {
+		ayaListRemembered.swapList(listOfAya)
+	}
 
 	if (loading)
 	{
 		LazyColumn(contentPadding = paddingValues) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
-						ayaNumber = "1" ,
-						ayaArabic = "بسم الله الرحمن الرحيم" ,
-						ayaTranslation = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-						language = "english" ,
-						loading = loading
+						loading = loading ,
+						handleEvents = handleEvents ,
+						aya = ayaList[index] ,
+						ayaState = ayaState ,
+						updateList = updateList
 							 )
 			}
 		}
@@ -87,33 +108,58 @@ fun AyaListUI(
 		}
 
 		LazyColumn(userScrollEnabled = true , contentPadding = paddingValues , state = listState) {
-			items(ayaList.size) { index ->
+			items(ayaListRemembered.size) { index ->
 				AyaListItemUI(
-						ayaNumber = ayaList[index].ayaNumber.toString() ,
-						ayaArabic = ayaList[index].ayaArabic ,
-						ayaTranslation = ayaList[index].translation ,
-						language = language ,
-						loading = loading
+						loading = loading ,
+						handleEvents = handleEvents ,
+						aya = ayaListRemembered[index] ,
+						ayaState = ayaState ,
+						updateList = updateList
 							 )
 			}
 		}
 	}
 }
 
+fun <T> SnapshotStateList<T>.swapList(newList: List<T>){
+	clear()
+	addAll(newList)
+}
+
 @Composable
 fun AyaListItemUI(
-	ayaNumber : String ,
-	ayaArabic : String ,
-	ayaTranslation : String ,
-	language : String ,
 	loading : Boolean ,
+	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
+	aya : Aya ,
+	ayaState : State<QuranViewModel.AyaState> ,
+	updateList : () -> Unit ,
 				 )
 {
 
 	//create a new speech recognizer
 //	val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(LocalContext.current)
+	val isLoading = remember {
+		mutableStateOf(false)
+	}
 
-	val cardBackgroundColor = if (ayaNumber == "0")
+	val isBookMarkedVerse = remember {
+		mutableStateOf(false)
+	}
+
+	val isFavoured = remember {
+		mutableStateOf(false)
+	}
+
+	val hasNote = remember {
+		mutableStateOf(false)
+	}
+
+	val noteContent = remember {
+		mutableStateOf("")
+	}
+
+
+	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
 		MaterialTheme.colorScheme.outline
 	} else
@@ -129,16 +175,20 @@ fun AyaListItemUI(
 	val translationFontSize = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
 
 	//mutable ayaArabic state so that we can change it when the user clicks on the mic button
-	val ayaArabicState = remember { mutableStateOf(ayaArabic) }
+	val ayaArabicState = remember { mutableStateOf(aya.ayaArabic) }
 
 //	val isRecording = remember { mutableStateOf(false) }
-
 	ElevatedCard(
 			modifier = Modifier
 				.padding(4.dp)
 				.fillMaxHeight()
 				.fillMaxWidth()
-				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp)) ,
+				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp))
+				.clickable {
+					isBookMarkedVerse.value = ! isBookMarkedVerse.value
+					handleEvents(QuranViewModel.AyaEvent.BookmarkAya(aya.id, isBookMarkedVerse.value))
+					updateList()
+				},
 			shape = RoundedCornerShape(8.dp)
 				) {
 		Row(
@@ -146,6 +196,16 @@ fun AyaListItemUI(
 					.fillMaxWidth()
 					.padding(8.dp)
 		   ) {
+			if (isBookMarkedVerse.value){
+				Icon(
+						imageVector = FeatherIcons.Bookmark ,
+						contentDescription = "Bookmark" ,
+						tint = MaterialTheme.colorScheme.primary ,
+						modifier = Modifier
+							.size(24.dp)
+							.padding(4.dp)
+					)
+			}
 
 
 			Column(
@@ -158,7 +218,7 @@ fun AyaListItemUI(
 							style = MaterialTheme.typography.titleLarge ,
 							fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp ,
 							fontFamily = quranFont ,
-							textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
+							textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth()
 								.padding(4.dp)
@@ -173,15 +233,15 @@ fun AyaListItemUI(
 						)
 				}
 				Spacer(modifier = Modifier.height(4.dp))
-				if (language == "urdu")
+				if (aya.TranslationLanguage == "URDU")
 				{
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
-								text = "$ayaTranslation ۔" ,
+								text = "${aya.ayaTranslation} ۔" ,
 								style = MaterialTheme.typography.titleSmall ,
 								fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp ,
 								fontFamily = urduFont ,
-								textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
+								textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
 								modifier = Modifier
 									.fillMaxWidth()
 									.padding(horizontal = 4.dp)
@@ -196,13 +256,13 @@ fun AyaListItemUI(
 							)
 					}
 				}
-				if (language == "english")
+				if (aya.TranslationLanguage == "ENGLISH")
 				{
 					Text(
-							text = ayaTranslation ,
+							text = aya.ayaTranslation ,
 							style = MaterialTheme.typography.bodySmall ,
 							fontSize = translationFontSize.sp ,
-							textAlign = if (ayaNumber != "0") TextAlign.Justify else TextAlign.Center ,
+							textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth()
 								.padding(horizontal = 4.dp)
@@ -291,6 +351,7 @@ fun AyaListItemUI(
 		}
 	}
 }
+
 
 //the function responsible for converting the audio file to text
 //fun convertAudioToText(
@@ -396,93 +457,3 @@ fun AyaListItemUI(
 //			100000
 //									 )
 //}
-
-
-@Preview
-@Composable
-fun AyaListUIPreview()
-{
-	//make 10 LocalAya
-	val ayaList = ArrayList<Aya>()
-	//add the aya to the list
-	ayaList.add(
-			Aya(
-					0 ,
-					"بسم الله الرحمن الرحيم" ,
-					"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-					"Surah" ,
-					1 ,
-					"ENGLISH"
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					1 ,
-					"الحمد لله رب العالمين" ,
-					"All praise is due to Allah, Lord of the worlds." , "Surah" ,
-					1 ,
-					"ENGLISH"
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					2 ,
-					"الرحمن الرحيم" ,
-					"The Entirely Merciful, the Especially Merciful." ,
-					"Surah" , 1 ,
-					"ENGLISH"
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					3 , "مالك يوم الدين" , "Master of the Day of Judgment." , "Surah" ,
-					1 ,
-					"ENGLISH"
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					4 ,
-					"إياك نعبد وإياك نستعين" ,
-					"You alone do we worship, and You alone do we implore for help." , "Surah" ,
-					1 ,
-					"ENGLISH"
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					5 , "اهدنا الصراط المستقيم" , "Guide us to the straight path." , "Surah" ,
-					1 ,
-					"ENGLISH"
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					6 ,
-					"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
-					"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
-					"Surah" ,
-					1 ,
-					"ENGLISH"
-			   )
-			   )
-
-	AyaListUI(ayaList , PaddingValues(8.dp) , "english" , true)
-}
-
-
-//aya list item preview
-@Preview
-@Composable
-fun AyaListItemUIPreview()
-{
-	val aya = Aya(
-			0 ,
-			"بسم الله الرحمن الرحيم" ,
-			"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-			"Surah" ,
-			1 ,
-			"ENGLISH"
-				 )
-	AyaListItemUI(aya.ayaNumber.toString() , aya.ayaArabic , aya.translation , "english" , false)
-}

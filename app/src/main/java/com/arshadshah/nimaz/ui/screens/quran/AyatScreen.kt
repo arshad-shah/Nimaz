@@ -42,10 +42,13 @@ fun AyatScreen(
 		Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: isSurah")
 		viewModel.getAllAyaForSurah(number !!.toInt() , language)
 		val ayat = remember { viewModel.ayaSurahState }.collectAsState()
+		val ayatState = remember { viewModel.ayaState }.collectAsState()
 		AyaSurahList(
 				number = number.toInt() , language = language ,
 				paddingValues = paddingValues ,
 				state = ayat ,
+				handleEvents = viewModel::handleAyaEvent,
+				ayaState =ayatState
 					)
 
 	} else
@@ -53,11 +56,14 @@ fun AyatScreen(
 		Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: isJuz")
 		viewModel.getAllAyaForJuz(number !!.toInt() , language)
 		val ayat = remember { viewModel.ayaJuzstate }.collectAsState()
+		val ayatState = remember { viewModel.ayaState }.collectAsState()
 		AyaJuzList(
 				number = number.toInt() ,
 				language = language ,
 				paddingValues = paddingValues ,
-				state = ayat
+				state = ayat ,
+				handleEvents = viewModel::handleAyaEvent,
+				ayaState =ayatState
 				  )
 	}
 }

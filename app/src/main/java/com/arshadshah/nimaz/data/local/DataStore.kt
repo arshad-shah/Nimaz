@@ -31,6 +31,14 @@ class DataStore(db : AppDatabase)
 	suspend fun countJuzAyat(juzNumber : Int , translationLanguage : String) =
 		ayaDao.countJuzAya(juzNumber , translationLanguage)
 
+	//bookmark an aya
+	suspend fun bookmarkAya(id : Int,bookmarkAya : Boolean) = ayaDao.bookmarkAya(id,bookmarkAya)
+
+	//favorite an aya
+	suspend fun favoriteAya(id : Int,favoriteAya : Boolean) = ayaDao.favoriteAya(id,favoriteAya)
+
+	//add a note to an aya
+	suspend fun addNoteToAya(id : Int,note : String) = ayaDao.addNoteToAya(id,note)
 
 	//get all juz
 	suspend fun getAllJuz() = juzDao.getAllJuz().map { it.toJuz() }
@@ -82,19 +90,40 @@ class DataStore(db : AppDatabase)
 }
 
 private fun Aya.toLocalAya() = LocalAya(
-		id = 0 ,
 		ayaNumber = ayaNumber ,
 		ayaArabic = ayaArabic ,
-		translation = translation ,
+		translation = ayaTranslation ,
+		suraNumber = suraNumber ,
+		ayaNumberInSurah = ayaNumberInSurah ,
+		bookmark = bookmark ,
+		favorite = favorite ,
+		note = note ,
+		audioFileLocation = audioFileLocation ,
+		sajda = sajda ,
+		sajdaType = sajdaType ,
+		ruku = ruku ,
+		juzNumber = juzNumber ,
 		ayaType = ayaType ,
 		numberOfType = numberOfType ,
 		translationLanguage = TranslationLanguage ,
+
 									   )
 
 private fun LocalAya.toAya() = Aya(
+		id = id ,
 		ayaNumber = ayaNumber ,
 		ayaArabic = ayaArabic ,
-		translation = translation ,
+		ayaTranslation = translation ,
+		suraNumber = suraNumber ,
+		ayaNumberInSurah = ayaNumberInSurah ,
+		bookmark = bookmark ,
+		favorite = favorite ,
+		note = note ,
+		audioFileLocation = audioFileLocation ,
+		sajda = sajda ,
+		sajdaType = sajdaType ,
+		ruku = ruku ,
+		juzNumber = juzNumber ,
 		ayaType = ayaType ,
 		numberOfType = numberOfType ,
 		TranslationLanguage = translationLanguage ,

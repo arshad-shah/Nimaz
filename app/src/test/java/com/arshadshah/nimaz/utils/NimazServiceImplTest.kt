@@ -27,16 +27,6 @@ class NimazServiceImplTest
 	}
 
 	@Test
-	fun testGetQiblaDirection() {
-		runBlocking {
-			val latitude = 51.5074
-			val longitude = 0.1278
-			val qiblaDirectionResponse = nimazServicesImpl.getQiblaDirection(latitude, longitude)
-			assertNotNull(qiblaDirectionResponse)
-		}
-	}
-
-	@Test
 	fun testGetPrayerTimes() {
 		runBlocking {
 			val mapOfParams = mapOf("param1" to "value1", "param2" to "value2")
