@@ -17,6 +17,7 @@ object LocalDataStore
 		{
 			val db = Room.databaseBuilder(context , AppDatabase::class.java , "database")
 				.addMigrations(AppDatabase.Migration1To2())
+				.addMigrations(AppDatabase.Migration2To3())
 				.build()
 			dataStore = DataStore(db)
 			Log.d(AppConstants.DATA_STORE_TAG , "DataStore initialized")

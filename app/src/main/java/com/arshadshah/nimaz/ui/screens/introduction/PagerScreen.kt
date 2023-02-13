@@ -22,7 +22,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.fillMaxHeight().testTag("pagerScreen") ,
+				.fillMaxHeight()
+				.testTag("pagerScreen") ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {
@@ -30,7 +31,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 		Text(
 				modifier = Modifier
 					.fillMaxWidth()
-					.testTag("pagerScreenTitle"),
+					.testTag("pagerScreenTitle") ,
 				text = onBoardingPage.title ,
 				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
 				fontWeight = FontWeight.Bold ,
@@ -41,7 +42,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 				modifier = Modifier
 					.fillMaxWidth(0.5f)
 					.fillMaxHeight(0.6f)
-					.testTag("pagerScreenImage"),
+					.testTag("pagerScreenImage") ,
 				imageVector = onBoardingPage.image ,
 				contentDescription = "Pager Image" ,
 				colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
@@ -51,7 +52,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 					.fillMaxWidth()
 					.padding(horizontal = 40.dp)
 					.padding(top = 20.dp , bottom = 20.dp)
-					.testTag("pagerScreenDescription"),
+					.testTag("pagerScreenDescription") ,
 				text = onBoardingPage.description ,
 				fontSize = MaterialTheme.typography.bodyMedium.fontSize ,
 				fontWeight = FontWeight.Medium ,
@@ -61,7 +62,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 		if (onBoardingPage.extra != {})
 		{
 			ElevatedCard(
-					modifier = Modifier.padding(8.dp)
+					modifier = Modifier
+						.padding(8.dp)
 						.testTag("pagerScreenExtra") ,
 						) {
 				//the extra functionality compose

@@ -69,23 +69,29 @@ object PrayerTimesRepository
 		return try
 		{
 			val prayerTimesAvailable = dataStore.countPrayerTimes() > 0
-			if(prayerTimesAvailable){
+			if (prayerTimesAvailable)
+			{
 				val prayerTimesLocal = dataStore.getAllPrayerTimes()
 				//check if the next prayer time is in the future
 				val nextPrayerTime = prayerTimesLocal.nextPrayer?.time
 				val currentTime = prayerTimesLocal.currentPrayer?.time
 				//if it is in the future return the prayer times from the database
-				if(nextPrayerTime?.isAfter(LocalDateTime.now()) == true && currentTime?.isBefore(LocalDateTime.now()) == true){
+				if (nextPrayerTime?.isAfter(LocalDateTime.now()) == true && currentTime?.isBefore(
+							LocalDateTime.now()
+																								 ) == true
+				)
+				{
 					ApiResponse.Success(dataStore.getAllPrayerTimes())
-				}else{
+				} else
+				{
 					//map the Prayertime object to a map of names
 					val prayerTimesToMapped = dataStore.getAllPrayerTimes()
 					val mapConverted = mapOf(
-							"FAJR" to prayerTimesToMapped.fajr,
-							"SUNRISE" to prayerTimesToMapped.sunrise,
-							"DHUHR" to prayerTimesToMapped.dhuhr,
-							"ASR" to prayerTimesToMapped.asr,
-							"MAGHRIB" to prayerTimesToMapped.maghrib,
+							"FAJR" to prayerTimesToMapped.fajr ,
+							"SUNRISE" to prayerTimesToMapped.sunrise ,
+							"DHUHR" to prayerTimesToMapped.dhuhr ,
+							"ASR" to prayerTimesToMapped.asr ,
+							"MAGHRIB" to prayerTimesToMapped.maghrib ,
 							"ISHA" to prayerTimesToMapped.isha
 											)
 					val nextPrayerTimeName = prayerTimesToMapped.nextPrayer?.name
@@ -94,12 +100,13 @@ object PrayerTimesRepository
 					//for example if the nextPrayerTimeName is DHUHR we return the time for ASR as the next prayer time from the map
 					//we can use the index of the nextPrayerTimeName to get the next prayer time
 					val nextPrayerTimeIndex = mapConverted.keys.indexOf(nextPrayerTimeName)
-					val nextPrayerTimeFromMap = mapConverted.values.elementAt(nextPrayerTimeIndex + 1)
+					val nextPrayerTimeFromMap =
+						mapConverted.values.elementAt(nextPrayerTimeIndex + 1)
 					val nextPrayerNameFromMap = mapConverted.keys.elementAt(nextPrayerTimeIndex + 1)
 
 
 					val newNextPrayerTime = Prayertime(
-							name = nextPrayerNameFromMap,
+							name = nextPrayerNameFromMap ,
 							time = nextPrayerTimeFromMap
 													  )
 
@@ -107,23 +114,29 @@ object PrayerTimesRepository
 					//for example if the nextPrayerTimeName is DHUHR we return the time for DHUHR as the current prayer time from the map
 					//we can use the index of the nextPrayerTimeName to get the current prayer time
 					val currentPrayerTimeIndex = mapConverted.keys.indexOf(nextPrayerTimeName)
-					val currentPrayerTimeFromMap = mapConverted.values.elementAt(currentPrayerTimeIndex)
-					val currentPrayerNameFromMap = mapConverted.keys.elementAt(currentPrayerTimeIndex)
+					val currentPrayerTimeFromMap =
+						mapConverted.values.elementAt(currentPrayerTimeIndex)
+					val currentPrayerNameFromMap =
+						mapConverted.keys.elementAt(currentPrayerTimeIndex)
 
 					val newCurrentPrayerTime = Prayertime(
-							name = currentPrayerNameFromMap,
+							name = currentPrayerNameFromMap ,
 							time = currentPrayerTimeFromMap
-														  )
+														 )
 
 					//delete all the prayer times from the local database
 					dataStore.deleteAllPrayerTimes()
-					val newPrayerTimesObject = prayerTimesToMapped.copy(nextPrayer = newNextPrayerTime, currentPrayer = newCurrentPrayerTime)
+					val newPrayerTimesObject = prayerTimesToMapped.copy(
+							nextPrayer = newNextPrayerTime ,
+							currentPrayer = newCurrentPrayerTime
+																	   )
 					//insert the prayer times into the local database
 					dataStore.saveAllPrayerTimes(newPrayerTimesObject)
 
 					ApiResponse.Success(newPrayerTimesObject)
 				}
-			}else{
+			} else
+			{
 				val prayerTimesResponse = NimazServicesImpl.getPrayerTimes(mapOfParams)
 				val prayerTimes = mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse)
 				runBlocking {

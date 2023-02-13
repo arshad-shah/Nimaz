@@ -81,9 +81,11 @@ fun PrayerTimesList(
 					"isha" to prayerTimes.isha ,
 									  )
 
-			if(prayerTimes.currentPrayer?.name == "SUNRISE"){
+			if (prayerTimes.currentPrayer?.name == "SUNRISE")
+			{
 				currentPrayerName.value = "DUHA"
-			}else{
+			} else
+			{
 				currentPrayerName.value = prayerTimes.currentPrayer?.name !!
 			}
 

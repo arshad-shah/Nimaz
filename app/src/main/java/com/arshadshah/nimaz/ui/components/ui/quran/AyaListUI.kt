@@ -11,7 +11,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -44,20 +43,6 @@ fun AyaListUI(
 	ayaState : State<QuranViewModel.AyaState> ,
 			 )
 {
-
-	//map the ayaList to a mutable list so that we can change the values of the ayaList
-	val listOfAya = ayaList.map { it.copy() }
-	val ayaListRemembered = remember { mutableStateListOf<Aya>() }
-
-	//swap the list
-	ayaListRemembered.swapList(listOfAya)
-
-	//function to swap the list
-	//we need to do this because we want to change the values of the ayaList
-	val updateList = {
-		ayaListRemembered.swapList(listOfAya)
-	}
-
 	if (loading)
 	{
 		LazyColumn(contentPadding = paddingValues) {
@@ -67,7 +52,6 @@ fun AyaListUI(
 						handleEvents = handleEvents ,
 						aya = ayaList[index] ,
 						ayaState = ayaState ,
-						updateList = updateList
 							 )
 			}
 		}
@@ -108,22 +92,16 @@ fun AyaListUI(
 		}
 
 		LazyColumn(userScrollEnabled = true , contentPadding = paddingValues , state = listState) {
-			items(ayaListRemembered.size) { index ->
+			items(ayaList.size) { index ->
 				AyaListItemUI(
 						loading = loading ,
 						handleEvents = handleEvents ,
-						aya = ayaListRemembered[index] ,
+						aya = ayaList[index] ,
 						ayaState = ayaState ,
-						updateList = updateList
 							 )
 			}
 		}
 	}
-}
-
-fun <T> SnapshotStateList<T>.swapList(newList: List<T>){
-	clear()
-	addAll(newList)
 }
 
 @Composable
@@ -132,7 +110,6 @@ fun AyaListItemUI(
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	aya : Aya ,
 	ayaState : State<QuranViewModel.AyaState> ,
-	updateList : () -> Unit ,
 				 )
 {
 
@@ -186,9 +163,13 @@ fun AyaListItemUI(
 				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp))
 				.clickable {
 					isBookMarkedVerse.value = ! isBookMarkedVerse.value
-					handleEvents(QuranViewModel.AyaEvent.BookmarkAya(aya.id, isBookMarkedVerse.value))
-					updateList()
-				},
+					handleEvents(
+							QuranViewModel.AyaEvent.BookmarkAya(
+									aya.id ,
+									isBookMarkedVerse.value
+															   )
+								)
+				} ,
 			shape = RoundedCornerShape(8.dp)
 				) {
 		Row(
@@ -196,7 +177,8 @@ fun AyaListItemUI(
 					.fillMaxWidth()
 					.padding(8.dp)
 		   ) {
-			if (isBookMarkedVerse.value){
+			if (isBookMarkedVerse.value)
+			{
 				Icon(
 						imageVector = FeatherIcons.Bookmark ,
 						contentDescription = "Bookmark" ,
@@ -457,3 +439,6 @@ fun AyaListItemUI(
 //			100000
 //									 )
 //}
+
+
+//a component to show ruku info

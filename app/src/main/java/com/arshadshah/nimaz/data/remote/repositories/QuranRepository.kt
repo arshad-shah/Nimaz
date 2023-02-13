@@ -105,7 +105,7 @@ object QuranRepository
 				//	val numberOfType : Int , //surah number or juz number
 				//	val TranslationLanguage : String ,
 				val aya = Aya(
-						id = 0,
+						id = 0 ,
 						ayaResponse.number ,
 						ayaResponse.arabic ,
 						ayaResponse.translation ,
@@ -151,7 +151,7 @@ object QuranRepository
 			for (ayaResponse in response)
 			{
 				val aya = Aya(
-						id = 0,
+						id = 0 ,
 						ayaResponse.number ,
 						ayaResponse.arabic ,
 						ayaResponse.translation ,

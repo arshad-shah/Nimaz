@@ -32,13 +32,13 @@ class DataStore(db : AppDatabase)
 		ayaDao.countJuzAya(juzNumber , translationLanguage)
 
 	//bookmark an aya
-	suspend fun bookmarkAya(id : Int,bookmarkAya : Boolean) = ayaDao.bookmarkAya(id,bookmarkAya)
+	suspend fun bookmarkAya(id : Int , bookmarkAya : Boolean) = ayaDao.bookmarkAya(id , bookmarkAya)
 
 	//favorite an aya
-	suspend fun favoriteAya(id : Int,favoriteAya : Boolean) = ayaDao.favoriteAya(id,favoriteAya)
+	suspend fun favoriteAya(id : Int , favoriteAya : Boolean) = ayaDao.favoriteAya(id , favoriteAya)
 
 	//add a note to an aya
-	suspend fun addNoteToAya(id : Int,note : String) = ayaDao.addNoteToAya(id,note)
+	suspend fun addNoteToAya(id : Int , note : String) = ayaDao.addNoteToAya(id , note)
 
 	//get all juz
 	suspend fun getAllJuz() = juzDao.getAllJuz().map { it.toJuz() }
@@ -106,7 +106,6 @@ private fun Aya.toLocalAya() = LocalAya(
 		ayaType = ayaType ,
 		numberOfType = numberOfType ,
 		translationLanguage = TranslationLanguage ,
-
 									   )
 
 private fun LocalAya.toAya() = Aya(
@@ -210,7 +209,6 @@ private fun Dua.toLocalDua() = LocalDua(
 		chapter_id = chapter_id ,
 		favourite = favourite ,
 		arabic_dua = arabic_dua ,
-		arabic_reference = arabic_reference ,
 		english_translation = english_translation ,
 		english_reference = english_reference ,
 									   )
@@ -220,7 +218,6 @@ private fun LocalDua.toDua() = Dua(
 		chapter_id = chapter_id ,
 		favourite = favourite ,
 		arabic_dua = arabic_dua ,
-		arabic_reference = arabic_reference ,
 		english_translation = english_translation ,
 		english_reference = english_reference ,
 								  )

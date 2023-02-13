@@ -124,7 +124,7 @@ fun PrayerTimesRow(
 					text = " -${countDownTime.hours} : ${countDownTime.minutes} : ${countDownTime.seconds}" ,
 					textAlign = TextAlign.Center ,
 					style = MaterialTheme.typography.titleSmall
-											   )
+				)
 		}
 		Text(
 				text = prayerTime !!.format(formatter) ,

@@ -103,7 +103,6 @@ fun DuaListItemPreview()
 			"اللهم صل على محمد وآل محمد" ,
 			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
 			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
-			"Sahih Muslim"
 				 )
 	DuaListItem(dua , true)
 }

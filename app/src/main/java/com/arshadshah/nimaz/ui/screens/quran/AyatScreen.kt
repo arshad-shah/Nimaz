@@ -47,8 +47,8 @@ fun AyatScreen(
 				number = number.toInt() , language = language ,
 				paddingValues = paddingValues ,
 				state = ayat ,
-				handleEvents = viewModel::handleAyaEvent,
-				ayaState =ayatState
+				handleEvents = viewModel::handleAyaEvent ,
+				ayaState = ayatState
 					)
 
 	} else
@@ -62,8 +62,8 @@ fun AyatScreen(
 				language = language ,
 				paddingValues = paddingValues ,
 				state = ayat ,
-				handleEvents = viewModel::handleAyaEvent,
-				ayaState =ayatState
+				handleEvents = viewModel::handleAyaEvent ,
+				ayaState = ayatState
 				  )
 	}
 }
