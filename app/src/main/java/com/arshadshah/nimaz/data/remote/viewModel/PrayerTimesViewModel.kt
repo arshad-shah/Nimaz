@@ -57,8 +57,9 @@ class PrayerTimesViewModel : ViewModel()
 
 		class Start(val timeToNextPrayer : Long) : PrayerTimesEvent()
 		object RELOAD : PrayerTimesEvent()
+
 		//get updated prayertimes if parameters change in settings
-		class UPDATE_PRAYERTIMES(val mapOfParameters: Map<String, String>) : PrayerTimesEvent()
+		class UPDATE_PRAYERTIMES(val mapOfParameters : Map<String , String>) : PrayerTimesEvent()
 	}
 
 	//function to handle the timer event
@@ -100,7 +101,7 @@ class PrayerTimesViewModel : ViewModel()
 	}
 
 	//function to update the prayer times
-	fun updatePrayerTimes(mapOfParameters : Map<String, String>)
+	fun updatePrayerTimes(mapOfParameters : Map<String , String>)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -133,14 +134,14 @@ class PrayerTimesViewModel : ViewModel()
 			try
 			{
 				_prayerTimesState.value = PrayerTimesState.Loading
-					val response = PrayerTimesRepository.getPrayerTimes(context)
-					if (response.data != null)
-					{
-						_prayerTimesState.value = PrayerTimesState.Success(response.data)
-					} else
-					{
-						_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
-					}
+				val response = PrayerTimesRepository.getPrayerTimes(context)
+				if (response.data != null)
+				{
+					_prayerTimesState.value = PrayerTimesState.Success(response.data)
+				} else
+				{
+					_prayerTimesState.value = PrayerTimesState.Error(response.message !!)
+				}
 
 			} catch (e : Exception)
 			{

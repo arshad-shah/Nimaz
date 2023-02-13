@@ -69,11 +69,16 @@ fun ManualLocationInput(
 							locationFoundCallbackManual = locationFoundCallbackManual
 												)
 					//reload prayer times
-					reloadPrayerTimes(context,PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+					reloadPrayerTimes(
+							context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 							AppConstants.getDefaultParametersForMethod(
-									sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
+									sharedPreferences.getData(
+											AppConstants.CALCULATION_METHOD ,
+											"IRELAND"
+															 )
 																	  )
-																													 ))
+																							  )
+									 )
 					showDialog.value = false
 				}) { Text(text = "Confirm") }
 			} ,

@@ -5,7 +5,6 @@ data class Dua(
 	val chapter_id : Int ,
 	val favourite : Int ,
 	val arabic_dua : String ,
-	val arabic_reference : String ,
 	val english_translation : String ,
 	val english_reference : String ,
 			  )

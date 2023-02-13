@@ -21,7 +21,7 @@ interface AyaDao
 
 	//bookmark an aya
 	@Query("UPDATE Aya SET bookmark = :bookmark WHERE id = :id")
-	suspend fun bookmarkAya(id: Int, bookmark : Boolean)
+	suspend fun bookmarkAya(id : Int , bookmark : Boolean)
 
 	//favorite an aya
 	@Query("UPDATE Aya SET favorite = :favorite WHERE id = :id")
@@ -31,7 +31,7 @@ interface AyaDao
 	@Query("UPDATE Aya SET note = :note WHERE id = :id")
 	suspend fun addNoteToAya(id : Int , note : String)
 
-	@Insert(entity = LocalAya::class, onConflict = OnConflictStrategy.REPLACE)
+	@Insert(entity = LocalAya::class , onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(aya : List<LocalAya>)
 
 	//count the number of ayas

@@ -65,7 +65,6 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 											"" ,
 											"" ,
 											"" ,
-											"" ,
 											 ) ,
 									loading = true
 									   )

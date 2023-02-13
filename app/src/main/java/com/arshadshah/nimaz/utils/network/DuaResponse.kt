@@ -13,8 +13,6 @@ data class DuaResponse(
 	val favourite : Int ,
 	@SerialName("arabic_dua")
 	val arabicDua : String ,
-	@SerialName("arabic_reference")
-	val arabicReference : String ,
 	@SerialName("english_translation")
 	val englishTranslation : String ,
 	@SerialName("english_reference")
