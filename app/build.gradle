@@ -132,4 +132,7 @@ dependencies {
     implementation "com.google.android.play:app-update-ktx:$app_update_version"
 
     implementation 'com.google.code.gson:gson:2.9.0'
+
+    implementation "io.github.boguszpawlowski.composecalendar:composecalendar:1.0.2"
+    implementation "io.github.boguszpawlowski.composecalendar:composecalendar:1.0.2"
 }
