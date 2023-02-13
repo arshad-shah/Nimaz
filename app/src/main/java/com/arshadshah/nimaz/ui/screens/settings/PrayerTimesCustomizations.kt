@@ -95,8 +95,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	{
 		ishaAngleState.value = "0"
 		ishaaAngleVisible.value = false
-	}
-	else
+	} else
 	{
 		ishaaAngleVisible.value = true
 	}
@@ -156,7 +155,12 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		mapOfParams["maghribAdjustment"] = maghribAdjustment.value
 		mapOfParams["ishaAdjustment"] = ishaAdjustment.value
 		//then pass it to the UPDATE_PRAYERTIMES event
-		prayerTimesViewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(mapOfParams))
+		prayerTimesViewModel.handleEvent(
+				context ,
+				PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+						mapOfParams
+																		)
+										)
 	}
 
 	Column(
@@ -256,7 +260,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						valueState = fajrAngleState ,
 										  )
 			}
-			if(ishaaAngleVisible.value){
+			if (ishaaAngleVisible.value)
+			{
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
@@ -277,7 +282,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							valueState = ishaAngleState ,
 											  )
 				}
-			}else{
+			} else
+			{
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
@@ -286,8 +292,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							) {
 					SettingsMenuLink(
 							modifier = Modifier.padding(8.dp) ,
-							title = {Text(text = "Isha Interval of ${ishaIntervalState.value} Minutes")} ,
-							subtitle = {Text(text = "The interval of time after Maghrib at which the Isha prayer begins")} ,
+							title = { Text(text = "Isha Interval of ${ishaIntervalState.value} Minutes") } ,
+							subtitle = { Text(text = "The interval of time after Maghrib at which the Isha prayer begins") } ,
 							onClick = { } ,
 									)
 				}
@@ -428,7 +434,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 
 @Preview(showBackground = true)
 @Composable
-fun SettingsScreenPreview() {
+fun SettingsScreenPreview()
+{
 	NimazTheme {
 		PrayerTimesCustomizations(paddingValues = PaddingValues(16.dp))
 	}

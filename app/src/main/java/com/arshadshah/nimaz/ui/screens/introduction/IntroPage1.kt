@@ -33,7 +33,9 @@ fun IntroPage1()
 
 	Column(modifier = Modifier.fillMaxSize()) {
 		HorizontalPager(
-				modifier = Modifier.weight(10f).testTag("introPager") ,
+				modifier = Modifier
+					.weight(10f)
+					.testTag("introPager") ,
 				count = pages.size ,
 				state = pagerState ,
 				verticalAlignment = Alignment.Top
@@ -44,7 +46,8 @@ fun IntroPage1()
 				pagerState = pagerState ,
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
-					.padding(20.dp).testTag("introPagerIndicator") ,
+					.padding(20.dp)
+					.testTag("introPagerIndicator") ,
 				activeColor = MaterialTheme.colorScheme.secondary ,
 				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f) ,
 				indicatorWidth = 12.dp ,

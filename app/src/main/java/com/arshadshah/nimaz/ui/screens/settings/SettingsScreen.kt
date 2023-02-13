@@ -127,11 +127,17 @@ fun SettingsScreen(
 						} ,
 						onCheckedChange = {
 							storage.value = it
-							prayerTimesViewModel.handleEvent(context,PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-									AppConstants.getDefaultParametersForMethod(
-											sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
-																			  )
-																															 ))
+							prayerTimesViewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											AppConstants.getDefaultParametersForMethod(
+													sharedPreferences.getData(
+															AppConstants.CALCULATION_METHOD ,
+															"IRELAND"
+																			 )
+																					  )
+																							)
+															)
 						}
 							  )
 			}
@@ -143,7 +149,10 @@ fun SettingsScreen(
 							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							) {
-					ManualLocationInput(locationFoundCallbackManual, prayerTimesViewModel::handleEvent)
+					ManualLocationInput(
+							locationFoundCallbackManual ,
+							prayerTimesViewModel::handleEvent
+									   )
 				}
 				CoordinatesView(
 						longitude = longitude ,

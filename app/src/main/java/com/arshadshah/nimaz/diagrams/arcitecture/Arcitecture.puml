@@ -10,20 +10,20 @@ rectangle location {
 
 cloud {
 rectangle "API" as backend {
-    node "Nginx Service"{
-        port 80 as HTTP
-        port 443 as HTTPS
-        rectangle {
-            control "Reverse Proxy" as reverse_proxy
-        }
-    }
 
     node "Docker network" {
-        frame "Backend Container" {
+        node "Nginx Container" as nginx{
+            port 80 as HTTP
+            port 443 as HTTPS
+            rectangle {
+                control "Reverse Proxy" as reverse_proxy
+            }
+        }
+        frame "Backend Container" as database{
             port 3306 as mysql
             database "quran"
         }
-        frame "Middle Tier Container"{
+        frame "Middle Tier Container" as api{
             port 8000 as nimaz_api_port
             [Spring Boot API] as Nimaz_API
         }
@@ -31,7 +31,18 @@ rectangle "API" as backend {
   }
 }
 
-
+cloud {
+'firebase analytics, crashlytics, etc
+    rectangle "Firebase" as firebase{
+        [Firebase Analytics]
+        [Firebase Crashlytics]
+    }
+}
+   nginx -[hidden]-> api
+    nginx -[hidden]-> database
+    frontend -[hidden]-> nginx
+    location -[hidden]> frontend
+    firebase -[hidden]> frontend
 ' external ports
     mysql -left-(3306
     HTTP -up-(80
@@ -40,7 +51,8 @@ rectangle "API" as backend {
 
     Android -down-> 80
     Android <-down-> 443
-    Android <-right-> location
+    Android <-right-> firebase
+    Android <-up-> location
 
     reverse_proxy <-down-> nimaz_api_port
 

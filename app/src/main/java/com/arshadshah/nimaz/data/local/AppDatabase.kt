@@ -15,7 +15,7 @@ import com.arshadshah.nimaz.data.local.models.*
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class] ,
-		version = 2 ,
+		version = 3 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -27,10 +27,10 @@ abstract class AppDatabase : RoomDatabase()
 	abstract val prayerTimes : PrayerTimesDao
 	abstract val dua : DuaDao
 
-	//migration from version 1 to 2
 	class Migration1To2 : Migration(1 , 2)
 	{
-		override fun migrate(database: SupportSQLiteDatabase)
+
+		override fun migrate(database : SupportSQLiteDatabase)
 		{
 			database.execSQL("ALTER TABLE Aya ADD COLUMN suraNumber INTEGER NOT NULL DEFAULT 0")
 			database.execSQL("ALTER TABLE Aya ADD COLUMN ayaNumberInSurah INTEGER NOT NULL DEFAULT 0")
@@ -42,6 +42,26 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("ALTER TABLE Aya ADD COLUMN sajdaType TEXT NOT NULL DEFAULT ''")
 			database.execSQL("ALTER TABLE Aya ADD COLUMN ruku INTEGER NOT NULL DEFAULT 0")
 			database.execSQL("ALTER TABLE Aya ADD COLUMN juzNumber INTEGER NOT NULL DEFAULT 0")
+		}
+	}
+
+	//migration from version 3 to 4
+	class Migration2To3 : Migration(2 , 3)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//1. Create the new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Dua_new` (`_id` INTEGER NOT NULL, `chapter_id` INTEGER NOT NULL, `favourite` INTEGER NOT NULL, `arabic_dua` TEXT NOT NULL, `english_translation` TEXT NOT NULL, `english_reference` TEXT NOT NULL, PRIMARY KEY(`_id`))")
+
+			//2. Copy the data
+			database.execSQL("INSERT INTO Dua_new SELECT _id, chapter_id, favourite, arabic_dua, english_translation, english_reference FROM Dua")
+
+			//3. Remove the old table
+			database.execSQL("DROP TABLE Dua")
+
+			//4. Change the table name to the correct one
+			database.execSQL("ALTER TABLE Dua_new RENAME TO Dua")
 		}
 	}
 }

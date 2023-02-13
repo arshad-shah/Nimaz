@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
+import android.content.Context
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,7 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 	//get font size from shared preferences#
 	val sharedPreferences = PrivateSharedPreferences(context)
 	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
+
 	Verses(
 			modifier = Modifier
 				.padding(paddingValues)
@@ -47,54 +49,73 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 		AyaList.forEach { aya ->
 			val isNotBismillah =
 				aya.ayaNumber != 0 || aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾"
-			CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-				ClickableText(
-						modifier = if (isNotBismillah)
-						{
-							Modifier
-								.placeholder(
-										visible = loading ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
-						} else
-						{
-							Modifier
-								.fillMaxWidth()
-								.border(
-										2.dp ,
-										MaterialTheme.colorScheme.outline ,
-										RoundedCornerShape(8.dp)
-									   )
-								.placeholder(
-										visible = loading ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
-						} ,
-						text = AnnotatedString(aya.ayaArabic) ,
-						softWrap = true ,
-						maxLines = 2 ,
-						style = TextStyle(
-								fontFamily = quranFont ,
-								//if arabic font size is not set then use default font size
-								fontSize = if (arabicFontSize == 0f) 24.sp else arabicFontSize.sp ,
-								lineHeight = 60.sp ,
-								color = MaterialTheme.colorScheme.onSurface ,
-								textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
-										 ) ,
-						onClick = {
-							Toasty.info(context , aya.ayaNumber.toString()).show()
-						}
-							 )
-			}
+			Verse(
+					context = context ,
+					isNotBismillah = isNotBismillah ,
+					//split the aya into words
+					word = aya.ayaArabic ,
+					loading = loading ,
+					arabicFontSize = arabicFontSize
+				 )
 		}
+	}
+}
+
+@Composable
+fun Verse(
+	context : Context ,
+	isNotBismillah : Boolean ,
+	loading : Boolean ,
+	arabicFontSize : Float ,
+	word : String ,
+		 )
+{
+	CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+		ClickableText(
+				modifier = if (isNotBismillah)
+				{
+					Modifier
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
+				} else
+				{
+					Modifier
+						.fillMaxWidth()
+						.border(
+								2.dp ,
+								MaterialTheme.colorScheme.outline ,
+								RoundedCornerShape(8.dp)
+							   )
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
+				} ,
+				text = AnnotatedString(word) ,
+				softWrap = true ,
+				maxLines = 2 ,
+				style = TextStyle(
+						fontFamily = quranFont ,
+						//if arabic font size is not set then use default font size
+						fontSize = if (arabicFontSize == 0f) 24.sp else arabicFontSize.sp ,
+						lineHeight = 60.sp ,
+						color = MaterialTheme.colorScheme.onSurface ,
+						textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
+								 ) ,
+				onClick = {
+					Toasty.info(context , word).show()
+				}
+					 )
 	}
 }
 

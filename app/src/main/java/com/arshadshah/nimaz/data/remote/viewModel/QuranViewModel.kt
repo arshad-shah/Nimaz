@@ -205,9 +205,10 @@ class QuranViewModel(context : Context) : ViewModel()
 	//events to bookmark an aya, favorite an aya, add a note to an aya
 	sealed class AyaEvent
 	{
-		data class BookmarkAya(val id : Int, val bookmark : Boolean) : AyaEvent()
-		data class FavoriteAya(val id : Int, val favorite : Boolean) : AyaEvent()
-		data class AddNoteToAya(val id : Int, val note : String) : AyaEvent()
+
+		data class BookmarkAya(val id : Int , val bookmark : Boolean) : AyaEvent()
+		data class FavoriteAya(val id : Int , val favorite : Boolean) : AyaEvent()
+		data class AddNoteToAya(val id : Int , val note : String) : AyaEvent()
 	}
 
 	//events handler
@@ -217,15 +218,17 @@ class QuranViewModel(context : Context) : ViewModel()
 		{
 			is AyaEvent.BookmarkAya ->
 			{
-				bookmarkAya(ayaEvent.id, ayaEvent.bookmark)
+				bookmarkAya(ayaEvent.id , ayaEvent.bookmark)
 			}
+
 			is AyaEvent.FavoriteAya ->
 			{
-				favoriteAya(ayaEvent.id, ayaEvent.favorite)
+				favoriteAya(ayaEvent.id , ayaEvent.favorite)
 			}
+
 			is AyaEvent.AddNoteToAya ->
 			{
-				addNoteToAya(ayaEvent.id, ayaEvent.note)
+				addNoteToAya(ayaEvent.id , ayaEvent.note)
 			}
 
 			else ->
@@ -235,14 +238,14 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//bookmark an aya
-	fun bookmarkAya(id : Int, bookmark : Boolean)
+	fun bookmarkAya(id : Int , bookmark : Boolean)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
-				dataStore.bookmarkAya(id, bookmark)
+				dataStore.bookmarkAya(id , bookmark)
 				_ayaState.value = AyaState.Success
 			} catch (e : Exception)
 			{
@@ -252,14 +255,14 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//favorite an aya
-	fun favoriteAya(id: Int, favorite : Boolean)
+	fun favoriteAya(id : Int , favorite : Boolean)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
-				dataStore.favoriteAya( id, favorite)
+				dataStore.favoriteAya(id , favorite)
 				_ayaState.value = AyaState.Success
 			} catch (e : Exception)
 			{
@@ -269,14 +272,14 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//add a note to an aya
-	fun addNoteToAya(id: Int, note : String)
+	fun addNoteToAya(id : Int , note : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
-				dataStore.addNoteToAya(id, note)
+				dataStore.addNoteToAya(id , note)
 				_ayaState.value = AyaState.Success
 			} catch (e : Exception)
 			{

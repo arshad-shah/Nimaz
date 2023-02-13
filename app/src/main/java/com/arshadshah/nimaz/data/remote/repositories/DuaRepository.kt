@@ -33,7 +33,6 @@ object DuaRepository
 									duaResponse.chapterId ,
 									duaResponse.favourite ,
 									duaResponse.arabicDua ,
-									duaResponse.arabicReference ,
 									duaResponse.englishTranslation ,
 									duaResponse.englishReference
 							   )
