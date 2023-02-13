@@ -17,10 +17,6 @@ class ErrorDetector
 	fun errorDetector(correct : String , incorrect : String) : SpannableString
 	{
 		Log.d(AppConstants.ERROR_DETECTOR_TAG , "Error Detector Started")
-		//bismillah with and without diacratics
-		val diacritics = "[\\u064b\\u064c\\u064d\\u064e\\u064f\\u0650\\u0651\\u0652\\u0640]"
-		val correctPlain = correct.replace("ٱ".toRegex() , "ا").replace(diacritics.toRegex() , "")
-		val incorrectPlain = incorrect.replace(diacritics.toRegex() , "")
 
 		val correctWords = correct.split(" ").toMutableList()
 		val incorrectWords = incorrect.split(" ").toMutableList()
