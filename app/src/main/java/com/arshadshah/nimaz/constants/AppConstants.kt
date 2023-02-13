@@ -224,7 +224,7 @@ object AppConstants
 	fun getDefaultParametersForMethod(method : String) : Map<String , String>
 	{
 		val mapOfDefaultParameters = mutableMapOf<String , String>()
-		when(method)
+		when (method)
 		{
 			"MWL" ->
 			{
@@ -240,6 +240,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"EGYPTIAN" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "19.5"
@@ -254,6 +255,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"KARACHI" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
@@ -268,6 +270,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"MAKKAH" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18.5"
@@ -282,6 +285,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"DUBAI" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18.2"
@@ -296,6 +300,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"ISNA" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "15"
@@ -310,6 +315,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"KUWAIT" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
@@ -324,6 +330,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"TEHRAN" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "17.7"
@@ -338,6 +345,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"SHIA" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "16"
@@ -352,6 +360,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"GULF" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "19.5"
@@ -366,6 +375,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"QATAR" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
@@ -380,6 +390,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"SINGAPORE" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "20"
@@ -394,6 +405,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"FRANCE" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "12"
@@ -408,6 +420,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"TURKEY" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
@@ -422,6 +435,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"RUSSIA" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "16"
@@ -436,6 +450,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"MOONSIGHTING" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
@@ -450,6 +465,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"IRELAND" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "13.5"
@@ -464,6 +480,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
 				mapOfDefaultParameters["ishaAdjustment"] = "-1"
 			}
+
 			"OTHER" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "0"
@@ -478,6 +495,7 @@ object AppConstants
 				mapOfDefaultParameters["maghribAdjustment"] = "0"
 				mapOfDefaultParameters["ishaAdjustment"] = "0"
 			}
+
 			else ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
