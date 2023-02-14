@@ -25,14 +25,31 @@ fun AyatScreen(
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
+	val fontArabic = sharedPreferences.getDataFloat(
+			AppConstants.ARABIC_FONT_SIZE
+												   )
+	val fontTranslation = sharedPreferences.getDataFloat(
+			AppConstants.TRANSLATION_FONT_SIZE
+														)
+	val fontStyle = sharedPreferences.getData(
+			AppConstants.FONT_STYLE,
+			"Default"
+											 )
+
+
 	sharedPreferences.saveDataFloat(
 			customkey = AppConstants.ARABIC_FONT_SIZE ,
-			data = 24.0f
+			data = fontArabic
 								   )
 	sharedPreferences.saveDataFloat(
 			customkey = AppConstants.TRANSLATION_FONT_SIZE ,
-			data = 16.0f
+			data = fontTranslation
 								   )
+
+	sharedPreferences.saveData(
+			customkey = AppConstants.FONT_STYLE,
+			data = fontStyle
+							  )
 
 
 	Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: $number $isSurah $language")
