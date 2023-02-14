@@ -28,16 +28,17 @@ class SensorDataManager(context : Context) : SensorEventListener
 																														   )
 		)
 		{
-			Log.d("SensorDataManager" , "No sensors")
-			Toasty.error(context , "No sensors found on device" , Toasty.LENGTH_LONG).show()
-		} else
-		{
 			Log.d("SensorDataManager" , "init")
 			accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 			magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
 			sensorManager.registerListener(this , accelerometer , SensorManager.SENSOR_DELAY_UI)
 			sensorManager.registerListener(this , magnetometer , SensorManager.SENSOR_DELAY_UI)
+		} else
+		{
+
+			Log.d("SensorDataManager" , "No sensors")
+			Toasty.error(context , "No sensors found on device" , Toasty.LENGTH_LONG).show()
 		}
 	}
 

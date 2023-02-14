@@ -73,6 +73,7 @@ dependencies {
     implementation "androidx.datastore:datastore-core:$datastore_core_version"
     implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
     implementation "androidx.navigation:navigation-compose:$nav_version"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
@@ -132,4 +133,7 @@ dependencies {
     implementation "com.google.android.play:app-update-ktx:$app_update_version"
 
     implementation 'com.google.code.gson:gson:2.9.0'
+
+    implementation "io.github.boguszpawlowski.composecalendar:composecalendar:1.0.2"
+    implementation "io.github.boguszpawlowski.composecalendar:composecalendar:1.0.2"
 }

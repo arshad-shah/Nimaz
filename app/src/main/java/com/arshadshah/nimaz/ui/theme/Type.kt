@@ -11,6 +11,9 @@ import com.arshadshah.nimaz.R
 
 val nunito = FontFamily(Font(R.font.nunito))
 val quranFont = FontFamily(Font(R.font.quran_font))
+val utmaniQuranFont = FontFamily(Font(R.font.uthman))
+val hidayat = FontFamily(Font(R.font.noorehidayat))
+val amiri = FontFamily(Font(R.font.amiri))
 val urduFont = FontFamily(Font(R.font.urdu))
 
 // Set of Material typography styles to start with these are the default values
