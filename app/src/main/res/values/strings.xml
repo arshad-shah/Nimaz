@@ -33,4 +33,5 @@
     <string name="title_activity_list_of_tasbeeh">ListOfTasbeeh</string>
     <string name="title_activity_shahadah">ShahadahActivity</string>
     <string name="title_activity_zakat_calculator">ZakatCalculator</string>
+    <string name="bead">Bead</string>
 </resources>
