@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
+	const val FONT_STYLE = "font_style"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 
 	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/custom"

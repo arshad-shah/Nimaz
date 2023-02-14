@@ -22,8 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.theme.quranFont
-import com.arshadshah.nimaz.ui.theme.urduFont
+import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -150,6 +149,7 @@ fun AyaListItemUI(
 	val sharedPreferences = PrivateSharedPreferences(context)
 	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
 	val translationFontSize = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
+	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE, "Default")
 
 	//mutable ayaArabic state so that we can change it when the user clicks on the mic button
 	val ayaArabicState = remember { mutableStateOf(aya.ayaArabic) }
@@ -199,7 +199,25 @@ fun AyaListItemUI(
 							text = ayaArabicState.value ,
 							style = MaterialTheme.typography.titleLarge ,
 							fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp ,
-							fontFamily = quranFont ,
+							fontFamily = when(fontStyle) {
+								"Default" -> {
+									quranFont
+								}
+								"Naqsh" -> {
+									utmaniQuranFont
+								}
+								"Hidayat" -> {
+									hidayat
+								}
+								"Amiri" -> {
+									amiri
+								}
+
+								else ->
+								{
+									quranFont
+								}
+							} ,
 							textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth()
