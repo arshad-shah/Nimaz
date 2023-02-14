@@ -76,6 +76,7 @@ fun PrayerTrackerHeader(monthState : MonthState) {
 		.uppercase(Locale.ROOT) + currentMonth.month.name.substring(1).lowercase(
 			Locale.ROOT
 																				)
+
 	ElevatedCard(
 			modifier = Modifier
 				.padding(8.dp),
@@ -147,6 +148,7 @@ fun PrayerTrackerWeekHeader(weekState : List<DayOfWeek>){
 //composable to show two tabs for the prayer tracker one for current day and one for the fasting tracker
 @Composable
 fun PrayerTrackerTabs(paddingValues : PaddingValues , dateSelected : MutableState<String>) {
+
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
 	val titles = listOf("Prayer")
 	ElevatedCard(

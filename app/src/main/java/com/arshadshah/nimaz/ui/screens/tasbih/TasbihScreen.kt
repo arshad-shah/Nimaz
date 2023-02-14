@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.Counter
+import com.arshadshah.nimaz.ui.components.ui.PrayerBeads
 import com.arshadshah.nimaz.ui.theme.quranFont
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Minus
@@ -179,6 +180,7 @@ fun TasbihScreen(paddingValues : PaddingValues)
 					   ) {
 		it
 		Counter(vibrator , it , vibrationAllowed , count , reset , showResetDialog)
+//		PrayerBeads()
 	}
 }
 
