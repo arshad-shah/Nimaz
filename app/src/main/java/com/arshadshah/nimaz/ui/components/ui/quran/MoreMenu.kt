@@ -25,6 +25,7 @@ fun MoreMenu(
 			)
 {
 
+
 	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 
 	val pageTypeState =
@@ -38,6 +39,7 @@ fun MoreMenu(
 
 	val items1 : List<String> = listOf("List" , "Page (Experimental)")
 	val items2 : List<String> = listOf("English" , "Urdu")
+	val items3 : List<String> = listOf("Default" , "Naqsh", "Hidayat", "Amiri")
 	val (showDialog1 , setShowDialog1) = remember { mutableStateOf(false) }
 	val (showDialog2 , setShowDialog2) = remember { mutableStateOf(false) }
 
@@ -54,6 +56,13 @@ fun MoreMenu(
 			key = AppConstants.TRANSLATION_FONT_SIZE ,
 			defaultValue = 16f
 																	  )
+
+	//font style
+	val fontStyleState = rememberPreferenceStringSettingState(
+			key = AppConstants.FONT_STYLE ,
+			defaultValue = "Default" ,
+			sharedPreferences
+															 )
 
 	DropdownMenu(
 			expanded = menuOpen ,
@@ -92,7 +101,7 @@ fun MoreMenu(
 				DropdownMenuItem(onClick = {
 					setShowDialog3(true)
 					setMenuOpen(false)
-				} , text = { Text(text = "Font Size") })
+				} , text = { Text(text = "Font") })
 			}
 				)
 
@@ -117,7 +126,7 @@ fun MoreMenu(
 					)
 	} else if (showDialog3)
 	{
-		FontSizeDialog(setShowDialog3 , arabicFontSizeState , translationFontSizeState)
+		FontSizeDialog(setShowDialog3 , arabicFontSizeState , translationFontSizeState, fontStyleState,items3)
 	} else
 	{
 		return

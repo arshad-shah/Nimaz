@@ -1,0 +1,44 @@
+{
+  ConstraintSets: {
+    start: {
+      bead: {
+        width: 40,
+        height: 40,
+        start: ['parent', 'start', 16]
+      },
+      my_divider: {
+        start: ['bead', 'end', 16],
+        top: ['bead', 'top'],
+        bottom: ['bead', 'bottom']
+      }
+    },
+    end: {
+      bead: {
+        width: 40,
+        height: 40,
+        end: ['parent', 'end', 16]
+      },
+      my_divider: {
+        end: ['bead', 'start', 16],
+        top: ['bead', 'top'],
+        bottom: ['bead', 'bottom']
+      }
+    }
+  },
+  Transitions: {
+    default: {
+      from: 'start',
+      to: 'end',
+      pathMotionArc: 'startHorizontal',
+      KeyFrames: {
+        KeyAttributes: [
+          {
+            target: ['bead'],
+            frames: [0, 5, 50, 95, 100],
+            translationY: [0, -50, -200, -50, 0]
+          }
+        ]
+      }
+    }
+  }
+}

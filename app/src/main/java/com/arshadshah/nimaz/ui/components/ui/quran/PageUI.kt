@@ -24,8 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -40,6 +39,7 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 	//get font size from shared preferences#
 	val sharedPreferences = PrivateSharedPreferences(context)
 	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
+	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE, "Default")
 
 	Verses(
 			modifier = Modifier
@@ -55,7 +55,8 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 					//split the aya into words
 					word = aya.ayaArabic ,
 					loading = loading ,
-					arabicFontSize = arabicFontSize
+					arabicFontSize = arabicFontSize,
+					fontStyle = fontStyle
 				 )
 		}
 	}
@@ -68,6 +69,7 @@ fun Verse(
 	loading : Boolean ,
 	arabicFontSize : Float ,
 	word : String ,
+	fontStyle : String ,
 		 )
 {
 	CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -105,7 +107,25 @@ fun Verse(
 				softWrap = true ,
 				maxLines = 2 ,
 				style = TextStyle(
-						fontFamily = quranFont ,
+						fontFamily =  when(fontStyle) {
+							"Default" -> {
+								quranFont
+							}
+							"Naqsh" -> {
+								utmaniQuranFont
+							}
+							"Hidayat" -> {
+								hidayat
+							}
+							"Amiri" -> {
+								amiri
+							}
+
+							else ->
+							{
+								quranFont
+							}
+						}  ,
 						//if arabic font size is not set then use default font size
 						fontSize = if (arabicFontSize == 0f) 24.sp else arabicFontSize.sp ,
 						lineHeight = 60.sp ,

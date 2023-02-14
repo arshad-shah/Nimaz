@@ -12,6 +12,22 @@ class DataStore(db : AppDatabase)
 	private val surahDao = db.surah
 	private val prayerTimesDao = db.prayerTimes
 	private val duaDao = db.dua
+	private val prayerTrackerDao = db.prayersTracker
+
+	//get trtacker for a specific date
+	suspend fun getTrackerForDate(date : String) = prayerTrackerDao.getTrackerForDate(date)
+
+	//get all the trackers
+	suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers()
+
+	//save a tracker
+	suspend fun saveTracker(tracker : LocalPrayersTracker) = prayerTrackerDao.saveTracker(tracker)
+
+	//update a tracker
+	suspend fun updateTracker(tracker : LocalPrayersTracker) = prayerTrackerDao.updateTracker(tracker)
+
+	//delete a tracker
+	suspend fun deleteTracker(tracker : LocalPrayersTracker) = prayerTrackerDao.deleteTracker(tracker)
 
 	//get all the ayas of a surah
 	suspend fun getAyasOfSurah(surahNumber : Int , translationLanguage : String) =
