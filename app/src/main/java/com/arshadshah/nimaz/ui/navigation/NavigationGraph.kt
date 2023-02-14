@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.navigation
 
 import android.os.Build
+import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterTransition
@@ -9,6 +10,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.activity
@@ -39,6 +41,10 @@ import com.google.accompanist.navigation.animation.composable
 fun NavigationGraph(
 	navController : NavController ,
 	paddingValues : PaddingValues ,
+	showResetDialog : MutableState<Boolean> ,
+	vibrator : Vibrator ,
+	vibrationAllowed : MutableState<Boolean> ,
+	rOrl : MutableState<Int> ,
 				   )
 {
 
@@ -355,7 +361,7 @@ fun NavigationGraph(
 		}
 
 		composable(TASBIH_SCREEN_ROUTE) {
-			TasbihScreen(paddingValues = paddingValues)
+			TasbihScreen(paddingValues = paddingValues, showResetDialog, vibrator,vibrationAllowed,rOrl)
 		}
 
 		composable(NAMESOFALLAH_SCREEN_ROUTE) {
