@@ -8,6 +8,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Vibrator
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,10 +18,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
@@ -47,9 +50,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Pause
-import compose.icons.feathericons.Play
-import compose.icons.feathericons.StopCircle
+import compose.icons.feathericons.*
 
 class MainActivity : ComponentActivity()
 {
@@ -155,6 +156,13 @@ class MainActivity : ComponentActivity()
 				}
 				val (menuOpen , setMenuOpen) = remember { mutableStateOf(false) }
 				val CustomAnimation = remember { CustomAnimation() }
+
+				val showResetDialog = remember { mutableStateOf(false) }
+
+				val vibrator = this.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+				val vibrationAllowed = remember { mutableStateOf(true) }
+				val rOrl = remember { mutableStateOf(0) }
+
 				Scaffold(
 						topBar = {
 							AnimatedVisibility(
@@ -244,6 +252,47 @@ class MainActivity : ComponentActivity()
 															}
 														}
 
+													}else if(route.value == TASBIH_SCREEN_ROUTE){
+														//icon button to chenge the position of the button for right or left
+														IconButton(onClick = {
+															rOrl.value = if (rOrl.value == 0) 1 else 0
+														}) {
+															Icon(
+																	imageVector = if (rOrl.value == 0) FeatherIcons.CornerRightDown
+																	else FeatherIcons.CornerLeftDown ,
+																	contentDescription = "Change the position of the button"
+																)
+														}
+														//vibration toggle button for tasbih to provide feedback
+														IconButton(onClick = {
+															vibrationAllowed.value =
+																! vibrationAllowed.value
+															//mute the vibration
+															if (! vibrationAllowed.value)
+															{
+																vibrator.cancel()
+															}
+														}) {
+															Icon(
+																	painter = if (vibrationAllowed.value) painterResource(
+																			id = R.drawable.vibration
+																														 )
+																	else painterResource(
+																			id = R.drawable.close
+																						) ,
+																	contentDescription = "Vibration"
+																)
+														}
+
+														//a reset button to reset the count
+														IconButton(onClick = {
+															showResetDialog.value = true
+														}) {
+															Icon(
+																	imageVector = Icons.Filled.Refresh ,
+																	contentDescription = "Reset" ,
+																)
+														}
 													}
 												}
 												 )
@@ -260,7 +309,7 @@ class MainActivity : ComponentActivity()
 									})
 						}
 						) { it ->
-					NavigationGraph(navController = navController , it)
+					NavigationGraph(navController = navController , it,showResetDialog,vibrator,vibrationAllowed,rOrl)
 				}
 			}
 		}

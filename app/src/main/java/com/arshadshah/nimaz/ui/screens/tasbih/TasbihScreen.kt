@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import android.content.Context
 import android.os.Vibrator
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -9,26 +8,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.Counter
-import com.arshadshah.nimaz.ui.components.ui.PrayerBeads
 import com.arshadshah.nimaz.ui.theme.quranFont
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Minus
@@ -36,15 +30,18 @@ import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterialApi::class , ExperimentalMaterial3Api::class)
 @Composable
-fun TasbihScreen(paddingValues : PaddingValues)
+fun TasbihScreen(
+	paddingValues : PaddingValues ,
+	showResetDialog : MutableState<Boolean> ,
+	vibrator : Vibrator ,
+	vibrationAllowed : MutableState<Boolean> ,
+	rOrl : MutableState<Int>
+				)
 {
 
 
 	val resources = LocalContext.current.resources
 	val context = LocalContext.current
-
-	val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-	val vibrationAllowed = remember { mutableStateOf(true) }
 	val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
 			bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
 																   )
@@ -97,8 +94,6 @@ fun TasbihScreen(paddingValues : PaddingValues)
 		}
 	}
 
-	var showResetDialog = remember { mutableStateOf(false) }
-
 	//the state of the lazy column, it should scroll to the item where selected is true
 	//get the arrays
 	val englishNames = resources.getStringArray(R.array.tasbeehTransliteration)
@@ -110,42 +105,6 @@ fun TasbihScreen(paddingValues : PaddingValues)
 			modifier = Modifier
 				.shadow(16.dp , CardDefaults.elevatedShape)
 				.padding(paddingValues) ,
-			topBar = {
-				TopAppBar(
-						title = { } ,
-						actions = {
-							//vibration toggle button for tasbih to provide feedback
-							IconButton(onClick = {
-								vibrationAllowed.value = ! vibrationAllowed.value
-								//mute the vibration
-								if (! vibrationAllowed.value)
-								{
-									vibrator.cancel()
-								}
-							}) {
-								Icon(
-										painter = if (vibrationAllowed.value) painterResource(
-												id = R.drawable.vibration
-																							 )
-										else painterResource(
-												id = R.drawable.close
-															) ,
-										contentDescription = "Vibration"
-									)
-							}
-
-							//a reset button to reset the count
-							IconButton(onClick = {
-								showResetDialog.value = true
-							}) {
-								Icon(
-										imageVector = Icons.Filled.Refresh ,
-										contentDescription = "Reset" ,
-									)
-							}
-						}
-						 )
-			} ,
 			scaffoldState = bottomSheetScaffoldState ,
 			sheetShape = RoundedCornerShape(topStart = 16.dp , topEnd = 16.dp) ,
 			sheetElevation = 8.dp ,
@@ -179,7 +138,7 @@ fun TasbihScreen(paddingValues : PaddingValues)
 			sheetPeekHeight = 200.dp ,
 					   ) {
 		it
-		Counter(vibrator , it , vibrationAllowed , count , reset , showResetDialog)
+		Counter(vibrator , it , vibrationAllowed , count , reset , showResetDialog, rOrl)
 //		PrayerBeads()
 	}
 }
