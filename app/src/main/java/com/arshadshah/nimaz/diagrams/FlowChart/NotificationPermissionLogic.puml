@@ -1,0 +1,39 @@
+@startuml
+title Notification permission flow
+start
+:when user is on the page;
+'check if permission is already granted
+if(Notification permission granted?) then (yes)
+:Set toggle to on;
+else (no)
+:Set toggle to off;
+endif
+'when user clicks on toggle
+if(User clicks on notification permission Toggle) then (yes)
+:Request permission;
+else (no)
+if(User moves away from page without granting permission) then (yes)
+:Show Toast message saying that adhan will not work without permission;
+:Disable adhan;
+else (no)
+endif
+endif
+'after click on toggle and permission dialog is shown check if permission is granted
+if(Notification permission granted?) then (yes)
+:Set toggle to on;
+else (no)
+:Set toggle to off;
+endif
+
+'if user allows permission but then disables the toggle thne show a toast message
+'explaining how to remove the permission and navigate to the settings page of the app
+if(User disables the toggle after granting permission) then (yes)
+:Show Toast message saying that adhan will not work without permission;
+:Navigate to settings page of the app;
+:Disable adhan;
+else (no)
+endif
+
+stop
+
+@enduml
