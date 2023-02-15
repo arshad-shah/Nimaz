@@ -17,8 +17,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -42,12 +44,14 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.location.NetworkChecker
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.updateAppWidget
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity()
 {
@@ -160,7 +164,28 @@ class MainActivity : ComponentActivity()
 				val vibrationAllowed = remember { mutableStateOf(true) }
 				val rOrl = remember { mutableStateOf(0) }
 
+				val snackbarHostState = remember { SnackbarHostState() }
+				val scope = rememberCoroutineScope()
+
+				//check for network connection
+				val networkConnection = remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
+
+				LaunchedEffect(networkConnection.value) {
+					if (!networkConnection.value)
+					{
+						scope.launch {
+							snackbarHostState.showSnackbar(
+									"No internet connection" ,
+									duration = SnackbarDuration.Indefinite,
+									withDismissAction = true
+														  )
+						}
+					}
+				}
+
+
 				Scaffold(
+						snackbarHost = { SnackbarHost(snackbarHostState) },
 						topBar = {
 							AnimatedVisibility(
 									visible = checkRoute(route.value.toString()) ,
@@ -308,7 +333,7 @@ class MainActivity : ComponentActivity()
 									}
 											  )
 						} ,
-						bottomBar = {
+																  bottomBar = {
 							AnimatedVisibility(
 									visible = ! checkRoute(route.value.toString()) ,
 									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
