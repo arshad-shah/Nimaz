@@ -144,7 +144,7 @@ fun FeatureThatRequiresLocationPermission(
 
 		} else
 		{
-			showRationale.value = false
+			showRationale.value = true
 			descToShow.value =
 				"Location permission is required to get accurate prayer times the system will revert to using manual location without updates."
 		}
@@ -155,16 +155,25 @@ fun FeatureThatRequiresLocationPermission(
 		//permission not granted
 		//show dialog
 		AlertDialog(
-				onDismissRequest = { locationPermissionState.launchMultiplePermissionRequest() } ,
+				onDismissRequest = {
+					locationPermissionState.launchMultiplePermissionRequest()
+					showRationale.value = false
+								   } ,
 				title = { Text(text = "Location Permission Required") } ,
 				text = { Text(text = descToShow.value) } ,
 				confirmButton = {
-					Button(onClick = { locationPermissionState.launchMultiplePermissionRequest() }) {
+					Button(onClick = {
+						locationPermissionState.launchMultiplePermissionRequest()
+						showRationale.value = false
+					}) {
 						Text(text = "Allow")
 					}
 				} ,
 				dismissButton = {
-					Button(onClick = { locationPermissionState.launchMultiplePermissionRequest() }) {
+					Button(onClick = {
+						locationPermissionState.launchMultiplePermissionRequest()
+						showRationale.value = false
+					}) {
 						Text(text = "Cancel")
 					}
 				}

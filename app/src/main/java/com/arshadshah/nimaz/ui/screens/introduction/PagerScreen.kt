@@ -12,9 +12,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun PagerScreen(onBoardingPage : OnBoardingPage)
@@ -70,17 +68,5 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 				onBoardingPage.extra.invoke()
 			}
 		}
-	}
-}
-
-@Preview
-@Composable
-fun PagerScreenPreview()
-{
-	val pages = listOf(
-			OnBoardingPage.Fourth ,
-					  )
-	NimazTheme {
-		PagerScreen(pages[0])
 	}
 }
