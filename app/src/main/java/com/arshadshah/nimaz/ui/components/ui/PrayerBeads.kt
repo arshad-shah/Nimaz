@@ -24,7 +24,8 @@ import java.util.*
 
 @OptIn(ExperimentalMotionApi::class)
 @Composable
-fun PrayerBeads() {
+fun PrayerBeads()
+{
 	val progress = remember { mutableStateOf(0f) }
 	//a prayer beads animation that is used in the prayer screen
 	//we have a motion layout that has a constraint set that is used to animate the beads
@@ -33,24 +34,29 @@ fun PrayerBeads() {
 
 	//json for the motion scene
 
-	Column(modifier = Modifier
-		.fillMaxSize()
-		.padding(8.dp),
-		  verticalArrangement = Arrangement.SpaceEvenly,
+	Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(8.dp) ,
+			verticalArrangement = Arrangement.SpaceEvenly ,
 		  ) {
 
 		PrayerBeadsMotionLayout(progress = progress.value)
 
-		Slider(value = progress.value, onValueChange = { progress.value = it })
+		Slider(value = progress.value , onValueChange = { progress.value = it })
 	}
 }
 
 @OptIn(ExperimentalMotionApi::class)
 @Composable
-fun PrayerBeadsMotionLayout(progress: Float){
+fun PrayerBeadsMotionLayout(progress : Float)
+{
 	Log.d("progress" , progress.toString())
 	val context = LocalContext.current
-	val motionSceneJson = remember { context.resources.openRawResource(R.raw.prayer_beads_motion_scene).readBytes().decodeToString() }
+	val motionSceneJson = remember {
+		context.resources.openRawResource(R.raw.prayer_beads_motion_scene).readBytes()
+			.decodeToString()
+	}
 	Log.d("motionSceneJson" , motionSceneJson)
 	MotionLayout(
 			motionScene = MotionScene(motionSceneJson) ,
@@ -68,44 +74,45 @@ fun PrayerBeadsMotionLayout(progress: Float){
 @Composable
 fun Beads(motionProperties : MutableState<MotionLayoutScope.MotionProperties>)
 {
-	Box (
+	Box(
 			modifier = Modifier.layoutId("prayer_beads")
-			){
+	   ) {
 		Box(
 				modifier = Modifier
 					.fillMaxWidth()
-					.height(48.dp),
+					.height(48.dp) ,
 				contentAlignment = Alignment.Center
 		   ) {
 			Divider(
 					modifier = Modifier
 						.height(3.dp)
 						.fillMaxWidth()
-						.layoutId("thread"),
+						.layoutId("thread") ,
 					color = MaterialTheme.colorScheme.outline
 				   )
 		}
 		Row {
-				Box(
+			Box(
+					modifier = Modifier
+						.width(48.dp)
+						.height(48.dp)
+			   ) {
+				Image(
+						painter = painterResource(id = R.drawable.bead1) ,
+						contentDescription = "Prayer Beads" ,
 						modifier = Modifier
-							.width(48.dp)
-							.height(48.dp)
-				   ) {
-					Image(
-							painter = painterResource(id = R.drawable.bead1) ,
-							contentDescription = "Prayer Beads" ,
-							modifier = Modifier
-								.size(48.dp)
-								.padding(vertical = 1.dp)
-								.layoutId("bead")
-						 )
-				}
+							.size(48.dp)
+							.padding(vertical = 1.dp)
+							.layoutId("bead")
+					 )
+			}
 		}
 	}
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PrayerBeadsPreview() {
+fun PrayerBeadsPreview()
+{
 	PrayerBeads()
 }

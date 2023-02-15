@@ -19,13 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.Counter
 import com.arshadshah.nimaz.ui.theme.quranFont
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Minus
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterialApi::class , ExperimentalMaterial3Api::class)
@@ -35,7 +34,7 @@ fun TasbihScreen(
 	showResetDialog : MutableState<Boolean> ,
 	vibrator : Vibrator ,
 	vibrationAllowed : MutableState<Boolean> ,
-	rOrl : MutableState<Int>
+	rOrl : MutableState<Int> ,
 				)
 {
 
@@ -112,11 +111,11 @@ fun TasbihScreen(
 			sheetContent = {
 				//an icon to show where to pull the bottom sheet from
 				Icon(
-						imageVector = FeatherIcons.Minus ,
+						painter = painterResource(id = R.drawable.minus_icon) ,
 						contentDescription = "Pull to expand" ,
 						modifier = Modifier
 							.align(Alignment.CenterHorizontally)
-							.size(48.dp) ,
+							.size(24.dp) ,
 					)
 				//show the one where selected is true if none is selected, show the first one
 				LazyColumn(state = listState) {
@@ -138,7 +137,7 @@ fun TasbihScreen(
 			sheetPeekHeight = 200.dp ,
 					   ) {
 		it
-		Counter(vibrator , it , vibrationAllowed , count , reset , showResetDialog, rOrl)
+		Counter(vibrator , it , vibrationAllowed , count , reset , showResetDialog , rOrl)
 //		PrayerBeads()
 	}
 }

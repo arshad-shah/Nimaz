@@ -1,48 +1,51 @@
 package com.arshadshah.nimaz.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.ui.icons.Prayer
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Book
-import compose.icons.feathericons.Compass
-import compose.icons.feathericons.Menu
-import compose.icons.feathericons.Settings
 
 
-sealed class BottomNavItem(var title : String , var icon : ImageVector , var screen_route : String)
+sealed class BottomNavItem(
+	var title : String ,
+	var icon : Int ,
+	var screen_route : String ,
+	val iconDescription : String = "" ,
+						  )
 {
 
 	//today
 	object PrayerTimesScreen :
 		BottomNavItem(
 				AppConstants.PRAYER_TIMES_SCREEN_TITLE ,
-				Icons.Prayer ,
-				AppConstants.PRAYER_TIMES_SCREEN_ROUTE
+				R.drawable.person_praying_icon ,
+				AppConstants.PRAYER_TIMES_SCREEN_ROUTE ,
+				"Prayer Times Screen"
 					 )
 
 	object QiblaScreen : BottomNavItem(
 			AppConstants.QIBLA_SCREEN_TITLE ,
-			FeatherIcons.Compass ,
-			AppConstants.QIBLA_SCREEN_ROUTE
+			R.drawable.compass_icon ,
+			AppConstants.QIBLA_SCREEN_ROUTE ,
+			"Qibla Compass Screen"
 									  )
 
 	object QuranScreen : BottomNavItem(
 			AppConstants.QURAN_SCREEN_TITLE ,
-			FeatherIcons.Book ,
-			AppConstants.QURAN_SCREEN_ROUTE
+			R.drawable.quran_icon ,
+			AppConstants.QURAN_SCREEN_ROUTE ,
+			"Quran Screen"
 									  )
 
 	object MoreScreen : BottomNavItem(
 			AppConstants.MORE_SCREEN_TITLE ,
-			FeatherIcons.Menu ,
-			AppConstants.MORE_SCREEN_ROUTE
+			R.drawable.menu_burger_icon ,
+			AppConstants.MORE_SCREEN_ROUTE ,
+			"More Features Screen"
 									 )
 
 	object SettingsScreen : BottomNavItem(
 			AppConstants.SETTINGS_SCREEN_TITLE ,
-			FeatherIcons.Settings ,
-			AppConstants.SETTINGS_SCREEN_ROUTE
+			R.drawable.settings_icon ,
+			AppConstants.SETTINGS_SCREEN_ROUTE ,
+			"Settings Screen"
 										 )
 }

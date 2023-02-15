@@ -15,15 +15,14 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
@@ -49,7 +48,6 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
-import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 
 class MainActivity : ComponentActivity()
@@ -181,7 +179,8 @@ class MainActivity : ComponentActivity()
 												navigationIcon = {
 													IconButton(onClick = { navController.navigateUp() }) {
 														Icon(
-																imageVector = Icons.Default.ArrowBack ,
+																modifier = Modifier.size(24.dp) ,
+																painter = painterResource(id = R.drawable.angle_left_icon) ,
 																contentDescription = "Back"
 															)
 													}
@@ -193,7 +192,8 @@ class MainActivity : ComponentActivity()
 														//open the menu
 														IconButton(onClick = { setMenuOpen(true) }) {
 															Icon(
-																	imageVector = Icons.Filled.MoreVert ,
+																	modifier = Modifier.size(24.dp) ,
+																	painter = painterResource(id = R.drawable.settings_sliders_icon) ,
 																	contentDescription = "Menu"
 																)
 														}
@@ -215,7 +215,8 @@ class MainActivity : ComponentActivity()
 															}
 																	  ) {
 																Icon(
-																		imageVector = FeatherIcons.StopCircle ,
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.stop_icon) ,
 																		contentDescription = "Stop playing"
 																	)
 															}
@@ -240,26 +241,33 @@ class MainActivity : ComponentActivity()
 															if (isPlaying.value)
 															{
 																Icon(
-																		imageVector = FeatherIcons.Pause ,
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.pause_icon) ,
 																		contentDescription = "Pause playing"
 																	)
 															} else
 															{
 																Icon(
-																		imageVector = FeatherIcons.Play ,
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.play_icon) ,
 																		contentDescription = "Play"
 																	)
 															}
 														}
 
-													}else if(route.value == TASBIH_SCREEN_ROUTE){
+													} else if (route.value == TASBIH_SCREEN_ROUTE)
+													{
 														//icon button to chenge the position of the button for right or left
 														IconButton(onClick = {
-															rOrl.value = if (rOrl.value == 0) 1 else 0
+															rOrl.value =
+																if (rOrl.value == 0) 1 else 0
 														}) {
 															Icon(
-																	imageVector = if (rOrl.value == 0) FeatherIcons.CornerRightDown
-																	else FeatherIcons.CornerLeftDown ,
+																	modifier = Modifier.size(24.dp) ,
+																	painter = if (rOrl.value == 0) painterResource(
+																			id = R.drawable.corner_right_down_icon
+																												  )
+																	else painterResource(id = R.drawable.corner_left_down_icon) ,
 																	contentDescription = "Change the position of the button"
 																)
 														}
@@ -274,11 +282,12 @@ class MainActivity : ComponentActivity()
 															}
 														}) {
 															Icon(
+																	modifier = Modifier.size(24.dp) ,
 																	painter = if (vibrationAllowed.value) painterResource(
 																			id = R.drawable.vibration
 																														 )
 																	else painterResource(
-																			id = R.drawable.close
+																			id = R.drawable.cross_icon
 																						) ,
 																	contentDescription = "Vibration"
 																)
@@ -289,7 +298,8 @@ class MainActivity : ComponentActivity()
 															showResetDialog.value = true
 														}) {
 															Icon(
-																	imageVector = Icons.Filled.Refresh ,
+																	modifier = Modifier.size(24.dp) ,
+																	painter = painterResource(id = R.drawable.refresh_icon) ,
 																	contentDescription = "Reset" ,
 																)
 														}
@@ -309,7 +319,14 @@ class MainActivity : ComponentActivity()
 									})
 						}
 						) { it ->
-					NavigationGraph(navController = navController , it,showResetDialog,vibrator,vibrationAllowed,rOrl)
+					NavigationGraph(
+							navController = navController ,
+							it ,
+							showResetDialog ,
+							vibrator ,
+							vibrationAllowed ,
+							rOrl
+								   )
 				}
 			}
 		}

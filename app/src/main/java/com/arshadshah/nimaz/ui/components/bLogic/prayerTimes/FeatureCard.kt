@@ -1,22 +1,17 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.ui.icons.NineNine
-import com.arshadshah.nimaz.ui.components.ui.icons.PlusMinusTasbih
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.ArrowRight
-import compose.icons.feathericons.Github
-import compose.icons.feathericons.List
 
 
 @Composable
@@ -38,13 +33,8 @@ fun FeatureCard(
 		  ) {
 		//website link
 		LinkButton(
-				icon = {
-					Icon(
-							modifier = Modifier.size(48.dp) ,
-							imageVector = Icons.PlusMinusTasbih ,
-							contentDescription = "Tasbih" ,
-						)
-				} ,
+				painter = painterResource(id = R.drawable.tasbih) ,
+				content = "Tasbih" ,
 				onClick = {
 					onNavigateToTasbihScreen(" ")
 				} ,
@@ -53,13 +43,8 @@ fun FeatureCard(
 
 		//linkdIn link
 		LinkButton(
-				icon = {
-					Icon(
-							modifier = Modifier.size(28.dp) ,
-							imageVector = Icons.NineNine ,
-							contentDescription = "Names of Allah" ,
-						)
-				} ,
+				painter = painterResource(id = R.drawable.names_of_allah) ,
+				content = "Names of Allah" ,
 				onClick = {
 					onNavigateToNames()
 				} ,
@@ -67,13 +52,8 @@ fun FeatureCard(
 				  )
 		//email link
 		LinkButton(
-				icon = {
-					Icon(
-							modifier = Modifier.size(48.dp) ,
-							imageVector = FeatherIcons.List ,
-							contentDescription = "Duas" ,
-						)
-				} ,
+				painter = painterResource(id = R.drawable.dua) ,
+				content = "Dua" ,
 				onClick = {
 					onNavigateToListOfTasbeeh()
 				} ,
@@ -95,14 +75,8 @@ fun FeatureCard(
 //				title = "Zakah Calculator"
 //				  )
 		LinkButton(
-				icon = {
-					//get the icon from drawable folder
-					Icon(
-							modifier = Modifier.size(48.dp) ,
-							painter = painterResource(id = R.drawable.shahadah) ,
-							contentDescription = "Shadah" ,
-						)
-				} ,
+				painter = painterResource(id = R.drawable.shahadah) ,
+				content = "Shahadah" ,
 				onClick = {
 					onNavigateToShadah()
 				} ,
@@ -115,7 +89,8 @@ fun FeatureCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LinkButton(
-	icon : @Composable () -> Unit ,
+	painter : Painter ,
+	content : String ,
 	onClick : () -> Unit ,
 	title : String = "" ,
 			  )
@@ -133,11 +108,12 @@ fun LinkButton(
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
-			IconButton(
-					onClick = onClick ,
-					enabled = true ,
-					content = icon
-					  )
+			Image(
+					modifier = Modifier
+						.size(48.dp) ,
+					painter = painter ,
+					contentDescription = content
+				 )
 
 			Text(
 					text = title ,
@@ -146,9 +122,11 @@ fun LinkButton(
 				)
 			//an icon of arrow to indicate that it is a link
 			Icon(
-					imageVector = FeatherIcons.ArrowRight ,
+					modifier = Modifier
+						.size(24.dp)
+						.padding(start = 8.dp) ,
+					painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 					contentDescription = "Link" ,
-					modifier = Modifier.padding(start = 8.dp) ,
 				)
 		}
 	}
@@ -159,12 +137,8 @@ fun LinkButton(
 fun LinkButtonPreview()
 {
 	LinkButton(
-			icon = {
-				Icon(
-						imageVector = FeatherIcons.Github ,
-						contentDescription = "Github"
-					)
-			} ,
+			painter = painterResource(id = R.drawable.tasbih) ,
+			content = "Tasbih" ,
 			onClick = {} ,
 			title = "Github"
 			  )

@@ -13,14 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Edit
-import compose.icons.feathericons.Minus
-import compose.icons.feathericons.Plus
+import com.arshadshah.nimaz.R
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +43,7 @@ fun Counter(
 					  )
 	}
 
-	var showObjectiveDialog =  remember { mutableStateOf(false) }
+	var showObjectiveDialog = remember { mutableStateOf(false) }
 
 	//lap counter
 	val lap =
@@ -112,9 +110,9 @@ fun Counter(
 				count = count ,
 				lap = lap ,
 				lapCountCounter = lapCountCounter ,
-				objective = objective,
-				context = LocalContext.current,
-				rOrl = rOrl,
+				objective = objective ,
+				context = LocalContext.current ,
+				rOrl = rOrl ,
 						  )
 	}
 
@@ -214,7 +212,7 @@ fun Editbutton(
 	count : MutableState<Int> ,
 	context : Context ,
 	showObjectiveDialog : MutableState<Boolean> ,
-	objective : MutableState<String>
+	objective : MutableState<String> ,
 			  )
 {
 	Row(
@@ -248,7 +246,11 @@ fun Editbutton(
 						style = MaterialTheme.typography.titleLarge ,
 						fontSize = 26.sp
 					)
-				Icon(imageVector = FeatherIcons.Edit , contentDescription = "Edit")
+				Icon(
+						modifier = Modifier.size(24.dp) ,
+						painter = painterResource(id = R.drawable.edit_icon) ,
+						contentDescription = "Edit"
+					)
 			}
 		}
 	}
@@ -263,16 +265,17 @@ fun IncrementDecrement(
 	vibrationAllowed : MutableState<Boolean> ,
 	vibrator : Vibrator ,
 	context : Context ,
-	rOrl : MutableState<Int>
+	rOrl : MutableState<Int> ,
 					  )
 {
 	//if rorl is 0 then switch the place of the increment and decrement buttons to right side and if its 1 then switch the place of the increment and decrement buttons to left side
-	if(rOrl.value == 0){
+	if (rOrl.value == 0)
+	{
 		Row(
 				modifier = Modifier.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.SpaceEvenly ,
 				verticalAlignment = Alignment.CenterVertically
-		   ){
+		   ) {
 
 			Decrementbutton(
 					count = count ,
@@ -285,26 +288,27 @@ fun IncrementDecrement(
 
 			Spacer(modifier = Modifier.width(16.dp))
 			IncrementButton(
-					count =count ,
-					lap =  lap,
+					count = count ,
+					lap = lap ,
 					lapCountCounter = lapCountCounter ,
-					objective =  objective,
+					objective = objective ,
 					vibrationAllowed = vibrationAllowed ,
 					vibrator = vibrator ,
 					context = context
 						   )
 		}
-	}else{
+	} else
+	{
 		Row(
 				modifier = Modifier.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.SpaceEvenly ,
 				verticalAlignment = Alignment.CenterVertically
-		   ){
+		   ) {
 			IncrementButton(
-					count =count ,
-					lap =  lap,
+					count = count ,
+					lap = lap ,
 					lapCountCounter = lapCountCounter ,
-					objective =  objective,
+					objective = objective ,
 					vibrationAllowed = vibrationAllowed ,
 					vibrator = vibrator ,
 					context = context
@@ -333,7 +337,8 @@ fun IncrementButton(
 	vibrationAllowed : MutableState<Boolean> ,
 	vibrator : Vibrator ,
 	context : Context ,
-				   ){
+				   )
+{
 	ElevatedButton(
 			contentPadding = PaddingValues(38.dp) ,
 			modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
@@ -379,7 +384,11 @@ fun IncrementButton(
 						.show()
 				}
 			}) {
-		Icon(imageVector = FeatherIcons.Plus , contentDescription = "Add")
+		Icon(
+				modifier = Modifier.size(48.dp) ,
+				painter = painterResource(id = R.drawable.plus_icon) ,
+				contentDescription = "Add"
+			)
 	}
 }
 
@@ -391,7 +400,8 @@ fun Decrementbutton(
 	objective : MutableState<String> ,
 	vibrationAllowed : MutableState<Boolean> ,
 	vibrator : Vibrator ,
-				   ){
+				   )
+{
 	ElevatedButton(
 			contentPadding = PaddingValues(16.dp) ,
 			modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
@@ -438,6 +448,11 @@ fun Decrementbutton(
 					lapCountCounter.value = 0
 				}
 			}) {
-		Icon(imageVector = FeatherIcons.Minus , contentDescription = "Delete")
+		Icon(
+				modifier = Modifier.size(24.dp) ,
+				painter = painterResource(id = R.drawable.minus_icon) ,
+				contentDescription = "Delete"
+			)
 	}
+
 }

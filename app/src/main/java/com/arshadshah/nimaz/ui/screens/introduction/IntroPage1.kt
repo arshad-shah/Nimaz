@@ -71,7 +71,7 @@ fun IntroPage1()
 					.fillMaxWidth()
 					.testTag("introButtons") ,
 				//if we are on firts or last page than use space between else use end for page 1 and start for last page
-				horizontalArrangement = when(pagerState.currentPage)
+				horizontalArrangement = when (pagerState.currentPage)
 				{
 					0 -> Arrangement.End
 					else -> Arrangement.SpaceBetween
@@ -129,7 +129,7 @@ fun IntroPage1()
 							(context as Introduction).finish()
 						} ,
 						modifier = Modifier
-							.padding(horizontal = 20.dp),
+							.padding(horizontal = 20.dp) ,
 						shape = MaterialTheme.shapes.medium ,
 					  ) {
 					Text(text = "Let's Get Started")

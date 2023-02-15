@@ -115,7 +115,11 @@ fun LocationScreenUI()
 					}
 				} else
 				{
-					Toasty.info(context , "Please disable location permission for Nimaz in \n Permissions -> Location -> Don't Allow", Toasty.LENGTH_LONG).show()
+					Toasty.info(
+							context ,
+							"Please disable location permission for Nimaz in \n Permissions -> Location -> Don't Allow" ,
+							Toasty.LENGTH_LONG
+							   ).show()
 					//send the user to the location settings of the app
 					val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
 					with(intent) {
@@ -133,7 +137,7 @@ fun LocationScreenUI()
 				}
 			} ,
 			title = {
-				Text(text = if (!checked.value) "Location" else "Allow Auto Location")
+				Text(text = if (! checked.value) "Location" else "Allow Auto Location")
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
@@ -171,9 +175,12 @@ fun LocationScreenUI()
 				  )
 
 	//if checked, then show the manual location page
-	if (!checked.value)
+	if (! checked.value)
 	{
-		ManualLocationInput(reloadPrayerTimes = prayerTimesViewModel::handleEvent, locationFoundCallbackManual = locationFoundCallbackManual)
+		ManualLocationInput(
+				reloadPrayerTimes = prayerTimesViewModel::handleEvent ,
+				locationFoundCallbackManual = locationFoundCallbackManual
+						   )
 	}
 }
 
