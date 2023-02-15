@@ -168,15 +168,16 @@ class MainActivity : ComponentActivity()
 				val scope = rememberCoroutineScope()
 
 				//check for network connection
-				val networkConnection = remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
+				val networkConnection =
+					remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
 
 				LaunchedEffect(networkConnection.value) {
-					if (!networkConnection.value)
+					if (! networkConnection.value)
 					{
 						scope.launch {
 							snackbarHostState.showSnackbar(
 									"No internet connection" ,
-									duration = SnackbarDuration.Indefinite,
+									duration = SnackbarDuration.Indefinite ,
 									withDismissAction = true
 														  )
 						}
@@ -185,7 +186,7 @@ class MainActivity : ComponentActivity()
 
 
 				Scaffold(
-						snackbarHost = { SnackbarHost(snackbarHostState) },
+						snackbarHost = { SnackbarHost(snackbarHostState) } ,
 						topBar = {
 							AnimatedVisibility(
 									visible = checkRoute(route.value.toString()) ,
@@ -333,7 +334,7 @@ class MainActivity : ComponentActivity()
 									}
 											  )
 						} ,
-																  bottomBar = {
+						bottomBar = {
 							AnimatedVisibility(
 									visible = ! checkRoute(route.value.toString()) ,
 									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,

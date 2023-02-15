@@ -32,6 +32,7 @@ import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+
 sealed class OnBoardingPage(
 	val image : Int ,
 	val title : String ,
