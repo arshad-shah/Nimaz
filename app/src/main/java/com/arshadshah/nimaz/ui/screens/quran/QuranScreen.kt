@@ -45,19 +45,20 @@ fun QuranScreen(
 											 )
 
 
-	if(fontArabic == 0f)
+	if (fontArabic == 0f)
 	{
 		sharedPreferences.saveDataFloat(
 				customkey = AppConstants.ARABIC_FONT_SIZE ,
 				data = 24f
 									   )
-	}else if(fontTranslation == 0f)
+	} else if (fontTranslation == 0f)
 	{
 		sharedPreferences.saveDataFloat(
 				customkey = AppConstants.TRANSLATION_FONT_SIZE ,
 				data = 16f
 									   )
-	}else{
+	} else
+	{
 		sharedPreferences.saveDataFloat(
 				customkey = AppConstants.ARABIC_FONT_SIZE ,
 				data = fontArabic
