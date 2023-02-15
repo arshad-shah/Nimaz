@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.*
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -33,14 +33,13 @@ import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.icons.Prayer
+import com.arshadshah.nimaz.ui.components.ui.intro.LocationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresNotificationPermission
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
@@ -212,102 +211,9 @@ sealed class OnBoardingPage(
 	object Fifth : OnBoardingPage(
 			image = FeatherIcons.MapPin ,
 			title = "Location" ,
-			description = "Nimaz can use your location to get accurate prayer times. You can also use manual location." ,
+			description = "Nimaz needs your location to get accurate prayer times. You can also use manual location." ,
 			extra = {
-				val context = LocalContext.current
-				val sharedpref = PrivateSharedPreferences(context)
-				//location permission state
-				val locationPermissionState = rememberMultiplePermissionsState(
-						permissions = listOf(
-								Manifest.permission.ACCESS_COARSE_LOCATION ,
-								Manifest.permission.ACCESS_FINE_LOCATION
-											)
-																			  )
-				//the state of the switch
-				val state =
-					rememberPreferenceBooleanSettingState(
-							AppConstants.LOCATION_TYPE ,
-							locationPermissionState.allPermissionsGranted
-														 )
-
-				val checked =
-					remember { mutableStateOf(locationPermissionState.allPermissionsGranted) }
-				//call FeatureThatRequiresLocationPermission() when the switch is checked
-				if (checked.value)
-				{
-					FeatureThatRequiresLocationPermission(locationPermissionState , checked)
-				}
-
-				//a laucnhed affect to check if the user has granted the notification permission
-				LaunchedEffect(locationPermissionState.allPermissionsGranted) {
-					if (locationPermissionState.allPermissionsGranted)
-					{
-						//if the user has granted the notification permission then set the state of the switch to true
-						state.value = true
-						//set the isChecked to true
-						checked.value = true
-					} else
-					{
-						//if the user has not granted the notification permission then set the state of the switch to false
-						state.value = false
-						//set the isChecked to false
-						checked.value = false
-					}
-				}
-
-				SettingsSwitch(
-						state = state ,
-						onCheckedChange = {
-							if (it)
-							{
-								if (locationPermissionState.allPermissionsGranted)
-								{
-									sharedpref.saveDataBoolean(AppConstants.LOCATION_TYPE , true)
-								} else
-								{
-									locationPermissionState.launchMultiplePermissionRequest()
-									sharedpref.saveDataBoolean(AppConstants.LOCATION_TYPE , true)
-								}
-							} else
-							{
-								//if its unchecked, then we need to remove the location permission
-								//and remove the value from the shared preferences
-								sharedpref.removeData(AppConstants.LOCATION_TYPE)
-							}
-						} ,
-						title = {
-							Text(text = "Allow Auto Location")
-						} ,
-						subtitle = {
-							//if the permission is granted, show a checkmark and text saying "Allowed"
-							if (checked.value)
-							{
-								Row {
-									Icon(
-											imageVector = Icons.Filled.CheckCircle ,
-											contentDescription = "Location Allowed"
-										)
-									Text(text = "Allowed")
-								}
-							} else
-							{
-								//if the permission is not granted, show a notification icon and text saying "Not Allowed"
-								Row {
-									Icon(
-											imageVector = Icons.Filled.Close ,
-											contentDescription = "Location Not Allowed"
-										)
-									Text(text = "Not Allowed")
-								}
-							}
-						} ,
-						icon = {
-							Icon(
-									imageVector = Icons.Filled.LocationOn ,
-									contentDescription = "Location"
-								)
-						}
-							  )
+				LocationScreenUI()
 			}
 								 )
 
@@ -325,18 +231,16 @@ sealed class OnBoardingPage(
 
 				//battery optimization exemption
 				val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-				val isbatteryOptimizationExempted =
-					powerManager.isIgnoringBatteryOptimizations(context.packageName)
-				val isChecked = remember { mutableStateOf(isbatteryOptimizationExempted) }
+				val isChecked = remember { mutableStateOf(powerManager.isIgnoringBatteryOptimizations(context.packageName)) }
 				//the state of the switch
 				val state = rememberPreferenceBooleanSettingState(
 						AppConstants.BATTERY_OPTIMIZATION ,
-						isbatteryOptimizationExempted
+						isChecked.value
 																 )
 
 				//a laucnhed affect to check if the user has granted the notification permission
-				LaunchedEffect(isbatteryOptimizationExempted) {
-					if (isbatteryOptimizationExempted)
+				LaunchedEffect(isChecked.value) {
+					if (isChecked.value)
 					{
 						//if the user has granted the notification permission then set the state of the switch to true
 						state.value = true
