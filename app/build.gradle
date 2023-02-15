@@ -109,9 +109,6 @@ dependencies {
 
 
     implementation "com.github.GrenderG:Toasty:$toasty_version"
-    //icons
-    implementation "br.com.devsrsouza.compose.icons.android:feather:$feather_version"
-    implementation "br.com.devsrsouza.compose.icons.android:font-awesome:$font_awesome_version"
 
     //room
     implementation "androidx.room:room-runtime:$room_version"

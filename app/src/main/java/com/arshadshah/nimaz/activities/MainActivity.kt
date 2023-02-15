@@ -48,7 +48,6 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
-import compose.icons.feathericons.*
 
 class MainActivity : ComponentActivity()
 {
@@ -62,7 +61,7 @@ class MainActivity : ComponentActivity()
 		appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
 			if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
 			{
-				Log.d(MAIN_ACTIVITY_TAG , "onResume:  update is stalled")
+				Log.d(MAIN_ACTIVITY_TAG , "onResume:  update is installed")
 				appUpdateManager.startUpdateFlowForResult(
 						appUpdateInfo ,
 						AppUpdateType.IMMEDIATE ,
