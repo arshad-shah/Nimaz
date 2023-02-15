@@ -10,6 +10,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -19,7 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
@@ -28,7 +32,6 @@ import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 
 sealed class OnBoardingPage(
@@ -84,7 +87,7 @@ sealed class OnBoardingPage(
 	@SuppressLint("BatteryLife")
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Sixth : OnBoardingPage(
-			image = R.drawable.battery,
+			image = R.drawable.battery ,
 			title = "Battery Optimization" ,
 			description = "Nimaz needs to be exempted from battery optimization to show adhan notifications." ,
 			extra = {
@@ -94,7 +97,8 @@ sealed class OnBoardingPage(
 
 				//battery optimization exemption
 				val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-				val isChecked = remember { mutableStateOf(powerManager.isIgnoringBatteryOptimizations(context.packageName)) }
+				val isChecked =
+					remember { mutableStateOf(powerManager.isIgnoringBatteryOptimizations(context.packageName)) }
 				//the state of the switch
 				val state = rememberPreferenceBooleanSettingState(
 						AppConstants.BATTERY_OPTIMIZATION ,
@@ -164,7 +168,8 @@ sealed class OnBoardingPage(
 						} ,
 						icon = {
 							Icon(
-									imageVector = FeatherIcons.Battery ,
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.battery) ,
 									contentDescription = "Battery Optimization"
 								)
 						}

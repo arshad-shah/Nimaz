@@ -60,7 +60,7 @@ fun NotificationScreenUI()
 	}
 
 	val lifecycle = LocalLifecycleOwner.current.lifecycle
-	lifecycle.addObserver(LifecycleEventObserver { _, event ->
+	lifecycle.addObserver(LifecycleEventObserver { _ , event ->
 		if (event == Lifecycle.Event.ON_RESUME)
 		{
 			isChecked.value = notificationPermissionState.status.isGranted

@@ -24,10 +24,12 @@ class DataStore(db : AppDatabase)
 	suspend fun saveTracker(tracker : LocalPrayersTracker) = prayerTrackerDao.saveTracker(tracker)
 
 	//update a tracker
-	suspend fun updateTracker(tracker : LocalPrayersTracker) = prayerTrackerDao.updateTracker(tracker)
+	suspend fun updateTracker(tracker : LocalPrayersTracker) =
+		prayerTrackerDao.updateTracker(tracker)
 
 	//delete a tracker
-	suspend fun deleteTracker(tracker : LocalPrayersTracker) = prayerTrackerDao.deleteTracker(tracker)
+	suspend fun deleteTracker(tracker : LocalPrayersTracker) =
+		prayerTrackerDao.deleteTracker(tracker)
 
 	//get all the ayas of a surah
 	suspend fun getAyasOfSurah(surahNumber : Int , translationLanguage : String) =

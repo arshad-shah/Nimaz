@@ -42,7 +42,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 					.fillMaxWidth(0.5f)
 					.fillMaxHeight(0.4f)
 					.testTag("pagerScreenImage") ,
-				painter = painterResource(id =onBoardingPage.image) ,
+				painter = painterResource(id = onBoardingPage.image) ,
 				contentDescription = "Pager Image" ,
 			 )
 		Text(

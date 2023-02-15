@@ -158,7 +158,7 @@ fun FeatureThatRequiresLocationPermission(
 				onDismissRequest = {
 					locationPermissionState.launchMultiplePermissionRequest()
 					showRationale.value = false
-								   } ,
+				} ,
 				title = { Text(text = "Location Permission Required") } ,
 				text = { Text(text = descToShow.value) } ,
 				confirmButton = {

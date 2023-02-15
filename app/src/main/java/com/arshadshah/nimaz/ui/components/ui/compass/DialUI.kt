@@ -18,19 +18,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.bLogic.compass.SensorData
 import com.arshadshah.nimaz.ui.components.ui.icons.Dot
-import com.arshadshah.nimaz.ui.components.ui.icons.QiblaCompassMain
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlin.math.abs
 
 @OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun DialUI(bearing : Double , data : SensorData?)
+fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 {
 
 	val hasSensor =
@@ -110,12 +110,12 @@ fun DialUI(bearing : Double , data : SensorData?)
 			)
 		//the dial
 		Image(
-				imageVector = Icons.QiblaCompassMain ,
+				painter = imageToDisplay ,
 				contentDescription = "Compass" ,
 				modifier = Modifier
 					.rotate(rotateAnim.value)
 					.fillMaxWidth()
-					.padding(vertical = 16.dp) ,
+					.padding(16.dp) ,
 				alignment = Alignment.Center
 			 )
 	}

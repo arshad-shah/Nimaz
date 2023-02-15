@@ -32,7 +32,7 @@ fun AyatScreen(
 			AppConstants.TRANSLATION_FONT_SIZE
 														)
 	val fontStyle = sharedPreferences.getData(
-			AppConstants.FONT_STYLE,
+			AppConstants.FONT_STYLE ,
 			"Default"
 											 )
 
@@ -47,7 +47,7 @@ fun AyatScreen(
 								   )
 
 	sharedPreferences.saveData(
-			customkey = AppConstants.FONT_STYLE,
+			customkey = AppConstants.FONT_STYLE ,
 			data = fontStyle
 							  )
 

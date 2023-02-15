@@ -4,10 +4,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
@@ -20,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
@@ -34,8 +32,6 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.LocationFinderAuto
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.*
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -101,7 +97,8 @@ fun SettingsScreen(
 						state = storage ,
 						icon = {
 							Icon(
-									imageVector = FeatherIcons.MapPin ,
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.marker_icon) ,
 									contentDescription = "Location"
 								)
 						} ,
@@ -171,7 +168,8 @@ fun SettingsScreen(
 					onClick = onNavigateToPrayerTimeCustomizationScreen ,
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.Clock ,
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.settings_sliders_icon) ,
 								contentDescription = "Clock"
 							)
 					} ,
@@ -213,7 +211,8 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = FeatherIcons.Bell ,
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.alarm_clock_icon) ,
 									contentDescription = "Notifications"
 								)
 						} ,
@@ -263,7 +262,8 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = FeatherIcons.Bell ,
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.alarm_set_icon) ,
 									contentDescription = "Back"
 								)
 						} ,
@@ -291,7 +291,8 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = FeatherIcons.Settings ,
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.settings_icon) ,
 									contentDescription = "Settings for notification"
 								)
 						} ,
@@ -318,7 +319,8 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = FeatherIcons.Lock ,
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.privacy_policy_icon) ,
 									contentDescription = "Privacy Policy"
 								)
 						} ,
@@ -343,7 +345,8 @@ fun SettingsScreen(
 						} ,
 						icon = {
 							Icon(
-									imageVector = FeatherIcons.File ,
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.document_icon) ,
 									contentDescription = "Privacy Policy"
 								)
 						} ,
@@ -367,7 +370,8 @@ fun SettingsScreen(
 					} ,
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.Info ,
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.info_icon) ,
 								contentDescription = "About"
 							)
 					} ,
