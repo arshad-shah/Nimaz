@@ -34,7 +34,7 @@ fun AuthorLinks()
 					icon = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.external_link_icon),
+								painter = painterResource(id = R.drawable.external_link_icon) ,
 								contentDescription = "Portfolio Website Link" ,
 							)
 					} ,
@@ -50,7 +50,7 @@ fun AuthorLinks()
 					icon = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.linkedin_icon),
+								painter = painterResource(id = R.drawable.linkedin_icon) ,
 								contentDescription = "LinkedIn Link" ,
 							)
 					} ,
@@ -67,7 +67,7 @@ fun AuthorLinks()
 					icon = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.mail_icon),
+								painter = painterResource(id = R.drawable.mail_icon) ,
 								contentDescription = "Email Link" ,
 							)
 					} ,
@@ -81,7 +81,7 @@ fun AuthorLinks()
 					icon = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.github_icon),
+								painter = painterResource(id = R.drawable.github_icon) ,
 								contentDescription = "Github"
 							)
 					} ,

@@ -92,7 +92,7 @@ fun ImageSwitcherCard(changeImageIndex : (Int) -> Unit)
 					.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.Center ,
 				verticalAlignment = Alignment.CenterVertically
-		   ) {
+			   ) {
 			item {
 				imagesMapped.forEach { (index , image) ->
 					Image(
