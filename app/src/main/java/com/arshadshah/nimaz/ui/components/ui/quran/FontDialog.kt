@@ -36,16 +36,19 @@ fun FontSizeDialog(
 				arabicFontSizeState.value = 24f
 				translationFontSizeState.value = 16f
 			}
+
 			"Naqsh" ->
 			{
 				arabicFontSizeState.value = 26f
 				translationFontSizeState.value = 16f
 			}
+
 			"Hidayat" ->
 			{
 				arabicFontSizeState.value = 24f
 				translationFontSizeState.value = 16f
 			}
+
 			"Amiri" ->
 			{
 				arabicFontSizeState.value = 24f
@@ -123,14 +126,19 @@ fun FontSizeDialog(
 										.height(48.dp)
 										.border(
 												width = 1.dp ,
-												color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f) ,
+												color = MaterialTheme.colorScheme.onSurface.copy(
+														alpha = 0.2f
+																								) ,
 												shape = MaterialTheme.shapes.small
-											   ),
+											   ) ,
 									verticalAlignment = Alignment.CenterVertically
 							   ) {
 								//find the font style from the list of font styles
 								//and then show it in the text
-								Text(text = items3[items3.indexOf(fontStyleState.value)], modifier = Modifier.padding(start = 8.dp))
+								Text(
+										text = items3[items3.indexOf(fontStyleState.value)] ,
+										modifier = Modifier.padding(start = 8.dp)
+									)
 								Icon(
 										modifier = Modifier.padding(start = 8.dp) ,
 										imageVector = Icons.Outlined.ArrowDropDown ,

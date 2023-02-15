@@ -361,7 +361,13 @@ fun NavigationGraph(
 		}
 
 		composable(TASBIH_SCREEN_ROUTE) {
-			TasbihScreen(paddingValues = paddingValues, showResetDialog, vibrator,vibrationAllowed,rOrl)
+			TasbihScreen(
+					paddingValues = paddingValues ,
+					showResetDialog ,
+					vibrator ,
+					vibrationAllowed ,
+					rOrl
+						)
 		}
 
 		composable(NAMESOFALLAH_SCREEN_ROUTE) {

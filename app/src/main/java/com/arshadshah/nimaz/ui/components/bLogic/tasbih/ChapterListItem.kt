@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.ArrowRight
 
 @Composable
 fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , loading : Boolean)
@@ -60,7 +60,7 @@ fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , lo
 			}
 			//arrow icon to navigate to chapter
 			Icon(
-					imageVector = FeatherIcons.ArrowRight ,
+					painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 					contentDescription = "Navigate to chapter" ,
 					modifier = Modifier
 						.align(Alignment.CenterVertically)

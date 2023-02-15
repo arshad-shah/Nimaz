@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 @Dao
 interface PrayerTrackerDao
 {
+
 	//get trtacker for a specific date
 	@Query("SELECT * FROM PrayersTracker WHERE date = :date")
 	suspend fun getTrackerForDate(date : String) : LocalPrayersTracker
@@ -15,11 +16,11 @@ interface PrayerTrackerDao
 	suspend fun getAllTrackers() : List<LocalPrayersTracker>
 
 	//save a tracker
-	@Insert(entity = LocalPrayersTracker::class, onConflict = OnConflictStrategy.REPLACE)
+	@Insert(entity = LocalPrayersTracker::class , onConflict = OnConflictStrategy.REPLACE)
 	suspend fun saveTracker(tracker : LocalPrayersTracker)
 
 	//update a tracker
-	@Update(entity = LocalPrayersTracker::class, onConflict = OnConflictStrategy.REPLACE)
+	@Update(entity = LocalPrayersTracker::class , onConflict = OnConflictStrategy.REPLACE)
 	suspend fun updateTracker(tracker : LocalPrayersTracker)
 
 	//delete a tracker
