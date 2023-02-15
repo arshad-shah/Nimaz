@@ -2,19 +2,21 @@ package com.arshadshah.nimaz.ui.components.ui.settings
 
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +43,13 @@ fun ManualLocationInput(
 			onClick = {
 				showDialog.value = true
 			} ,
-			icon = { Icon(imageVector = FeatherIcons.Edit , contentDescription = "Location") }
+			icon = {
+				Icon(
+						modifier = Modifier.size(24.dp) ,
+						painter = painterResource(id = R.drawable.location_marker_edit_icon) ,
+						contentDescription = "Location"
+					)
+			}
 					)
 
 	if (! showDialog.value) return

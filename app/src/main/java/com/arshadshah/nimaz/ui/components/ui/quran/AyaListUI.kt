@@ -15,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
@@ -27,8 +29,6 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Bookmark
 import kotlin.reflect.KFunction1
 
 
@@ -149,7 +149,7 @@ fun AyaListItemUI(
 	val sharedPreferences = PrivateSharedPreferences(context)
 	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
 	val translationFontSize = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
-	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE, "Default")
+	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
 
 	//mutable ayaArabic state so that we can change it when the user clicks on the mic button
 	val ayaArabicState = remember { mutableStateOf(aya.ayaArabic) }
@@ -180,7 +180,7 @@ fun AyaListItemUI(
 			if (isBookMarkedVerse.value)
 			{
 				Icon(
-						imageVector = FeatherIcons.Bookmark ,
+						painter = painterResource(id = R.drawable.bookmark_icon) ,
 						contentDescription = "Bookmark" ,
 						tint = MaterialTheme.colorScheme.primary ,
 						modifier = Modifier
@@ -199,17 +199,25 @@ fun AyaListItemUI(
 							text = ayaArabicState.value ,
 							style = MaterialTheme.typography.titleLarge ,
 							fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp ,
-							fontFamily = when(fontStyle) {
-								"Default" -> {
+							fontFamily = when (fontStyle)
+							{
+								"Default" ->
+								{
 									quranFont
 								}
-								"Naqsh" -> {
+
+								"Naqsh" ->
+								{
 									utmaniQuranFont
 								}
-								"Hidayat" -> {
+
+								"Hidayat" ->
+								{
 									hidayat
 								}
-								"Amiri" -> {
+
+								"Amiri" ->
+								{
 									amiri
 								}
 

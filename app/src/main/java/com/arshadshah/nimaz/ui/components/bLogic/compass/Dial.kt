@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.bLogic.compass
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.data.remote.viewModel.QiblaViewModel
 import com.arshadshah.nimaz.ui.components.ui.compass.DialUI
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun Dial(state : State<QiblaViewModel.QiblaState>)
+fun Dial(state : State<QiblaViewModel.QiblaState> , imageToDisplay : Painter)
 {
 
 	val context = LocalContext.current
@@ -39,17 +40,17 @@ fun Dial(state : State<QiblaViewModel.QiblaState>)
 	{
 		is QiblaViewModel.QiblaState.Loading ->
 		{
-			DialUI(0.0 , data)
+			DialUI(0.0 , data , imageToDisplay)
 		}
 
 		is QiblaViewModel.QiblaState.Error ->
 		{
-			DialUI(0.0 , data)
+			DialUI(0.0 , data , imageToDisplay)
 		}
 
 		is QiblaViewModel.QiblaState.Success ->
 		{
-			qiblaState.bearing?.let { DialUI(it , data) }
+			qiblaState.bearing?.let { DialUI(it , data , imageToDisplay) }
 		}
 	}
 }

@@ -8,13 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun PagerScreen(onBoardingPage : OnBoardingPage)
@@ -31,6 +29,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 		Text(
 				modifier = Modifier
 					.fillMaxWidth()
+					.padding(bottom = 20.dp)
 					.testTag("pagerScreenTitle") ,
 				text = onBoardingPage.title ,
 				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
@@ -41,11 +40,10 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 		Image(
 				modifier = Modifier
 					.fillMaxWidth(0.5f)
-					.fillMaxHeight(0.6f)
+					.fillMaxHeight(0.4f)
 					.testTag("pagerScreenImage") ,
-				imageVector = onBoardingPage.image ,
+				painter = painterResource(id = onBoardingPage.image) ,
 				contentDescription = "Pager Image" ,
-				colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
 			 )
 		Text(
 				modifier = Modifier
@@ -70,17 +68,5 @@ fun PagerScreen(onBoardingPage : OnBoardingPage)
 				onBoardingPage.extra.invoke()
 			}
 		}
-	}
-}
-
-@Preview
-@Composable
-fun PagerScreenPreview()
-{
-	val pages = listOf(
-			OnBoardingPage.Fourth ,
-					  )
-	NimazTheme {
-		PagerScreen(pages[0])
 	}
 }

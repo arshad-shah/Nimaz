@@ -20,6 +20,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
 import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun QuranScreen(
@@ -28,6 +29,51 @@ fun QuranScreen(
 			   )
 {
 	val viewModel = QuranViewModel(LocalContext.current)
+
+
+	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
+
+	val fontArabic = sharedPreferences.getDataFloat(
+			AppConstants.ARABIC_FONT_SIZE
+												   )
+	val fontTranslation = sharedPreferences.getDataFloat(
+			AppConstants.TRANSLATION_FONT_SIZE
+														)
+	val fontStyle = sharedPreferences.getData(
+			AppConstants.FONT_STYLE ,
+			"Default"
+											 )
+
+
+	if (fontArabic == 0f)
+	{
+		sharedPreferences.saveDataFloat(
+				customkey = AppConstants.ARABIC_FONT_SIZE ,
+				data = 24f
+									   )
+	} else if (fontTranslation == 0f)
+	{
+		sharedPreferences.saveDataFloat(
+				customkey = AppConstants.TRANSLATION_FONT_SIZE ,
+				data = 16f
+									   )
+	} else
+	{
+		sharedPreferences.saveDataFloat(
+				customkey = AppConstants.ARABIC_FONT_SIZE ,
+				data = fontArabic
+									   )
+		sharedPreferences.saveDataFloat(
+				customkey = AppConstants.TRANSLATION_FONT_SIZE ,
+				data = fontTranslation
+									   )
+
+		sharedPreferences.saveData(
+				customkey = AppConstants.FONT_STYLE ,
+				data = fontStyle
+								  )
+	}
+
 	//save the state of the tab
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
 	val titles = listOf("Sura" , "Juz")

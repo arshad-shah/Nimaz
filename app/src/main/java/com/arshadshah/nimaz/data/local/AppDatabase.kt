@@ -14,7 +14,7 @@ import com.arshadshah.nimaz.data.local.models.*
 		TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class, LocalPrayersTracker::class],
+		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class] ,
 		version = 3 ,
 		exportSchema = false
 		 )

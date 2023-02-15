@@ -1,8 +1,12 @@
 package com.arshadshah.nimaz.ui.navigation
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -18,19 +22,27 @@ fun BottomNavigationBar(navController : NavController)
 							   )
 	NavigationBar(
 			containerColor = MaterialTheme.colorScheme.surface ,
-			contentColor = MaterialTheme.colorScheme.secondary
+			contentColor = MaterialTheme.colorScheme.secondary ,
 				 ) {
 		val navBackStackEntry by navController.currentBackStackEntryAsState()
 		val currentRoute = navBackStackEntry?.destination?.route
 		bottomNavItems.forEach { bottomNavItem ->
 			NavigationBarItem(
+					colors = NavigationBarItemDefaults.colors(
+							selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer ,
+							selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer ,
+							unselectedIconColor = MaterialTheme.colorScheme.secondary ,
+							unselectedTextColor = MaterialTheme.colorScheme.secondary ,
+							indicatorColor = MaterialTheme.colorScheme.secondaryContainer
+															 ) ,
 					icon = {
 						Icon(
-								imageVector = bottomNavItem.icon ,
-								contentDescription = null
+								modifier = Modifier.size(28.dp) ,
+								painter = painterResource(id = bottomNavItem.icon) ,
+								contentDescription = bottomNavItem.iconDescription
 							)
 					} ,
-					alwaysShowLabel = false ,
+					alwaysShowLabel = true ,
 					label = { Text(text = bottomNavItem.title) } ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {

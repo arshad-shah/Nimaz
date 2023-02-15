@@ -6,13 +6,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.ArrowLeft
-import compose.icons.feathericons.ArrowRight
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.header.MonthState
 import io.github.boguszpawlowski.composecalendar.rememberSelectableCalendarState
@@ -22,66 +21,72 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun PrayerTracker() {
+fun PrayerTracker()
+{
 
 	val showTracker = rememberSaveable { mutableStateOf(false) }
 	val dateSelected = rememberSaveable { mutableStateOf("") }
 	Column {
 		SelectableCalendar(
-				weekHeader = {weekState ->
+				weekHeader = { weekState ->
 					PrayerTrackerWeekHeader(weekState = weekState)
-				},
+				} ,
 				monthContainer = {
 					ElevatedCard(
 							elevation = CardDefaults.elevatedCardElevation(
-									defaultElevation = 4.dp,
+									defaultElevation = 4.dp ,
 																		  )
 								) {
 						it(PaddingValues(3.dp))
 					}
-				},
+				} ,
 				monthHeader = { monthState ->
 					PrayerTrackerHeader(monthState = monthState)
-				},
+				} ,
 				calendarState = rememberSelectableCalendarState(
 						confirmSelectionChange = {
 							//strip the [] from the date
-							val date = it.toString().replace("[", "").replace("]", "")
-							if (date.isEmpty()){
+							val date = it.toString().replace("[" , "").replace("]" , "")
+							if (date.isEmpty())
+							{
 								showTracker.value = false
-							}else{
+							} else
+							{
 								val dateObject = LocalDate.parse(date)
 								val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 								val formattedDate = dateObject.format(formatter)
 								dateSelected.value = formattedDate
 								showTracker.value = dateSelected.value.isNotEmpty()
 							}
-							true }
-															   ),
+							true
+						}
+															   ) ,
 						  )
 
-		if (showTracker.value){
-			PrayerTrackerTabs(paddingValues = PaddingValues(16.dp),dateSelected = dateSelected)
+		if (showTracker.value)
+		{
+			PrayerTrackerTabs(paddingValues = PaddingValues(16.dp) , dateSelected = dateSelected)
 		}
 	}
 }
 
 //composable for the header
 @Composable
-fun PrayerTrackerHeader(monthState : MonthState) {
+fun PrayerTrackerHeader(monthState : MonthState)
+{
 	val currentMonth = monthState.currentMonth
 	val currentYear = monthState.currentMonth.year
 	//sentence case the month name
-	val currentMonthName = currentMonth.month.name.substring(0, 1)
+	val currentMonthName = currentMonth.month.name.substring(0 , 1)
 		.uppercase(Locale.ROOT) + currentMonth.month.name.substring(1).lowercase(
 			Locale.ROOT
 																				)
 
 	ElevatedCard(
 			modifier = Modifier
-				.padding(8.dp),
+				.padding(8.dp) ,
 			elevation = CardDefaults.elevatedCardElevation(
-					defaultElevation = 4.dp,
+					defaultElevation = 4.dp ,
 														  )
 				) {
 		Row(
@@ -92,28 +97,30 @@ fun PrayerTrackerHeader(monthState : MonthState) {
 		   ) {
 			//left arrow
 			IconButton(
-					onClick = { monthState.currentMonth = monthState.currentMonth.minusMonths(1) },
+					onClick = { monthState.currentMonth = monthState.currentMonth.minusMonths(1) } ,
 					modifier = Modifier.padding(8.dp)
 					  ) {
 				Icon(
-						imageVector = FeatherIcons.ArrowLeft ,
+						modifier = Modifier.size(48.dp) ,
+						painter = painterResource(id = R.drawable.angle_small_left_icon) ,
 						contentDescription = "Previous Month"
 					)
 			}
-				Text(
-						text = "$currentMonthName $currentYear",
-						style = MaterialTheme.typography.titleMedium ,
-						maxLines = 1 ,
-						modifier = Modifier.padding(8.dp)
-					)
+			Text(
+					text = "$currentMonthName $currentYear" ,
+					style = MaterialTheme.typography.titleMedium ,
+					maxLines = 1 ,
+					modifier = Modifier.padding(8.dp)
+				)
 
 			//right arrow
 			IconButton(
-					onClick = { monthState.currentMonth = monthState.currentMonth.plusMonths(1) },
+					onClick = { monthState.currentMonth = monthState.currentMonth.plusMonths(1) } ,
 					modifier = Modifier.padding(8.dp)
 					  ) {
 				Icon(
-						imageVector = FeatherIcons.ArrowRight ,
+						modifier = Modifier.size(48.dp) ,
+						painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 						contentDescription = "Next Month"
 					)
 			}
@@ -122,7 +129,8 @@ fun PrayerTrackerHeader(monthState : MonthState) {
 }
 
 @Composable
-fun PrayerTrackerWeekHeader(weekState : List<DayOfWeek>){
+fun PrayerTrackerWeekHeader(weekState : List<DayOfWeek>)
+{
 	ElevatedCard {
 		Row(
 				modifier = Modifier
@@ -132,7 +140,7 @@ fun PrayerTrackerWeekHeader(weekState : List<DayOfWeek>){
 		   ) {
 			weekState.forEach { dayOfWeek ->
 				Text(
-						text = dayOfWeek.name.substring(0, 3),
+						text = dayOfWeek.name.substring(0 , 3) ,
 						style = MaterialTheme.typography.titleSmall ,
 						maxLines = 1 ,
 						overflow = TextOverflow.Ellipsis ,
@@ -147,7 +155,8 @@ fun PrayerTrackerWeekHeader(weekState : List<DayOfWeek>){
 
 //composable to show two tabs for the prayer tracker one for current day and one for the fasting tracker
 @Composable
-fun PrayerTrackerTabs(paddingValues : PaddingValues , dateSelected : MutableState<String>) {
+fun PrayerTrackerTabs(paddingValues : PaddingValues , dateSelected : MutableState<String>)
+{
 
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
 	val titles = listOf("Prayer")
@@ -155,7 +164,7 @@ fun PrayerTrackerTabs(paddingValues : PaddingValues , dateSelected : MutableStat
 			modifier = Modifier.padding(paddingValues) ,
 				) {
 		Column(modifier = Modifier.padding(paddingValues)) {
-			Text(text = "Date: ${dateSelected.value}", style = MaterialTheme.typography.titleSmall)
+			Text(text = "Date: ${dateSelected.value}" , style = MaterialTheme.typography.titleSmall)
 			TabRow(selectedTabIndex = selectedTab) {
 				titles.forEachIndexed { index , title ->
 					Tab(
@@ -185,7 +194,8 @@ fun PrayerTrackerTabs(paddingValues : PaddingValues , dateSelected : MutableStat
 
 //Prayer tracker list
 @Composable
-fun PrayerTrackerList() {
+fun PrayerTrackerList()
+{
 	//a list of toggleable items
 	val items = listOf(
 			"Fajr" ,
@@ -194,10 +204,11 @@ fun PrayerTrackerList() {
 			"Asr" ,
 			"Maghrib" ,
 			"Isha"
-					 )
+					  )
 
 	//a list of booleans to keep track of the state of the toggleable items
-	val checkedState = remember { mutableStateListOf(false , false , false , false , false , false) }
+	val checkedState =
+		remember { mutableStateListOf(false , false , false , false , false , false) }
 
 	//the list of items
 	Column {
@@ -209,7 +220,7 @@ fun PrayerTrackerList() {
 					verticalAlignment = Alignment.CenterVertically
 			   ) {
 				RadioButton(selected = checkedState[index] , onClick = {
-					checkedState[index] = !checkedState[index]
+					checkedState[index] = ! checkedState[index]
 				})
 				Text(text = item)
 			}
@@ -219,7 +230,8 @@ fun PrayerTrackerList() {
 
 @Preview
 @Composable
-fun PrayerTrackerPreview() {
+fun PrayerTrackerPreview()
+{
 	NimazTheme {
 		PrayerTracker()
 	}
