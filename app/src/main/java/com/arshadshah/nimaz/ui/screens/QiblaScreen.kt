@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +37,8 @@ fun QiblaScreen(paddingValues : PaddingValues)
 			1 to painterResource(id = R.drawable.qibla2) ,
 			2 to painterResource(id = R.drawable.qibla3) ,
 			3 to painterResource(id = R.drawable.qibla4) ,
+			4 to painterResource(id = R.drawable.qibla5) ,
+			5 to painterResource(id = R.drawable.qibla6) ,
 							)
 	//create a mu	 that will be used to switch between the images
 	var imageToDisplay by remember { mutableStateOf(imagesMapped[imageIndexFromStorage]) }
@@ -79,31 +82,35 @@ fun ImageSwitcherCard(changeImageIndex : (Int) -> Unit)
 			1 to painterResource(id = R.drawable.qibla2) ,
 			2 to painterResource(id = R.drawable.qibla3) ,
 			3 to painterResource(id = R.drawable.qibla4) ,
+			4 to painterResource(id = R.drawable.qibla5) ,
+			5 to painterResource(id = R.drawable.qibla6) ,
 							)
 
 	ElevatedCard {
-		Row(
+		LazyRow(
 				modifier = Modifier
 					.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.Center ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
-			imagesMapped.forEach { (index , image) ->
-				Image(
-						painter = image ,
-						contentDescription = "Compass" ,
-						modifier = Modifier
-							.size(
-									if (isSelected.value == index) 100.dp
-									else 80.dp
-								 )
-							.padding(vertical = 16.dp)
-							.clickable {
-								changeImageIndex(index)
-								isSelected.value = index
-							} ,
-						alignment = Alignment.Center
-					 )
+			item {
+				imagesMapped.forEach { (index , image) ->
+					Image(
+							painter = image ,
+							contentDescription = "Compass" ,
+							modifier = Modifier
+								.size(
+										if (isSelected.value == index) 100.dp
+										else 80.dp
+									 )
+								.padding(vertical = 16.dp)
+								.clickable {
+									changeImageIndex(index)
+									isSelected.value = index
+								} ,
+							alignment = Alignment.Center
+						 )
+				}
 			}
 		}
 	}
@@ -123,6 +130,8 @@ fun ImageSwitcherCardPreview()
 			1 to painterResource(id = R.drawable.qibla2) ,
 			2 to painterResource(id = R.drawable.qibla3) ,
 			3 to painterResource(id = R.drawable.qibla4) ,
+			4 to painterResource(id = R.drawable.qibla5) ,
+			5 to painterResource(id = R.drawable.qibla6) ,
 							)
 
 
