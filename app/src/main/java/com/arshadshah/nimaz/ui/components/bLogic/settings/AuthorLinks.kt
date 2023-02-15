@@ -11,14 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.ExternalLink
-import compose.icons.feathericons.Github
-import compose.icons.feathericons.Linkedin
-import compose.icons.feathericons.Mail
 
 @Composable
 fun AuthorLinks()
@@ -36,7 +33,8 @@ fun AuthorLinks()
 			LinkButton(
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.ExternalLink ,
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.external_link_icon),
 								contentDescription = "Portfolio Website Link" ,
 							)
 					} ,
@@ -51,7 +49,8 @@ fun AuthorLinks()
 			LinkButton(
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.Linkedin ,
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.linkedin_icon),
 								contentDescription = "LinkedIn Link" ,
 							)
 					} ,
@@ -67,7 +66,8 @@ fun AuthorLinks()
 			LinkButton(
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.Mail ,
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.mail_icon),
 								contentDescription = "Email Link" ,
 							)
 					} ,
@@ -80,7 +80,8 @@ fun AuthorLinks()
 			LinkButton(
 					icon = {
 						Icon(
-								imageVector = FeatherIcons.Github ,
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.github_icon),
 								contentDescription = "Github"
 							)
 					} ,
