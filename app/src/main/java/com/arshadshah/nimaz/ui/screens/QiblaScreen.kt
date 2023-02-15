@@ -17,6 +17,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QiblaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.compass.BearingAndLocationContainer
 import com.arshadshah.nimaz.ui.components.bLogic.compass.Dial
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun QiblaScreen(paddingValues : PaddingValues)
@@ -27,9 +28,8 @@ fun QiblaScreen(paddingValues : PaddingValues)
 	val state = remember { viewModel.qiblaState }.collectAsState()
 	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "QiblaScreen: ${state.value}")
 
-	val defaultImage = painterResource(id = R.drawable.qibla1)
-	//create a mu	 that will be used to switch between the images
-	var imageToDisplay by remember { mutableStateOf(defaultImage) }
+	val sharedPreferences = PrivateSharedPreferences(context)
+	val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
 
 	val imagesMapped = mapOf(
 			0 to painterResource(id = R.drawable.qibla1) ,
@@ -37,11 +37,14 @@ fun QiblaScreen(paddingValues : PaddingValues)
 			2 to painterResource(id = R.drawable.qibla3) ,
 			3 to painterResource(id = R.drawable.qibla4) ,
 							)
+	//create a mu	 that will be used to switch between the images
+	var imageToDisplay by remember { mutableStateOf(imagesMapped[imageIndexFromStorage]) }
 
 
 	//a function that will change the image index to the index given
 	val changeImageIndex = { index : Int ->
-		imageToDisplay = imagesMapped[index] ?: defaultImage
+		imageToDisplay = imagesMapped[index]
+		sharedPreferences.saveDataInt("QiblaImageIndex" , index)
 	}
 
 
@@ -53,7 +56,7 @@ fun QiblaScreen(paddingValues : PaddingValues)
 			verticalArrangement = Arrangement.Center
 		  ) {
 		BearingAndLocationContainer(state)
-		Dial(state = state , imageToDisplay = imageToDisplay)
+		Dial(state = state , imageToDisplay = imageToDisplay !!)
 		ImageSwitcherCard(changeImageIndex)
 	}
 }
@@ -62,9 +65,13 @@ fun QiblaScreen(paddingValues : PaddingValues)
 fun ImageSwitcherCard(changeImageIndex : (Int) -> Unit)
 {
 
+
+	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
+	val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
+
 	//an is selected state that will be used to change the size of the image
 	//it tracks the index of the image
-	val isSelected = remember { mutableStateOf(0) }
+	val isSelected = remember { mutableStateOf(imageIndexFromStorage) }
 
 	//map the images to a number
 	val imagesMapped = mapOf(
