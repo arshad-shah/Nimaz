@@ -14,6 +14,10 @@ interface SurahDao
 	@Query("SELECT * FROM Surah")
 	fun getAllSurahs() : List<LocalSurah>
 
+	//get surah by id
+	@Query("SELECT * FROM Surah WHERE number = :number")
+	fun getSurahById(number : Int) : LocalSurah
+
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	fun insert(surah : List<LocalSurah>)
 

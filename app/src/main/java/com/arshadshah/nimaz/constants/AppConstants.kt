@@ -4,7 +4,9 @@ object AppConstants
 {
 
 	const val FONT_STYLE = "font_style"
-	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
+
+		private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
+//	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
 	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/custom"
 

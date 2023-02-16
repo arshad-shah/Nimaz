@@ -1,25 +1,29 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
+import android.content.Intent
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
@@ -39,7 +43,9 @@ fun AyaListUI(
 	language : String ,
 	loading : Boolean ,
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
-	ayaState : State<QuranViewModel.AyaState> ,
+	noteState : LiveData<String> ,
+	type : String ,
+	number : Int ,
 			 )
 {
 	if (loading)
@@ -50,7 +56,7 @@ fun AyaListUI(
 						loading = loading ,
 						handleEvents = handleEvents ,
 						aya = ayaList[index] ,
-						ayaState = ayaState ,
+						noteState = noteState ,
 							 )
 			}
 		}
@@ -59,8 +65,6 @@ fun AyaListUI(
 		//if a new item is viewed, then scroll to that item
 		val sharedPref = LocalContext.current.getSharedPreferences("quran" , 0)
 		val listState = rememberLazyListState()
-		val type = ayaList[0].ayaType
-		val number = ayaList[0].numberOfType
 		val visibleItemIndex =
 			remember {
 				mutableStateOf(
@@ -96,7 +100,7 @@ fun AyaListUI(
 						loading = loading ,
 						handleEvents = handleEvents ,
 						aya = ayaList[index] ,
-						ayaState = ayaState ,
+						noteState = noteState ,
 							 )
 			}
 		}
@@ -108,7 +112,7 @@ fun AyaListItemUI(
 	loading : Boolean ,
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	aya : Aya ,
-	ayaState : State<QuranViewModel.AyaState> ,
+	noteState : LiveData<String> ,
 				 )
 {
 
@@ -118,22 +122,33 @@ fun AyaListItemUI(
 		mutableStateOf(false)
 	}
 
-	val isBookMarkedVerse = remember {
-		mutableStateOf(false)
-	}
-
-	val isFavoured = remember {
-		mutableStateOf(false)
-	}
-
-	val hasNote = remember {
-		mutableStateOf(false)
-	}
-
-	val noteContent = remember {
+	val error = remember {
 		mutableStateOf("")
 	}
 
+	val isBookMarkedVerse = remember {
+		mutableStateOf(aya.bookmark)
+	}
+
+	val isFavoured = remember {
+		mutableStateOf(aya.favorite)
+	}
+
+	val hasNote = remember {
+		mutableStateOf(aya.note.isNotBlank())
+	}
+
+	val noteContent = remember {
+		mutableStateOf(aya.note)
+	}
+
+	val popUpOpen = remember {
+		mutableStateOf(false)
+	}
+
+	val showNoteDialog = remember {
+		mutableStateOf(false)
+	}
 
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
@@ -160,16 +175,7 @@ fun AyaListItemUI(
 				.padding(4.dp)
 				.fillMaxHeight()
 				.fillMaxWidth()
-				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp))
-				.clickable {
-					isBookMarkedVerse.value = ! isBookMarkedVerse.value
-					handleEvents(
-							QuranViewModel.AyaEvent.BookmarkAya(
-									aya.id ,
-									isBookMarkedVerse.value
-															   )
-								)
-				} ,
+				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp)) ,
 			shape = RoundedCornerShape(8.dp)
 				) {
 		Row(
@@ -177,68 +183,59 @@ fun AyaListItemUI(
 					.fillMaxWidth()
 					.padding(8.dp)
 		   ) {
-			if (isBookMarkedVerse.value)
-			{
-				Icon(
-						painter = painterResource(id = R.drawable.bookmark_icon) ,
-						contentDescription = "Bookmark" ,
-						tint = MaterialTheme.colorScheme.primary ,
-						modifier = Modifier
-							.size(24.dp)
-							.padding(4.dp)
-					)
-			}
 
 
 			Column(
 					modifier = Modifier
 						.weight(0.90f)
 				  ) {
-				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-					Text(
-							text = ayaArabicState.value ,
-							style = MaterialTheme.typography.titleLarge ,
-							fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp ,
-							fontFamily = when (fontStyle)
-							{
-								"Default" ->
+				SelectionContainer {
+					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+						Text(
+								text = ayaArabicState.value ,
+								style = MaterialTheme.typography.titleLarge ,
+								fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp ,
+								fontFamily = when (fontStyle)
 								{
-									quranFont
-								}
+									"Default" ->
+									{
+										quranFont
+									}
 
-								"Naqsh" ->
-								{
-									utmaniQuranFont
-								}
+									"Naqsh" ->
+									{
+										utmaniQuranFont
+									}
 
-								"Hidayat" ->
-								{
-									hidayat
-								}
+									"Hidayat" ->
+									{
+										hidayat
+									}
 
-								"Amiri" ->
-								{
-									amiri
-								}
+									"Amiri" ->
+									{
+										amiri
+									}
 
-								else ->
-								{
-									quranFont
-								}
-							} ,
-							textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(4.dp)
-								.placeholder(
-										visible = loading ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
-						)
+									else ->
+									{
+										quranFont
+									}
+								} ,
+								textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(4.dp)
+									.placeholder(
+											visible = isLoading.value ,
+											color = MaterialTheme.colorScheme.outline ,
+											shape = RoundedCornerShape(4.dp) ,
+											highlight = PlaceholderHighlight.shimmer(
+													highlightColor = Color.White ,
+																					)
+												)
+							)
+					}
 				}
 				Spacer(modifier = Modifier.height(4.dp))
 				if (aya.TranslationLanguage == "URDU")
@@ -254,7 +251,7 @@ fun AyaListItemUI(
 									.fillMaxWidth()
 									.padding(horizontal = 4.dp)
 									.placeholder(
-											visible = loading ,
+											visible = isLoading.value ,
 											color = MaterialTheme.colorScheme.outline ,
 											shape = RoundedCornerShape(4.dp) ,
 											highlight = PlaceholderHighlight.shimmer(
@@ -275,7 +272,7 @@ fun AyaListItemUI(
 								.fillMaxWidth()
 								.padding(horizontal = 4.dp)
 								.placeholder(
-										visible = loading ,
+										visible = isLoading.value ,
 										color = MaterialTheme.colorScheme.outline ,
 										shape = RoundedCornerShape(4.dp) ,
 										highlight = PlaceholderHighlight.shimmer(
@@ -355,6 +352,241 @@ fun AyaListItemUI(
 //							)
 //					}
 //				}
+
+
+				Row(
+						horizontalArrangement = Arrangement.SpaceBetween ,
+						verticalAlignment = Alignment.CenterVertically ,
+						modifier = Modifier
+							.padding(4.dp)
+				   ) {
+					if (isBookMarkedVerse.value)
+					{
+						Icon(
+								painter = painterResource(id = R.drawable.bookmark_icon) ,
+								contentDescription = "Bookmark" ,
+								tint = MaterialTheme.colorScheme.primary ,
+								modifier = Modifier
+									.size(24.dp)
+									.padding(4.dp)
+							)
+					}
+
+					if (isFavoured.value)
+					{
+						Icon(
+								painter = painterResource(id = R.drawable.favorite_icon) ,
+								contentDescription = "Favourite" ,
+								tint = MaterialTheme.colorScheme.primary ,
+								modifier = Modifier
+									.size(24.dp)
+									.padding(4.dp)
+							)
+					}
+
+					if (hasNote.value)
+					{
+						Icon(
+								painter = painterResource(id = R.drawable.note_icon) ,
+								contentDescription = "Note" ,
+								tint = MaterialTheme.colorScheme.primary ,
+								modifier = Modifier
+									.size(24.dp)
+									.padding(4.dp)
+									.clickable {
+										handleEvents(
+												QuranViewModel.AyaEvent.getNoteForAya(
+														aya.ayaNumber ,
+														aya.suraNumber ,
+														aya.ayaNumberInSurah
+																					 )
+													)
+										showNoteDialog.value = true
+										noteContent.value = aya.note
+									}
+							)
+					}
+				}
+
+				if (aya.ayaNumberInQuran != 0)
+				{
+					//a button that opens a popup menu
+					IconButton(
+							onClick = {
+								popUpOpen.value = ! popUpOpen.value
+							} ,
+							enabled = true ,
+							modifier = Modifier
+								.align(Alignment.End)
+							  ) {
+						Icon(
+								modifier = Modifier
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.more_menu_icon) ,
+								contentDescription = "More Menu" ,
+							)
+					}
+				}
+
+				if (showNoteDialog.value)
+				{
+					NoteInput(
+							showNoteDialog = showNoteDialog ,
+							noteContent = noteContent ,
+							onClick = {
+								hasNote.value = ! hasNote.value
+								aya.note = noteContent.value
+								handleEvents(
+										QuranViewModel.AyaEvent.AddNoteToAya(
+												aya.ayaNumber ,
+												aya.suraNumber ,
+												aya.ayaNumberInSurah ,
+												noteContent.value
+																			)
+											)
+								showNoteDialog.value = false
+							}
+							 )
+				}
+
+				if (popUpOpen.value)
+				{
+					//popup menu
+					Popup(
+							onDismissRequest = {
+								popUpOpen.value = false
+							} ,
+							alignment = Alignment.BottomEnd ,
+							offset = IntOffset(0 , - 150) ,
+						 ) {
+						ElevatedCard(
+								modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)) ,
+									) {
+							Row(
+									modifier = Modifier
+										.padding(8.dp) ,
+									verticalAlignment = Alignment.CenterVertically
+							   ) {
+
+								IconButton(
+										modifier = Modifier.border(
+												1.dp ,
+												MaterialTheme.colorScheme.primary ,
+												RoundedCornerShape(50)
+																  ) ,
+										onClick = {
+											isBookMarkedVerse.value = ! isBookMarkedVerse.value
+											aya.bookmark = isBookMarkedVerse.value
+											handleEvents(
+													QuranViewModel.AyaEvent.BookmarkAya(
+															aya.ayaNumber ,
+															aya.suraNumber ,
+															aya.ayaNumberInSurah ,
+															isBookMarkedVerse.value
+																					   )
+														)
+											popUpOpen.value = false
+										}
+										  ) {
+									Icon(
+											painter = painterResource(id = R.drawable.bookmark_icon) ,
+											contentDescription = "Bookmark" ,
+											tint = MaterialTheme.colorScheme.primary ,
+											modifier = Modifier
+												.size(24.dp)
+												.padding(4.dp) ,
+										)
+								}
+								Spacer(modifier = Modifier.width(8.dp))
+								IconButton(
+										modifier = Modifier.border(
+												1.dp ,
+												MaterialTheme.colorScheme.primary ,
+												RoundedCornerShape(50)
+																  ) ,
+										onClick = {
+											isFavoured.value = ! isFavoured.value
+											aya.favorite = isFavoured.value
+											handleEvents(
+													QuranViewModel.AyaEvent.FavoriteAya(
+															aya.ayaNumber ,
+															aya.suraNumber ,
+															aya.ayaNumberInSurah ,
+															isFavoured.value
+																					   )
+														)
+											popUpOpen.value = false
+										} ,
+										enabled = true ,
+										  ) {
+									Icon(
+											painter = painterResource(id = R.drawable.favorite_icon) ,
+											contentDescription = "Favourite" ,
+											tint = MaterialTheme.colorScheme.primary ,
+											modifier = Modifier
+												.size(24.dp)
+												.padding(4.dp) ,
+										)
+								}
+
+
+								Spacer(modifier = Modifier.width(8.dp))
+								IconButton(
+										modifier = Modifier.border(
+												1.dp ,
+												MaterialTheme.colorScheme.primary ,
+												RoundedCornerShape(50)
+																  ) ,
+										onClick = {
+											showNoteDialog.value = ! showNoteDialog.value
+											popUpOpen.value = false
+										} ,
+										enabled = true ,
+										  ) {
+									Icon(
+											modifier = Modifier
+												.size(24.dp)
+												.padding(4.dp) ,
+											painter = painterResource(id = R.drawable.edit_note_icon) ,
+											tint = MaterialTheme.colorScheme.primary ,
+											contentDescription = "Add Note" ,
+										)
+								}
+
+								Spacer(modifier = Modifier.width(8.dp))
+								IconButton(
+										modifier = Modifier.border(
+												1.dp ,
+												MaterialTheme.colorScheme.primary ,
+												RoundedCornerShape(50)
+																  ) ,
+										onClick = {
+											//share the aya
+											val shareIntent = Intent(Intent.ACTION_SEND)
+											shareIntent.type = "text/plain"
+											shareIntent.putExtra(Intent.EXTRA_TEXT , aya.ayaArabic)
+											context.startActivity(
+													Intent.createChooser(
+															shareIntent ,
+															"Share via"
+																		)
+																 )
+										} ,
+										enabled = true ,
+										  ) {
+									Icon(
+											modifier = Modifier
+												.size(24.dp)
+												.padding(4.dp) ,
+											painter = painterResource(id = R.drawable.share_icon) ,
+											tint = MaterialTheme.colorScheme.primary ,
+											contentDescription = "Share aya" ,
+										)
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
