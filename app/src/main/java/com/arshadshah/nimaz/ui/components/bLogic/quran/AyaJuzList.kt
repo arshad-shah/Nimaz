@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
@@ -21,7 +22,7 @@ fun AyaJuzList(
 	language : String ,
 	state : State<QuranViewModel.AyaJuzState> ,
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
-	ayaState : State<QuranViewModel.AyaState> ,
+	noteState : LiveData<String> ,
 			  )
 {
 	when (val ayatJuzListState = state.value)
@@ -48,7 +49,7 @@ fun AyaJuzList(
 						language = language ,
 						loading = true ,
 						handleEvents = handleEvents ,
-						ayaState = ayaState ,
+						noteState = noteState ,
 						 )
 			} else
 			{
@@ -79,7 +80,7 @@ fun AyaJuzList(
 						language = language ,
 						loading = false ,
 						handleEvents = handleEvents ,
-						ayaState = ayaState ,
+						noteState = noteState ,
 						 )
 			} else
 			{
