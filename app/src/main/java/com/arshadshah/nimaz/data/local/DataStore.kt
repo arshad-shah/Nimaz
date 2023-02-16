@@ -43,23 +43,65 @@ class DataStore(db : AppDatabase)
 	suspend fun insertAyats(aya : List<Aya>) = ayaDao.insert(aya.map { it.toLocalAya() })
 
 	//count the number of ayas
-	suspend fun countSurahAyat(surahNumber : Int , translationLanguage : String) =
+	suspend fun countSurahAyat(
+		surahNumber : Int ,
+		translationLanguage : String ,
+							  ) =
 		ayaDao.countSurahAya(surahNumber , translationLanguage)
 
 	suspend fun countJuzAyat(juzNumber : Int , translationLanguage : String) =
 		ayaDao.countJuzAya(juzNumber , translationLanguage)
 
+	suspend fun getBismillahAya(translationLanguage : String) =
+		ayaDao.getBismillah(translationLanguage).toAya()
+
 	//bookmark an aya
-	suspend fun bookmarkAya(id : Int , bookmarkAya : Boolean) = ayaDao.bookmarkAya(id , bookmarkAya)
+	suspend fun bookmarkAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+		bookmarkAya : Boolean ,
+						   ) =
+		ayaDao.bookmarkAya(ayaNumber , surahNumber , ayaNumberInSurah , bookmarkAya)
 
 	//favorite an aya
-	suspend fun favoriteAya(id : Int , favoriteAya : Boolean) = ayaDao.favoriteAya(id , favoriteAya)
+	suspend fun favoriteAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+		favoriteAya : Boolean ,
+						   ) =
+		ayaDao.favoriteAya(ayaNumber , surahNumber , ayaNumberInSurah , favoriteAya)
 
 	//add a note to an aya
-	suspend fun addNoteToAya(id : Int , note : String) = ayaDao.addNoteToAya(id , note)
+	suspend fun addNoteToAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+		note : String ,
+							) =
+		ayaDao.addNoteToAya(ayaNumber , surahNumber , ayaNumberInSurah , note)
+
+	suspend fun getNoteOfAya(ayaNumber : Int , surahNumber : Int , ayaNumberInSurah : Int) =
+		ayaDao.getNoteOfAya(ayaNumber , surahNumber , ayaNumberInSurah)
+
+	//get all the bookmarked ayas
+	suspend fun getBookmarkedAyas() =
+		ayaDao.getBookmarkedAyas().map { it.toAya() }
+
+	//get all the favorited ayas
+	suspend fun getFavoritedAyas() =
+		ayaDao.getFavoritedAyas().map { it.toAya() }
+
+	//get all the ayas with notes
+	suspend fun getAyasWithNotes() =
+		ayaDao.getAyasWithNotes().map { it.toAya() }
+
 
 	//get all juz
 	suspend fun getAllJuz() = juzDao.getAllJuz().map { it.toJuz() }
+
+	suspend fun getJuzById(number : Int) = juzDao.getJuzById(number).toJuz()
 
 	//save all juz by mapping the Array list of juz to local juz
 	suspend fun saveAllJuz(juz : ArrayList<Juz>) = juzDao.insert(juz.map { it.toLocalJuz() })
@@ -68,6 +110,9 @@ class DataStore(db : AppDatabase)
 
 	//get all surah
 	fun getAllSurah() = surahDao.getAllSurahs().map { it.toSurah() }
+
+
+	fun getSurahById(number : Int) = surahDao.getSurahById(number).toSurah()
 
 	//save all surah by mapping the Array list of surah to local surah
 	fun saveAllSurah(surah : ArrayList<Surah>) = surahDao.insert(surah.map { it.toLocalSurah() })
@@ -108,6 +153,7 @@ class DataStore(db : AppDatabase)
 }
 
 private fun Aya.toLocalAya() = LocalAya(
+		ayaNumberInQuran = ayaNumberInQuran ,
 		ayaNumber = ayaNumber ,
 		ayaArabic = ayaArabic ,
 		translation = ayaTranslation ,
@@ -121,13 +167,11 @@ private fun Aya.toLocalAya() = LocalAya(
 		sajdaType = sajdaType ,
 		ruku = ruku ,
 		juzNumber = juzNumber ,
-		ayaType = ayaType ,
-		numberOfType = numberOfType ,
 		translationLanguage = TranslationLanguage ,
 									   )
 
 private fun LocalAya.toAya() = Aya(
-		id = id ,
+		ayaNumberInQuran = ayaNumberInQuran ,
 		ayaNumber = ayaNumber ,
 		ayaArabic = ayaArabic ,
 		ayaTranslation = translation ,
@@ -141,8 +185,6 @@ private fun LocalAya.toAya() = Aya(
 		sajdaType = sajdaType ,
 		ruku = ruku ,
 		juzNumber = juzNumber ,
-		ayaType = ayaType ,
-		numberOfType = numberOfType ,
 		TranslationLanguage = translationLanguage ,
 								  )
 
