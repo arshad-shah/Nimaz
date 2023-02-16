@@ -25,6 +25,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
+import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.NotificationHelper
@@ -297,6 +298,15 @@ fun SettingsScreen(
 								)
 						} ,
 								)
+			}
+
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				BatteryExemptionUI()
 			}
 		}
 
