@@ -58,6 +58,7 @@ class DataStore(db : AppDatabase)
 	//add a note to an aya
 	suspend fun addNoteToAya(id : Int , note : String) = ayaDao.addNoteToAya(id , note)
 
+	suspend fun getNoteOfAya(id : Int) = ayaDao.getNoteOfAya(id)
 	//get all juz
 	suspend fun getAllJuz() = juzDao.getAllJuz().map { it.toJuz() }
 

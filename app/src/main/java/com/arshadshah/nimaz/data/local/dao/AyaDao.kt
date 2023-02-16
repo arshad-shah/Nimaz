@@ -31,6 +31,10 @@ interface AyaDao
 	@Query("UPDATE Aya SET note = :note WHERE id = :id")
 	suspend fun addNoteToAya(id : Int , note : String)
 
+	//get a  note fro an aya
+	@Query("SELECT note FROM Aya WHERE id = :id")
+	suspend fun getNoteOfAya(id : Int) : String
+
 	@Insert(entity = LocalAya::class , onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(aya : List<LocalAya>)
 

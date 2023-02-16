@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.Aya
@@ -54,9 +56,12 @@ class QuranViewModel(context : Context) : ViewModel()
 	{
 
 		object Loading : AyaState()
-		object Success : AyaState()
+		data class Success(val data : String) : AyaState()
 		data class Error(val errorMessage : String) : AyaState()
 	}
+
+	private var _noteOfAya = MutableLiveData<String>()
+	val noteOfAya : LiveData<String> = _noteOfAya
 
 	private var _ayaState = MutableStateFlow(AyaState.Loading as AyaState)
 	val ayaState = _ayaState.asStateFlow()
@@ -209,6 +214,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		data class BookmarkAya(val id : Int , val bookmark : Boolean) : AyaEvent()
 		data class FavoriteAya(val id : Int , val favorite : Boolean) : AyaEvent()
 		data class AddNoteToAya(val id : Int , val note : String) : AyaEvent()
+		data class getNoteForAya(val id : Int) : AyaEvent()
 	}
 
 	//events handler
@@ -230,6 +236,10 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				addNoteToAya(ayaEvent.id , ayaEvent.note)
 			}
+			is AyaEvent.getNoteForAya ->
+			{
+				getNoteForAya(ayaEvent.id)
+			}
 
 			else ->
 			{
@@ -246,7 +256,7 @@ class QuranViewModel(context : Context) : ViewModel()
 				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				dataStore.bookmarkAya(id , bookmark)
-				_ayaState.value = AyaState.Success
+				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
 				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
@@ -263,7 +273,7 @@ class QuranViewModel(context : Context) : ViewModel()
 				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				dataStore.favoriteAya(id , favorite)
-				_ayaState.value = AyaState.Success
+				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
 				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
@@ -280,10 +290,26 @@ class QuranViewModel(context : Context) : ViewModel()
 				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				dataStore.addNoteToAya(id , note)
-				_ayaState.value = AyaState.Success
+				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
 				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	//get a note for an aya
+	fun getNoteForAya(id : Int)
+	{
+		viewModelScope.launch(Dispatchers.Main) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				val note = dataStore.getNoteOfAya(id)
+				_noteOfAya.value = note
+			} catch (e : Exception)
+			{
+				_noteOfAya.value = "Error getting note"
 			}
 		}
 	}
