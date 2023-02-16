@@ -76,6 +76,7 @@ fun QuranScreen(
 
 	//save the state of the tab
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
+//	val titles = listOf("Sura" , "Juz", "My Quran")
 	val titles = listOf("Sura" , "Juz")
 	Column(modifier = Modifier.padding(paddingValues)) {
 
@@ -124,6 +125,19 @@ fun QuranScreen(
 						state = juzListState ,
 					   )
 			}
+//			2 ->
+//			{
+//				val bookmarks = viewModel.bookmarks
+//				val favorites = viewModel.favorites
+//				val notes = viewModel.notes
+//				MyQuranScreen(
+//						bookmarks = bookmarks ,
+//						favorites = favorites ,
+//						notes = notes ,
+//						onNavigateToAyatScreen = onNavigateToAyatScreen ,
+//						handleEvents = viewModel::handleAyaEvent
+//							 )
+//			}
 		}
 	}
 }

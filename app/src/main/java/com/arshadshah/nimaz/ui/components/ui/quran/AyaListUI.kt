@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -45,6 +44,8 @@ fun AyaListUI(
 	loading : Boolean ,
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	noteState : LiveData<String> ,
+	type : String ,
+	number : Int ,
 			 )
 {
 	if (loading)
@@ -64,8 +65,6 @@ fun AyaListUI(
 		//if a new item is viewed, then scroll to that item
 		val sharedPref = LocalContext.current.getSharedPreferences("quran" , 0)
 		val listState = rememberLazyListState()
-		val type = ayaList[0].ayaType
-		val number = ayaList[0].numberOfType
 		val visibleItemIndex =
 			remember {
 				mutableStateOf(
@@ -140,7 +139,7 @@ fun AyaListItemUI(
 	}
 
 	val noteContent = remember {
-		mutableStateOf(noteState.value ?: "")
+		mutableStateOf(aya.note)
 	}
 
 	val popUpOpen = remember {
@@ -355,81 +354,93 @@ fun AyaListItemUI(
 //				}
 
 
-				if (isBookMarkedVerse.value)
-				{
-					Icon(
-							painter = painterResource(id = R.drawable.bookmark_icon) ,
-							contentDescription = "Bookmark" ,
-							tint = MaterialTheme.colorScheme.primary ,
-							modifier = Modifier
-								.size(24.dp)
-								.padding(4.dp)
-								.align(Alignment.Start)
-						)
-				}
-
-				if(isFavoured.value)
-				{
-					Icon(
-							painter = painterResource(id = R.drawable.favorite_icon) ,
-							contentDescription = "Favourite" ,
-							tint = MaterialTheme.colorScheme.primary ,
-							modifier = Modifier
-								.size(24.dp)
-								.padding(4.dp)
-								.align(Alignment.Start)
-						)
-				}
-
-				if(hasNote.value){
-					Icon(
-							painter = painterResource(id = R.drawable.note_icon) ,
-							contentDescription = "Note" ,
-							tint = MaterialTheme.colorScheme.primary ,
-							modifier = Modifier
-								.size(24.dp)
-								.padding(4.dp)
-								.align(Alignment.Start)
-								.clickable{
-									handleEvents(
-											QuranViewModel.AyaEvent.getNoteForAya(
-													aya.id
-																				 )
-												)
-									showNoteDialog.value = true
-									noteContent.value = aya.note
-									Log.d("AyaListItemUI" , "Note clicked : ${aya.note}")
-								}
-						)
-				}
-
-				//a button that opens a popup menu
-				IconButton(
-						onClick = {
-							popUpOpen.value = ! popUpOpen.value
-						} ,
-						enabled = true ,
+				Row(
+						horizontalArrangement = Arrangement.SpaceBetween ,
+						verticalAlignment = Alignment.CenterVertically ,
 						modifier = Modifier
-							.align(Alignment.End)
-						  ) {
-					Icon(
-							modifier = Modifier
-								.size(24.dp),
-							painter = painterResource(id = R.drawable.more_menu_icon),
-							contentDescription =  "More Menu",
-						)
+							.padding(4.dp)
+				   ) {
+					if (isBookMarkedVerse.value)
+					{
+						Icon(
+								painter = painterResource(id = R.drawable.bookmark_icon) ,
+								contentDescription = "Bookmark" ,
+								tint = MaterialTheme.colorScheme.primary ,
+								modifier = Modifier
+									.size(24.dp)
+									.padding(4.dp)
+							)
+					}
+
+					if (isFavoured.value)
+					{
+						Icon(
+								painter = painterResource(id = R.drawable.favorite_icon) ,
+								contentDescription = "Favourite" ,
+								tint = MaterialTheme.colorScheme.primary ,
+								modifier = Modifier
+									.size(24.dp)
+									.padding(4.dp)
+							)
+					}
+
+					if (hasNote.value)
+					{
+						Icon(
+								painter = painterResource(id = R.drawable.note_icon) ,
+								contentDescription = "Note" ,
+								tint = MaterialTheme.colorScheme.primary ,
+								modifier = Modifier
+									.size(24.dp)
+									.padding(4.dp)
+									.clickable {
+										handleEvents(
+												QuranViewModel.AyaEvent.getNoteForAya(
+														aya.ayaNumber ,
+														aya.suraNumber ,
+														aya.ayaNumberInSurah
+																					 )
+													)
+										showNoteDialog.value = true
+										noteContent.value = aya.note
+									}
+							)
+					}
 				}
 
-				if (showNoteDialog.value){
+				if (aya.ayaNumberInQuran != 0)
+				{
+					//a button that opens a popup menu
+					IconButton(
+							onClick = {
+								popUpOpen.value = ! popUpOpen.value
+							} ,
+							enabled = true ,
+							modifier = Modifier
+								.align(Alignment.End)
+							  ) {
+						Icon(
+								modifier = Modifier
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.more_menu_icon) ,
+								contentDescription = "More Menu" ,
+							)
+					}
+				}
+
+				if (showNoteDialog.value)
+				{
 					NoteInput(
-							showNoteDialog = showNoteDialog,
-							noteContent = noteContent,
+							showNoteDialog = showNoteDialog ,
+							noteContent = noteContent ,
 							onClick = {
 								hasNote.value = ! hasNote.value
 								aya.note = noteContent.value
 								handleEvents(
 										QuranViewModel.AyaEvent.AddNoteToAya(
-												aya.id,
+												aya.ayaNumber ,
+												aya.suraNumber ,
+												aya.ayaNumberInSurah ,
 												noteContent.value
 																			)
 											)
@@ -438,17 +449,18 @@ fun AyaListItemUI(
 							 )
 				}
 
-				if(popUpOpen.value){
+				if (popUpOpen.value)
+				{
 					//popup menu
 					Popup(
 							onDismissRequest = {
 								popUpOpen.value = false
 							} ,
 							alignment = Alignment.BottomEnd ,
-							offset = IntOffset(0 , -150) ,
+							offset = IntOffset(0 , - 150) ,
 						 ) {
 						ElevatedCard(
-								modifier = Modifier.shadow(8.dp, RoundedCornerShape(8.dp)) ,
+								modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)) ,
 									) {
 							Row(
 									modifier = Modifier
@@ -461,26 +473,28 @@ fun AyaListItemUI(
 												1.dp ,
 												MaterialTheme.colorScheme.primary ,
 												RoundedCornerShape(50)
-																  ),
+																  ) ,
 										onClick = {
 											isBookMarkedVerse.value = ! isBookMarkedVerse.value
 											aya.bookmark = isBookMarkedVerse.value
 											handleEvents(
 													QuranViewModel.AyaEvent.BookmarkAya(
-															aya.id ,
+															aya.ayaNumber ,
+															aya.suraNumber ,
+															aya.ayaNumberInSurah ,
 															isBookMarkedVerse.value
 																					   )
 														)
 											popUpOpen.value = false
 										}
-										  ){
+										  ) {
 									Icon(
 											painter = painterResource(id = R.drawable.bookmark_icon) ,
 											contentDescription = "Bookmark" ,
 											tint = MaterialTheme.colorScheme.primary ,
 											modifier = Modifier
 												.size(24.dp)
-												.padding(4.dp),
+												.padding(4.dp) ,
 										)
 								}
 								Spacer(modifier = Modifier.width(8.dp))
@@ -489,18 +503,20 @@ fun AyaListItemUI(
 												1.dp ,
 												MaterialTheme.colorScheme.primary ,
 												RoundedCornerShape(50)
-																  ),
+																  ) ,
 										onClick = {
 											isFavoured.value = ! isFavoured.value
 											aya.favorite = isFavoured.value
 											handleEvents(
 													QuranViewModel.AyaEvent.FavoriteAya(
-															aya.id ,
+															aya.ayaNumber ,
+															aya.suraNumber ,
+															aya.ayaNumberInSurah ,
 															isFavoured.value
 																					   )
 														)
 											popUpOpen.value = false
-										},
+										} ,
 										enabled = true ,
 										  ) {
 									Icon(
@@ -509,7 +525,7 @@ fun AyaListItemUI(
 											tint = MaterialTheme.colorScheme.primary ,
 											modifier = Modifier
 												.size(24.dp)
-												.padding(4.dp),
+												.padding(4.dp) ,
 										)
 								}
 
@@ -520,7 +536,7 @@ fun AyaListItemUI(
 												1.dp ,
 												MaterialTheme.colorScheme.primary ,
 												RoundedCornerShape(50)
-																  ),
+																  ) ,
 										onClick = {
 											showNoteDialog.value = ! showNoteDialog.value
 											popUpOpen.value = false
@@ -530,7 +546,7 @@ fun AyaListItemUI(
 									Icon(
 											modifier = Modifier
 												.size(24.dp)
-												.padding(4.dp),
+												.padding(4.dp) ,
 											painter = painterResource(id = R.drawable.edit_note_icon) ,
 											tint = MaterialTheme.colorScheme.primary ,
 											contentDescription = "Add Note" ,
@@ -543,20 +559,25 @@ fun AyaListItemUI(
 												1.dp ,
 												MaterialTheme.colorScheme.primary ,
 												RoundedCornerShape(50)
-																  ),
+																  ) ,
 										onClick = {
 											//share the aya
 											val shareIntent = Intent(Intent.ACTION_SEND)
 											shareIntent.type = "text/plain"
 											shareIntent.putExtra(Intent.EXTRA_TEXT , aya.ayaArabic)
-											context.startActivity(Intent.createChooser(shareIntent , "Share via"))
+											context.startActivity(
+													Intent.createChooser(
+															shareIntent ,
+															"Share via"
+																		)
+																 )
 										} ,
 										enabled = true ,
 										  ) {
 									Icon(
 											modifier = Modifier
 												.size(24.dp)
-												.padding(4.dp),
+												.padding(4.dp) ,
 											painter = painterResource(id = R.drawable.share_icon) ,
 											tint = MaterialTheme.colorScheme.primary ,
 											contentDescription = "Share aya" ,

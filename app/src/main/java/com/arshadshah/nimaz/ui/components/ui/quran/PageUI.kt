@@ -198,7 +198,7 @@ fun PageUIPreview()
 	//add the aya to the list
 	ayaList.add(
 			Aya(
-					id = 0 ,
+					0 ,
 					0 ,
 					"بسم الله الرحمن الرحيم" ,
 					"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
@@ -212,14 +212,12 @@ fun PageUIPreview()
 					"sajdaType" ,
 					0 ,
 					0 ,
-					"Surah" ,
-					1 ,
 					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
-					id = 0 ,
+					1 ,
 					1 ,
 					"الحمد لله رب العالمين" ,
 					"All praise is due to Allah, Lord of the worlds." ,
@@ -233,14 +231,12 @@ fun PageUIPreview()
 					"sajdaType" ,
 					0 ,
 					0 ,
-					"Surah" ,
-					1 ,
 					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
-					id = 0 ,
+					2 ,
 					2 ,
 					"الرحمن الرحيم" ,
 					"The Entirely Merciful, the Especially Merciful." ,
@@ -254,14 +250,12 @@ fun PageUIPreview()
 					"sajdaType" ,
 					0 ,
 					0 ,
-					"Surah" ,
-					1 ,
 					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
-					id = 0 ,
+					3 ,
 					3 ,
 					"مالك يوم الدين" ,
 					"Master of the Day of Judgment." ,
@@ -275,14 +269,12 @@ fun PageUIPreview()
 					"sajdaType" ,
 					0 ,
 					0 ,
-					"Surah" ,
-					1 ,
 					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
-					id = 0 ,
+					4 ,
 					4 ,
 					"إياك نعبد وإياك نستعين" ,
 					"You alone do we worship, and You alone do we implore for help." ,
@@ -296,14 +288,12 @@ fun PageUIPreview()
 					"sajdaType" ,
 					0 ,
 					0 ,
-					"Surah" ,
-					1 ,
 					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
-					id = 0 ,
+					5 ,
 					5 ,
 					"اهدنا الصراط المستقيم" ,
 					"Guide us to the straight path." ,
@@ -317,14 +307,12 @@ fun PageUIPreview()
 					"sajdaType" ,
 					0 ,
 					0 ,
-					"Surah" ,
-					1 ,
 					"ENGLISH" ,
 			   )
 			   )
 	ayaList.add(
 			Aya(
-					id = 0 ,
+					6 ,
 					6 ,
 					"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
 					"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
@@ -338,8 +326,6 @@ fun PageUIPreview()
 					"sajdaType" ,
 					0 ,
 					0 ,
-					"Surah" ,
-					1 ,
 					"ENGLISH" ,
 			   )
 			   )

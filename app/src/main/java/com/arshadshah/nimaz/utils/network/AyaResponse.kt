@@ -3,21 +3,10 @@ package com.arshadshah.nimaz.utils.network
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-//    var ayaNumber: Int,
-//    var ayaArabic: String,
-//    var ayaTranslation: String,
-//    var suraNumber: Int,
-//    var ayaNumberInSurah: Int,
-//    var bookmark: Boolean,
-//    var favorite: Boolean,
-//    var note: String,
-//    var audioFileLocation: String,
-//    var sajda: Boolean,
-//    var sajdaType: String,
-//    var ruku: Int,
-//    var juzNumber: Int
 @Serializable
 data class AyaResponse(
+	@SerialName("ayaNumberInQuran")
+	val ayaNumberInQuran : Int ,
 	@SerialName("ayaNumber")
 	val number : Int ,
 	@SerialName("ayaArabic")

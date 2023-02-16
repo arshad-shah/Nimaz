@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.data.remote.models
 
 data class Aya(
-	val id : Int ,
+	val ayaNumberInQuran : Int ,
 	var ayaNumber : Int ,
 	var ayaArabic : String ,
 	var ayaTranslation : String ,
@@ -15,7 +15,5 @@ data class Aya(
 	var sajdaType : String ,
 	var ruku : Int ,
 	var juzNumber : Int ,
-	val ayaType : String , //surah or juz
-	val numberOfType : Int , //surah number or juz number
 	val TranslationLanguage : String ,
 			  )

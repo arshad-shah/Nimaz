@@ -15,6 +15,10 @@ interface JuzDao
 	@Query("SELECT * FROM Juz")
 	suspend fun getAllJuz() : List<LocalJuz>
 
+	//get juz by id
+	@Query("SELECT * FROM Juz WHERE number = :number")
+	suspend fun getJuzById(number : Int) : LocalJuz
+
 	//insert all the juz
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(juz : List<LocalJuz>)

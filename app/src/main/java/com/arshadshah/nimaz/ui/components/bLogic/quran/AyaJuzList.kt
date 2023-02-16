@@ -23,6 +23,7 @@ fun AyaJuzList(
 	state : State<QuranViewModel.AyaJuzState> ,
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	noteState : LiveData<String> ,
+	type : String ,
 			  )
 {
 	when (val ayatJuzListState = state.value)
@@ -50,6 +51,8 @@ fun AyaJuzList(
 						loading = true ,
 						handleEvents = handleEvents ,
 						noteState = noteState ,
+						type = type ,
+						number = number ,
 						 )
 			} else
 			{
@@ -81,6 +84,8 @@ fun AyaJuzList(
 						loading = false ,
 						handleEvents = handleEvents ,
 						noteState = noteState ,
+						type = type ,
+						number = number ,
 						 )
 			} else
 			{
