@@ -36,7 +36,8 @@ fun AyatScreen(
 				paddingValues = paddingValues ,
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
-				noteState = noteState
+				noteState = noteState ,
+				type = "surah"
 					)
 
 	} else
@@ -51,7 +52,8 @@ fun AyatScreen(
 				paddingValues = paddingValues ,
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
-				noteState = noteState
+				noteState = noteState ,
+				type = "juz"
 				  )
 	}
 }

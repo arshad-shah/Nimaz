@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Aya")
 data class LocalAya(
-		//a primary key that is auto generated
-	@PrimaryKey(autoGenerate = true)
-	val id : Int = 0 ,
+	@PrimaryKey
+	val ayaNumberInQuran : Int ,
 	val ayaNumber : Int ,
 	val ayaArabic : String ,
 	val translation : String ,
@@ -21,7 +20,5 @@ data class LocalAya(
 	val sajdaType : String ,
 	val ruku : Int ,
 	val juzNumber : Int ,
-	val ayaType : String , //surah or juz
-	val numberOfType : Int , //surah number or juz number
 	val translationLanguage : String ,
 				   )
