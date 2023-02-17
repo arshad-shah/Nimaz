@@ -97,6 +97,14 @@ class DataStore(db : AppDatabase)
 	suspend fun getAyasWithNotes() =
 		ayaDao.getAyasWithNotes().map { it.toAya() }
 
+	//addAudioToAya
+	suspend fun addAudioToAya(
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+		audio : String ,
+							 ) =
+		ayaDao.addAudioToAya(surahNumber , ayaNumberInSurah , audio)
+
 
 	//get all juz
 	suspend fun getAllJuz() = juzDao.getAllJuz().map { it.toJuz() }

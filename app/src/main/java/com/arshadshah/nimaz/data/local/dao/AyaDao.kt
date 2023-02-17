@@ -66,6 +66,15 @@ interface AyaDao
 	@Query("SELECT * FROM Aya WHERE note != ''")
 	suspend fun getAyasWithNotes() : List<LocalAya>
 
+	//add a audio local path to an aya
+	//audioFileLocation
+	@Query("UPDATE Aya SET audioFileLocation = :audioFileLocation WHERE suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+	suspend fun addAudioToAya(
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+		audioFileLocation : String ,
+							 )
+
 	@Insert(entity = LocalAya::class , onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(aya : List<LocalAya>)
 

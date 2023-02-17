@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 
+import android.media.MediaPlayer
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ fun AyaJuzList(
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	noteState : LiveData<String> ,
 	type : String ,
+	mediaPlayer : MediaPlayer ,
 			  )
 {
 	when (val ayatJuzListState = state.value)
