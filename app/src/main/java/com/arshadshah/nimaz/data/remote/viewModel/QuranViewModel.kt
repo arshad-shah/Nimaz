@@ -384,6 +384,13 @@ class QuranViewModel(context : Context) : ViewModel()
 
 		//get all notes
 		object getNotes : AyaEvent()
+
+		//addAudioToAya
+		data class addAudioToAya(
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+			val audio : String ,
+							 ) : AyaEvent()
 	}
 
 	//events handler
@@ -440,9 +447,38 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				getAllNotes()
 			}
+			is AyaEvent.addAudioToAya ->
+			{
+				addAudioToAya(
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah ,
+						ayaEvent.audio
+							 )
+			}
 
 			else ->
 			{
+			}
+		}
+	}
+
+	//add audio to aya
+	fun addAudioToAya(
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+		audio : String ,
+					 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_ayaState.value = AyaState.Loading
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.addAudioToAya(surahNumber , ayaNumberInSurah , audio)
+				_ayaState.value = AyaState.Success("")
+			} catch (e : Exception)
+			{
+				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
 			}
 		}
 	}

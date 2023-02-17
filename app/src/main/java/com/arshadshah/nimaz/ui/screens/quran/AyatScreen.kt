@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ fun AyatScreen(
 	isSurah : String ,
 	language : String ,
 	paddingValues : PaddingValues ,
+	mediaPlayer : MediaPlayer ,
 			  )
 {
 	val context = LocalContext.current
@@ -37,7 +39,8 @@ fun AyatScreen(
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
 				noteState = noteState ,
-				type = "surah"
+				type = "surah",
+				mediaPlayer = mediaPlayer
 					)
 
 	} else
@@ -53,7 +56,8 @@ fun AyatScreen(
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
 				noteState = noteState ,
-				type = "juz"
+				type = "juz",
+				mediaPlayer = mediaPlayer
 				  )
 	}
 }

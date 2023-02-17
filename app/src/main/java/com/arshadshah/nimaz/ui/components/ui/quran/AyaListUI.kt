@@ -1,6 +1,9 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.net.Uri
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,12 +30,14 @@ import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import java.io.File
 import kotlin.reflect.KFunction1
 
 
@@ -48,6 +53,8 @@ fun AyaListUI(
 	number : Int ,
 			 )
 {
+
+	val spacesFileRepository = SpacesFileRepository(LocalContext.current)
 	if (loading)
 	{
 		LazyColumn(contentPadding = paddingValues) {
@@ -57,6 +64,7 @@ fun AyaListUI(
 						handleEvents = handleEvents ,
 						aya = ayaList[index] ,
 						noteState = noteState ,
+						spacesFileRepository = spacesFileRepository ,
 							 )
 			}
 		}
@@ -101,6 +109,7 @@ fun AyaListUI(
 						handleEvents = handleEvents ,
 						aya = ayaList[index] ,
 						noteState = noteState ,
+						spacesFileRepository = spacesFileRepository ,
 							 )
 			}
 		}
@@ -113,8 +122,11 @@ fun AyaListItemUI(
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	aya : Aya ,
 	noteState : LiveData<String> ,
+	spacesFileRepository : SpacesFileRepository ,
 				 )
 {
+
+	val context = LocalContext.current
 
 	//create a new speech recognizer
 //	val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(LocalContext.current)
@@ -150,6 +162,123 @@ fun AyaListItemUI(
 		mutableStateOf(false)
 	}
 
+	val mediaPlayer = MediaPlayer()
+	val duration = remember {
+		mutableStateOf(0)
+	}
+
+	//isDownloaded is used to show a progress bar when the user clicks on the download button
+	val isDownloaded = remember {
+		mutableStateOf(false)
+	}
+	val progressOfDownload = remember {
+		mutableStateOf(0f)
+	}
+	val isPlaying = remember {
+		mutableStateOf(false)
+	}
+	val isPaused = remember {
+		mutableStateOf(false)
+	}
+	val isStopped = remember {
+		mutableStateOf(false)
+	}
+
+	val fileToBePlayed = remember {
+		mutableStateOf<File?>(File("${context.filesDir}/quran/${aya.suraNumber}/${aya.ayaNumberInSurah}.mp3"))
+	}
+
+	val hasAudio = remember {
+		mutableStateOf(aya.audioFileLocation.isNotEmpty())
+	}
+
+	//callback fro the download progress
+	//callback: (File?, Exception?, progress:Int, completed: Boolean) -> Unit)
+	val downloadCallback = { file : File? , exception : Exception? , progress : Int , completed : Boolean ->
+		if (completed)
+		{
+			isDownloaded.value = true
+			progressOfDownload.value = 100f
+			fileToBePlayed.value = file
+			aya.audioFileLocation = file?.absolutePath.toString()
+			handleEvents(QuranViewModel.AyaEvent.addAudioToAya(aya.suraNumber, aya.ayaNumberInSurah, aya.audioFileLocation))
+		} else
+		{
+			isDownloaded.value = false
+			progressOfDownload.value = progress.toFloat()
+			fileToBePlayed.value = null
+		}
+	}
+
+	//play the file
+	fun playFile()
+	{
+		if (fileToBePlayed.value != null)
+		{
+			mediaPlayer.reset()
+			mediaPlayer.setAudioAttributes(
+					AudioAttributes.Builder()
+						.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+						.setUsage(AudioAttributes.USAGE_MEDIA)
+						.build()
+										  )
+			val uri = Uri.fromFile(fileToBePlayed.value)
+			mediaPlayer.setDataSource(uri.toString())
+			mediaPlayer.prepare()
+			mediaPlayer.start()
+			duration.value = mediaPlayer.duration
+			isPlaying.value = true
+			isPaused.value = false
+			isStopped.value = false
+		}
+	}
+
+	//pause the file
+	fun pauseFile()
+	{
+		if (mediaPlayer.isPlaying)
+		{
+			mediaPlayer.pause()
+			isPlaying.value = false
+			isPaused.value = true
+			isStopped.value = false
+		}
+	}
+
+	//stop the file
+	fun stopFile()
+	{
+		if (mediaPlayer.isPlaying)
+		{
+			mediaPlayer.stop()
+			mediaPlayer.reset()
+			isPlaying.value = false
+			isPaused.value = false
+			isStopped.value = true
+		}
+	}
+
+	//function to check if the file is downloaded already
+	fun checkIfFileIsDownloaded()
+	{
+		if (hasAudio.value)
+		{
+			isDownloaded.value = true
+			fileToBePlayed.value = File(aya.audioFileLocation)
+			playFile()
+		} else
+		{
+			isDownloaded.value = false
+			fileToBePlayed.value = null
+			spacesFileRepository.downloadAyaFile(aya.suraNumber,aya.ayaNumberInSurah, downloadCallback)
+		}
+	}
+	mediaPlayer.setOnCompletionListener {
+		isPlaying.value = false
+		isPaused.value = false
+		isStopped.value = true
+	}
+
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
 		MaterialTheme.colorScheme.outline
@@ -158,7 +287,6 @@ fun AyaListItemUI(
 		//use default color
 		MaterialTheme.colorScheme.surface
 	}
-	val context = LocalContext.current
 
 	//get font size from shared preferences#
 	val sharedPreferences = PrivateSharedPreferences(context)
@@ -449,6 +577,98 @@ fun AyaListItemUI(
 							 )
 				}
 
+				//a progress bar to show the download progress
+				if(progressOfDownload.value != 0f && ! isDownloaded.value){
+					LinearProgressIndicator(
+							progress = progressOfDownload.value ,
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(4.dp)
+						)
+				}
+
+				//a linear progress to show the audio player progress
+				if (isPlaying.value)
+				{
+					LinearProgressIndicator(
+							progress = duration.value / 1000f ,
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(4.dp)
+						)
+				}
+
+
+				if(isDownloaded.value || hasAudio.value){
+					//a row to show th play button and the audio player
+					Row(
+							horizontalArrangement = Arrangement.SpaceBetween ,
+							verticalAlignment = Alignment.CenterVertically ,
+							modifier = Modifier
+								.padding(4.dp)
+					   ) {
+						//play and puase button
+						IconButton(
+								onClick = {
+									if (isPlaying.value)
+									{
+										pauseFile()
+									} else
+									{
+										playFile()
+									}
+								} ,
+								enabled = true ,
+								modifier = Modifier
+									.align(Alignment.CenterVertically)
+								  ) {
+							if (isPlaying.value)
+							{
+								Icon(
+										painter = painterResource(id = R.drawable.pause_icon) ,
+										contentDescription = "Pause" ,
+										tint = MaterialTheme.colorScheme.primary ,
+										modifier = Modifier
+											.size(24.dp)
+											.padding(4.dp)
+									)
+							} else
+							{
+								Icon(
+										painter = painterResource(id = R.drawable.play_icon) ,
+										contentDescription = "Play" ,
+										tint = MaterialTheme.colorScheme.primary ,
+										modifier = Modifier
+											.size(24.dp)
+											.padding(4.dp)
+									)
+							}
+						}
+
+						if (isPlaying.value)
+						{
+							//stop button
+							IconButton(
+									onClick = {
+										stopFile()
+									} ,
+									enabled = true ,
+									modifier = Modifier
+										.align(Alignment.CenterVertically)
+									  ) {
+								Icon(
+										painter = painterResource(id = R.drawable.stop_icon) ,
+										contentDescription = "Stop" ,
+										tint = MaterialTheme.colorScheme.primary ,
+										modifier = Modifier
+											.size(24.dp)
+											.padding(4.dp)
+									)
+							}
+						}
+					}
+				}
+
 				if (popUpOpen.value)
 				{
 					//popup menu
@@ -583,6 +803,29 @@ fun AyaListItemUI(
 											contentDescription = "Share aya" ,
 										)
 								}
+
+								Spacer(modifier = Modifier.width(8.dp))
+								IconButton(
+										modifier = Modifier.border(
+												1.dp ,
+												MaterialTheme.colorScheme.primary ,
+												RoundedCornerShape(50)
+																  ) ,
+										onClick = {
+											checkIfFileIsDownloaded()
+											popUpOpen.value = false
+										} ,
+										enabled =true,
+										  ) {
+									Icon(
+											modifier = Modifier
+												.size(24.dp)
+												.padding(4.dp) ,
+											painter = painterResource(id = R.drawable.play_icon) ,
+											tint = MaterialTheme.colorScheme.primary ,
+											contentDescription = "Play ayah" ,
+										)
+								}
 							}
 						}
 					}
@@ -697,6 +940,3 @@ fun AyaListItemUI(
 //			100000
 //									 )
 //}
-
-
-//a component to show ruku info
