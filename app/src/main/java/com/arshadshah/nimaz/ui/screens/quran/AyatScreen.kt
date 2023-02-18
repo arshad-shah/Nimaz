@@ -39,7 +39,7 @@ fun AyatScreen(
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
 				noteState = noteState ,
-				type = "surah",
+				type = "surah" ,
 				mediaPlayer = mediaPlayer
 					)
 
@@ -56,7 +56,7 @@ fun AyatScreen(
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
 				noteState = noteState ,
-				type = "juz",
+				type = "juz" ,
 				mediaPlayer = mediaPlayer
 				  )
 	}

@@ -17,13 +17,11 @@ interface NimazService
 
 	suspend fun getAyaForSurah(
 		surahNumber : Int ,
-		language : String ,
-							  ) : ArrayList<AyaResponse>
+							  ) : Map<String , ArrayList<AyaResponse>>
 
 	suspend fun getAyaForJuz(
 		juzNumber : Int ,
-		language : String ,
-							) : ArrayList<AyaResponse>
+							) : Map<String , ArrayList<AyaResponse>>
 
 	//get duas chapters
 	suspend fun getChapters() : ArrayList<ChaptersResponse>

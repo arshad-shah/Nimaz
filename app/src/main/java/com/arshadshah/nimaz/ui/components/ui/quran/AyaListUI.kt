@@ -71,10 +71,12 @@ fun AyaListUI(
 
 	val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-	DisposableEffect(lifecycle){
-		val observer = LifecycleEventObserver { _, event ->
-			when{
-				event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_DESTROY || event == Lifecycle.Event.ON_PAUSE -> {
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _ , event ->
+			when
+			{
+				event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_DESTROY || event == Lifecycle.Event.ON_PAUSE ->
+				{
 					mediaPlayer.release()
 				}
 			}
@@ -155,7 +157,7 @@ fun AyaListItemUI(
 	aya : Aya ,
 	noteState : LiveData<String> ,
 	spacesFileRepository : SpacesFileRepository ,
-	mediaPlayer : MediaPlayer
+	mediaPlayer : MediaPlayer ,
 				 )
 {
 
@@ -226,28 +228,35 @@ fun AyaListItemUI(
 
 	//callback fro the download progress
 	//callback: (File?, Exception?, progress:Int, completed: Boolean) -> Unit)
-	val downloadCallback = { file : File? , exception : Exception? , progress : Int , completed : Boolean ->
-		if(exception != null)
-		{
-			isDownloaded.value = false
-			progressOfDownload.value = 0f
-			fileToBePlayed.value = null
-			error.value = exception.message.toString()
+	val downloadCallback =
+		{ file : File? , exception : Exception? , progress : Int , completed : Boolean ->
+			if (exception != null)
+			{
+				isDownloaded.value = false
+				progressOfDownload.value = 0f
+				fileToBePlayed.value = null
+				error.value = exception.message.toString()
+			}
+			if (completed)
+			{
+				isDownloaded.value = true
+				progressOfDownload.value = 100f
+				fileToBePlayed.value = file
+				aya.audioFileLocation = file?.absolutePath.toString()
+				handleEvents(
+						QuranViewModel.AyaEvent.addAudioToAya(
+								aya.suraNumber ,
+								aya.ayaNumberInSurah ,
+								aya.audioFileLocation
+															 )
+							)
+			} else
+			{
+				isDownloaded.value = false
+				progressOfDownload.value = progress.toFloat()
+				fileToBePlayed.value = null
+			}
 		}
-		if (completed)
-		{
-			isDownloaded.value = true
-			progressOfDownload.value = 100f
-			fileToBePlayed.value = file
-			aya.audioFileLocation = file?.absolutePath.toString()
-			handleEvents(QuranViewModel.AyaEvent.addAudioToAya(aya.suraNumber, aya.ayaNumberInSurah, aya.audioFileLocation))
-		} else
-		{
-			isDownloaded.value = false
-			progressOfDownload.value = progress.toFloat()
-			fileToBePlayed.value = null
-		}
-	}
 
 	//play the file
 	fun playFile()
@@ -309,7 +318,11 @@ fun AyaListItemUI(
 		{
 			isDownloaded.value = false
 			fileToBePlayed.value = null
-			spacesFileRepository.downloadAyaFile(aya.suraNumber,aya.ayaNumberInSurah, downloadCallback)
+			spacesFileRepository.downloadAyaFile(
+					aya.suraNumber ,
+					aya.ayaNumberInSurah ,
+					downloadCallback
+												)
 		}
 	}
 
@@ -335,6 +348,12 @@ fun AyaListItemUI(
 	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
 	val translationFontSize = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
 	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
+	//get the translation type from shared preferences
+	val translationType =
+		PrivateSharedPreferences(context).getData(
+				key = AppConstants.TRANSLATION_LANGUAGE ,
+				s = "English"
+												 )
 
 	ElevatedCard(
 			modifier = Modifier
@@ -404,11 +423,11 @@ fun AyaListItemUI(
 					}
 				}
 				Spacer(modifier = Modifier.height(4.dp))
-				if (aya.TranslationLanguage == "URDU")
+				if (translationType == "Urdu")
 				{
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
-								text = "${aya.ayaTranslation} ۔" ,
+								text = "${aya.ayaTranslationUrdu} ۔" ,
 								style = MaterialTheme.typography.titleSmall ,
 								fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp ,
 								fontFamily = urduFont ,
@@ -427,10 +446,10 @@ fun AyaListItemUI(
 							)
 					}
 				}
-				if (aya.TranslationLanguage == "ENGLISH")
+				if (translationType == "English")
 				{
 					Text(
-							text = aya.ayaTranslation ,
+							text = aya.ayaTranslationEnglish ,
 							style = MaterialTheme.typography.bodySmall ,
 							fontSize = translationFontSize.sp ,
 							textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
@@ -527,7 +546,6 @@ fun AyaListItemUI(
 				}
 
 
-
 				//the note dialog that appears when the user clicks on the note icon
 				if (showNoteDialog.value)
 				{
@@ -573,7 +591,7 @@ fun AyaListItemUI(
 									cancel(
 											cause = CancellationException(
 													"Audio finished playing"
-																						)
+																		 )
 										  )
 								}
 							}
@@ -586,11 +604,12 @@ fun AyaListItemUI(
 							modifier = Modifier
 								.fillMaxWidth()
 								.padding(4.dp)
-						)
+										   )
 				}
 
 
-				if(isDownloaded.value || hasAudio.value){
+				if (isDownloaded.value || hasAudio.value)
+				{
 					//a row to show th play button and the audio player
 					Row(
 							horizontalArrangement = Arrangement.SpaceBetween ,
@@ -598,7 +617,8 @@ fun AyaListItemUI(
 							modifier = Modifier
 								.padding(4.dp)
 					   ) {
-						if(isPaused.value || isStopped.value || !isPlaying.value){
+						if (isPaused.value || isStopped.value || ! isPlaying.value)
+						{
 							//play and pause button
 							IconButton(
 									onClick = {
@@ -619,7 +639,8 @@ fun AyaListItemUI(
 							}
 						}
 
-						if(isPlaying.value){
+						if (isPlaying.value)
+						{
 							//play and puase button
 							IconButton(
 									onClick = {
@@ -629,14 +650,14 @@ fun AyaListItemUI(
 									modifier = Modifier
 										.align(Alignment.CenterVertically)
 									  ) {
-									Icon(
-											painter = painterResource(id = R.drawable.pause_icon) ,
-											contentDescription = "Pause" ,
-											tint = MaterialTheme.colorScheme.primary ,
-											modifier = Modifier
-												.size(24.dp)
-												.padding(4.dp)
-										)
+								Icon(
+										painter = painterResource(id = R.drawable.pause_icon) ,
+										contentDescription = "Pause" ,
+										tint = MaterialTheme.colorScheme.primary ,
+										modifier = Modifier
+											.size(24.dp)
+											.padding(4.dp)
+									)
 							}
 
 							//stop button
@@ -796,7 +817,8 @@ fun AyaListItemUI(
 										)
 								}
 
-								if(aya.audioFileLocation.isEmpty()){
+								if (aya.audioFileLocation.isEmpty())
+								{
 									Spacer(modifier = Modifier.width(8.dp))
 									IconButton(
 											modifier = Modifier.border(
@@ -808,7 +830,7 @@ fun AyaListItemUI(
 												checkIfFileIsDownloaded()
 												popUpOpen.value = false
 											} ,
-											enabled =true,
+											enabled = true ,
 											  ) {
 										Icon(
 												modifier = Modifier

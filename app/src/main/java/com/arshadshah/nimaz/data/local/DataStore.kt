@@ -32,12 +32,12 @@ class DataStore(db : AppDatabase)
 		prayerTrackerDao.deleteTracker(tracker)
 
 	//get all the ayas of a surah
-	suspend fun getAyasOfSurah(surahNumber : Int , translationLanguage : String) =
-		ayaDao.getAyasOfSurah(surahNumber , translationLanguage).map { it.toAya() }
+	suspend fun getAyasOfSurah(surahNumber : Int) =
+		ayaDao.getAyasOfSurah(surahNumber).map { it.toAya() }
 
 	//get all the ayas of a juz
-	suspend fun getAyasOfJuz(juzNumber : Int , translationLanguage : String) =
-		ayaDao.getAyasOfJuz(juzNumber , translationLanguage).map { it.toAya() }
+	suspend fun getAyasOfJuz(juzNumber : Int) =
+		ayaDao.getAyasOfJuz(juzNumber).map { it.toAya() }
 
 	//insert all the ayas
 	suspend fun insertAyats(aya : List<Aya>) = ayaDao.insert(aya.map { it.toLocalAya() })
@@ -45,15 +45,11 @@ class DataStore(db : AppDatabase)
 	//count the number of ayas
 	suspend fun countSurahAyat(
 		surahNumber : Int ,
-		translationLanguage : String ,
 							  ) =
-		ayaDao.countSurahAya(surahNumber , translationLanguage)
+		ayaDao.countSurahAya(surahNumber)
 
 	suspend fun countJuzAyat(juzNumber : Int , translationLanguage : String) =
-		ayaDao.countJuzAya(juzNumber , translationLanguage)
-
-	suspend fun getBismillahAya(translationLanguage : String) =
-		ayaDao.getBismillah(translationLanguage).toAya()
+		ayaDao.countJuzAya(juzNumber)
 
 	//bookmark an aya
 	suspend fun bookmarkAya(
@@ -164,7 +160,8 @@ private fun Aya.toLocalAya() = LocalAya(
 		ayaNumberInQuran = ayaNumberInQuran ,
 		ayaNumber = ayaNumber ,
 		ayaArabic = ayaArabic ,
-		translation = ayaTranslation ,
+		translationEnglish = ayaTranslationEnglish ,
+		translationUrdu = ayaTranslationUrdu ,
 		suraNumber = suraNumber ,
 		ayaNumberInSurah = ayaNumberInSurah ,
 		bookmark = bookmark ,
@@ -175,14 +172,14 @@ private fun Aya.toLocalAya() = LocalAya(
 		sajdaType = sajdaType ,
 		ruku = ruku ,
 		juzNumber = juzNumber ,
-		translationLanguage = TranslationLanguage ,
 									   )
 
 private fun LocalAya.toAya() = Aya(
 		ayaNumberInQuran = ayaNumberInQuran ,
 		ayaNumber = ayaNumber ,
 		ayaArabic = ayaArabic ,
-		ayaTranslation = translation ,
+		ayaTranslationEnglish = translationEnglish ,
+		ayaTranslationUrdu = translationUrdu ,
 		suraNumber = suraNumber ,
 		ayaNumberInSurah = ayaNumberInSurah ,
 		bookmark = bookmark ,
@@ -193,7 +190,6 @@ private fun LocalAya.toAya() = Aya(
 		sajdaType = sajdaType ,
 		ruku = ruku ,
 		juzNumber = juzNumber ,
-		TranslationLanguage = translationLanguage ,
 								  )
 
 
