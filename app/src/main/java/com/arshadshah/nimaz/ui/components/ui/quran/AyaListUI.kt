@@ -4,6 +4,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -26,6 +28,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -37,6 +41,10 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.reflect.KFunction1
 
@@ -55,6 +63,28 @@ fun AyaListUI(
 {
 
 	val spacesFileRepository = SpacesFileRepository(LocalContext.current)
+
+	//media player
+	val mediaPlayer = remember {
+		MediaPlayer()
+	}
+
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+	DisposableEffect(lifecycle){
+		val observer = LifecycleEventObserver { _, event ->
+			when{
+				event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_DESTROY || event == Lifecycle.Event.ON_PAUSE -> {
+					mediaPlayer.release()
+				}
+			}
+		}
+
+		lifecycle.addObserver(observer)
+		onDispose {
+			lifecycle.removeObserver(observer)
+		}
+	}
 	if (loading)
 	{
 		LazyColumn(contentPadding = paddingValues) {
@@ -65,6 +95,7 @@ fun AyaListUI(
 						aya = ayaList[index] ,
 						noteState = noteState ,
 						spacesFileRepository = spacesFileRepository ,
+						mediaPlayer = mediaPlayer
 							 )
 			}
 		}
@@ -110,6 +141,7 @@ fun AyaListUI(
 						aya = ayaList[index] ,
 						noteState = noteState ,
 						spacesFileRepository = spacesFileRepository ,
+						mediaPlayer = mediaPlayer
 							 )
 			}
 		}
@@ -123,6 +155,7 @@ fun AyaListItemUI(
 	aya : Aya ,
 	noteState : LiveData<String> ,
 	spacesFileRepository : SpacesFileRepository ,
+	mediaPlayer : MediaPlayer
 				 )
 {
 
@@ -162,7 +195,6 @@ fun AyaListItemUI(
 		mutableStateOf(false)
 	}
 
-	val mediaPlayer = MediaPlayer()
 	val duration = remember {
 		mutableStateOf(0)
 	}
@@ -185,7 +217,7 @@ fun AyaListItemUI(
 	}
 
 	val fileToBePlayed = remember {
-		mutableStateOf<File?>(File("${context.filesDir}/quran/${aya.suraNumber}/${aya.ayaNumberInSurah}.mp3"))
+		mutableStateOf<File?>(File(aya.audioFileLocation))
 	}
 
 	val hasAudio = remember {
@@ -195,6 +227,13 @@ fun AyaListItemUI(
 	//callback fro the download progress
 	//callback: (File?, Exception?, progress:Int, completed: Boolean) -> Unit)
 	val downloadCallback = { file : File? , exception : Exception? , progress : Int , completed : Boolean ->
+		if(exception != null)
+		{
+			isDownloaded.value = false
+			progressOfDownload.value = 0f
+			fileToBePlayed.value = null
+			error.value = exception.message.toString()
+		}
 		if (completed)
 		{
 			isDownloaded.value = true
@@ -216,13 +255,13 @@ fun AyaListItemUI(
 		if (fileToBePlayed.value != null)
 		{
 			mediaPlayer.reset()
+			val uri = Uri.fromFile(fileToBePlayed.value)
 			mediaPlayer.setAudioAttributes(
 					AudioAttributes.Builder()
 						.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
 						.setUsage(AudioAttributes.USAGE_MEDIA)
 						.build()
 										  )
-			val uri = Uri.fromFile(fileToBePlayed.value)
 			mediaPlayer.setDataSource(uri.toString())
 			mediaPlayer.prepare()
 			mediaPlayer.start()
@@ -273,10 +312,13 @@ fun AyaListItemUI(
 			spacesFileRepository.downloadAyaFile(aya.suraNumber,aya.ayaNumberInSurah, downloadCallback)
 		}
 	}
+
 	mediaPlayer.setOnCompletionListener {
 		isPlaying.value = false
 		isPaused.value = false
 		isStopped.value = true
+		mediaPlayer.stop()
+		mediaPlayer.reset()
 	}
 
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
@@ -294,10 +336,6 @@ fun AyaListItemUI(
 	val translationFontSize = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
 	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
 
-	//mutable ayaArabic state so that we can change it when the user clicks on the mic button
-	val ayaArabicState = remember { mutableStateOf(aya.ayaArabic) }
-
-//	val isRecording = remember { mutableStateOf(false) }
 	ElevatedCard(
 			modifier = Modifier
 				.padding(4.dp)
@@ -320,7 +358,7 @@ fun AyaListItemUI(
 				SelectionContainer {
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
-								text = ayaArabicState.value ,
+								text = aya.ayaArabic ,
 								style = MaterialTheme.typography.titleLarge ,
 								fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp ,
 								fontFamily = when (fontStyle)
@@ -409,79 +447,8 @@ fun AyaListItemUI(
 											)
 						)
 				}
-				//an icon button that starts recording audio in a wav file and saves it to the device storage
-				//it works by holding down the button and releasing it to stop recording
-				//the file is saved in the app's private storage
-				//the file name is the surah number and aya number
-				//button is only visible if the user has granted the app the RECORD_AUDIO permission
-				//if the user has not granted the permission, the button is not visible
-//				IconButton(
-//						onClick = {
-//							//start recording
-//							val permission = ContextCompat.checkSelfPermission(
-//									context ,
-//									Manifest.permission.RECORD_AUDIO
-//																			  )
-//							if (permission == PackageManager.PERMISSION_GRANTED)
-//							{
-//								if (! isRecording.value)
-//								{
-//									convertAudioToText(context , speechRecognizer) {
-//										val errors = ErrorDetector().errorDetector(ayaArabic , it)
-//										Toasty.success(context , errors).show()
-//										Log.d("AyaListItemUI" , errors.toString())
-//										ayaArabicState.value = errors.toString()
-//									}
-//									Toasty.info(
-//											context ,
-//											"Recording started" ,
-//											Toast.LENGTH_SHORT ,
-//											true
-//											   ).show()
-//									isRecording.value = true
-//								} else
-//								{
-//									speechRecognizer.stopListening()
-//									Toasty.info(
-//											context ,
-//											"Recording stopped" ,
-//											Toast.LENGTH_SHORT ,
-//											true
-//											   ).show()
-//									isRecording.value = false
-//								}
-//							} else
-//							{
-//								//request permission
-//								ActivityCompat.requestPermissions(
-//										context as Activity ,
-//										arrayOf(Manifest.permission.RECORD_AUDIO) ,
-//										1
-//																 )
-//							}
-//						} ,
-//						enabled = true ,
-//						modifier = Modifier
-//							.padding(4.dp)
-//							.align(Alignment.End)
-//						  ) {
-//					if (isRecording.value)
-//					{
-//						Icon(
-//								imageVector = FeatherIcons.MicOff ,
-//								contentDescription = "Stop recording" ,
-//								tint = Color.Red
-//							)
-//					} else
-//					{
-//						Icon(
-//								imageVector = FeatherIcons.Mic ,
-//								contentDescription = "Record audio" ,
-//							)
-//					}
-//				}
-
-
+				/***************************************************************************/
+				//row for the features of the aya when they are invoked
 				Row(
 						horizontalArrangement = Arrangement.SpaceBetween ,
 						verticalAlignment = Alignment.CenterVertically ,
@@ -535,7 +502,10 @@ fun AyaListItemUI(
 							)
 					}
 				}
+				//end of row for the features of the aya when they are invoked
+				/***************************************************************************/
 
+				//more menu button that opens a popup menu
 				if (aya.ayaNumberInQuran != 0)
 				{
 					//a button that opens a popup menu
@@ -556,6 +526,9 @@ fun AyaListItemUI(
 					}
 				}
 
+
+
+				//the note dialog that appears when the user clicks on the note icon
 				if (showNoteDialog.value)
 				{
 					NoteInput(
@@ -577,21 +550,39 @@ fun AyaListItemUI(
 							 )
 				}
 
-				//a progress bar to show the download progress
-				if(progressOfDownload.value != 0f && ! isDownloaded.value){
-					LinearProgressIndicator(
-							progress = progressOfDownload.value ,
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(4.dp)
-						)
-				}
-
 				//a linear progress to show the audio player progress
 				if (isPlaying.value)
 				{
+
+					//get seconds from the duration
+					val seconds = duration.value / 1000f
+
+					//every second update the progress until seconds is reached
+					val currentProgress = remember { mutableStateOf(0f) }
+					LaunchedEffect(key1 = isPlaying.value) {
+						//start the timer
+						launch {
+							while (currentProgress.value < seconds)
+							{
+								delay(100)
+								currentProgress.value += 0.1f
+								//when the progress reaches the duration stop the timer
+								if (currentProgress.value >= seconds)
+								{
+									isPlaying.value = false
+									cancel(
+											cause = CancellationException(
+													"Audio finished playing"
+																						)
+										  )
+								}
+							}
+						}
+					}
+					//log the current progress
+					Log.d("AyaListItemUI" , "current progress is $currentProgress")
 					LinearProgressIndicator(
-							progress = duration.value / 1000f ,
+							progress = currentProgress.value / seconds ,
 							modifier = Modifier
 								.fillMaxWidth()
 								.padding(4.dp)
@@ -607,33 +598,16 @@ fun AyaListItemUI(
 							modifier = Modifier
 								.padding(4.dp)
 					   ) {
-						//play and puase button
-						IconButton(
-								onClick = {
-									if (isPlaying.value)
-									{
-										pauseFile()
-									} else
-									{
+						if(isPaused.value || isStopped.value || !isPlaying.value){
+							//play and pause button
+							IconButton(
+									onClick = {
 										playFile()
-									}
-								} ,
-								enabled = true ,
-								modifier = Modifier
-									.align(Alignment.CenterVertically)
-								  ) {
-							if (isPlaying.value)
-							{
-								Icon(
-										painter = painterResource(id = R.drawable.pause_icon) ,
-										contentDescription = "Pause" ,
-										tint = MaterialTheme.colorScheme.primary ,
-										modifier = Modifier
-											.size(24.dp)
-											.padding(4.dp)
-									)
-							} else
-							{
+									} ,
+									enabled = true ,
+									modifier = Modifier
+										.align(Alignment.CenterVertically)
+									  ) {
 								Icon(
 										painter = painterResource(id = R.drawable.play_icon) ,
 										contentDescription = "Play" ,
@@ -645,8 +619,26 @@ fun AyaListItemUI(
 							}
 						}
 
-						if (isPlaying.value)
-						{
+						if(isPlaying.value){
+							//play and puase button
+							IconButton(
+									onClick = {
+										pauseFile()
+									} ,
+									enabled = true ,
+									modifier = Modifier
+										.align(Alignment.CenterVertically)
+									  ) {
+									Icon(
+											painter = painterResource(id = R.drawable.pause_icon) ,
+											contentDescription = "Pause" ,
+											tint = MaterialTheme.colorScheme.primary ,
+											modifier = Modifier
+												.size(24.dp)
+												.padding(4.dp)
+										)
+							}
+
 							//stop button
 							IconButton(
 									onClick = {
@@ -804,27 +796,29 @@ fun AyaListItemUI(
 										)
 								}
 
-								Spacer(modifier = Modifier.width(8.dp))
-								IconButton(
-										modifier = Modifier.border(
-												1.dp ,
-												MaterialTheme.colorScheme.primary ,
-												RoundedCornerShape(50)
-																  ) ,
-										onClick = {
-											checkIfFileIsDownloaded()
-											popUpOpen.value = false
-										} ,
-										enabled =true,
-										  ) {
-									Icon(
-											modifier = Modifier
-												.size(24.dp)
-												.padding(4.dp) ,
-											painter = painterResource(id = R.drawable.play_icon) ,
-											tint = MaterialTheme.colorScheme.primary ,
-											contentDescription = "Play ayah" ,
-										)
+								if(aya.audioFileLocation.isEmpty()){
+									Spacer(modifier = Modifier.width(8.dp))
+									IconButton(
+											modifier = Modifier.border(
+													1.dp ,
+													MaterialTheme.colorScheme.primary ,
+													RoundedCornerShape(50)
+																	  ) ,
+											onClick = {
+												checkIfFileIsDownloaded()
+												popUpOpen.value = false
+											} ,
+											enabled =true,
+											  ) {
+										Icon(
+												modifier = Modifier
+													.size(24.dp)
+													.padding(4.dp) ,
+												painter = painterResource(id = R.drawable.download_icon) ,
+												tint = MaterialTheme.colorScheme.primary ,
+												contentDescription = "Play ayah" ,
+											)
+									}
 								}
 							}
 						}
@@ -834,109 +828,3 @@ fun AyaListItemUI(
 		}
 	}
 }
-
-
-//the function responsible for converting the audio file to text
-//fun convertAudioToText(
-//	context : Context ,
-//	speechRecognizer : SpeechRecognizer ,
-//	callback : (String) -> Unit ,
-//					  )
-//{
-//	if (ContextCompat.checkSelfPermission(
-//				context ,
-//				Manifest.permission.RECORD_AUDIO
-//										 ) != PackageManager.PERMISSION_GRANTED
-//	)
-//	{
-//		checkPermission()
-//	} else
-//	{
-//		//create a new speech recognizer intent
-//		val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-//		//set the language to arabic
-//		speechRecognizerIntent.putExtra(
-//				RecognizerIntent.EXTRA_LANGUAGE_MODEL ,
-//				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-//									   )
-//		speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE , "ar")
-//		//set the speech recognizer intent to the speech recognizer
-//		//we are using the speech recognizer to convert the audio file to text
-//		speechRecognizer.setRecognitionListener(object : RecognitionListener
-//												{
-//													override fun onReadyForSpeech(params : Bundle?)
-//													{
-//														Log.d("newText" , "onReadyForSpeech")
-//													}
-//
-//													override fun onBeginningOfSpeech()
-//													{
-//														Log.d("newText" , "onBeginningOfSpeech")
-//													}
-//
-//													override fun onRmsChanged(rmsdB : Float)
-//													{
-//													}
-//
-//													override fun onBufferReceived(buffer : ByteArray?)
-//													{
-//													}
-//
-//													override fun onEndOfSpeech()
-//													{
-//														Log.d("newText" , "onEndOfSpeech")
-//													}
-//
-//													override fun onError(error : Int)
-//													{
-//														Log.d("newText" , "onError: $error")
-//													}
-//
-//													override fun onResults(results : Bundle?)
-//													{
-//
-//														Log.d(
-//																"newText" ,
-//																"onResults: ${
-//																	results?.getStringArrayList(
-//																			SpeechRecognizer.RESULTS_RECOGNITION
-//																							   )
-//																}"
-//															 )
-//														//get the results
-//														val data = results?.getStringArrayList(
-//																SpeechRecognizer.RESULTS_RECOGNITION
-//																							  )
-//														callback(data?.get(0) ?: "")
-//													}
-//
-//													override fun onPartialResults(partialResults : Bundle?)
-//													{
-//														Log.d(
-//																"newText" ,
-//																"onPartialResults: $partialResults"
-//															 )
-//													}
-//
-//													override fun onEvent(
-//														eventType : Int ,
-//														params : Bundle? ,
-//																		)
-//													{
-//														Log.d("newText" , "onEvent: $eventType")
-//													}
-//												})
-//
-//		//start listening to the audio using the speech recognizer
-//		speechRecognizer.startListening(speechRecognizerIntent)
-//	}
-//}
-//
-//private fun checkPermission()
-//{
-//	ActivityCompat.requestPermissions(
-//			QuranActivity() ,
-//			arrayOf(Manifest.permission.RECORD_AUDIO) ,
-//			100000
-//									 )
-//}
