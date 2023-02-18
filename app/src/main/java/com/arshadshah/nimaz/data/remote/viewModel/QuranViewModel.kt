@@ -154,14 +154,14 @@ class QuranViewModel(context : Context) : ViewModel()
 				val dataStore = LocalDataStore.getDataStore()
 				val surahTotalAya = (dataStore.getSurahById(surahNumber).numberOfAyahs)
 				val languageConverted = language.uppercase(Locale.ROOT)
-				val ayaInDatabase = dataStore.countSurahAyat(surahNumber , languageConverted)
+				val ayaInDatabase = dataStore.countSurahAyat(surahNumber)
 				//check if the ayat are teh same as the surah total ayat
 				val areAyatSame = ayaInDatabase == surahTotalAya
 
 				if (areAyatSame)
 				{
 					val surahAyatList =
-						dataStore.getAyasOfSurah(surahNumber , languageConverted) as ArrayList<Aya>
+						dataStore.getAyasOfSurah(surahNumber) as ArrayList<Aya>
 					val newList =
 						addBismillahToFirstAya(surahAyatList , languageConverted , surahNumber)
 					_ayaSurahstate.value = AyaSurahState.Success(newList)
@@ -205,24 +205,46 @@ class QuranViewModel(context : Context) : ViewModel()
 			}
 		}
 		val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
-		//create a map of the aya of bismillah
-		val aya = Aya(
-				0 ,
-				ayaNumberOfBismillah ,
-				ayaArabicOfBismillah ,
-				ayaOfBismillah ,
-				surahNumber ,
-				1 ,
-				false ,
-				false ,
-				"" ,
-				"" ,
-				false ,
-				"" ,
-				0 ,
-				0 ,
-				languageConverted
+		val aya : Aya
+		if (languageConverted == "ENGLISH")
+		{
+			aya = Aya(
+					0 ,
+					ayaNumberOfBismillah ,
+					ayaArabicOfBismillah ,
+					ayaOfBismillah ,
+					"" ,
+					surahNumber ,
+					1 ,
+					false ,
+					false ,
+					"" ,
+					"" ,
+					false ,
+					"" ,
+					0 ,
+					0 ,
 					 )
+		} else
+		{
+			aya = Aya(
+					0 ,
+					ayaNumberOfBismillah ,
+					ayaArabicOfBismillah ,
+					"" ,
+					ayaOfBismillah ,
+					surahNumber ,
+					1 ,
+					false ,
+					false ,
+					"" ,
+					"" ,
+					false ,
+					"" ,
+					0 ,
+					0 ,
+					 )
+		}
 		//first check if an object like this is already in the list
 		//check all the attributes of the object bisimillah with the attributes of the object in the list at index 0
 		if (surahAyatList[0].ayaArabic != ayaArabicOfBismillah && surahAyatList[0].suraNumber != 1)
@@ -252,7 +274,7 @@ class QuranViewModel(context : Context) : ViewModel()
 				if (juzTotalAyat == areAyatAvailable)
 				{
 					val listOfJuzAyat =
-						dataStore.getAyasOfJuz(juzNumber , languageConverted) as ArrayList<Aya>
+						dataStore.getAyasOfJuz(juzNumber) as ArrayList<Aya>
 					val newList = addBismillahInJuz(juzNumber , languageConverted , listOfJuzAyat)
 					_ayaJuzstate.value = AyaJuzState.Success(newList)
 				} else
@@ -286,7 +308,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	{
 
 		//add the following object to index 0 of ayaForSurah without losing value of index 0 in ayaForSurah
-		val ayaNumberOfBismillah = "0"
+		val ayaNumberOfBismillah = 0
 
 		val ayaOfBismillah = when (languageConverted)
 		{
@@ -301,25 +323,46 @@ class QuranViewModel(context : Context) : ViewModel()
 		val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
 
 		//create a map of the aya of bismillah
-		val ayaOfBismillahMap = Aya(
-				0 ,
-				ayaNumberOfBismillah.toInt() ,
-				ayaArabicOfBismillah ,
-				ayaOfBismillah ,
-				0 ,
-				1 ,
-				false ,
-				false ,
-				"" ,
-				"" ,
-				false ,
-				"" ,
-				0 ,
-				juzNumber ,
-				languageConverted
-								   )
-
-
+		val aya : Aya
+		if (languageConverted == "ENGLISH")
+		{
+			aya = Aya(
+					0 ,
+					ayaNumberOfBismillah ,
+					ayaArabicOfBismillah ,
+					ayaOfBismillah ,
+					"" ,
+					listOfJuzAyat[0].suraNumber ,
+					1 ,
+					false ,
+					false ,
+					"" ,
+					"" ,
+					false ,
+					"" ,
+					0 ,
+					0 ,
+					 )
+		} else
+		{
+			aya = Aya(
+					0 ,
+					ayaNumberOfBismillah ,
+					ayaArabicOfBismillah ,
+					"" ,
+					ayaOfBismillah ,
+					listOfJuzAyat[0].suraNumber ,
+					1 ,
+					false ,
+					false ,
+					"" ,
+					"" ,
+					false ,
+					"" ,
+					0 ,
+					0 ,
+					 )
+		}
 		//find all the objects in arraylist ayaForJuz where ayaForJuz[i]!!.ayaNumber = 1
 		//add object bismillah before it for every occurance of ayaForJuz[i]!!.ayaNumber = 1
 		var index = 0
@@ -333,7 +376,7 @@ class QuranViewModel(context : Context) : ViewModel()
 					if (juzNumber + 1 != 10 && index != 36)
 					{
 						//add the map of bismillah to ayaList at the current index
-						listOfJuzAyat.add(index , ayaOfBismillahMap)
+						listOfJuzAyat.add(index , aya)
 						//skip the next iteration
 						index ++
 					}
@@ -384,6 +427,13 @@ class QuranViewModel(context : Context) : ViewModel()
 
 		//get all notes
 		object getNotes : AyaEvent()
+
+		//addAudioToAya
+		data class addAudioToAya(
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+			val audio : String ,
+								) : AyaEvent()
 	}
 
 	//events handler
@@ -441,8 +491,38 @@ class QuranViewModel(context : Context) : ViewModel()
 				getAllNotes()
 			}
 
+			is AyaEvent.addAudioToAya ->
+			{
+				addAudioToAya(
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah ,
+						ayaEvent.audio
+							 )
+			}
+
 			else ->
 			{
+			}
+		}
+	}
+
+	//add audio to aya
+	fun addAudioToAya(
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+		audio : String ,
+					 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_ayaState.value = AyaState.Loading
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.addAudioToAya(surahNumber , ayaNumberInSurah , audio)
+				_ayaState.value = AyaState.Success("")
+			} catch (e : Exception)
+			{
+				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
 			}
 		}
 	}

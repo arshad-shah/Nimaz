@@ -15,8 +15,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 78
-        versionName '1.5.9'
+        versionCode 79
+        versionName '1.5.10'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -133,4 +133,7 @@ dependencies {
 
     implementation "io.github.boguszpawlowski.composecalendar:composecalendar:1.0.2"
     implementation "io.github.boguszpawlowski.composecalendar:composecalendar:1.0.2"
+
+    //Add AWS S3 SDK
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.12.5'
 }
