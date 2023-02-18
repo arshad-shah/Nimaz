@@ -73,39 +73,70 @@ object NimazServicesImpl : NimazService
 
 	override suspend fun getAyaForSurah(
 		surahNumber : Int ,
-		language : String ,
-									   ) : ArrayList<AyaResponse>
+									   ) : Map<String , ArrayList<AyaResponse>>
 	{
-		val url =
+		val urlEnglish =
 			AppConstants.QURAN_SURAH_AYAT_URL.replace("{surahNumber}" , surahNumber.toString())
-				.replace("{translationLanguage}" , language)
+				.replace("{translationLanguage}" , "ENGLISH")
 		//create a get request and return the response
-		val response : ArrayList<AyaResponse> = httpClient.request(url) {
+		val responseEnglish : ArrayList<AyaResponse> = httpClient.request(urlEnglish) {
 			method = HttpMethod.Get
 			header("Content-Type" , "application/json")
 		}.body() !!
 
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForSurah: $response")
+		//make second request for urdu translation
+		val urlUrdu =
+			AppConstants.QURAN_SURAH_AYAT_URL.replace("{surahNumber}" , surahNumber.toString())
+				.replace("{translationLanguage}" , "URDU")
+		//create a get request and return the response
+		val responseUrdu : ArrayList<AyaResponse> = httpClient.request(urlUrdu) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
 
-		return response
+		//combine the two responses
+		val mapOfResponses = mapOf(
+				"english" to responseEnglish ,
+				"urdu" to responseUrdu
+								  )
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForSurah: $mapOfResponses")
+
+		return mapOfResponses
 	}
 
 	override suspend fun getAyaForJuz(
 		juzNumber : Int ,
-		language : String ,
-									 ) : ArrayList<AyaResponse>
+									 ) : Map<String , ArrayList<AyaResponse>>
 	{
-		val url = AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
-			.replace("{translationLanguage}" , language)
+		val urlEnglish =
+			AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
+				.replace("{translationLanguage}" , "ENGLISH")
 		//create a get request and return the response
-		val response : ArrayList<AyaResponse> = httpClient.request(url) {
+		val response : ArrayList<AyaResponse> = httpClient.request(urlEnglish) {
 			method = HttpMethod.Get
 			header("Content-Type" , "application/json")
 		}.body() !!
 
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForJuz: $response")
+		//make second request for urdu translation
+		val urlUrdu = AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
+			.replace("{translationLanguage}" , "URDU")
+		//create a get request and return the response
+		val responseUrdu : ArrayList<AyaResponse> = httpClient.request(urlUrdu) {
+			method = HttpMethod.Get
+			header("Content-Type" , "application/json")
+		}.body() !!
 
-		return response
+		//combine the two responses
+		val mapOfResponses = mapOf(
+				"english" to response ,
+				"urdu" to responseUrdu
+								  )
+
+
+
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForJuz: $mapOfResponses")
+
+		return mapOfResponses
 	}
 
 	//get all the chapters for duas from api

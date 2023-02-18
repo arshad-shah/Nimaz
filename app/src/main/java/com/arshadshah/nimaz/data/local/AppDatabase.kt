@@ -15,7 +15,7 @@ import com.arshadshah.nimaz.data.local.models.*
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class] ,
-		version = 5 ,
+		version = 6 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -100,6 +100,30 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("DROP TABLE Aya")
 			//rename new table
 			database.execSQL("ALTER TABLE Aya_new RENAME TO Aya")
+		}
+	}
+
+	//migration from version 5 to 6
+	class Migration5To6 : Migration(5 , 6)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//rename column translation to translationEnglish
+			database.execSQL("ALTER TABLE Aya RENAME COLUMN translation TO translationEnglish")
+			//add new column translationUrdu
+			database.execSQL("ALTER TABLE Aya ADD COLUMN translationUrdu TEXT NOT NULL DEFAULT ''")
+
+			//drop the column translationLanguage
+			//1. Create the new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Aya_new` (`ayaNumberInQuran` INTEGER NOT NULL,`ayaNumber` INTEGER NOT NULL, `ayaArabic` TEXT NOT NULL, `translationEnglish` TEXT NOT NULL, `translationUrdu` TEXT NOT NULL, `suraNumber` INTEGER NOT NULL, `ayaNumberInSurah` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, `note` TEXT NOT NULL, `audioFileLocation` TEXT NOT NULL, `sajda` INTEGER NOT NULL, `sajdaType` TEXT NOT NULL, `ruku` INTEGER NOT NULL, `juzNumber` INTEGER NOT NULL, PRIMARY KEY(`ayaNumberInQuran`))")
+			//2. Copy the data
+			database.execSQL("INSERT INTO Aya_new SELECT ayaNumberInQuran, ayaNumber, ayaArabic, translationEnglish, translationUrdu, suraNumber, ayaNumberInSurah, bookmark, favorite, note, audioFileLocation, sajda, sajdaType, ruku, juzNumber FROM Aya")
+			//3. Remove the old table
+			database.execSQL("DROP TABLE Aya")
+			//4. Change the table name to the correct one
+			database.execSQL("ALTER TABLE Aya_new RENAME TO Aya")
+
 		}
 	}
 }

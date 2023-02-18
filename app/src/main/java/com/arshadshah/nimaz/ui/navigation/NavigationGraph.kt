@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.navigation
 
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Vibrator
 import androidx.annotation.RequiresApi
@@ -45,6 +46,7 @@ fun NavigationGraph(
 	vibrator : Vibrator ,
 	vibrationAllowed : MutableState<Boolean> ,
 	rOrl : MutableState<Int> ,
+	mediaPlayer : MediaPlayer ,
 				   )
 {
 
@@ -328,7 +330,8 @@ fun NavigationGraph(
 					number = it.arguments?.getString("number") ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
-					paddingValues = paddingValues
+					paddingValues = paddingValues ,
+					mediaPlayer = mediaPlayer ,
 					  )
 		}
 

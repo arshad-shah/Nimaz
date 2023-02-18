@@ -9,7 +9,8 @@ data class LocalAya(
 	val ayaNumberInQuran : Int ,
 	val ayaNumber : Int ,
 	val ayaArabic : String ,
-	val translation : String ,
+	val translationEnglish : String ,
+	val translationUrdu : String ,
 	val suraNumber : Int ,
 	val ayaNumberInSurah : Int ,
 	val bookmark : Boolean ,
@@ -20,5 +21,4 @@ data class LocalAya(
 	val sajdaType : String ,
 	val ruku : Int ,
 	val juzNumber : Int ,
-	val translationLanguage : String ,
 				   )

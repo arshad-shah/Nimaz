@@ -4,7 +4,8 @@ data class Aya(
 	val ayaNumberInQuran : Int ,
 	var ayaNumber : Int ,
 	var ayaArabic : String ,
-	var ayaTranslation : String ,
+	val ayaTranslationEnglish : String ,
+	val ayaTranslationUrdu : String ,
 	var suraNumber : Int ,
 	var ayaNumberInSurah : Int ,
 	var bookmark : Boolean ,
@@ -15,5 +16,4 @@ data class Aya(
 	var sajdaType : String ,
 	var ruku : Int ,
 	var juzNumber : Int ,
-	val TranslationLanguage : String ,
 			  )
