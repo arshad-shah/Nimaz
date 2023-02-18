@@ -18,13 +18,15 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.ui.theme.*
+import com.arshadshah.nimaz.ui.theme.amiri
+import com.arshadshah.nimaz.ui.theme.hidayat
+import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -187,150 +189,4 @@ fun Verses(modifier : Modifier , content : @Composable () -> Unit)
 				}
 			}
 		  )
-}
-
-@Preview
-@Composable
-fun PageUIPreview()
-{
-	//make 10 LocalAya
-	val ayaList = ArrayList<Aya>()
-	//add the aya to the list
-	ayaList.add(
-			Aya(
-					0 ,
-					0 ,
-					"بسم الله الرحمن الرحيم" ,
-					"In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-					0 ,
-					0 ,
-					true ,
-					false ,
-					"note" ,
-					"audioFileLocation" ,
-					false ,
-					"sajdaType" ,
-					0 ,
-					0 ,
-					"ENGLISH" ,
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					1 ,
-					1 ,
-					"الحمد لله رب العالمين" ,
-					"All praise is due to Allah, Lord of the worlds." ,
-					0 ,
-					0 ,
-					true ,
-					false ,
-					"note" ,
-					"audioFileLocation" ,
-					false ,
-					"sajdaType" ,
-					0 ,
-					0 ,
-					"ENGLISH" ,
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					2 ,
-					2 ,
-					"الرحمن الرحيم" ,
-					"The Entirely Merciful, the Especially Merciful." ,
-					0 ,
-					0 ,
-					true ,
-					false ,
-					"note" ,
-					"audioFileLocation" ,
-					false ,
-					"sajdaType" ,
-					0 ,
-					0 ,
-					"ENGLISH" ,
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					3 ,
-					3 ,
-					"مالك يوم الدين" ,
-					"Master of the Day of Judgment." ,
-					0 ,
-					0 ,
-					true ,
-					false ,
-					"note" ,
-					"audioFileLocation" ,
-					false ,
-					"sajdaType" ,
-					0 ,
-					0 ,
-					"ENGLISH" ,
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					4 ,
-					4 ,
-					"إياك نعبد وإياك نستعين" ,
-					"You alone do we worship, and You alone do we implore for help." ,
-					0 ,
-					0 ,
-					true ,
-					false ,
-					"note" ,
-					"audioFileLocation" ,
-					false ,
-					"sajdaType" ,
-					0 ,
-					0 ,
-					"ENGLISH" ,
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					5 ,
-					5 ,
-					"اهدنا الصراط المستقيم" ,
-					"Guide us to the straight path." ,
-					0 ,
-					0 ,
-					true ,
-					false ,
-					"note" ,
-					"audioFileLocation" ,
-					false ,
-					"sajdaType" ,
-					0 ,
-					0 ,
-					"ENGLISH" ,
-			   )
-			   )
-	ayaList.add(
-			Aya(
-					6 ,
-					6 ,
-					"صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين" ,
-					"The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray." ,
-					0 ,
-					0 ,
-					true ,
-					false ,
-					"note" ,
-					"audioFileLocation" ,
-					false ,
-					"sajdaType" ,
-					0 ,
-					0 ,
-					"ENGLISH" ,
-			   )
-			   )
-	NimazTheme(darkTheme = true) {
-		Page(ayaList , PaddingValues() , false)
-	}
-
 }

@@ -330,8 +330,8 @@ fun NavigationGraph(
 					number = it.arguments?.getString("number") ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
-					paddingValues = paddingValues,
-					mediaPlayer = mediaPlayer,
+					paddingValues = paddingValues ,
+					mediaPlayer = mediaPlayer ,
 					  )
 		}
 

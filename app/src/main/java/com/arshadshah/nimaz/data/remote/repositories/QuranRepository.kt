@@ -82,17 +82,24 @@ object QuranRepository
 		{
 			//capitalize the language
 			val languageConverted = language.uppercase(Locale.ROOT)
-			val response =
-				NimazServicesImpl.getAyaForSurah(surahNumber , languageConverted)
+			val responses =
+				NimazServicesImpl.getAyaForSurah(surahNumber)
+			//get the english response
+			val responseEnglish = responses["english"] !!
+			val responseUrdu = responses["urdu"] !!
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()
-			for (ayaResponse in response)
+			for (ayaResponse in responseEnglish)
 			{
+				//get the urdu response index for the english response
+				val indexOfAyaInUrdu =
+					responseUrdu.indexOfFirst { it.ayaNumberInQuran == ayaResponse.ayaNumberInQuran }
 				val aya = Aya(
 						ayaResponse.ayaNumberInQuran ,
 						ayaResponse.number ,
 						ayaResponse.arabic ,
 						ayaResponse.translation ,
+						responseUrdu[indexOfAyaInUrdu].translation ,
 						ayaResponse.surahNumber ,
 						ayaResponse.ayaNumberInSurah ,
 						false ,
@@ -103,7 +110,6 @@ object QuranRepository
 						ayaResponse.sajdaType ,
 						ayaResponse.ruku ,
 						ayaResponse.juzNumber ,
-						languageConverted ,
 							 )
 				ayas.add(aya)
 			}
@@ -127,16 +133,22 @@ object QuranRepository
 		{
 			//capitalize the language
 			val languageConverted = language.uppercase(Locale.ROOT)
-			val response = NimazServicesImpl.getAyaForJuz(juzNumber , languageConverted)
+			val responses = NimazServicesImpl.getAyaForJuz(juzNumber)
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()
-			for (ayaResponse in response)
+			val responseEnglish = responses["english"] !!
+			val responseUrdu = responses["urdu"] !!
+			for (ayaResponse in responseEnglish)
 			{
+				//get the urdu response index for the english response
+				val indexOfAyaInUrdu =
+					responseUrdu.indexOfFirst { it.ayaNumberInQuran == ayaResponse.ayaNumberInQuran }
 				val aya = Aya(
 						ayaResponse.ayaNumberInQuran ,
 						ayaResponse.number ,
 						ayaResponse.arabic ,
 						ayaResponse.translation ,
+						responseUrdu[indexOfAyaInUrdu].translation ,
 						ayaResponse.surahNumber ,
 						ayaResponse.ayaNumberInSurah ,
 						false ,
@@ -147,7 +159,6 @@ object QuranRepository
 						ayaResponse.sajdaType ,
 						ayaResponse.ruku ,
 						ayaResponse.juzNumber ,
-						languageConverted ,
 							 )
 				ayas.add(aya)
 			}

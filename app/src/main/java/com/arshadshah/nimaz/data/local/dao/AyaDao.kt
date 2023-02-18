@@ -12,15 +12,12 @@ interface AyaDao
 	suspend fun getAllAyas() : List<LocalAya>
 
 	//get all the ayas of a surah
-	@Query("SELECT * FROM Aya WHERE suraNumber = :surahNumber AND translationLanguage = :translationLanguage")
-	suspend fun getAyasOfSurah(surahNumber : Int , translationLanguage : String) : List<LocalAya>
+	@Query("SELECT * FROM Aya WHERE suraNumber = :surahNumber")
+	suspend fun getAyasOfSurah(surahNumber : Int) : List<LocalAya>
 
 	//get all the ayas of a juz
-	@Query("SELECT * FROM Aya WHERE juzNumber = :juzNumber AND translationLanguage = :translationLanguage")
-	suspend fun getAyasOfJuz(juzNumber : Int , translationLanguage : String) : List<LocalAya>
-
-	@Query("SELECT * FROM Aya WHERE ayaNumberInQuran = 0 AND translationLanguage = :translationLanguage")
-	suspend fun getBismillah(translationLanguage : String) : LocalAya
+	@Query("SELECT * FROM Aya WHERE juzNumber = :juzNumber")
+	suspend fun getAyasOfJuz(juzNumber : Int) : List<LocalAya>
 
 	//bookmark an aya
 	@Query("UPDATE Aya SET bookmark = :bookmark WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
@@ -79,9 +76,9 @@ interface AyaDao
 	suspend fun insert(aya : List<LocalAya>)
 
 	//count the number of ayas
-	@Query("SELECT COUNT(*) FROM Aya WHERE juzNumber = :juzNumber AND translationLanguage = :translationLanguage")
-	suspend fun countJuzAya(juzNumber : Int , translationLanguage : String) : Int
+	@Query("SELECT COUNT(*) FROM Aya WHERE juzNumber = :juzNumber")
+	suspend fun countJuzAya(juzNumber : Int) : Int
 
-	@Query("SELECT COUNT(*) FROM Aya WHERE suraNumber = :surahNumber AND translationLanguage = :translationLanguage")
-	suspend fun countSurahAya(surahNumber : Int , translationLanguage : String) : Int
+	@Query("SELECT COUNT(*) FROM Aya WHERE suraNumber = :surahNumber")
+	suspend fun countSurahAya(surahNumber : Int) : Int
 }

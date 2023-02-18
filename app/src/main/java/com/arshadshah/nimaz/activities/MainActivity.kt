@@ -350,8 +350,8 @@ class MainActivity : ComponentActivity()
 							showResetDialog ,
 							vibrator ,
 							vibrationAllowed ,
-							rOrl,
-							mediaPlayer,
+							rOrl ,
+							mediaPlayer ,
 								   )
 				}
 			}
