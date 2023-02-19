@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Juz
-import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -111,7 +111,7 @@ fun JuzListItemUI(
 				Text(
 						text = name ,
 						style = MaterialTheme.typography.titleLarge ,
-						fontFamily = quranFont ,
+						fontFamily = utmaniQuranFont ,
 						modifier = Modifier
 							.padding(vertical = 4.dp)
 							.placeholder(
