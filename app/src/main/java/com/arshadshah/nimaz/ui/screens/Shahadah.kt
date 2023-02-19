@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
 fun ShahadahScreen(paddingValues : PaddingValues)
@@ -36,7 +36,7 @@ fun ShahadahScreen(paddingValues : PaddingValues)
 				Text(
 						text = "أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ ٱللَّٰهِ" ,
 						style = MaterialTheme.typography.headlineLarge ,
-						fontFamily = quranFont ,
+						fontFamily = utmaniQuranFont ,
 						textAlign = TextAlign.Center ,
 						modifier = Modifier
 							.padding(4.dp)

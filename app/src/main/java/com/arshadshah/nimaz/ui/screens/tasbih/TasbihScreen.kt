@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.Counter
-import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterialApi::class , ExperimentalMaterial3Api::class)
@@ -209,7 +209,7 @@ fun TasbihRow(
 				Text(
 						text = arabicName ,
 						style = androidx.compose.material3.MaterialTheme.typography.titleLarge ,
-						fontFamily = quranFont ,
+						fontFamily = utmaniQuranFont ,
 						modifier = Modifier
 							.padding(4.dp)
 							.fillMaxWidth() ,

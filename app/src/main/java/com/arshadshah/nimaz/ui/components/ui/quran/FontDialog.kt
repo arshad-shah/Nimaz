@@ -33,13 +33,13 @@ fun FontSizeDialog(
 		{
 			"Default" ->
 			{
-				arabicFontSizeState.value = 24f
+				arabicFontSizeState.value = 26f
 				translationFontSizeState.value = 16f
 			}
 
-			"Naqsh" ->
+			"Quranme" ->
 			{
-				arabicFontSizeState.value = 26f
+				arabicFontSizeState.value = 24f
 				translationFontSizeState.value = 16f
 			}
 

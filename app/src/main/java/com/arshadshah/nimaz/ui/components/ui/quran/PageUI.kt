@@ -113,12 +113,12 @@ fun Verse(
 						{
 							"Default" ->
 							{
-								quranFont
+								utmaniQuranFont
 							}
 
-							"Naqsh" ->
+							"Quranme" ->
 							{
-								utmaniQuranFont
+								quranFont
 							}
 
 							"Hidayat" ->
@@ -133,7 +133,7 @@ fun Verse(
 
 							else ->
 							{
-								quranFont
+								utmaniQuranFont
 							}
 						} ,
 						//if arabic font size is not set then use default font size
