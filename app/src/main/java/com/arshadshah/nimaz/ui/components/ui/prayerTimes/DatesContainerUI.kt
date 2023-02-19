@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,12 +13,15 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DatesContainerUI(GregDate : String , islamDate : String)
+fun DatesContainerUI(GregDate : String , islamDate : String , onNavigateToTracker : () -> Unit)
 {
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
 				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+				.clickable {
+					onNavigateToTracker()
+				}
 				) {
 		Column(horizontalAlignment = Alignment.CenterHorizontally) {
 			Text(

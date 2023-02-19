@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
 fun NamesOfAllah(paddingValues : PaddingValues)
@@ -106,7 +106,7 @@ fun NamesOfAllahRow(
 					Text(
 							text = arabicName ,
 							style = MaterialTheme.typography.headlineLarge ,
-							fontFamily = quranFont ,
+							fontFamily = utmaniQuranFont ,
 							textAlign = TextAlign.Center ,
 							modifier = Modifier
 								.padding(4.dp)

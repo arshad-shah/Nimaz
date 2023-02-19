@@ -384,12 +384,12 @@ fun AyaListItemUI(
 								{
 									"Default" ->
 									{
-										quranFont
+										utmaniQuranFont
 									}
 
-									"Naqsh" ->
+									"Quranme" ->
 									{
-										utmaniQuranFont
+										quranFont
 									}
 
 									"Hidayat" ->
@@ -404,7 +404,7 @@ fun AyaListItemUI(
 
 									else ->
 									{
-										quranFont
+										utmaniQuranFont
 									}
 								} ,
 								textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,

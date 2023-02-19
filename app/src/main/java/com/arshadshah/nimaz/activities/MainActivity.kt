@@ -33,6 +33,7 @@ import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
@@ -372,7 +373,8 @@ class MainActivity : ComponentActivity()
 			CHAPTER_SCREEN_ROUTE -> "Dua"
 			TASBIH_SCREEN_ROUTE -> "Tasbih"
 			NAMESOFALLAH_SCREEN_ROUTE -> "Allah"
-			else -> "Settings"
+			PRAYER_TRACKER_SCREEN_ROUTE -> "Calender"
+			else -> ""
 		}
 	}
 
@@ -389,7 +391,8 @@ class MainActivity : ComponentActivity()
 				CHAPTERS_SCREEN_ROUTE ,
 				CHAPTER_SCREEN_ROUTE ,
 				TASBIH_SCREEN_ROUTE ,
-				NAMESOFALLAH_SCREEN_ROUTE
+				NAMESOFALLAH_SCREEN_ROUTE ,
+				PRAYER_TRACKER_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)

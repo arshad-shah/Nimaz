@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.remote.models.Dua
-import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -41,7 +41,7 @@ fun DuaListItem(dua : Dua , loading : Boolean)
 						text = dua.arabic_dua ,
 						style = MaterialTheme.typography.titleLarge ,
 						fontSize = 28.sp ,
-						fontFamily = quranFont ,
+						fontFamily = utmaniQuranFont ,
 						modifier = Modifier
 							.padding(4.dp)
 							.fillMaxWidth()
@@ -104,5 +104,5 @@ fun DuaListItemPreview()
 			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
 			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
 				 )
-	DuaListItem(dua , true)
+	DuaListItem(dua , false)
 }

@@ -39,7 +39,7 @@ fun MoreMenu(
 
 	val items1 : List<String> = listOf("List" , "Page (Experimental)")
 	val items2 : List<String> = listOf("English" , "Urdu")
-	val items3 : List<String> = listOf("Default" , "Naqsh" , "Hidayat" , "Amiri")
+	val items3 : List<String> = listOf("Default" , "Quranme" , "Hidayat" , "Amiri")
 	val (showDialog1 , setShowDialog1) = remember { mutableStateOf(false) }
 	val (showDialog2 , setShowDialog2) = remember { mutableStateOf(false) }
 
