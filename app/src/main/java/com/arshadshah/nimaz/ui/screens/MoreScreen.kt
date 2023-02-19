@@ -12,6 +12,7 @@ fun MoreScreen(
 	onNavigateToListOfTasbeeh : () -> Unit ,
 	onNavigateToShadah : () -> Unit ,
 	onNavigateToZakat : () -> Unit ,
+	onNavigateToPrayerTracker : () -> Unit ,
 			  )
 {
 	FeatureCard(
@@ -20,6 +21,7 @@ fun MoreScreen(
 			onNavigateToNames = onNavigateToNames ,
 			onNavigateToListOfTasbeeh = onNavigateToListOfTasbeeh ,
 			onNavigateToShadah = onNavigateToShadah ,
-			onNavigateToZakat = onNavigateToZakat
+			onNavigateToZakat = onNavigateToZakat ,
+			onNavigateToPrayerTracker = onNavigateToPrayerTracker ,
 			   )
 }
