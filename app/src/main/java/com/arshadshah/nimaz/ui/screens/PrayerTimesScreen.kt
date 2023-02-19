@@ -17,6 +17,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,
 	viewModel : PrayerTimesViewModel = PrayerTimesViewModel() ,
+	onNavigateToTracker : () -> Unit ,
 					 )
 {
 	val context = LocalContext.current
@@ -52,7 +53,7 @@ fun PrayerTimesScreen(
 							 )
 
 		// Calling the DatesContainer composable
-		DatesContainer()
+		DatesContainer(onNavigateToTracker = onNavigateToTracker)
 
 		// Calling the PrayerTimesList composable
 		PrayerTimesList(

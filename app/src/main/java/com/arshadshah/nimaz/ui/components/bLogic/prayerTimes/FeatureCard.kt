@@ -22,6 +22,7 @@ fun FeatureCard(
 	onNavigateToListOfTasbeeh : () -> Unit ,
 	onNavigateToShadah : () -> Unit ,
 	onNavigateToZakat : () -> Unit ,
+	onNavigateToPrayerTracker : () -> Unit ,
 			   )
 {
 	Column(
@@ -58,6 +59,14 @@ fun FeatureCard(
 					onNavigateToListOfTasbeeh()
 				} ,
 				title = "Duas" ,
+				  )
+		LinkButton(
+				painter = painterResource(id = R.drawable.calendar_icon) ,
+				content = "Calender" ,
+				onClick = {
+					onNavigateToPrayerTracker()
+				} ,
+				title = "Calender" ,
 				  )
 		//TODO: IN PROGRESS
 //		LinkButton(
