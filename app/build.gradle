@@ -136,4 +136,7 @@ dependencies {
 
     //Add AWS S3 SDK
     implementation 'com.amazonaws:aws-android-sdk-s3:2.12.5'
+
+    //charts
+    implementation "com.github.tehras:charts:$charts_version"
 }

@@ -56,8 +56,10 @@ class TrackerViewModel : ViewModel()
 	val progressState = _progressState.asStateFlow()
 
 	//dates with trackers
-	private var _datesWithTrackers = MutableStateFlow(listOf<String>())
-	val datesWithTrackers = _datesWithTrackers.asStateFlow()
+	private var _allTrackers = MutableStateFlow(listOf<PrayerTracker>())
+	val allTrackers = _allTrackers.asStateFlow()
+
+
 
 	//event for the tracker for prayer
 	sealed class TrackerEvent
@@ -77,6 +79,8 @@ class TrackerViewModel : ViewModel()
 
 		//return dates with trackers
 		class GET_PROGRESS_FOR_DATE(val date : String) : TrackerEvent()
+
+		object GET_ALL_TRACKERS : TrackerEvent()
 	}
 
 	fun onEvent(event : TrackerEvent)
@@ -90,6 +94,22 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.SET_DATE -> _dateState.value = event.date
 			is TrackerEvent.SET_PROGRESS -> _progressState.value = event.progress
 			is TrackerEvent.GET_PROGRESS_FOR_DATE -> getProgressForDate(event.date)
+			is TrackerEvent.GET_ALL_TRACKERS -> getAllTrackers()
+		}
+	}
+
+	private fun getAllTrackers()
+	{
+		viewModelScope.launch {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				val trackers = dataStore.getAllTrackers()
+				_allTrackers.value = trackers
+			} catch (e : Exception)
+			{
+				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
+			}
 		}
 	}
 

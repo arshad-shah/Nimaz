@@ -25,6 +25,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
+import com.github.tehras.charts.bar.BarChart
+import com.github.tehras.charts.bar.BarChartData
+import com.github.tehras.charts.bar.renderer.bar.SimpleBarDrawer
+import com.github.tehras.charts.bar.renderer.label.SimpleValueDrawer
+import com.github.tehras.charts.bar.renderer.yaxis.SimpleYAxisDrawer
+import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -32,6 +38,7 @@ import es.dmoral.toasty.Toasty
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+
 
 @Composable
 fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
@@ -45,6 +52,9 @@ fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
 	}.collectAsState()
 
 	LaunchedEffect(key1 = "getTrackerForDate") {
+		if(!isIntegrated){
+			viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_ALL_TRACKERS)
+		}
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(!isIntegrated))
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dateState.value))
 	}
@@ -55,6 +65,10 @@ fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
 
 	val showDateSelector = remember {
 		viewModel.showDateSelector
+	}.collectAsState()
+
+	val allTracker = remember {
+		viewModel.allTrackers
 	}.collectAsState()
 
 	val fajrState = remember {
@@ -131,6 +145,47 @@ fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
 			}
 		}
 	}
+
+//		val mutablelist = mutableListOf<BarChartData.Bar>()
+//		for (tracker in allTracker.value)
+//		{
+//			mutablelist.add(
+//					BarChartData.Bar(
+//							value = tracker.progress.toFloat() ,
+//							//a random color
+//							color = Color(0xFF000000.toInt() + (Math.random() * 0x00FFFFFF).toInt()) ,
+//							label = LocalDate.parse(tracker.date).format(DateTimeFormatter.ofPattern("dd")) ,
+//									)
+//						   )
+//			Log.d("Tracker" , tracker.toString())
+//		}
+//		ElevatedCard(
+//				modifier = Modifier.padding(top = 8.dp , bottom = 8.dp , start = 8.dp , end = 8.dp) ,
+//					) {
+//			//if the list is empty show a placeholder
+//			if (mutablelist.isEmpty())
+//			{
+//				Text(text = "No data to show" , style = MaterialTheme.typography.titleMedium)
+//			}
+//			else{
+//				BarChart(
+//						modifier = Modifier
+//							.fillMaxWidth()
+//							.padding(8.dp) ,
+//						barChartData = BarChartData(
+//								bars = mutablelist ,
+//												   ),
+//						animation = simpleChartAnimation(),
+//				barDrawer = SimpleBarDrawer(),
+//				yAxisDrawer = SimpleYAxisDrawer(
+//						labelValueFormatter = { value ->
+//							"${value.toInt()}"
+//						}
+//											   ),
+//				labelDrawer = SimpleValueDrawer()
+//						)
+//			}
+//		}
 	}
 }
 
@@ -542,7 +597,7 @@ fun ToggleableItem(
 			//a icon button to toggle the state of the toggleable item
 			IconButton(
 					modifier = Modifier
-						.padding(vertical = 8.dp, horizontal = 4.dp)
+						.padding(vertical = 8.dp , horizontal = 4.dp)
 						.size(32.dp)
 						.border(1.dp , MaterialTheme.colorScheme.primary , CircleShape),
 					onClick = {
@@ -581,7 +636,7 @@ fun ToggleableItem(
 			//a icon button to toggle the state of the toggleable item
 			IconButton(
 					modifier = Modifier
-						.padding(vertical = 8.dp, horizontal = 4.dp)
+						.padding(vertical = 8.dp , horizontal = 4.dp)
 						.size(24.dp)
 						.border(1.dp , MaterialTheme.colorScheme.primary , CircleShape),
 					onClick = {
