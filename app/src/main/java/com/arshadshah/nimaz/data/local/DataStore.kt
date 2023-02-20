@@ -33,6 +33,9 @@ class DataStore(db : AppDatabase)
 
 	//check if a tracker exists
 	suspend fun checkIfTrackerExists(date : String) = prayerTrackerDao.trackerExistsForDate(date)
+	suspend fun getDatesWithTrackers() = prayerTrackerDao.getDatesWithTrackers()
+
+	suspend fun getProgressForDate(date : String) = prayerTrackerDao.getProgressForDate(date)
 
 	//get all the ayas of a surah
 	suspend fun getAyasOfSurah(surahNumber : Int) =
@@ -311,6 +314,7 @@ private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
 		asr = asr ,
 		maghrib = maghrib ,
 		isha = isha,
+		progress = progress,
 																	 )
 
 private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
@@ -320,4 +324,5 @@ private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
 		asr = asr ,
 		maghrib = maghrib ,
 		isha = isha,
+		progress = progress,
 																	)

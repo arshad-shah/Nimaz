@@ -9,4 +9,5 @@ data class PrayerTracker(
 	val asr : Boolean = false ,
 	val maghrib : Boolean = false ,
 	val isha : Boolean = false ,
+	val progress : Int = 0
 						)

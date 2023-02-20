@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,7 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -19,13 +22,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.header.MonthState
 import io.github.boguszpawlowski.composecalendar.rememberSelectableCalendarState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
+import io.github.boguszpawlowski.composecalendar.selection.SelectionMode
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -36,6 +42,12 @@ import java.time.temporal.ChronoField
 @Composable
 fun Calender(paddingValues : PaddingValues)
 {
+	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
+
+	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
+
+
 	Column(
 			modifier = Modifier
 				.fillMaxSize()
@@ -46,11 +58,11 @@ fun Calender(paddingValues : PaddingValues)
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top=0.dp, start=8.dp, end = 8.dp, bottom = 4.dp)
+					.padding(top = 0.dp , start = 8.dp , end = 8.dp , bottom = 4.dp)
 					) {
 			SelectableCalendar(
 					dayContent = {
-						CalenderDay(dayState = it)
+						CalenderDay(dayState = it,)
 					} ,
 					weekHeader = { weekState ->
 						CalenderWeekHeader(weekState = weekState)
@@ -61,10 +73,53 @@ fun Calender(paddingValues : PaddingValues)
 					monthHeader = { monthState ->
 						CalenderHeader(monthState = monthState)
 					} ,
-					calendarState = rememberSelectableCalendarState()
+					calendarState = rememberSelectableCalendarState(
+							confirmSelectionChange = {
+								mutableDate.value = it.size
+									.let { size ->
+										if (size == 0)
+										{
+											LocalDate.now()
+										}
+										else
+										{
+											it.first()
+										}
+									}
+								true
+							},
+							selectionState = DynamicSelectionState(
+									selectionMode = SelectionMode.Single,
+									selection = mutableDate.value
+										.let { date ->
+											if (date == null)
+											{
+												setOf(LocalDate.now())
+											} else
+											{
+												setOf(date)
+											}
+										}.toList(),
+									confirmSelectionChange = {
+										mutableDate.value = it.size
+											.let { size ->
+												if (size == 0)
+												{
+													LocalDate.now()
+												}
+												else
+												{
+													it.first()
+												}
+											}
+										true
+									}
+
+							),
+																   )
 							  )
 		}
-
+		PrayerTracker(paddingValues = PaddingValues(4.dp), isIntegrated = true)
 	}
 }
 
@@ -160,6 +215,54 @@ fun CalenderHeader(monthState : MonthState)
 					horizontalAlignment = Alignment.CenterHorizontally ,
 					verticalArrangement = Arrangement.Center
 				  ) {
+				//if its today show today else show the today dimmed with a symbol to show which way to go to get to today
+				if (monthState.currentMonth == YearMonth.now())
+				{
+					Text(
+							text = "Today" ,
+							style = MaterialTheme.typography.titleSmall
+						)
+				}
+				else
+				{
+					Row(
+							horizontalArrangement = Arrangement.Center ,
+							verticalAlignment = Alignment.CenterVertically
+					   ) {
+						if (monthState.currentMonth.isAfter(YearMonth.now()))
+						{
+							Icon(
+									modifier = Modifier.size(16.dp) ,
+									painter = painterResource(id = R.drawable.angle_small_left_icon) ,
+									contentDescription = "Previous Day" ,
+									tint = MaterialTheme.colorScheme.primary
+								)
+							Text(
+									text = "Today" ,
+									style = MaterialTheme.typography.titleSmall,
+									modifier = Modifier
+										.padding(start = 4.dp)
+										.alpha(0.5f)
+								)
+						}
+						else
+						{
+							Text(
+									text = "Today" ,
+									style = MaterialTheme.typography.titleSmall,
+									modifier = Modifier
+										.padding(start = 4.dp)
+										.alpha(0.5f)
+								)
+							Icon(
+									modifier = Modifier.size(16.dp) ,
+									painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+									contentDescription = "Next Day" ,
+									tint = MaterialTheme.colorScheme.primary
+								)
+						}
+					}
+				}
 				Text(
 						text = currentMonthYear ,
 						style = MaterialTheme.typography.titleLarge ,
@@ -232,9 +335,13 @@ fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
 			   )
 {
+
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
+	val currentDate = dayState.date
 	val today = dayState.isCurrentDay
+
+	val isSelectedDay = dayState.selectionState.isDateSelected(currentDate)
 
 	val hasDescription = remember { mutableStateOf(false) }
 
@@ -245,14 +352,14 @@ fun CalenderDay(
 	ElevatedCard(
 			modifier = Modifier
 				.padding(4.dp)
-				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f),
+				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f) ,
 				) {
 
 		Column(
 				modifier = Modifier
 					.border(
 							width = 1.dp ,
-							color = if (today) MaterialTheme.colorScheme.primary else Color.Transparent ,
+							color = if (today || isSelectedDay) MaterialTheme.colorScheme.primary else Color.Transparent ,
 							shape = MaterialTheme.shapes.medium
 						   )
 					.clickable(
@@ -282,7 +389,7 @@ fun CalenderDay(
 					color = when (importantDay.first)
 					{
 						false -> if (today) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
-						else -> MaterialTheme.colorScheme.primary
+						true -> MaterialTheme.colorScheme.primary
 					}
 				)
 			Divider(
@@ -327,6 +434,88 @@ fun CalenderDay(
 			}
 		}
 	}
+}
+
+@Composable
+fun getGradientForProgress(progressState : Int) : Brush
+{
+	//if the day is selected then we need to change the color of the background to the progress color
+	if (progressState == 100)
+	{
+		return Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+							   )
+									)
+	}else if (progressState == 80)
+	{
+		return Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						Color.Transparent
+							   )
+									)
+	}else if (progressState == 60)
+	{
+		return Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						Color.Transparent ,
+						Color.Transparent
+							   )
+									)
+	}else if (progressState == 40)
+	{
+		return Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent
+							   )
+									)
+	}else if (progressState == 20)
+	{
+		return Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent
+							   )
+									)
+	}else if (progressState == 0)
+	{
+		return Brush.verticalGradient(
+				colors = listOf(
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent
+							   )
+									)
+	}
+	return Brush.verticalGradient(
+			colors = listOf(
+					Color.Transparent ,
+					Color.Transparent ,
+					Color.Transparent ,
+					Color.Transparent ,
+					Color.Transparent
+						   )
+								)
 }
 
 //function to check if a day is an important day
