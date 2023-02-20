@@ -28,8 +28,8 @@ fun PrayerTimesScreen(
 
 	//reload the data when the screen is resumed
 	LaunchedEffect(Unit) {
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
 		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
+		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
 	}
 
 	// Collecting the state of the view model
