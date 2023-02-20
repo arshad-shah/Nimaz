@@ -25,21 +25,26 @@ fun PrayerTimesScreen(
 
 	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
 	val settingViewModel = viewModel(key = "SettingViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+
+	//reload the data when the screen is resumed
+	LaunchedEffect(Unit) {
+		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
+		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
+	}
+
 	// Collecting the state of the view model
 	val state by remember { viewModel.prayerTimesState }.collectAsState()
-	val locationState by remember { settingViewModel.locationName }.collectAsState()
+	val locationState  =  remember { settingViewModel.locationName }.collectAsState()
 
 	val currentPrayerName = remember {
 		viewModel.currentPrayerName
 	}.collectAsState()
 
-	//reload the data when the screen is resumed
-	LaunchedEffect(Unit) {
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
-	}
-
 	//log all the states
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "state: $state")
+	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "locationState: $locationState")
+	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "currentPrayerName: $currentPrayerName")
+
 	Column(
 			modifier = Modifier
 				.fillMaxSize()
