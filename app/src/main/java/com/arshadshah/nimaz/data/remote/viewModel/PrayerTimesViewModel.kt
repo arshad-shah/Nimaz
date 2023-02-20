@@ -34,6 +34,11 @@ class PrayerTimesViewModel : ViewModel()
 	private val _countDownTimeState = MutableStateFlow(CountDownTime(0 , 0 , 0 ))
 	val timer = _countDownTimeState.asStateFlow()
 
+	//current prayer name
+	private val _currentPrayerName = MutableStateFlow("Loading...")
+	val currentPrayerName = _currentPrayerName.asStateFlow()
+
+
 	//event that starts the timer
 	sealed class PrayerTimesEvent
 	{
@@ -91,6 +96,7 @@ class PrayerTimesViewModel : ViewModel()
 				val response = PrayerTimesRepository.updatePrayerTimes(mapOfParameters)
 				if (response.data != null)
 				{
+					_currentPrayerName.value = response.data.currentPrayer?.name.toString()
 					_prayerTimesState.value = PrayerTimesState.Success(response.data)
 				} else
 				{
@@ -118,6 +124,13 @@ class PrayerTimesViewModel : ViewModel()
 				val response = PrayerTimesRepository.getPrayerTimes(context)
 				if (response.data != null)
 				{
+					if (response.data.currentPrayer?.name.toString() == "SUNRISE")
+					{
+						_currentPrayerName.value = "Duha"
+					} else
+					{
+						_currentPrayerName.value = response.data.currentPrayer?.name.toString()
+					}
 					_prayerTimesState.value = PrayerTimesState.Success(response.data)
 				} else
 				{

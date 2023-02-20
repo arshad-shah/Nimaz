@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
@@ -18,7 +17,6 @@ import kotlin.reflect.KFunction2
 fun PrayerTimesList(
 	state : PrayerTimesViewModel.PrayerTimesState ,
 	handleEvent : KFunction2<Context , PrayerTimesViewModel.PrayerTimesEvent , Unit> ,
-	currentPrayerName : MutableState<String> ,
 				   )
 {
 	val context = LocalContext.current
@@ -76,14 +74,6 @@ fun PrayerTimesList(
 					"isha" to prayerTimes.isha ,
 									  )
 
-			if (prayerTimes.currentPrayer?.name == "SUNRISE")
-			{
-				currentPrayerName.value = "DUHA"
-			} else
-			{
-				currentPrayerName.value = prayerTimes.currentPrayer?.name !!
-			}
-
 			//save the prayer times in shared preferences
 			sharedPreferences.saveData(AppConstants.FAJR , prayerTimesMap["fajr"] !!.toString())
 			sharedPreferences.saveData(
@@ -99,7 +89,7 @@ fun PrayerTimesList(
 			sharedPreferences.saveData(AppConstants.ISHA , prayerTimesMap["isha"] !!.toString())
 			sharedPreferences.saveData(
 					AppConstants.CURRENT_PRAYER ,
-					prayerTimes.currentPrayer.name
+					prayerTimes.currentPrayer?.name.toString()
 									  )
 
 
