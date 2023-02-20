@@ -1,10 +1,8 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
@@ -17,9 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
@@ -333,6 +333,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.fajr_icon) ,
+										  contentDescription = "Fajr Time"
+										)
+								},
 								title = {
 									Text(text = "Fajr Time")
 								} ,
@@ -360,6 +368,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.sunrise_icon) ,
+											contentDescription = "Fajr Time"
+										 )
+								},
 								title = {
 									Text(text = "Sunrise Time")
 								} ,
@@ -387,6 +403,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.dhuhr_icon) ,
+											contentDescription = "Dhuhr Time"
+										 )
+								},
 								title = {
 									Text(text = "Dhuhr Time")
 								} ,
@@ -414,6 +438,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.asr_icon) ,
+											contentDescription = "Asr Time"
+										 )
+								},
 								title = {
 									Text(text = "Asr Time")
 								} ,
@@ -441,6 +473,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.maghrib_icon) ,
+											contentDescription = "Maghrib Time"
+										 )
+								},
 								title = {
 									Text(text = "Maghrib Time")
 								} ,
@@ -468,6 +508,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.isha_icon) ,
+											contentDescription = "Isha Time"
+										 )
+								},
 								title = {
 									Text(text = "Isha Time")
 								} ,

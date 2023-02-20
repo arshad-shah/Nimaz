@@ -6,13 +6,14 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.RemoteViews
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.WIDGET_PENDING_INTENT_REQUEST_CODE
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import java.time.LocalDateTime
+import com.arshadshah.nimaz.data.remote.models.PrayerTimes
+import com.arshadshah.nimaz.utils.LocalDataStore
+import kotlinx.coroutines.runBlocking
 import java.time.format.DateTimeFormatter
 
 /**
@@ -52,6 +53,8 @@ internal fun updateAppWidget(
 							)
 {
 
+	Log.d("Nimaz: Widget" , "Updating Widget!")
+
 	val intent = Intent(context , MainActivity::class.java)
 	val pendingIntent = PendingIntent.getActivity(
 			context ,
@@ -60,38 +63,14 @@ internal fun updateAppWidget(
 			FLAG_IMMUTABLE
 												 )
 
-	val sharedPreferences = PrivateSharedPreferences(context)
-	//get the prayer times from the shared preferences
-	val fajr = LocalDateTime.parse(
-			sharedPreferences.getData(
-					AppConstants.FAJR ,
-					LocalDateTime.now().toString()
-									 )
-								  )
-	val dhuhr = LocalDateTime.parse(
-			sharedPreferences.getData(
-					AppConstants.DHUHR ,
-					LocalDateTime.now().toString()
-									 )
-								   )
-	val asr = LocalDateTime.parse(
-			sharedPreferences.getData(
-					AppConstants.ASR ,
-					LocalDateTime.now().toString()
-									 )
-								 )
-	val maghrib = LocalDateTime.parse(
-			sharedPreferences.getData(
-					AppConstants.MAGHRIB ,
-					LocalDateTime.now().toString()
-									 )
-									 )
-	val isha = LocalDateTime.parse(
-			sharedPreferences.getData(
-					AppConstants.ISHA ,
-					LocalDateTime.now().toString()
-									 )
-								  )
+	LocalDataStore.init(context)
+	val dataStore = LocalDataStore.getDataStore()
+	val prayertimes : PrayerTimes
+	runBlocking {
+		dataStore.getAllPrayerTimes().let {
+			prayertimes = it
+		}
+	}
 	// Construct the RemoteViews object
 	val views = RemoteViews(context.packageName , R.layout.nimaz)
 
@@ -99,20 +78,20 @@ internal fun updateAppWidget(
 	val formatter = DateTimeFormatter.ofPattern("hh:mm a")
 
 	//format the prayer times to show them in the widget as 00:00 using the formatTime function
-	val fajrTime = fajr.format(formatter)
-	val dhuhrTime = dhuhr.format(formatter)
-	val asrTime = asr.format(formatter)
-	val maghribTime = maghrib.format(formatter)
-	val ishaTime = isha.format(formatter)
+	val fajrTime = prayertimes.fajr?.format(formatter)
+	val dhuhrTime = prayertimes.dhuhr?.format(formatter)
+	val asrTime = prayertimes.asr?.format(formatter)
+	val maghribTime = prayertimes.maghrib?.format(formatter)
+	val ishaTime = prayertimes.isha?.format(formatter)
 
-	views.setTextViewText(R.id.Fajr_time , fajrTime.format(DateTimeFormatter.ofPattern("HH:mm")))
-	views.setTextViewText(R.id.Zuhar_time , dhuhrTime.format(DateTimeFormatter.ofPattern("HH:mm")))
-	views.setTextViewText(R.id.Asar_time , asrTime.format(DateTimeFormatter.ofPattern("HH:mm")))
+	views.setTextViewText(R.id.Fajr_time , fajrTime)
+	views.setTextViewText(R.id.Zuhar_time , dhuhrTime)
+	views.setTextViewText(R.id.Asar_time , asrTime)
 	views.setTextViewText(
 			R.id.Maghrib_time ,
-			maghribTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+			maghribTime
 						 )
-	views.setTextViewText(R.id.Ishaa_time , ishaTime.format(DateTimeFormatter.ofPattern("HH:mm")))
+	views.setTextViewText(R.id.Ishaa_time , ishaTime)
 
 	views.setOnClickPendingIntent(R.id.widget , pendingIntent)
 

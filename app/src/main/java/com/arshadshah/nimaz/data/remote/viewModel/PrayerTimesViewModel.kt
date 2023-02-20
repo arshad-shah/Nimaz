@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,6 +69,7 @@ class PrayerTimesViewModel : ViewModel()
 			//event to update the prayer times
 			is PrayerTimesEvent.UPDATE_PRAYERTIMES ->
 			{
+				PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				updatePrayerTimes(event.mapOfParameters)
 			}
 
