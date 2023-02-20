@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.StringPreferenceSettingValueState
 import kotlin.math.roundToInt
@@ -24,6 +25,7 @@ fun FontSizeDialog(
 	translationFontSizeState : SettingValueState<Float> ,
 	fontStyleState : StringPreferenceSettingValueState ,
 	items3 : List<String> ,
+	handleQuranEvents : (QuranViewModel.QuranMenuEvents) -> Unit ,
 				  )
 {
 	val fontMenuExpanded = remember { mutableStateOf(false) }
@@ -84,7 +86,10 @@ fun FontSizeDialog(
 					}
 					Slider(
 							value = arabicFontSizeState.value ,
-							onValueChange = { arabicFontSizeState.value = it } ,
+							onValueChange = {
+								arabicFontSizeState.value = it
+								handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(it))
+											} ,
 							valueRange = 24f .. 40f ,
 							modifier = Modifier.width(300.dp)
 						  )
@@ -105,7 +110,10 @@ fun FontSizeDialog(
 
 					Slider(
 							value = translationFontSizeState.value ,
-							onValueChange = { translationFontSizeState.value = it } ,
+							onValueChange = {
+								translationFontSizeState.value = it
+								handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(it))
+											} ,
 							valueRange = 16f .. 40f ,
 							modifier = Modifier.width(300.dp)
 						  )
@@ -158,6 +166,7 @@ fun FontSizeDialog(
 														fontStyleState.value = item
 														setFontBasedOnFontStyle(fontStyleState.value)
 														fontMenuExpanded.value = false
+														handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Arabic_Font(fontStyleState.value))
 													} ,
 													text = { Text(text = item) }
 															)

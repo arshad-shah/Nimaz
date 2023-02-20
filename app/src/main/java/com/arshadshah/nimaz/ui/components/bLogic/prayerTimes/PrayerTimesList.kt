@@ -2,11 +2,10 @@ package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
 import android.content.Context
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -18,14 +17,12 @@ import kotlin.reflect.KFunction2
 @Composable
 fun PrayerTimesList(
 	state : PrayerTimesViewModel.PrayerTimesState ,
-	timer : LiveData<CountDownTime> ,
 	handleEvent : KFunction2<Context , PrayerTimesViewModel.PrayerTimesEvent , Unit> ,
 	currentPrayerName : MutableState<String> ,
 				   )
 {
 	val context = LocalContext.current
 	val sharedPreferences = PrivateSharedPreferences(context)
-	var countDownTime by remember { mutableStateOf(CountDownTime(0 , 0 , 0)) }
 
 	when (state)
 	{
@@ -42,7 +39,6 @@ fun PrayerTimesList(
 										  ) ,
 					name = "" ,
 					state = state ,
-					countDownTime = countDownTime ,
 					loading = true ,
 							 )
 		}
@@ -53,7 +49,6 @@ fun PrayerTimesList(
 					prayerTimesMap = mapOf() ,
 					name = "" ,
 					state = state ,
-					countDownTime = countDownTime ,
 					loading = false ,
 							 )
 		}
@@ -121,12 +116,6 @@ fun PrayerTimesList(
 									)
 				sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 			}
-
-			LaunchedEffect(key1 = timer) {
-				timer.observeForever {
-					countDownTime = it
-				}
-			}
 			val timeToNextPrayerLong =
 				state.prayerTimes.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())
 					?.toInstant()
@@ -144,7 +133,6 @@ fun PrayerTimesList(
 					name = prayerTimes.nextPrayer?.name ?: "" ,
 					prayerTimesMap = prayerTimesMap ,
 					state = state ,
-					countDownTime = countDownTime ,
 					loading = false ,
 							 )
 		}

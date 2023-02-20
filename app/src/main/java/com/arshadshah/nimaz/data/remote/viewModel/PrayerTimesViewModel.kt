@@ -3,18 +3,12 @@ package com.arshadshah.nimaz.data.remote.viewModel
 import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
-import com.arshadshah.nimaz.utils.Location
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.location.NetworkChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,25 +25,14 @@ class PrayerTimesViewModel : ViewModel()
 		data class Error(val error : String) : PrayerTimesState()
 	}
 
-	sealed class LocationState
-	{
-
-		object Loading : LocationState()
-		data class Success(val location : String) : LocationState()
-		data class Error(val error : String) : LocationState()
-	}
-
-	private val _locationState = MutableStateFlow(LocationState.Loading as LocationState)
-	val locationState = _locationState.asStateFlow()
-
 	private var _prayerTimesState =
 		MutableStateFlow(PrayerTimesState.Loading as PrayerTimesState)
 	val prayerTimesState = _prayerTimesState.asStateFlow()
 
 	private var countDownTimer : CountDownTimer? = null
 
-	private val _countDownTimeState = MutableLiveData<CountDownTime>()
-	val timer : LiveData<CountDownTime> = _countDownTimeState
+	private val _countDownTimeState = MutableStateFlow(CountDownTime(0 , 0 , 0 ))
+	val timer = _countDownTimeState.asStateFlow()
 
 	//event that starts the timer
 	sealed class PrayerTimesEvent
@@ -93,8 +76,6 @@ class PrayerTimesViewModel : ViewModel()
 	fun reload(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			//load the location
-			loadLocation(context)
 			//load the prayer times
 			loadPrayerTimes(context)
 		}
@@ -150,90 +131,6 @@ class PrayerTimesViewModel : ViewModel()
 						"loadPrayerTimes: ${e.message}"
 					 )
 				_prayerTimesState.value = PrayerTimesState.Error(e.message !!)
-			}
-		}
-	}
-
-	//load location
-	fun loadLocation(context : Context)
-	{
-		viewModelScope.launch(Dispatchers.IO) {
-			try
-			{
-				_locationState.value = LocationState.Loading
-				Log.d(
-						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-						"loadLocation: loading..."
-					 )
-				val sharedPreferences = PrivateSharedPreferences(context)
-				val locationAuto =
-					sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE , true)
-				val locationName = mutableStateOf(
-						sharedPreferences.getData(
-								AppConstants.LOCATION_INPUT ,
-								"Abbeyleix"
-												 )
-												 )
-				val latitude =
-					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.0))
-				val longitude =
-					mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 7.0))
-				//callback for location
-				val locationFoundCallbackManual =
-					{ longitudeValue : Double , latitudeValue : Double , name : String ->
-						//save location
-						locationName.value = name
-						latitude.value = latitudeValue
-						longitude.value = longitudeValue
-					}
-				val listener = { latitudeValue : Double , longitudeValue : Double ->
-					//save location
-					latitude.value = latitudeValue
-					longitude.value = longitudeValue
-				}
-
-				if (NetworkChecker().networkCheck(context))
-				{
-					if (locationAuto)
-					{
-						Location().getAutomaticLocation(
-								context ,
-								listener ,
-								locationFoundCallbackManual
-													   )
-						Log.d(
-								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-								"loadLocation: auto"
-							 )
-						_locationState.value = LocationState.Success(locationName.value)
-					} else
-					{
-						Location().getManualLocation(
-								locationName.value ,
-								context ,
-								locationFoundCallbackManual
-													)
-						Log.d(
-								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-								"loadLocation: manual"
-							 )
-						_locationState.value = LocationState.Success(locationName.value)
-					}
-				} else
-				{
-					Log.d(
-							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-							"loadLocation: no network"
-						 )
-					_locationState.value = LocationState.Error("No network")
-				}
-			} catch (e : Exception)
-			{
-				Log.d(
-						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-						"loadLocation: ${e.message}"
-					 )
-				_locationState.value = LocationState.Error(e.message !!)
 			}
 		}
 	}

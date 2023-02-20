@@ -24,6 +24,7 @@ fun CustomDialog(
 	setShowDialog : (Boolean) -> Unit ,
 	state : SettingValueState<Int> ,
 	valueState : SettingValueState<String> ,
+	onStateChange : (String) -> Unit ,
 				)
 {
 	val coroutineScope = rememberCoroutineScope()
@@ -31,6 +32,7 @@ fun CustomDialog(
 		coroutineScope.launch {
 			state.value = selectedIndex
 			valueState.value = items[selectedIndex]
+			onStateChange(items[selectedIndex])
 		}
 	}
 
@@ -82,7 +84,9 @@ fun CustomDialog(
 										 ) ,
 			confirmButton = {
 				Button(
-						onClick = { setShowDialog(false) } ,
+						onClick = {
+							setShowDialog(false)
+								  } ,
 						content = { Text(text = "Confirm") }
 					  )
 			} ,

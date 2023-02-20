@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,27 +13,26 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.ui.settings.*
-import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -45,39 +45,34 @@ fun SettingsScreen(
 				  )
 {
 	val context = LocalContext.current
-	val prayerTimesViewModel = PrayerTimesViewModel()
+	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+
+	LaunchedEffect(key1 = true) {
+		viewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation)
+	}
+
+
+	val isLocationManual = remember {
+		viewModel.isLocationManual
+	}.collectAsState()
+
+	val locationNameState = remember {
+		viewModel.locationName
+	}.collectAsState()
+
+	val latitudeState = remember {
+		viewModel.latitude
+	}.collectAsState()
+
+	val longitudeState = remember {
+		viewModel.longitude
+	}.collectAsState()
+	
+	val isLocationNameLoading = remember {
+		viewModel.isLocationNameLoading
+	}.collectAsState()
+
 	val sharedPreferences = PrivateSharedPreferences(context)
-	//values for coordinates that are mutable
-	val longitude =
-		remember { mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)) }
-	val latitude =
-		remember { mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)) }
-	val locationName = remember {
-		mutableStateOf(
-				sharedPreferences.getData(
-						AppConstants.LOCATION_INPUT ,
-						"Abbeyleix"
-										 )
-					  )
-	}
-
-	val cityname =
-		rememberPreferenceStringSettingState(AppConstants.LOCATION_INPUT , "Abbeyleix")
-
-	//a listner callback that is called when the location is found
-	val locationFoundCallback = { latitudeValue : Double , longitudeValue : Double ->
-		longitude.value = longitudeValue
-		latitude.value = latitudeValue
-	}
-
-	//a callback that is called when using mauual location
-	val locationFoundCallbackManual =
-		{ latitudeValue : Double , longitudeValue : Double , name : String ->
-			longitude.value = longitudeValue
-			latitude.value = latitudeValue
-			locationName.value = name
-			sharedPreferences.saveData(AppConstants.LOCATION_INPUT , name)
-		}
 
 	Column(
 			modifier = Modifier
@@ -88,6 +83,7 @@ fun SettingsScreen(
 		SettingsGroup(title = { Text(text = "Location") }) {
 			val storage =
 				rememberPreferenceBooleanSettingState(AppConstants.LOCATION_TYPE , true)
+			storage.value = isLocationManual.value
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
@@ -107,35 +103,42 @@ fun SettingsScreen(
 							if (storage.value)
 							{
 								Text(text = "Automatic")
-								//if the location city name is not null, then run the code
-								if (cityname.value != "")
-								{
-									Location().getAutomaticLocation(
-											LocalContext.current ,
-											locationFoundCallback ,
-											locationFoundCallbackManual
-																   )
-								}
 							} else
 							{
 								Text(text = "Manual")
-								val locationFinderAuto = LocationFinderAuto()
-								locationFinderAuto.stopLocationUpdates()
 							}
 						} ,
+						subtitle = {
+							if (storage.value)
+							{
+								if(isLocationNameLoading.value)
+								{
+									Text(text = "Loading...")
+								}else{
+									Text(text = locationNameState.value)
+								}
+							} else
+							{
+								Text(text = "Enter your location manually")
+							}
+						},
 						onCheckedChange = {
 							storage.value = it
-							prayerTimesViewModel.handleEvent(
-									context ,
-									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-											AppConstants.getDefaultParametersForMethod(
-													sharedPreferences.getData(
-															AppConstants.CALCULATION_METHOD ,
-															"IRELAND"
-																			 )
-																					  )
-																							)
-															)
+							viewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.LocationToggle(it)
+													)
+							//if its true then we need to get the location from the gps
+							if (it)
+							{
+								viewModel.handleEvent(
+										SettingsViewModel.SettingsEvent.LocationAutomatic(context)
+													)
+							}else{
+								//if its false then we need to get the location from the shared preferences
+								viewModel.handleEvent(
+										SettingsViewModel.SettingsEvent.LocationManual(context, locationNameState.value)
+													)
+							}
 						}
 							  )
 			}
@@ -148,16 +151,17 @@ fun SettingsScreen(
 							.fillMaxWidth()
 							) {
 					ManualLocationInput(
-							locationFoundCallbackManual ,
-							prayerTimesViewModel::handleEvent
+							handleSettingEvents = viewModel::handleEvent ,
+							locationNameState = locationNameState ,
 									   )
 				}
 				CoordinatesView(
-						longitude = longitude ,
-						latitude = latitude
+						longitudeState = longitudeState ,
+						latitudeState = latitudeState ,
 							   )
 			}
 		}
+
 		ElevatedCard(
 				modifier = Modifier
 					.padding(8.dp)
