@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
+import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,16 +11,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
-import com.arshadshah.nimaz.constants.AppConstants.getDefaultParametersForMethod
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
@@ -34,12 +40,12 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val context = LocalContext.current
 	val sharedPreferences = PrivateSharedPreferences(context)
 
+	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val settingViewModel = viewModel(key = "SettingViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+
 	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
-	val defaultValuesForMethod = remember {
-		mutableStateOf(getDefaultParametersForMethod("IRELAND"))
-	}
 
 	val calculationMethodState =
 		rememberPreferenceStringSettingState(
@@ -87,80 +93,66 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 
 
 	val ishaaAngleVisible = remember {
-		mutableStateOf(true)
-	}
+		settingViewModel.ishaAngleVisibility
+	}.collectAsState()
 
-	//if the calculation method is MAKKAH, QATAR, or GULF then the Isha angle is not visible
-	if (calculationMethodState.value == "MAKKAH" || calculationMethodState.value == "QATAR" || calculationMethodState.value == "GULF")
-	{
-		ishaAngleState.value = "0"
-		ishaaAngleVisible.value = false
-	} else
-	{
-		ishaaAngleVisible.value = true
-	}
+	val calculationMethod = remember {
+		settingViewModel.calculationMethod
+	}.collectAsState()
 
-	//whenever the calculation method is changed, the default values for that method are loaded and the values are set to the state
-	SideEffect {
+	val madhab = remember {
+		settingViewModel.madhab
+	}.collectAsState()
 
-	}
-	LaunchedEffect(calculationMethodState.value)
-	{
-		defaultValuesForMethod.value = getDefaultParametersForMethod(calculationMethodState.value)
-		fajrAngleState.value = defaultValuesForMethod.value["fajrAngle"].toString()
-		ishaAngleState.value = defaultValuesForMethod.value["ishaAngle"].toString()
-		madhabState.value = defaultValuesForMethod.value["madhab"].toString()
-		ishaIntervalState.value = defaultValuesForMethod.value["ishaInterval"].toString()
-		highLatitudeRuleState.value = defaultValuesForMethod.value["highLatitudeRule"].toString()
-		fajrAdjustment.value = defaultValuesForMethod.value["fajrAdjustment"].toString()
-		sunriseAdjustment.value = defaultValuesForMethod.value["sunriseAdjustment"].toString()
-		dhuhrAdjustment.value = defaultValuesForMethod.value["dhuhrAdjustment"].toString()
-		asrAdjustment.value = defaultValuesForMethod.value["asrAdjustment"].toString()
-		maghribAdjustment.value = defaultValuesForMethod.value["maghribAdjustment"].toString()
-		ishaAdjustment.value = defaultValuesForMethod.value["ishaAdjustment"].toString()
-	}
+	val highLatitudeRule = remember {
+		settingViewModel.highLatitude
+	}.collectAsState()
 
-	LaunchedEffect(
-			calculationMethodState.value ,
-			madhabState.value ,
-			highLatitudeRuleState.value ,
-			fajrAngleState.value ,
-			ishaAngleState.value ,
-			fajrAdjustment.value ,
-			sunriseAdjustment.value ,
-			dhuhrAdjustment.value ,
-			asrAdjustment.value ,
-			maghribAdjustment.value ,
-			ishaAdjustment.value
-				  )
-	{
-		val prayerTimesViewModel = PrayerTimesViewModel()
-		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
-		//then pass it to the UPDATE_PRAYERTIMES event
-		val mapOfParams = mutableMapOf<String , String>()
-		mapOfParams["latitude"] = latitude.toString()
-		mapOfParams["longitude"] = longitude.toString()
-		mapOfParams["date"] = LocalDateTime.now().toString()
-		mapOfParams["fajrAngle"] = fajrAngleState.value
-		mapOfParams["ishaAngle"] = ishaAngleState.value
-		mapOfParams["ishaInterval"] = ishaIntervalState.value
-		mapOfParams["method"] = calculationMethodState.value
-		mapOfParams["madhab"] = madhabState.value
-		mapOfParams["highLatitudeRule"] = highLatitudeRuleState.value
-		mapOfParams["fajrAdjustment"] = fajrAdjustment.value
-		mapOfParams["sunriseAdjustment"] = sunriseAdjustment.value
-		mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment.value
-		mapOfParams["asrAdjustment"] = asrAdjustment.value
-		mapOfParams["maghribAdjustment"] = maghribAdjustment.value
-		mapOfParams["ishaAdjustment"] = ishaAdjustment.value
-		//then pass it to the UPDATE_PRAYERTIMES event
-		prayerTimesViewModel.handleEvent(
-				context ,
-				PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-						mapOfParams
-																		)
-										)
+	val fajrAngle = remember {
+		settingViewModel.fajrAngle
+	}.collectAsState()
+
+	val ishaAngle = remember {
+		settingViewModel.ishaAngle
+	}.collectAsState()
+
+	val fajrAdjustmentValue = remember {
+		settingViewModel.fajrOffset
+	}.collectAsState()
+
+	val sunriseAdjustmentValue = remember {
+		settingViewModel.sunriseOffset
+	}.collectAsState()
+
+	val dhuhrAdjustmentValue = remember {
+		settingViewModel.dhuhrOffset
+	}.collectAsState()
+
+	val asrAdjustmentValue = remember {
+		settingViewModel.asrOffset
+	}.collectAsState()
+
+	val maghribAdjustmentValue = remember {
+		settingViewModel.maghribOffset
+	}.collectAsState()
+
+	val ishaAdjustmentValue = remember {
+		settingViewModel.ishaOffset
+	}.collectAsState()
+
+	LaunchedEffect(Unit){
+		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+		calculationMethodState.value = calculationMethod.value
+		madhabState.value = madhab.value
+		highLatitudeRuleState.value = highLatitudeRule.value
+		fajrAngleState.value = fajrAngle.value
+		ishaAngleState.value = ishaAngle.value
+		fajrAdjustment.value = fajrAdjustmentValue.value
+		sunriseAdjustment.value = sunriseAdjustmentValue.value
+		dhuhrAdjustment.value = dhuhrAdjustmentValue.value
+		asrAdjustment.value = asrAdjustmentValue.value
+		maghribAdjustment.value = maghribAdjustmentValue.value
+		ishaAdjustment.value = ishaAdjustmentValue.value
 	}
 
 	Column(
@@ -189,6 +181,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						} ,
 						items = mapOfMethods ,
 						valueState = calculationMethodState ,
+						onChange = { method: String ->
+							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.CalculationMethod(method))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						} ,
 						height = 500.dp
 							)
 			}
@@ -199,19 +195,26 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						.fillMaxWidth()
 						) {
 				SettingsList(
+						valueState = madhabState ,
 						title = {
 							Text(text = "Madhab")
-						} ,
-						subtitle = {
-							Text(text = madhabState.value)
 						} ,
 						description = {
 							Text(text = "The madhab used to calculate the asr prayer times.")
 						} ,
 						items = mapOfMadhabs ,
-						valueState = madhabState ,
+						subtitle = {
+							Text(text = madhabState.value)
+						} ,
 						height = 300.dp
-							)
+							) { madhab : String ->
+					settingViewModel.handleEvent(
+							SettingsViewModel.SettingsEvent.Madhab(
+									madhab
+																			 )
+												)
+					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+				}
 			}
 			ElevatedCard(
 					modifier = Modifier
@@ -220,19 +223,26 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						.fillMaxWidth()
 						) {
 				SettingsList(
+						valueState = highLatitudeRuleState ,
 						title = {
 							Text(text = "High Latitude Rule")
-						} ,
-						subtitle = {
-							Text(text = highLatitudeRuleState.value)
 						} ,
 						description = {
 							Text(text = "The high latitude rule used to calculate the prayer times.")
 						} ,
 						items = mapOfHighLatitudeRules ,
-						valueState = highLatitudeRuleState ,
+						subtitle = {
+							Text(text = highLatitudeRuleState.value)
+						} ,
 						height = 350.dp
-							)
+							) { highLatRule : String ->
+					settingViewModel.handleEvent(
+							SettingsViewModel.SettingsEvent.HighLatitude(
+									highLatRule
+																			 )
+												)
+					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+				}
 			}
 		}
 
@@ -258,7 +268,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						} ,
 						items = (0 .. 50).map { (it - 25) } ,
 						valueState = fajrAngleState ,
-										  )
+										  ) { angle : Int ->
+					settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.FajrAngle(angle.toString()))
+					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+				}
 			}
 			if (ishaaAngleVisible.value)
 			{
@@ -272,15 +285,22 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							title = {
 								Text(text = "Isha Angle")
 							} ,
-							subtitle = {
-								Text(text = ishaAngleState.value)
-							} ,
 							description = {
 								Text(text = "The angle of the sun at which the Isha prayer begins")
 							} ,
 							items = (0 .. 50).map { (it - 25) } ,
+							subtitle = {
+								Text(text = ishaAngleState.value)
+							} ,
 							valueState = ishaAngleState ,
-											  )
+											  ) { angle : Int ->
+						settingViewModel.handleEvent(
+								SettingsViewModel.SettingsEvent.IshaAngle(
+										angle.toString()
+																													)
+													)
+						viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+					}
 				}
 			} else
 			{
@@ -317,15 +337,22 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								title = {
 									Text(text = "Fajr Time")
 								} ,
-								subtitle = {
-									Text(text = fajrAdjustment.value)
-								} ,
 								description = {
 									Text(text = "Adjust the time of the Fajr prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
+								subtitle = {
+									Text(text = fajrAdjustment.value)
+								} ,
 								valueState = fajrAdjustment ,
-												  )
+												  ) { adjustment : Int ->
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.FajrOffset(
+											adjustment.toString()
+																														)
+														)
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						}
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -337,15 +364,22 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								title = {
 									Text(text = "Sunrise Time")
 								} ,
-								subtitle = {
-									Text(text = sunriseAdjustment.value)
-								} ,
 								description = {
 									Text(text = "Adjust the time of the Sunrise prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
+								subtitle = {
+									Text(text = sunriseAdjustment.value)
+								} ,
 								valueState = sunriseAdjustment ,
-												  )
+												  ) { adjustment : Int ->
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.SunriseOffset(
+											adjustment.toString()
+																														)
+														)
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						}
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -357,15 +391,22 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								title = {
 									Text(text = "Dhuhr Time")
 								} ,
-								subtitle = {
-									Text(text = dhuhrAdjustment.value)
-								} ,
 								description = {
 									Text(text = "Adjust the time of the Dhuhr prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
+								subtitle = {
+									Text(text = dhuhrAdjustment.value)
+								} ,
 								valueState = dhuhrAdjustment ,
-												  )
+												  ) { adjustment : Int ->
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.DhuhrOffset(
+											adjustment.toString()
+																														)
+														)
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						}
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -377,15 +418,22 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								title = {
 									Text(text = "Asr Time")
 								} ,
-								subtitle = {
-									Text(text = asrAdjustment.value)
-								} ,
 								description = {
 									Text(text = "Adjust the time of the Asr prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
+								subtitle = {
+									Text(text = asrAdjustment.value)
+								} ,
 								valueState = asrAdjustment ,
-												  )
+												  ) { adjustment : Int ->
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.AsrOffset(
+											adjustment.toString()
+																														)
+														)
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						}
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -397,15 +445,22 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								title = {
 									Text(text = "Maghrib Time")
 								} ,
-								subtitle = {
-									Text(text = maghribAdjustment.value)
-								} ,
 								description = {
 									Text(text = "Adjust the time of the Maghrib prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
+								subtitle = {
+									Text(text = maghribAdjustment.value)
+								} ,
 								valueState = maghribAdjustment ,
-												  )
+												  ) { adjustment : Int ->
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.MaghribOffset(
+											adjustment.toString()
+																														)
+														)
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						}
 					}
 					ElevatedCard(
 							modifier = Modifier
@@ -417,19 +472,70 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								title = {
 									Text(text = "Isha Time")
 								} ,
-								subtitle = {
-									Text(text = ishaAdjustment.value)
-								} ,
 								description = {
 									Text(text = "Adjust the time of the Isha prayer")
 								} ,
 								items = (0 .. 120).map { (it - 60) } ,
+								subtitle = {
+									Text(text = ishaAdjustment.value)
+								} ,
 								valueState = ishaAdjustment ,
-												  )
+												  ) { adjustment : Int ->
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.IshaOffset(
+											adjustment.toString()
+																														)
+														)
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						}
 					}
 				}
 					 )
 	}
+}
+
+//function to create a params for the prayer times
+fun getParams(context: Context) : MutableMap<String , String>
+{
+	val sharedPreferences = PrivateSharedPreferences(context)
+	val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+	val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+	val fajrAngle : String = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
+	val ishaAngle : String = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
+	val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
+	val calculationMethod : String =
+		sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
+	val madhab : String = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
+	val highLatitudeRule : String =
+		sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
+	val fajrAdjustment : String = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
+	val sunriseAdjustment : String =
+		sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
+	val dhuhrAdjustment : String =
+		sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
+	val asrAdjustment : String = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT , "0")
+	val maghribAdjustment : String =
+		sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
+	val ishaAdjustment : String = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
+
+	val mapOfParams = mutableMapOf<String , String>()
+	mapOfParams["latitude"] = latitude.toString()
+	mapOfParams["longitude"] = longitude.toString()
+	mapOfParams["date"] = LocalDateTime.now().toString()
+	mapOfParams["fajrAngle"] = fajrAngle
+	mapOfParams["ishaAngle"] = ishaAngle
+	mapOfParams["ishaInterval"] = ishaInterval
+	mapOfParams["method"] = calculationMethod
+	mapOfParams["madhab"] = madhab
+	mapOfParams["highLatitudeRule"] = highLatitudeRule
+	mapOfParams["fajrAdjustment"] = fajrAdjustment
+	mapOfParams["sunriseAdjustment"] = sunriseAdjustment
+	mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment
+	mapOfParams["asrAdjustment"] = asrAdjustment
+	mapOfParams["maghribAdjustment"] = maghribAdjustment
+	mapOfParams["ishaAdjustment"] = ishaAdjustment
+
+	return mapOfParams
 }
 
 @Preview(showBackground = true)
