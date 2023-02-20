@@ -25,7 +25,7 @@ fun ManualLocationInput(
 
 	val context = LocalContext.current
 	val showDialog = remember { mutableStateOf(false) }
-	val name = remember{
+	val name = remember {
 		mutableStateOf(locationNameState.value)
 	}
 	//show manual location input
@@ -54,7 +54,7 @@ fun ManualLocationInput(
 			title = { Text(text = "Edit Location") } ,
 			text = {
 				OutlinedTextField(
-						value = name.value,
+						value = name.value ,
 						onValueChange = { name.value = it } ,
 						label = { Text(text = "Location") } ,
 						singleLine = true ,
@@ -63,7 +63,13 @@ fun ManualLocationInput(
 			} ,
 			confirmButton = {
 				Button(onClick = {
-					handleSettingEvents(SettingsViewModel.SettingsEvent.LocationInput(context, name.value))
+					handleSettingEvents(
+							SettingsViewModel.SettingsEvent.LocationInput(
+									context ,
+									name.value
+																		 )
+									   )
+
 					showDialog.value = false
 				}) { Text(text = "Confirm") }
 			} ,

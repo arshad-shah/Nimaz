@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,6 +9,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,8 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
+import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 
 
 @Composable
@@ -29,6 +31,7 @@ fun LocationSettings(){
 
 	val context = LocalContext.current
 	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModelPrayerTimes = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
 	val isLocationAuto = remember {
 		viewModel.isLocationAuto
 	}.collectAsState()
@@ -49,16 +52,23 @@ fun LocationSettings(){
 		viewModel.isLocationNameLoading
 	}.collectAsState()
 
+	//if the changes are made to the location settings, then the prayer times are updated
+	//					viewModelPrayerTimes.handleEvent(
+	//							context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+	//							PrayerTimesParamMapper.getParams(context)
+	//																							  )
+	//													)
+	LaunchedEffect(key1 = locationNameState.value , key2 = latitudeState.value , key3 = longitudeState.value) {
+		viewModelPrayerTimes.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				PrayerTimesParamMapper.getParams(context)
+																	  )
+										)
+	}
+
 	val storage =
 		rememberPreferenceBooleanSettingState(AppConstants.LOCATION_TYPE , true)
 	storage.value = isLocationAuto.value
-
-	//log all the states
-	Log.d("Nimaz:" , "isLocationAuto: ${isLocationAuto.value}")
-	Log.d("Nimaz:" , "locationNameState: ${locationNameState.value}")
-	Log.d("Nimaz:" , "latitudeState: ${latitudeState.value}")
-	Log.d("Nimaz:" , "longitudeState: ${longitudeState.value}")
-	Log.d("Nimaz:" , "isLocationNameLoading: ${isLocationNameLoading.value}")
 
 	SettingsGroup(title = { Text(text = "Location") }) {
 		ElevatedCard(
