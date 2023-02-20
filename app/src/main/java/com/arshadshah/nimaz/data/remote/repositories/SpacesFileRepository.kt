@@ -11,7 +11,6 @@ import com.amazonaws.regions.Region
 import com.amazonaws.services.s3.AmazonS3Client
 import es.dmoral.toasty.Toasty
 import java.io.File
-import java.util.*
 
 
 interface SpaceRegionRepresentable
@@ -55,8 +54,6 @@ class SpacesFileRepository(context : Context)
 		val credentials = StaticCredentialsProvider(BasicAWSCredentials(accesskey , secretkey))
 		val client = AmazonS3Client(credentials , Region.getRegion("us-east-1"))
 		client.endpoint = spaceregion.endpoint()
-
-		Log.d("Client TimeOffset" , Date().toString())
 		transferUtility = TransferUtility.builder().s3Client(client).context(context).build()
 		appContext = context
 	}
