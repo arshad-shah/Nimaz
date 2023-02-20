@@ -52,6 +52,7 @@ fun PrayerTimesScreen(
 		LocationTimeContainer(
 				currentPrayerName = currentPrayerName ,
 				locationState = locationState ,
+				handleEvent = settingViewModel::handleEvent ,
 							 )
 
 		// Calling the DatesContainer composable

@@ -23,13 +23,14 @@ fun SettingsNumberPickerDialog(
 	modifier : Modifier = Modifier ,
 	state : SettingValueState<Int> = rememberIntSettingState() ,
 	title : @Composable () -> Unit ,
-	description : (@Composable () -> Unit)? = null ,
+	description : @Composable() (() -> Unit)? = null ,
 	items : List<Int> ,
 	icon : @Composable() (() -> Unit)? = null ,
 	useSelectedValueAsSubtitle : Boolean = true ,
 	subtitle : @Composable() (() -> Unit)? = null ,
 	action : @Composable() (() -> Unit)? = null ,
 	valueState : SettingValueState<String> = rememberStringSettingState() ,
+	onChange : (Int) -> Unit = { },
 							  )
 {
 
@@ -62,6 +63,7 @@ fun SettingsNumberPickerDialog(
 			val index = items.indexOf(selectedIndex)
 			state.value = index
 			valueState.value = selectedIndex.toString()
+			onChange(selectedIndex)
 		}
 	}
 
@@ -132,8 +134,8 @@ fun SettingsNumberPickerDialogPreview()
 		SettingsNumberPickerDialog(
 				title = { Text(text = "Title") } ,
 				description = { Text(text = "Description") } ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
+				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				subtitle = { Text(text = "Subtitle") } ,
 				valueState = storage ,
 								  )

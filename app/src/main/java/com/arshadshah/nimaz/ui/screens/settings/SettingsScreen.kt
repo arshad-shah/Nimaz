@@ -48,7 +48,7 @@ fun SettingsScreen(
 	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
 
 	LaunchedEffect(key1 = true) {
-		viewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation)
+		viewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
 	}
 
 

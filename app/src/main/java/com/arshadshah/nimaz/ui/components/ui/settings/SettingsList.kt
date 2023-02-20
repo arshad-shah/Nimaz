@@ -28,13 +28,14 @@ fun SettingsList(
 	state : SettingValueState<Int> = rememberIntSettingState() ,
 	valueState : SettingValueState<String> = rememberStringSettingState() ,
 	title : @Composable () -> Unit ,
-	description : (@Composable () -> Unit)? = null ,
+	description : @Composable() (() -> Unit)? = null ,
 	items : Map<String , String> ,
-	icon : (@Composable () -> Unit)? = null ,
+	icon : @Composable() (() -> Unit)? = null ,
 	useSelectedValueAsSubtitle : Boolean = true ,
-	subtitle : (@Composable () -> Unit)? = null ,
-	action : (@Composable () -> Unit)? = null ,
+	subtitle : @Composable() (() -> Unit)? = null ,
+	action : @Composable() (() -> Unit)? = null ,
 	height : Dp = 56.dp ,
+	onChange : (String) -> Unit = { } ,
 				)
 {
 
@@ -69,6 +70,7 @@ fun SettingsList(
 		coroutineScope.launch {
 			state.value = selectedIndex
 			valueState.value = items.keys.elementAt(selectedIndex)
+			onChange(valueState.value)
 		}
 	}
 	AlertDialog(
@@ -157,6 +159,8 @@ internal fun ListLinkPreview()
 	//50 items
 	NimazTheme {
 		SettingsList(
+				title = { Text(text = "Hello") } ,
+				description = { Text(text = "This is a description") } ,
 				items = mapOf(
 						"1" to "Item 1" ,
 						"2" to "Item 2" ,
@@ -201,9 +205,7 @@ internal fun ListLinkPreview()
 						"41" to "Item 41" ,
 							 ) ,
 				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
 				subtitle = { Text(text = "This is a longer text") } ,
-				description = { Text(text = "This is a description") } ,
 					)
 	}
 }
