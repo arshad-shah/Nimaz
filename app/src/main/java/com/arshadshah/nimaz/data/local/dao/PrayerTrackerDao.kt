@@ -30,4 +30,14 @@ interface PrayerTrackerDao
 	//delete all trackers
 	@Query("DELETE FROM PrayersTracker")
 	suspend fun deleteAllTrackers()
+	@Query("SELECT EXISTS(SELECT * FROM PrayersTracker WHERE date = :date)")
+	suspend fun trackerExistsForDate(date : String) : Boolean
+
+	//find out which dates have trackers
+	@Query("SELECT date FROM PrayersTracker")
+	suspend fun getDatesWithTrackers() : List<String>
+
+	//get progress for a specific date
+	@Query("SELECT progress FROM PrayersTracker WHERE date = :date")
+	suspend fun getProgressForDate(date : String) : Int
 }

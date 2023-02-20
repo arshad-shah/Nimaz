@@ -1,17 +1,21 @@
 package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -25,7 +29,6 @@ fun PrayerTimesListUI(
 	prayerTimesMap : Map<String , LocalDateTime?> ,
 	name : String ,
 	state : PrayerTimesViewModel.PrayerTimesState ,
-	countDownTime : CountDownTime ,
 	loading : Boolean ,
 					 )
 {
@@ -54,8 +57,6 @@ fun PrayerTimesListUI(
 						prayerName = key ,
 						prayerTime = value ,
 						isHighlighted = isHighlighted ,
-						state = state ,
-						countDownTime = countDownTime ,
 						loading = loading ,
 							  )
 			}
@@ -64,17 +65,16 @@ fun PrayerTimesListUI(
 }
 
 //the row for the prayer times
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrayerTimesRow(
 	prayerName : String ,
 	prayerTime : LocalDateTime? ,
 	isHighlighted : Boolean ,
-	state : PrayerTimesViewModel.PrayerTimesState ,
-	countDownTime : CountDownTime ,
 	loading : Boolean ,
 				  )
 {
+	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val countDownTime = remember { viewModel.timer }.collectAsState()
 	//format the date to time based on device format
 	val formatter = DateTimeFormatter.ofPattern("hh:mm a")
 	val sentenceCase =
@@ -121,7 +121,7 @@ fun PrayerTimesRow(
 										highlightColor = Color.White ,
 																		)
 									) ,
-					text = " -${countDownTime.hours} : ${countDownTime.minutes} : ${countDownTime.seconds}" ,
+					text = " -${countDownTime.value.hours} : ${countDownTime.value.minutes} : ${countDownTime.value.seconds}" ,
 					textAlign = TextAlign.Center ,
 					style = MaterialTheme.typography.titleSmall
 				)

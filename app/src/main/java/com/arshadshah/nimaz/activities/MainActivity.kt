@@ -25,9 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
@@ -40,6 +42,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
@@ -172,6 +175,8 @@ class MainActivity : ComponentActivity()
 				val networkConnection =
 					remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
 
+				val viewModel = viewModel(key = "QuranViewModel", initializer = { QuranViewModel(this@MainActivity) }, viewModelStoreOwner = this as ComponentActivity)
+
 				LaunchedEffect(networkConnection.value) {
 					if (! networkConnection.value)
 					{
@@ -213,121 +218,128 @@ class MainActivity : ComponentActivity()
 												} ,
 												actions = {
 													//only show the menu button if the title is Quran
-													if (route.value == QURAN_SCREEN_ROUTE)
+													when (route.value)
 													{
-														//open the menu
-														IconButton(onClick = { setMenuOpen(true) }) {
-															Icon(
-																	modifier = Modifier.size(24.dp) ,
-																	painter = painterResource(id = R.drawable.settings_sliders_icon) ,
-																	contentDescription = "Menu"
-																)
-														}
-														MoreMenu(
-																menuOpen = menuOpen ,
-																setMenuOpen = setMenuOpen
-																)
-													} else if (route.value == NAMESOFALLAH_SCREEN_ROUTE)
-													{
-														if (! isStopped.value)
+														QURAN_SCREEN_ROUTE,
+														QURAN_AYA_SCREEN_ROUTE ->
 														{
+															//open the menu
+															IconButton(onClick = { setMenuOpen(true) }) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.settings_sliders_icon) ,
+																		contentDescription = "Menu"
+																	)
+															}
+															MoreMenu(
+																	menuOpen = menuOpen ,
+																	setMenuOpen = setMenuOpen,
+																	handleQuranEvents = viewModel::handleQuranMenuEvents
+																	)
+														}
+														NAMESOFALLAH_SCREEN_ROUTE ->
+														{
+															if (! isStopped.value)
+															{
+																IconButton(onClick = {
+																	mediaPlayer.stop()
+																	mediaPlayer.reset()
+																	prepareMediaPlayer(this@MainActivity)
+																	isPlaying.value = false
+																	isPaused.value = false
+																	isStopped.value = true
+																}
+																		  ) {
+																	Icon(
+																			modifier = Modifier.size(24.dp) ,
+																			painter = painterResource(id = R.drawable.stop_icon) ,
+																			contentDescription = "Stop playing"
+																		)
+																}
+															}
 															IconButton(onClick = {
-																mediaPlayer.stop()
-																mediaPlayer.reset()
-																prepareMediaPlayer(this@MainActivity)
-																isPlaying.value = false
-																isPaused.value = false
-																isStopped.value = true
+																if (isPlaying.value.not())
+																{
+																	//start the audio
+																	mediaPlayer.start()
+																	isPlaying.value = true
+																	isPaused.value = false
+																	isStopped.value = false
+																} else
+																{
+																	mediaPlayer.pause()
+																	isPlaying.value = false
+																	isPaused.value = true
+																	isStopped.value = false
+																}
 															}
 																	  ) {
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = painterResource(id = R.drawable.stop_icon) ,
-																		contentDescription = "Stop playing"
-																	)
+																if (isPlaying.value)
+																{
+																	Icon(
+																			modifier = Modifier.size(24.dp) ,
+																			painter = painterResource(id = R.drawable.pause_icon) ,
+																			contentDescription = "Pause playing"
+																		)
+																} else
+																{
+																	Icon(
+																			modifier = Modifier.size(24.dp) ,
+																			painter = painterResource(id = R.drawable.play_icon) ,
+																			contentDescription = "Play"
+																		)
+																}
 															}
-														}
-														IconButton(onClick = {
-															if (isPlaying.value.not())
-															{
-																//start the audio
-																mediaPlayer.start()
-																isPlaying.value = true
-																isPaused.value = false
-																isStopped.value = false
-															} else
-															{
-																mediaPlayer.pause()
-																isPlaying.value = false
-																isPaused.value = true
-																isStopped.value = false
-															}
-														}
-																  ) {
-															if (isPlaying.value)
-															{
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = painterResource(id = R.drawable.pause_icon) ,
-																		contentDescription = "Pause playing"
-																	)
-															} else
-															{
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = painterResource(id = R.drawable.play_icon) ,
-																		contentDescription = "Play"
-																	)
-															}
-														}
 
-													} else if (route.value == TASBIH_SCREEN_ROUTE)
-													{
-														//icon button to chenge the position of the button for right or left
-														IconButton(onClick = {
-															rOrl.value =
-																if (rOrl.value == 0) 1 else 0
-														}) {
-															Icon(
-																	modifier = Modifier.size(24.dp) ,
-																	painter = if (rOrl.value == 0) painterResource(
-																			id = R.drawable.corner_right_down_icon
-																												  )
-																	else painterResource(id = R.drawable.corner_left_down_icon) ,
-																	contentDescription = "Change the position of the button"
-																)
 														}
-														//vibration toggle button for tasbih to provide feedback
-														IconButton(onClick = {
-															vibrationAllowed.value =
-																! vibrationAllowed.value
-															//mute the vibration
-															if (! vibrationAllowed.value)
-															{
-																vibrator.cancel()
+														TASBIH_SCREEN_ROUTE ->
+														{
+															//icon button to chenge the position of the button for right or left
+															IconButton(onClick = {
+																rOrl.value =
+																	if (rOrl.value == 0) 1 else 0
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = if (rOrl.value == 0) painterResource(
+																				id = R.drawable.corner_right_down_icon
+																													  )
+																		else painterResource(id = R.drawable.corner_left_down_icon) ,
+																		contentDescription = "Change the position of the button"
+																	)
 															}
-														}) {
-															Icon(
-																	modifier = Modifier.size(24.dp) ,
-																	painter = if (vibrationAllowed.value) painterResource(
-																			id = R.drawable.vibration
-																														 )
-																	else painterResource(
-																			id = R.drawable.cross_icon
-																						) ,
-																	contentDescription = "Vibration"
-																)
-														}
+															//vibration toggle button for tasbih to provide feedback
+															IconButton(onClick = {
+																vibrationAllowed.value =
+																	! vibrationAllowed.value
+																//mute the vibration
+																if (! vibrationAllowed.value)
+																{
+																	vibrator.cancel()
+																}
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = if (vibrationAllowed.value) painterResource(
+																				id = R.drawable.vibration
+																															 )
+																		else painterResource(
+																				id = R.drawable.cross_icon
+																							) ,
+																		contentDescription = "Vibration"
+																	)
+															}
 
-														//a reset button to reset the count
-														IconButton(onClick = {
-															showResetDialog.value = true
-														}) {
-															Icon(
-																	modifier = Modifier.size(24.dp) ,
-																	painter = painterResource(id = R.drawable.refresh_icon) ,
-																	contentDescription = "Reset" ,
-																)
+															//a reset button to reset the count
+															IconButton(onClick = {
+																showResetDialog.value = true
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.refresh_icon) ,
+																		contentDescription = "Reset" ,
+																	)
+															}
 														}
 													}
 												}
@@ -373,7 +385,8 @@ class MainActivity : ComponentActivity()
 			CHAPTER_SCREEN_ROUTE -> "Dua"
 			TASBIH_SCREEN_ROUTE -> "Tasbih"
 			NAMESOFALLAH_SCREEN_ROUTE -> "Allah"
-			PRAYER_TRACKER_SCREEN_ROUTE -> "Calender"
+			PRAYER_TRACKER_SCREEN_ROUTE -> "Prayer Tracker"
+			CALENDER_SCREEN_ROUTE -> "Calender"
 			else -> ""
 		}
 	}
@@ -392,7 +405,8 @@ class MainActivity : ComponentActivity()
 				CHAPTER_SCREEN_ROUTE ,
 				TASBIH_SCREEN_ROUTE ,
 				NAMESOFALLAH_SCREEN_ROUTE ,
-				PRAYER_TRACKER_SCREEN_ROUTE
+				PRAYER_TRACKER_SCREEN_ROUTE,
+				CALENDER_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
