@@ -78,7 +78,7 @@ class LocationFinder
 						longitudeValue =
 							sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 						cityName =
-							sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
+							sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
 						Log.i("Location" , "Location Found From Storage $cityName")
 					}
 				} catch (e : Exception)
@@ -88,7 +88,7 @@ class LocationFinder
 					longitudeValue =
 						sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 					val cityNameFromStorage =
-						sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
+						sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
 					cityName = cityNameFromStorage
 					Log.i("Location" , "Location Found From Storage $cityName")
 				}
@@ -96,7 +96,7 @@ class LocationFinder
 			{
 				latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 				longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
-				cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
+				cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
 				Log.i("Location" , "Location Found From Storage $cityName")
 			}
 		}
@@ -139,7 +139,7 @@ class LocationFinder
 					latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 					longitudeValue =
 						sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
-					cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
+					cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
 					Log.i("Location" , "Location Found From Storage $cityName")
 				}
 			} catch (e : Exception)
@@ -148,7 +148,7 @@ class LocationFinder
 				latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 				longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				val cityNameFromStorage =
-					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
+					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
 
 				cityName = cityNameFromStorage
 				Log.i("Location" , "Location Found From value $latitude, and $longitude")
@@ -157,7 +157,7 @@ class LocationFinder
 		{
 			latitudeValue = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 			longitudeValue = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
-			cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "Abbeyleix")
+			cityName = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
 			Log.i("Location" , "Location Found From Storage $cityName")
 		}
 	}

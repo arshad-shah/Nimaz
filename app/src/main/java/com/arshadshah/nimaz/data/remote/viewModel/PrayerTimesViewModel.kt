@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,26 +64,18 @@ class PrayerTimesViewModel : ViewModel()
 			//event to reload the prayer times
 			is PrayerTimesEvent.RELOAD ->
 			{
-				reload(context)
+				loadPrayerTimes(context)
 			}
 			//event to update the prayer times
 			is PrayerTimesEvent.UPDATE_PRAYERTIMES ->
 			{
+				PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				updatePrayerTimes(event.mapOfParameters)
 			}
 
 			else ->
 			{
 			}
-		}
-	}
-
-	//function to reload the UI state
-	fun reload(context : Context)
-	{
-		viewModelScope.launch(Dispatchers.IO) {
-			//load the prayer times
-			loadPrayerTimes(context)
 		}
 	}
 
@@ -175,7 +168,7 @@ class PrayerTimesViewModel : ViewModel()
 
 			override fun onFinish()
 			{
-				reload(context)
+				loadPrayerTimes(context)
 			}
 		}.start()
 	}

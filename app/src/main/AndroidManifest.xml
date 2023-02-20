@@ -71,6 +71,7 @@
             android:enabled="true"
             android:exported="true"
             android:permission="com.android.alarm.permission.SET_ALARM" />
+
         <activity
             android:name=".activities.Introduction"
             android:exported="false"
