@@ -1,16 +1,12 @@
-package com.arshadshah.nimaz.data.local.models
+package com.arshadshah.nimaz.data.remote.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import java.time.LocalDate
 
-@Entity(tableName = "PrayersTracker")
-data class LocalPrayersTracker(
-	@PrimaryKey
+data class PrayerTracker(
 	val date : String = LocalDate.now().toString() ,
 	val fajr : Boolean = false ,
 	val dhuhr : Boolean = false ,
 	val asr : Boolean = false ,
 	val maghrib : Boolean = false ,
 	val isha : Boolean = false ,
-							  )
+						)

@@ -15,21 +15,24 @@ class DataStore(db : AppDatabase)
 	private val prayerTrackerDao = db.prayersTracker
 
 	//get trtacker for a specific date
-	suspend fun getTrackerForDate(date : String) = prayerTrackerDao.getTrackerForDate(date)
+	suspend fun getTrackerForDate(date : String) = prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
 
 	//get all the trackers
 	suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers()
 
 	//save a tracker
-	suspend fun saveTracker(tracker : LocalPrayersTracker) = prayerTrackerDao.saveTracker(tracker)
+	suspend fun saveTracker(tracker : PrayerTracker) = prayerTrackerDao.saveTracker(tracker.toLocalPrayersTracker())
 
 	//update a tracker
-	suspend fun updateTracker(tracker : LocalPrayersTracker) =
-		prayerTrackerDao.updateTracker(tracker)
+	suspend fun updateTracker(tracker : PrayerTracker) =
+		prayerTrackerDao.updateTracker(tracker.toLocalPrayersTracker())
 
 	//delete a tracker
-	suspend fun deleteTracker(tracker : LocalPrayersTracker) =
-		prayerTrackerDao.deleteTracker(tracker)
+	suspend fun deleteTracker(tracker : PrayerTracker) =
+		prayerTrackerDao.deleteTracker(tracker.toLocalPrayersTracker())
+
+	//check if a tracker exists
+	suspend fun checkIfTrackerExists(date : String) = prayerTrackerDao.trackerExistsForDate(date)
 
 	//get all the ayas of a surah
 	suspend fun getAyasOfSurah(surahNumber : Int) =
@@ -300,3 +303,21 @@ private fun LocalChapter.toChapter() = Chapter(
 		english_title = english_title ,
 		duas = duas.map { it.toDua() } as ArrayList<Dua> ,
 											  )
+
+private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
+		date = date ,
+		fajr = fajr ,
+		dhuhr = dhuhr ,
+		asr = asr ,
+		maghrib = maghrib ,
+		isha = isha,
+																	 )
+
+private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
+		date = date ,
+		fajr = fajr ,
+		dhuhr = dhuhr ,
+		asr = asr ,
+		maghrib = maghrib ,
+		isha = isha,
+																	)
