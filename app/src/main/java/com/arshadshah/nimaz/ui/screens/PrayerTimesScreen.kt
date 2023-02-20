@@ -30,8 +30,8 @@ fun PrayerTimesScreen(
 	val locationState by remember { settingViewModel.locationName }.collectAsState()
 
 	val currentPrayerName = remember {
-		mutableStateOf("Loading...")
-	}
+		viewModel.currentPrayerName
+	}.collectAsState()
 
 	//reload the data when the screen is resumed
 	LaunchedEffect(Unit) {
@@ -61,7 +61,6 @@ fun PrayerTimesScreen(
 		PrayerTimesList(
 				state = state ,
 				handleEvent = viewModel::handleEvent ,
-				currentPrayerName = currentPrayerName ,
 					   )
 	}
 }
