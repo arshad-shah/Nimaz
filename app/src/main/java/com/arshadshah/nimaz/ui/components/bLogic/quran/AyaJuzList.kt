@@ -27,7 +27,7 @@ fun AyaJuzList(
 	type : String ,
 	mediaPlayer : MediaPlayer ,
 	handleMenuEvents : KFunction1<QuranViewModel.QuranMenuEvents , Unit> ,
-	pageMode : Any ,
+	pageMode : State<String> ,
 			  )
 {
 	when (val ayatJuzListState = state.value)
@@ -40,7 +40,7 @@ fun AyaJuzList(
 						key = AppConstants.PAGE_TYPE ,
 						s = "List"
 																	  )
-			if (pageMode == "List")
+			if (pageMode.value == "List")
 			{
 				AyaListUI(
 						ayaList = ArrayList(6) ,
@@ -60,14 +60,7 @@ fun AyaJuzList(
 
 		is QuranViewModel.AyaJuzState.Success ->
 		{
-
-			//get the translation type from shared preferences
-			val pageType =
-				PrivateSharedPreferences(LocalContext.current).getData(
-						key = AppConstants.PAGE_TYPE ,
-						s = "List"
-																	  )
-			if (pageMode == "List")
+			if (pageMode.value == "List")
 			{
 				AyaListUI(
 						ayaList = ayatJuzListState.data ,

@@ -63,6 +63,9 @@ fun AyaListUI(
 {
 
 	val context = LocalContext.current
+	val spacesFileRepository = SpacesFileRepository(LocalContext.current)
+
+
 	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
 
 	val arabicFontSize = remember {
@@ -80,7 +83,6 @@ fun AyaListUI(
 		viewModel.translation
 	}.collectAsState()
 
-	val spacesFileRepository = SpacesFileRepository(LocalContext.current)
 
 	//media player
 	val mediaPlayer = remember {
