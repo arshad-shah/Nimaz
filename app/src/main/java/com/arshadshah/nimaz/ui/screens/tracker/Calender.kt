@@ -374,6 +374,10 @@ fun CalenderDay(
 
 							else ->
 							{
+								if (dayState.isFromCurrentMonth)
+								{
+									dayState.selectionState.onDateSelected(dayState.date)
+								}
 								//show the description of the day
 								hasDescription.value = ! hasDescription.value
 							}
