@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class TrackerViewModel : ViewModel()
 {
@@ -18,32 +19,45 @@ class TrackerViewModel : ViewModel()
 		data class Error(val message : String) : TrackerState()
 	}
 
-	private var _trackerState = MutableStateFlow<TrackerState>(TrackerState.Loading as TrackerState)
+	private var _trackerState = MutableStateFlow(TrackerState.Loading as TrackerState)
 	val trackerState = _trackerState.asStateFlow()
 
 	//state of date
-	private var _dateState = MutableStateFlow<String>("")
+	private var _dateState = MutableStateFlow(LocalDate.now().toString())
 	val dateState = _dateState.asStateFlow()
 
+	//state of the date selector component
+	private var _showDateSelector = MutableStateFlow(true)
+	val showDateSelector = _showDateSelector.asStateFlow()
+
 	//fajr
-	private var _fajrState = MutableStateFlow<Boolean>(false)
+	private var _fajrState = MutableStateFlow(false)
 	val fajrState = _fajrState.asStateFlow()
 
 	//zuhr
-	private var _zuhrState = MutableStateFlow<Boolean>(false)
+	private var _zuhrState = MutableStateFlow(false)
 	val zuhrState = _zuhrState.asStateFlow()
 
 	//asr
-	private var _asrState = MutableStateFlow<Boolean>(false)
+	private var _asrState = MutableStateFlow(false)
 	val asrState = _asrState.asStateFlow()
 
 	//maghrib
-	private var _maghribState = MutableStateFlow<Boolean>(false)
+	private var _maghribState = MutableStateFlow(false)
 	val maghribState = _maghribState.asStateFlow()
 
 	//isha
-	private var _ishaState = MutableStateFlow<Boolean>(false)
+	private var _ishaState = MutableStateFlow(false)
 	val ishaState = _ishaState.asStateFlow()
+
+
+	//state to show progress of completed prayers
+	private var _progressState = MutableStateFlow(0)
+	val progressState = _progressState.asStateFlow()
+
+	//dates with trackers
+	private var _datesWithTrackers = MutableStateFlow(listOf<String>())
+	val datesWithTrackers = _datesWithTrackers.asStateFlow()
 
 	//event for the tracker for prayer
 	sealed class TrackerEvent
@@ -51,6 +65,18 @@ class TrackerViewModel : ViewModel()
 		class UPDATE_TRACKER(val tracker :PrayerTracker) : TrackerEvent()
 		class GET_TRACKER_FOR_DATE(val date : String) : TrackerEvent()
 		class SAVE_TRACKER(val tracker : PrayerTracker) : TrackerEvent()
+
+		//event for the date selector
+		class SHOW_DATE_SELECTOR(val shouldShow : Boolean) : TrackerEvent()
+
+		//set date event
+		class SET_DATE(val date : String) : TrackerEvent()
+
+		//progress event
+		class SET_PROGRESS(val progress : Int) : TrackerEvent()
+
+		//return dates with trackers
+		class GET_PROGRESS_FOR_DATE(val date : String) : TrackerEvent()
 	}
 
 	fun onEvent(event : TrackerEvent)
@@ -60,6 +86,25 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.UPDATE_TRACKER -> updateTracker(event.tracker)
 			is TrackerEvent.GET_TRACKER_FOR_DATE -> getTrackerForDate(event.date)
 			is TrackerEvent.SAVE_TRACKER -> saveTracker(event.tracker)
+			is TrackerEvent.SHOW_DATE_SELECTOR -> _showDateSelector.value = event.shouldShow
+			is TrackerEvent.SET_DATE -> _dateState.value = event.date
+			is TrackerEvent.SET_PROGRESS -> _progressState.value = event.progress
+			is TrackerEvent.GET_PROGRESS_FOR_DATE -> getProgressForDate(event.date)
+		}
+	}
+
+	private fun getProgressForDate(date : String)
+	{
+		viewModelScope.launch {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				val tracker = dataStore.getTrackerForDate(date)
+				_progressState.value = tracker.progress
+			} catch (e : Exception)
+			{
+				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
+			}
 		}
 	}
 
@@ -82,6 +127,7 @@ class TrackerViewModel : ViewModel()
 					_asrState.value = false
 					_maghribState.value = false
 					_ishaState.value = false
+					_progressState.value = 0
 
 				}else{
 					val tracker = dataStore.getTrackerForDate(date)
@@ -92,6 +138,7 @@ class TrackerViewModel : ViewModel()
 					_maghribState.value = tracker.maghrib
 					_ishaState.value = tracker.isha
 					_trackerState.value = TrackerState.Tracker(tracker)
+					_progressState.value = tracker.progress
 				}
 			}
 			catch (e : Exception)
@@ -121,7 +168,7 @@ class TrackerViewModel : ViewModel()
 					_asrState.value = tracker.asr
 					_maghribState.value = tracker.maghrib
 					_ishaState.value = tracker.isha
-
+					_progressState.value = tracker.progress
 				}
 				else
 				{
@@ -135,6 +182,7 @@ class TrackerViewModel : ViewModel()
 					_asrState.value = tracker.asr
 					_maghribState.value = tracker.maghrib
 					_ishaState.value = tracker.isha
+					_progressState.value = tracker.progress
 				}
 			}
 			catch (e : Exception)
@@ -161,6 +209,7 @@ class TrackerViewModel : ViewModel()
 				_maghribState.value = tracker.maghrib
 				_ishaState.value = tracker.isha
 				_trackerState.value = TrackerState.Tracker(updatedTracker)
+				_progressState.value = tracker.progress
 			}
 			catch (e : Exception)
 			{

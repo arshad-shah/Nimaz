@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,24 +34,27 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun PrayerTracker(paddingValues : PaddingValues)
+fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
 {
-	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
-	val titles = listOf("Prayer")
 
 	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
 
+	val dateState = remember {
+		viewModel.dateState
+	}.collectAsState()
+
 	LaunchedEffect(key1 = "getTrackerForDate") {
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(!isIntegrated))
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dateState.value))
 	}
 
 	val stateOfTrackerForToday = remember {
 		viewModel.trackerState
 	}.collectAsState()
 
-	val dateState = remember {
-		viewModel.dateState
+	val showDateSelector = remember {
+		viewModel.showDateSelector
 	}.collectAsState()
 
 	val fajrState = remember {
@@ -72,6 +77,15 @@ fun PrayerTracker(paddingValues : PaddingValues)
 		viewModel.ishaState
 	}.collectAsState()
 
+	val progressState = remember {
+		viewModel.progressState
+	}.collectAsState()
+
+	val titles =
+		if (showDateSelector.value)
+			listOf("Prayer Tracker")
+		else
+			listOf("Prayer Tracker \n ${LocalDate.parse(dateState.value).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))}")
 
 
 	Column(modifier = Modifier.padding(paddingValues) , horizontalAlignment = Alignment.CenterHorizontally) {
@@ -87,6 +101,7 @@ fun PrayerTracker(paddingValues : PaddingValues)
 							onClick = { setSelectedTab(index) } ,
 							text = {
 								Text(
+										textAlign = TextAlign.Center ,
 										text = title ,
 										maxLines = 2 ,
 										overflow = TextOverflow.Ellipsis ,
@@ -103,12 +118,14 @@ fun PrayerTracker(paddingValues : PaddingValues)
 					PrayerTrackerList(
 							viewModel::onEvent ,
 							stateOfTrackerForToday.value,
-							mutableDate,
 							fajrState.value,
 							zuhrState.value,
 							asrState.value,
 							maghribState.value,
-							ishaState.value
+							ishaState.value,
+							showDateSelector,
+							dateState,
+									progressState
 									 )
 				}
 			}
@@ -119,11 +136,14 @@ fun PrayerTracker(paddingValues : PaddingValues)
 
 @Composable
 fun DateSelector(
-	date : MutableState<LocalDate> ,
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
 				 )
 {
-
+	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+	val dateState = remember {
+		viewModel.dateState
+	}.collectAsState()
+	val date = remember { mutableStateOf(LocalDate.parse(dateState.value)) }
 	val hijrahDate = remember { mutableStateOf(HijrahDate.from(date.value)) }
 	val newDay = remember { mutableStateOf(date.value.dayOfMonth) }
 	val newMonth = remember { mutableStateOf(date.value.monthValue) }
@@ -138,6 +158,7 @@ fun DateSelector(
 		   ) {
 			IconButton(onClick = {
 				date.value = date.value.minusDays(1)
+				handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
 				handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
 				newDay.value = date.value.dayOfMonth
 				newMonth.value = date.value.monthValue
@@ -246,12 +267,14 @@ fun DateSelector(
 fun PrayerTrackerList(
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
 	stateOfTrackerForToday : TrackerViewModel.TrackerState ,
-	dateMutable : MutableState<LocalDate> ,
 	fajrState : Boolean ,
 	zuharState : Boolean ,
 	asrState : Boolean ,
 	maghribState : Boolean ,
 	ishaState : Boolean ,
+	showDateSelector : State<Boolean> ,
+	dateState : State<String> ,
+	progressState : State<Int> ,
 					 )
 {
 	val context = LocalContext.current
@@ -266,6 +289,7 @@ fun PrayerTrackerList(
 	val asrChecked = remember { mutableStateOf(false) }
 	val maghribChecked = remember { mutableStateOf(false) }
 	val ishaChecked = remember { mutableStateOf(false) }
+	val progress = remember { mutableStateOf(0f) }
 
 		when (state)
 		{
@@ -280,8 +304,10 @@ fun PrayerTrackerList(
 						asrChecked = asrChecked ,
 						maghribChecked = maghribChecked ,
 						ishaChecked = ishaChecked ,
-						dateMutable = dateMutable ,
-						handleEvent = handleEvent,
+						handleEvent = handleEvent ,
+						showDateSelector = showDateSelector ,
+						dateState = dateState ,
+						progress = progress
 									  )
 			}
 			is TrackerViewModel.TrackerState.Tracker ->
@@ -291,6 +317,7 @@ fun PrayerTrackerList(
 				asrChecked.value = asrState
 				maghribChecked.value = maghribState
 				ishaChecked.value = ishaState
+				progress.value = progressState.value.toFloat()
 				Log.d("Tracker" , "Loaded")
 				PrayerTrackerListItems(
 						items = items ,
@@ -300,8 +327,10 @@ fun PrayerTrackerList(
 						asrChecked = asrChecked ,
 						maghribChecked = maghribChecked ,
 						ishaChecked = ishaChecked ,
-						dateMutable = dateMutable ,
 						handleEvent = handleEvent ,
+						showDateSelector = showDateSelector ,
+						dateState = dateState ,
+						progress = progress
 									  )
 			}
 			is TrackerViewModel.TrackerState.Error ->
@@ -325,75 +354,172 @@ fun PrayerTrackerListItems(
 	asrChecked : MutableState<Boolean> ,
 	maghribChecked : MutableState<Boolean> ,
 	ishaChecked : MutableState<Boolean> ,
-	dateMutable : MutableState<LocalDate> ,
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
+	showDateSelector : State<Boolean> ,
+	dateState : State<String> ,
+	progress : MutableState<Float> ,
 						  )
 {
-	DateSelector(
-			date = dateMutable ,
-			handleEvent = handleEvent
-				)
-	ElevatedCard(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(4.dp) ,
-				) {
-		items.forEachIndexed { index , item ->
-			//if not the first item add a divider
-			if (index != 0)
-			{
-				Divider(
-						color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
-						thickness = 1.dp
-					   )
+	if(showDateSelector.value){
+		DateSelector(
+				handleEvent = handleEvent
+					)
+		LazyColumn(){
+			item{
+				ElevatedCard(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(4.dp) ,
+							) {
+					items.forEachIndexed { index , item ->
+						//if not the first item add a divider
+						if (index != 0)
+						{
+							Divider(
+									color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
+									thickness = 1.dp
+								   )
+						}
+						//the toggleable item
+						ToggleableItem(
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(8.dp)
+									.placeholder(
+											visible = loading ,
+											color = MaterialTheme.colorScheme.outline ,
+											shape = RoundedCornerShape(4.dp) ,
+											highlight = PlaceholderHighlight.shimmer(
+													highlightColor = Color.White ,
+																					)
+												) ,
+								text = item ,
+								checked = when (item)
+								{
+									"Fajr" -> fajrChecked.value
+									"Dhuhr" -> zuhrChecked.value
+									"Asr" -> asrChecked.value
+									"Maghrib" -> maghribChecked.value
+									"Isha" -> ishaChecked.value
+									else -> false
+								} ,
+								onCheckedChange = {
+									when (item)
+									{
+										"Fajr" -> fajrChecked.value = it
+										"Dhuhr" -> zuhrChecked.value = it
+										"Asr" -> asrChecked.value = it
+										"Maghrib" -> maghribChecked.value = it
+										"Isha" -> ishaChecked.value = it
+									}
+
+									//for each of the checked items add 20 to the progress any unchecked item subtracts 20
+									progress.value = when (item)
+									{
+										"Fajr" -> if (it) progress.value + 20 else progress.value - 20
+										"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
+										"Asr" -> if (it) progress.value + 20 else progress.value - 20
+										"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
+										"Isha" -> if (it) progress.value + 20 else progress.value - 20
+										else -> 0f
+									}
+
+									handleEvent(
+											TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
+													PrayerTracker(
+															fajr = fajrChecked.value ,
+															dhuhr = zuhrChecked.value ,
+															asr = asrChecked.value ,
+															maghrib = maghribChecked.value ,
+															isha = ishaChecked.value ,
+															date = dateState.value,
+															progress = progress.value.toInt()
+																 )
+																						)
+											   )
+								},
+								showDateSelector = showDateSelector.value
+									  )
+					}
+				}
 			}
-			//the toggleable item
-			ToggleableItem(
+		}
+	}else{
+			ElevatedCard(
 					modifier = Modifier
 						.fillMaxWidth()
-						.padding(8.dp)
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									) ,
-					text = item ,
-					checked = when (item)
-					{
-						"Fajr" -> fajrChecked.value
-						"Dhuhr" -> zuhrChecked.value
-						"Asr" -> asrChecked.value
-						"Maghrib" -> maghribChecked.value
-						"Isha" -> ishaChecked.value
-						else -> false
-					} ,
-					onCheckedChange = {
-						when (item)
-						{
-							"Fajr" -> fajrChecked.value = it
-							"Dhuhr" -> zuhrChecked.value = it
-							"Asr" -> asrChecked.value = it
-							"Maghrib" -> maghribChecked.value = it
-							"Isha" -> ishaChecked.value = it
-						}
-						handleEvent(
-								TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
-										PrayerTracker(
-												fajr = fajrChecked.value ,
-												dhuhr = zuhrChecked.value ,
-												asr = asrChecked.value ,
-												maghrib = maghribChecked.value ,
-												isha = ishaChecked.value ,
-												date = dateMutable.value.toString()
-													 )
-																			)
-								   )
+						.padding(4.dp) ,
+						) {
+				Row(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(8.dp) ,
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically
+				   ){
+					items.forEachIndexed { index , item ->
+						//the toggleable item
+						ToggleableItem(
+								text = item ,
+								checked = when (item)
+								{
+									"Fajr" -> fajrChecked.value
+									"Dhuhr" -> zuhrChecked.value
+									"Asr" -> asrChecked.value
+									"Maghrib" -> maghribChecked.value
+									"Isha" -> ishaChecked.value
+									else -> false
+								} ,
+								onCheckedChange = {
+									when (item)
+									{
+										"Fajr" -> fajrChecked.value = it
+										"Dhuhr" -> zuhrChecked.value = it
+										"Asr" -> asrChecked.value = it
+										"Maghrib" -> maghribChecked.value = it
+										"Isha" -> ishaChecked.value = it
+									}
+
+									//for each of the checked items add 20 to the progress any unchecked item subtracts 20
+									progress.value = when (item)
+									{
+										"Fajr" -> if (it) progress.value + 20 else progress.value - 20
+										"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
+										"Asr" -> if (it) progress.value + 20 else progress.value - 20
+										"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
+										"Isha" -> if (it) progress.value + 20 else progress.value - 20
+										else -> 0f
+									}
+
+									handleEvent(
+											TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
+													PrayerTracker(
+															fajr = fajrChecked.value ,
+															dhuhr = zuhrChecked.value ,
+															asr = asrChecked.value ,
+															maghrib = maghribChecked.value ,
+															isha = ishaChecked.value ,
+															date = dateState.value ,
+															progress = progress.value.toInt()
+																 )
+																						)
+											   )
+								} ,
+								modifier = Modifier
+									.padding(8.dp)
+									.placeholder(
+											visible = loading ,
+											color = MaterialTheme.colorScheme.outline ,
+											shape = RoundedCornerShape(4.dp) ,
+											highlight = PlaceholderHighlight.shimmer(
+													highlightColor = Color.White ,
+																					)
+												) ,
+								showDateSelector = showDateSelector.value
+									  )
 					}
-						  )
-		}
+				}
+			}
 	}
 
 }
@@ -404,52 +530,125 @@ fun ToggleableItem(
 	checked : Boolean ,
 	onCheckedChange : (Boolean) -> Unit ,
 	modifier : Modifier ,
+	showDateSelector : Boolean ,
 				  )
 {
-	Row(
-			modifier = modifier ,
-			verticalAlignment = Alignment.CenterVertically
-	   ) {
-		//a icon button to toggle the state of the toggleable item
-		IconButton(
-				modifier = Modifier.size(48.dp).border(
-						1.dp ,
-						MaterialTheme.colorScheme.primary ,
-						CircleShape
-													  ) ,
-				onClick = {
-			onCheckedChange(!checked)
-		}) {
-			if (!checked){
-				Icon(
-						painter = painterResource(id = R.drawable.cross_icon),
-						contentDescription = "Close" ,
-						tint = MaterialTheme.colorScheme.primary,
-						modifier = Modifier.size(24.dp)
+	if(showDateSelector){
+		Row(
+				modifier = modifier ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
+			//a icon button to toggle the state of the toggleable item
+			//a icon button to toggle the state of the toggleable item
+			IconButton(
+					modifier = Modifier
+						.padding(vertical = 8.dp, horizontal = 4.dp)
+						.size(32.dp)
+						.border(1.dp , MaterialTheme.colorScheme.primary , CircleShape),
+					onClick = {
+						onCheckedChange(!checked)
+					}) {
+				if (!checked){
+					Icon(
+							painter = painterResource(id = R.drawable.cross_icon),
+							contentDescription = "Close" ,
+							tint = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.size(48.dp)
 						)
-			}else{
-				Icon(
-						painter = painterResource(id = R.drawable.check_icon),
-						contentDescription = "Check" ,
-						tint = MaterialTheme.colorScheme.primary,
-						modifier = Modifier.size(24.dp)
+				}else{
+					Icon(
+							painter = painterResource(id = R.drawable.check_icon),
+							contentDescription = "Check" ,
+							tint = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.size(48.dp)
 						)
+				}
 			}
+
+
+			Text(
+					text = text ,
+					modifier = Modifier.padding(start = 16.dp) ,
+					style = MaterialTheme.typography.bodyLarge
+				)
 		}
+	}else{
+		Column(
+				modifier = modifier ,
+				horizontalAlignment = Alignment.CenterHorizontally,
+				verticalArrangement = Arrangement.Center
+		   ) {
+			//a icon button to toggle the state of the toggleable item
+			IconButton(
+					modifier = Modifier
+						.padding(vertical = 8.dp, horizontal = 4.dp)
+						.size(24.dp)
+						.border(1.dp , MaterialTheme.colorScheme.primary , CircleShape),
+					onClick = {
+						onCheckedChange(!checked)
+					}) {
+				if (!checked){
+					Icon(
+							painter = painterResource(id = R.drawable.cross_icon),
+							contentDescription = "Close" ,
+							tint = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.size(26.dp)
+						)
+				}else{
+					Icon(
+							painter = painterResource(id = R.drawable.check_icon),
+							contentDescription = "Check" ,
+							tint = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.size(26.dp)
+						)
+				}
+			}
 
 
-		Text(
-				text = text ,
-				modifier = Modifier.padding(start = 16.dp) ,
-				style = MaterialTheme.typography.bodyLarge
-			)
+			Text(
+					modifier = Modifier.padding(top = 8.dp) ,
+					text = text ,
+					style = MaterialTheme.typography.bodySmall
+				)
+		}
 	}
 }
 
-
+//preview of the toggleable item
 @Preview
 @Composable
-fun PrayerTrackerNewPreview()
+fun ToggleableItemPreview()
 {
-	PrayerTracker()
+	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
+	
+	ElevatedCard(
+			modifier = Modifier.fillMaxWidth()
+				) {
+		Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(8.dp) ,
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
+		   ){
+		items.forEachIndexed { index , item ->
+			ToggleableItem(
+					text = item ,
+					checked = true ,
+					onCheckedChange = { } ,
+					modifier = Modifier
+						.padding(8.dp)
+						.placeholder(
+								visible = false ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									) ,
+					showDateSelector = false
+						  )
+		}
+	}
+	}
 }
