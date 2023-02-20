@@ -56,7 +56,6 @@ fun NavigationGraph(
 
 	AnimatedNavHost(
 			navController = navController as NavHostController ,
-//			startDestination = BottomNavItem.PrayerTimesScreen.screen_route ,
 			startDestination = BottomNavItem.PrayerTimesScreen.screen_route ,
 			enterTransition = {
 				when (initialState.destination.route)

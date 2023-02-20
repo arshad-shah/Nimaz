@@ -42,6 +42,8 @@ buildscript {
         build_gradle_version = "3.4.0"
         google_services_version = "4.3.14"
         firebase_crashlytics_gradle_version = "2.9.2"
+
+        charts_version = "0.2.4-alpha"
     }
 
     dependencies {

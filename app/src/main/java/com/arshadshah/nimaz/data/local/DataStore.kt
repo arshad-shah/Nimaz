@@ -18,7 +18,7 @@ class DataStore(db : AppDatabase)
 	suspend fun getTrackerForDate(date : String) = prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
 
 	//get all the trackers
-	suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers()
+	suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers().map { it.toPrayerTracker() }
 
 	//save a tracker
 	suspend fun saveTracker(tracker : PrayerTracker) = prayerTrackerDao.saveTracker(tracker.toLocalPrayersTracker())
