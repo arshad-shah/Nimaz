@@ -23,6 +23,7 @@ fun FeatureCard(
 	onNavigateToShadah : () -> Unit ,
 	onNavigateToZakat : () -> Unit ,
 	onNavigateToPrayerTracker : () -> Unit ,
+	onNavigateToCalender : () -> Unit ,
 			   )
 {
 	Column(
@@ -61,10 +62,19 @@ fun FeatureCard(
 				title = "Duas" ,
 				  )
 		LinkButton(
+				painter = painterResource(id = R.drawable.tracker_icon) ,
+				content = "Prayer Tracker" ,
+				onClick = {
+					onNavigateToPrayerTracker()
+				} ,
+				title = "Prayer Tracker" ,
+				  )
+
+		LinkButton(
 				painter = painterResource(id = R.drawable.calendar_icon) ,
 				content = "Calender" ,
 				onClick = {
-					onNavigateToPrayerTracker()
+					onNavigateToCalender()
 				} ,
 				title = "Calender" ,
 				  )
