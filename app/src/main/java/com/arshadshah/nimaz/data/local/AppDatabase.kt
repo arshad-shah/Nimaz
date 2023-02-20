@@ -15,7 +15,7 @@ import com.arshadshah.nimaz.data.local.models.*
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class] ,
-		version = 6 ,
+		version = 7 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -124,6 +124,18 @@ abstract class AppDatabase : RoomDatabase()
 			//4. Change the table name to the correct one
 			database.execSQL("ALTER TABLE Aya_new RENAME TO Aya")
 
+		}
+	}
+
+	//migration from version 6 to 7
+	class Migration6To7 : Migration(6 , 7)
+	{
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			database.execSQL("DROP TABLE PrayersTracker")
+			database.execSQL("CREATE TABLE IF NOT EXISTS `PrayersTracker_new` (`date` TEXT NOT NULL, `fajr` INTEGER NOT NULL, `dhuhr` INTEGER NOT NULL, `asr` INTEGER NOT NULL, `maghrib` INTEGER NOT NULL, `isha` INTEGER NOT NULL, progress INTEGER NOT NULL, PRIMARY KEY(`date`))")
+			//rename new table
+			database.execSQL("ALTER TABLE PrayersTracker_new RENAME TO PrayersTracker")
 		}
 	}
 }

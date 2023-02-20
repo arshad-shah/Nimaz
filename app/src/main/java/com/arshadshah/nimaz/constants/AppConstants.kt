@@ -151,6 +151,7 @@ object AppConstants
 	const val PRAYER_TIMES_SETTINGS_SCREEN_ROUTE = "prayer_times_settings_screen"
 	const val ABOUT_SCREEN_ROUTE = "about_screen"
 	const val PRAYER_TRACKER_SCREEN_ROUTE = "prayer_tracker_screen"
+	const val CALENDER_SCREEN_ROUTE : String = "calendar_screen"
 
 	//Logging tags
 

@@ -10,18 +10,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
+import kotlin.reflect.KFunction1
 
 @Composable
 fun MoreMenu(
 	menuOpen : Boolean = false ,
 	setMenuOpen : (Boolean) -> Unit ,
 	state : SettingValueState<Int> = rememberIntSettingState() ,
+	handleQuranEvents : KFunction1<QuranViewModel.QuranMenuEvents , Unit> ,
 			)
 {
 
@@ -113,16 +116,22 @@ fun MoreMenu(
 				setShowDialog = setShowDialog1 ,
 				state = state ,
 				valueState = pageTypeState ,
-				items = items1 ,
+				items = items1,
+				onStateChange = {
+					handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Display_Mode(it))
+				}
 					)
 	} else if (showDialog2)
 	{
 		CustomDialog(
 				title = "Translation" ,
+				items = items2 ,
 				setShowDialog = setShowDialog2 ,
 				state = state ,
 				valueState = translationState ,
-				items = items2 ,
+				onStateChange = {
+					handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Translation(it))
+				}
 					)
 	} else if (showDialog3)
 	{
@@ -131,7 +140,8 @@ fun MoreMenu(
 				arabicFontSizeState ,
 				translationFontSizeState ,
 				fontStyleState ,
-				items3
+				items3,
+				handleQuranEvents
 					  )
 	} else
 	{

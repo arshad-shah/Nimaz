@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.activity
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
@@ -34,6 +35,7 @@ import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
+import com.arshadshah.nimaz.ui.screens.tracker.Calender
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -118,6 +120,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					CALENDER_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -180,6 +187,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
 					PRAYER_TRACKER_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					CALENDER_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -250,6 +262,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					CALENDER_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -316,21 +333,27 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
+					CALENDER_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
 					else -> ExitTransition.None
 				}
 			}
 				   ) {
+
 		composable(BottomNavItem.PrayerTimesScreen.screen_route)
 		{
 			PrayerTimesScreen(
 					paddingValues = paddingValues
 							 ) {
-				navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
+				navController.navigate(CALENDER_SCREEN_ROUTE)
 			}
 		}
 
-		composable(PRAYER_TRACKER_SCREEN_ROUTE) {
-			PrayerTracker()
+		composable(CALENDER_SCREEN_ROUTE){
+			Calender(paddingValues)
 		}
 
 		composable(BottomNavItem.QiblaScreen.screen_route) {
@@ -392,10 +415,17 @@ fun NavigationGraph(
 					onNavigateToPrayerTracker = {
 						navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
 					} ,
+					onNavigateToCalender = {
+						navController.navigate(CALENDER_SCREEN_ROUTE)
+					} ,
 					onNavigateToZakat = {
 						navController.navigate("Zakat")
 					} ,
 					  )
+		}
+
+		composable(PRAYER_TRACKER_SCREEN_ROUTE) {
+			PrayerTracker(paddingValues)
 		}
 
 		composable(TASBIH_SCREEN_ROUTE) {

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -16,11 +17,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
 import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun QuranScreen(
@@ -28,51 +29,10 @@ fun QuranScreen(
 	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
 			   )
 {
-	val viewModel = QuranViewModel(LocalContext.current)
+	val context = LocalContext.current
+	val viewModel = viewModel(key = "QuranViewModel", initializer = { QuranViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
 
-
-	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
-
-	val fontArabic = sharedPreferences.getDataFloat(
-			AppConstants.ARABIC_FONT_SIZE
-												   )
-	val fontTranslation = sharedPreferences.getDataFloat(
-			AppConstants.TRANSLATION_FONT_SIZE
-														)
-	val fontStyle = sharedPreferences.getData(
-			AppConstants.FONT_STYLE ,
-			"Default"
-											 )
-
-
-	if (fontArabic == 0f)
-	{
-		sharedPreferences.saveDataFloat(
-				customkey = AppConstants.ARABIC_FONT_SIZE ,
-				data = 24f
-									   )
-	} else if (fontTranslation == 0f)
-	{
-		sharedPreferences.saveDataFloat(
-				customkey = AppConstants.TRANSLATION_FONT_SIZE ,
-				data = 16f
-									   )
-	} else
-	{
-		sharedPreferences.saveDataFloat(
-				customkey = AppConstants.ARABIC_FONT_SIZE ,
-				data = fontArabic
-									   )
-		sharedPreferences.saveDataFloat(
-				customkey = AppConstants.TRANSLATION_FONT_SIZE ,
-				data = fontTranslation
-									   )
-
-		sharedPreferences.saveData(
-				customkey = AppConstants.FONT_STYLE ,
-				data = fontStyle
-								  )
-	}
+	viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
 
 	//save the state of the tab
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }

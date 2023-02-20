@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
 import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,8 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
@@ -21,27 +24,36 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.constants.AppConstants
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.theme.amiri
 import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
+import kotlin.reflect.KFunction1
 
 @Composable
-fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Boolean)
+fun Page(
+	AyaList : ArrayList<Aya> ,
+	paddingValues : PaddingValues ,
+	loading : Boolean ,
+	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit>
+		)
 {
-	val context = LocalContext.current
 
-	//get font size from shared preferences#
-	val sharedPreferences = PrivateSharedPreferences(context)
-	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
-	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
+	val context = LocalContext.current
+	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
+	val arabicFontSize = remember {
+		viewModel.arabic_Font_size
+	}.collectAsState()
+	val arabicFont = remember {
+		viewModel.arabic_Font
+	}.collectAsState()
 
 	Verses(
 			modifier = Modifier
@@ -57,8 +69,8 @@ fun Page(AyaList : ArrayList<Aya> , paddingValues : PaddingValues , loading : Bo
 					//split the aya into words
 					word = aya.ayaArabic ,
 					loading = loading ,
-					arabicFontSize = arabicFontSize ,
-					fontStyle = fontStyle
+					arabicFontSize = arabicFontSize.value ,
+					fontStyle = arabicFont.value
 				 )
 		}
 	}

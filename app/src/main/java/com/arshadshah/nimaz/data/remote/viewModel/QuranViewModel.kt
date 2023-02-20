@@ -5,11 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.repositories.QuranRepository
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -84,6 +86,101 @@ class QuranViewModel(context : Context) : ViewModel()
 	{
 		getSurahList(context)
 		getJuzList(context)
+	}
+
+	//state for quran menu features like page display, font size, font type, etc
+	private val _arabic_Font_size = MutableStateFlow(24.0f)
+	val arabic_Font_size = _arabic_Font_size.asStateFlow()
+
+	private val _arabic_Font = MutableStateFlow("Default")
+	val arabic_Font = _arabic_Font.asStateFlow()
+
+	private val _translation_Font_size = MutableStateFlow(14.0f)
+	val translation_Font_size = _translation_Font_size.asStateFlow()
+
+	private val _translation = MutableStateFlow("English")
+	val translation = _translation.asStateFlow()
+
+	private val _display_Mode = MutableStateFlow("List")
+	val display_Mode = _display_Mode.asStateFlow()
+
+	val sharedPreferences = PrivateSharedPreferences(context)
+
+
+	//events for quran menu features like page display, font size, font type, etc
+	sealed class QuranMenuEvents
+	{
+		//reload ui
+		object Reload_Surah : QuranMenuEvents()
+		object Reload_Juz : QuranMenuEvents()
+		object Reload_Aya : QuranMenuEvents()
+
+		//change arabic font
+		data class Change_Arabic_Font(val font : String) : QuranMenuEvents()
+		//change translation font
+		data class Change_Translation(val lang : String) : QuranMenuEvents()
+		data class Change_Arabic_Font_Size(val size : Float) : QuranMenuEvents()
+		//change translation font size
+		data class Change_Translation_Font_Size(val size : Float) : QuranMenuEvents()
+
+		//change display mode
+		data class Change_Display_Mode(val mode : String) : QuranMenuEvents()
+
+		//initialize quran using settings
+		object Initialize_Quran : QuranMenuEvents()
+	}
+
+	fun handleQuranMenuEvents(event : QuranMenuEvents)
+	{
+		when (event)
+		{
+			is QuranMenuEvents.Reload_Surah ->
+			{
+				_surahState.value = SurahState.Loading
+			}
+			is QuranMenuEvents.Reload_Juz ->
+			{
+				_juzState.value = JuzState.Loading
+			}
+			is QuranMenuEvents.Reload_Aya ->
+			{
+				_ayaState.value = AyaState.Loading
+			}
+			is QuranMenuEvents.Change_Arabic_Font ->
+			{
+				_ayaState.value = AyaState.Loading
+				_arabic_Font.value = event.font
+			}
+			is QuranMenuEvents.Change_Translation ->
+			{
+				_ayaState.value = AyaState.Loading
+				_translation.value = event.lang
+			}
+			is QuranMenuEvents.Change_Arabic_Font_Size ->
+			{
+				_ayaState.value = AyaState.Loading
+				_arabic_Font_size.value = event.size
+			}
+			is QuranMenuEvents.Change_Translation_Font_Size ->
+			{
+				_ayaState.value = AyaState.Loading
+				_translation_Font_size.value = event.size
+			}
+			is QuranMenuEvents.Change_Display_Mode ->
+			{
+				_ayaState.value = AyaState.Loading
+				_display_Mode.value = event.mode
+			}
+			is QuranMenuEvents.Initialize_Quran ->
+			{
+				_ayaState.value = AyaState.Loading
+				_arabic_Font.value = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
+				_translation.value = sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE , "English")
+				_arabic_Font_size.value = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
+				_translation_Font_size.value = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
+				_display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE , "List")
+			}
+		}
 	}
 
 	fun getSurahList(context : Context)

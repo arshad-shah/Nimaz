@@ -6,7 +6,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,11 +17,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
 
 @Composable
-fun CoordinatesView(latitude : MutableState<Double> , longitude : MutableState<Double>)
+fun CoordinatesView(latitudeState : State<Double> , longitudeState : State<Double>)
 {
 	//round the latitude and longitude to 4 decimal places
-	val latitudeRounded = String.format("%.4f" , latitude.value)
-	val longitudeRounded = String.format("%.4f" , longitude.value)
+	val latitudeRounded = String.format("%.4f" , latitudeState.value)
+	val longitudeRounded = String.format("%.4f" , longitudeState.value)
 
 	ElevatedCard(
 			modifier = Modifier
