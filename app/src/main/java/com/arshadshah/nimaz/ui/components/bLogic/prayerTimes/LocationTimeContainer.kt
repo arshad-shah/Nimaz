@@ -14,7 +14,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -23,24 +22,10 @@ import java.util.*
 
 @Composable
 fun LocationTimeContainer(
-	locationState : PrayerTimesViewModel.LocationState ,
+	locationState : String ,
 	currentPrayerName : MutableState<String> ,
 						 )
 {
-
-	when (val location = locationState)
-	{
-		is PrayerTimesViewModel.LocationState.Loading ->
-		{
-			ContainerUI(
-					currentPrayerNameSentenceCase = "" ,
-					isLoading = true ,
-					location = "Loading"
-					   )
-		}
-
-		is PrayerTimesViewModel.LocationState.Success ->
-		{
 			val currentPrayerNameSentenceCase = currentPrayerName.value
 				.substring(0 , 1)
 				.uppercase(Locale.ROOT) + currentPrayerName.value
@@ -49,19 +34,8 @@ fun LocationTimeContainer(
 			ContainerUI(
 					currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
 					isLoading = false ,
-					location = location.location
+					location = locationState ,
 					   )
-		}
-
-		is PrayerTimesViewModel.LocationState.Error ->
-		{
-			ContainerUI(
-					currentPrayerNameSentenceCase = "" ,
-					isLoading = false ,
-					location = "Error"
-					   )
-		}
-	}
 }
 
 @Composable

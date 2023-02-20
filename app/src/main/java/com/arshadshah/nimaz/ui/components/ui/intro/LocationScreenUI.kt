@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -11,19 +12,17 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.ManualLocationInput
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -34,7 +33,11 @@ import es.dmoral.toasty.Toasty
 fun LocationScreenUI()
 {
 	val context = LocalContext.current
-	val sharedpref = PrivateSharedPreferences(context)
+	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val locationNameState = remember {
+		viewModel.locationName
+	}.collectAsState()
+
 	//location permission state
 	val locationPermissionState = rememberMultiplePermissionsState(
 			permissions = listOf(
@@ -56,31 +59,6 @@ fun LocationScreenUI()
 	{
 		FeatureThatRequiresLocationPermission(locationPermissionState , checked)
 	}
-
-	//a manual location page
-	val prayerTimesViewModel = PrayerTimesViewModel()
-	val sharedPreferences = PrivateSharedPreferences(context)
-	//values for coordinates that are mutable
-	val longitude =
-		remember { mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)) }
-	val latitude =
-		remember { mutableStateOf(sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)) }
-	val locationName = remember {
-		mutableStateOf(
-				sharedPreferences.getData(
-						AppConstants.LOCATION_INPUT ,
-						"Abbeyleix"
-										 )
-					  )
-	}
-
-	val locationFoundCallbackManual =
-		{ latitudeValue : Double , longitudeValue : Double , name : String ->
-			longitude.value = longitudeValue
-			latitude.value = latitudeValue
-			locationName.value = name
-			sharedPreferences.saveData(AppConstants.LOCATION_INPUT , name)
-		}
 
 	//a laucnhed affect to check if the user has granted the notification permission
 	LaunchedEffect(locationPermissionState.allPermissionsGranted) {
@@ -107,14 +85,16 @@ fun LocationScreenUI()
 				{
 					if (locationPermissionState.allPermissionsGranted)
 					{
-						sharedpref.saveDataBoolean(AppConstants.LOCATION_TYPE , true)
+						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(it))
+						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationAutomatic(context))
 					} else
 					{
+						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(it))
 						locationPermissionState.launchMultiplePermissionRequest()
-						sharedpref.saveDataBoolean(AppConstants.LOCATION_TYPE , true)
 					}
 				} else
 				{
+					viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(it))
 					Toasty.info(
 							context ,
 							"Please disable location permission for Nimaz in \n Permissions -> Location -> Don't Allow" ,
@@ -131,9 +111,6 @@ fun LocationScreenUI()
 					}
 
 					context.startActivity(intent)
-					//if its unchecked, then we need to remove the location permission
-					//and remove the value from the shared preferences
-					sharedpref.removeData(AppConstants.LOCATION_TYPE)
 				}
 			} ,
 			title = {
@@ -178,8 +155,8 @@ fun LocationScreenUI()
 	if (! checked.value)
 	{
 		ManualLocationInput(
-				reloadPrayerTimes = prayerTimesViewModel::handleEvent ,
-				locationFoundCallbackManual = locationFoundCallbackManual
+				handleSettingEvents = viewModel::handleEvent,
+				locationNameState = locationNameState,
 						   )
 	}
 }

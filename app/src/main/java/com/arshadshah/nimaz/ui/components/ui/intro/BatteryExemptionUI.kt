@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -13,62 +14,81 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @SuppressLint("BatteryLife")
 @Composable
 fun BatteryExemptionUI()
 {
 	val context = LocalContext.current
-	//get shared preference
-	val sharedpref = PrivateSharedPreferences(context)
+
+	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val isBatteryExempt = remember {
+		viewModel.isBatteryExempt
+	}.collectAsState()
+
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
 
 	//battery optimization exemption
 	val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 	val isChecked =
 		remember { mutableStateOf(powerManager.isIgnoringBatteryOptimizations(context.packageName)) }
+
 	//the state of the switch
 	val state = rememberPreferenceBooleanSettingState(
 			AppConstants.BATTERY_OPTIMIZATION ,
 			isChecked.value
 													 )
 
-	//a laucnhed affect to check if the user has granted the notification permission
-	LaunchedEffect(isChecked.value) {
-		if (isChecked.value)
-		{
-			//if the user has granted the notification permission then set the state of the switch to true
-			state.value = true
-			//set the isChecked to true
-			isChecked.value = true
-		} else
-		{
-			//if the user has not granted the notification permission then set the state of the switch to false
-			state.value = false
-			//set the isChecked to false
-			isChecked.value = false
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _ , event ->
+			when (event)
+			{
+				Lifecycle.Event.ON_RESUME ->
+				{
+					viewModel.handleEvent(
+							SettingsViewModel.SettingsEvent.BatteryExempt(
+									powerManager.isIgnoringBatteryOptimizations(
+											context.packageName
+																			   )
+																		 )
+										 )
+					state.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+					isChecked.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+				}
+
+				else ->
+				{
+
+				}
+			}
+		}
+
+		lifecycle.addObserver(observer)
+		onDispose {
+			lifecycle.removeObserver(observer)
 		}
 	}
+
+
 	SettingsSwitch(
 			state = state ,
 			onCheckedChange = {
 				if (it)
 				{
-					//if the switch is checked, then we need to ask for the battery optimization exemption
-					//and save the value in the shared preferences
-					sharedpref.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , true)
 					val intent = Intent()
 					intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 					intent.data = Uri.parse("package:" + context.packageName)
@@ -79,9 +99,6 @@ fun BatteryExemptionUI()
 					val intent = Intent()
 					intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
 					context.startActivity(intent)
-					//if its unchecked, then we need to remove the battery optimization exemption
-					//and remove the value from the shared preferences
-					sharedpref.removeData(AppConstants.BATTERY_OPTIMIZATION)
 				}
 			} ,
 			title = {
@@ -89,7 +106,7 @@ fun BatteryExemptionUI()
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
-				if (isChecked.value)
+				if (isBatteryExempt.value)
 				{
 					Row {
 						Icon(

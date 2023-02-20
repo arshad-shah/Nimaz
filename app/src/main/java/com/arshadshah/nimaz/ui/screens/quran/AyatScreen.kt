@@ -2,11 +2,13 @@ package com.arshadshah.nimaz.ui.screens.quran
 
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.AyaJuzList
@@ -22,7 +24,8 @@ fun AyatScreen(
 			  )
 {
 	val context = LocalContext.current
-	val viewModel = QuranViewModel(context)
+	val viewModel = viewModel(key = "QuranViewModel", initializer = { QuranViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val pageMode = remember { viewModel.display_Mode }.collectAsState()
 
 
 	Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: $number $isSurah $language")
@@ -38,6 +41,8 @@ fun AyatScreen(
 				paddingValues = paddingValues ,
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
+				handleMenuEvents = viewModel::handleQuranMenuEvents ,
+				pageMode = pageMode ,
 				noteState = noteState ,
 				type = "surah" ,
 				mediaPlayer = mediaPlayer
@@ -55,9 +60,11 @@ fun AyatScreen(
 				paddingValues = paddingValues ,
 				state = ayat ,
 				handleEvents = viewModel::handleAyaEvent ,
+				handleMenuEvents = viewModel::handleQuranMenuEvents ,
 				noteState = noteState ,
 				type = "juz" ,
-				mediaPlayer = mediaPlayer
+				mediaPlayer = mediaPlayer,
+				pageMode = pageMode ,
 				  )
 	}
 }

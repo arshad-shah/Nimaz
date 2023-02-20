@@ -26,6 +26,8 @@ fun AyaJuzList(
 	noteState : LiveData<String> ,
 	type : String ,
 	mediaPlayer : MediaPlayer ,
+	handleMenuEvents : KFunction1<QuranViewModel.QuranMenuEvents , Unit> ,
+	pageMode : Any ,
 			  )
 {
 	when (val ayatJuzListState = state.value)
@@ -38,13 +40,7 @@ fun AyaJuzList(
 						key = AppConstants.PAGE_TYPE ,
 						s = "List"
 																	  )
-			var isList = true
-			if (pageType != "List")
-			{
-				isList = false
-			}
-
-			if (isList)
+			if (pageMode == "List")
 			{
 				AyaListUI(
 						ayaList = ArrayList(6) ,
@@ -58,7 +54,7 @@ fun AyaJuzList(
 						 )
 			} else
 			{
-				Page(ArrayList(10) , paddingValues , loading = true)
+				Page(ArrayList(10) , paddingValues , loading = true , handleEvents)
 			}
 		}
 
@@ -71,13 +67,7 @@ fun AyaJuzList(
 						key = AppConstants.PAGE_TYPE ,
 						s = "List"
 																	  )
-			var isList = true
-			if (pageType != "List")
-			{
-				isList = false
-			}
-
-			if (isList)
+			if (pageMode == "List")
 			{
 				AyaListUI(
 						ayaList = ayatJuzListState.data ,
@@ -91,7 +81,7 @@ fun AyaJuzList(
 						 )
 			} else
 			{
-				Page(ayatJuzListState.data , paddingValues , false)
+				Page(ayatJuzListState.data , paddingValues , false , handleEvents)
 			}
 		}
 

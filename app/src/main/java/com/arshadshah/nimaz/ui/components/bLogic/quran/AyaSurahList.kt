@@ -8,11 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.Page
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
 import kotlin.reflect.KFunction1
 
@@ -26,25 +24,15 @@ fun AyaSurahList(
 	noteState : LiveData<String> ,
 	type : String ,
 	mediaPlayer : MediaPlayer ,
+	handleMenuEvents : KFunction1<QuranViewModel.QuranMenuEvents , Unit> ,
+	pageMode : State<String> ,
 				)
 {
 	when (val ayatSurahListState = state.value)
 	{
 		is QuranViewModel.AyaSurahState.Loading ->
 		{
-			//get the translation type from shared preferences
-			val pageType =
-				PrivateSharedPreferences(LocalContext.current).getData(
-						key = AppConstants.PAGE_TYPE ,
-						s = "List"
-																	  )
-			var isList = true
-			if (pageType != "List")
-			{
-				isList = false
-			}
-
-			if (isList)
+			if (pageMode.value == "List")
 			{
 				AyaListUI(
 						ayaList = ArrayList(6) ,
@@ -58,25 +46,14 @@ fun AyaSurahList(
 						 )
 			} else
 			{
-				Page(ArrayList(10) , paddingValues , loading = true)
+				Page(ArrayList(10) , paddingValues , loading = true,handleEvents = handleEvents)
 			}
 		}
 
 		is QuranViewModel.AyaSurahState.Success ->
 		{
-			//get the translation type from shared preferences
-			val pageType =
-				PrivateSharedPreferences(LocalContext.current).getData(
-						key = AppConstants.PAGE_TYPE ,
-						s = "List"
-																	  )
-			var isList = true
-			if (pageType != "List")
-			{
-				isList = false
-			}
 
-			if (isList)
+			if (pageMode.value == "List")
 			{
 				AyaListUI(
 						ayaList = ayatSurahListState.data ,
@@ -90,7 +67,7 @@ fun AyaSurahList(
 						 )
 			} else
 			{
-				Page(ayatSurahListState.data , paddingValues , false)
+				Page(ayatSurahListState.data , paddingValues , false , handleEvents)
 			}
 		}
 

@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,13 +32,12 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.theme.*
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -61,6 +61,24 @@ fun AyaListUI(
 	number : Int ,
 			 )
 {
+
+	val context = LocalContext.current
+	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
+
+	val arabicFontSize = remember {
+		viewModel.arabic_Font_size
+	}.collectAsState()
+	val arabicFont = remember {
+		viewModel.arabic_Font
+	}.collectAsState()
+
+	val translationFontSize = remember {
+		viewModel.translation_Font_size
+	}.collectAsState()
+
+	val translation = remember {
+		viewModel.translation
+	}.collectAsState()
 
 	val spacesFileRepository = SpacesFileRepository(LocalContext.current)
 
@@ -97,7 +115,11 @@ fun AyaListUI(
 						aya = ayaList[index] ,
 						noteState = noteState ,
 						spacesFileRepository = spacesFileRepository ,
-						mediaPlayer = mediaPlayer
+						mediaPlayer = mediaPlayer,
+						arabic_Font_size = arabicFontSize,
+						arabic_Font = arabicFont,
+						translation_Font_size = translationFontSize,
+						translation = translation,
 							 )
 			}
 		}
@@ -143,7 +165,11 @@ fun AyaListUI(
 						aya = ayaList[index] ,
 						noteState = noteState ,
 						spacesFileRepository = spacesFileRepository ,
-						mediaPlayer = mediaPlayer
+						mediaPlayer = mediaPlayer ,
+						arabic_Font_size = arabicFontSize,
+						arabic_Font = arabicFont,
+						translation_Font_size = translationFontSize,
+						translation = translation,
 							 )
 			}
 		}
@@ -158,6 +184,10 @@ fun AyaListItemUI(
 	noteState : LiveData<String> ,
 	spacesFileRepository : SpacesFileRepository ,
 	mediaPlayer : MediaPlayer ,
+	arabic_Font_size : State<Float> ,
+	translation_Font_size : State<Float> ,
+	arabic_Font : State<String> ,
+	translation : State<String> ,
 				 )
 {
 
@@ -342,19 +372,6 @@ fun AyaListItemUI(
 		//use default color
 		MaterialTheme.colorScheme.surface
 	}
-
-	//get font size from shared preferences#
-	val sharedPreferences = PrivateSharedPreferences(context)
-	val arabicFontSize = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
-	val translationFontSize = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
-	val fontStyle = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
-	//get the translation type from shared preferences
-	val translationType =
-		PrivateSharedPreferences(context).getData(
-				key = AppConstants.TRANSLATION_LANGUAGE ,
-				s = "English"
-												 )
-
 	ElevatedCard(
 			modifier = Modifier
 				.padding(4.dp)
@@ -379,8 +396,8 @@ fun AyaListItemUI(
 						Text(
 								text = aya.ayaArabic ,
 								style = MaterialTheme.typography.titleLarge ,
-								fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp ,
-								fontFamily = when (fontStyle)
+								fontSize = if (arabic_Font_size.value == 0.0f) 24.sp else arabic_Font_size.value.sp ,
+								fontFamily = when (arabic_Font.value)
 								{
 									"Default" ->
 									{
@@ -423,13 +440,13 @@ fun AyaListItemUI(
 					}
 				}
 				Spacer(modifier = Modifier.height(4.dp))
-				if (translationType == "Urdu")
+				if (translation.value == "Urdu")
 				{
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
 								text = "${aya.ayaTranslationUrdu} ۔" ,
 								style = MaterialTheme.typography.titleSmall ,
-								fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp ,
+								fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp ,
 								fontFamily = urduFont ,
 								textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
 								modifier = Modifier
@@ -446,12 +463,12 @@ fun AyaListItemUI(
 							)
 					}
 				}
-				if (translationType == "English")
+				if (translation.value == "English")
 				{
 					Text(
 							text = aya.ayaTranslationEnglish ,
 							style = MaterialTheme.typography.bodySmall ,
-							fontSize = translationFontSize.sp ,
+							fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp ,
 							textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth()
