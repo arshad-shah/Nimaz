@@ -85,16 +85,15 @@ fun LocationScreenUI()
 				{
 					if (locationPermissionState.allPermissionsGranted)
 					{
-						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(it))
-						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationAutomatic(context))
+						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,it))
 					} else
 					{
-						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(it))
+						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,it))
 						locationPermissionState.launchMultiplePermissionRequest()
 					}
 				} else
 				{
-					viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(it))
+					viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,it))
 					Toasty.info(
 							context ,
 							"Please disable location permission for Nimaz in \n Permissions -> Location -> Don't Allow" ,

@@ -63,7 +63,7 @@ class PrayerTimesViewModel : ViewModel()
 			//event to reload the prayer times
 			is PrayerTimesEvent.RELOAD ->
 			{
-				reload(context)
+				loadPrayerTimes(context)
 			}
 			//event to update the prayer times
 			is PrayerTimesEvent.UPDATE_PRAYERTIMES ->
@@ -74,15 +74,6 @@ class PrayerTimesViewModel : ViewModel()
 			else ->
 			{
 			}
-		}
-	}
-
-	//function to reload the UI state
-	fun reload(context : Context)
-	{
-		viewModelScope.launch(Dispatchers.IO) {
-			//load the prayer times
-			loadPrayerTimes(context)
 		}
 	}
 
@@ -175,7 +166,7 @@ class PrayerTimesViewModel : ViewModel()
 
 			override fun onFinish()
 			{
-				reload(context)
+				loadPrayerTimes(context)
 			}
 		}.start()
 	}

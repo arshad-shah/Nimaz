@@ -63,7 +63,7 @@ fun ManualLocationInput(
 			} ,
 			confirmButton = {
 				Button(onClick = {
-					handleSettingEvents(SettingsViewModel.SettingsEvent.LocationManual(context, name.value))
+					handleSettingEvents(SettingsViewModel.SettingsEvent.LocationInput(context, name.value))
 					showDialog.value = false
 				}) { Text(text = "Confirm") }
 			} ,

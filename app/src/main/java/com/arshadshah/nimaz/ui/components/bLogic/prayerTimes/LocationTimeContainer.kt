@@ -20,7 +20,7 @@ import kotlin.reflect.KFunction1
 
 @Composable
 fun LocationTimeContainer(
-	locationState : String ,
+	locationState : State<String> ,
 	currentPrayerName : State<String> ,
 	handleEvent : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
 						 )
@@ -40,7 +40,7 @@ fun LocationTimeContainer(
 @Composable
 fun ContainerUI(
 	currentPrayerNameSentenceCase : String ,
-	location : String ,
+	location : State<String> ,
 	handleEvent : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
 			   )
 {
@@ -63,7 +63,7 @@ fun ContainerUI(
 						.clickable{
 							handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
 						},
-					heading = "Location" , text = location
+					heading = "Location" , text = location.value
 					  )
 			//vertical divider line
 			Divider(
