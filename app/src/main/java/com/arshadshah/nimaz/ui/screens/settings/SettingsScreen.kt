@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,22 +12,18 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
-import com.arshadshah.nimaz.ui.components.ui.settings.*
+import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
+import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
+import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
@@ -45,32 +40,6 @@ fun SettingsScreen(
 				  )
 {
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
-
-	LaunchedEffect(key1 = true) {
-		viewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
-	}
-
-
-	val isLocationManual = remember {
-		viewModel.isLocationManual
-	}.collectAsState()
-
-	val locationNameState = remember {
-		viewModel.locationName
-	}.collectAsState()
-
-	val latitudeState = remember {
-		viewModel.latitude
-	}.collectAsState()
-
-	val longitudeState = remember {
-		viewModel.longitude
-	}.collectAsState()
-	
-	val isLocationNameLoading = remember {
-		viewModel.isLocationNameLoading
-	}.collectAsState()
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
@@ -79,88 +48,7 @@ fun SettingsScreen(
 				.verticalScroll(rememberScrollState() , true)
 				.padding(paddingValues)
 		  ) {
-
-		SettingsGroup(title = { Text(text = "Location") }) {
-			val storage =
-				rememberPreferenceBooleanSettingState(AppConstants.LOCATION_TYPE , true)
-			storage.value = isLocationManual.value
-			ElevatedCard(
-					modifier = Modifier
-						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-						.fillMaxWidth()
-						) {
-				SettingsSwitch(
-						state = storage ,
-						icon = {
-							Icon(
-									modifier = Modifier.size(24.dp) ,
-									painter = painterResource(id = R.drawable.marker_icon) ,
-									contentDescription = "Location"
-								)
-						} ,
-						title = {
-							if (storage.value)
-							{
-								Text(text = "Automatic")
-							} else
-							{
-								Text(text = "Manual")
-							}
-						} ,
-						subtitle = {
-							if (storage.value)
-							{
-								if(isLocationNameLoading.value)
-								{
-									Text(text = "Loading...")
-								}else{
-									Text(text = locationNameState.value)
-								}
-							} else
-							{
-								Text(text = "Enter your location manually")
-							}
-						},
-						onCheckedChange = {
-							storage.value = it
-							viewModel.handleEvent(
-									SettingsViewModel.SettingsEvent.LocationToggle(it)
-													)
-							//if its true then we need to get the location from the gps
-							if (it)
-							{
-								viewModel.handleEvent(
-										SettingsViewModel.SettingsEvent.LocationAutomatic(context)
-													)
-							}else{
-								//if its false then we need to get the location from the shared preferences
-								viewModel.handleEvent(
-										SettingsViewModel.SettingsEvent.LocationManual(context, locationNameState.value)
-													)
-							}
-						}
-							  )
-			}
-			if (! storage.value)
-			{
-				ElevatedCard(
-						modifier = Modifier
-							.padding(8.dp)
-							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-							.fillMaxWidth()
-							) {
-					ManualLocationInput(
-							handleSettingEvents = viewModel::handleEvent ,
-							locationNameState = locationNameState ,
-									   )
-				}
-				CoordinatesView(
-						longitudeState = longitudeState ,
-						latitudeState = latitudeState ,
-							   )
-			}
-		}
+		LocationSettings()
 
 		ElevatedCard(
 				modifier = Modifier

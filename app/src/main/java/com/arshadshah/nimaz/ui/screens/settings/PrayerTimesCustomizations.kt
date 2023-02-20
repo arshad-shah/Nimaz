@@ -1,11 +1,8 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
-import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
@@ -18,9 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
@@ -32,7 +31,7 @@ import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsNumberPickerDialog
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import java.time.LocalDateTime
+import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper.getParams
 
 @Composable
 fun PrayerTimesCustomizations(paddingValues : PaddingValues)
@@ -334,6 +333,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.fajr_icon) ,
+										  contentDescription = "Fajr Time"
+										)
+								},
 								title = {
 									Text(text = "Fajr Time")
 								} ,
@@ -361,6 +368,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.sunrise_icon) ,
+											contentDescription = "Fajr Time"
+										 )
+								},
 								title = {
 									Text(text = "Sunrise Time")
 								} ,
@@ -388,6 +403,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.dhuhr_icon) ,
+											contentDescription = "Dhuhr Time"
+										 )
+								},
 								title = {
 									Text(text = "Dhuhr Time")
 								} ,
@@ -415,6 +438,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.asr_icon) ,
+											contentDescription = "Asr Time"
+										 )
+								},
 								title = {
 									Text(text = "Asr Time")
 								} ,
@@ -442,6 +473,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.maghrib_icon) ,
+											contentDescription = "Maghrib Time"
+										 )
+								},
 								title = {
 									Text(text = "Maghrib Time")
 								} ,
@@ -469,6 +508,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
+								icon = {
+									Image(
+											modifier = Modifier
+												.size(48.dp),
+											painter = painterResource(id = R.drawable.isha_icon) ,
+											contentDescription = "Isha Time"
+										 )
+								},
 								title = {
 									Text(text = "Isha Time")
 								} ,
@@ -493,51 +540,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					 )
 	}
 }
-
-//function to create a params for the prayer times
-fun getParams(context: Context) : MutableMap<String , String>
-{
-	val sharedPreferences = PrivateSharedPreferences(context)
-	val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-	val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
-	val fajrAngle : String = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
-	val ishaAngle : String = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
-	val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
-	val calculationMethod : String =
-		sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
-	val madhab : String = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
-	val highLatitudeRule : String =
-		sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
-	val fajrAdjustment : String = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
-	val sunriseAdjustment : String =
-		sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
-	val dhuhrAdjustment : String =
-		sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
-	val asrAdjustment : String = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT , "0")
-	val maghribAdjustment : String =
-		sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
-	val ishaAdjustment : String = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
-
-	val mapOfParams = mutableMapOf<String , String>()
-	mapOfParams["latitude"] = latitude.toString()
-	mapOfParams["longitude"] = longitude.toString()
-	mapOfParams["date"] = LocalDateTime.now().toString()
-	mapOfParams["fajrAngle"] = fajrAngle
-	mapOfParams["ishaAngle"] = ishaAngle
-	mapOfParams["ishaInterval"] = ishaInterval
-	mapOfParams["method"] = calculationMethod
-	mapOfParams["madhab"] = madhab
-	mapOfParams["highLatitudeRule"] = highLatitudeRule
-	mapOfParams["fajrAdjustment"] = fajrAdjustment
-	mapOfParams["sunriseAdjustment"] = sunriseAdjustment
-	mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment
-	mapOfParams["asrAdjustment"] = asrAdjustment
-	mapOfParams["maghribAdjustment"] = maghribAdjustment
-	mapOfParams["ishaAdjustment"] = ishaAdjustment
-
-	return mapOfParams
-}
-
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview()

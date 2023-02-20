@@ -8,8 +8,9 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.location.LocationFinder
+import com.arshadshah.nimaz.utils.location.LocationFinderAuto
 import com.arshadshah.nimaz.utils.location.NetworkChecker
-import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,15 +22,15 @@ class SettingsViewModel(context: Context) : ViewModel()
 
 
 	//state for switch of location toggle between manual and automatic
-	private var _isLocationManual = MutableStateFlow(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
-	val isLocationManual = _isLocationManual.asStateFlow()
+	private var _isLocationAuto = MutableStateFlow(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
+	val isLocationAuto = _isLocationAuto.asStateFlow()
 
 	//location name loading state
 	private var _isLocationNameLoading = MutableStateFlow(false)
 	val isLocationNameLoading = _isLocationNameLoading.asStateFlow()
 
 	//location name state
-	private var _locationName = MutableStateFlow(sharedPreferences.getData(AppConstants.LOCATION_INPUT, "Dublin"))
+	private var _locationName = MutableStateFlow(sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
 	val locationName = _locationName.asStateFlow()
 
 	//latitude state
@@ -101,11 +102,9 @@ class SettingsViewModel(context: Context) : ViewModel()
 	//events
 	sealed class SettingsEvent
 	{
-		class LocationToggle(val checked : Boolean) : SettingsEvent()
-		class LocationInput(val location : String) : SettingsEvent()
+		class LocationToggle(val context : Context, val checked : Boolean) : SettingsEvent()
+		class LocationInput(val context : Context, val location : String) : SettingsEvent()
 		class LoadLocation(val context: Context) : SettingsEvent()
-		class LocationManual(val context : Context , val locationName : String) : SettingsEvent()
-		class LocationAutomatic(val context : Context) : SettingsEvent()
 		class BatteryExempt(val exempt : Boolean) : SettingsEvent()
 
 		//prayer times adjustments
@@ -134,33 +133,25 @@ class SettingsViewModel(context: Context) : ViewModel()
 		{
 			is SettingsEvent.LocationToggle ->
 			{
-				_isLocationManual.value = event.checked
+				_isLocationAuto.value = event.checked
 				sharedPreferences.saveDataBoolean(LOCATION_TYPE, event.checked)
+				loadLocation(event.context, event.checked)
 			}
 			is SettingsEvent.LocationInput ->
 			{
 				_locationName.value = event.location
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT, event.location)
+				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
 			}
 			is SettingsEvent.LoadLocation ->
 			{
-				loadLocation(event.context)
-			}
-			is SettingsEvent.LocationManual ->
-			{
-				loadLocationManual(event.context, event.locationName)
-			}
-			is SettingsEvent.LocationAutomatic ->
-			{
-				loadLocationAuto(event.context)
+				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
 			}
 			is SettingsEvent.BatteryExempt ->
 			{
 				_isBatteryExempt.value = event.exempt
 				sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION, event.exempt)
 			}
-			//prayer times adjustments
-			//calculation method
 			is SettingsEvent.CalculationMethod ->
 			{
 				_calculationMethod.value = event.method
@@ -233,7 +224,7 @@ class SettingsViewModel(context: Context) : ViewModel()
 			}
 			is SettingsEvent.LoadSettings ->
 			{
-				_isLocationManual.value = sharedPreferences.getDataBoolean(LOCATION_TYPE, false)
+				_isLocationAuto.value = sharedPreferences.getDataBoolean(LOCATION_TYPE, false)
 				_locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
 				_isBatteryExempt.value = sharedPreferences.getDataBoolean(AppConstants.BATTERY_OPTIMIZATION, false)
 				_calculationMethod.value = sharedPreferences.getData(AppConstants.CALCULATION_METHOD, "ISNA")
@@ -255,7 +246,7 @@ class SettingsViewModel(context: Context) : ViewModel()
 
 
 
-	fun loadLocationManual(context : Context, locationName : String)
+	private fun loadLocationManual(context : Context , locationName : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -269,7 +260,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 						_latitude.value = latitudeValue
 						_longitude.value = longitudeValue
 						_isLocationNameLoading.value = false
-						Toasty.success(context, "Location found").show()
 					}
 
 				if (NetworkChecker().networkCheck(context))
@@ -300,9 +290,9 @@ class SettingsViewModel(context: Context) : ViewModel()
 		}
 	}
 
-	fun loadLocationAuto(context : Context)
+	private fun loadLocationAuto(context : Context)
 	{
-		viewModelScope.launch(Dispatchers.IO) {
+		viewModelScope.launch(Dispatchers.Main) {
 			try
 			{
 				_isLocationNameLoading.value = true
@@ -310,25 +300,33 @@ class SettingsViewModel(context: Context) : ViewModel()
 					//save location
 					_latitude.value = latitudeValue
 					_longitude.value = longitudeValue
+
+					val locationFoundCallbackManual =
+						{ latitude : Double, longitude : Double , name : String ->
+							//save location
+							_locationName.value = name
+							_latitude.value = latitude
+							_longitude.value = longitude
+							_isLocationNameLoading.value = false
+						}
+
+
+					//get the location name
+					val locationFinder = LocationFinder()
+					locationFinder.findCityName(
+							context ,
+							latitude = latitudeValue ,
+							longitude = longitudeValue ,
+							locationFoundCallbackManual = locationFoundCallbackManual
+											   )
+					_isLocationNameLoading.value = false
 				}
-
-				val locationFoundCallbackManual =
-					{ latitudeValue : Double, longitudeValue : Double , name : String ->
-						//save location
-						_locationName.value = name
-						_latitude.value = latitudeValue
-						_longitude.value = longitudeValue
-						_isLocationNameLoading.value = false
-						Toasty.success(context, "Location found").show()
-					}
-
 
 				if (NetworkChecker().networkCheck(context))
 				{
 					Location().getAutomaticLocation(
 							context ,
-							listener ,
-							locationFoundCallbackManual
+							listener
 												   )
 					Log.d(
 							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
@@ -352,29 +350,18 @@ class SettingsViewModel(context: Context) : ViewModel()
 	}
 
 	//load location from shared preferences
-	fun loadLocation(context : Context)
+	private fun loadLocation(context : Context , checked : Boolean)
 	{
-		viewModelScope.launch(Dispatchers.IO) {
+		viewModelScope.launch(Dispatchers.Main) {
 			try
 			{
-				//load location type
-				_isLocationManual.value = sharedPreferences.getDataBoolean(LOCATION_TYPE, false)
-
-				//load location name
-				_locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-
-				//load latitude
-				_latitude.value = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.0)
-
-				//load longitude
-				_longitude.value = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -7.0)
-
-				if (!_isLocationManual.value)
+				if (checked)
 				{
 					loadLocationAuto(context)
 				} else
 				{
-					loadLocationManual(context, _locationName.value)
+					LocationFinderAuto().stopLocationUpdates()
+					loadLocationManual(context, sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
 				}
 			} catch (e : Exception)
 			{
