@@ -3,7 +3,9 @@ package com.arshadshah.nimaz.ui.screens.settings
 import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,17 +14,24 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.THEME
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
+import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -42,6 +51,10 @@ fun SettingsScreen(
 	val context = LocalContext.current
 
 	val sharedPreferences = PrivateSharedPreferences(context)
+	val viewModelSettings = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val themeState = remember {
+		viewModelSettings.theme
+	}.collectAsState()
 
 	Column(
 			modifier = Modifier
@@ -67,6 +80,53 @@ fun SettingsScreen(
 							)
 					} ,
 							)
+		}
+
+		val stateOfTheme = rememberPreferenceStringSettingState(key =THEME, defaultValue = themeState.value)
+
+		stateOfTheme.value = themeState.value
+
+		//map of theme to theme name
+//		keys are like this LIGHT , DARK , SYSTEM
+		val themeMapForDynamic = mapOf(
+				"LIGHT" to "Light" ,
+				"DARK" to "Dark" ,
+				"SYSTEM" to "System Default",
+				"DYNAMIC" to "Dynamic"
+							)
+		val themeMapForNonDynamic = mapOf(
+				"LIGHT" to "Light" ,
+				"DARK" to "Dark" ,
+				"SYSTEM" to "System Default",
+										)
+
+		//theme
+		ElevatedCard(
+				modifier = Modifier
+					.padding(8.dp)
+					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+					.fillMaxWidth()
+					) {
+			SettingsList(
+					onChange = {
+						viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
+						Toasty.success(context , "Theme Changed to $it" , Toast.LENGTH_SHORT , true).show()
+					},
+					height = 400.dp ,
+					subtitle = {
+						Text(text = "Change the theme of the app")
+					} ,
+					icon = {
+						Icon(
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.theme_icon) ,
+								contentDescription = "Theme"
+							)
+					},
+					valueState = stateOfTheme,
+					title ={ Text(text = "Theme") },
+		 			items = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic,
+						)
 		}
 
 
