@@ -15,12 +15,10 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -43,6 +41,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
@@ -149,7 +148,26 @@ class MainActivity : ComponentActivity()
 
 		//this is used to show the full activity on the screen
 		setContent {
-			NimazTheme {
+			val viewModelSettings = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(this@MainActivity) }, viewModelStoreOwner = this as ComponentActivity)
+			val themeState = remember {
+				viewModelSettings.theme
+			}.collectAsState()
+
+			val dynamicColor = when (themeState.value) {
+				"DYNAMIC" -> true
+				else -> false
+			}
+
+			val systemTheme = when (themeState.value) {
+				"SYSTEM" -> isSystemInDarkTheme()
+				"LIGHT" -> false
+				"DARK" -> true
+				else -> false
+			}
+			NimazTheme(
+					darkTheme = systemTheme,
+					dynamicColor = dynamicColor,
+					  ) {
 				val isPlaying = remember { mutableStateOf(false) }
 				val isPaused = remember { mutableStateOf(false) }
 				val isStopped = remember { mutableStateOf(true) }
