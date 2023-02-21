@@ -2,9 +2,6 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants
 {
-
-	const val FONT_STYLE = "font_style"
-
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -67,6 +64,8 @@ object AppConstants
 	const val NOTIFICATION_ALLOWED = "notificationAllowed"
 	const val BATTERY_OPTIMIZATION = "batteryOptimization"
 	const val CHANNEL_LOCK = "channelLock"
+	const val THEME = "theme"
+	const val FONT_STYLE = "font_style"
 
 	//codes
 	const val APP_UPDATE_REQUEST_CODE = 100
