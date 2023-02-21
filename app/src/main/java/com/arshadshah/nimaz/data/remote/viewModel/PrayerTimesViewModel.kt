@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class PrayerTimesViewModel : ViewModel()
 {
@@ -38,6 +39,12 @@ class PrayerTimesViewModel : ViewModel()
 	//current prayer name
 	private val _currentPrayerName = MutableStateFlow("Loading...")
 	val currentPrayerName = _currentPrayerName.asStateFlow()
+
+	private val _nextPrayerName = MutableStateFlow("Loading...")
+	val nextPrayerName = _nextPrayerName.asStateFlow()
+
+	private val _nextPrayerTime = MutableStateFlow(LocalDateTime.now())
+	val nextPrayerTime = _nextPrayerTime.asStateFlow()
 
 
 	//event that starts the timer
@@ -90,6 +97,8 @@ class PrayerTimesViewModel : ViewModel()
 				if (response.data != null)
 				{
 					_currentPrayerName.value = response.data.currentPrayer?.name.toString()
+					_nextPrayerName.value = response.data.nextPrayer?.name.toString()
+					_nextPrayerTime.value = response.data.nextPrayer?.time
 					_prayerTimesState.value = PrayerTimesState.Success(response.data)
 				} else
 				{
@@ -123,6 +132,15 @@ class PrayerTimesViewModel : ViewModel()
 					} else
 					{
 						_currentPrayerName.value = response.data.currentPrayer?.name.toString()
+					}
+					if (response.data.nextPrayer?.name.toString() == "SUNRISE")
+					{
+						_nextPrayerName.value = "Duha"
+						_nextPrayerTime.value = response.data.nextPrayer?.time
+					} else
+					{
+						_nextPrayerName.value = response.data.nextPrayer?.name.toString()
+						_nextPrayerTime.value = response.data.nextPrayer?.time
 					}
 					_prayerTimesState.value = PrayerTimesState.Success(response.data)
 				} else
