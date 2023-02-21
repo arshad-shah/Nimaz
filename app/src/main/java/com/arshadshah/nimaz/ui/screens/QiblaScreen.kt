@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.screens
 
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QiblaViewModel
@@ -24,7 +26,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 fun QiblaScreen(paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
-	val viewModel = QiblaViewModel(context)
+	val viewModel = viewModel(key = "QiblaViewModel", initializer = { QiblaViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
 
 	val state = remember { viewModel.qiblaState }.collectAsState()
 	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "QiblaScreen: ${state.value}")
