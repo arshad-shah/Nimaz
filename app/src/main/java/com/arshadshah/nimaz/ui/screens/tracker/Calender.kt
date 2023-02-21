@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -53,12 +54,11 @@ fun Calender(paddingValues : PaddingValues)
 				.fillMaxSize()
 				.padding(paddingValues),
 			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Center
+			verticalArrangement = Arrangement.Top
 		  ) {
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top = 0.dp , start = 8.dp , end = 8.dp , bottom = 4.dp)
 					) {
 			SelectableCalendar(
 					dayContent = {
@@ -119,7 +119,7 @@ fun Calender(paddingValues : PaddingValues)
 																   )
 							  )
 		}
-		PrayerTracker(paddingValues = PaddingValues(4.dp), isIntegrated = true)
+		PrayerTracker(paddingValues = PaddingValues(vertical = 4.dp), isIntegrated = true)
 	}
 }
 
@@ -219,6 +219,8 @@ fun CalenderHeader(monthState : MonthState)
 				if (monthState.currentMonth == YearMonth.now())
 				{
 					Text(
+							modifier = Modifier
+								.padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
 							text = "Today" ,
 							style = MaterialTheme.typography.titleSmall
 						)
@@ -241,7 +243,7 @@ fun CalenderHeader(monthState : MonthState)
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall,
 									modifier = Modifier
-										.padding(start = 4.dp)
+										.padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
 										.alpha(0.5f)
 								)
 						}
@@ -251,7 +253,7 @@ fun CalenderHeader(monthState : MonthState)
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall,
 									modifier = Modifier
-										.padding(start = 4.dp)
+										.padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
 										.alpha(0.5f)
 								)
 							Icon(
@@ -267,14 +269,14 @@ fun CalenderHeader(monthState : MonthState)
 						text = currentMonthYear ,
 						style = MaterialTheme.typography.titleLarge ,
 						maxLines = 1 ,
-						modifier = Modifier.padding(8.dp)
+						modifier = Modifier.padding(4.dp)
 					)
 
 				Text(
 						text = hijriFormated ,
 						style = MaterialTheme.typography.bodySmall ,
 						maxLines = 1 ,
-						modifier = Modifier.padding(8.dp)
+						modifier = Modifier.padding(4.dp)
 					)
 			}
 
@@ -299,23 +301,32 @@ fun CalenderHeader(monthState : MonthState)
 fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 {
 	ElevatedCard(
-			modifier = Modifier.padding(vertical = 8.dp) ,
+			modifier = Modifier.padding(top = 8.dp) ,
 				) {
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(8.dp) ,
+					.padding(horizontal = 4.dp, vertical = 8.dp) ,
 				horizontalArrangement = Arrangement.Center
 		   ) {
 			weekState.forEach { dayOfWeek ->
 				Text(
 						text = dayOfWeek.name.substring(0 , 3) ,
-						style = MaterialTheme.typography.titleSmall ,
+						style = MaterialTheme.typography.titleMedium ,
+						color = if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY)
+						{
+							MaterialTheme.colorScheme.error
+						}
+						else
+						{
+							MaterialTheme.colorScheme.onSurface
+						} ,
 						maxLines = 1 ,
 						overflow = TextOverflow.Ellipsis ,
 						textAlign = TextAlign.Center ,
 						modifier = Modifier
 							.weight(1f)
+							.padding(4.dp)
 					)
 			}
 		}
@@ -326,7 +337,7 @@ fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 {
 	ElevatedCard {
-		monthState(PaddingValues(8.dp))
+		monthState(PaddingValues(0.dp))
 	}
 }
 
@@ -351,8 +362,9 @@ fun CalenderDay(
 	val importantDay = isImportantDay(hijriDayOfMonth , hijriMonth)
 	ElevatedCard(
 			modifier = Modifier
-				.padding(4.dp)
-				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f) ,
+				.padding(2.dp)
+				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
+				.shadow(if (today || isSelectedDay) 6.dp else 3.dp, shape = MaterialTheme.shapes.medium) ,
 				) {
 
 		Column(
@@ -387,9 +399,10 @@ fun CalenderDay(
 			  ) {
 			Text(
 					text = dayState.date.dayOfMonth.toString() ,
-					style = MaterialTheme.typography.titleSmall ,
+					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
+					modifier = Modifier.padding(8.dp),
 					color = when (importantDay.first)
 					{
 						false -> if (today) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
@@ -399,14 +412,15 @@ fun CalenderDay(
 			Divider(
 					modifier = Modifier
 						.fillMaxWidth() ,
-					color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
 				   )
 			Text(
 					//put a letter scissor ha in front of the day to show that it is a hijri day
 					text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
-					style = MaterialTheme.typography.titleSmall ,
+					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
+					modifier = Modifier.padding(8.dp),
 					color = when (importantDay.first)
 					{
 						false -> if (today) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
@@ -444,82 +458,90 @@ fun CalenderDay(
 fun getGradientForProgress(progressState : Int) : Brush
 {
 	//if the day is selected then we need to change the color of the background to the progress color
-	if (progressState == 100)
+	when (progressState)
 	{
-		return Brush.verticalGradient(
+		100 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+								   )
+										 )
+		}
+		80 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent
+								   )
+										 )
+		}
+		60 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+		40 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+		20 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+		0 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+		else -> return Brush.verticalGradient(
 				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-							   )
-									)
-	}else if (progressState == 80)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent ,
 						Color.Transparent
 							   )
-									)
-	}else if (progressState == 60)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
-	}else if (progressState == 40)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
-	}else if (progressState == 20)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
-	}else if (progressState == 0)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
+											 )
 	}
-	return Brush.verticalGradient(
-			colors = listOf(
-					Color.Transparent ,
-					Color.Transparent ,
-					Color.Transparent ,
-					Color.Transparent ,
-					Color.Transparent
-						   )
-								)
 }
 
 //function to check if a day is an important day
