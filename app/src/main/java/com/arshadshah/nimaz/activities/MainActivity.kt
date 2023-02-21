@@ -153,20 +153,36 @@ class MainActivity : ComponentActivity()
 				viewModelSettings.theme
 			}.collectAsState()
 
-			val dynamicColor = when (themeState.value) {
-				"DYNAMIC" -> true
-				else -> false
+			val darkTheme = remember {
+				mutableStateOf(false)
+			}
+			val dynamicTheme = remember {
+				mutableStateOf(false)
 			}
 
-			val systemTheme = when (themeState.value) {
-				"SYSTEM" -> isSystemInDarkTheme()
-				"LIGHT" -> false
-				"DARK" -> true
-				else -> false
+			when (themeState.value) {
+				"DYNAMIC" -> {
+					dynamicTheme.value = true
+					darkTheme.value = isSystemInDarkTheme()
+				}
+				"SYSTEM" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isSystemInDarkTheme()
+				}
+				"LIGHT" -> {
+					dynamicTheme.value = false
+					darkTheme.value = false
+				}
+				"DARK" -> {
+					dynamicTheme.value = false
+					darkTheme.value = true
+				}
 			}
+
 			NimazTheme(
-					darkTheme = systemTheme,
-					dynamicColor = dynamicColor,
+					darkTheme = darkTheme.value,
+					dynamicColor = dynamicTheme.value,
 					  ) {
 				val isPlaying = remember { mutableStateOf(false) }
 				val isPaused = remember { mutableStateOf(false) }
