@@ -132,8 +132,10 @@ abstract class AppDatabase : RoomDatabase()
 	{
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
-			database.execSQL("DROP TABLE PrayersTracker")
+			//drop table PrayersTracker and create a new one
 			database.execSQL("CREATE TABLE IF NOT EXISTS `PrayersTracker_new` (`date` TEXT NOT NULL, `fajr` INTEGER NOT NULL, `dhuhr` INTEGER NOT NULL, `asr` INTEGER NOT NULL, `maghrib` INTEGER NOT NULL, `isha` INTEGER NOT NULL, progress INTEGER NOT NULL, PRIMARY KEY(`date`))")
+
+			database.execSQL("DROP TABLE IF EXISTS PrayersTracker")
 			//rename new table
 			database.execSQL("ALTER TABLE PrayersTracker_new RENAME TO PrayersTracker")
 		}

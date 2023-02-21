@@ -21,6 +21,12 @@ class SettingsViewModel(context: Context) : ViewModel()
 	val sharedPreferences = PrivateSharedPreferences(context)
 
 
+	//theme state
+	//it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
+	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME, "SYSTEM"))
+	val theme = _theme.asStateFlow()
+
+
 	//state for switch of location toggle between manual and automatic
 	private var _isLocationAuto = MutableStateFlow(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
 	val isLocationAuto = _isLocationAuto.asStateFlow()
@@ -125,6 +131,9 @@ class SettingsViewModel(context: Context) : ViewModel()
 		class IshaOffset(val offset : String) : SettingsEvent()
 
 		object LoadSettings : SettingsEvent()
+
+		//theme
+		class Theme(val theme : String) : SettingsEvent()
 	}
 	//events for the settings screen
 	fun handleEvent(event : SettingsEvent)
@@ -240,6 +249,11 @@ class SettingsViewModel(context: Context) : ViewModel()
 				_asrOffset.value = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT, "0")
 				_maghribOffset.value = sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT, "0")
 				_ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT, "0")
+			}
+			is SettingsEvent.Theme ->
+			{
+				_theme.value = event.theme
+				sharedPreferences.saveData(AppConstants.THEME, event.theme)
 			}
 		}
 	}
