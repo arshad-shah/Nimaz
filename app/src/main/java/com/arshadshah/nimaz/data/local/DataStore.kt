@@ -13,6 +13,8 @@ class DataStore(db : AppDatabase)
 	private val prayerTimesDao = db.prayerTimes
 	private val duaDao = db.dua
 	private val prayerTrackerDao = db.prayersTracker
+	//fastTracker
+	private val fastTrackerDao = db.fastTracker
 
 	//get trtacker for a specific date
 	suspend fun getTrackerForDate(date : String) = prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
@@ -36,6 +38,31 @@ class DataStore(db : AppDatabase)
 	suspend fun getDatesWithTrackers() = prayerTrackerDao.getDatesWithTrackers()
 
 	suspend fun getProgressForDate(date : String) = prayerTrackerDao.getProgressForDate(date)
+
+	//fasting tracker
+
+	//get tracker for a specific date
+	suspend fun getFastTrackerForDate(date : String) = fastTrackerDao.getFastTrackerForDate(date).toFastTracker()
+
+	//get all the trackers
+	suspend fun getAllFastTrackers() = fastTrackerDao.getAllFastTrackers().map { it.toFastTracker() }
+
+	//save a tracker
+	suspend fun saveFastTracker(tracker : FastTracker) = fastTrackerDao.saveFastTracker(tracker.toLocalFastTracker())
+
+	//update a tracker
+	suspend fun updateFastTracker(tracker : FastTracker) =
+		fastTrackerDao.updateFastTracker(tracker.toLocalFastTracker())
+
+	//delete a tracker
+	suspend fun deleteFastTracker(tracker : FastTracker) =
+		fastTrackerDao.deleteFastTracker(tracker.toLocalFastTracker())
+
+	//delete all trackers
+	suspend fun deleteFastAllTrackers() = fastTrackerDao.deleteFastAllTrackers()
+
+	suspend fun fastTrackerExistsForDate(date : String) = fastTrackerDao.fastTrackerExistsForDate(date)
+
 
 	//get all the ayas of a surah
 	suspend fun getAyasOfSurah(surahNumber : Int) =
@@ -326,3 +353,14 @@ private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
 		isha = isha,
 		progress = progress,
 																	)
+
+//fasting
+private fun FastTracker.toLocalFastTracker() = LocalFastTracker(
+		date = date ,
+		isFasting = isFasting ,
+																	   )
+
+private fun LocalFastTracker.toFastTracker() = FastTracker(
+		date = date ,
+		isFasting = isFasting ,
+																	  )
