@@ -39,16 +39,13 @@ fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
 {
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
 
-	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
 
 	val dateState = remember {
 		viewModel.dateState
 	}.collectAsState()
 
 	LaunchedEffect(key1 = "getTrackerForDate") {
-		if(!isIntegrated){
-			viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_ALL_TRACKERS)
-		}
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(!isIntegrated))
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dateState.value))
 	}

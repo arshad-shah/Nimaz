@@ -33,7 +33,6 @@ import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.header.MonthState
 import io.github.boguszpawlowski.composecalendar.rememberSelectableCalendarState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
-import io.github.boguszpawlowski.composecalendar.selection.SelectionMode
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -49,9 +48,8 @@ fun Calender(paddingValues : PaddingValues)
 
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
-	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
 	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
-
 
 	Column(
 			modifier = Modifier
@@ -78,48 +76,48 @@ fun Calender(paddingValues : PaddingValues)
 						CalenderHeader(monthState = monthState)
 					} ,
 					calendarState = rememberSelectableCalendarState(
-							confirmSelectionChange = {
-								mutableDate.value = it.size
-									.let { size ->
-										if (size == 0)
-										{
-											LocalDate.now()
-										}
-										else
-										{
-											it.first()
-										}
-									}
-								true
-							},
-							selectionState = DynamicSelectionState(
-									selectionMode = SelectionMode.Single,
-									selection = mutableDate.value
-										.let { date ->
-											if (date == null)
-											{
-												setOf(LocalDate.now())
-											} else
-											{
-												setOf(date)
-											}
-										}.toList(),
-									confirmSelectionChange = {
-										mutableDate.value = it.size
-											.let { size ->
-												if (size == 0)
-												{
-													LocalDate.now()
-												}
-												else
-												{
-													it.first()
-												}
-											}
-										true
-									}
-
-							),
+//							confirmSelectionChange = {
+//								mutableDate.value = it.size
+//									.let { size ->
+//										if (size == 0)
+//										{
+//											LocalDate.now()
+//										}
+//										else
+//										{
+//											it.first()
+//										}
+//									}
+//								true
+//							},
+//							selectionState = DynamicSelectionState(
+//									selectionMode = SelectionMode.Single,
+//									selection = mutableDate.value
+//										.let { date ->
+//											if (date == null)
+//											{
+//												setOf(LocalDate.now())
+//											} else
+//											{
+//												setOf(date)
+//											}
+//										}.toList(),
+//									confirmSelectionChange = {
+//										mutableDate.value = it.size
+//											.let { size ->
+//												if (size == 0)
+//												{
+//													LocalDate.now()
+//												}
+//												else
+//												{
+//													it.first()
+//												}
+//											}
+//										true
+//									}
+//
+//							),
 																   )
 							  )
 		}
@@ -350,6 +348,8 @@ fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
 			   )
 {
+	val context = LocalContext.current
+	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
 
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
@@ -388,7 +388,8 @@ fun CalenderDay(
 							color = when (importantDay.first)
 							{
 								false -> if (today) MaterialTheme.colorScheme.secondary else if (isSelectedDay) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(
-										alpha = 0.3f)
+										alpha = 0.3f
+																																															  )
 								true -> MaterialTheme.colorScheme.primary
 							} ,
 							shape = MaterialTheme.shapes.medium
@@ -401,6 +402,8 @@ fun CalenderDay(
 							false -> if (dayState.isFromCurrentMonth)
 							{
 								dayState.selectionState.onDateSelected(dayState.date)
+								viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
+								viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dayState.date.toString()))
 							}
 
 							else ->
@@ -408,6 +411,8 @@ fun CalenderDay(
 								if (dayState.isFromCurrentMonth)
 								{
 									dayState.selectionState.onDateSelected(dayState.date)
+									viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
+									viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dayState.date.toString()))
 								}
 								//show the description of the day
 								hasDescription.value = ! hasDescription.value
