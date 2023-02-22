@@ -475,7 +475,7 @@ object AppConstants
 				mapOfDefaultParameters["fajrAngle"] = "13.5"
 				mapOfDefaultParameters["ishaAngle"] = "13.5"
 				mapOfDefaultParameters["ishaInterval"] = "0"
-				mapOfDefaultParameters["madhab"] = "SHAFI"
+				mapOfDefaultParameters["madhab"] = "HANAFI"
 				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
 				mapOfDefaultParameters["fajrAdjustment"] = "2"
 				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
