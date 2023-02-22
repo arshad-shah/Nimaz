@@ -27,7 +27,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.arshadshah.nimaz.utils.LocalDataStore
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.header.MonthState
@@ -43,8 +42,6 @@ import java.time.temporal.ChronoField
 @Composable
 fun Calender(paddingValues : PaddingValues)
 {
-
-	LocalDataStore.init(LocalContext.current)
 
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
