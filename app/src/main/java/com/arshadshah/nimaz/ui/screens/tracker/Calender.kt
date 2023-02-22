@@ -375,8 +375,8 @@ fun CalenderDay(
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)
 					{
-						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer else if (today) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
-						true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f) else if (today) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
+						true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
 					}
 							)
 				) {
@@ -421,10 +421,10 @@ fun CalenderDay(
 					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(8.dp),
+					modifier = Modifier.padding(6.dp),
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
 						true -> MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
@@ -439,11 +439,11 @@ fun CalenderDay(
 					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(8.dp),
+					modifier = Modifier.padding(6.dp),
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
-						else -> MaterialTheme.colorScheme.onPrimaryContainer
+						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer
+						else -> MaterialTheme.colorScheme.onTertiaryContainer
 					}
 				)
 		}
