@@ -95,6 +95,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaAngleVisibility
 	}.collectAsState()
 
+	val ishaInterval = remember {
+		settingViewModel.ishaInterval
+	}.collectAsState()
+
 	val calculationMethod = remember {
 		settingViewModel.calculationMethod
 	}.collectAsState()
@@ -139,19 +143,21 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaOffset
 	}.collectAsState()
 
+	calculationMethodState.value = calculationMethod.value
+	madhabState.value = madhab.value
+	highLatitudeRuleState.value = highLatitudeRule.value
+	fajrAngleState.value = fajrAngle.value
+	ishaAngleState.value = ishaAngle.value
+	ishaIntervalState.value = ishaInterval.value
+	fajrAdjustment.value = fajrAdjustmentValue.value
+	sunriseAdjustment.value = sunriseAdjustmentValue.value
+	dhuhrAdjustment.value = dhuhrAdjustmentValue.value
+	asrAdjustment.value = asrAdjustmentValue.value
+	maghribAdjustment.value = maghribAdjustmentValue.value
+	ishaAdjustment.value = ishaAdjustmentValue.value
+
 	LaunchedEffect(Unit){
 		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
-		calculationMethodState.value = calculationMethod.value
-		madhabState.value = madhab.value
-		highLatitudeRuleState.value = highLatitudeRule.value
-		fajrAngleState.value = fajrAngle.value
-		ishaAngleState.value = ishaAngle.value
-		fajrAdjustment.value = fajrAdjustmentValue.value
-		sunriseAdjustment.value = sunriseAdjustmentValue.value
-		dhuhrAdjustment.value = dhuhrAdjustmentValue.value
-		asrAdjustment.value = asrAdjustmentValue.value
-		maghribAdjustment.value = maghribAdjustmentValue.value
-		ishaAdjustment.value = ishaAdjustmentValue.value
 	}
 
 	Column(
@@ -182,6 +188,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						valueState = calculationMethodState ,
 						onChange = { method: String ->
 							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.CalculationMethod(method))
+							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.UpdateSettings(method))
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
 						} ,
 						height = 500.dp

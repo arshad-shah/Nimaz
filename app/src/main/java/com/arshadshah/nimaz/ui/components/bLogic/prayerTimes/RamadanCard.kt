@@ -64,7 +64,7 @@ fun RamadanCard()
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(16.dp) ,
+					.padding(8.dp) ,
 					) {
 			Column(
 					modifier = Modifier.padding(16.dp) ,

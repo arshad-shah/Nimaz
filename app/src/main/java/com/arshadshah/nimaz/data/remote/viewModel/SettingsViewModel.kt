@@ -73,11 +73,11 @@ class SettingsViewModel(context: Context) : ViewModel()
 	val ishaAngle = _ishaAngle.asStateFlow()
 
 	//ishaAngle visibility state
-	private var _ishaAngleVisibility = MutableStateFlow(sharedPreferences.getData(AppConstants.CALCULATION_METHOD, "IRELAND") == "MAKKAH" || sharedPreferences.getData(AppConstants.CALCULATION_METHOD, "IRELAND") == "QATAR" || sharedPreferences.getData(AppConstants.CALCULATION_METHOD, "IRELAND") == "GULF")
+	private var _ishaAngleVisibility = MutableStateFlow(true)
 	val ishaAngleVisibility = _ishaAngleVisibility.asStateFlow()
 
 	//isha interval state
-	private var _ishaInterval = MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_INTERVAL, "0"))
+	private var _ishaInterval = MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_INTERVAL, "90"))
 	val ishaInterval = _ishaInterval.asStateFlow()
 
 	//offset state
@@ -134,6 +134,8 @@ class SettingsViewModel(context: Context) : ViewModel()
 
 		//theme
 		class Theme(val theme : String) : SettingsEvent()
+		//update settings based on calculation method
+		class UpdateSettings(val method : String) : SettingsEvent()
 	}
 	//events for the settings screen
 	fun handleEvent(event : SettingsEvent)
@@ -143,117 +145,176 @@ class SettingsViewModel(context: Context) : ViewModel()
 			is SettingsEvent.LocationToggle ->
 			{
 				_isLocationAuto.value = event.checked
-				sharedPreferences.saveDataBoolean(LOCATION_TYPE, event.checked)
-				loadLocation(event.context, event.checked)
+				sharedPreferences.saveDataBoolean(LOCATION_TYPE , event.checked)
+				loadLocation(event.context , event.checked)
 			}
+
 			is SettingsEvent.LocationInput ->
 			{
 				_locationName.value = event.location
-				sharedPreferences.saveData(AppConstants.LOCATION_INPUT, event.location)
-				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
+				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , event.location)
+				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
 			}
+
 			is SettingsEvent.LoadLocation ->
 			{
-				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
+				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
 			}
+
 			is SettingsEvent.BatteryExempt ->
 			{
 				_isBatteryExempt.value = event.exempt
-				sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION, event.exempt)
+				sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , event.exempt)
 			}
+
 			is SettingsEvent.CalculationMethod ->
 			{
 				_calculationMethod.value = event.method
-				sharedPreferences.saveData(AppConstants.CALCULATION_METHOD, event.method)
+				sharedPreferences.saveData(AppConstants.CALCULATION_METHOD , event.method)
 			}
+
 			is SettingsEvent.Madhab ->
 			{
 				_madhab.value = event.madhab
-				sharedPreferences.saveData(AppConstants.MADHAB, event.madhab)
+				sharedPreferences.saveData(AppConstants.MADHAB , event.madhab)
 			}
+
 			is SettingsEvent.HighLatitude ->
 			{
 				_highLatitude.value = event.rule
-				sharedPreferences.saveData(AppConstants.HIGH_LATITUDE_RULE, event.rule)
+				sharedPreferences.saveData(AppConstants.HIGH_LATITUDE_RULE , event.rule)
 			}
+
 			is SettingsEvent.FajrAngle ->
 			{
 				_fajrAngle.value = event.angle
-				sharedPreferences.saveData(AppConstants.FAJR_ANGLE, event.angle)
+				sharedPreferences.saveData(AppConstants.FAJR_ANGLE , event.angle)
 			}
+
 			is SettingsEvent.IshaAngle ->
 			{
 				_ishaAngle.value = event.angle
-				sharedPreferences.saveData(AppConstants.ISHA_ANGLE, event.angle)
+				sharedPreferences.saveData(AppConstants.ISHA_ANGLE , event.angle)
 			}
+
 			is SettingsEvent.IshaAngleVisibility ->
 			{
 				_ishaAngleVisibility.value = event.visible
-				if (!event.visible)
+				if (! event.visible)
 				{
 					_ishaAngle.value = "0"
-					sharedPreferences.saveData(AppConstants.ISHA_ANGLE, "0")
+					sharedPreferences.saveData(AppConstants.ISHA_ANGLE , "0")
 				}
 			}
+
 			is SettingsEvent.IshaInterval ->
 			{
 				_ishaInterval.value = event.interval
-				sharedPreferences.saveData(AppConstants.ISHA_INTERVAL, event.interval)
+				sharedPreferences.saveData(AppConstants.ISHA_INTERVAL , event.interval)
 			}
 			//offset
 			is SettingsEvent.FajrOffset ->
 			{
 				_fajrOffset.value = event.offset
-				sharedPreferences.saveData(AppConstants.FAJR_ADJUSTMENT, event.offset)
+				sharedPreferences.saveData(AppConstants.FAJR_ADJUSTMENT , event.offset)
 			}
+
 			is SettingsEvent.SunriseOffset ->
 			{
 				_sunriseOffset.value = event.offset
-				sharedPreferences.saveData(AppConstants.SUNRISE_ADJUSTMENT, event.offset)
+				sharedPreferences.saveData(AppConstants.SUNRISE_ADJUSTMENT , event.offset)
 			}
+
 			is SettingsEvent.DhuhrOffset ->
 			{
 				_dhuhrOffset.value = event.offset
-				sharedPreferences.saveData(AppConstants.DHUHR_ADJUSTMENT, event.offset)
+				sharedPreferences.saveData(AppConstants.DHUHR_ADJUSTMENT , event.offset)
 			}
+
 			is SettingsEvent.AsrOffset ->
 			{
 				_asrOffset.value = event.offset
-				sharedPreferences.saveData(AppConstants.ASR_ADJUSTMENT, event.offset)
+				sharedPreferences.saveData(AppConstants.ASR_ADJUSTMENT , event.offset)
 			}
+
 			is SettingsEvent.MaghribOffset ->
 			{
 				_maghribOffset.value = event.offset
-				sharedPreferences.saveData(AppConstants.MAGHRIB_ADJUSTMENT, event.offset)
+				sharedPreferences.saveData(AppConstants.MAGHRIB_ADJUSTMENT , event.offset)
 			}
+
 			is SettingsEvent.IshaOffset ->
 			{
 				_ishaOffset.value = event.offset
-				sharedPreferences.saveData(AppConstants.ISHA_ADJUSTMENT, event.offset)
+				sharedPreferences.saveData(AppConstants.ISHA_ADJUSTMENT , event.offset)
 			}
+
 			is SettingsEvent.LoadSettings ->
 			{
-				_isLocationAuto.value = sharedPreferences.getDataBoolean(LOCATION_TYPE, false)
-				_locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-				_isBatteryExempt.value = sharedPreferences.getDataBoolean(AppConstants.BATTERY_OPTIMIZATION, false)
-				_calculationMethod.value = sharedPreferences.getData(AppConstants.CALCULATION_METHOD, "ISNA")
-				_madhab.value = sharedPreferences.getData(AppConstants.MADHAB, "Shafi")
-				_highLatitude.value = sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE, "AngleBased")
-				_fajrAngle.value = sharedPreferences.getData(AppConstants.FAJR_ANGLE, "18")
-				_ishaAngle.value = sharedPreferences.getData(AppConstants.ISHA_ANGLE, "17")
-				_ishaAngleVisibility.value = _calculationMethod.value != "MAKKAH" && _calculationMethod.value != "QATAR" && _calculationMethod.value != "GULF"
-				_ishaInterval.value = sharedPreferences.getData(AppConstants.ISHA_INTERVAL, "0")
-				_fajrOffset.value = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT, "0")
-				_sunriseOffset.value = sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT, "0")
-				_dhuhrOffset.value = sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT, "0")
-				_asrOffset.value = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT, "0")
-				_maghribOffset.value = sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT, "0")
-				_ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT, "0")
+				_isLocationAuto.value = sharedPreferences.getDataBoolean(LOCATION_TYPE , false)
+				_locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
+				_isBatteryExempt.value =
+					sharedPreferences.getDataBoolean(AppConstants.BATTERY_OPTIMIZATION , false)
+				_calculationMethod.value =
+					sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "ISNA")
+				_madhab.value = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
+				_highLatitude.value =
+					sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
+				_fajrAngle.value = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
+				_ishaAngle.value = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
+				val isNotAnIntervalMethod = when (_calculationMethod.value)
+				{
+					"MAKKAH" , "QATAR" , "GULF" -> false
+					else -> true
+				}
+				_ishaAngleVisibility.value = isNotAnIntervalMethod
+				_ishaInterval.value = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "90")
+				_fajrOffset.value = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
+				_sunriseOffset.value =
+					sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
+				_dhuhrOffset.value = sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
+				_asrOffset.value = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT , "0")
+				_maghribOffset.value =
+					sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
+				_ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
 			}
 			is SettingsEvent.Theme ->
 			{
 				_theme.value = event.theme
 				sharedPreferences.saveData(AppConstants.THEME, event.theme)
+			}
+
+			is SettingsEvent.UpdateSettings ->
+			{
+				val defaultsForMethod = AppConstants.getDefaultParametersForMethod(event.method)
+				_fajrAngle.value = defaultsForMethod["fajrAngle"] !!
+				_ishaAngle.value = defaultsForMethod["ishaAngle"] !!
+				val shouldBeVisible = defaultsForMethod["ishaInterval"] == "0"
+				_ishaAngleVisibility.value = shouldBeVisible
+				_ishaInterval.value = defaultsForMethod["ishaInterval"] !!
+				_madhab.value = defaultsForMethod["madhab"] !!
+				_highLatitude.value = defaultsForMethod["highLatitudeRule"] !!
+				_fajrOffset.value = defaultsForMethod["fajrAdjustment"] !!
+				_sunriseOffset.value = defaultsForMethod["sunriseAdjustment"] !!
+				_dhuhrOffset.value = defaultsForMethod["dhuhrAdjustment"] !!
+				_asrOffset.value = defaultsForMethod["asrAdjustment"] !!
+				_maghribOffset.value = defaultsForMethod["maghribAdjustment"] !!
+				_ishaOffset.value = defaultsForMethod["ishaAdjustment"] !!
+
+				//save it to shared preferences
+				sharedPreferences.saveData(AppConstants.CALCULATION_METHOD , event.method)
+				sharedPreferences.saveData(AppConstants.MADHAB , defaultsForMethod["madhab"] !!)
+				sharedPreferences.saveData(AppConstants.HIGH_LATITUDE_RULE , defaultsForMethod["highLatitudeRule"] !!)
+				sharedPreferences.saveData(AppConstants.FAJR_ANGLE , defaultsForMethod["fajrAngle"] !!)
+				sharedPreferences.saveData(AppConstants.ISHA_ANGLE , defaultsForMethod["ishaAngle"] !!)
+				sharedPreferences.saveData(AppConstants.ISHA_INTERVAL , defaultsForMethod["ishaInterval"] !!)
+				sharedPreferences.saveData(AppConstants.FAJR_ADJUSTMENT , defaultsForMethod["fajrAdjustment"] !!)
+				sharedPreferences.saveData(AppConstants.SUNRISE_ADJUSTMENT , defaultsForMethod["sunriseAdjustment"] !!)
+				sharedPreferences.saveData(AppConstants.DHUHR_ADJUSTMENT , defaultsForMethod["dhuhrAdjustment"] !!)
+				sharedPreferences.saveData(AppConstants.ASR_ADJUSTMENT , defaultsForMethod["asrAdjustment"] !!)
+				sharedPreferences.saveData(AppConstants.MAGHRIB_ADJUSTMENT , defaultsForMethod["maghribAdjustment"] !!)
+				sharedPreferences.saveData(AppConstants.ISHA_ADJUSTMENT , defaultsForMethod["ishaAdjustment"] !!)
+
 			}
 		}
 	}
