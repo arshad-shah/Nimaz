@@ -55,6 +55,10 @@ class TrackerViewModel : ViewModel()
 	private var _progressState = MutableStateFlow(0)
 	val progressState = _progressState.asStateFlow()
 
+	//a progressfor a specific date
+	private var _progressForDate = MutableStateFlow(Pair(LocalDate.now().toString(),0))
+	val progressForDate = _progressForDate.asStateFlow()
+
 	//dates with trackers
 	private var _allTrackers = MutableStateFlow(listOf<PrayerTracker>())
 	val allTrackers = _allTrackers.asStateFlow()
@@ -120,7 +124,7 @@ class TrackerViewModel : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val tracker = dataStore.getTrackerForDate(date)
-				_progressState.value = tracker.progress
+				_progressForDate.value = Pair(date,tracker.progress)
 			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")

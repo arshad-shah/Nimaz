@@ -5,10 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,7 +46,7 @@ fun Calender(paddingValues : PaddingValues)
 
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
-	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
 	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
 
 
@@ -351,6 +348,11 @@ fun CalenderDay(
 			   )
 {
 
+	val viewModel = viewModel(key="TrackerViewModel", initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_DATE(dayState.date.toString()))
+	val progressOfDay = remember {
+		viewModel.progressForDate
+	}.collectAsState()
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
 	val currentDate = dayState.date
@@ -375,7 +377,7 @@ fun CalenderDay(
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)
 					{
-						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f) else if (today) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f) else if (today) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f) else if(LocalDate.parse(progressOfDay.value.first) == dayState.date) Color.Red else MaterialTheme.colorScheme.surface
 						true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
 					}
 							)
@@ -388,7 +390,8 @@ fun CalenderDay(
 							color = when (importantDay.first)
 							{
 								false -> if (today) MaterialTheme.colorScheme.secondary else if (isSelectedDay) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(
-										alpha = 0.3f)
+										alpha = 0.3f
+																																															  )
 								true -> MaterialTheme.colorScheme.primary
 							} ,
 							shape = MaterialTheme.shapes.medium
