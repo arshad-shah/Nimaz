@@ -14,8 +14,8 @@ import com.arshadshah.nimaz.data.local.models.*
 		TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class] ,
-		version = 7 ,
+		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class, LocalFastTracker::class] ,
+		version = 8 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -27,6 +27,7 @@ abstract class AppDatabase : RoomDatabase()
 	abstract val prayerTimes : PrayerTimesDao
 	abstract val dua : DuaDao
 	abstract val prayersTracker : PrayerTrackerDao
+	abstract val fastTracker : FastTrackerDao
 
 	class Migration1To2 : Migration(1 , 2)
 	{
@@ -138,6 +139,20 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("DROP TABLE IF EXISTS PrayersTracker")
 			//rename new table
 			database.execSQL("ALTER TABLE PrayersTracker_new RENAME TO PrayersTracker")
+		}
+	}
+
+	//migration from version 7 to 8
+	//a migration to add a new table for the new feature of the app
+	class Migration7To8 : Migration(7 , 8)
+	{
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//create a new table
+//			database.execSQL("CREATE TABLE IF NOT EXISTS `QuranTracker_new` (`date` TEXT NOT NULL, `ayaNumber` INTEGER NOT NULL, `suraNumber` INTEGER NOT NULL, `ayaNumberInSurah` INTEGER NOT NULL, `progress` INTEGER NOT NULL, PRIMARY KEY(`date`))")
+
+			//fasting tracker
+			database.execSQL("CREATE TABLE IF NOT EXISTS `FastTracker` (`date` TEXT NOT NULL, `isFasting` INTEGER NOT NULL, PRIMARY KEY(`date`))")
 		}
 	}
 }
