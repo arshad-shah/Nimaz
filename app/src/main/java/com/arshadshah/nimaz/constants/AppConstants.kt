@@ -128,10 +128,11 @@ object AppConstants
 
 	// bottom nav item titles
 	const val PRAYER_TIMES_SCREEN_TITLE = "Prayer"
-	const val QIBLA_SCREEN_TITLE = "Qibla"
+	const val DASHBOARD_SCREEN_TITLE = "Home"
 	const val QURAN_SCREEN_TITLE = "Quran"
 	const val MORE_SCREEN_TITLE = "More"
 	const val SETTINGS_SCREEN_TITLE = "Settings"
+
 
 	//bottom nav item routes
 	const val PRAYER_TIMES_SCREEN_ROUTE = "prayer_times_screen"
@@ -151,6 +152,7 @@ object AppConstants
 	const val ABOUT_SCREEN_ROUTE = "about_screen"
 	const val PRAYER_TRACKER_SCREEN_ROUTE = "prayer_tracker_screen"
 	const val CALENDER_SCREEN_ROUTE : String = "calendar_screen"
+	const val DASHBOARD_SCREEN = "dashboard_screen"
 
 	//Logging tags
 
