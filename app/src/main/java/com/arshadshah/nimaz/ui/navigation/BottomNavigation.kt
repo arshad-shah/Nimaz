@@ -14,8 +14,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 fun BottomNavigationBar(navController : NavController)
 {
 	val bottomNavItems = listOf(
+			BottomNavItem.Dashboard ,
 			BottomNavItem.PrayerTimesScreen ,
-			BottomNavItem.QiblaScreen ,
 			BottomNavItem.QuranScreen ,
 			BottomNavItem.MoreScreen ,
 			BottomNavItem.SettingsScreen

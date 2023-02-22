@@ -1,21 +1,24 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun FastTrackerCard(
@@ -36,84 +39,37 @@ fun FastTrackerCard(
 				.fillMaxWidth()
 				.padding(4.dp)
 				) {
-		Column(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
-				horizontalAlignment = Alignment.CenterHorizontally ,
-				verticalArrangement = Arrangement.Center
-			  ) {
-			if(!showDateSelector.value){
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(
-									start = 6.dp ,
-									end = 6.dp ,
-									top = 4.dp ,
-									bottom = 4.dp
-									) ,
-						horizontalArrangement = Arrangement.SpaceBetween ,
-						verticalAlignment = Alignment.CenterVertically
-				   ) {
-					Text(
-							text = "Fasting" , style = MaterialTheme.typography.titleMedium
-						)
-					Text(
-							text = LocalDate.parse(dateState.value)
-								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							style = MaterialTheme.typography.titleMedium
-						)
-				}
-			}
 			Row(
 					modifier = Modifier
-						.fillMaxWidth()
-						.padding(
-								start = 6.dp ,
-								end = 6.dp ,
-								top = 4.dp ,
-								bottom = 4.dp
-								) ,
+						.padding(8.dp)
+						.fillMaxWidth(),
 					horizontalArrangement = Arrangement.Start ,
 					verticalAlignment = Alignment.CenterVertically
 			   ) {
-				IconButton(
-						modifier = Modifier
-							.padding(vertical = 8.dp , horizontal = 4.dp)
-							.size(32.dp)
-							.border(1.dp , MaterialTheme.colorScheme.primary , CircleShape) ,
-						onClick = {
+				ToggleableItem(
+						text = if (isFastingToday.value) "Fasting" else "Not Fasting"  ,
+						checked = isFastingToday.value ,
+						onCheckedChange = {
 							isFastingToday.value = !isFastingToday.value
 							handleEvent(TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
 									FastTracker(
 											date = dateState.value ,
 											isFasting = isFastingToday.value
-												)
-										))
-						}) {
-					if (!isFastingToday.value){
-						Icon(
-								painter = painterResource(id = R.drawable.cross_icon) ,
-								contentDescription = "Close" ,
-								tint = MaterialTheme.colorScheme.primary ,
-								modifier = Modifier.size(48.dp)
-							)
-					}else{
-						Icon(
-								painter = painterResource(id = R.drawable.check_icon) ,
-								contentDescription = "Check" ,
-								tint = MaterialTheme.colorScheme.primary ,
-								modifier = Modifier.size(48.dp)
-							)
-					}
-				}
-				Text(
-						text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,
-						style = MaterialTheme.typography.titleMedium,
-						modifier = Modifier.padding(start = 16.dp)
-					)
+											   )
+																						 ))
+						} ,
+						modifier = Modifier
+							.padding(8.dp)
+							.placeholder(
+									visible = false ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										) ,
+						showDateSelector = showDateSelector.value
+							  )
 			}
-		}
 	}
 }

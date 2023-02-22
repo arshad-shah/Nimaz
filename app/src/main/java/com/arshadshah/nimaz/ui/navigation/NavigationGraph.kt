@@ -22,6 +22,7 @@ import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
@@ -56,7 +57,7 @@ fun NavigationGraph(
 
 	AnimatedNavHost(
 			navController = navController as NavHostController ,
-			startDestination = BottomNavItem.PrayerTimesScreen.screen_route ,
+			startDestination = BottomNavItem.Dashboard.screen_route ,
 			enterTransition = {
 				when (initialState.destination.route)
 				{
@@ -65,7 +66,7 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
-					BottomNavItem.QiblaScreen.screen_route ->
+					QIBLA_SCREEN_ROUTE ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -121,6 +122,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
 					CALENDER_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.Dashboard.screen_route ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -136,7 +142,7 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
-					BottomNavItem.QiblaScreen.screen_route ->
+					QIBLA_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -192,6 +198,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
 					CALENDER_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					BottomNavItem.Dashboard.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -207,7 +218,7 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
-					BottomNavItem.QiblaScreen.screen_route ->
+					QIBLA_SCREEN_ROUTE ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -263,6 +274,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
 					CALENDER_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					BottomNavItem.Dashboard.screen_route ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -278,7 +294,7 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
-					BottomNavItem.QiblaScreen.screen_route ->
+					QIBLA_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -338,10 +354,19 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
+					BottomNavItem.Dashboard.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
 					else -> ExitTransition.None
 				}
 			}
 				   ) {
+
+		composable(BottomNavItem.Dashboard.screen_route){
+			Dashboard()
+		}
 
 		composable(BottomNavItem.PrayerTimesScreen.screen_route)
 		{
@@ -356,7 +381,7 @@ fun NavigationGraph(
 			Calender(paddingValues)
 		}
 
-		composable(BottomNavItem.QiblaScreen.screen_route) {
+		composable(QIBLA_SCREEN_ROUTE) {
 			QiblaScreen(paddingValues)
 		}
 		composable(BottomNavItem.QuranScreen.screen_route) {
@@ -408,6 +433,9 @@ fun NavigationGraph(
 					} ,
 					onNavigateToListOfTasbeeh = {
 						navController.navigate(CHAPTERS_SCREEN_ROUTE)
+					} ,
+					onNavigateToQibla = {
+						navController.navigate(QIBLA_SCREEN_ROUTE)
 					} ,
 					onNavigateToShadah = {
 						navController.navigate(SHAHADAH_SCREEN_ROUTE)
