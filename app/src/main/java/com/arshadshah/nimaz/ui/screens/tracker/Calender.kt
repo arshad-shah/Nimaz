@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.LocalDataStore
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.header.MonthState
@@ -43,6 +44,9 @@ import java.time.temporal.ChronoField
 @Composable
 fun Calender(paddingValues : PaddingValues)
 {
+
+	LocalDataStore.init(LocalContext.current)
+
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
 	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
@@ -119,7 +123,7 @@ fun Calender(paddingValues : PaddingValues)
 																   )
 							  )
 		}
-		PrayerTracker(paddingValues = PaddingValues(vertical = 4.dp), isIntegrated = true)
+		PrayerTracker(paddingValues = PaddingValues(0.dp), isIntegrated = true)
 	}
 }
 
@@ -243,7 +247,7 @@ fun CalenderHeader(monthState : MonthState)
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall,
 									modifier = Modifier
-										.padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
 										.alpha(0.5f)
 								)
 						}
@@ -253,7 +257,7 @@ fun CalenderHeader(monthState : MonthState)
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall,
 									modifier = Modifier
-										.padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
 										.alpha(0.5f)
 								)
 							Icon(
@@ -306,7 +310,7 @@ fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 4.dp, vertical = 8.dp) ,
+					.padding(horizontal = 4.dp , vertical = 8.dp) ,
 				horizontalArrangement = Arrangement.Center
 		   ) {
 			weekState.forEach { dayOfWeek ->
@@ -364,14 +368,29 @@ fun CalenderDay(
 			modifier = Modifier
 				.padding(2.dp)
 				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
-				.shadow(if (today || isSelectedDay) 6.dp else 3.dp, shape = MaterialTheme.shapes.medium) ,
+				.shadow(
+						if (today || isSelectedDay) 6.dp else 0.dp ,
+						shape = MaterialTheme.shapes.medium
+					   ) ,
+			colors = CardDefaults.elevatedCardColors(
+					containerColor = when (importantDay.first)
+					{
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer else if (today) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+						true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+					}
+							)
 				) {
 
 		Column(
 				modifier = Modifier
 					.border(
-							width = 1.dp ,
-							color = if (today || isSelectedDay) MaterialTheme.colorScheme.primary else Color.Transparent ,
+							width = if (today || isSelectedDay) 2.dp else 1.dp ,
+							color = when (importantDay.first)
+							{
+								false -> if (today) MaterialTheme.colorScheme.secondary else if (isSelectedDay) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(
+										alpha = 0.3f)
+								true -> MaterialTheme.colorScheme.primary
+							} ,
 							shape = MaterialTheme.shapes.medium
 						   )
 					.clickable(
@@ -405,8 +424,8 @@ fun CalenderDay(
 					modifier = Modifier.padding(8.dp),
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
-						true -> MaterialTheme.colorScheme.primary
+						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+						true -> MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
 			Divider(
@@ -423,8 +442,8 @@ fun CalenderDay(
 					modifier = Modifier.padding(8.dp),
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
-						else -> MaterialTheme.colorScheme.primary
+						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+						else -> MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
 		}
@@ -612,7 +631,7 @@ fun isImportantDay(day : Int , month : Int) : Pair<Boolean , String>
 @Composable
 fun PrayerTrackerPreview()
 {
-	NimazTheme {
+	NimazTheme(darkTheme = true) {
 		Calender(PaddingValues(8.dp))
 	}
 }

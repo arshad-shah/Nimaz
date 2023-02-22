@@ -25,12 +25,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
-import com.github.tehras.charts.bar.BarChart
-import com.github.tehras.charts.bar.BarChartData
-import com.github.tehras.charts.bar.renderer.bar.SimpleBarDrawer
-import com.github.tehras.charts.bar.renderer.label.SimpleValueDrawer
-import com.github.tehras.charts.bar.renderer.yaxis.SimpleYAxisDrawer
-import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -105,44 +99,74 @@ fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
 	Column(modifier = Modifier.padding(paddingValues) , horizontalAlignment = Alignment.CenterHorizontally) {
 
 	ElevatedCard(
-			modifier = Modifier.padding(top = 0.dp , bottom = 8.dp , start = 8.dp , end = 8.dp) ,
+			modifier = Modifier.padding(top = 4.dp , bottom = 8.dp , start = 0.dp , end = 0.dp) ,
 				) {
-		Column {
-			TabRow(selectedTabIndex = selectedTab) {
-				titles.forEachIndexed { index , title ->
-					Tab(
-							selected = selectedTab == index ,
-							onClick = { setSelectedTab(index) } ,
-							text = {
-								Text(
-										textAlign = TextAlign.Center ,
-										text = title ,
-										maxLines = 2 ,
-										overflow = TextOverflow.Ellipsis ,
-										style = MaterialTheme.typography.titleSmall
-									)
-							}
-					   )
+		if(showDateSelector.value){
+			Column {
+				TabRow(selectedTabIndex = selectedTab) {
+					titles.forEachIndexed { index , title ->
+						Tab(
+								selected = selectedTab == index ,
+								onClick = { setSelectedTab(index) } ,
+								text = {
+									Text(
+											textAlign = TextAlign.Center ,
+											text = title ,
+											maxLines = 2 ,
+											overflow = TextOverflow.Ellipsis ,
+											style = MaterialTheme.typography.titleSmall
+										)
+								}
+						   )
+					}
 				}
-			}
-			when (selectedTab)
-			{
-				0 ->
+				when (selectedTab)
 				{
-					PrayerTrackerList(
-							viewModel::onEvent ,
-							stateOfTrackerForToday.value,
-							fajrState.value,
-							zuhrState.value,
-							asrState.value,
-							maghribState.value,
-							ishaState.value,
-							showDateSelector,
-							dateState,
-									progressState
-									 )
+					0 ->
+					{
+						PrayerTrackerList(
+								viewModel::onEvent ,
+								stateOfTrackerForToday.value,
+								fajrState.value,
+								zuhrState.value,
+								asrState.value,
+								maghribState.value,
+								ishaState.value,
+								showDateSelector,
+								dateState,
+								progressState
+										 )
+					}
 				}
 			}
+		}
+		else{
+
+			Row(
+					modifier = Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+					horizontalArrangement = Arrangement.SpaceBetween,
+					verticalAlignment = Alignment.CenterVertically
+			   ){
+				Text(
+						text = "Prayer Tracker" , style = MaterialTheme.typography.titleMedium
+					)
+				Text(
+						text = LocalDate.parse(dateState.value)
+							.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) , style = MaterialTheme.typography.titleMedium
+					)
+			}
+			PrayerTrackerList(
+					viewModel::onEvent ,
+					stateOfTrackerForToday.value,
+					fajrState.value,
+					zuhrState.value,
+					asrState.value,
+					maghribState.value,
+					ishaState.value,
+					showDateSelector,
+					dateState,
+					progressState
+							 )
 		}
 	}
 
