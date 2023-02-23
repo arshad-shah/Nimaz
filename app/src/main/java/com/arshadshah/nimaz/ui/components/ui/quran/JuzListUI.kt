@@ -31,7 +31,7 @@ fun JuzListUI(
 	loading : Boolean ,
 			 )
 {
-	LazyColumn(userScrollEnabled = true) {
+	LazyColumn(userScrollEnabled = !loading) {
 		items(juz.size) { index ->
 			JuzListItemUI(
 					loading = loading ,
@@ -79,7 +79,7 @@ fun JuzListItemUI(
 					.padding(8.dp)
 					.fillMaxWidth()
 					.clickable(
-							enabled = true
+							enabled = !loading ,
 							  ) {
 						onNavigateToAyatScreen(juzNumber , false , translation)
 					}

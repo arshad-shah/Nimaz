@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,73 +21,29 @@ import java.util.*
 
 class QuranViewModel(context : Context) : ViewModel()
 {
+	//repository
+	private val quranRepository = QuranRepository
 
-	sealed class SurahState
-	{
-
-		object Loading : SurahState()
-		data class Success(val data : ArrayList<Surah>?) : SurahState()
-		data class Error(val errorMessage : String) : SurahState()
-	}
-
-	sealed class JuzState
-	{
-
-		object Loading : JuzState()
-		data class Success(val data : ArrayList<Juz>) : JuzState()
-		data class Error(val errorMessage : String) : JuzState()
-	}
-
-	sealed class AyaSurahState
-	{
-
-		object Loading : AyaSurahState()
-		data class Success(val data : ArrayList<Aya>) : AyaSurahState()
-		data class Error(val errorMessage : String) : AyaSurahState()
-	}
-
-	sealed class AyaJuzState
-	{
-
-		object Loading : AyaJuzState()
-		data class Success(val data : ArrayList<Aya>) : AyaJuzState()
-		data class Error(val errorMessage : String) : AyaJuzState()
-	}
-
-	//aya features state
-	sealed class AyaState
-	{
-
-		object Loading : AyaState()
-		data class Success(val data : String) : AyaState()
-		data class Error(val errorMessage : String) : AyaState()
-	}
-
-	private var _noteOfAya = MutableLiveData<String>()
-	val noteOfAya : LiveData<String> = _noteOfAya
-
-	private var _ayaState = MutableStateFlow(AyaState.Loading as AyaState)
-	val ayaState = _ayaState.asStateFlow()
-
-	private var _ayaJuzstate = MutableStateFlow(AyaJuzState.Loading as AyaJuzState)
-	val ayaJuzstate = _ayaJuzstate.asStateFlow()
-
-	private var _ayaSurahstate = MutableStateFlow(AyaSurahState.Loading as AyaSurahState)
-	val ayaSurahState = _ayaSurahstate.asStateFlow()
+	val sharedPreferences = PrivateSharedPreferences(context)
 
 
-	private var _surahState = MutableStateFlow(SurahState.Loading as SurahState)
-	val surahState = _surahState.asStateFlow()
+	//general state for error and loading
+	private val _errorState = MutableStateFlow("")
+	val errorState = _errorState.asStateFlow()
+	private val _loadingState = MutableStateFlow(false)
+	val loadingState = _loadingState.asStateFlow()
 
 
-	private var _juzState = MutableStateFlow(JuzState.Loading as JuzState)
-	val juzState = _juzState.asStateFlow()
+	//surah list state
+	private var _surahListState = MutableStateFlow(ArrayList<Surah>())
+	val surahListState = _surahListState.asStateFlow()
 
-	init
-	{
-		getSurahList(context)
-		getJuzList(context)
-	}
+	//juz list state
+	private var _juzListState = MutableStateFlow(ArrayList<Juz>())
+	val juzListState = _juzListState.asStateFlow()
+
+	private val _ayaListState = MutableStateFlow(ArrayList<Aya>())
+	val ayaListState = _ayaListState.asStateFlow()
 
 	//state for quran menu features like page display, font size, font type, etc
 	private val _arabic_Font_size = MutableStateFlow(24.0f)
@@ -104,17 +61,17 @@ class QuranViewModel(context : Context) : ViewModel()
 	private val _display_Mode = MutableStateFlow("List")
 	val display_Mode = _display_Mode.asStateFlow()
 
-	val sharedPreferences = PrivateSharedPreferences(context)
+
+	init
+	{
+		getSurahList()
+		getJuzList()
+	}
 
 
 	//events for quran menu features like page display, font size, font type, etc
 	sealed class QuranMenuEvents
 	{
-		//reload ui
-		object Reload_Surah : QuranMenuEvents()
-		object Reload_Juz : QuranMenuEvents()
-		object Reload_Aya : QuranMenuEvents()
-
 		//change arabic font
 		data class Change_Arabic_Font(val font : String) : QuranMenuEvents()
 		//change translation font
@@ -134,46 +91,28 @@ class QuranViewModel(context : Context) : ViewModel()
 	{
 		when (event)
 		{
-			is QuranMenuEvents.Reload_Surah ->
-			{
-				_surahState.value = SurahState.Loading
-			}
-			is QuranMenuEvents.Reload_Juz ->
-			{
-				_juzState.value = JuzState.Loading
-			}
-			is QuranMenuEvents.Reload_Aya ->
-			{
-				_ayaState.value = AyaState.Loading
-			}
 			is QuranMenuEvents.Change_Arabic_Font ->
 			{
-				_ayaState.value = AyaState.Loading
 				_arabic_Font.value = event.font
 			}
 			is QuranMenuEvents.Change_Translation ->
 			{
-				_ayaState.value = AyaState.Loading
 				_translation.value = event.lang
 			}
 			is QuranMenuEvents.Change_Arabic_Font_Size ->
 			{
-				_ayaState.value = AyaState.Loading
 				_arabic_Font_size.value = event.size
 			}
 			is QuranMenuEvents.Change_Translation_Font_Size ->
 			{
-				_ayaState.value = AyaState.Loading
 				_translation_Font_size.value = event.size
 			}
 			is QuranMenuEvents.Change_Display_Mode ->
 			{
-				_ayaState.value = AyaState.Loading
 				_display_Mode.value = event.mode
 			}
 			is QuranMenuEvents.Initialize_Quran ->
 			{
-				_ayaState.value = AyaState.Loading
 				_arabic_Font.value = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
 				_translation.value = sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE , "English")
 				_arabic_Font_size.value = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
@@ -183,9 +122,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun getSurahList(context : Context)
+	fun getSurahList()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
+			_loadingState.value = true
+			_errorState.value = ""
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -193,29 +134,39 @@ class QuranViewModel(context : Context) : ViewModel()
 				if (surahAvailable > 0)
 				{
 					val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<Surah>
-					_surahState.value = SurahState.Success(surahList)
+					_surahListState.value = surahList
+					_loadingState.value = false
+					_errorState.value = ""
 				} else
 				{
-					val response = QuranRepository.getSurahs()
+					val response = quranRepository.getSurahs()
 					if (response.data != null)
 					{
 						dataStore.saveAllSurah(response.data)
-						_surahState.value = SurahState.Success(response.data)
+						_surahListState.value = response.data
+						_loadingState.value = false
+						_errorState.value = ""
 					} else
 					{
-						_surahState.value = SurahState.Error(response.message !!)
+						_surahListState.value = ArrayList()
+						_loadingState.value = false
+						_errorState.value = response.message!!
 					}
 				}
 			} catch (e : Exception)
 			{
-				_surahState.value = SurahState.Error(e.message ?: "Unknown error")
+				_surahListState.value = ArrayList()
+				_loadingState.value = false
+				_errorState.value = e.message!!
 			}
 		}
 	}
 
-	fun getJuzList(context : Context)
+	fun getJuzList()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
+			_loadingState.value = true
+			_errorState.value = ""
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -223,22 +174,30 @@ class QuranViewModel(context : Context) : ViewModel()
 				if (juzAvailable > 0)
 				{
 					val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<Juz>
-					_juzState.value = JuzState.Success(juzList)
+					_juzListState.value = juzList
+					_loadingState.value = false
+					_errorState.value = ""
 				} else
 				{
-					val response = QuranRepository.getJuzs()
+					val response = quranRepository.getJuzs()
 					if (response.data != null)
 					{
 						dataStore.saveAllJuz(response.data)
-						_juzState.value = JuzState.Success(response.data)
+						_juzListState.value = response.data
+						_loadingState.value = false
+						_errorState.value = ""
 					} else
 					{
-						_juzState.value = JuzState.Error(response.message !!)
+						_juzListState.value = ArrayList()
+						_loadingState.value = false
+						_errorState.value = response.message!!
 					}
 				}
 			} catch (e : Exception)
 			{
-				_juzState.value = JuzState.Error(e.message ?: "Unknown error")
+				_juzListState.value = ArrayList()
+				_loadingState.value = false
+				_errorState.value = e.message!!
 			}
 		}
 	}
@@ -246,6 +205,8 @@ class QuranViewModel(context : Context) : ViewModel()
 	fun getAllAyaForSurah(surahNumber : Int , language : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
+			_loadingState.value = true
+			_errorState.value = ""
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -261,24 +222,32 @@ class QuranViewModel(context : Context) : ViewModel()
 						dataStore.getAyasOfSurah(surahNumber) as ArrayList<Aya>
 					val newList =
 						addBismillahToFirstAya(surahAyatList , languageConverted , surahNumber)
-					_ayaSurahstate.value = AyaSurahState.Success(newList)
+					_ayaListState.value = newList
+					_loadingState.value = false
+					_errorState.value = ""
 				} else
 				{
-					val response = QuranRepository.getAyaForSurah(surahNumber , language)
+					val response = quranRepository.getAyaForSurah(surahNumber , language)
 					if (response.data != null)
 					{
 						dataStore.insertAyats(response.data)
 						val newList =
 							addBismillahToFirstAya(response.data , languageConverted , surahNumber)
-						_ayaSurahstate.value = AyaSurahState.Success(newList)
+						_ayaListState.value = newList
+						_loadingState.value = false
+						_errorState.value = ""
 					} else
 					{
-						_ayaSurahstate.value = AyaSurahState.Error(response.message !!)
+						_ayaListState.value = ArrayList()
+						_loadingState.value = false
+						_errorState.value = response.message!!
 					}
 				}
 			} catch (e : Exception)
 			{
-				_ayaSurahstate.value = AyaSurahState.Error(e.message ?: "Unknown error")
+				_ayaListState.value = ArrayList()
+				_loadingState.value = false
+				_errorState.value = e.message!!
 			}
 		}
 	}
@@ -358,6 +327,8 @@ class QuranViewModel(context : Context) : ViewModel()
 	fun getAllAyaForJuz(juzNumber : Int , language : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
+			_loadingState.value = true
+			_errorState.value = ""
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -373,25 +344,34 @@ class QuranViewModel(context : Context) : ViewModel()
 					val listOfJuzAyat =
 						dataStore.getAyasOfJuz(juzNumber) as ArrayList<Aya>
 					val newList = addBismillahInJuz(juzNumber , languageConverted , listOfJuzAyat)
-					_ayaJuzstate.value = AyaJuzState.Success(newList)
+					_ayaListState.value = newList
+					_loadingState.value = false
+					_errorState.value = ""
+
 				} else
 				{
-					val response = QuranRepository.getAyaForJuz(juzNumber , language)
+					val response = quranRepository.getAyaForJuz(juzNumber , language)
 					if (response.data != null)
 					{
 						dataStore.insertAyats(response.data)
 						val newList =
 							addBismillahInJuz(juzNumber , languageConverted , response.data)
-						_ayaJuzstate.value = AyaJuzState.Success(newList)
+						_ayaListState.value = newList
+						_loadingState.value = false
+						_errorState.value = ""
 					} else
 					{
-						_ayaJuzstate.value = AyaJuzState.Error(response.message !!)
+						_ayaListState.value = ArrayList()
+						_loadingState.value = false
+						_errorState.value = response.message!!
 					}
 				}
 
 			} catch (e : Exception)
 			{
-				_ayaJuzstate.value = AyaJuzState.Error(e.message ?: "Unknown error")
+				_ayaListState.value = ArrayList()
+				_loadingState.value = false
+				_errorState.value = e.message!!
 			}
 		}
 	}
@@ -484,6 +464,7 @@ class QuranViewModel(context : Context) : ViewModel()
 
 		return listOfJuzAyat
 	}
+
 
 	//events to bookmark an aya, favorite an aya, add a note to an aya
 	sealed class AyaEvent
@@ -613,13 +594,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				dataStore.addAudioToAya(surahNumber , ayaNumberInSurah , audio)
-				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
-				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+				Log.d("addAudioToAya" , e.message ?: "Unknown error")
 			}
 		}
 	}
@@ -635,13 +614,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				dataStore.bookmarkAya(ayaNumber , surahNumber , ayaNumberInSurah , bookmark)
-				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
-				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+				Log.d("bookmarkAya" , e.message ?: "Unknown error")
 			}
 		}
 	}
@@ -657,13 +634,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				dataStore.favoriteAya(ayaNumber , surahNumber , ayaNumberInSurah , favorite)
-				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
-				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+				Log.d("favoriteAya" , e.message ?: "Unknown error")
 			}
 		}
 	}
@@ -674,13 +649,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				dataStore.addNoteToAya(id , surahNumber , ayaNumberInSurah , note)
-				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
-				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+				Log.d("addNoteToAya" , e.message ?: "Unknown error")
 			}
 		}
 	}
@@ -693,10 +666,9 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val note = dataStore.getNoteOfAya(ayaNumber , surahNumber , ayaNumberInSurah)
-				_noteOfAya.value = note
 			} catch (e : Exception)
 			{
-				_noteOfAya.value = "Error getting note"
+				Log.d("getNoteForAya" , e.message ?: "Unknown error")
 			}
 		}
 	}
@@ -716,14 +688,12 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				val notes = dataStore.getAyasWithNotes()
 				_notes.value = notes
-				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
-				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+				Log.d("getAllNotes" , e.message ?: "Unknown error")
 			}
 		}
 	}
@@ -735,14 +705,12 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				val favorites = dataStore.getFavoritedAyas()
 				_favorites.value = favorites
-				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
-				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+				Log.d("getAllFavorites" , e.message ?: "Unknown error")
 			}
 		}
 	}
@@ -753,14 +721,12 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_ayaState.value = AyaState.Loading
 				val dataStore = LocalDataStore.getDataStore()
 				val bookmarks = dataStore.getBookmarkedAyas()
 				_bookmarks.value = bookmarks
-				_ayaState.value = AyaState.Success("")
 			} catch (e : Exception)
 			{
-				_ayaState.value = AyaState.Error(e.message ?: "Unknown error")
+				Log.d("getAllBookmarks" , e.message ?: "Unknown error")
 			}
 		}
 	}

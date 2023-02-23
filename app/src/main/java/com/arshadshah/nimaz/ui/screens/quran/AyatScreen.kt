@@ -34,37 +34,35 @@ fun AyatScreen(
 	{
 		Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: isSurah")
 		viewModel.getAllAyaForSurah(number !!.toInt() , language)
-		val ayat = remember { viewModel.ayaSurahState }.collectAsState()
-		val noteState = viewModel.noteOfAya
+		val ayatSurah = remember { viewModel.ayaListState }.collectAsState()
+		val loadingAyatSurah = remember { viewModel.loadingState }.collectAsState()
+		val errorAyatSurah = remember { viewModel.errorState }.collectAsState()
 		AyaSurahList(
 				number = number.toInt() , language = language ,
 				paddingValues = paddingValues ,
-				state = ayat ,
-				handleEvents = viewModel::handleAyaEvent ,
-				handleMenuEvents = viewModel::handleQuranMenuEvents ,
+				state = ayatSurah ,
 				pageMode = pageMode ,
-				noteState = noteState ,
 				type = "surah" ,
-				mediaPlayer = mediaPlayer
+				loading = loadingAyatSurah.value ,
+				error = errorAyatSurah.value ,
 					)
 
 	} else
 	{
 		Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: isJuz")
 		viewModel.getAllAyaForJuz(number !!.toInt() , language)
-		val ayat = remember { viewModel.ayaJuzstate }.collectAsState()
-		val noteState = viewModel.noteOfAya
+		val ayatJuz = remember { viewModel.ayaListState }.collectAsState()
+		val loadingAyatJuz = remember { viewModel.loadingState }.collectAsState()
+		val errorAyatJuz = remember { viewModel.errorState }.collectAsState()
 		AyaJuzList(
 				number = number.toInt() ,
 				language = language ,
 				paddingValues = paddingValues ,
-				state = ayat ,
-				handleEvents = viewModel::handleAyaEvent ,
-				handleMenuEvents = viewModel::handleQuranMenuEvents ,
-				noteState = noteState ,
+				state = ayatJuz ,
 				type = "juz" ,
-				mediaPlayer = mediaPlayer,
 				pageMode = pageMode ,
+				loading = loadingAyatJuz.value ,
+				error = errorAyatJuz.value ,
 				  )
 	}
 }

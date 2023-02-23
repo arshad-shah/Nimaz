@@ -61,21 +61,27 @@ fun QuranScreen(
 			0 ->
 			{
 				Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG , "Surah Screen")
-				val surahListState = remember { viewModel.surahState }.collectAsState()
+				val surahListState = remember { viewModel.surahListState }.collectAsState()
+				val isLoadingSurah = remember { viewModel.loadingState }.collectAsState()
+				val errorSurah = remember { viewModel.errorState }.collectAsState()
 				Log.d(
 						AppConstants.QURAN_SURAH_SCREEN_TAG ,
 						"surahListState.value = ${surahListState.value}"
 					 )
 				SurahList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
-						state = surahListState
+						state = surahListState,
+						loading = isLoadingSurah.value,
+						error = errorSurah.value
 						 )
 			}
 
 			1 ->
 			{
 				Log.d(AppConstants.QURAN_JUZ_SCREEN_TAG , "Juz Screen")
-				val juzListState = remember { viewModel.juzState }.collectAsState()
+				val juzListState = remember { viewModel.juzListState }.collectAsState()
+				val isLoadingJuz = remember { viewModel.loadingState }.collectAsState()
+				val errorJuz = remember { viewModel.errorState }.collectAsState()
 				Log.d(
 						AppConstants.QURAN_JUZ_SCREEN_TAG ,
 						"juzListState.value = ${juzListState.value}"
@@ -83,6 +89,8 @@ fun QuranScreen(
 				JuzList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
 						state = juzListState ,
+						loading = isLoadingJuz.value ,
+						error = errorJuz.value
 					   )
 			}
 //			2 ->
