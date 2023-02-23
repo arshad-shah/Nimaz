@@ -75,6 +75,30 @@ fun AyaListUI(
 	val mediaPlayer = remember {
 		MediaPlayer()
 	}
+
+	//when we close or move to another screen, we want to clean the state o'f the AyaListItemUI so that we don't have any bugs such as dangling data
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _ , event ->
+			when (event)
+			{
+				Lifecycle.Event.ON_STOP , Lifecycle.Event.ON_DESTROY , Lifecycle.Event.ON_PAUSE ->
+				{
+					mediaPlayer.release()
+				}
+
+				else ->
+				{
+				}
+			}
+		}
+
+		lifecycle.addObserver(observer)
+		onDispose {
+			lifecycle.removeObserver(observer)
+		}
+	}
 	if (loading)
 	{
 		LazyColumn(contentPadding = paddingValues) {
@@ -220,30 +244,7 @@ fun AyaListItemUI(
 	isBookMarkedVerse.value = aya.bookmark
 	hasNote.value = aya.note.isNotEmpty()
 	hasAudio.value = aya.audioFileLocation.isNotEmpty()
-
-	//when we close or move to another screen, we want to clean the state o'f the AyaListItemUI so that we don't have any bugs such as dangling data
-	val lifecycle = LocalLifecycleOwner.current.lifecycle
-
-	DisposableEffect(lifecycle) {
-		val observer = LifecycleEventObserver { _ , event ->
-			when (event)
-			{
-				Lifecycle.Event.ON_STOP , Lifecycle.Event.ON_DESTROY , Lifecycle.Event.ON_PAUSE ->
-				{
-					mediaPlayer.release()
-				}
-
-				else ->
-				{
-				}
-			}
-		}
-
-		lifecycle.addObserver(observer)
-		onDispose {
-			lifecycle.removeObserver(observer)
-		}
-	}
+	fileToBePlayed.value = File(aya.audioFileLocation)
 
 	//callback fro the download progress
 	//callback: (File?, Exception?, progress:Int, completed: Boolean) -> Unit)
@@ -277,21 +278,35 @@ fun AyaListItemUI(
 			}
 		}
 
+	fun prepareMediaPlayer()
+	{
+		mediaPlayer.reset()
+		val uri = Uri.fromFile(fileToBePlayed.value)
+		mediaPlayer.setAudioAttributes(
+				AudioAttributes.Builder()
+					.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+					.setUsage(AudioAttributes.USAGE_MEDIA)
+					.build()
+									  )
+		mediaPlayer.setDataSource(uri.toString())
+		mediaPlayer.prepare()
+	}
+
 	//play the file
 	fun playFile()
 	{
-		if (fileToBePlayed.value != null)
+		//if the file isnull and there is no audio playing then prepare the media player and play the file
+		//else just start the current file that is playing
+		if (!isPaused.value)
 		{
-			mediaPlayer.reset()
-			val uri = Uri.fromFile(fileToBePlayed.value)
-			mediaPlayer.setAudioAttributes(
-					AudioAttributes.Builder()
-						.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-						.setUsage(AudioAttributes.USAGE_MEDIA)
-						.build()
-										  )
-			mediaPlayer.setDataSource(uri.toString())
-			mediaPlayer.prepare()
+			prepareMediaPlayer()
+			mediaPlayer.start()
+			duration.value = mediaPlayer.duration
+			isPlaying.value = true
+			isPaused.value = false
+			isStopped.value = false
+		} else
+		{
 			mediaPlayer.start()
 			duration.value = mediaPlayer.duration
 			isPlaying.value = true
@@ -326,31 +341,15 @@ fun AyaListItemUI(
 	}
 
 	//function to check if the file is downloaded already
-	fun checkIfFileIsDownloaded()
+	fun downloadFile()
 	{
-		if (hasAudio.value)
-		{
-			isDownloaded.value = true
-			fileToBePlayed.value = File(aya.audioFileLocation)
-			playFile()
-		} else
-		{
-			isDownloaded.value = false
-			fileToBePlayed.value = null
-			spacesFileRepository.downloadAyaFile(
-					aya.suraNumber ,
-					aya.ayaNumberInSurah ,
-					downloadCallback
-												)
-		}
-	}
-
-	mediaPlayer.setOnCompletionListener {
-		isPlaying.value = false
-		isPaused.value = false
-		isStopped.value = true
-		mediaPlayer.stop()
-		mediaPlayer.reset()
+		isDownloaded.value = false
+		fileToBePlayed.value = null
+		spacesFileRepository.downloadAyaFile(
+				aya.suraNumber ,
+				aya.ayaNumberInSurah ,
+				downloadCallback
+											)
 	}
 
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
@@ -528,7 +527,7 @@ fun AyaListItemUI(
 							showNoteDialog = showNoteDialog ,
 							noteContent = noteContent ,
 							popUpOpen = popUpOpen ,
-							onDownloadClicked = { checkIfFileIsDownloaded() }
+							onDownloadClicked = { downloadFile() }
 							)
 				}
 			}
