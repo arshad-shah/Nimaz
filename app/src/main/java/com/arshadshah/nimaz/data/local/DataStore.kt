@@ -134,7 +134,6 @@ class DataStore(db : AppDatabase)
 							 ) =
 		ayaDao.addAudioToAya(surahNumber , ayaNumberInSurah , audio)
 
-
 	//get all juz
 	suspend fun getAllJuz() = juzDao.getAllJuz().map { it.toJuz() }
 

@@ -207,6 +207,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			_loadingState.value = true
 			_errorState.value = ""
+			_ayaListState.value = ArrayList()
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -329,6 +330,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			_loadingState.value = true
 			_errorState.value = ""
+			_ayaListState.value = ArrayList()
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -464,7 +466,6 @@ class QuranViewModel(context : Context) : ViewModel()
 
 		return listOfJuzAyat
 	}
-
 
 	//events to bookmark an aya, favorite an aya, add a note to an aya
 	sealed class AyaEvent
