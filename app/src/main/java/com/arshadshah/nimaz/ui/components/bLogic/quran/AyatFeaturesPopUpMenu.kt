@@ -151,13 +151,16 @@ fun AyatFeaturesPopUpMenu(
 							//share the aya
 							val shareIntent = Intent(Intent.ACTION_SEND)
 							shareIntent.type = "text/plain"
-							shareIntent.putExtra(Intent.EXTRA_TEXT , aya.ayaArabic)
-							context.startActivity(
-									Intent.createChooser(
-											shareIntent ,
-											"Share via"
-														)
-												 )
+							//create the share message
+							//with the aya text, aya translation
+							//the sura number followed by the aya number
+							shareIntent.putExtra(
+									Intent.EXTRA_TEXT ,
+									"Chapter ${aya.suraNumber}: Verse ${aya.ayaNumberInSurah}\n\n${aya.ayaArabic}\n${aya.ayaTranslationEnglish}"
+											   )
+
+							//start the share intent
+							context.startActivity(Intent.createChooser(shareIntent , "Share Aya"))
 						} ,
 						enabled = true ,
 						  ) {
