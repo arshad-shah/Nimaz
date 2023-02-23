@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +35,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.quran.AyatFeatures
 import com.arshadshah.nimaz.ui.components.bLogic.quran.AyatFeaturesPopUpMenu
 import com.arshadshah.nimaz.ui.components.bLogic.quran.PlayerForAyat
 import com.arshadshah.nimaz.ui.theme.*
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -52,9 +54,8 @@ fun AyaListUI(
 {
 
 	val context = LocalContext.current
-	val spacesFileRepository = SpacesFileRepository(LocalContext.current)
 	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
-
+	val spaceFilesRepository = SpacesFileRepository(context)
 	val arabicFontSize = remember {
 		viewModel.arabic_Font_size
 	}.collectAsState()
@@ -105,12 +106,12 @@ fun AyaListUI(
 			items(ayaList.size) { index ->
 				AyaListItemUI(
 						aya = ayaList[index] ,
-						spacesFileRepository = spacesFileRepository ,
 						mediaPlayer = mediaPlayer,
 						arabic_Font_size = arabicFontSize,
 						arabic_Font = arabicFont,
 						translation_Font_size = translationFontSize,
 						translation = translation,
+						spacesFileRepository = spaceFilesRepository,
 							 )
 			}
 		}
@@ -152,12 +153,12 @@ fun AyaListUI(
 			items(ayaList.size) { index ->
 				AyaListItemUI(
 						aya = ayaList[index] ,
-						spacesFileRepository = spacesFileRepository ,
 						mediaPlayer = mediaPlayer ,
 						arabic_Font_size = arabicFontSize,
 						arabic_Font = arabicFont,
 						translation_Font_size = translationFontSize,
 						translation = translation,
+						spacesFileRepository = spaceFilesRepository,
 							 )
 			}
 		}
@@ -167,7 +168,7 @@ fun AyaListUI(
 @Composable
 fun AyaListItemUI(
 	aya : Aya ,
-	spacesFileRepository : SpacesFileRepository ,
+	spacesFileRepository : SpacesFileRepository,
 	mediaPlayer : MediaPlayer ,
 	arabic_Font_size : State<Float> ,
 	translation_Font_size : State<Float> ,
@@ -330,7 +331,7 @@ fun AyaListItemUI(
 	//stop the file
 	fun stopFile()
 	{
-		if (mediaPlayer.isPlaying)
+		if (!isStopped.value)
 		{
 			mediaPlayer.stop()
 			mediaPlayer.reset()
@@ -472,49 +473,40 @@ fun AyaListItemUI(
 						)
 				}
 
+				Row(
+						modifier = Modifier.fillMaxWidth() ,
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically
+				   ) {
+					AyatFeatures(
+							isBookMarkedVerse = isBookMarkedVerse ,
+							isFavouredVerse = isFavoured ,
+							hasNote = hasNote ,
+							handleEvents = viewModel::handleAyaEvent ,
+							aya = aya ,
+							showNoteDialog = showNoteDialog ,
+							noteContent = noteContent ,
+								)
 
-				AyatFeatures(
-						isBookMarkedVerse = isBookMarkedVerse ,
-						isFavouredVerse = isFavoured ,
-						hasNote = hasNote ,
-						handleEvents = viewModel::handleAyaEvent ,
-						aya = aya ,
-						showNoteDialog = showNoteDialog ,
-						noteContent = noteContent ,
-							)
-
-				//more menu button that opens a popup menu
-				if (aya.ayaNumberInQuran != 0)
-				{
-					//a button that opens a popup menu
-					IconButton(
-							onClick = {
-								popUpOpen.value = ! popUpOpen.value
-							} ,
-							enabled = true ,
-							modifier = Modifier
-								.align(Alignment.End)
-							  ) {
-						Icon(
-								modifier = Modifier
-									.size(24.dp) ,
-								painter = painterResource(id = R.drawable.more_menu_icon) ,
-								contentDescription = "More Menu" ,
-							)
+					//more menu button that opens a popup menu
+					if (aya.ayaNumberInQuran != 0)
+					{
+						//a button that opens a popup menu
+						IconButton(
+								onClick = {
+									popUpOpen.value = ! popUpOpen.value
+								} ,
+								enabled = true ,
+								  ) {
+							Icon(
+									modifier = Modifier
+										.size(24.dp) ,
+									painter = painterResource(id = R.drawable.more_menu_icon) ,
+									contentDescription = "More Menu" ,
+								)
+						}
 					}
 				}
-
-				PlayerForAyat(
-						isPlaying = isPlaying ,
-						isPaused = isPaused ,
-						isStopped = isStopped ,
-						duration = duration ,
-						isDownloaded = isDownloaded ,
-						hasAudio = hasAudio ,
-						onPlayClicked = { playFile() } ,
-						onPauseClicked = { pauseFile() } ,
-						onStopClicked = { stopFile() } ,
-							 )
 
 				if (popUpOpen.value)
 				{
@@ -528,9 +520,60 @@ fun AyaListItemUI(
 							noteContent = noteContent ,
 							popUpOpen = popUpOpen ,
 							onDownloadClicked = { downloadFile() }
-							)
+										 )
 				}
+
+				PlayerForAyat(
+						isPlaying = isPlaying ,
+						isPaused = isPaused ,
+						isStopped = isStopped ,
+						duration = duration ,
+						isDownloaded = isDownloaded ,
+						hasAudio = hasAudio ,
+						onPlayClicked = { playFile() } ,
+						onPauseClicked = { pauseFile() } ,
+						onStopClicked = { stopFile() } ,
+							 )
 			}
 		}
 	}
+}
+
+//preview AyaListItemUI
+@Preview(showBackground = true)
+@Composable
+fun AyaListItemUIPreview()
+{
+	NimazTheme {
+		LocalDataStore.init(LocalContext.current)
+		//create a dummy aya
+		val aya = Aya(
+				ayaNumber = 1 ,
+				ayaNumberInQuran = 1 ,
+				ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
+				ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+				ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
+				audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
+				ayaNumberInSurah = 1 ,
+				bookmark = true ,
+				favorite = true ,
+				note = "dsfhsdhsgdfhstghs" ,
+				juzNumber = 1 ,
+				suraNumber = 1 ,
+				ruku = 1 ,
+				sajda = false ,
+				sajdaType = "" ,
+					 )
+
+		AyaListItemUI(
+				aya = aya ,
+				mediaPlayer = MediaPlayer() ,
+				arabic_Font_size = remember { mutableStateOf(0.0f) } ,
+				translation_Font_size = remember { mutableStateOf(0.0f) } ,
+				arabic_Font = remember { mutableStateOf("Amiri") } ,
+				translation = remember { mutableStateOf("English") } ,
+				spacesFileRepository = SpacesFileRepository(LocalContext.current) ,
+					 )
+	}
+
 }

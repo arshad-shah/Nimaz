@@ -9,14 +9,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.NoteInput
+import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlin.reflect.KFunction1
 
 @Composable
@@ -33,8 +38,6 @@ fun AyatFeatures(
 	Row(
 			horizontalArrangement = Arrangement.SpaceBetween ,
 			verticalAlignment = Alignment.CenterVertically ,
-			modifier = Modifier
-				.padding(4.dp)
 	   ) {
 		if (isBookMarkedVerse.value)
 		{
@@ -109,4 +112,41 @@ fun AyatFeatures(
 				 )
 	}
 
+}
+
+@Preview
+@Composable
+fun AyatFeaturesPreview()
+{
+
+	val viewModel = QuranViewModel(LocalContext.current)
+	LocalDataStore.init(LocalContext.current)
+	//create a dummy aya
+	val aya = Aya(
+			ayaNumber = 1 ,
+			ayaNumberInQuran = 1 ,
+			ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
+			ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+			ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
+			audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
+			ayaNumberInSurah = 1 ,
+			bookmark = true ,
+			favorite = true ,
+			note = "dsfhsdhsgdfhstghs" ,
+			juzNumber = 1 ,
+			suraNumber = 1 ,
+			ruku = 1 ,
+			sajda = false ,
+			sajdaType = "" ,
+				 )
+
+	AyatFeatures(
+			isBookMarkedVerse = remember { mutableStateOf(aya.bookmark) } ,
+			isFavouredVerse = remember { mutableStateOf(aya.favorite) } ,
+			hasNote = remember { mutableStateOf(aya.note.isNotEmpty()) } ,
+			handleEvents = viewModel::handleAyaEvent ,
+			aya = aya ,
+			showNoteDialog = remember { mutableStateOf(false) } ,
+			noteContent = remember { mutableStateOf("") }
+					)
 }
