@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import kotlinx.coroutines.CancellationException
@@ -69,7 +70,7 @@ fun PlayerForAyat(
 		Log.d("AyaListItemUI" , "current progress is ${currentProgress.value / seconds}")
 		LinearProgressIndicator(
 				progress = currentProgress.value / seconds ,
-				modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).size(4.dp) ,
+				modifier = Modifier.fillMaxWidth().padding(4.dp).height(8.dp) ,
 				strokeCap = StrokeCap.Round ,
 							   )
 	}
@@ -83,6 +84,7 @@ fun PlayerForAyat(
 				verticalAlignment = Alignment.CenterVertically ,
 				modifier = Modifier
 					.fillMaxWidth()
+					.padding(vertical = 4.dp)
 		   ) {
 			if (isPaused.value || isStopped.value || ! isPlaying.value)
 			{
@@ -99,7 +101,7 @@ fun PlayerForAyat(
 							tint = MaterialTheme.colorScheme.primary ,
 							modifier = Modifier
 								.size(24.dp)
-								.padding(4.dp)
+								.padding(horizontal = 4.dp)
 						)
 				}
 			}
@@ -119,7 +121,7 @@ fun PlayerForAyat(
 							tint = MaterialTheme.colorScheme.primary ,
 							modifier = Modifier
 								.size(24.dp)
-								.padding(4.dp)
+								.padding(horizontal = 4.dp)
 						)
 				}
 			}
@@ -139,11 +141,28 @@ fun PlayerForAyat(
 							tint = MaterialTheme.colorScheme.primary ,
 							modifier = Modifier
 								.size(24.dp)
-								.padding(4.dp)
+								.padding(horizontal = 4.dp)
 						)
 				}
 			}
 		}
 	}
 
+}
+
+@Preview
+@Composable
+fun PlayerForAyatPreview()
+{
+	PlayerForAyat(
+			duration = remember { mutableStateOf(5) } ,
+			isPlaying = remember { mutableStateOf(true) } ,
+			isPaused = remember { mutableStateOf(true) } ,
+			isStopped = remember { mutableStateOf(true) } ,
+			isDownloaded = remember { mutableStateOf(true) } ,
+			hasAudio = remember { mutableStateOf(true) } ,
+			onPlayClicked = { } ,
+			onPauseClicked = { } ,
+			onStopClicked = { } ,
+				 )
 }

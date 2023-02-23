@@ -97,7 +97,6 @@ fun NoteInput(
 				TextButton(onClick = {
 					//close dialog
 					showNoteDialog.value = false
-
 				}) { Text(text = "Cancel") }
 			} ,
 			   )
