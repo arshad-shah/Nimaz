@@ -3,45 +3,38 @@ package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.platform.LocalContext
-import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
+import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.ui.components.ui.quran.SurahListUI
-import es.dmoral.toasty.Toasty
 
 @Composable
 fun SurahList(
 	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
-	state : State<QuranViewModel.SurahState> ,
+	state : State<ArrayList<Surah>> ,
+	loading : Boolean ,
+	error : String ,
 			 )
 {
-	when (val surahState = state.value)
+
+	if(loading)
 	{
-		is QuranViewModel.SurahState.Loading ->
-		{
-			SurahListUI(
-					surahs = ArrayList(6) ,
-					onNavigateToAyatScreen = onNavigateToAyatScreen ,
-					loading = true
-					   )
-		}
-
-		is QuranViewModel.SurahState.Success ->
-		{
-			SurahListUI(
-					surahs = surahState.data !! ,
-					onNavigateToAyatScreen = onNavigateToAyatScreen ,
-					loading = false
-					   )
-		}
-
-		is QuranViewModel.SurahState.Error ->
-		{
-			SurahListUI(
-					surahs = ArrayList(6) ,
-					onNavigateToAyatScreen = onNavigateToAyatScreen ,
-					loading = true
-					   )
-			Toasty.error(LocalContext.current , surahState.errorMessage).show()
-		}
+		SurahListUI(
+				surahs = ArrayList(114) ,
+				onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				loading = true
+				   )
+	}else if(error.isNotEmpty())
+	{
+		SurahListUI(
+				surahs = ArrayList(114) ,
+				onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				loading = false
+				   )
+	}else
+	{
+		SurahListUI(
+				surahs = state.value ,
+				onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				loading = false
+				   )
 	}
 }

@@ -1,92 +1,72 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 
-import android.media.MediaPlayer
-import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.LiveData
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
+import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.ui.quran.Page
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import es.dmoral.toasty.Toasty
-import kotlin.reflect.KFunction1
 
 @Composable
 fun AyaJuzList(
 	paddingValues : PaddingValues ,
 	number : Int ,
 	language : String ,
-	state : State<QuranViewModel.AyaJuzState> ,
-	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
-	noteState : LiveData<String> ,
 	type : String ,
-	mediaPlayer : MediaPlayer ,
-	handleMenuEvents : KFunction1<QuranViewModel.QuranMenuEvents , Unit> ,
 	pageMode : State<String> ,
+	error : String ,
+	loading : Boolean ,
+	state : State<ArrayList<Aya>> ,
 			  )
 {
-	when (val ayatJuzListState = state.value)
+	if( loading )
 	{
-		is QuranViewModel.AyaJuzState.Loading ->
+		if (pageMode.value == "List")
 		{
-			//get the translation type from shared preferences
-			val pageType =
-				PrivateSharedPreferences(LocalContext.current).getData(
-						key = AppConstants.PAGE_TYPE ,
-						s = "List"
-																	  )
-			if (pageMode.value == "List")
-			{
-				AyaListUI(
-						ayaList = ArrayList(6) ,
-						paddingValues = paddingValues ,
-						language = language ,
-						loading = true ,
-						handleEvents = handleEvents ,
-						noteState = noteState ,
-						type = type ,
-						number = number ,
-						 )
-			} else
-			{
-				Page(ArrayList(10) , paddingValues , loading = true , handleEvents)
-			}
+			AyaListUI(
+					ayaList = state.value ,
+					paddingValues = paddingValues ,
+					language = language ,
+					loading = true ,
+					type = type ,
+					number = number ,
+					 )
+		} else
+		{
+			Page(state.value , paddingValues , true )
 		}
-
-		is QuranViewModel.AyaJuzState.Success ->
+	} else if (error.isNotEmpty())
+	{
+		if (pageMode.value == "List")
 		{
-			if (pageMode.value == "List")
-			{
-				AyaListUI(
-						ayaList = ayatJuzListState.data ,
-						paddingValues = paddingValues ,
-						language = language ,
-						loading = false ,
-						handleEvents = handleEvents ,
-						noteState = noteState ,
-						type = type ,
-						number = number ,
-						 )
-			} else
-			{
-				Page(ayatJuzListState.data , paddingValues , false , handleEvents)
-			}
+			AyaListUI(
+					ayaList = state.value ,
+					paddingValues = paddingValues ,
+					language = language ,
+					loading = false ,
+					type = type ,
+					number = number ,
+					 )
+		} else
+		{
+			Page(state.value , paddingValues , false )
 		}
-
-		is QuranViewModel.AyaJuzState.Error ->
+	} else
+	{
+		if (pageMode.value == "List")
 		{
-			Toasty.error(
-					LocalContext.current ,
-					ayatJuzListState.errorMessage ,
-					Toast.LENGTH_SHORT ,
-					true
-						)
-				.show()
+			AyaListUI(
+					ayaList = state.value ,
+					paddingValues = paddingValues ,
+					language = language ,
+					loading = false ,
+					type = type ,
+					number = number ,
+					 )
+		} else
+		{
+			Page(state.value , paddingValues , false )
 		}
 	}
 }
