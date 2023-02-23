@@ -92,7 +92,9 @@ fun AyatFeatures(
 				showNoteDialog = showNoteDialog ,
 				noteContent = noteContent ,
 				onClick = {
-					hasNote.value = ! hasNote.value
+					//update the note in the aya object if the note is not empty
+					hasNote.value = noteContent.value.isNotEmpty()
+
 					aya.note = noteContent.value
 					handleEvents(
 							QuranViewModel.AyaEvent.AddNoteToAya(
