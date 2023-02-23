@@ -38,7 +38,6 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import java.io.File
-import kotlin.reflect.KFunction1
 
 
 @Composable
@@ -76,31 +75,11 @@ fun AyaListUI(
 	val mediaPlayer = remember {
 		MediaPlayer()
 	}
-
-	val lifecycle = LocalLifecycleOwner.current.lifecycle
-
-	DisposableEffect(lifecycle) {
-		val observer = LifecycleEventObserver { _ , event ->
-			when
-			{
-				event == Lifecycle.Event.ON_STOP || event == Lifecycle.Event.ON_DESTROY || event == Lifecycle.Event.ON_PAUSE ->
-				{
-					mediaPlayer.release()
-				}
-			}
-		}
-
-		lifecycle.addObserver(observer)
-		onDispose {
-			lifecycle.removeObserver(observer)
-		}
-	}
 	if (loading)
 	{
 		LazyColumn(contentPadding = paddingValues) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
-						handleEvents = viewModel::handleAyaEvent ,
 						aya = ayaList[index] ,
 						spacesFileRepository = spacesFileRepository ,
 						mediaPlayer = mediaPlayer,
@@ -148,7 +127,6 @@ fun AyaListUI(
 		LazyColumn(userScrollEnabled = true , contentPadding = paddingValues , state = listState) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
-						handleEvents = viewModel::handleAyaEvent,
 						aya = ayaList[index] ,
 						spacesFileRepository = spacesFileRepository ,
 						mediaPlayer = mediaPlayer ,
@@ -164,7 +142,6 @@ fun AyaListUI(
 
 @Composable
 fun AyaListItemUI(
-	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	aya : Aya ,
 	spacesFileRepository : SpacesFileRepository ,
 	mediaPlayer : MediaPlayer ,
@@ -174,6 +151,10 @@ fun AyaListItemUI(
 	translation : State<String> ,
 				 )
 {
+	val context = LocalContext.current
+	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
+
+
 	val isLoading = remember {
 		mutableStateOf(false)
 	}
@@ -183,19 +164,19 @@ fun AyaListItemUI(
 	}
 
 	val isBookMarkedVerse = remember {
-		mutableStateOf(aya.bookmark)
+		mutableStateOf(false)
 	}
 
 	val isFavoured = remember {
-		mutableStateOf(aya.favorite)
+		mutableStateOf(false)
 	}
 
 	val hasNote = remember {
-		mutableStateOf(aya.note.isNotBlank())
+		mutableStateOf(false)
 	}
 
 	val noteContent = remember {
-		mutableStateOf(aya.note)
+		mutableStateOf("")
 	}
 
 	val popUpOpen = remember {
@@ -228,11 +209,40 @@ fun AyaListItemUI(
 	}
 
 	val fileToBePlayed = remember {
-		mutableStateOf<File?>(File(aya.audioFileLocation))
+		mutableStateOf<File?>(null)
 	}
 
 	val hasAudio = remember {
-		mutableStateOf(aya.audioFileLocation.isNotEmpty())
+		mutableStateOf(false)
+	}
+
+	isFavoured.value = aya.favorite
+	isBookMarkedVerse.value = aya.bookmark
+	hasNote.value = aya.note.isNotEmpty()
+	hasAudio.value = aya.audioFileLocation.isNotEmpty()
+
+	//when we close or move to another screen, we want to clean the state o'f the AyaListItemUI so that we don't have any bugs such as dangling data
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _ , event ->
+			when (event)
+			{
+				Lifecycle.Event.ON_STOP , Lifecycle.Event.ON_DESTROY , Lifecycle.Event.ON_PAUSE ->
+				{
+					mediaPlayer.release()
+				}
+
+				else ->
+				{
+				}
+			}
+		}
+
+		lifecycle.addObserver(observer)
+		onDispose {
+			lifecycle.removeObserver(observer)
+		}
 	}
 
 	//callback fro the download progress
@@ -252,7 +262,7 @@ fun AyaListItemUI(
 				progressOfDownload.value = 100f
 				fileToBePlayed.value = file
 				aya.audioFileLocation = file?.absolutePath.toString()
-				handleEvents(
+				viewModel.handleAyaEvent(
 						QuranViewModel.AyaEvent.addAudioToAya(
 								aya.suraNumber ,
 								aya.ayaNumberInSurah ,
@@ -468,7 +478,7 @@ fun AyaListItemUI(
 						isBookMarkedVerse = isBookMarkedVerse ,
 						isFavouredVerse = isFavoured ,
 						hasNote = hasNote ,
-						handleEvents = handleEvents ,
+						handleEvents = viewModel::handleAyaEvent ,
 						aya = aya ,
 						showNoteDialog = showNoteDialog ,
 						noteContent = noteContent ,
@@ -514,7 +524,7 @@ fun AyaListItemUI(
 							isBookMarkedVerse = isBookMarkedVerse ,
 							isFavouredVerse = isFavoured ,
 							hasNote = hasNote ,
-							handleEvents = handleEvents ,
+							handleEvents = viewModel::handleAyaEvent ,
 							showNoteDialog = showNoteDialog ,
 							noteContent = noteContent ,
 							popUpOpen = popUpOpen ,
