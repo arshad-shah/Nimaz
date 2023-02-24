@@ -107,22 +107,22 @@ fun DashboardPrayertimesCard(){
 							modifier = Modifier
 								.size(100.dp),
 							painter = when(nextPrayerName.value) {
-								"SUNRISE" -> {
+								"sunrise" -> {
 									painterResource(id = R.drawable.sunrise_icon)
 								}
-								"FAJR" -> {
+								"fajr" -> {
 									painterResource(id = R.drawable.fajr_icon)
 								}
-								"DHUHR" -> {
+								"dhuhr" -> {
 									painterResource(id = R.drawable.dhuhr_icon)
 								}
-								"ASR" -> {
+								"asr" -> {
 									painterResource(id = R.drawable.asr_icon)
 								}
-								"MAGHRIB" -> {
+								"maghrib" -> {
 									painterResource(id = R.drawable.maghrib_icon)
 								}
-								"ISHA" -> {
+								"isha" -> {
 									painterResource(id = R.drawable.isha_icon)
 								}
 								else -> {
@@ -137,7 +137,7 @@ fun DashboardPrayertimesCard(){
 						verticalArrangement = Arrangement.Center ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
-					Text(text = nextPrayerName.value.first() + nextPrayerName.value.substring(1)
+					Text(text = nextPrayerName.value.first().uppercase() + nextPrayerName.value.substring(1)
 						.lowercase(
 								Locale.ROOT
 								  ),

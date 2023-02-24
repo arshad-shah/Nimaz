@@ -16,6 +16,24 @@ import java.time.LocalDateTime
 object PrayerTimesRepository
 {
 
+	//get prayer times for today from database
+	//if not found in database get from API and then save to database and then return
+	suspend fun getPrayerTimesForWidget(context : Context) : ApiResponse<PrayerTimes>
+	{
+		LocalDataStore.init(context)
+		val dataStore = LocalDataStore.getDataStore()
+		val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
+
+		if(prayerTimesLocal == null){
+			val prayerTimes = getPrayerTimes(context)
+			if(prayerTimes != null){
+				prayerTimes.data?.let { dataStore.saveAllPrayerTimes(it) }
+				return prayerTimes
+			}
+		}
+		return ApiResponse.Success(prayerTimesLocal)
+	}
+
 	/**
 	 * Creates a map of prayer times parameters to be used in the API call
 	 * all the parameters are taken from the user's settings
