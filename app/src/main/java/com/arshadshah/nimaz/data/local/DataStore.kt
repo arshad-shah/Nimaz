@@ -15,6 +15,32 @@ class DataStore(db : AppDatabase)
 	private val prayerTrackerDao = db.prayersTracker
 	//fastTracker
 	private val fastTrackerDao = db.fastTracker
+	//tasbihTracker
+	private val tasbihTrackerDao = db.tasbihTracker
+	//save a tasbih to the database
+	suspend fun saveTasbih(tasbih : Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
+
+	//get all the tasbih
+	suspend fun getAllTasbih() = tasbihTrackerDao.getAll().map { it.toTasbih() }
+
+	//get all the tasbih for a specific date
+	suspend fun getTasbihForDate(date : String) = tasbihTrackerDao.getForDate(date).map { it.toTasbih() }
+
+	//get all the tasbih that are completed
+	suspend fun getCompletedTasbih() = tasbihTrackerDao.getCompleted().map { it.toTasbih() }
+
+	//get all the tasbih that are not completed
+	suspend fun getNotCompletedTasbih() = tasbihTrackerDao.getNotCompleted().map { it.toTasbih() }
+
+	//get all the tasbih that are completed today
+	suspend fun getCompletedTasbihToday(date : String) = tasbihTrackerDao.getCompletedToday(date).map { it.toTasbih() }
+
+	//get all the tasbih that are not completed today
+	suspend fun getNotCompletedTasbihToday(date : String) = tasbihTrackerDao.getNotCompletedToday(date).map { it.toTasbih() }
+
+	//delete a tasbih from the database
+	suspend fun deleteTasbih(tasbih : Tasbih) = tasbihTrackerDao.deleteTasbih(tasbih.toLocalTasbih())
+
 
 	//get trtacker for a specific date
 	suspend fun getTrackerForDate(date : String) = prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
@@ -363,3 +389,23 @@ private fun LocalFastTracker.toFastTracker() = FastTracker(
 		date = date ,
 		isFasting = isFasting ,
 																	  )
+
+private fun Tasbih.toLocalTasbih() = LocalTasbih(
+		date = date ,
+		arabicName = arabicName ,
+		englishName = englishName ,
+		translationName = translationName ,
+		goal = goal ,
+		completed = completed ,
+		isCompleted = isCompleted ,
+												)
+
+private fun LocalTasbih.toTasbih() = Tasbih(
+		date = date ,
+		arabicName = arabicName ,
+		englishName = englishName ,
+		translationName = translationName ,
+		goal = goal ,
+		completed = completed ,
+		isCompleted = isCompleted ,
+										   )

@@ -1,22 +1,19 @@
 package com.arshadshah.nimaz.ui.screens
 
 import android.content.res.Resources
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToIndex
-import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.activities.MainActivity
+import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 class NamesOfAllahTest {
 	@get:Rule
-	val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+	val composeTestRule = createAndroidComposeRule<MainActivity>()
 
 	private lateinit var resources: Resources
 
@@ -27,9 +24,13 @@ class NamesOfAllahTest {
 
 	@Test
 	fun test_NamesOfAllah_displays_names() {
-		composeTestRule.setContent {
-			NamesOfAllah(PaddingValues(0.dp))
-		}
+		//click on the more button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.MoreScreen.title).performClick()
+
+		//click on the tasbih button in the more screen
+		composeTestRule.onNodeWithTag("More Link Names of Allah").performClick()
+		//verify that the more screen is displayed
+		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_NAMES_OF_ALLAH).assertIsDisplayed()
 
 		composeTestRule.onNodeWithText(resources.getStringArray(R.array.Arabic)[0]).assertExists()
 		composeTestRule.onNodeWithText(resources.getStringArray(R.array.English)[1]).assertExists()
@@ -38,29 +39,38 @@ class NamesOfAllahTest {
 
 	@Test
 	fun test_NamesOfAllahRow_displays_english_name() {
-		composeTestRule.setContent {
-			NamesOfAllahRow(0, resources.getStringArray(R.array.English)[0], "", "")
-		}
+		//click on the more button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.MoreScreen.title).performClick()
 
+		//click on the tasbih button in the more screen
+		composeTestRule.onNodeWithTag("More Link Names of Allah").performClick()
+		//verify that the more screen is displayed
+		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_NAMES_OF_ALLAH).assertIsDisplayed()
 		composeTestRule.onNodeWithText(resources.getStringArray(R.array.English)[0]).assertExists()
 
 	}
 
 	@Test
 	fun test_NamesOfAllahRow_displays_arabic_name() {
-		composeTestRule.setContent {
-			NamesOfAllahRow(0, "", resources.getStringArray(R.array.Arabic)[0], "")
-		}
+		//click on the more button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.MoreScreen.title).performClick()
 
+		//click on the tasbih button in the more screen
+		composeTestRule.onNodeWithTag("More Link Names of Allah").performClick()
+		//verify that the more screen is displayed
+		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_NAMES_OF_ALLAH).assertIsDisplayed()
 		composeTestRule.onNodeWithText(resources.getStringArray(R.array.Arabic)[0]).assertExists()
 	}
 
 	@Test
 	fun test_NamesOfAllahRow_displays_translation() {
-		composeTestRule.setContent {
-			NamesOfAllahRow(0, "", "", resources.getStringArray(R.array.translation)[0])
-		}
+		//click on the more button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.MoreScreen.title).performClick()
 
+		//click on the tasbih button in the more screen
+		composeTestRule.onNodeWithTag("More Link Names of Allah").performClick()
+		//verify that the more screen is displayed
+		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_NAMES_OF_ALLAH).assertIsDisplayed()
 		composeTestRule.onNodeWithText(resources.getStringArray(R.array.translation)[0]).assertExists()
 	}
 
@@ -69,19 +79,44 @@ class NamesOfAllahTest {
 	//loop through the names and check that they are displayed
 	@Test
 	fun test_NamesOfAllah_displays_99_names() {
-		composeTestRule.setContent {
-			NamesOfAllah(PaddingValues(0.dp))
-		}
+//click on the more button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.MoreScreen.title).performClick()
+
+		//click on the tasbih button in the more screen
+		composeTestRule.onNodeWithTag("More Link Names of Allah").performClick()
+		//verify that the more screen is displayed
+		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_NAMES_OF_ALLAH).assertIsDisplayed()
 
 		val arabicNames = resources.getStringArray(R.array.Arabic)
 		val englishNames = resources.getStringArray(R.array.English)
 		val translationNames = resources.getStringArray(R.array.translation)
 
 		for (i in 0..98) {
-			composeTestRule.onNodeWithTag("NamesOfAllah").performScrollToIndex(i)
+			composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_NAMES_OF_ALLAH).performScrollToIndex(i)
 			composeTestRule.onNodeWithText(arabicNames[i]).assertExists()
 			composeTestRule.onNodeWithText(englishNames[i]).assertExists()
 			composeTestRule.onNodeWithText(translationNames[i]).assertExists()
 		}
+	}
+
+	//test that the player is playing the audio when the play button is clicked
+	@Test
+	fun test_NamesOfAllahRow_play_audio()
+	{
+		//click on the more button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.MoreScreen.title).performClick()
+
+		composeTestRule.onNodeWithTag("More Link Names of Allah").performClick()
+
+		//verify that the more screen is displayed
+		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_NAMES_OF_ALLAH).assertIsDisplayed()
+
+		//click on the tasbih button in the more screen
+		composeTestRule.onNodeWithContentDescription("Stop playing").assertDoesNotExist()
+		//click on the tasbih button in the more screen
+		composeTestRule.onNodeWithContentDescription("Play").assertExists()
+		composeTestRule.onNodeWithContentDescription("Play").performClick()
+		composeTestRule.onNodeWithContentDescription("Stop playing").assertExists()
+		composeTestRule.onNodeWithContentDescription("Pause playing").assertExists()
 	}
 }
