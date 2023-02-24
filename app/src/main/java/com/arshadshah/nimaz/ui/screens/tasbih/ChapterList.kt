@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CHAPTERS
 import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.arshadshah.nimaz.data.remote.viewModel.DuaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.ChapterListItem
@@ -47,6 +50,7 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 		is DuaViewModel.ChapterState.Loading ->
 		{
 			LazyColumn(
+
 					contentPadding = paddingValues ,
 					state = listState
 					  )
@@ -71,6 +75,7 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 		is DuaViewModel.ChapterState.Success ->
 		{
 			LazyColumn(
+					modifier = Modifier.testTag(TEST_TAG_CHAPTERS) ,
 					contentPadding = paddingValues ,
 					state = listState
 					  )

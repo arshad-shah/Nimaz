@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
@@ -34,7 +35,10 @@ fun SurahListUI(
 	loading : Boolean ,
 			   )
 {
-	LazyColumn(userScrollEnabled = !loading) {
+	LazyColumn(
+			userScrollEnabled = !loading,
+			modifier = Modifier.testTag(AppConstants.TEST_TAG_QURAN_SURAH)
+			  ) {
 		items(surahs.size) { index ->
 			SurahListItemUI(
 					loading = loading ,

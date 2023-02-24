@@ -14,7 +14,7 @@ import com.arshadshah.nimaz.data.local.models.*
 		TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class, LocalFastTracker::class] ,
+		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class, LocalFastTracker::class , LocalTasbih::class] ,
 		version = 8 ,
 		exportSchema = false
 		 )
@@ -28,6 +28,7 @@ abstract class AppDatabase : RoomDatabase()
 	abstract val dua : DuaDao
 	abstract val prayersTracker : PrayerTrackerDao
 	abstract val fastTracker : FastTrackerDao
+	abstract val tasbihTracker : TasbihTrackerDao
 
 	class Migration1To2 : Migration(1 , 2)
 	{
