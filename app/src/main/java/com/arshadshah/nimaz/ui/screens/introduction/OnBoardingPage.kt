@@ -65,8 +65,8 @@ sealed class OnBoardingPage(
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Sixth : OnBoardingPage(
 			image = R.drawable.battery ,
-			title = "Battery Optimization" ,
-			description = "Nimaz needs to be exempted from battery optimization to show adhan notifications." ,
+			title = "Battery Exemption" ,
+			description = "Nimaz needs to be exempted from battery optimization to show adhan notifications Correctly." ,
 			extra = {
 				BatteryExemptionUI()
 			}

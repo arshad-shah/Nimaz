@@ -174,7 +174,7 @@ object AppConstants
 
 	const val TEST_TAG_SETTINGS = "Settings"
 	const val TEST_TAG_ABOUT = "About"
-	const val TEST_TAG_PRAYER_TIMES_SETTINGS = "Prayer Times Settings"
+	const val TEST_TAG_ABOUT_PAGE = "About page"
 	const val TEST_TAG_PRAYER_TRACKER = "Prayer Tracker"
 	const val TEST_TAG_CALENDER = "Calender"
 	const val TEST_TAG_TASBIH_LIST = "Tasbih List"
@@ -183,6 +183,10 @@ object AppConstants
 	const val TEST_TAG_CHAPTERS = "Chapters"
 	const val TEST_TAG_CHAPTER = "Chapter"
 	const val TEST_TAG_AYA = "Aya"
+	const val TEST_TAG_SURAH_ITEM = "surah item"
+	const val TEST_TAG_JUZ_ITEM = "juz item"
+	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON = "Prayer times customization button"
+	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION = "Prayer times customization screen"
 
 
 	//logging tags

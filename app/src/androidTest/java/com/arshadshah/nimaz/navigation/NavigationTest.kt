@@ -1,15 +1,15 @@
 package com.arshadshah.nimaz.navigation
 
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT_PAGE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_MORE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_SURAH
@@ -71,7 +71,28 @@ class NavigationTest
 		//verify that the settings screen is displayed
 		composeTestRule.onNodeWithTag(TEST_TAG_SETTINGS).assertIsDisplayed()
 	}
-
+	@Test
+	fun navHost_verify_click_on_prayer_times_customization_opens_the_customization_screen(){
+		//click on the settings button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.SettingsScreen.title).performClick()
+		//verify that the settings screen is displayed
+		composeTestRule.onNodeWithTag(TEST_TAG_SETTINGS).assertIsDisplayed()
+		//click on the button
+		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON).performClick()
+		composeTestRule.onNodeWithTag(TEST_TAG_PRAYER_TIMES_CUSTOMIZATION).assertIsDisplayed()
+	}
+	@Test
+	fun navHost_verify_click_on_about_opens_the_about_screen(){
+		//click on the settings button in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.SettingsScreen.title).performClick()
+		//verify that the settings screen is displayed
+		composeTestRule.onNodeWithTag(TEST_TAG_SETTINGS).assertIsDisplayed()
+		//scroll to the bottom
+		composeTestRule.onNodeWithTag(TEST_TAG_ABOUT).performScrollTo()
+		//click on the button
+		composeTestRule.onNodeWithTag(TEST_TAG_ABOUT).performClick()
+		composeTestRule.onNodeWithTag(TEST_TAG_ABOUT_PAGE).assertIsDisplayed()
+	}
 	@Test
 	fun navHost_verify_click_on_home_opens_home_screen(){
 		//click on the home button in the bottom navigation bar

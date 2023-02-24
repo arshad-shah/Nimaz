@@ -14,7 +14,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
@@ -79,6 +81,7 @@ fun LocationScreenUI()
 	}
 
 	SettingsSwitch(
+			modifier = Modifier.testTag("LocationSwitch") ,
 			state = state ,
 			onCheckedChange = {
 				if (it)
@@ -113,7 +116,7 @@ fun LocationScreenUI()
 				}
 			} ,
 			title = {
-				Text(text = if (! checked.value) "Location" else "Allow Auto Location")
+				Text(text = "Enable Auto Location")
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
@@ -126,7 +129,7 @@ fun LocationScreenUI()
 								imageVector = Icons.Filled.CheckCircle ,
 								contentDescription = "Location Allowed"
 							)
-						Text(text = "Allowed")
+						Text(text = "Enabled")
 					}
 				} else
 				{
@@ -138,7 +141,7 @@ fun LocationScreenUI()
 								imageVector = Icons.Filled.Close ,
 								contentDescription = "Location Not Allowed"
 							)
-						Text(text = "Auto Location not allowed")
+						Text(text = "Disabled")
 					}
 				}
 			} ,
