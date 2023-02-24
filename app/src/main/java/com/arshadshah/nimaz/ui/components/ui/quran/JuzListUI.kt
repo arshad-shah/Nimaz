@@ -13,10 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_JUZ_ITEM
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -31,7 +34,10 @@ fun JuzListUI(
 	loading : Boolean ,
 			 )
 {
-	LazyColumn(userScrollEnabled = !loading) {
+	LazyColumn(
+			userScrollEnabled = !loading,
+			  modifier = Modifier.testTag(TEST_TAG_QURAN_JUZ)
+			  ) {
 		items(juz.size) { index ->
 			JuzListItemUI(
 					loading = loading ,
@@ -78,6 +84,7 @@ fun JuzListItemUI(
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_JUZ_ITEM)
 					.clickable(
 							enabled = !loading ,
 							  ) {

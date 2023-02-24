@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.*
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
@@ -35,6 +36,7 @@ import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
+import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.ui.screens.tracker.Calender
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
@@ -131,6 +133,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					TASBIH_LIST_SCREEN ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -203,6 +210,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
 					BottomNavItem.Dashboard.screen_route ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					TASBIH_LIST_SCREEN ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -283,6 +295,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					TASBIH_LIST_SCREEN ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -359,6 +376,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
+					TASBIH_LIST_SCREEN ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
 					else -> ExitTransition.None
 				}
 			}
@@ -419,14 +441,26 @@ fun NavigationGraph(
 		composable(BottomNavItem.MoreScreen.screen_route) {
 			MoreScreen(
 					paddingValues ,
-					onNavigateToTasbihScreen = { arabic : String ->
+					onNavigateToTasbihScreen = { arabic : String , translation: String , transliteration:String ->
 						//replace the placeholder with the actual route TASBIH_SCREEN_ROUTE
+						//tasbih_screen/{arabic}/{translation}/{transliteration}
 						navController.navigate(
 								TASBIH_SCREEN_ROUTE.replace(
 										"{arabic}" ,
 										arabic
 														   )
+									.replace(
+											"{translation}" ,
+											translation
+											)
+									.replace(
+											"{transliteration}" ,
+											transliteration
+											)
 											  )
+					} ,
+					onNavigateToTasbihListScreen = {
+						navController.navigate(TASBIH_LIST_SCREEN)
 					} ,
 					onNavigateToNames = {
 						navController.navigate(NAMESOFALLAH_SCREEN_ROUTE)
@@ -452,17 +486,41 @@ fun NavigationGraph(
 					  )
 		}
 
+		composable(TASBIH_LIST_SCREEN){
+			ListOfTasbih(paddingValues) { arabic : String , translation : String , transliteration : String ->
+				//replace the placeholder with the actual route TASBIH_SCREEN_ROUTE
+				//tasbih_screen/{arabic}/{translation}/{transliteration}
+				navController.navigate(
+						TASBIH_SCREEN_ROUTE.replace(
+								"{arabic}" ,
+								arabic
+												   )
+							.replace(
+									"{translation}" ,
+									translation
+									)
+							.replace(
+									"{transliteration}" ,
+									transliteration
+									)
+									  )
+			}
+		}
+
 		composable(PRAYER_TRACKER_SCREEN_ROUTE) {
 			PrayerTracker(paddingValues)
 		}
 
 		composable(TASBIH_SCREEN_ROUTE) {
 			TasbihScreen(
+					tasbihArabic = it.arguments?.getString("arabic") !! ,
+					tasbihEnglish = it.arguments?.getString("translation") !! ,
+					tasbihTranslitration = it.arguments?.getString("transliteration") !! ,
 					paddingValues = paddingValues ,
-					showResetDialog ,
-					vibrator ,
-					vibrationAllowed ,
-					rOrl
+					showResetDialog = showResetDialog,
+					vibrator = vibrator ,
+					vibrationAllowed = vibrationAllowed ,
+					rOrl = rOrl
 						)
 		}
 

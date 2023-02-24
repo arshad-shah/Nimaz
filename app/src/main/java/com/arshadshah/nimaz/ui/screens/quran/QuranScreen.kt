@@ -16,9 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_TAB
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
 import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
@@ -38,11 +41,12 @@ fun QuranScreen(
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
 //	val titles = listOf("Sura" , "Juz", "My Quran")
 	val titles = listOf("Sura" , "Juz")
-	Column(modifier = Modifier.padding(paddingValues)) {
+	Column(modifier = Modifier.padding(paddingValues).testTag(TEST_TAG_QURAN)) {
 
 		TabRow(selectedTabIndex = selectedTab) {
 			titles.forEachIndexed { index , title ->
 				Tab(
+						modifier = Modifier.testTag(TEST_TAG_QURAN_TAB.replace("{number}" , index.toString())) ,
 						selected = selectedTab == index ,
 						onClick = { setSelectedTab(index) } ,
 						text = {

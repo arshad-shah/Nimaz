@@ -52,7 +52,7 @@ fun IntroPage1()
 				state = pagerState ,
 				verticalAlignment = Alignment.Top
 					   ) { position ->
-			PagerScreen(onBoardingPage = pages[position])
+			PagerScreen(onBoardingPage = pages[position], position)
 		}
 		HorizontalPagerIndicator(
 				pagerState = pagerState ,

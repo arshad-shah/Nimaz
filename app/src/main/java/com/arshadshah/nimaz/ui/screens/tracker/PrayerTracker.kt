@@ -11,11 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
 import com.arshadshah.nimaz.ui.components.ui.trackers.PrayerTrackerListItems
@@ -93,7 +95,7 @@ fun PrayerTracker(paddingValues : PaddingValues, isIntegrated : Boolean = false)
 	val titles = listOf("Prayer Tracker", "Fasting")
 
 
-	Column(modifier = Modifier.padding(paddingValues) , horizontalAlignment = Alignment.CenterHorizontally) {
+	Column(modifier = Modifier.padding(paddingValues).testTag(TEST_TAG_PRAYER_TRACKER) , horizontalAlignment = Alignment.CenterHorizontally) {
 
 	ElevatedCard(
 			modifier = Modifier.padding(top = 4.dp , bottom = 8.dp , start = 0.dp , end = 0.dp) ,

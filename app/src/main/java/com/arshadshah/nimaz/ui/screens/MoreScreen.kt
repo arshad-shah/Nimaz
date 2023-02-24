@@ -7,7 +7,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.FeatureCard
 @Composable
 fun MoreScreen(
 	paddingValues : PaddingValues ,
-	onNavigateToTasbihScreen : (String) -> Unit ,
+	onNavigateToTasbihScreen : (String , String , String) -> Unit ,
 	onNavigateToNames : () -> Unit ,
 	onNavigateToListOfTasbeeh : () -> Unit ,
 	onNavigateToShadah : () -> Unit ,
@@ -15,6 +15,7 @@ fun MoreScreen(
 	onNavigateToPrayerTracker : () -> Unit ,
 	onNavigateToCalender : () -> Unit ,
 	onNavigateToQibla : () -> Unit ,
+	onNavigateToTasbihListScreen : () -> Unit ,
 			  )
 {
 	FeatureCard(
@@ -27,5 +28,6 @@ fun MoreScreen(
 			onNavigateToPrayerTracker = onNavigateToPrayerTracker ,
 			onNavigateToCalender = onNavigateToCalender ,
 			onNavigateToQibla = onNavigateToQibla ,
+			onNavigateToTasbihListScreen = onNavigateToTasbihListScreen ,
 			   )
 }

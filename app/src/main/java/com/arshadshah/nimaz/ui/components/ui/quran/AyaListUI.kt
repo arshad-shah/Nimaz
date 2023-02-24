@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
@@ -149,7 +151,10 @@ fun AyaListUI(
 			}
 		}
 
-		LazyColumn(userScrollEnabled = true , contentPadding = paddingValues , state = listState) {
+		LazyColumn(
+				modifier = Modifier.testTag(TEST_TAG_AYA),
+				userScrollEnabled = true , contentPadding = paddingValues , state = listState
+				  ) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
 						aya = ayaList[index] ,
