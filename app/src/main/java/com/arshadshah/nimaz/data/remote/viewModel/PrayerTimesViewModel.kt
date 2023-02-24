@@ -1,22 +1,34 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.RemoteViews
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.widgets.Nimaz
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class PrayerTimesViewModel : ViewModel()
 {
@@ -86,6 +98,8 @@ class PrayerTimesViewModel : ViewModel()
 
 		//get updated prayertimes if parameters change in settings
 		class UPDATE_PRAYERTIMES(val mapOfParameters : Map<String , String>) : PrayerTimesEvent()
+
+		class UPDATE_WIDGET(val context : Context) : PrayerTimesEvent()
 	}
 
 	//function to handle the timer event
@@ -109,9 +123,62 @@ class PrayerTimesViewModel : ViewModel()
 				PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				updatePrayerTimes(event.mapOfParameters)
 			}
+			//event to update the widget
+			is PrayerTimesEvent.UPDATE_WIDGET ->
+			{
+				updateWidget(event.context)
+			}
 
 			else ->
 			{
+			}
+		}
+	}
+
+	private fun updateWidget(context : Context)
+	{
+		val appWidgetManager = AppWidgetManager.getInstance(context)
+		val widgetIds = appWidgetManager.getAppWidgetIds(
+				ComponentName(context, Nimaz::class.java)
+														)
+
+		// Update the widget UI on the main thread
+		Handler(Looper.getMainLooper()).post {
+			Log.d("WidgetService" , "Updating widget")
+			widgetIds.forEach { widgetId ->
+				val views = RemoteViews(context.packageName , R.layout.nimaz)
+				val intent = Intent(context , MainActivity::class.java)
+				val pendingIntent = PendingIntent.getActivity(
+						context ,
+						AppConstants.WIDGET_PENDING_INTENT_REQUEST_CODE ,
+						intent ,
+						PendingIntent.FLAG_IMMUTABLE
+															 )
+				views.setOnClickPendingIntent(R.id.widget , pendingIntent)
+
+				// Set the random number text
+				runBlocking {
+					val repository = PrayerTimesRepository.getPrayerTimesForWidget(context)
+					views.setTextViewText(
+							R.id.Fajr_time , repository.data?.fajr?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+					views.setTextViewText(
+							R.id.Zuhar_time , repository.data?.dhuhr?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+					views.setTextViewText(
+							R.id.Asar_time , repository.data?.asr?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+					views.setTextViewText(
+							R.id.Maghrib_time ,
+							repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+										 )
+					views.setTextViewText(
+							R.id.Ishaa_time , repository.data?.isha?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+				}
+				// Update the widget
+				appWidgetManager.updateAppWidget(widgetId, views)
+				Log.d("WidgetService" , "Widget updated")
 			}
 		}
 	}

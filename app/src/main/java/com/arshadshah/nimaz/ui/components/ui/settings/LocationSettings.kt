@@ -64,6 +64,7 @@ fun LocationSettings(){
 				PrayerTimesParamMapper.getParams(context)
 																	  )
 										)
+		viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 	}
 
 	val storage =
@@ -111,6 +112,7 @@ fun LocationSettings(){
 						viewModel.handleEvent(
 								SettingsViewModel.SettingsEvent.LocationToggle(context, it)
 											 )
+						viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 					}
 						  )
 		}
