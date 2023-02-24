@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_JUZ_ITEM
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
@@ -83,6 +84,7 @@ fun JuzListItemUI(
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_JUZ_ITEM)
 					.clickable(
 							enabled = !loading ,
 							  ) {

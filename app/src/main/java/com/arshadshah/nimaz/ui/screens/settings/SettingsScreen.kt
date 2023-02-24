@@ -26,6 +26,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
@@ -70,6 +72,7 @@ fun SettingsScreen(
 					.padding(8.dp)
 					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON)
 					) {
 			SettingsMenuLink(
 					title = { Text(text = "Prayer Times Adjustments") } ,
@@ -324,6 +327,7 @@ fun SettingsScreen(
 					.padding(8.dp)
 					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_ABOUT)
 					) {
 			SettingsMenuLink(
 					title = { Text(text = "About") } ,
