@@ -66,9 +66,6 @@ fun PrayerTimesScreen(
 		DatesContainer(onNavigateToTracker = onNavigateToTracker)
 
 		// Calling the PrayerTimesList composable
-		PrayerTimesList(
-				state = state ,
-				handleEvent = viewModel::handleEvent ,
-					   )
+		PrayerTimesList()
 	}
 }

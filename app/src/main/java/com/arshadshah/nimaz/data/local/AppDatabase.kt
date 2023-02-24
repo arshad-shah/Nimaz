@@ -9,13 +9,12 @@ import com.arshadshah.nimaz.data.local.dao.*
 import com.arshadshah.nimaz.data.local.models.*
 
 @TypeConverters(
-		LocalPrayertimeConverter::class ,
 		TimestampTypeConvertor::class ,
 		TypeConvertorForListOfDuas::class
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class, LocalFastTracker::class , LocalTasbih::class] ,
-		version = 8 ,
+		version = 9 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -154,6 +153,27 @@ abstract class AppDatabase : RoomDatabase()
 
 			//fasting tracker
 			database.execSQL("CREATE TABLE IF NOT EXISTS `FastTracker` (`date` TEXT NOT NULL, `isFasting` INTEGER NOT NULL, PRIMARY KEY(`date`))")
+		}
+	}
+
+	//migration from version 8 to 9
+	//a migration to alter the table prayer_times so that the timestamp column is renamed to date, and 	val nextPrayer : LocalPrayertime = LocalPrayertime("" , "") ,
+	//	val currentPrayer : LocalPrayertime = LocalPrayertime("" , "") , are removed
+	class Migration8To9 : Migration(8 , 9)
+	{
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//rename column timestamp to date
+			database.execSQL("ALTER TABLE prayer_times RENAME COLUMN timestamp TO date")
+			//drop the column nextPrayer
+			//1. Create the new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `prayer_times_new` (`date` TEXT NOT NULL, `fajr` TEXT NOT NULL,`sunrise` TEXT NOT NULL, `dhuhr` TEXT NOT NULL, `asr` TEXT NOT NULL, `maghrib` TEXT NOT NULL, `isha` TEXT NOT NULL, PRIMARY KEY(`date`))")
+			//2. Copy the data`dhuhr` TEXT NOT NULL,
+			database.execSQL("INSERT INTO prayer_times_new SELECT date, fajr,sunrise, dhuhr, asr, maghrib, isha FROM prayer_times")
+			//3. Remove the old table
+			database.execSQL("DROP TABLE IF EXISTS prayer_times")
+			//4. Change the table name to the correct one
+			database.execSQL("ALTER TABLE prayer_times_new RENAME TO prayer_times")
 		}
 	}
 }

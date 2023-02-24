@@ -137,14 +137,14 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			//get all the prayer times from the shared preferences
-			val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR , "00:00"))
+			val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR , LocalDateTime.now().toString()))
 			val sunrise =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE , "00:00"))
-			val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR , "00:00"))
-			val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR , "00:00"))
+				LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE , LocalDateTime.now().toString()))
+			val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR , LocalDateTime.now().toString()))
+			val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR , LocalDateTime.now().toString()))
 			val maghrib =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB , "00:00"))
-			val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA , "00:00"))
+				LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB , LocalDateTime.now().toString()))
+			val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA , LocalDateTime.now().toString()))
 
 			ElevatedCard(
 					modifier = Modifier
