@@ -1,8 +1,10 @@
 package com.arshadshah.nimaz.activities
 
+import android.app.ActivityManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
@@ -52,12 +54,14 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.location.NetworkChecker
 import com.arshadshah.nimaz.widgets.Nimaz
+import com.arshadshah.nimaz.widgets.WidgetService
 import com.arshadshah.nimaz.widgets.updateAppWidget
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.launch
+
 
 class MainActivity : ComponentActivity()
 {
@@ -228,6 +232,13 @@ class MainActivity : ComponentActivity()
 				}
 
 
+				this.startService(Intent(this , WidgetService::class.java))
+
+				Log.d(MAIN_ACTIVITY_TAG , "Is service running: " + isMyServiceRunning(WidgetService::class.java).toString())
+
+
+
+
 				Scaffold(
 						modifier = Modifier.testTag("mainActivity") ,
 						snackbarHost = { SnackbarHost(snackbarHostState) } ,
@@ -258,8 +269,9 @@ class MainActivity : ComponentActivity()
 													//only show the menu button if the title is Quran
 													when (route.value)
 													{
-														QURAN_SCREEN_ROUTE,
-														QURAN_AYA_SCREEN_ROUTE ->
+														QURAN_SCREEN_ROUTE ,
+														QURAN_AYA_SCREEN_ROUTE ,
+														->
 														{
 															//open the menu
 															IconButton(onClick = { setMenuOpen(true) }) {
@@ -271,7 +283,7 @@ class MainActivity : ComponentActivity()
 															}
 															MoreMenu(
 																	menuOpen = menuOpen ,
-																	setMenuOpen = setMenuOpen,
+																	setMenuOpen = setMenuOpen ,
 																	handleQuranEvents = viewModel::handleQuranMenuEvents
 																	)
 														}
@@ -468,6 +480,19 @@ class MainActivity : ComponentActivity()
 			setDataSource(context , myUri)
 			prepare()
 		}
+	}
+
+	private fun isMyServiceRunning(serviceClass : Class<*>) : Boolean
+	{
+		val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+		for (service in manager.getRunningServices(Int.MAX_VALUE))
+		{
+			if (serviceClass.name == service.service.className)
+			{
+				return true
+			}
+		}
+		return false
 	}
 
 }

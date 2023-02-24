@@ -29,6 +29,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
@@ -58,6 +59,35 @@ fun SettingsScreen(
 	val themeState = remember {
 		viewModelSettings.theme
 	}.collectAsState()
+
+	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val fajrTime = remember {
+		viewModel.fajrTime
+	}.collectAsState()
+
+	val sunriseTime = remember {
+		viewModel.sunriseTime
+	}.collectAsState()
+
+	val dhuhrTime = remember {
+		viewModel.dhuhrTime
+	}.collectAsState()
+
+	val asrTime = remember {
+		viewModel.asrTime
+	}.collectAsState()
+
+	val maghribTime = remember {
+		viewModel.maghribTime
+	}.collectAsState()
+
+	val ishaTime = remember {
+		viewModel.ishaTime
+	}.collectAsState()
+
+
+
+
 
 	Column(
 			modifier = Modifier
@@ -136,16 +166,6 @@ fun SettingsScreen(
 
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
-			//get all the prayer times from the shared preferences
-			val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR , "00:00"))
-			val sunrise =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE , "00:00"))
-			val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR , "00:00"))
-			val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR , "00:00"))
-			val maghrib =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB , "00:00"))
-			val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA , "00:00"))
-
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
@@ -157,12 +177,12 @@ fun SettingsScreen(
 						onClick = {
 							CreateAlarms().exact(
 									context ,
-									fajr ,
-									sunrise ,
-									dhuhr ,
-									asr ,
-									maghrib ,
-									isha
+									fajrTime.value ,
+									sunriseTime.value ,
+									dhuhrTime.value ,
+									asrTime.value ,
+									maghribTime.value ,
+									ishaTime.value
 												)
 							Toasty.success(context , "Alarms Reset" , Toast.LENGTH_SHORT , true)
 								.show()

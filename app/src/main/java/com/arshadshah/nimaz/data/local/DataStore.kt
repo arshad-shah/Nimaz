@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local
 
 import com.arshadshah.nimaz.data.local.models.*
 import com.arshadshah.nimaz.data.remote.models.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class DataStore(db : AppDatabase)
@@ -184,6 +185,9 @@ class DataStore(db : AppDatabase)
 	//get all prayer times
 	suspend fun getAllPrayerTimes() = prayerTimesDao.getPrayerTimes().toPrayerTimes()
 
+	//getPrayerTimesForADate
+	suspend fun getPrayerTimesForADate(date : String) = prayerTimesDao.getPrayerTimesForADate(date).toPrayerTimes()
+
 	//delete all prayer times
 	suspend fun deleteAllPrayerTimes() = prayerTimesDao.deleteAllPrayerTimes()
 
@@ -290,39 +294,23 @@ private fun LocalSurah.toSurah() = Surah(
 										)
 
 private fun PrayerTimes.toLocalPrayerTimes() = LocalPrayerTimes(
-		timeStamp = timestamp.toString() ,
+		date = date.toString() ,
 		fajr = fajr.toString() ,
 		sunrise = sunrise.toString() ,
 		dhuhr = dhuhr.toString() ,
 		asr = asr.toString() ,
 		maghrib = maghrib.toString() ,
 		isha = isha.toString() ,
-		nextPrayer = LocalPrayertime(
-				nextPrayer !!.name ,
-				nextPrayer.time.toString() ,
-									) ,
-		currentPrayer = LocalPrayertime(
-				currentPrayer !!.name ,
-				currentPrayer.time.toString() ,
-									   ) ,
 															   )
 
 private fun LocalPrayerTimes.toPrayerTimes() = PrayerTimes(
-		timestamp = LocalDateTime.parse(timeStamp) ,
+		date = LocalDate.parse(date) ,
 		fajr = LocalDateTime.parse(fajr) ,
 		sunrise = LocalDateTime.parse(sunrise) ,
 		dhuhr = LocalDateTime.parse(dhuhr) ,
 		asr = LocalDateTime.parse(asr) ,
 		maghrib = LocalDateTime.parse(maghrib) ,
 		isha = LocalDateTime.parse(isha) ,
-		nextPrayer = Prayertime(
-				nextPrayer.name ,
-				LocalDateTime.parse(nextPrayer.time) ,
-							   ) ,
-		currentPrayer = Prayertime(
-				currentPrayer.name ,
-				LocalDateTime.parse(currentPrayer.time) ,
-								  ) ,
 														  )
 
 //duas
