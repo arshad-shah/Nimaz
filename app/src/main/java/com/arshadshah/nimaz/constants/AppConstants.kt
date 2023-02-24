@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants
 {
+
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -144,7 +145,7 @@ object AppConstants
 
 	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen"
 	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}"
-	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{arabic}"
+	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{arabic}/{translation}/{transliteration}"
 	const val NAMESOFALLAH_SCREEN_ROUTE = "namesofallah_screen"
 
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
@@ -153,8 +154,40 @@ object AppConstants
 	const val PRAYER_TRACKER_SCREEN_ROUTE = "prayer_tracker_screen"
 	const val CALENDER_SCREEN_ROUTE : String = "calendar_screen"
 	const val DASHBOARD_SCREEN = "dashboard_screen"
+	const val TASBIH_LIST_SCREEN = "tasbih_list_screen"
 
-	//Logging tags
+	//Test tags
+	//navigation tags
+	const val TEST_TAG_HOME = "Home"
+	const val TEST_TAG_PRAYER_TIMES = "Prayer Times"
+	const val TEST_TAG_QIBLA = "Qibla"
+	const val TEST_TAG_QURAN = "Quran"
+	const val TEST_TAG_QURAN_TAB = "QURAN TAB {number}"
+	const val TEST_TAG_QURAN_SURAH = "QURAN SURAH"
+	const val TEST_TAG_QURAN_JUZ = "QURAN JUZ"
+	const val TEST_TAG_SHAHADAH = "Shahadah"
+
+	const val TEST_TAG_MORE = "More"
+	const val TEST_TAG_MORE_LINK = "More Link {title}"
+
+
+
+	const val TEST_TAG_SETTINGS = "Settings"
+	const val TEST_TAG_ABOUT = "About"
+	const val TEST_TAG_ABOUT_PAGE = "About page"
+	const val TEST_TAG_PRAYER_TRACKER = "Prayer Tracker"
+	const val TEST_TAG_CALENDER = "Calender"
+	const val TEST_TAG_TASBIH_LIST = "Tasbih List"
+	const val TEST_TAG_TASBIH = "Tasbih"
+	const val TEST_TAG_NAMES_OF_ALLAH = "Names of Allah"
+	const val TEST_TAG_CHAPTERS = "Chapters"
+	const val TEST_TAG_CHAPTER = "Chapter"
+	const val TEST_TAG_AYA = "Aya"
+	const val TEST_TAG_SURAH_ITEM = "surah item"
+	const val TEST_TAG_JUZ_ITEM = "juz item"
+	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON = "Prayer times customization button"
+	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION = "Prayer times customization screen"
+
 
 	//logging tags
 	const val TAG = "Nimaz"

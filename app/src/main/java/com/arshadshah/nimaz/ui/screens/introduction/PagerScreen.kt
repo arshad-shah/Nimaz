@@ -15,13 +15,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PagerScreen(onBoardingPage : OnBoardingPage)
+fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 {
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
 				.fillMaxHeight()
-				.testTag("pagerScreen") ,
+				.testTag("pagerScreen $position") ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {

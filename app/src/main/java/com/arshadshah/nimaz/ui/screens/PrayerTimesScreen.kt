@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
@@ -49,7 +50,8 @@ fun PrayerTimesScreen(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(paddingValues)
-				.padding(8.dp) ,
+				.padding(8.dp)
+				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.SpaceEvenly
 		  ) {

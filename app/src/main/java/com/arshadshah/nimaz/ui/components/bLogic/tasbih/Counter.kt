@@ -31,6 +31,7 @@ fun Counter(
 	reset : MutableState<Boolean> ,
 	showResetDialog : MutableState<Boolean> ,
 	rOrl : MutableState<Int> ,
+	integrated : Boolean = false
 		   )
 {
 
@@ -43,7 +44,7 @@ fun Counter(
 					  )
 	}
 
-	var showObjectiveDialog = remember { mutableStateOf(false) }
+	val showObjectiveDialog = remember { mutableStateOf(false) }
 
 	//lap counter
 	val lap =
@@ -72,7 +73,6 @@ fun Counter(
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.fillMaxHeight()
 				.padding(16.dp)
 				.padding(paddingValues) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,

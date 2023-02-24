@@ -43,6 +43,8 @@ buildscript {
         firebase_crashlytics_gradle_version = "2.9.2"
 
         charts_version = "0.2.4-alpha"
+
+        navigation_testing_version = "2.5.3"
     }
 
     dependencies {

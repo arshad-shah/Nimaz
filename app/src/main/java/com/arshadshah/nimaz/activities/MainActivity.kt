@@ -21,10 +21,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
@@ -227,6 +229,7 @@ class MainActivity : ComponentActivity()
 
 
 				Scaffold(
+						modifier = Modifier.testTag("mainActivity") ,
 						snackbarHost = { SnackbarHost(snackbarHostState) } ,
 						topBar = {
 							AnimatedVisibility(
@@ -423,6 +426,7 @@ class MainActivity : ComponentActivity()
 			PRAYER_TRACKER_SCREEN_ROUTE -> "Prayer Tracker"
 			CALENDER_SCREEN_ROUTE -> "Calender"
 			QIBLA_SCREEN_ROUTE -> "Qibla"
+			AppConstants.TASBIH_LIST_SCREEN -> "Tasbih List"
 			else -> ""
 		}
 	}
@@ -443,7 +447,8 @@ class MainActivity : ComponentActivity()
 				NAMESOFALLAH_SCREEN_ROUTE ,
 				PRAYER_TRACKER_SCREEN_ROUTE,
 				CALENDER_SCREEN_ROUTE,
-				QIBLA_SCREEN_ROUTE
+				QIBLA_SCREEN_ROUTE,
+				AppConstants.TASBIH_LIST_SCREEN
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)

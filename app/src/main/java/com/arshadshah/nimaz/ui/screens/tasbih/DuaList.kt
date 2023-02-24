@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.data.remote.viewModel.DuaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.DuaListItem
@@ -76,6 +79,7 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 		is DuaViewModel.DuaState.Success ->
 		{
 			LazyColumn(
+					modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER) ,
 					contentPadding = paddingValues ,
 					state = listState ,
 					content = {

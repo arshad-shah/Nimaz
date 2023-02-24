@@ -9,15 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_MORE_LINK
 
 
 @Composable
 fun FeatureCard(
-	onNavigateToTasbihScreen : (String) -> Unit ,
+	onNavigateToTasbihScreen : (String , String , String) -> Unit ,
 	onNavigateToNames : () -> Unit ,
 	paddingValues : PaddingValues ,
 	onNavigateToListOfTasbeeh : () -> Unit ,
@@ -26,12 +29,14 @@ fun FeatureCard(
 	onNavigateToPrayerTracker : () -> Unit ,
 	onNavigateToCalender : () -> Unit ,
 	onNavigateToQibla : () -> Unit ,
+	onNavigateToTasbihListScreen : () -> Unit ,
 			   )
 {
 	LazyColumn(
 			modifier = Modifier
 				.fillMaxSize()
-				.padding(paddingValues) ,
+				.padding(paddingValues)
+				.testTag(AppConstants.TEST_TAG_MORE) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {
@@ -41,9 +46,17 @@ fun FeatureCard(
 					painter = painterResource(id = R.drawable.tasbih) ,
 					content = "Tasbih" ,
 					onClick = {
-						onNavigateToTasbihScreen(" ")
+						onNavigateToTasbihScreen(" ", " ", " ")
 					} ,
 					title = "Tasbih" ,
+					  )
+			LinkButton(
+					painter = painterResource(id = R.drawable.tasbih) ,
+					content = "Tasbih List" ,
+					onClick = {
+						onNavigateToTasbihListScreen()
+					} ,
+					title = "Tasbih List" ,
 					  )
 			LinkButton(
 					painter = painterResource(id = R.drawable.qibla) ,
@@ -129,7 +142,8 @@ fun LinkButton(
 	ElevatedCard(
 			modifier = Modifier
 				.padding(8.dp)
-				.fillMaxWidth() ,
+				.fillMaxWidth()
+				.testTag(TEST_TAG_MORE_LINK.replace("{title}" , title)),
 			onClick = onClick
 				) {
 		Row(
