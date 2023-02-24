@@ -3,15 +3,14 @@ package com.arshadshah.nimaz.data.remote.repositories
 import android.content.Context
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
-import com.arshadshah.nimaz.data.remote.models.Prayertime
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.ApiResponse
 import com.arshadshah.nimaz.utils.network.NimazServicesImpl
 import com.arshadshah.nimaz.utils.network.PrayerTimeResponse
 import io.ktor.client.plugins.*
-import kotlinx.coroutines.runBlocking
 import java.io.IOException
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 object PrayerTimesRepository
@@ -71,82 +70,45 @@ object PrayerTimesRepository
 			val prayerTimesAvailable = dataStore.countPrayerTimes() > 0
 			if (prayerTimesAvailable)
 			{
-				val prayerTimesLocal = dataStore.getAllPrayerTimes()
-				//check if the next prayer time is in the future
-				val nextPrayerTime = prayerTimesLocal.nextPrayer?.time
-				val currentTime = prayerTimesLocal.currentPrayer?.time
-				//if it is in the future return the prayer times from the database
-				if (nextPrayerTime?.isAfter(LocalDateTime.now()) == true && currentTime?.isBefore(
-							LocalDateTime.now()
-																								 ) == true
-				)
+				val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
+
+				//check if the date is for current month if not update the prayer times
+				val date = prayerTimesLocal.date
+				val currentDate = LocalDate.now()
+				val currentMonth = currentDate.monthValue
+				val currentYear = currentDate.year
+				val dateMonth = date?.monthValue
+				val dateYear = date?.year
+				if (dateMonth != currentMonth || dateYear != currentYear)
 				{
-					ApiResponse.Success(dataStore.getAllPrayerTimes())
-				} else
+					val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
+					val prayerTimes = mutableListOf<PrayerTimes>()
+					dataStore.deleteAllPrayerTimes()
+					for (prayerTimeResponse in prayerTimesResponse)
+					{
+						val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
+						prayerTimes.add(prayerTime)
+						dataStore.saveAllPrayerTimes(prayerTime)
+					}
+					return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() }!!)
+				}
+
+				if (prayerTimesLocal != null)
 				{
-					//map the Prayertime object to a map of names
-					val prayerTimesToMapped = dataStore.getAllPrayerTimes()
-					val mapConverted = mapOf(
-							"FAJR" to prayerTimesToMapped.fajr ,
-							"SUNRISE" to prayerTimesToMapped.sunrise ,
-							"DHUHR" to prayerTimesToMapped.dhuhr ,
-							"ASR" to prayerTimesToMapped.asr ,
-							"MAGHRIB" to prayerTimesToMapped.maghrib ,
-							"ISHA" to prayerTimesToMapped.isha
-											)
-					val nextPrayerTimeName = prayerTimesToMapped.nextPrayer?.name
-
-					//find out the next prayer time from the map
-					//for example if the nextPrayerTimeName is DHUHR we return the time for ASR as the next prayer time from the map
-					//we can use the index of the nextPrayerTimeName to get the next prayer time
-					val nextPrayerTimeIndex = mapConverted.keys.indexOf(nextPrayerTimeName)
-					val nextPrayerTimeFromMap =
-						mapConverted.values.elementAt(nextPrayerTimeIndex + 1)
-					val nextPrayerNameFromMap = mapConverted.keys.elementAt(nextPrayerTimeIndex + 1)
-
-
-					val newNextPrayerTime = Prayertime(
-							name = nextPrayerNameFromMap ,
-							time = nextPrayerTimeFromMap
-													  )
-
-					//find out the new current prayer time from the map
-					//for example if the nextPrayerTimeName is DHUHR we return the time for DHUHR as the current prayer time from the map
-					//we can use the index of the nextPrayerTimeName to get the current prayer time
-					val currentPrayerTimeIndex = mapConverted.keys.indexOf(nextPrayerTimeName)
-					val currentPrayerTimeFromMap =
-						mapConverted.values.elementAt(currentPrayerTimeIndex)
-					val currentPrayerNameFromMap =
-						mapConverted.keys.elementAt(currentPrayerTimeIndex)
-
-					val newCurrentPrayerTime = Prayertime(
-							name = currentPrayerNameFromMap ,
-							time = currentPrayerTimeFromMap
-														 )
-
-					//delete all the prayer times from the local database
-					dataStore.deleteAllPrayerTimes()
-					val newPrayerTimesObject = prayerTimesToMapped.copy(
-							nextPrayer = newNextPrayerTime ,
-							currentPrayer = newCurrentPrayerTime
-																	   )
-					//insert the prayer times into the local database
-					dataStore.saveAllPrayerTimes(newPrayerTimesObject)
-
-					ApiResponse.Success(newPrayerTimesObject)
+					return ApiResponse.Success(prayerTimesLocal)
 				}
-			} else
-			{
-				val prayerTimesResponse = NimazServicesImpl.getPrayerTimes(mapOfParams)
-				val prayerTimes = mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse)
-				runBlocking {
-					//delete all the prayer times from the local database
-					dataStore.deleteAllPrayerTimes()
-					//insert the prayer times into the local database
-					dataStore.saveAllPrayerTimes(prayerTimes)
+			}else{
+				val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
+				val prayerTimes = mutableListOf<PrayerTimes>()
+				for (prayerTimeResponse in prayerTimesResponse)
+				{
+					val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
+					prayerTimes.add(prayerTime)
+					dataStore.saveAllPrayerTimes(prayerTime)
 				}
-				ApiResponse.Success(prayerTimes)
+				return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() }!!)
 			}
+			ApiResponse.Error("Prayer Times Not Available" , null)
 		} catch (e : ClientRequestException)
 		{
 			ApiResponse.Error(e.message , null)
@@ -161,36 +123,29 @@ object PrayerTimesRepository
 	suspend fun updatePrayerTimes(mapOfParameters : Map<String , String>) : ApiResponse<PrayerTimes>
 	{
 		val dataStore = LocalDataStore.getDataStore()
-		val prayerTimesResponse = NimazServicesImpl.getPrayerTimes(mapOfParameters)
-		val prayerTimes = mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse)
-		runBlocking {
-			//delete all the prayer times from the local database
-			dataStore.deleteAllPrayerTimes()
-			//insert the prayer times into the local database
-			dataStore.saveAllPrayerTimes(prayerTimes)
+		val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParameters)
+		val prayerTimes = mutableListOf<PrayerTimes>()
+		dataStore.deleteAllPrayerTimes()
+		for (prayerTimeResponse in prayerTimesResponse)
+		{
+			val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
+			prayerTimes.add(prayerTime)
+			dataStore.saveAllPrayerTimes(prayerTime)
 		}
-		return ApiResponse.Success(prayerTimes)
+		return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() }!!)
 	}
 
 	//a function to map a prayer times response to a prayer times object
 	private fun mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse : PrayerTimeResponse) : PrayerTimes
 	{
 		return PrayerTimes(
-				timestamp = LocalDateTime.now() ,
+				date = LocalDate.parse(prayerTimesResponse.date) ,
 				LocalDateTime.parse(prayerTimesResponse.fajr) ,
 				LocalDateTime.parse(prayerTimesResponse.sunrise) ,
 				LocalDateTime.parse(prayerTimesResponse.dhuhr) ,
 				LocalDateTime.parse(prayerTimesResponse.asr) ,
 				LocalDateTime.parse(prayerTimesResponse.maghrib) ,
 				LocalDateTime.parse(prayerTimesResponse.isha) ,
-				Prayertime(
-						name = prayerTimesResponse.nextPrayer.name ,
-						time = LocalDateTime.parse(prayerTimesResponse.nextPrayer.time)
-						  ) ,
-				Prayertime(
-						name = prayerTimesResponse.currentPrayer.name ,
-						time = LocalDateTime.parse(prayerTimesResponse.currentPrayer.time)
-						  )
 						  )
 	}
 }

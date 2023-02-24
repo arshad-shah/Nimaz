@@ -51,7 +51,7 @@ fun DashboardPrayertimesCard(){
 	}.collectAsState()
 
 	val timeToNextPrayerLong =
-		nextPrayerTime.value.atZone(java.time.ZoneId.systemDefault())
+		nextPrayerTime.value?.atZone(java.time.ZoneId.systemDefault())
 			?.toInstant()
 			?.toEpochMilli()
 	val currentTime =

@@ -1,131 +1,128 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 
-import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
-import kotlin.reflect.KFunction2
 
 
 @Composable
-fun PrayerTimesList(
-	state : PrayerTimesViewModel.PrayerTimesState ,
-	handleEvent : KFunction2<Context , PrayerTimesViewModel.PrayerTimesEvent , Unit> ,
-				   )
+fun PrayerTimesList()
 {
 	val context = LocalContext.current
-	val sharedPreferences = PrivateSharedPreferences(context)
 
-	when (state)
+	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+
+	val fajrTime = remember {
+		viewModel.fajrTime
+	}.collectAsState()
+
+	val sunriseTime = remember {
+		viewModel.sunriseTime
+	}.collectAsState()
+
+	val dhuhrTime = remember {
+		viewModel.dhuhrTime
+	}.collectAsState()
+
+	val asrTime = remember {
+		viewModel.asrTime
+	}.collectAsState()
+
+	val maghribTime = remember {
+		viewModel.maghribTime
+	}.collectAsState()
+
+	val ishaTime = remember {
+		viewModel.ishaTime
+	}.collectAsState()
+
+	val isLoading = remember {
+		viewModel.isLoading
+	}.collectAsState()
+
+	val isError = remember {
+		viewModel.error
+	}.collectAsState()
+
+	val nextPrayerName = remember {
+		viewModel.nextPrayerName
+	}.collectAsState()
+
+	val nextPrayerTime = remember {
+		viewModel.nextPrayerTime
+	}.collectAsState()
+
+	if (isError.value.isNotBlank()){
+		Toasty.error(context, isError.value).show()
+	}else if (isLoading.value)
 	{
-		is PrayerTimesViewModel.PrayerTimesState.Loading ->
+		PrayerTimesListUI(
+				name = nextPrayerName.value ?: "" ,
+				prayerTimesMap = mapOf(
+						"Fajr" to fajrTime.value ,
+						"Sunrise" to sunriseTime.value ,
+						"Dhuhr" to dhuhrTime.value ,
+						"Asr" to asrTime.value ,
+						"Maghrib" to maghribTime.value ,
+						"Isha" to ishaTime.value ,
+									  ) ,
+				loading = true ,
+						 )
+	}else{
+		val sharedPreferences = PrivateSharedPreferences(context)
+		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+
+
+		if (! alarmLock)
 		{
-			PrayerTimesListUI(
-					prayerTimesMap = mapOf(
-							"FAJR" to LocalDateTime.now() ,
-							"SUNRISE" to LocalDateTime.now() ,
-							"DHUHR" to LocalDateTime.now() ,
-							"ASR" to LocalDateTime.now() ,
-							"MAGHRIB" to LocalDateTime.now() ,
-							"ISHA" to LocalDateTime.now() ,
-										  ) ,
-					name = "" ,
-					state = state ,
-					loading = true ,
-							 )
+			CreateAlarms().exact(
+					context ,
+					fajrTime.value !! ,
+					sunriseTime.value !! ,
+					dhuhrTime.value !! ,
+					asrTime.value !! ,
+					maghribTime.value !! ,
+					ishaTime.value !! ,
+								)
+			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 		}
+		val timeToNextPrayerLong =
+			nextPrayerTime.value.atZone(java.time.ZoneId.systemDefault())
+				?.toInstant()
+				?.toEpochMilli()
+		val currentTime =
+			LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
+				.toEpochMilli()
 
-		is PrayerTimesViewModel.PrayerTimesState.Error ->
-		{
-			PrayerTimesListUI(
-					prayerTimesMap = mapOf() ,
-					name = "" ,
-					state = state ,
-					loading = false ,
+		val difference = timeToNextPrayerLong?.minus(currentTime)
+		viewModel.handleEvent(
+				LocalContext.current ,
+				PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
 							 )
-		}
-
-		is PrayerTimesViewModel.PrayerTimesState.Success ->
-		{
-			val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-			//delete previous values from shared preferences
-			sharedPreferences.removeData(AppConstants.FAJR)
-			sharedPreferences.removeData(AppConstants.SUNRISE)
-			sharedPreferences.removeData(AppConstants.DHUHR)
-			sharedPreferences.removeData(AppConstants.ASR)
-			sharedPreferences.removeData(AppConstants.MAGHRIB)
-			sharedPreferences.removeData(AppConstants.ISHA)
-			sharedPreferences.removeData(AppConstants.CURRENT_PRAYER)
-
-			val prayerTimes = state.prayerTimes
-			//Map<String , LocalDateTime?>
-			val prayerTimesMap = mapOf(
-					"fajr" to prayerTimes.fajr ,
-					"sunrise" to prayerTimes.sunrise ,
-					"dhuhr" to prayerTimes.dhuhr ,
-					"asr" to prayerTimes.asr ,
-					"maghrib" to prayerTimes.maghrib ,
-					"isha" to prayerTimes.isha ,
-									  )
-
-			//save the prayer times in shared preferences
-			sharedPreferences.saveData(AppConstants.FAJR , prayerTimesMap["fajr"] !!.toString())
-			sharedPreferences.saveData(
-					AppConstants.SUNRISE ,
-					prayerTimesMap["sunrise"] !!.toString()
-									  )
-			sharedPreferences.saveData(AppConstants.DHUHR , prayerTimesMap["dhuhr"] !!.toString())
-			sharedPreferences.saveData(AppConstants.ASR , prayerTimesMap["asr"] !!.toString())
-			sharedPreferences.saveData(
-					AppConstants.MAGHRIB ,
-					prayerTimesMap["maghrib"] !!.toString()
-									  )
-			sharedPreferences.saveData(AppConstants.ISHA , prayerTimesMap["isha"] !!.toString())
-			sharedPreferences.saveData(
-					AppConstants.CURRENT_PRAYER ,
-					prayerTimes.currentPrayer?.name.toString()
-									  )
-
-
-			if (! alarmLock)
-			{
-				CreateAlarms().exact(
-						context ,
-						prayerTimesMap["fajr"] !! ,
-						prayerTimesMap["sunrise"] !! ,
-						prayerTimesMap["dhuhr"] !! ,
-						prayerTimesMap["asr"] !! ,
-						prayerTimesMap["maghrib"] !! ,
-						prayerTimesMap["isha"] !! ,
-									)
-				sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-			}
-			val timeToNextPrayerLong =
-				state.prayerTimes.nextPrayer?.time?.atZone(java.time.ZoneId.systemDefault())
-					?.toInstant()
-					?.toEpochMilli()
-			val currentTime =
-				LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
-					.toEpochMilli()
-
-			val difference = timeToNextPrayerLong?.minus(currentTime)
-			handleEvent(
-					LocalContext.current ,
-					PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
-					   )
-			PrayerTimesListUI(
-					name = prayerTimes.nextPrayer?.name ?: "" ,
-					prayerTimesMap = prayerTimesMap ,
-					state = state ,
-					loading = false ,
-							 )
-		}
+		PrayerTimesListUI(
+				name = nextPrayerName.value.first()
+					.uppercaseChar() + nextPrayerName.value.substring(1) ,
+				loading = false ,
+				prayerTimesMap = mapOf(
+						"Fajr" to fajrTime.value !! ,
+						"Sunrise" to sunriseTime.value !! ,
+						"Dhuhr" to dhuhrTime.value !! ,
+						"Asr" to asrTime.value !! ,
+						"Maghrib" to maghribTime.value !! ,
+						"Isha" to ishaTime.value !! ,
+									  ) ,
+						 )
 	}
 
 }

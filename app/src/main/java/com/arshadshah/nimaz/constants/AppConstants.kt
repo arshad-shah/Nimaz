@@ -7,6 +7,8 @@ object AppConstants
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
 	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/custom"
+	const val PRAYER_TIMES_MONTHLY_URL = "$BASE_URL/prayertimes/monthly"
+	const val PRAYER_TIMES_MONTHLY_CUSTOM_URL = "$BASE_URL/prayertimes/monthly/custom"
 
 	//auth
 	const val LOGIN_URL = "$BASE_URL/auth/authenticate"
