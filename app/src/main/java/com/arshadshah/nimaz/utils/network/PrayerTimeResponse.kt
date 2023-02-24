@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PrayerTimeResponse(
+	@SerialName("date")
+	val date : String ,
 	@SerialName("fajr")
 	var fajr : String ,
 	@SerialName("sunrise")
@@ -18,18 +20,4 @@ data class PrayerTimeResponse(
 	val maghrib : String ,
 	@SerialName("isha")
 	val isha : String ,
-	@SerialName("nextPrayer")
-	val nextPrayer : Prayertime ,
-	@SerialName("currentPrayer")
-	val currentPrayer : Prayertime ,
 							 )
-{
-
-	@Serializable
-	data class Prayertime(
-		@SerialName("name")
-		val name : String ,
-		@SerialName("time")
-		val time : String ,
-						 )
-}
