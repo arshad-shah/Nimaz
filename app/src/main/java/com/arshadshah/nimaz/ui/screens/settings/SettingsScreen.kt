@@ -14,6 +14,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -38,7 +39,6 @@ import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
 import com.arshadshah.nimaz.utils.NotificationHelper
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import es.dmoral.toasty.Toasty
@@ -53,14 +53,17 @@ fun SettingsScreen(
 				  )
 {
 	val context = LocalContext.current
-
-	val sharedPreferences = PrivateSharedPreferences(context)
 	val viewModelSettings = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
 	val themeState = remember {
 		viewModelSettings.theme
 	}.collectAsState()
 
 	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+
+	LaunchedEffect(Unit){
+		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+	}
+
 	val fajrTime = remember {
 		viewModel.fajrTime
 	}.collectAsState()
@@ -84,10 +87,6 @@ fun SettingsScreen(
 	val ishaTime = remember {
 		viewModel.ishaTime
 	}.collectAsState()
-
-
-
-
 
 	Column(
 			modifier = Modifier

@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.ui.screens
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +18,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,

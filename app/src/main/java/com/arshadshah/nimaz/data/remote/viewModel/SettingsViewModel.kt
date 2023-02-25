@@ -1,25 +1,33 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
+import android.os.Build
+import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
-import com.arshadshah.nimaz.utils.Location
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.location.LocationFinder
-import com.arshadshah.nimaz.utils.location.LocationFinderAuto
-import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.google.android.gms.location.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.*
 
 class SettingsViewModel(context: Context) : ViewModel()
 {
 	val sharedPreferences = PrivateSharedPreferences(context)
 
+	private val geocoder = Geocoder(context , Locale.getDefault())
+
+	private val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
 	//theme state
 	//it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
@@ -32,19 +40,23 @@ class SettingsViewModel(context: Context) : ViewModel()
 	val isLocationAuto = _isLocationAuto.asStateFlow()
 
 	//location name loading state
-	private var _isLocationNameLoading = MutableStateFlow(false)
-	val isLocationNameLoading = _isLocationNameLoading.asStateFlow()
+	private var _isLoading = MutableStateFlow(false)
+	val isLoading = _isLoading.asStateFlow()
+
+	//location name error state
+	private var _isError = MutableStateFlow("")
+	val isError = _isError.asStateFlow()
 
 	//location name state
 	private var _locationName = MutableStateFlow(sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
 	val locationName = _locationName.asStateFlow()
 
 	//latitude state
-	private var _latitude = MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498))
+	private var _latitude = MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LATITUDE, 0.0))
 	val latitude = _latitude.asStateFlow()
 
 	//longitude state
-	private var _longitude = MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603))
+	private var _longitude = MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LONGITUDE, 0.0))
 	val longitude = _longitude.asStateFlow()
 
 	//battery exempt state
@@ -53,11 +65,11 @@ class SettingsViewModel(context: Context) : ViewModel()
 
 	//prayer times adjustments state
 	//calculation method state
-	private var _calculationMethod = MutableStateFlow(sharedPreferences.getData(AppConstants.CALCULATION_METHOD, "IRELAND"))
+	private var _calculationMethod = MutableStateFlow(sharedPreferences.getData(AppConstants.CALCULATION_METHOD, "MWL"))
 	val calculationMethod = _calculationMethod.asStateFlow()
 
 	//Madhab state
-	private var _madhab = MutableStateFlow(sharedPreferences.getData(AppConstants.MADHAB, "HANAFI"))
+	private var _madhab = MutableStateFlow(sharedPreferences.getData(AppConstants.MADHAB, "SHAFI"))
 	val madhab = _madhab.asStateFlow()
 
 	//high latitude state
@@ -69,7 +81,7 @@ class SettingsViewModel(context: Context) : ViewModel()
 	val fajrAngle = _fajrAngle.asStateFlow()
 
 	//isha angle state
-	private var _ishaAngle = MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_ANGLE, "18"))
+	private var _ishaAngle = MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_ANGLE, "17"))
 	val ishaAngle = _ishaAngle.asStateFlow()
 
 	//ishaAngle visibility state
@@ -77,7 +89,7 @@ class SettingsViewModel(context: Context) : ViewModel()
 	val ishaAngleVisibility = _ishaAngleVisibility.asStateFlow()
 
 	//isha interval state
-	private var _ishaInterval = MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_INTERVAL, "90"))
+	private var _ishaInterval = MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_INTERVAL, "0"))
 	val ishaInterval = _ishaInterval.asStateFlow()
 
 	//offset state
@@ -110,6 +122,9 @@ class SettingsViewModel(context: Context) : ViewModel()
 	{
 		class LocationToggle(val context : Context, val checked : Boolean) : SettingsEvent()
 		class LocationInput(val context : Context, val location : String) : SettingsEvent()
+		//events to update latitude and longitude
+		class Latitude(val context : Context,val latitude : Double) : SettingsEvent()
+		class Longitude(val context : Context,val longitude : Double) : SettingsEvent()
 		class LoadLocation(val context: Context) : SettingsEvent()
 		class BatteryExempt(val exempt : Boolean) : SettingsEvent()
 
@@ -131,13 +146,13 @@ class SettingsViewModel(context: Context) : ViewModel()
 		class IshaOffset(val offset : String) : SettingsEvent()
 
 		object LoadSettings : SettingsEvent()
-
 		//theme
 		class Theme(val theme : String) : SettingsEvent()
 		//update settings based on calculation method
 		class UpdateSettings(val method : String) : SettingsEvent()
 	}
 	//events for the settings screen
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	fun handleEvent(event : SettingsEvent)
 	{
 		when (event)
@@ -153,6 +168,19 @@ class SettingsViewModel(context: Context) : ViewModel()
 			{
 				_locationName.value = event.location
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , event.location)
+				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+			}
+			is SettingsEvent.Latitude ->
+			{
+				_latitude.value = event.latitude
+				sharedPreferences.saveData(AppConstants.LATITUDE , event.latitude.toString())
+				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+			}
+
+			is SettingsEvent.Longitude ->
+			{
+				_longitude.value = event.longitude
+				sharedPreferences.saveData(AppConstants.LONGITUDE , event.longitude.toString())
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
 			}
 
@@ -251,15 +279,18 @@ class SettingsViewModel(context: Context) : ViewModel()
 
 			is SettingsEvent.LoadSettings ->
 			{
+				_isLoading.value = true
 				_isLocationAuto.value = sharedPreferences.getDataBoolean(LOCATION_TYPE , false)
 				_locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
+				_latitude.value = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
+				_longitude.value = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)
 				_isBatteryExempt.value =
 					sharedPreferences.getDataBoolean(AppConstants.BATTERY_OPTIMIZATION , false)
 				_calculationMethod.value =
-					sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "ISNA")
+					sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "MWL")
 				_madhab.value = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
 				_highLatitude.value =
-					sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
+					sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "MIDDLE_OF_THE_NIGHT")
 				_fajrAngle.value = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 				_ishaAngle.value = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
 				val isNotAnIntervalMethod = when (_calculationMethod.value)
@@ -268,7 +299,7 @@ class SettingsViewModel(context: Context) : ViewModel()
 					else -> true
 				}
 				_ishaAngleVisibility.value = isNotAnIntervalMethod
-				_ishaInterval.value = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "90")
+				_ishaInterval.value = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
 				_fajrOffset.value = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
 				_sunriseOffset.value =
 					sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
@@ -277,6 +308,7 @@ class SettingsViewModel(context: Context) : ViewModel()
 				_maghribOffset.value =
 					sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
 				_ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
+				_isLoading.value = false
 			}
 			is SettingsEvent.Theme ->
 			{
@@ -318,125 +350,25 @@ class SettingsViewModel(context: Context) : ViewModel()
 			}
 		}
 	}
-
-
-
-	private fun loadLocationManual(context : Context , locationName : String)
+	//load location from shared preferences
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+	private fun loadLocation(context : Context , checked : Boolean)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				_isLocationNameLoading.value = true
-				//callback for location
-				val locationFoundCallbackManual =
-					{ latitudeValue : Double, longitudeValue : Double , name : String ->
-						//save location
-						_locationName.value = name
-						_latitude.value = latitudeValue
-						_longitude.value = longitudeValue
-						_isLocationNameLoading.value = false
-					}
-
-				if (NetworkChecker().networkCheck(context))
-				{
-						Location().getManualLocation(
-								locationName ,
-								context ,
-								locationFoundCallbackManual,
-													)
-						Log.d(
-								AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-								"loadLocation: manual"
-							 )
-				} else
-				{
-					Log.d(
-							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-							"loadLocation: no network"
-						 )
-				}
-			} catch (e : Exception)
-			{
-				Log.d(
-						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-						"loadLocation: ${e.message}"
-					 )
-			}
-		}
-	}
-
-	private fun loadLocationAuto(context : Context)
-	{
-		viewModelScope.launch(Dispatchers.Main) {
-			try
-			{
-				_isLocationNameLoading.value = true
-				val listener = { latitudeValue : Double , longitudeValue : Double ->
-					//save location
-					_latitude.value = latitudeValue
-					_longitude.value = longitudeValue
-
-					val locationFoundCallbackManual =
-						{ latitude : Double, longitude : Double , name : String ->
-							//save location
-							_locationName.value = name
-							_latitude.value = latitude
-							_longitude.value = longitude
-							_isLocationNameLoading.value = false
-						}
-
-
-					//get the location name
-					val locationFinder = LocationFinder()
-					locationFinder.findCityName(
-							context ,
-							latitude = latitudeValue ,
-							longitude = longitudeValue ,
-							locationFoundCallbackManual = locationFoundCallbackManual
-											   )
-					_isLocationNameLoading.value = false
-				}
-
-				if (NetworkChecker().networkCheck(context))
-				{
-					Location().getAutomaticLocation(
-							context ,
-							listener
-												   )
-					Log.d(
-							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-							"loadLocation: manual"
-						 )
-				} else
-				{
-					Log.d(
-							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-							"loadLocation: no network"
-						 )
-				}
-			} catch (e : Exception)
-			{
-				Log.d(
-						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-						"loadLocation: ${e.message}"
-					 )
-			}
-		}
-	}
-
-	//load location from shared preferences
-	private fun loadLocation(context : Context , checked : Boolean)
-	{
-		viewModelScope.launch(Dispatchers.Main) {
-			try
-			{
 				if (checked)
 				{
-					loadLocationAuto(context)
+					_isLoading.value = true
+					startLocationUpdates()
+					_isLoading.value = false
+
 				} else
 				{
-					LocationFinderAuto().stopLocationUpdates()
-					loadLocationManual(context, sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
+					_isLoading.value = true
+					stopLocationUpdates()
+					forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
+					_isLoading.value = false
 				}
 			} catch (e : Exception)
 			{
@@ -444,7 +376,146 @@ class SettingsViewModel(context: Context) : ViewModel()
 						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 						"loadLocation: ${e.message}"
 					 )
+				_isLoading.value = false
+				_isError.value = e.message.toString()
 			}
 		}
 	}
+
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+	fun reverseGeocode(latitude : Double , longitude : Double)
+	{
+		Log.d("Nimaz: reverseGeocode" , "reverseGeocode")
+		try
+		{
+			val gcd = geocoder.getFromLocation(latitude , longitude , 1)
+			val addresses : List<Address> = gcd as List<Address>
+			if (addresses.isNotEmpty())
+			{
+				val address : Address = addresses[0]
+				_locationName.value = address.locality
+				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				_latitude.value = latitude
+				_longitude.value = longitude
+				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , latitude)
+				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , longitude)
+
+				Log.i("Location" , "Location Found From value $latitude $longitude")
+			} else
+			{
+				_latitude.value =
+					sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+				_longitude.value =
+					sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+				val cityNameFromStorage =
+					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
+				Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+			}
+		} catch (e : Exception)
+		{
+			Log.e("Geocoder" , "Geocoder has failed")
+			_latitude.value =
+				sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+			_longitude.value =
+				sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+			val cityNameFromStorage =
+				sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
+			Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+		}
+	}
+
+	//forwards geocode
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+	fun forwardGeocode(cityName : String)
+	{
+		Log.d("Nimaz: forwardGeocode" , "forwardGeocode")
+		try
+		{
+			val addresses : List<Address> =
+				geocoder.getFromLocationName(cityName , 1) as List<Address>
+			if (addresses.isNotEmpty())
+			{
+				val address : Address = addresses[0]
+				_locationName.value = address.locality
+				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				_latitude.value = address.latitude
+				_longitude.value = address.longitude
+				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , address.latitude)
+				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , address.longitude)
+				Log.i("Location" , "Location Found From value $cityName")
+			} else
+			{
+				_latitude.value =
+					sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+				_longitude.value =
+					sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+				val cityNameFromStorage =
+					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
+				Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+			}
+		} catch (e : Exception)
+		{
+			Log.e("Geocoder" , "Geocoder has failed")
+			_latitude.value =
+				sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+			_longitude.value =
+				sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+			val cityNameFromStorage =
+				sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
+			Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+		}
+	}
+
+
+	private val ONE_MINUTE = 1000 * 60
+	val locationRequest : LocationRequest = LocationRequest.Builder(
+			Priority.PRIORITY_BALANCED_POWER_ACCURACY ,
+			ONE_MINUTE.toLong()
+																   ).build()
+
+	@SuppressLint("MissingPermission")
+	private fun startLocationUpdates()
+	{
+		fusedLocationProviderClient.requestLocationUpdates(
+				locationRequest ,
+				locationCallback ,
+				Looper.getMainLooper()
+														  )
+	}
+
+	private fun stopLocationUpdates()
+	{
+		fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+	}
+
+	private val locationCallback  = object : LocationCallback()
+	{
+		@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+		override fun onLocationResult(p0 : LocationResult)
+		{
+			super.onLocationResult(p0)
+			locationRequest ?: return
+			for (location in p0.locations)
+			{
+				setLocationData(location)
+				Log.d("Nimaz: Location" , "Latitude: ${location.latitude} Longitude: ${location.longitude}")
+			}
+		}
+	}
+
+
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+	private fun setLocationData(location : Location?)
+	{
+		location?.let {
+			_latitude.value = location.latitude
+			_longitude.value = location.longitude
+			reverseGeocode(
+						 location.latitude ,
+						 location.longitude
+						  )
+		}
+	}
+
+
 }

@@ -10,8 +10,8 @@ object PrayerTimesParamMapper
 	fun getParams(context: Context) : MutableMap<String , String>
 	{
 		val sharedPreferences = PrivateSharedPreferences(context)
-		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)
 		val fajrAngle : String = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 		val ishaAngle : String = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
 		val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")

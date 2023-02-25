@@ -303,15 +303,23 @@ private fun PrayerTimes.toLocalPrayerTimes() = LocalPrayerTimes(
 		isha = isha.toString() ,
 															   )
 
-private fun LocalPrayerTimes.toPrayerTimes() = PrayerTimes(
-		date = LocalDate.parse(date) ,
-		fajr = LocalDateTime.parse(fajr) ,
-		sunrise = LocalDateTime.parse(sunrise) ,
-		dhuhr = LocalDateTime.parse(dhuhr) ,
-		asr = LocalDateTime.parse(asr) ,
-		maghrib = LocalDateTime.parse(maghrib) ,
-		isha = LocalDateTime.parse(isha) ,
-														  )
+private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes? {
+	val date = LocalDate.parse(date)
+	return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null && date != null) {
+		PrayerTimes(
+				date = date,
+				fajr = LocalDateTime.parse(fajr),
+				sunrise = LocalDateTime.parse(sunrise),
+				dhuhr = LocalDateTime.parse(dhuhr),
+				asr = LocalDateTime.parse(asr),
+				maghrib = LocalDateTime.parse(maghrib),
+				isha = LocalDateTime.parse(isha),
+				   )
+	} else {
+		null
+	}
+}
+
 
 //duas
 private fun Dua.toLocalDua() = LocalDua(

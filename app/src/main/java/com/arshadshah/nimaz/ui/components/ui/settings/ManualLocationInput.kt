@@ -73,7 +73,6 @@ fun ManualLocationInput(
 									name.value
 																		 )
 									   )
-					viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 
 					showDialog.value = false
 				}) { Text(text = "Confirm") }
