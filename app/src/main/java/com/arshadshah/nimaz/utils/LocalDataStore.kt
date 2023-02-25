@@ -39,4 +39,10 @@ object LocalDataStore
 		return dataStore !!
 	}
 
+	// a function to check if the data store has been initialized
+	fun isInitialized() : Boolean
+	{
+		return dataStore != null
+	}
+
 }

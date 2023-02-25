@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
+import android.os.Build
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -34,6 +36,7 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper.getParams
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 {
@@ -42,6 +45,11 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 
 	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
 	val settingViewModel = viewModel(key = "SettingViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+
+
+	LaunchedEffect(Unit){
+		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+	}
 
 	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
@@ -144,6 +152,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaOffset
 	}.collectAsState()
 
+	val isLoading = remember {
+		settingViewModel.isLoading
+	}.collectAsState()
+
 	calculationMethodState.value = calculationMethod.value
 	madhabState.value = madhab.value
 	highLatitudeRuleState.value = highLatitudeRule.value
@@ -156,10 +168,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	asrAdjustment.value = asrAdjustmentValue.value
 	maghribAdjustment.value = maghribAdjustmentValue.value
 	ishaAdjustment.value = ishaAdjustmentValue.value
-
-	LaunchedEffect(Unit){
-		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
-	}
 
 	Column(
 			modifier = Modifier
@@ -192,7 +200,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.CalculationMethod(method))
 							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.UpdateSettings(method))
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						} ,
 						height = 500.dp
 							)
@@ -223,7 +230,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																			 )
 												)
 					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 				}
 			}
 			ElevatedCard(
@@ -252,7 +258,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																			 )
 												)
 					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 				}
 			}
 		}
@@ -282,7 +287,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 										  ) { angle : Int ->
 					settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.FajrAngle(angle.toString()))
 					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 				}
 			}
 			if (ishaaAngleVisible.value)
@@ -312,7 +316,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																													)
 													)
 						viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-						viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 					}
 				}
 			} else
@@ -373,7 +376,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -409,7 +411,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -445,7 +446,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -481,7 +481,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -517,7 +516,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -553,13 +551,13 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 				}
 					 )
 	}
 }
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview()

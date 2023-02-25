@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
+import android.os.Build
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ElevatedCard
@@ -27,6 +29,7 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun DashboardPrayertimesCard(){
 

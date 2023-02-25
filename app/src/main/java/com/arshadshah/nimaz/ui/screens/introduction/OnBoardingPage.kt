@@ -7,8 +7,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
-import com.arshadshah.nimaz.ui.components.ui.intro.LocationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
+import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 sealed class OnBoardingPage(
@@ -56,7 +56,7 @@ sealed class OnBoardingPage(
 			title = "Location" ,
 			description = "Nimaz needs your location to get accurate prayer times. You can also use manual location." ,
 			extra = {
-				LocationScreenUI()
+				LocationSettings(isIntro = true)
 			}
 								 )
 

@@ -15,25 +15,6 @@ import java.time.LocalDateTime
 
 object PrayerTimesRepository
 {
-
-	//get prayer times for today from database
-	//if not found in database get from API and then save to database and then return
-	suspend fun getPrayerTimesForWidget(context : Context) : ApiResponse<PrayerTimes>
-	{
-		LocalDataStore.init(context)
-		val dataStore = LocalDataStore.getDataStore()
-		val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
-
-		if(prayerTimesLocal == null){
-			val prayerTimes = getPrayerTimes(context)
-			if(prayerTimes != null){
-				prayerTimes.data?.let { dataStore.saveAllPrayerTimes(it) }
-				return prayerTimes
-			}
-		}
-		return ApiResponse.Success(prayerTimesLocal)
-	}
-
 	/**
 	 * Creates a map of prayer times parameters to be used in the API call
 	 * all the parameters are taken from the user's settings
@@ -44,10 +25,15 @@ object PrayerTimesRepository
 	suspend fun getPrayerTimes(context : Context) : ApiResponse<PrayerTimes>
 	{
 
+		//check if the local datastore has been initialized if not initialize it
+		if (!LocalDataStore.isInitialized())
+		{
+			LocalDataStore.init(context)
+		}
 		val dataStore = LocalDataStore.getDataStore()
 		val sharedPreferences = PrivateSharedPreferences(context)
-		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
+		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
+		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)
 		val fajrAngle : String = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 		val ishaAngle : String = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
 		val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
@@ -91,7 +77,7 @@ object PrayerTimesRepository
 				val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
 
 				//check if the date is for current month if not update the prayer times
-				val date = prayerTimesLocal.date
+				val date = prayerTimesLocal?.date
 				val currentDate = LocalDate.now()
 				val currentMonth = currentDate.monthValue
 				val currentYear = currentDate.year
