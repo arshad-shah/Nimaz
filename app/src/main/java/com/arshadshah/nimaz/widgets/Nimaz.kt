@@ -40,7 +40,7 @@ class Nimaz : AppWidgetProvider()
 
 			// Set the random number text
 			runBlocking {
-				val repository = PrayerTimesRepository.getPrayerTimesForWidget(context)
+				val repository = PrayerTimesRepository.getPrayerTimes(context)
 				views.setTextViewText(R.id.Fajr_time , repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
 				views.setTextViewText(R.id.Zuhar_time , repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
 				views.setTextViewText(R.id.Asar_time , repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
@@ -87,7 +87,7 @@ internal fun updateAppWidget(
 
 	val views = RemoteViews(context.packageName , R.layout.nimaz)
 	runBlocking {
-		val repository = PrayerTimesRepository.getPrayerTimesForWidget(context)
+		val repository = PrayerTimesRepository.getPrayerTimes(context)
 		views.setTextViewText(R.id.Fajr_time , repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
 		views.setTextViewText(R.id.Zuhar_time , repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
 		views.setTextViewText(R.id.Asar_time , repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a")))

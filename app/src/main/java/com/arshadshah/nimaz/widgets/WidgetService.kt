@@ -69,7 +69,7 @@ class WidgetService : Service()
 
 				// Set the random number text
 				runBlocking {
-					val repository = PrayerTimesRepository.getPrayerTimesForWidget(context)
+					val repository = PrayerTimesRepository.getPrayerTimes(context)
 					views.setTextViewText(
 							R.id.Fajr_time , repository.data?.fajr?.format(
 							DateTimeFormatter.ofPattern("hh:mm a")))
