@@ -30,7 +30,7 @@ fun MyQuranScreen(
 	bookmarks : State<List<Aya>> ,
 	favorites : State<List<Aya>> ,
 	notes : State<List<Aya>> ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 				 )
 {
@@ -101,7 +101,7 @@ fun MyQuranScreen(
 fun FeaturesDropDown(
 	items : State<List<Aya>> ,
 	language : String ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	nameOfFeature : String ,
 						)
 {
@@ -201,7 +201,8 @@ fun FeaturesDropDown(
 										onNavigateToAyatScreen(
 												list[i].suraNumber.toString() ,
 												true ,
-												language
+												language,
+												list[i].ayaNumberInSurah
 															  )
 									},
 								shape = MaterialTheme.shapes.medium ,
@@ -318,7 +319,7 @@ val ayas = listOf(
 		FeaturesDropDown(
 				items = remember { mutableStateOf(ayas) } ,
 				language = "english" ,
-				onNavigateToAyatScreen = { _, _, _ -> } ,
+				onNavigateToAyatScreen = { _ , _ , _ , _ -> } ,
 				nameOfFeature = "Notes"
 						)
 	}

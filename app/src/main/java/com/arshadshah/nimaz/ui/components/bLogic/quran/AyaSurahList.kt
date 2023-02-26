@@ -18,6 +18,7 @@ fun AyaSurahList(
 	state : State<ArrayList<Aya>> ,
 	loading : Boolean ,
 	error : String ,
+	scrollToAya : Int? ,
 				)
 {
 
@@ -32,6 +33,7 @@ fun AyaSurahList(
 					loading = true ,
 					type = type ,
 					number = number ,
+					scrollToAya = scrollToAya ,
 					 )
 		} else
 		{
@@ -48,6 +50,7 @@ fun AyaSurahList(
 					loading = false ,
 					type = type ,
 					number = number ,
+					scrollToAya = scrollToAya ,
 					 )
 		} else
 		{
@@ -64,6 +67,7 @@ fun AyaSurahList(
 					loading = false ,
 					type = type ,
 					number = number ,
+					scrollToAya	 = scrollToAya ,
 					 )
 		} else
 		{

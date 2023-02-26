@@ -29,7 +29,6 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun DashboardPrayertimesCard(){
 

@@ -32,7 +32,7 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun SurahListUI(
 	surahs : ArrayList<Surah> ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	loading : Boolean ,
 			   )
 {
@@ -65,7 +65,7 @@ fun SurahListItemUI(
 	englishNameTranslation : String ,
 	type : String ,
 	rukus : String ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	context : Context = LocalContext.current ,
 	loading : Boolean ,
 				   )
@@ -98,7 +98,7 @@ fun SurahListItemUI(
 					.clickable(
 							enabled = !loading,
 							onClick = {
-								onNavigateToAyatScreen(surahNumber , true , language)
+								onNavigateToAyatScreen(surahNumber , true , language, null)
 							}
 							  )
 		   ) {

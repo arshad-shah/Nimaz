@@ -18,7 +18,6 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,

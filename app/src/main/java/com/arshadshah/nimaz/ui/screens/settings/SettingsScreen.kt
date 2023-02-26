@@ -46,7 +46,6 @@ import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun SettingsScreen(
 	onNavigateToPrayerTimeCustomizationScreen : () -> Unit ,

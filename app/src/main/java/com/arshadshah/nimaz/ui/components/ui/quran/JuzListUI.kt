@@ -30,7 +30,7 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun JuzListUI(
 	juz : ArrayList<Juz> ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	loading : Boolean ,
 			 )
 {
@@ -55,7 +55,7 @@ fun JuzListItemUI(
 	juzNumber : String ,
 	name : String ,
 	tname : String ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	context : Context = LocalContext.current ,
 	loading : Boolean ,
 				 )
@@ -88,7 +88,7 @@ fun JuzListItemUI(
 					.clickable(
 							enabled = !loading ,
 							  ) {
-						onNavigateToAyatScreen(juzNumber , false , translation)
+						onNavigateToAyatScreen(juzNumber , false , translation , null)
 					}
 		   ) {
 
