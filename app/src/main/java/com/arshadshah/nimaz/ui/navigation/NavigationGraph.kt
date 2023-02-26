@@ -139,6 +139,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					MY_QURAN_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -216,6 +221,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
 					TASBIH_LIST_SCREEN ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					MY_QURAN_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -301,6 +311,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					MY_QURAN_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -382,13 +397,32 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
+					MY_QURAN_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+
 					else -> ExitTransition.None
 				}
 			}
 				   ) {
 
 		composable(BottomNavItem.Dashboard.screen_route){
-			Dashboard()
+			Dashboard(
+					onNavigateToPrayerTimes = {
+						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route){
+							 popUpTo(navController.graph.startDestinationId) { inclusive = true }
+						}
+
+					},
+					onNavigateToCalender = {
+						navController.navigate(CALENDER_SCREEN_ROUTE)
+					},
+					onNavigateToTracker = {
+						navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
+					}
+					 )
 		}
 
 		composable(BottomNavItem.PrayerTimesScreen.screen_route)
