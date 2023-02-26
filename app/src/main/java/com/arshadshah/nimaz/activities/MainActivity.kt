@@ -4,7 +4,6 @@ import android.app.ActivityManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
@@ -232,7 +231,7 @@ class MainActivity : ComponentActivity()
 				}
 
 
-				this.startService(Intent(this , WidgetService::class.java))
+//				this.startService(Intent(this , WidgetService::class.java))
 
 				Log.d(MAIN_ACTIVITY_TAG , "Is service running: " + isMyServiceRunning(WidgetService::class.java).toString())
 
@@ -439,6 +438,7 @@ class MainActivity : ComponentActivity()
 			CALENDER_SCREEN_ROUTE -> "Calender"
 			QIBLA_SCREEN_ROUTE -> "Qibla"
 			AppConstants.TASBIH_LIST_SCREEN -> "Tasbih List"
+			AppConstants.MY_QURAN_SCREEN_ROUTE -> "Aya"
 			else -> ""
 		}
 	}
@@ -460,7 +460,8 @@ class MainActivity : ComponentActivity()
 				PRAYER_TRACKER_SCREEN_ROUTE,
 				CALENDER_SCREEN_ROUTE,
 				QIBLA_SCREEN_ROUTE,
-				AppConstants.TASBIH_LIST_SCREEN
+				AppConstants.TASBIH_LIST_SCREEN,
+				AppConstants.MY_QURAN_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)

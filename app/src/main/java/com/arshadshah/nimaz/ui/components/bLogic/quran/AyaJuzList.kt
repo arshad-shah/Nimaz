@@ -18,6 +18,7 @@ fun AyaJuzList(
 	error : String ,
 	loading : Boolean ,
 	state : State<ArrayList<Aya>> ,
+	scrollToAya : Int? ,
 			  )
 {
 	if( loading )
@@ -31,6 +32,7 @@ fun AyaJuzList(
 					loading = true ,
 					type = type ,
 					number = number ,
+					scrollToAya = scrollToAya ,
 					 )
 		} else
 		{
@@ -47,6 +49,7 @@ fun AyaJuzList(
 					loading = false ,
 					type = type ,
 					number = number ,
+					scrollToAya = scrollToAya ,
 					 )
 		} else
 		{
@@ -63,6 +66,7 @@ fun AyaJuzList(
 					loading = false ,
 					type = type ,
 					number = number ,
+					scrollToAya = scrollToAya ,
 					 )
 		} else
 		{

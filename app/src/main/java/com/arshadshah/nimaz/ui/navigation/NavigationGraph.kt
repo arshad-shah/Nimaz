@@ -20,6 +20,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
@@ -408,32 +409,69 @@ fun NavigationGraph(
 		}
 		composable(BottomNavItem.QuranScreen.screen_route) {
 			QuranScreen(
-					paddingValues ,
-					onNavigateToAyatScreen = { number : String , isSurah : Boolean , language : String ->
-						//replace the placeholder with the actual route
-						navController.navigate(
-								QURAN_AYA_SCREEN_ROUTE.replace(
-										"{number}" ,
-										number
-															  )
-									.replace(
-											"{isSurah}" ,
-											isSurah.toString()
-											)
-									.replace(
-											"{language}" ,
-											language
-											)
-											  )
-					})
+					paddingValues
+					   ) { number : String , isSurah : Boolean , language : String , scrollToAya : Int? ->
+				if (scrollToAya != null)
+				{
+					navController.navigate(
+							MY_QURAN_SCREEN_ROUTE.replace(
+									"{number}" ,
+									number
+														  )
+								.replace(
+										"{isSurah}" ,
+										isSurah.toString()
+										)
+								.replace(
+										"{language}" ,
+										language
+										)
+								.replace(
+										"{scrollTo}" ,
+										scrollToAya.toString()
+										)
+										  ) {
+							popUpTo(MY_QURAN_SCREEN_ROUTE) {
+								inclusive = true
+							}
+							launchSingleTop = true
+						}
+				}
+				else
+				{
+					navController.navigate(
+							QURAN_AYA_SCREEN_ROUTE.replace(
+									"{number}" ,
+									number
+														  )
+								.replace(
+										"{isSurah}" ,
+										isSurah.toString()
+										)
+								.replace(
+										"{language}" ,
+										language
+										)
+										  )
+				}
+			}
 		}
+		composable(MY_QURAN_SCREEN_ROUTE) {
+			AyatScreen(
+					number = it.arguments?.getString("number") ,
+					isSurah = it.arguments?.getString("isSurah") !! ,
+					language = it.arguments?.getString("language") !! ,
+					scrollToAya = it.arguments?.getString("scrollTo") !! .toInt() ,
+					paddingValues = paddingValues ,
+					  )
+		}
+
 		composable(QURAN_AYA_SCREEN_ROUTE) {
 			AyatScreen(
 					number = it.arguments?.getString("number") ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
 					paddingValues = paddingValues ,
-					mediaPlayer = mediaPlayer ,
 					  )
 		}
 
