@@ -2,8 +2,6 @@ package com.arshadshah.nimaz.data.remote.viewModel
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
@@ -675,14 +673,14 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//state for bookmarking, favoriting, adding a note
-	private val _bookmarks = MutableLiveData<List<Aya>>()
-	val bookmarks : LiveData<List<Aya>> = _bookmarks
+	private val _bookmarks = MutableStateFlow(listOf<Aya>())
+	val bookmarks =  _bookmarks.asStateFlow()
 
-	private val _favorites = MutableLiveData<List<Aya>>()
-	val favorites : LiveData<List<Aya>> = _favorites
+	private val _favorites = MutableStateFlow(listOf<Aya>())
+	val favorites =  _favorites.asStateFlow()
 
-	private val _notes = MutableLiveData<List<Aya>>()
-	val notes : LiveData<List<Aya>> = _notes
+	private val _notes = MutableStateFlow(listOf<Aya>())
+	val notes =  _notes.asStateFlow()
 
 	fun getAllNotes()
 	{

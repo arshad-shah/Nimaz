@@ -34,7 +34,7 @@ fun FeatureThatRequiresLocationPermission(
 
 		} else
 		{
-			showDialog.value = true
+			showDialog.value = false
 			descToShow.value =
 				"Location permission is required to get accurate prayer times, Nimaz will revert to manual location."
 		}

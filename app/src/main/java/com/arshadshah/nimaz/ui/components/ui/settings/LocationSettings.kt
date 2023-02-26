@@ -108,6 +108,7 @@ fun LocationSettings(isIntro : Boolean = false){
 					PrayerTimesParamMapper.getParams(context)
 																					  )
 											)
+			viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 		}
 
 		if (isIntro)
@@ -287,6 +288,7 @@ fun LocationToggleSwitch(
 									PrayerTimesParamMapper.getParams(context)
 																									  )
 															)
+							viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}else{
 							locationPermissionState.launchMultiplePermissionRequest()
 						}
@@ -298,6 +300,7 @@ fun LocationToggleSwitch(
 								PrayerTimesParamMapper.getParams(context)
 																								  )
 														)
+						viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 
 						if(isIntro){
 							Toasty.info(
