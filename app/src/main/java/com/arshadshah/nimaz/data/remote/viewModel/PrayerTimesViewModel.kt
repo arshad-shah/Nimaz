@@ -1,22 +1,34 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.RemoteViews
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.widgets.Nimaz
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class PrayerTimesViewModel : ViewModel()
 {
@@ -111,9 +123,62 @@ class PrayerTimesViewModel : ViewModel()
 				PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				updatePrayerTimes(event.mapOfParameters)
 			}
+			//event to update the widget
+			is PrayerTimesEvent.UPDATE_WIDGET ->
+			{
+				updateWidget(event.context)
+			}
 
 			else ->
 			{
+			}
+		}
+	}
+
+	private fun updateWidget(context : Context)
+	{
+		val appWidgetManager = AppWidgetManager.getInstance(context)
+		val widgetIds = appWidgetManager.getAppWidgetIds(
+				ComponentName(context, Nimaz::class.java)
+														)
+
+		// Update the widget UI on the main thread
+		Handler(Looper.getMainLooper()).post {
+			Log.d("WidgetService" , "Updating widget")
+			widgetIds.forEach { widgetId ->
+				val views = RemoteViews(context.packageName , R.layout.nimaz)
+				val intent = Intent(context , MainActivity::class.java)
+				val pendingIntent = PendingIntent.getActivity(
+						context ,
+						AppConstants.WIDGET_PENDING_INTENT_REQUEST_CODE ,
+						intent ,
+						PendingIntent.FLAG_IMMUTABLE
+															 )
+				views.setOnClickPendingIntent(R.id.widget , pendingIntent)
+
+				// Set the random number text
+				runBlocking {
+					val repository = PrayerTimesRepository.getPrayerTimes(context)
+					views.setTextViewText(
+							R.id.Fajr_time , repository.data?.fajr?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+					views.setTextViewText(
+							R.id.Zuhar_time , repository.data?.dhuhr?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+					views.setTextViewText(
+							R.id.Asar_time , repository.data?.asr?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+					views.setTextViewText(
+							R.id.Maghrib_time ,
+							repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+										 )
+					views.setTextViewText(
+							R.id.Ishaa_time , repository.data?.isha?.format(
+							DateTimeFormatter.ofPattern("hh:mm a")))
+				}
+				// Update the widget
+				appWidgetManager.updateAppWidget(widgetId, views)
+				Log.d("WidgetService" , "Widget updated")
 			}
 		}
 	}
@@ -199,9 +264,14 @@ class PrayerTimesViewModel : ViewModel()
 							"maghrib" to response.data .maghrib ,
 							"isha" to response.data .isha
 												)
-
-					val currentPrayerName = currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-					val nextPrayerName = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
+//					val dataStore = LocalDataStore.getDataStore()
+//					val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().plusDays(1).toString())
+//
+					val currentDate = LocalDateTime.now()
+					val currentPrayerName = currentPrayer(currentDate, mapOfPrayerTimes).first
+					Log.d("Nimaz: currentDatetime" , "$currentDate")
+					Log.d("Nimaz: FajrDatetime" , "${response.data .fajr}")
+					val nextPrayerName = nextPrayer(currentDate, mapOfPrayerTimes).first
 					if(currentPrayerName == "isha" && nextPrayerName == "fajr" && LocalTime.now().hour <= response.data .fajr!!.toLocalTime().hour && LocalTime.now().hour >=0){
 						//minus 1 day from current prayer times
 					}
@@ -320,30 +390,66 @@ class PrayerTimesViewModel : ViewModel()
 
 	fun nextPrayer(time: LocalDateTime, mapOfPrayerTimes : Map<String, LocalDateTime?>): Pair<String, LocalDateTime> {
 		val `when` = time.toInstant(ZoneOffset.UTC).toEpochMilli()
+		val fajrTommorow = mapOfPrayerTimes["fajr"]?.plusDays(1)
+		val isha = mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
+		val fajr = mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
+		val sunrise = mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
+		val dhuhr = mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
+		val asr = mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
+		val maghrib = mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
+
 		return when {
 			//if the difference between the current time and the isha time is less than 0 or equal to 0 than the current prayer is isha
-			mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
+			isha - `when` <= 0 -> {
 				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
 			}
 
-			mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
+			maghrib - `when` <= 0 -> {
 				Pair("isha" , mapOfPrayerTimes["isha"]!!)
 			}
 
-			mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
+			asr - `when` <= 0 -> {
 				Pair("maghrib" , mapOfPrayerTimes["maghrib"]!!)
 			}
 
-			mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
+			dhuhr - `when` <= 0 -> {
 				Pair("asr" , mapOfPrayerTimes["asr"]!!)
 			}
 
-			mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
+			sunrise - `when` <= 0 -> {
 				Pair("dhuhr" , mapOfPrayerTimes["dhuhr"]!!)
 			}
 
-			mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
+			fajr - `when` <= 0 -> {
 				Pair("sunrise" , mapOfPrayerTimes["sunrise"]!!)
+			}
+
+			`when` in fajr..sunrise -> {
+				Pair("sunrise" , mapOfPrayerTimes["sunrise"]!!)
+			}
+
+			`when` in sunrise..dhuhr -> {
+				Pair("dhuhr" , mapOfPrayerTimes["dhuhr"]!!)
+			}
+
+			`when` in dhuhr..asr -> {
+				Pair("asr" , mapOfPrayerTimes["asr"]!!)
+			}
+
+			`when` in asr..maghrib -> {
+				Pair("maghrib" , mapOfPrayerTimes["maghrib"]!!)
+			}
+
+			`when` in maghrib..isha -> {
+				Pair("isha" , mapOfPrayerTimes["isha"]!!)
+			}
+
+			`when` in isha..fajrTommorow?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! -> {
+				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
+			}
+			//if the current time is less than the fajr time than the next prayer is fajr
+			`when` < fajr -> {
+				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
 			}
 
 			else -> {

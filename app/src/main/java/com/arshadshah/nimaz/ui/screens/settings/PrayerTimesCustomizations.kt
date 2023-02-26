@@ -200,6 +200,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.CalculationMethod(method))
 							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.UpdateSettings(method))
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						} ,
 						height = 500.dp
 							)
@@ -230,6 +231,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																			 )
 												)
 					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 				}
 			}
 			ElevatedCard(
@@ -258,6 +260,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																			 )
 												)
 					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 				}
 			}
 		}
@@ -287,6 +290,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 										  ) { angle : Int ->
 					settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.FajrAngle(angle.toString()))
 					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 				}
 			}
 			if (ishaaAngleVisible.value)
@@ -316,6 +320,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																													)
 													)
 						viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 					}
 				}
 			} else
@@ -376,6 +381,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -411,6 +417,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -446,6 +453,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -481,6 +489,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -516,6 +525,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 					ElevatedCard(
@@ -551,6 +561,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 																														)
 														)
 							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
 						}
 					}
 				}
