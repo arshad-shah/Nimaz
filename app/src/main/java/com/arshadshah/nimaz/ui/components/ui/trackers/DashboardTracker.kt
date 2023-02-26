@@ -11,7 +11,8 @@ import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTrackerList
 
 @Composable
-fun DashboardPrayerTracker() {
+fun DashboardPrayerTracker()
+{
 
 	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
 

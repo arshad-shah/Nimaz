@@ -1,9 +1,8 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
-import android.os.Build
 import androidx.activity.ComponentActivity
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +29,8 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun DashboardPrayertimesCard(){
+fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
+{
 
 	val context = LocalContext.current
 	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = context as ComponentActivity)
@@ -70,7 +70,10 @@ fun DashboardPrayertimesCard(){
 	ElevatedCard(
 			modifier = Modifier
 				.padding(8.dp)
-				.fillMaxWidth() ,
+				.fillMaxWidth()
+				.clickable {
+					onNavigateToPrayerTimes()
+				},
 				) {
 		Column(
 				modifier = Modifier
