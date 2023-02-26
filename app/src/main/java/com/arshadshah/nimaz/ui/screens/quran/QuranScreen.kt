@@ -29,7 +29,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
 @Composable
 fun QuranScreen(
 	paddingValues : PaddingValues ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 			   )
 {
 	val context = LocalContext.current
@@ -75,8 +75,8 @@ fun QuranScreen(
 					 )
 				SurahList(
 						onNavigateToAyatScreen = onNavigateToAyatScreen ,
-						state = surahListState,
-						loading = isLoadingSurah.value,
+						state = surahListState ,
+						loading = isLoadingSurah.value ,
 						error = errorSurah.value
 						 )
 			}

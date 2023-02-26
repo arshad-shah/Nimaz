@@ -8,7 +8,7 @@ import com.arshadshah.nimaz.ui.components.ui.quran.JuzListUI
 
 @Composable
 fun JuzList(
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	loading : Boolean ,
 	error : String ,
 	state : State<ArrayList<Juz>> ,
@@ -25,7 +25,7 @@ fun JuzList(
 	else if (error.isNotEmpty())
 	{
 		JuzListUI(
-				juz = ArrayList(30),
+				juz = ArrayList(30) ,
 				onNavigateToAyatScreen = onNavigateToAyatScreen ,
 				loading = false ,
 				 )

@@ -5,10 +5,8 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
-import android.os.Build
 import android.os.Looper
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
@@ -152,7 +150,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 		class UpdateSettings(val method : String) : SettingsEvent()
 	}
 	//events for the settings screen
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	fun handleEvent(event : SettingsEvent)
 	{
 		when (event)
@@ -351,7 +348,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 		}
 	}
 	//load location from shared preferences
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	private fun loadLocation(context : Context , checked : Boolean)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
@@ -382,7 +378,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 		}
 	}
 
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	fun reverseGeocode(latitude : Double , longitude : Double)
 	{
 		Log.d("Nimaz: reverseGeocode" , "reverseGeocode")
@@ -424,8 +419,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 		}
 	}
 
-	//forwards geocode
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	fun forwardGeocode(cityName : String)
 	{
 		Log.d("Nimaz: forwardGeocode" , "forwardGeocode")
@@ -490,7 +483,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 
 	private val locationCallback  = object : LocationCallback()
 	{
-		@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 		override fun onLocationResult(p0 : LocationResult)
 		{
 			super.onLocationResult(p0)
@@ -503,8 +495,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 		}
 	}
 
-
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	private fun setLocationData(location : Location?)
 	{
 		location?.let {

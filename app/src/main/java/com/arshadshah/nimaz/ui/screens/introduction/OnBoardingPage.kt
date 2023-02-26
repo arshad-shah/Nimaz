@@ -9,7 +9,6 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 sealed class OnBoardingPage(
 	val image : Int ,
@@ -38,7 +37,6 @@ sealed class OnBoardingPage(
 								 )
 
 	//the Notification permission page
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Fourth : OnBoardingPage(
 			image = R.drawable.adhan ,
 			title = "Adhan Notifications" ,
@@ -48,9 +46,6 @@ sealed class OnBoardingPage(
 			}
 								  )
 
-	//the location permission page
-	@OptIn(ExperimentalPermissionsApi::class)
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Fifth : OnBoardingPage(
 			image = R.drawable.location_pin ,
 			title = "Location" ,
@@ -62,7 +57,6 @@ sealed class OnBoardingPage(
 
 	//a page to ask for the battery optimization exemption
 	@SuppressLint("BatteryLife")
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	object Sixth : OnBoardingPage(
 			image = R.drawable.battery ,
 			title = "Battery Exemption" ,
