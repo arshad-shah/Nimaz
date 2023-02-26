@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +46,7 @@ import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun SettingsScreen(
 	onNavigateToPrayerTimeCustomizationScreen : () -> Unit ,
