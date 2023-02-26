@@ -8,7 +8,7 @@ import com.arshadshah.nimaz.ui.components.ui.quran.SurahListUI
 
 @Composable
 fun SurahList(
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	state : State<ArrayList<Surah>> ,
 	loading : Boolean ,
 	error : String ,

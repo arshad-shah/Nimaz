@@ -36,7 +36,6 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper.getParams
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 {
@@ -568,7 +567,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					 )
 	}
 }
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+
+
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview()

@@ -43,7 +43,6 @@ import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
 
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun LocationSettings(isIntro : Boolean = false){
@@ -180,7 +179,6 @@ fun LocationSettings(isIntro : Boolean = false){
 	}
 }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun LocationToggleSwitch(

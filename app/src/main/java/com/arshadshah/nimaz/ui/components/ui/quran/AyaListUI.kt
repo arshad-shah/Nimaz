@@ -52,6 +52,7 @@ fun AyaListUI(
 	loading : Boolean ,
 	type : String ,
 	number : Int ,
+	scrollToAya : Int? = null ,
 			 )
 {
 
@@ -133,7 +134,7 @@ fun AyaListUI(
 			}
 
 		//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-		LaunchedEffect(listState.firstVisibleItemIndex)
+		LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })
 		{
 			sharedPref.edit()
 				.putInt("visibleItemIndex-${type}-${number}" , listState.firstVisibleItemIndex)
@@ -143,11 +144,18 @@ fun AyaListUI(
 		//when we reopen the app, we want to scroll to the last item viewed
 		LaunchedEffect(visibleItemIndex.value)
 		{
-			if (visibleItemIndex.value != - 1)
+			if(scrollToAya != null)
 			{
-				listState.scrollToItem(visibleItemIndex.value)
-				//set the value back to -1 so that we don't scroll to the same item again
-				visibleItemIndex.value = - 1
+				listState.animateScrollToItem(scrollToAya)
+			}
+			else
+			{
+				if (visibleItemIndex.value != - 1)
+				{
+					listState.animateScrollToItem(visibleItemIndex.value)
+					//set the value back to -1 so that we don't scroll to the same item again
+					visibleItemIndex.value = - 1
+				}
 			}
 		}
 
