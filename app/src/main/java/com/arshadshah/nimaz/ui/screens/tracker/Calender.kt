@@ -75,50 +75,7 @@ fun Calender(paddingValues : PaddingValues)
 					monthHeader = { monthState ->
 						CalenderHeader(monthState = monthState)
 					} ,
-					calendarState = rememberSelectableCalendarState(
-//							confirmSelectionChange = {
-//								mutableDate.value = it.size
-//									.let { size ->
-//										if (size == 0)
-//										{
-//											LocalDate.now()
-//										}
-//										else
-//										{
-//											it.first()
-//										}
-//									}
-//								true
-//							},
-//							selectionState = DynamicSelectionState(
-//									selectionMode = SelectionMode.Single,
-//									selection = mutableDate.value
-//										.let { date ->
-//											if (date == null)
-//											{
-//												setOf(LocalDate.now())
-//											} else
-//											{
-//												setOf(date)
-//											}
-//										}.toList(),
-//									confirmSelectionChange = {
-//										mutableDate.value = it.size
-//											.let { size ->
-//												if (size == 0)
-//												{
-//													LocalDate.now()
-//												}
-//												else
-//												{
-//													it.first()
-//												}
-//											}
-//										true
-//									}
-//
-//							),
-																   )
+					calendarState = rememberSelectableCalendarState()
 							  )
 		}
 		PrayerTracker(paddingValues = PaddingValues(0.dp), isIntegrated = true)
@@ -460,7 +417,7 @@ fun CalenderDay(
 	{
 		Popup(
 				alignment = Alignment.TopCenter ,
-				offset = IntOffset(0 , - 130) ,
+				offset = IntOffset(0 , - 120) ,
 			 ) {
 			ElevatedCard(
 					modifier = Modifier
@@ -470,7 +427,7 @@ fun CalenderDay(
 						} ,
 						) {
 				Text(
-						text = importantDay.second ,
+						text = importantDay.second  ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier.padding(8.dp)
 					)

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import java.time.LocalDate
 
 @Composable
 fun PrayerTrackerListItems(
@@ -36,6 +38,8 @@ fun PrayerTrackerListItems(
 	progress : MutableState<Float> ,
 						  )
 {
+	val dateForTracker = LocalDate.parse(dateState.value)
+	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 	if(showDateSelector.value){
 		DateSelector(
 				handleEvent = handleEvent
@@ -43,7 +47,10 @@ fun PrayerTrackerListItems(
 				ElevatedCard(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(4.dp) ,
+							.padding(4.dp)
+							.background(
+									if (isAfterToday) MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
+									   ),
 							) {
 					items.forEachIndexed { index , item ->
 						//if not the first item add a divider
@@ -70,31 +77,33 @@ fun PrayerTrackerListItems(
 								text = item ,
 								checked = when (item)
 								{
-									"Fajr" -> fajrChecked.value
-									"Dhuhr" -> zuhrChecked.value
-									"Asr" -> asrChecked.value
-									"Maghrib" -> maghribChecked.value
-									"Isha" -> ishaChecked.value
+									//if the date is after today then disable the toggle
+									"Fajr" -> if (isAfterToday) false else fajrChecked.value
+									"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
+									"Asr" -> if (isAfterToday) false else asrChecked.value
+									"Maghrib" -> if (isAfterToday) false else maghribChecked.value
+									"Isha" -> if (isAfterToday) false else ishaChecked.value
 									else -> false
 								} ,
 								onCheckedChange = {
 									when (item)
 									{
-										"Fajr" -> fajrChecked.value = it
-										"Dhuhr" -> zuhrChecked.value = it
-										"Asr" -> asrChecked.value = it
-										"Maghrib" -> maghribChecked.value = it
-										"Isha" -> ishaChecked.value = it
+										//if the date is after today then disable the toggle
+										"Fajr" -> if (isAfterToday) fajrChecked.value = false else fajrChecked.value = it
+										"Dhuhr" -> if (isAfterToday) zuhrChecked.value = false else zuhrChecked.value = it
+										"Asr" -> if (isAfterToday) asrChecked.value = false else asrChecked.value = it
+										"Maghrib" -> if (isAfterToday) maghribChecked.value = false else maghribChecked.value = it
+										"Isha" -> if (isAfterToday) ishaChecked.value = false else ishaChecked.value = it
 									}
 
 									//for each of the checked items add 20 to the progress any unchecked item subtracts 20
 									progress.value = when (item)
 									{
-										"Fajr" -> if (it) progress.value + 20 else progress.value - 20
-										"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
-										"Asr" -> if (it) progress.value + 20 else progress.value - 20
-										"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
-										"Isha" -> if (it) progress.value + 20 else progress.value - 20
+										"Fajr" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+										"Dhuhr" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+										"Asr" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+										"Maghrib" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+										"Isha" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
 										else -> 0f
 									}
 
@@ -120,7 +129,7 @@ fun PrayerTrackerListItems(
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(4.dp) ,
+					.padding(4.dp)
 					) {
 			Row(
 					modifier = Modifier
@@ -135,31 +144,33 @@ fun PrayerTrackerListItems(
 							text = item ,
 							checked = when (item)
 							{
-								"Fajr" -> fajrChecked.value
-								"Dhuhr" -> zuhrChecked.value
-								"Asr" -> asrChecked.value
-								"Maghrib" -> maghribChecked.value
-								"Isha" -> ishaChecked.value
+								//if the date is after today then disable the toggle
+								"Fajr" -> if (isAfterToday) false else fajrChecked.value
+								"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
+								"Asr" -> if (isAfterToday) false else asrChecked.value
+								"Maghrib" -> if (isAfterToday) false else maghribChecked.value
+								"Isha" -> if (isAfterToday) false else ishaChecked.value
 								else -> false
 							} ,
 							onCheckedChange = {
 								when (item)
 								{
-									"Fajr" -> fajrChecked.value = it
-									"Dhuhr" -> zuhrChecked.value = it
-									"Asr" -> asrChecked.value = it
-									"Maghrib" -> maghribChecked.value = it
-									"Isha" -> ishaChecked.value = it
+									//if the date is after today then disable the toggle
+									"Fajr" -> if (isAfterToday) fajrChecked.value = false else fajrChecked.value = it
+									"Dhuhr" -> if (isAfterToday) zuhrChecked.value = false else zuhrChecked.value = it
+									"Asr" -> if (isAfterToday) asrChecked.value = false else asrChecked.value = it
+									"Maghrib" -> if (isAfterToday) maghribChecked.value = false else maghribChecked.value = it
+									"Isha" -> if (isAfterToday) ishaChecked.value = false else ishaChecked.value = it
 								}
 
 								//for each of the checked items add 20 to the progress any unchecked item subtracts 20
 								progress.value = when (item)
 								{
-									"Fajr" -> if (it) progress.value + 20 else progress.value - 20
-									"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
-									"Asr" -> if (it) progress.value + 20 else progress.value - 20
-									"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
-									"Isha" -> if (it) progress.value + 20 else progress.value - 20
+									"Fajr" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+									"Dhuhr" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+									"Asr" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+									"Maghrib" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
+									"Isha" -> if (it && !isAfterToday) progress.value + 20 else progress.value - 20
 									else -> 0f
 								}
 
@@ -187,7 +198,7 @@ fun PrayerTrackerListItems(
 												highlightColor = Color.White ,
 																				)
 											) ,
-							showDateSelector = showDateSelector.value
+										showDateSelector = showDateSelector.value
 								  )
 				}
 			}

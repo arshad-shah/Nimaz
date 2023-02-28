@@ -60,6 +60,7 @@ fun FastTrackerCard(
 						} ,
 						modifier = Modifier
 							.padding(8.dp)
+							.fillMaxWidth()
 							.placeholder(
 									visible = false ,
 									color = MaterialTheme.colorScheme.outline ,
