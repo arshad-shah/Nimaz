@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -25,7 +26,9 @@ fun ToggleableItem(
 {
 	if(showDateSelector){
 		Row(
-				modifier = modifier ,
+				modifier = modifier.clickable {
+					onCheckedChange(!checked)
+				} ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			//a icon button to toggle the state of the toggleable item
@@ -64,7 +67,9 @@ fun ToggleableItem(
 		}
 	}else{
 		Column(
-				modifier = modifier ,
+				modifier = modifier.clickable {
+					onCheckedChange(!checked)
+				} ,
 				horizontalAlignment = Alignment.CenterHorizontally ,
 				verticalArrangement = Arrangement.Center
 			  ) {

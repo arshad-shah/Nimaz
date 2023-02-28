@@ -146,7 +146,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						.lowercase(
 								Locale.ROOT
 								  ),
-						 style = MaterialTheme.typography.titleMedium
+						 style = MaterialTheme.typography.titleLarge
 						)
 					Text(text = nextPrayerTime.value.format(DateTimeFormatter.ofPattern("hh:mm a")) , style = MaterialTheme.typography.titleLarge)
 					Text(text = "-${timer.value.hours}:${timer.value.minutes}:${timer.value.seconds}" , style = MaterialTheme.typography.titleMedium , textAlign = TextAlign.Center , modifier = Modifier
