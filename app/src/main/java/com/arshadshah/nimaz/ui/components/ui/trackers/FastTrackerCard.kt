@@ -13,12 +13,15 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import es.dmoral.toasty.Toasty
+import java.time.LocalDate
 
 @Composable
 fun FastTrackerCard(
@@ -28,6 +31,9 @@ fun FastTrackerCard(
 	isFastingToday : MutableState<Boolean>
 				   )
 {
+	val context = LocalContext.current
+	val dateForTracker = LocalDate.parse(dateState.value)
+	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 	if(showDateSelector.value)
 	{
 		DateSelector(
@@ -50,6 +56,17 @@ fun FastTrackerCard(
 						text = if (isFastingToday.value) "Fasting" else "Not Fasting"  ,
 						checked = isFastingToday.value ,
 						onCheckedChange = {
+							//if the date is after today then don't allow the user to change the value
+							if (isAfterToday)
+							{
+								Toasty.info(
+										context ,
+										"Oops! you cant update the tracker for a date in the future" ,
+										Toasty.LENGTH_SHORT ,
+										true
+											).show()
+								return@ToggleableItem
+							}
 							isFastingToday.value = !isFastingToday.value
 							handleEvent(TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
 									FastTracker(
