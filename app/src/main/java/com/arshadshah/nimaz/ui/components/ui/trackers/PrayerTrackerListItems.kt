@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,12 +15,15 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import es.dmoral.toasty.Toasty
+import java.time.LocalDate
 
 @Composable
 fun PrayerTrackerListItems(
@@ -36,6 +40,10 @@ fun PrayerTrackerListItems(
 	progress : MutableState<Float> ,
 						  )
 {
+	val context = LocalContext.current
+	val dateForTracker = LocalDate.parse(dateState.value)
+	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
+
 	if(showDateSelector.value){
 		DateSelector(
 				handleEvent = handleEvent
@@ -43,7 +51,10 @@ fun PrayerTrackerListItems(
 				ElevatedCard(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(4.dp) ,
+							.padding(4.dp)
+							.background(
+									if (isAfterToday) MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
+									   ),
 							) {
 					items.forEachIndexed { index , item ->
 						//if not the first item add a divider
@@ -70,16 +81,28 @@ fun PrayerTrackerListItems(
 								text = item ,
 								checked = when (item)
 								{
-									"Fajr" -> fajrChecked.value
-									"Dhuhr" -> zuhrChecked.value
-									"Asr" -> asrChecked.value
-									"Maghrib" -> maghribChecked.value
-									"Isha" -> ishaChecked.value
+									//if the date is after today then disable the toggle
+									"Fajr" -> if (isAfterToday) false else fajrChecked.value
+									"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
+									"Asr" -> if (isAfterToday) false else asrChecked.value
+									"Maghrib" -> if (isAfterToday) false else maghribChecked.value
+									"Isha" -> if (isAfterToday) false else ishaChecked.value
 									else -> false
 								} ,
 								onCheckedChange = {
+									if (isAfterToday)
+									{
+										Toasty.info(
+												context ,
+												"Oops! you cant update the tracker for a date in the future" ,
+												Toasty.LENGTH_SHORT ,
+												true
+												   ).show()
+										return@ToggleableItem
+									}
 									when (item)
 									{
+										//if the date is after today then disable the toggle
 										"Fajr" -> fajrChecked.value = it
 										"Dhuhr" -> zuhrChecked.value = it
 										"Asr" -> asrChecked.value = it
@@ -120,7 +143,7 @@ fun PrayerTrackerListItems(
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(4.dp) ,
+					.padding(4.dp)
 					) {
 			Row(
 					modifier = Modifier
@@ -135,16 +158,28 @@ fun PrayerTrackerListItems(
 							text = item ,
 							checked = when (item)
 							{
-								"Fajr" -> fajrChecked.value
-								"Dhuhr" -> zuhrChecked.value
-								"Asr" -> asrChecked.value
-								"Maghrib" -> maghribChecked.value
-								"Isha" -> ishaChecked.value
+								//if the date is after today then disable the toggle
+								"Fajr" -> if (isAfterToday) false else fajrChecked.value
+								"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
+								"Asr" -> if (isAfterToday) false else asrChecked.value
+								"Maghrib" -> if (isAfterToday) false else maghribChecked.value
+								"Isha" -> if (isAfterToday) false else ishaChecked.value
 								else -> false
 							} ,
 							onCheckedChange = {
+								if (isAfterToday)
+								{
+									Toasty.info(
+											context ,
+											"Oops! you cant update the tracker for a date in the future" ,
+											Toasty.LENGTH_SHORT ,
+											true
+											   ).show()
+									return@ToggleableItem
+								}
 								when (item)
 								{
+									//if the date is after today then disable the toggle
 									"Fajr" -> fajrChecked.value = it
 									"Dhuhr" -> zuhrChecked.value = it
 									"Asr" -> asrChecked.value = it
@@ -187,7 +222,7 @@ fun PrayerTrackerListItems(
 												highlightColor = Color.White ,
 																				)
 											) ,
-							showDateSelector = showDateSelector.value
+										showDateSelector = showDateSelector.value
 								  )
 				}
 			}

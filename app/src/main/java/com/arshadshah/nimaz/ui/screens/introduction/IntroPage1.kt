@@ -1,10 +1,9 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
 import android.content.Intent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -22,10 +21,11 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class , ExperimentalAnimationApi::class)
 @Composable
 fun IntroPage1()
 {
@@ -37,13 +37,18 @@ fun IntroPage1()
 			OnBoardingPage.Fifth ,
 			OnBoardingPage.Sixth ,
 			OnBoardingPage.Seventh ,
+			OnBoardingPage.Eighth ,
 					  )
 
 	val pagerState = rememberPagerState()
 
+	val context = LocalContext.current
+	val sharedPref = PrivateSharedPreferences(context)
 	val scope = rememberCoroutineScope()
 
-	Column(modifier = Modifier.fillMaxSize()) {
+	Column(modifier = Modifier
+		.fillMaxSize()
+		.padding(if (pages[pagerState.currentPage].extra == {}) 8.dp else 20.dp)) {
 		HorizontalPager(
 				modifier = Modifier
 					.weight(10f)
@@ -58,16 +63,18 @@ fun IntroPage1()
 				pagerState = pagerState ,
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
+					//if the onBoardingPage.extra is not {} then add 20.dp padding else add 0.dp padding
 					.padding(20.dp)
 					.testTag("introPagerIndicator") ,
-				activeColor = MaterialTheme.colorScheme.secondary ,
+				activeColor = MaterialTheme.colorScheme.primary ,
 				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f) ,
 				indicatorWidth = 12.dp ,
 				indicatorHeight = 12.dp
 								)
+
+
 		Row(
 				modifier = Modifier
-					.weight(1f)
 					.fillMaxWidth()
 					.testTag("introButtons") ,
 				//if we are on firts or last page than use space between else use end for page 1 and start for last page
@@ -78,61 +85,39 @@ fun IntroPage1()
 				} ,
 				verticalAlignment = Alignment.CenterVertically ,
 		   ) {
-			//next and back buttons
-			//next button
-			//back button
-			//back button
-			//only show back button if not on first page
-			if (pagerState.currentPage != 0)
-			{
-				Button(
-						modifier = Modifier
-							.padding(horizontal = 20.dp)
-							.testTag("introBackButton") ,
-						shape = MaterialTheme.shapes.medium ,
-						onClick = {
-							scope.launch {
-								pagerState.animateScrollToPage(if (pagerState.currentPage == 0) pages.size - 1 else pagerState.currentPage - 1)
-							}
-						}
-					  ) {
-					Text(text = "Back")
+			if (pagerState.currentPage == pages.size - 1){
+				BackButton(modifier = Modifier.padding(horizontal = 20.dp) , pagerState = pagerState) {
+					scope.launch {
+						pagerState.animateScrollToPage(pagerState.currentPage - 1)
+					}
 				}
-			}
-
-			if (pagerState.currentPage != pages.size - 1)
-			{
-				Button(
-						modifier = Modifier
-							.padding(horizontal = 20.dp)
-							.testTag("introNextButton") ,
-						shape = MaterialTheme.shapes.medium ,
-						onClick = {
-							scope.launch {
-								pagerState.animateScrollToPage(if (pagerState.currentPage == pages.size - 1) 0 else pagerState.currentPage + 1)
-							}
-						}
-					  ) {
-					Text(text = "Next")
+				FinishButton(modifier = Modifier
+							 , pagerState = pagerState) {
+					//check if the settings were completed or not
+					val isLocationSet = sharedPref.getData(AppConstants.LOCATION_INPUT, "").isNotBlank()
+					val isNotificationSet = sharedPref.getDataBoolean(AppConstants.NOTIFICATION_ALLOWED, false)
+					if (isLocationSet && isNotificationSet){
+						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
+						context.startActivity(Intent(context , MainActivity::class.java))
+						//remove the activity from the back stack
+						(context as Introduction).finish()
+					}else{
+						Toasty.error(context , "Please complete the settings before proceeding").show()
+					}
 				}
-			}
-			if (pagerState.currentPage == pages.size - 1)
-			{
-				val context = LocalContext.current
-				val sharedPref = PrivateSharedPreferences(context)
-				//a button to navigate to the main screen
-				Button(
-						onClick = {
-							sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
-							context.startActivity(Intent(context , MainActivity::class.java))
-							//remove the activity from the back stack
-							(context as Introduction).finish()
-						} ,
-						modifier = Modifier
-							.padding(horizontal = 20.dp) ,
-						shape = MaterialTheme.shapes.medium ,
-					  ) {
-					Text(text = "Let's Get Started")
+			}else{
+				BackButton(modifier = Modifier.padding(horizontal = 20.dp) , pagerState = pagerState) {
+					scope.launch {
+						pagerState.animateScrollToPage(pagerState.currentPage - 1)
+					}
+				}
+				NextButton(modifier = Modifier
+					.padding(horizontal = 20.dp)
+					.testTag("introNextButton") ,
+						   pagerState = pagerState) {
+					scope.launch {
+						pagerState.animateScrollToPage(pagerState.currentPage + 1)
+					}
 				}
 			}
 		}

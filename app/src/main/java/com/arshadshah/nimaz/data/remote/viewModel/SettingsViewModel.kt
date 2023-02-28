@@ -156,8 +156,8 @@ class SettingsViewModel(context: Context) : ViewModel()
 		{
 			is SettingsEvent.LocationToggle ->
 			{
-				_isLocationAuto.value = event.checked
 				sharedPreferences.saveDataBoolean(LOCATION_TYPE , event.checked)
+				_isLocationAuto.value = event.checked
 				loadLocation(event.context , event.checked)
 			}
 
@@ -358,7 +358,6 @@ class SettingsViewModel(context: Context) : ViewModel()
 					_isLoading.value = true
 					startLocationUpdates()
 					_isLoading.value = false
-
 				} else
 				{
 					_isLoading.value = true
