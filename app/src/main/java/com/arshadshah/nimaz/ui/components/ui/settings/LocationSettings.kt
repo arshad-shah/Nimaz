@@ -3,10 +3,8 @@ package com.arshadshah.nimaz.ui.components.ui.settings
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import androidx.activity.ComponentActivity
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,9 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -36,6 +38,7 @@ import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -190,7 +193,9 @@ fun LocationToggleSwitch(
 	val context = LocalContext.current
 	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
 	val viewModelPrayerTimes = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
-
+	val isLocationAuto = remember {
+		viewModel.isLocationAuto
+	}.collectAsState()
 	val locationNameState = remember {
 		viewModel.locationName
 	}.collectAsState()
@@ -198,6 +203,42 @@ fun LocationToggleSwitch(
 		viewModel.isLoading
 	}.collectAsState()
 
+	val isChecked = remember {
+		mutableStateOf(isLocationAuto.value)
+	}
+
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _ , event ->
+			when (event)
+			{
+				Lifecycle.Event.ON_RESUME ->
+				{
+					if(locationPermissionState.permissions[0].status.isGranted || locationPermissionState.permissions[1].status.isGranted)
+					{
+						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,true))
+						viewModelPrayerTimes.handleEvent(
+								context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+								PrayerTimesParamMapper.getParams(context)
+																					  )
+														)
+						viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
+						isChecked.value = true
+					}
+				}
+
+				else ->
+				{
+
+				}
+			}
+		}
+
+		lifecycle.addObserver(observer)
+		onDispose {
+			lifecycle.removeObserver(observer)
+		}
+	}
 
 	ElevatedCard(
 			modifier = Modifier
@@ -239,7 +280,7 @@ fun LocationToggleSwitch(
 				subtitle = {
 					//if the permission is granted, show a checkmark and text saying "Allowed"
 					if (isIntro){
-						if (state.value)
+						if (isChecked.value)
 						{
 							Row(
 									verticalAlignment = Alignment.CenterVertically
@@ -264,14 +305,9 @@ fun LocationToggleSwitch(
 							}
 						}
 					}else{
-						if (state.value)
+						if (isLocationAuto.value)
 						{
-							if(isLoading.value)
-							{
-								Text(text = "Loading...")
-							}else{
-								Text(text = locationNameState.value)
-							}
+							Text(text = locationNameState.value)
 						}
 					}
 				},
@@ -280,7 +316,7 @@ fun LocationToggleSwitch(
 					{
 						if (locationPermissionState.allPermissionsGranted)
 						{
-							viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,it))
+							viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,true))
 							viewModelPrayerTimes.handleEvent(
 									context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 									PrayerTimesParamMapper.getParams(context)
@@ -299,7 +335,7 @@ fun LocationToggleSwitch(
 																								  )
 														)
 						viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
-
+						isChecked.value = false
 						if(isIntro){
 							Toasty.info(
 									context ,
@@ -319,5 +355,36 @@ fun LocationToggleSwitch(
 					}
 				}
 					  )
+	}
+
+	if (state.value && isIntro)
+	{
+		if (locationNameState.value.isBlank()){
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				Text(
+						textAlign = TextAlign.Center ,
+						text = "Current Location: Loading...",
+						modifier = Modifier.padding(16.dp) ,
+						style = MaterialTheme.typography.bodyMedium)
+			}
+		}else{
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+						.fillMaxWidth()
+						) {
+				Text(
+						textAlign = TextAlign.Center ,
+						text = "Current Location: " +  locationNameState.value ,
+						modifier = Modifier.padding(16.dp) ,
+						style = MaterialTheme.typography.bodyMedium)
+			}
+		}
 	}
 }

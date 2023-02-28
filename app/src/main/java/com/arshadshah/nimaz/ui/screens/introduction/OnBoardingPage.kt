@@ -2,8 +2,6 @@ package com.arshadshah.nimaz.ui.screens.introduction
 
 import android.annotation.SuppressLint
 import android.content.Intent.*
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
@@ -14,14 +12,14 @@ sealed class OnBoardingPage(
 	val image : Int ,
 	val title : String ,
 	val description : String ,
-	val extra : @Composable () -> Unit = {} ,
+	val extra : @Composable() (() -> Unit)? = null ,
 						   )
 {
 
 	object First : OnBoardingPage(
 			image = R.drawable.praying ,
 			title = "Assalamu alaikum" ,
-			description = "Nimaz is a muslim lifestyle companion app that helps you keep track of your daily prayers." ,
+			description = "Nimaz is a muslim lifestyle companion app that helps you with your daily prayers." ,
 								 )
 
 	object Second : OnBoardingPage(
@@ -33,11 +31,17 @@ sealed class OnBoardingPage(
 	object Third : OnBoardingPage(
 			image = R.drawable.quran ,
 			title = "Quran" ,
-			description = "Quran with urdu and english translations." ,
+			description = "Quran with urdu and english translations. You can also listen to the recitation of the Quran. You can also bookmark ayahs and read them later." ,
+								 )
+
+	object Fourth : OnBoardingPage(
+			image = R.drawable.tracker_icon ,
+			title = "Prayer and Fasting tracker" ,
+			description = "You can track your prayers and fasts." ,
 								 )
 
 	//the Notification permission page
-	object Fourth : OnBoardingPage(
+	object Fifth : OnBoardingPage(
 			image = R.drawable.adhan ,
 			title = "Adhan Notifications" ,
 			description = "Enable Adhan Notifications for Nimaz to get Prayer alerts in the form of Adhan." ,
@@ -46,7 +50,7 @@ sealed class OnBoardingPage(
 			}
 								  )
 
-	object Fifth : OnBoardingPage(
+	object Sixth : OnBoardingPage(
 			image = R.drawable.location_pin ,
 			title = "Location" ,
 			description = "Nimaz needs your location to get accurate prayer times. You can also use manual location." ,
@@ -57,7 +61,7 @@ sealed class OnBoardingPage(
 
 	//a page to ask for the battery optimization exemption
 	@SuppressLint("BatteryLife")
-	object Sixth : OnBoardingPage(
+	object Seventh : OnBoardingPage(
 			image = R.drawable.battery ,
 			title = "Battery Exemption" ,
 			description = "Nimaz needs to be exempted from battery optimization to show adhan notifications Correctly." ,
@@ -66,10 +70,12 @@ sealed class OnBoardingPage(
 			}
 								 )
 
-	object Seventh : OnBoardingPage(
+	object Eighth : OnBoardingPage(
 			image = R.drawable.check_mark ,
 			title = "Onboarding Complete" ,
 			description = "You are all set to use Nimaz. You can always change these settings later. I hope Nimaz helps you in your daily life and Kindly keep me and my family in your prayers." ,
-			extra = {}
+			extra = {
+
+			}
 								   )
 }
