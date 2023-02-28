@@ -1,11 +1,9 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -110,8 +108,8 @@ fun FeaturesDropDown(
 	//the icon that is shown in the dropdown
 	val icon = when (isExpanded.value)
 	{
-		true -> Icons.Filled.KeyboardArrowUp
-		false -> Icons.Filled.KeyboardArrowDown
+		true -> painterResource(id = R.drawable.arrow_up_icon)
+		false -> painterResource(id = R.drawable.arrow_down_icon)
 	}
 
 	//the list of bookmarks
@@ -170,11 +168,13 @@ fun FeaturesDropDown(
 							}
 							//the icon
 							Icon(
-									imageVector = icon ,
+									painter = icon ,
 									contentDescription = "dropdown icon" ,
 									modifier = Modifier
 										.padding(8.dp)
+										.size(24.dp)
 								)
+
 						}
 					}
 						)
@@ -183,6 +183,11 @@ fun FeaturesDropDown(
 			//the menu has a list of bookmarks
 			//when a bookmark is clicked it navigates to the ayat screen
 			//the bookmark is highlighted
+		AnimatedVisibility(
+				visible = isExpanded.value,
+				enter = expandVertically() + fadeIn() ,
+				exit = shrinkVertically() + fadeOut()
+						  ) {
 			if(isExpanded.value)
 			{
 				//if the list is empty show a placeholder
@@ -201,7 +206,7 @@ fun FeaturesDropDown(
 										onNavigateToAyatScreen(
 												list[i].suraNumber.toString() ,
 												true ,
-												language,
+												language ,
 												list[i].ayaNumberInSurah
 															  )
 									},
@@ -238,6 +243,7 @@ fun FeaturesDropDown(
 					}
 				}
 			}
+		}
 	}
 }
 
