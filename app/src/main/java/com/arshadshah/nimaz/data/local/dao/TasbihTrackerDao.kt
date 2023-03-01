@@ -32,9 +32,17 @@ interface TasbihTrackerDao
 	@Query("SELECT * FROM Tasbih WHERE date = :date")
 	fun getForDate(date : String) : List<LocalTasbih>
 
+	//get a tasbih by id
+	@Query("SELECT * FROM Tasbih WHERE id = :id")
+	fun getTasbihById(id : Int) : LocalTasbih
+
 	//save a tasbih to the database
 	@Insert(LocalTasbih::class)
 	fun saveTasbih(tasbih : LocalTasbih)
+
+	//update a tasbih in the database
+	@Query("UPDATE Tasbih SET completed = :completed , isCompleted = :isCompleted WHERE id = :id")
+	fun updateTasbih(id : Int , completed : Int , isCompleted : Boolean)
 
 	//delete a tasbih from the database
 	@Delete

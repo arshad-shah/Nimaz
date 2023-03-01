@@ -49,10 +49,10 @@ fun TasbihScreen(
 			verticalArrangement = Arrangement.Top ,
 
 			) {
-		Counter(vibrator , paddingValues , vibrationAllowed , count , reset , showResetDialog , rOrl)
 
 		if (tasbihArabic.isNotBlank() && tasbihEnglish.isNotBlank() && tasbihTranslitration.isNotBlank())
 		{
+			Counter(vibrator , paddingValues , vibrationAllowed , count , reset , showResetDialog , rOrl, true)
 			LazyColumn(content ={
 				item{
 					TasbihRow(
@@ -62,6 +62,8 @@ fun TasbihScreen(
 							 )
 				}
 			})
+		}else{
+			Counter(vibrator , paddingValues , vibrationAllowed , count , reset , showResetDialog , rOrl)
 		}
 	}
 }

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -18,7 +19,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +74,26 @@ fun Counter(
 			.putInt("lapCountCounter" , lapCountCounter.value).apply()
 	}
 
+	val viewModel = viewModel(key = "TasbihViewModel", initializer = { TasbihViewModel(context) }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val tasbih = if(integrated) remember {
+		viewModel.tasbih
+	}.collectAsState() else null
+
+	LaunchedEffect(key1 = lap.value){
+		if(integrated){
+			viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateTasbih(Tasbih(
+					id = tasbih?.value?.id!!,
+					date = tasbih.value.date,
+					arabicName = tasbih.value.arabicName,
+					englishName = tasbih.value.englishName,
+					translationName = tasbih.value.translationName,
+					goal = tasbih.value.goal,
+					completed = lap.value,
+					isCompleted = tasbih.value.isCompleted
+																				 )))
+		}
+	}
+
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
@@ -95,13 +119,26 @@ fun Counter(
 				fontSize = 100.sp ,
 				color = MaterialTheme.colorScheme.onSurface
 			)
+		//objective text
+		if (integrated)
+		{
+			Text(
+					modifier = Modifier
+						.align(Alignment.CenterHorizontally) ,
+					text = tasbih?.value?.goal.toString() ,
+					style = MaterialTheme.typography.bodyMedium ,
+					color = MaterialTheme.colorScheme.onSurface
+				)
+		}
 
-		Editbutton(
-				count = count ,
-				context = LocalContext.current ,
-				showObjectiveDialog = showObjectiveDialog ,
-				objective = objective ,
-				  )
+		if(!integrated){
+			Editbutton(
+					count = count ,
+					context = LocalContext.current ,
+					showObjectiveDialog = showObjectiveDialog ,
+					objective = objective ,
+					  )
+		}
 
 		Spacer(modifier = Modifier.height(32.dp))
 		IncrementDecrement(

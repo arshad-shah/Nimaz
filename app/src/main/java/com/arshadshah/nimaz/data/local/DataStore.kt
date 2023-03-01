@@ -18,9 +18,15 @@ class DataStore(db : AppDatabase)
 	private val fastTrackerDao = db.fastTracker
 	//tasbihTracker
 	private val tasbihTrackerDao = db.tasbihTracker
+
+
+	//update tasbih
+	suspend fun updateTasbih(tasbih : Tasbih) = tasbihTrackerDao.updateTasbih(tasbih.id, tasbih.completed, tasbih.isCompleted)
 	//save a tasbih to the database
 	suspend fun saveTasbih(tasbih : Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
 
+	//getTasbihById
+	suspend fun getTasbihById(id : Int) = tasbihTrackerDao.getTasbihById(id).toTasbih()
 	//get all the tasbih
 	suspend fun getAllTasbih() = tasbihTrackerDao.getAll().map { it.toTasbih() }
 
@@ -387,6 +393,7 @@ private fun LocalFastTracker.toFastTracker() = FastTracker(
 																	  )
 
 private fun Tasbih.toLocalTasbih() = LocalTasbih(
+		id = id ,
 		date = date ,
 		arabicName = arabicName ,
 		englishName = englishName ,
@@ -397,6 +404,7 @@ private fun Tasbih.toLocalTasbih() = LocalTasbih(
 												)
 
 private fun LocalTasbih.toTasbih() = Tasbih(
+		id = id ,
 		date = date ,
 		arabicName = arabicName ,
 		englishName = englishName ,

@@ -14,7 +14,7 @@ import com.arshadshah.nimaz.data.local.models.*
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class, LocalFastTracker::class , LocalTasbih::class] ,
-		version = 9 ,
+		version = 10 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -174,6 +174,21 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("DROP TABLE IF EXISTS prayer_times")
 			//4. Change the table name to the correct one
 			database.execSQL("ALTER TABLE prayer_times_new RENAME TO prayer_times")
+		}
+	}
+
+	//migration from version 9 to 10
+	//a migration to add a new primary key to the table Tasbih
+	class Migration9To10 : Migration(9 , 10)
+	{
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//drop the table Tasbih
+			database.execSQL("DROP TABLE IF EXISTS Tasbih")
+			//create a new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Tasbih_new` (`id` INTEGER NOT NULL, `date` TEXT NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `goal` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `isCompleted` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+			//rename new table
+			database.execSQL("ALTER TABLE Tasbih_new RENAME TO Tasbih")
 		}
 	}
 }

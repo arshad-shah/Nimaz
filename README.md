@@ -6,12 +6,12 @@ Nimaz is an android app that helps you keep track of your prayer times and stay 
 - Prayer times: The app will show you the exact prayer times for your current location.
 - Timer to next prayer: The app will show you how much time is remaining until the next prayer.
 - Date in Gregorian and Hijri: The app will display the current date in both the Gregorian and Hijri calendars.
+- Prayer and fast tracking: The app will track your prayers and fasts, so you can keep track of your progress.
 - Tasbih: The app includes a tasbih feature for counting your prayers.
-- List of Tasbih (coming soon): The app will soon include a list of tasbihs for you to choose from.
+- List of Tasbih: The app will soon include a list of tasbihs for you to choose from.
 - Compass to Qibla: The app includes a compass that points towards the Qibla, the direction of the Kaaba in Mecca.
 - Quran with English and Urdu translation: The app includes a Quran feature with both English and Urdu translations.
-- Quran Bookmark (coming soon): The app will soon include a bookmark feature for the Quran, so you can easily keep track of where you left off.
-- Mistake detector for Quran recitation (coming soon): The app will soon include a mistake detector for Quran recitation, to help you improve your recitation skills.
+- Quran Bookmark: The app will soon include a bookmark feature for the Quran, so you can easily keep track of where you left off.
 - Prayer times customization: The app allows you to customize your prayer times according to your preferences.
 - Alarms for each prayer: The app includes alarms for each prayer, so you never miss a prayer.
 - Notification for each prayer: The app sends notifications for each prayer, so you can stay on top of your prayer schedule.
