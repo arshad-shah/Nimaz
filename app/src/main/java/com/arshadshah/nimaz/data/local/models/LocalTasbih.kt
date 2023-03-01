@@ -7,6 +7,7 @@ import java.time.LocalDate
 @Entity(tableName = "Tasbih")
 data class LocalTasbih(
 	@PrimaryKey
+	val id : Int = 0,
 	val date : String = LocalDate.now().toString() ,
 	val arabicName : String ,
 	val englishName : String ,
