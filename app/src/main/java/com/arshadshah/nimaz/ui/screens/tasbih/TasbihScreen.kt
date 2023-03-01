@@ -32,12 +32,6 @@ fun TasbihScreen(
 {
 	val context = LocalContext.current
 
-	val count = remember {
-		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
-					  )
-	}
-
 	//reset
 	val reset = remember { mutableStateOf(false) }
 
@@ -52,7 +46,7 @@ fun TasbihScreen(
 
 		if (tasbihArabic.isNotBlank() && tasbihEnglish.isNotBlank() && tasbihTranslitration.isNotBlank())
 		{
-			Counter(vibrator , paddingValues , vibrationAllowed , count , reset , showResetDialog , rOrl, true)
+			Counter(vibrator , paddingValues , vibrationAllowed , reset , showResetDialog , rOrl, true)
 			LazyColumn(content ={
 				item{
 					TasbihRow(
@@ -63,7 +57,7 @@ fun TasbihScreen(
 				}
 			})
 		}else{
-			Counter(vibrator , paddingValues , vibrationAllowed , count , reset , showResetDialog , rOrl)
+			Counter(vibrator , paddingValues , vibrationAllowed , reset , showResetDialog , rOrl)
 		}
 	}
 }

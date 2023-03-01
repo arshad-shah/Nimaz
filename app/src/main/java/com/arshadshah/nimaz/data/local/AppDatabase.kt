@@ -14,7 +14,7 @@ import com.arshadshah.nimaz.data.local.models.*
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class, LocalFastTracker::class , LocalTasbih::class] ,
-		version = 10 ,
+		version = 11 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -188,6 +188,24 @@ abstract class AppDatabase : RoomDatabase()
 			//create a new table
 			database.execSQL("CREATE TABLE IF NOT EXISTS `Tasbih_new` (`id` INTEGER NOT NULL, `date` TEXT NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `goal` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `isCompleted` INTEGER NOT NULL, PRIMARY KEY(`id`))")
 			//rename new table
+			database.execSQL("ALTER TABLE Tasbih_new RENAME TO Tasbih")
+		}
+	}
+
+	//migration from version 10 to 11
+	//remove the column isCompleted from the table Tasbih and completed is renamed to count
+	class Migration10To11 : Migration(10 , 11)
+	{
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//drop the column isCompleted
+			//1. Create the new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Tasbih_new` (`id` INTEGER NOT NULL, `date` TEXT NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `goal` INTEGER NOT NULL, `count` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+			//2. Copy the data
+			database.execSQL("INSERT INTO Tasbih_new SELECT id, date, arabicName, englishName, translationName, goal, completed FROM Tasbih")
+			//3. Remove the old table
+			database.execSQL("DROP TABLE Tasbih")
+			//4. Change the table name to the correct one
 			database.execSQL("ALTER TABLE Tasbih_new RENAME TO Tasbih")
 		}
 	}
