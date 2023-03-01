@@ -31,20 +31,32 @@ fun Counter(
 	vibrator : Vibrator ,
 	paddingValues : PaddingValues ,
 	vibrationAllowed : MutableState<Boolean> ,
-	count : MutableState<Int> ,
 	reset : MutableState<Boolean> ,
 	showResetDialog : MutableState<Boolean> ,
 	rOrl : MutableState<Int> ,
 	integrated : Boolean = false
 		   )
 {
-
-	//get all the values from the shared preferences
-
 	val context = LocalContext.current
+	val viewModel = viewModel(key = "TasbihViewModel", initializer = { TasbihViewModel(context) }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val tasbih = if(integrated) remember {
+		viewModel.tasbih
+	}.collectAsState() else null
+
+	val count = remember {
+		mutableStateOf(
+				if(integrated)
+					context.getSharedPreferences("tasbih" , 0).getInt("count-${tasbih?.value?.id!!}" , 0)
+				else
+					context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
+					  )
+	}
 	val objective = remember {
 		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getString("objective" , "33") !!
+				if(integrated)
+					tasbih!!.value.goal.toString()
+				else
+					context.getSharedPreferences("tasbih" , 0).getString("objective" , "33")!!
 					  )
 	}
 
@@ -52,9 +64,17 @@ fun Counter(
 
 	//lap counter
 	val lap =
-		remember { mutableStateOf(context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)) }
+		remember { mutableStateOf(
+				if(integrated)
+					context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih?.value?.id!!}" , 0)
+				else
+				context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)
+								 ) }
 	val lapCountCounter = remember {
 		mutableStateOf(
+				if(integrated)
+					context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter-${tasbih?.value?.id!!}" , 0)
+				else
 				context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)
 					  )
 	}
@@ -62,24 +82,33 @@ fun Counter(
 	//persist all the values in shared preferences if the activity is destroyed
 	LaunchedEffect(key1 = count.value , key2 = objective.value , key3 = lap.value)
 	{
-		//save the count
-		context.getSharedPreferences("tasbih" , 0).edit().putInt("count" , count.value).apply()
-		//save the objective
-		context.getSharedPreferences("tasbih" , 0).edit().putString("objective" , objective.value)
-			.apply()
-		//save the lap
-		context.getSharedPreferences("tasbih" , 0).edit().putInt("lap" , lap.value).apply()
-		//save the lap count counter
-		context.getSharedPreferences("tasbih" , 0).edit()
-			.putInt("lapCountCounter" , lapCountCounter.value).apply()
+		if(!integrated){
+			//save the count
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("count" , count.value).apply()
+			//save the objective
+			context.getSharedPreferences("tasbih" , 0).edit().putString("objective" , objective.value)
+				.apply()
+			//save the lap
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("lap" , lap.value).apply()
+			//save the lap count counter
+			context.getSharedPreferences("tasbih" , 0).edit()
+				.putInt("lapCountCounter" , lapCountCounter.value).apply()
+		}
+		else{
+			//save the count
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("count-${tasbih?.value?.id!!}" , count.value).apply()
+			//save the objective
+			context.getSharedPreferences("tasbih" , 0).edit().putString("objective-${tasbih.value.id}" , objective.value)
+				.apply()
+			//save the lap
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("lap-${tasbih.value.id}" , lap.value).apply()
+			//save the lap count counter
+			context.getSharedPreferences("tasbih" , 0).edit()
+				.putInt("lapCountCounter-${tasbih.value.id}" , lapCountCounter.value).apply()
+		}
 	}
 
-	val viewModel = viewModel(key = "TasbihViewModel", initializer = { TasbihViewModel(context) }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
-	val tasbih = if(integrated) remember {
-		viewModel.tasbih
-	}.collectAsState() else null
-
-	LaunchedEffect(key1 = lap.value){
+	LaunchedEffect(key1 = count.value){
 		if(integrated){
 			viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateTasbih(Tasbih(
 					id = tasbih?.value?.id!!,
@@ -88,8 +117,7 @@ fun Counter(
 					englishName = tasbih.value.englishName,
 					translationName = tasbih.value.translationName,
 					goal = tasbih.value.goal,
-					completed = lap.value,
-					isCompleted = tasbih.value.isCompleted
+					count = count.value,
 																				 )))
 		}
 	}

@@ -138,15 +138,12 @@ fun TasbihRow(
 									viewModel.handleEvent(
 											TasbihViewModel.TasbihEvent.SetTasbih(
 													Tasbih(
-															//a random id using the date
-															id = LocalDate.now().toString().hashCode(),
 															date = LocalDate.now().toString() ,
 															arabicName = arabicName ,
 															englishName = englishName ,
 															translationName = translationName ,
 															goal = goal.value.toInt() ,
-															completed = 0 ,
-															isCompleted = false ,
+															count = 0 ,
 														  )
 																				 )
 														 )

@@ -20,11 +20,16 @@ class TasbihViewModel(context: Context): ViewModel()
 		englishName = "" ,
 		translationName = "" ,
 		goal = 0 ,
-		completed = 0 ,
-		isCompleted = false ,
+		count = 0 ,
 				  )
 										  )
 	val tasbih = _tasbih.asStateFlow()
+
+	//list of tasbih for today
+	private var _tasbihList = MutableStateFlow(
+			listOf<Tasbih>()
+												)
+	val tasbihList = _tasbihList.asStateFlow()
 
 	sealed class TasbihEvent
 	{
@@ -34,6 +39,10 @@ class TasbihViewModel(context: Context): ViewModel()
 		//get the tasbih by id
 		data class GetTasbih(val id : Int) : TasbihEvent()
 
+		//get the tasbih list for today
+		data class GetTasbihList(val date : String) : TasbihEvent()
+		//get all the tasbih
+		object GetAllTasbih : TasbihEvent()
 	}
 
 	//event for the tasbih
@@ -55,6 +64,34 @@ class TasbihViewModel(context: Context): ViewModel()
 			{
 				getTasbih(event.id)
 			}
+			is TasbihEvent.GetTasbihList ->
+			{
+				getTasbihList(event.date)
+			}
+			is TasbihEvent.GetAllTasbih ->
+			{
+				getAllTasbih()
+			}
+		}
+	}
+
+	//get the tasbih list for today
+	fun getTasbihList(date: String)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			val datastore = LocalDataStore.getDataStore()
+			val tasbihList = datastore.getTasbihForDate(date)
+			_tasbihList.value = tasbihList
+		}
+	}
+
+	//get all the tasbih
+	fun getAllTasbih()
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			val datastore = LocalDataStore.getDataStore()
+			val tasbihList = datastore.getAllTasbih()
+			_tasbihList.value = tasbihList
 		}
 	}
 
@@ -62,7 +99,7 @@ class TasbihViewModel(context: Context): ViewModel()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			val datastore = LocalDataStore.getDataStore()
-			val tasbih = datastore.getTasbihById(id)
+			val tasbih = datastore.getLatestTasbih()
 			_tasbih.value = tasbih
 		}
 	}
@@ -74,7 +111,7 @@ class TasbihViewModel(context: Context): ViewModel()
 			val datastore = LocalDataStore.getDataStore()
 			datastore.saveTasbih(tasbih)
 			//get the tasbih that was just created
-			val tasbih = datastore.getTasbihById(tasbih.id)
+			val tasbih = datastore.getLatestTasbih()
 			_tasbih.value = tasbih
 		}
 	}
@@ -85,7 +122,7 @@ class TasbihViewModel(context: Context): ViewModel()
 			val datastore = LocalDataStore.getDataStore()
 			datastore.updateTasbih(tasbih)
 			//get the tasbih that was just updated
-			val tasbih = datastore.getTasbihById(tasbih.id)
+			val tasbih = datastore.getLatestTasbih()
 			_tasbih.value = tasbih
 		}
 	}

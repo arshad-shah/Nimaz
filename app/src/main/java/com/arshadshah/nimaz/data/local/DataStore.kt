@@ -21,12 +21,15 @@ class DataStore(db : AppDatabase)
 
 
 	//update tasbih
-	suspend fun updateTasbih(tasbih : Tasbih) = tasbihTrackerDao.updateTasbih(tasbih.id, tasbih.completed, tasbih.isCompleted)
+	suspend fun updateTasbih(tasbih : Tasbih) = tasbihTrackerDao.updateTasbih(tasbih.id,tasbih.count)
 	//save a tasbih to the database
 	suspend fun saveTasbih(tasbih : Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
 
 	//getTasbihById
 	suspend fun getTasbihById(id : Int) = tasbihTrackerDao.getTasbihById(id).toTasbih()
+
+	//getLatestTasbih
+	suspend fun getLatestTasbih() = tasbihTrackerDao.getLatestTasbih().toTasbih()
 	//get all the tasbih
 	suspend fun getAllTasbih() = tasbihTrackerDao.getAll().map { it.toTasbih() }
 
@@ -399,8 +402,7 @@ private fun Tasbih.toLocalTasbih() = LocalTasbih(
 		englishName = englishName ,
 		translationName = translationName ,
 		goal = goal ,
-		completed = completed ,
-		isCompleted = isCompleted ,
+		count = count ,
 												)
 
 private fun LocalTasbih.toTasbih() = Tasbih(
@@ -410,6 +412,5 @@ private fun LocalTasbih.toTasbih() = Tasbih(
 		englishName = englishName ,
 		translationName = translationName ,
 		goal = goal ,
-		completed = completed ,
-		isCompleted = isCompleted ,
+		count = count ,
 										   )

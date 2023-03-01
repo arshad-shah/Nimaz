@@ -9,6 +9,5 @@ data class Tasbih(
 	val englishName : String ,
 	val translationName : String ,
 	val goal : Int = 0 ,
-	val completed : Int = 0 ,
-	val isCompleted : Boolean = false ,
+	val count : Int = 0 ,
 				 )
