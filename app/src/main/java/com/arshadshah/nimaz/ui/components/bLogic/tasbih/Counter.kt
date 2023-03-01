@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -18,7 +19,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,20 +31,32 @@ fun Counter(
 	vibrator : Vibrator ,
 	paddingValues : PaddingValues ,
 	vibrationAllowed : MutableState<Boolean> ,
-	count : MutableState<Int> ,
 	reset : MutableState<Boolean> ,
 	showResetDialog : MutableState<Boolean> ,
 	rOrl : MutableState<Int> ,
 	integrated : Boolean = false
 		   )
 {
-
-	//get all the values from the shared preferences
-
 	val context = LocalContext.current
+	val viewModel = viewModel(key = "TasbihViewModel", initializer = { TasbihViewModel(context) }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val tasbih = if(integrated) remember {
+		viewModel.tasbih
+	}.collectAsState() else null
+
+	val count = remember {
+		mutableStateOf(
+				if(integrated)
+					context.getSharedPreferences("tasbih" , 0).getInt("count-${tasbih?.value?.id!!}" , 0)
+				else
+					context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
+					  )
+	}
 	val objective = remember {
 		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getString("objective" , "33") !!
+				if(integrated)
+					tasbih!!.value.goal.toString()
+				else
+					context.getSharedPreferences("tasbih" , 0).getString("objective" , "33")!!
 					  )
 	}
 
@@ -48,9 +64,17 @@ fun Counter(
 
 	//lap counter
 	val lap =
-		remember { mutableStateOf(context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)) }
+		remember { mutableStateOf(
+				if(integrated)
+					context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih?.value?.id!!}" , 0)
+				else
+				context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)
+								 ) }
 	val lapCountCounter = remember {
 		mutableStateOf(
+				if(integrated)
+					context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter-${tasbih?.value?.id!!}" , 0)
+				else
 				context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)
 					  )
 	}
@@ -58,16 +82,44 @@ fun Counter(
 	//persist all the values in shared preferences if the activity is destroyed
 	LaunchedEffect(key1 = count.value , key2 = objective.value , key3 = lap.value)
 	{
-		//save the count
-		context.getSharedPreferences("tasbih" , 0).edit().putInt("count" , count.value).apply()
-		//save the objective
-		context.getSharedPreferences("tasbih" , 0).edit().putString("objective" , objective.value)
-			.apply()
-		//save the lap
-		context.getSharedPreferences("tasbih" , 0).edit().putInt("lap" , lap.value).apply()
-		//save the lap count counter
-		context.getSharedPreferences("tasbih" , 0).edit()
-			.putInt("lapCountCounter" , lapCountCounter.value).apply()
+		if(!integrated){
+			//save the count
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("count" , count.value).apply()
+			//save the objective
+			context.getSharedPreferences("tasbih" , 0).edit().putString("objective" , objective.value)
+				.apply()
+			//save the lap
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("lap" , lap.value).apply()
+			//save the lap count counter
+			context.getSharedPreferences("tasbih" , 0).edit()
+				.putInt("lapCountCounter" , lapCountCounter.value).apply()
+		}
+		else{
+			//save the count
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("count-${tasbih?.value?.id!!}" , count.value).apply()
+			//save the objective
+			context.getSharedPreferences("tasbih" , 0).edit().putString("objective-${tasbih.value.id}" , objective.value)
+				.apply()
+			//save the lap
+			context.getSharedPreferences("tasbih" , 0).edit().putInt("lap-${tasbih.value.id}" , lap.value).apply()
+			//save the lap count counter
+			context.getSharedPreferences("tasbih" , 0).edit()
+				.putInt("lapCountCounter-${tasbih.value.id}" , lapCountCounter.value).apply()
+		}
+	}
+
+	LaunchedEffect(key1 = count.value){
+		if(integrated){
+			viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateTasbih(Tasbih(
+					id = tasbih?.value?.id!!,
+					date = tasbih.value.date,
+					arabicName = tasbih.value.arabicName,
+					englishName = tasbih.value.englishName,
+					translationName = tasbih.value.translationName,
+					goal = tasbih.value.goal,
+					count = count.value,
+																				 )))
+		}
 	}
 
 	Column(
@@ -95,13 +147,26 @@ fun Counter(
 				fontSize = 100.sp ,
 				color = MaterialTheme.colorScheme.onSurface
 			)
+		//objective text
+		if (integrated)
+		{
+			Text(
+					modifier = Modifier
+						.align(Alignment.CenterHorizontally) ,
+					text = tasbih?.value?.goal.toString() ,
+					style = MaterialTheme.typography.bodyMedium ,
+					color = MaterialTheme.colorScheme.onSurface
+				)
+		}
 
-		Editbutton(
-				count = count ,
-				context = LocalContext.current ,
-				showObjectiveDialog = showObjectiveDialog ,
-				objective = objective ,
-				  )
+		if(!integrated){
+			Editbutton(
+					count = count ,
+					context = LocalContext.current ,
+					showObjectiveDialog = showObjectiveDialog ,
+					objective = objective ,
+					  )
+		}
 
 		Spacer(modifier = Modifier.height(32.dp))
 		IncrementDecrement(
