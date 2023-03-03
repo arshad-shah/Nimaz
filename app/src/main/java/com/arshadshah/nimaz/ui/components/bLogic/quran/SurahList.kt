@@ -15,21 +15,21 @@ fun SurahList(
 			 )
 {
 
-	if(loading)
+	if (loading)
 	{
 		SurahListUI(
 				surahs = ArrayList(114) ,
 				onNavigateToAyatScreen = onNavigateToAyatScreen ,
 				loading = true
 				   )
-	}else if(error.isNotEmpty())
+	} else if (error.isNotEmpty())
 	{
 		SurahListUI(
 				surahs = ArrayList(114) ,
 				onNavigateToAyatScreen = onNavigateToAyatScreen ,
 				loading = false
 				   )
-	}else
+	} else
 	{
 		SurahListUI(
 				surahs = state.value ,

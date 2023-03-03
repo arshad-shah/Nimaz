@@ -19,11 +19,15 @@ fun AyatScreen(
 	isSurah : String ,
 	language : String ,
 	paddingValues : PaddingValues ,
-	scrollToAya : Int?  = null ,
+	scrollToAya : Int? = null ,
 			  )
 {
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "QuranViewModel", initializer = { QuranViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
 	val pageMode = remember { viewModel.display_Mode }.collectAsState()
 
 

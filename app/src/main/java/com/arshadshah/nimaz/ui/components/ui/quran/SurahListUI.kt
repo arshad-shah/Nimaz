@@ -37,7 +37,7 @@ fun SurahListUI(
 			   )
 {
 	LazyColumn(
-			userScrollEnabled = !loading,
+			userScrollEnabled = ! loading ,
 			modifier = Modifier.testTag(AppConstants.TEST_TAG_QURAN_SURAH)
 			  ) {
 		items(surahs.size) { index ->
@@ -96,9 +96,9 @@ fun SurahListItemUI(
 					.fillMaxWidth()
 					.testTag(TEST_TAG_SURAH_ITEM + surahNumber)
 					.clickable(
-							enabled = !loading,
+							enabled = ! loading ,
 							onClick = {
-								onNavigateToAyatScreen(surahNumber , true , language, null)
+								onNavigateToAyatScreen(surahNumber , true , language , null)
 							}
 							  )
 		   ) {

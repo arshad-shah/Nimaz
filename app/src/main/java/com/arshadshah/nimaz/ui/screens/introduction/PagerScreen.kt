@@ -42,15 +42,15 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 				textAlign = TextAlign.Center
 			)
 
-			Image(
-					modifier = Modifier
-						.fillMaxWidth(0.6f)
-						//if onBoardingPage.extra is not {} then fill the height with 0.4f else fill the height with 0.6f
-						.fillMaxHeight(if (hasExtra) 0.5f else if (position == 4) 0.4f else 0.6f)
-						.testTag("pagerScreenImage") ,
-					painter = painterResource(id = onBoardingPage.image) ,
-					contentDescription = "Pager Image" ,
-				 )
+		Image(
+				modifier = Modifier
+					.fillMaxWidth(0.6f)
+					//if onBoardingPage.extra is not {} then fill the height with 0.4f else fill the height with 0.6f
+					.fillMaxHeight(if (hasExtra) 0.5f else if (position == 4) 0.4f else 0.6f)
+					.testTag("pagerScreenImage") ,
+				painter = painterResource(id = onBoardingPage.image) ,
+				contentDescription = "Pager Image" ,
+			 )
 
 		Text(
 				modifier = Modifier
@@ -114,7 +114,7 @@ fun BackButton(
 	modifier : Modifier ,
 	pagerState : PagerState ,
 	onClick : () -> Unit ,
-				)
+			  )
 {
 	Row(
 			modifier = modifier ,
@@ -144,20 +144,20 @@ fun NextButton(
 	modifier : Modifier ,
 	pagerState : PagerState ,
 	onClick : () -> Unit ,
-				)
+			  )
 {
 
-		AnimatedVisibility(
-				visible = pagerState.currentPage != 7
-						  ) {
-			Button(
-					modifier = Modifier
-						.padding(horizontal = 8.dp)
-						.testTag("introNextButton") ,
-					shape = MaterialTheme.shapes.medium ,
-					onClick = onClick ,
-				  ) {
-				Text(text = "Next")
-			}
+	AnimatedVisibility(
+			visible = pagerState.currentPage != 7
+					  ) {
+		Button(
+				modifier = Modifier
+					.padding(horizontal = 8.dp)
+					.testTag("introNextButton") ,
+				shape = MaterialTheme.shapes.medium ,
+				onClick = onClick ,
+			  ) {
+			Text(text = "Next")
 		}
+	}
 }

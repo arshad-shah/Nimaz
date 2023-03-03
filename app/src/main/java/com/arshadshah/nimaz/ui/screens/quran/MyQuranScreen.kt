@@ -52,46 +52,15 @@ fun MyQuranScreen(
 	}
 
 	LazyColumn(
-			userScrollEnabled =true,
+			userScrollEnabled = true ,
 			  ) {
-			item {
-				FeaturesDropDown(
-						label = "Bookmarks" ,
-						items = bookmarks.value ,
-						dropDownItem = {
-							FeatureDropdownItem(
-									item = it ,
-									onClick = { aya ->
-										onNavigateToAyatScreen(
-												aya.suraNumber.toString() ,
-												true ,
-												translation ,
-												aya.ayaNumberInSurah
-															  )
-									} ,
-									itemContent = { aya ->
-										//the text
-										Text(
-												modifier = Modifier
-													.padding(8.dp) ,
-												text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-												textAlign = TextAlign.Start ,
-												maxLines = 2 ,
-												overflow = TextOverflow.Ellipsis ,
-												style = MaterialTheme.typography.bodyLarge
-											)
-									}
-											   )
-						}
-								)
-			}
 		item {
 			FeaturesDropDown(
-					label = "Favorites" ,
-					items = favorites.value ,
+					label = "Bookmarks" ,
+					items = bookmarks.value ,
 					dropDownItem = {
 						FeatureDropdownItem(
-								item = it,
+								item = it ,
 								onClick = { aya ->
 									onNavigateToAyatScreen(
 											aya.suraNumber.toString() ,
@@ -111,7 +80,38 @@ fun MyQuranScreen(
 											overflow = TextOverflow.Ellipsis ,
 											style = MaterialTheme.typography.bodyLarge
 										)
-								},
+								}
+										   )
+					}
+							)
+		}
+		item {
+			FeaturesDropDown(
+					label = "Favorites" ,
+					items = favorites.value ,
+					dropDownItem = {
+						FeatureDropdownItem(
+								item = it ,
+								onClick = { aya ->
+									onNavigateToAyatScreen(
+											aya.suraNumber.toString() ,
+											true ,
+											translation ,
+											aya.ayaNumberInSurah
+														  )
+								} ,
+								itemContent = { aya ->
+									//the text
+									Text(
+											modifier = Modifier
+												.padding(8.dp) ,
+											text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
+											textAlign = TextAlign.Start ,
+											maxLines = 2 ,
+											overflow = TextOverflow.Ellipsis ,
+											style = MaterialTheme.typography.bodyLarge
+										)
+								} ,
 										   )
 					}
 							)
@@ -142,7 +142,7 @@ fun MyQuranScreen(
 											overflow = TextOverflow.Ellipsis ,
 											style = MaterialTheme.typography.bodyLarge
 										)
-								},
+								} ,
 										   )
 					}
 							)
@@ -173,7 +173,7 @@ fun FeaturesDropDownPreview()
 	//    val sajdaType: String,
 	//    val ruku: Int,
 	//    val juzNumber: Int,
-val ayas = listOf(
+	val ayas = listOf(
 			Aya(
 					ayaNumberInQuran = 1 ,
 					ayaNumber = 1 ,
@@ -190,8 +190,8 @@ val ayas = listOf(
 					sajdaType = "" ,
 					ruku = 1 ,
 					juzNumber = 1
-					) ,
-				 )
+			   ) ,
+					 )
 	NimazTheme {
 		FeaturesDropDown(
 				items = ayas ,
@@ -213,10 +213,10 @@ val ayas = listOf(
 										overflow = TextOverflow.Ellipsis ,
 										style = MaterialTheme.typography.bodyLarge
 									)
-							},
+							} ,
 									   )
 				}
-						){
+						) {
 		}
 	}
 }

@@ -88,8 +88,12 @@ fun FontSizeDialog(
 							value = arabicFontSizeState.value ,
 							onValueChange = {
 								arabicFontSizeState.value = it
-								handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(it))
-											} ,
+								handleQuranEvents(
+										QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(
+												it
+																							  )
+												 )
+							} ,
 							valueRange = 24f .. 40f ,
 							modifier = Modifier.width(300.dp)
 						  )
@@ -112,8 +116,12 @@ fun FontSizeDialog(
 							value = translationFontSizeState.value ,
 							onValueChange = {
 								translationFontSizeState.value = it
-								handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(it))
-											} ,
+								handleQuranEvents(
+										QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
+												it
+																								   )
+												 )
+							} ,
 							valueRange = 16f .. 40f ,
 							modifier = Modifier.width(300.dp)
 						  )
@@ -166,7 +174,11 @@ fun FontSizeDialog(
 														fontStyleState.value = item
 														setFontBasedOnFontStyle(fontStyleState.value)
 														fontMenuExpanded.value = false
-														handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Arabic_Font(fontStyleState.value))
+														handleQuranEvents(
+																QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
+																		fontStyleState.value
+																												 )
+																		 )
 													} ,
 													text = { Text(text = item) }
 															)

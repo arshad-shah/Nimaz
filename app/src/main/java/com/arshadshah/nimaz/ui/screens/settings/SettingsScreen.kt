@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -54,14 +53,22 @@ fun SettingsScreen(
 				  )
 {
 	val context = LocalContext.current
-	val viewModelSettings = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModelSettings = viewModel(
+			key = "SettingsViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+									 )
 	val themeState = remember {
 		viewModelSettings.theme
 	}.collectAsState()
 
-	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 
-	LaunchedEffect(Unit){
+	LaunchedEffect(Unit) {
 		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
 	}
 
@@ -117,7 +124,8 @@ fun SettingsScreen(
 							)
 		}
 
-		val stateOfTheme = rememberPreferenceStringSettingState(key =THEME, defaultValue = themeState.value)
+		val stateOfTheme =
+			rememberPreferenceStringSettingState(key = THEME , defaultValue = themeState.value)
 
 		stateOfTheme.value = themeState.value
 
@@ -126,14 +134,14 @@ fun SettingsScreen(
 		val themeMapForDynamic = mapOf(
 				"LIGHT" to "Light" ,
 				"DARK" to "Dark" ,
-				"SYSTEM" to "System Default",
+				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
-							)
+									  )
 		val themeMapForNonDynamic = mapOf(
 				"LIGHT" to "Light" ,
 				"DARK" to "Dark" ,
-				"SYSTEM" to "System Default",
-										)
+				"SYSTEM" to "System Default" ,
+										 )
 
 		//theme
 		ElevatedCard(
@@ -145,8 +153,9 @@ fun SettingsScreen(
 			SettingsList(
 					onChange = {
 						viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
-						Toasty.success(context , "Theme Changed to $it" , Toast.LENGTH_SHORT , true).show()
-					},
+						Toasty.success(context , "Theme Changed to $it" , Toast.LENGTH_SHORT , true)
+							.show()
+					} ,
 					height = 400.dp ,
 					subtitle = {
 						Text(text = "Change the theme of the app")
@@ -157,10 +166,10 @@ fun SettingsScreen(
 								painter = painterResource(id = R.drawable.theme_icon) ,
 								contentDescription = "Theme"
 							)
-					},
-					valueState = stateOfTheme,
-					title ={ Text(text = "Theme") },
-		 			items = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic,
+					} ,
+					valueState = stateOfTheme ,
+					title = { Text(text = "Theme") } ,
+					items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
 						)
 		}
 

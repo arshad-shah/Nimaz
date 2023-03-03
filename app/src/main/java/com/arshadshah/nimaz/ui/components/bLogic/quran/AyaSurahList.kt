@@ -22,7 +22,7 @@ fun AyaSurahList(
 				)
 {
 
-	if( loading )
+	if (loading)
 	{
 		if (pageMode.value == "List")
 		{
@@ -37,7 +37,7 @@ fun AyaSurahList(
 					 )
 		} else
 		{
-			Page(state.value  , paddingValues , true)
+			Page(state.value , paddingValues , true)
 		}
 	} else if (error.isNotEmpty())
 	{
@@ -54,7 +54,7 @@ fun AyaSurahList(
 					 )
 		} else
 		{
-			Page(state.value  , paddingValues , false)
+			Page(state.value , paddingValues , false)
 		}
 	} else
 	{
@@ -67,11 +67,11 @@ fun AyaSurahList(
 					loading = false ,
 					type = type ,
 					number = number ,
-					scrollToAya	 = scrollToAya ,
+					scrollToAya = scrollToAya ,
 					 )
 		} else
 		{
-			Page(state.value  , paddingValues , false)
+			Page(state.value , paddingValues , false)
 		}
 	}
 }

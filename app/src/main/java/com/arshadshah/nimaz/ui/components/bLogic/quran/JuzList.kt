@@ -21,15 +21,15 @@ fun JuzList(
 				onNavigateToAyatScreen = onNavigateToAyatScreen ,
 				loading = true
 				 )
-	}
-	else if (error.isNotEmpty())
+	} else if (error.isNotEmpty())
 	{
 		JuzListUI(
 				juz = ArrayList(30) ,
 				onNavigateToAyatScreen = onNavigateToAyatScreen ,
 				loading = false ,
 				 )
-	}else{
+	} else
+	{
 		JuzListUI(
 				juz = state.value ,
 				onNavigateToAyatScreen = onNavigateToAyatScreen ,

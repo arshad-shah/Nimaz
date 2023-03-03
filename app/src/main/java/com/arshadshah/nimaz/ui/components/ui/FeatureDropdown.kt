@@ -24,7 +24,7 @@ fun <T> FeaturesDropDown(
 	label : String ,
 	dropDownItem : @Composable (T) -> Unit ,
 	header : @Composable (() -> Unit)? = null ,
-					)
+						)
 {
 	Log.d("FeaturesDropDown" , "FeaturesDropDown: $label")
 	Log.d("FeaturesDropDown" , "FeaturesDropDown: ${items.size}")
@@ -63,7 +63,7 @@ fun <T> FeaturesDropDown(
 									.fillMaxWidth(0.9f) ,
 								verticalAlignment = Alignment.CenterVertically ,
 								horizontalArrangement = Arrangement.Start
-						   ){
+						   ) {
 							//the text
 							Text(
 									modifier = Modifier
@@ -105,19 +105,19 @@ fun <T> FeaturesDropDown(
 		//when a bookmark is clicked it navigates to the ayat screen
 		//the bookmark is highlighted
 		AnimatedVisibility(
-				visible = isExpanded.value,
+				visible = isExpanded.value ,
 				enter = expandVertically() + fadeIn() ,
 				exit = shrinkVertically() + fadeOut()
 						  ) {
-			if(items.isEmpty()){
+			if (items.isEmpty())
+			{
 				Placeholder(nameOfDropdown = label)
-			}
-			else
+			} else
 			{
 				Column(
 						modifier = Modifier
 							.fillMaxWidth()
-					) {
+					  ) {
 					if (header != null)
 					{
 						header()
@@ -132,36 +132,43 @@ fun <T> FeaturesDropDown(
 }
 
 @Composable
-fun <T> FeatureDropdownItem(item: T , onClick: (T) -> Unit , itemContent: @Composable (T) -> Unit){
-		ElevatedCard(
-				modifier = Modifier
-					.padding(bottom = 4.dp ,
-							 start = 8.dp ,
-							 end = 8.dp,
-							 top = 4.dp)
-					.fillMaxWidth()
-					.clickable {
-						onClick(item)
-					} ,
-				shape = MaterialTheme.shapes.medium ,
-				content = {
-					Row(
+fun <T> FeatureDropdownItem(
+	item : T ,
+	onClick : (T) -> Unit ,
+	itemContent : @Composable (T) -> Unit ,
+						   )
+{
+	ElevatedCard(
+			modifier = Modifier
+				.padding(
+						bottom = 4.dp ,
+						start = 8.dp ,
+						end = 8.dp ,
+						top = 4.dp
+						)
+				.fillMaxWidth()
+				.clickable {
+					onClick(item)
+				} ,
+			shape = MaterialTheme.shapes.medium ,
+			content = {
+				Row(
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth() ,
+						verticalAlignment = Alignment.CenterVertically ,
+						horizontalArrangement = Arrangement.SpaceBetween
+				   ) {
+					itemContent(item)
+					//the icon
+					Icon(
+							painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+							contentDescription = "Navigate" ,
 							modifier = Modifier
 								.padding(8.dp)
-								.fillMaxWidth() ,
-							verticalAlignment = Alignment.CenterVertically ,
-							horizontalArrangement = Arrangement.SpaceBetween
-					   ) {
-						itemContent(item)
-						//the icon
-						Icon(
-								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								contentDescription = "Navigate" ,
-								modifier = Modifier
-									.padding(8.dp)
-									.size(24.dp)
-							)
-					}
+								.size(24.dp)
+						)
 				}
-					)
+			}
+				)
 }

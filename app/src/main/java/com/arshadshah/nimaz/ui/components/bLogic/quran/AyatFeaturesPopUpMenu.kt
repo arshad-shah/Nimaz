@@ -157,7 +157,7 @@ fun AyatFeaturesPopUpMenu(
 							shareIntent.putExtra(
 									Intent.EXTRA_TEXT ,
 									"Chapter ${aya.suraNumber}: Verse ${aya.ayaNumberInSurah}\n\n${aya.ayaArabic}\n${aya.ayaTranslationEnglish}"
-											   )
+												)
 
 							//start the share intent
 							context.startActivity(Intent.createChooser(shareIntent , "Share Aya"))
@@ -186,7 +186,7 @@ fun AyatFeaturesPopUpMenu(
 							onClick = {
 								onDownloadClicked()
 								popUpOpen.value = false
-									  } ,
+							} ,
 							enabled = true ,
 							  ) {
 						Icon(

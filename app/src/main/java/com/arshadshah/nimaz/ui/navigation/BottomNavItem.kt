@@ -11,12 +11,13 @@ sealed class BottomNavItem(
 	val iconDescription : String = "" ,
 						  )
 {
-		object Dashboard : BottomNavItem(
+
+	object Dashboard : BottomNavItem(
 			AppConstants.DASHBOARD_SCREEN_TITLE ,
 			R.drawable.dashboard_icon ,
 			AppConstants.DASHBOARD_SCREEN ,
 			"Dashboard of nimaz"
-									  )
+									)
 
 	//today
 	object PrayerTimesScreen :
@@ -26,6 +27,7 @@ sealed class BottomNavItem(
 				AppConstants.PRAYER_TIMES_SCREEN_ROUTE ,
 				"Prayer Times Screen"
 					 )
+
 	object QuranScreen : BottomNavItem(
 			AppConstants.QURAN_SCREEN_TITLE ,
 			R.drawable.quran_icon ,

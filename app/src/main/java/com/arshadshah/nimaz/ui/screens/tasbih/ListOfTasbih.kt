@@ -1,12 +1,14 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,18 +27,25 @@ import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.TasbihRow
 import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ListOfTasbih(
 	paddingValues : PaddingValues ,
-	onNavigateToTasbihScreen : (String , String , String) -> Unit
+	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
 				)
 {
 	val resources = LocalContext.current.resources
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "TasbihViewModel", initializer = { TasbihViewModel(context) }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+
+	val viewModel = viewModel(
+			key = "TasbihViewModel" ,
+			initializer = { TasbihViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	val sharedPref = context.getSharedPreferences("tasbih" , 0)
 	val selected =
 		remember { mutableStateOf(sharedPref.getBoolean("selected" , false)) }
@@ -48,8 +57,8 @@ fun ListOfTasbih(
 			key1 = selected.value ,
 			key2 = indexSelected.value ,
 				  ) {
-			sharedPref.edit().putBoolean("selected" , selected.value).apply()
-			sharedPref.edit().putInt("indexSelected" , indexSelected.value).apply()
+		sharedPref.edit().putBoolean("selected" , selected.value).apply()
+		sharedPref.edit().putInt("indexSelected" , indexSelected.value).apply()
 
 	}
 
@@ -71,9 +80,11 @@ fun ListOfTasbih(
 
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
 	val titles = listOf("Tasbih List" , "My Tasbih")
-	Column(modifier = Modifier
-		.padding(paddingValues)
-		.testTag(AppConstants.TEST_TAG_QURAN)) {
+	Column(
+			modifier = Modifier
+				.padding(paddingValues)
+				.testTag(AppConstants.TEST_TAG_QURAN)
+		  ) {
 
 		TabRow(selectedTabIndex = selectedTab) {
 			titles.forEachIndexed { index , title ->
@@ -109,14 +120,15 @@ fun ListOfTasbih(
 						  ) {
 					items(englishNames.size) { index ->
 						TasbihRow(
-								englishNames[index] ,
 								arabicNames[index] ,
+								englishNames[index] ,
 								translationNames[index] ,
 								onNavigateToTasbihScreen
 								 )
 					}
 				}
 			}
+
 			1 ->
 			{
 				viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetAllTasbih)
@@ -141,8 +153,6 @@ fun ListOfTasbih(
 					}
 				} else
 				{
-					//if the list is not empty, show the list
-
 					LazyColumn(
 							userScrollEnabled = true ,
 							  ) {
@@ -151,65 +161,129 @@ fun ListOfTasbih(
 							tasbih.date
 						}.distinct()
 
-						//check how many tasbih are there for each date
-						val tasbihCountForDate = dates.map { date ->
-							listOfTasbih.value.filter { tasbih ->
-								tasbih.date == date
-							}.size
-						}
-						//create a list of tasbih for each date
-						val tasbihForDate = dates.mapIndexed { index , date ->
-							listOfTasbih.value.filterIndexed { tasbihIndex , tasbih ->
-								tasbihIndex < tasbihCountForDate[index] && tasbih.date == date
-							}
-						}
-						//log everything
-						Log.d("Tasbih" , "dates: $dates")
-						Log.d("Tasbih" , "tasbihCountForDate: $tasbihCountForDate")
-						Log.d("Tasbih" , "tasbihForDate: $tasbihForDate")
-
 						//for each date, render the tasbih drop down
 						for (index in dates.indices)
 						{
 							item {
-								FeaturesDropDown(
-										header = {
-											DropDownHeader(
-													headerLeft = "Name" ,
-													headerRight = "Count" ,
-													headerMiddle = "Goal"
-														  )
-										} ,
-										//the list of tasbih for the date at the index
-										items = listOfTasbih.value.filter { tasbih ->
-											tasbih.date == dates[index]
-										} ,
-										label = "Tasbih for " + LocalDate.parse(dates[index])
-											.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-										dropDownItem = {
-											FeatureDropdownItem(
-													item = it ,
-													onClick = { tasbih ->
-														onNavigateToTasbihScreen(
-																tasbih.englishName ,
-																tasbih.arabicName ,
-																tasbih.translationName
-																				)
-													} ,
-													itemContent = { tasbih ->
-														Text(
-																modifier = Modifier
-																	.padding(8.dp) ,
-																text = tasbih.englishName + " - " + tasbih.goal + " - " + tasbih.count ,
-																textAlign = TextAlign.Start ,
-																maxLines = 2 ,
-																overflow = TextOverflow.Ellipsis ,
-																style = MaterialTheme.typography.bodyLarge
-															)
-													} ,
-															   )
-										}
+								SettingsGroup(
+										title = {
+											Text(
+													text = LocalDate.parse(dates[index])
+														.format(DateTimeFormatter.ofPattern("YYYY")) ,
+													style = MaterialTheme.typography.titleLarge
 												)
+										}
+											 ) {
+									FeaturesDropDown(
+											header = {
+												DropDownHeader(
+														headerLeft = "Name" ,
+														headerRight = "Count" ,
+														headerMiddle = "Goal"
+															  )
+											} ,
+											//the list of tasbih for the date at the index
+											items = listOfTasbih.value.filter { tasbih ->
+												tasbih.date == dates[index]
+											} ,
+											label = LocalDate.parse(dates[index])
+												.format(DateTimeFormatter.ofPattern("dd MMMM")) ,
+											dropDownItem = {
+												FeatureDropdownItem(
+														item = it ,
+														onClick = { tasbih ->
+															onNavigateToTasbihScreen(
+																	tasbih.id.toString() ,
+																	tasbih.arabicName ,
+																	tasbih.englishName ,
+																	tasbih.translationName
+																					)
+														} ,
+														itemContent = { tasbih ->
+															//trim the text if it is too long
+															val trimmedText =
+																if (tasbih.englishName.length > 20)
+																{
+																	tasbih.englishName.substring(
+																			0 ,
+																			20
+																								) + "..."
+																} else
+																{
+																	tasbih.englishName
+																}
+															Row(
+																	modifier = Modifier
+																		.fillMaxWidth() ,
+																	verticalAlignment = Alignment.CenterVertically
+															   ) {
+																//an icon to indicate if the tasbih is completed
+																if(tasbih.count == tasbih.goal)
+																{
+																	Icon(
+																			imageVector = Icons.Default.CheckCircle ,
+																			contentDescription = "Completed" ,
+																			modifier = Modifier
+																				.size(24.dp)
+																		)
+																}
+																//name
+																Text(
+																		modifier = Modifier
+																			.weight(1f) ,
+																		text = trimmedText ,
+																		textAlign = TextAlign.Center ,
+																		maxLines = 2 ,
+																		overflow = TextOverflow.Ellipsis ,
+																		style = MaterialTheme.typography.bodySmall
+																	)
+																//divider
+																Divider(
+																		modifier = Modifier
+																			.width(1.dp)
+																			.height(24.dp) ,
+																		color = MaterialTheme.colorScheme.onSurface.copy(
+																				alpha = 0.08f
+																														) ,
+																		thickness = 1.dp ,
+																	   )
+																//goal
+																Text(
+																		modifier = Modifier
+																			.weight(1f) ,
+																		text = tasbih.goal.toString() ,
+																		textAlign = TextAlign.Center ,
+																		maxLines = 2 ,
+																		overflow = TextOverflow.Ellipsis ,
+																		style = MaterialTheme.typography.bodySmall
+																	)
+																//divider
+																Divider(
+																		modifier = Modifier
+																			.width(1.dp)
+																			.height(24.dp) ,
+																		color = MaterialTheme.colorScheme.onSurface.copy(
+																				alpha = 0.08f
+																														) ,
+																		thickness = 1.dp ,
+																	   )
+																//count
+																Text(
+																		modifier = Modifier
+																			.weight(1f) ,
+																		text = tasbih.count.toString() ,
+																		textAlign = TextAlign.Center ,
+																		maxLines = 2 ,
+																		overflow = TextOverflow.Ellipsis ,
+																		style = MaterialTheme.typography.bodySmall
+																	)
+															}
+														} ,
+																   )
+											}
+
+													)
+								}
 							}
 						}
 					}
@@ -230,10 +304,9 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 
 	Row(
 			modifier = Modifier
-				.fillMaxWidth()
-				.background(MaterialTheme.colorScheme.surface),
+				.fillMaxWidth() ,
 			verticalAlignment = Alignment.CenterVertically
-		  ) {
+	   ) {
 		//name
 		Text(
 				modifier = Modifier
@@ -247,7 +320,9 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 			)
 		//divider
 		Divider(
-				modifier = Modifier.width(1.dp).height(24.dp) ,
+				modifier = Modifier
+					.width(1.dp)
+					.height(24.dp) ,
 				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
 				thickness = 1.dp ,
 			   )
@@ -264,7 +339,9 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 			)
 		//divider
 		Divider(
-				modifier = Modifier.width(1.dp).height(24.dp) ,
+				modifier = Modifier
+					.width(1.dp)
+					.height(24.dp) ,
 				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
 				thickness = 1.dp ,
 			   )
@@ -282,11 +359,13 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 	}
 }
 
-@Preview(showBackground = true ,
-		 uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+@Preview(
+		showBackground = true ,
+		uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 		)
 @Composable
 //MyTasbihDropDownItem
-fun DefaultPreview() {
+fun DefaultPreview()
+{
 	DropDownHeader(headerLeft = "Name" , headerMiddle = "Goal" , headerRight = "Count")
 }

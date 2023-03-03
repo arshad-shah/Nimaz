@@ -35,8 +35,8 @@ fun JuzListUI(
 			 )
 {
 	LazyColumn(
-			userScrollEnabled = !loading,
-			  modifier = Modifier.testTag(TEST_TAG_QURAN_JUZ)
+			userScrollEnabled = ! loading ,
+			modifier = Modifier.testTag(TEST_TAG_QURAN_JUZ)
 			  ) {
 		items(juz.size) { index ->
 			JuzListItemUI(
@@ -86,7 +86,7 @@ fun JuzListItemUI(
 					.fillMaxWidth()
 					.testTag(TEST_TAG_JUZ_ITEM)
 					.clickable(
-							enabled = !loading ,
+							enabled = ! loading ,
 							  ) {
 						onNavigateToAyatScreen(juzNumber , false , translation , null)
 					}

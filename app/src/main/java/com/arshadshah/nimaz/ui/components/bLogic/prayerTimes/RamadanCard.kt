@@ -60,8 +60,9 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 				R.drawable.ramadan ,
 				R.drawable.ramadan2 ,
 				R.drawable.ramadan3 ,
-				R.drawable.ramadan4,
-				R.drawable.ramadan5)
+				R.drawable.ramadan4 ,
+				R.drawable.ramadan5
+			  )
 	//pick a random image
 	val randomImage = imagesToShow.random()
 	//save the image to show in the card
@@ -135,7 +136,8 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 						if (isAfterRamadanStart)
 						{
 							//estimated end
-							Text(text = ramadanEndFormatted.toString(),
+							Text(
+									text = ramadanEndFormatted.toString() ,
 									style = MaterialTheme.typography.titleSmall
 								)
 						} else

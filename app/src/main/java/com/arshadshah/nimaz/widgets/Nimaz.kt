@@ -41,25 +41,37 @@ class Nimaz : AppWidgetProvider()
 			// Set the random number text
 			runBlocking {
 				val repository = PrayerTimesRepository.getPrayerTimes(context)
-				views.setTextViewText(R.id.Fajr_time , repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
-				views.setTextViewText(R.id.Zuhar_time , repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
-				views.setTextViewText(R.id.Asar_time , repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
+				views.setTextViewText(
+						R.id.Fajr_time ,
+						repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+									 )
+				views.setTextViewText(
+						R.id.Zuhar_time ,
+						repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+									 )
+				views.setTextViewText(
+						R.id.Asar_time ,
+						repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+									 )
 				views.setTextViewText(
 						R.id.Maghrib_time ,
 						repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
-				views.setTextViewText(R.id.Ishaa_time , repository.data?.isha?.format(DateTimeFormatter.ofPattern("hh:mm a")))
+				views.setTextViewText(
+						R.id.Ishaa_time ,
+						repository.data?.isha?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+									 )
 			}
 			views.setOnClickPendingIntent(R.id.widget , pendingIntent)
 			// Update the widget
-			appWidgetManager.updateAppWidget(appWidgetId, views)
+			appWidgetManager.updateAppWidget(appWidgetId , views)
 		}
 	}
 
 	override fun onEnabled(context : Context)
 	{
 		// Enter relevant functionality for when the first widget is created
-		updateAppWidget(context, AppWidgetManager.getInstance(context), 0)
+		updateAppWidget(context , AppWidgetManager.getInstance(context) , 0)
 	}
 
 	override fun onDisabled(context : Context)
@@ -88,14 +100,26 @@ internal fun updateAppWidget(
 	val views = RemoteViews(context.packageName , R.layout.nimaz)
 	runBlocking {
 		val repository = PrayerTimesRepository.getPrayerTimes(context)
-		views.setTextViewText(R.id.Fajr_time , repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
-		views.setTextViewText(R.id.Zuhar_time , repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
-		views.setTextViewText(R.id.Asar_time , repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a")))
+		views.setTextViewText(
+				R.id.Fajr_time ,
+				repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+							 )
+		views.setTextViewText(
+				R.id.Zuhar_time ,
+				repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+							 )
+		views.setTextViewText(
+				R.id.Asar_time ,
+				repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+							 )
 		views.setTextViewText(
 				R.id.Maghrib_time ,
 				repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 							 )
-		views.setTextViewText(R.id.Ishaa_time , repository.data?.isha?.format(DateTimeFormatter.ofPattern("hh:mm a")))
+		views.setTextViewText(
+				R.id.Ishaa_time ,
+				repository.data?.isha?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+							 )
 	}
 
 	views.setOnClickPendingIntent(R.id.widget , pendingIntent)

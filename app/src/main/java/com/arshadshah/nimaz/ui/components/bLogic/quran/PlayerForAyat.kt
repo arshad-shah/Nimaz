@@ -44,7 +44,7 @@ fun PlayerForAyat(
 		val currentProgress = remember { mutableStateOf(0f) }
 		LaunchedEffect(key1 = isPlaying.value , key2 = isPaused.value) {
 			//start the timer make sure to pause the timer when the audio is paused
-			if (isPlaying.value && !isPaused.value)
+			if (isPlaying.value && ! isPaused.value)
 			{
 				//start the timer
 				launch {
@@ -70,7 +70,10 @@ fun PlayerForAyat(
 		Log.d("AyaListItemUI" , "current progress is ${currentProgress.value / seconds}")
 		LinearProgressIndicator(
 				progress = currentProgress.value / seconds ,
-				modifier = Modifier.fillMaxWidth().padding(4.dp).height(8.dp) ,
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(4.dp)
+					.height(8.dp) ,
 				strokeCap = StrokeCap.Round ,
 							   )
 	}
@@ -106,7 +109,7 @@ fun PlayerForAyat(
 				}
 			}
 
-			if (isPlaying.value && !isStopped.value)
+			if (isPlaying.value && ! isStopped.value)
 			{
 				//play and puase button
 				IconButton(
@@ -126,7 +129,7 @@ fun PlayerForAyat(
 				}
 			}
 
-			if(isPlaying.value || isPaused.value)
+			if (isPlaying.value || isPaused.value)
 			{
 				//stop button
 				IconButton(

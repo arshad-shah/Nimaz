@@ -48,11 +48,20 @@ import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun LocationSettings(isIntro : Boolean = false){
+fun LocationSettings(isIntro : Boolean = false)
+{
 
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
-	val viewModelPrayerTimes = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "SettingsViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+	val viewModelPrayerTimes = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+										)
 	val isLocationAuto = remember {
 		viewModel.isLocationAuto
 	}.collectAsState()
@@ -77,10 +86,11 @@ fun LocationSettings(isIntro : Boolean = false){
 	}.collectAsState()
 
 
-	if(isError.value.isNotBlank())
+	if (isError.value.isNotBlank())
 	{
-		Toasty.error(context, isError.value, Toasty.LENGTH_SHORT).show()
-	} else{
+		Toasty.error(context , isError.value , Toasty.LENGTH_SHORT).show()
+	} else
+	{
 
 		//location permission state
 		val locationPermissionState = rememberMultiplePermissionsState(
@@ -104,13 +114,22 @@ fun LocationSettings(isIntro : Boolean = false){
 			FeatureThatRequiresLocationPermission(locationPermissionState , state)
 		}
 
-		LaunchedEffect(key1 = locationNameState.value , key2 = latitudeState.value , key3 = longitudeState.value) {
+		LaunchedEffect(
+				key1 = locationNameState.value ,
+				key2 = latitudeState.value ,
+				key3 = longitudeState.value
+					  ) {
 			viewModelPrayerTimes.handleEvent(
 					context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 					PrayerTimesParamMapper.getParams(context)
 																					  )
 											)
-			viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
+			viewModelPrayerTimes.handleEvent(
+					context ,
+					PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+							context
+																	   )
+											)
 		}
 
 		if (isIntro)
@@ -118,7 +137,7 @@ fun LocationSettings(isIntro : Boolean = false){
 			LocationToggleSwitch(
 					state = state ,
 					locationPermissionState = locationPermissionState ,
-					isIntro = true,
+					isIntro = true ,
 								)
 			if (! state.value)
 			{
@@ -142,7 +161,8 @@ fun LocationSettings(isIntro : Boolean = false){
 									   )
 				}
 			}
-		}else{
+		} else
+		{
 			SettingsGroup(title = { Text(text = "Location") }) {
 				LocationToggleSwitch(
 						state = state ,
@@ -191,8 +211,16 @@ fun LocationToggleSwitch(
 						)
 {
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
-	val viewModelPrayerTimes = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "SettingsViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+	val viewModelPrayerTimes = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+										)
 	val isLocationAuto = remember {
 		viewModel.isLocationAuto
 	}.collectAsState()
@@ -214,15 +242,25 @@ fun LocationToggleSwitch(
 			{
 				Lifecycle.Event.ON_RESUME ->
 				{
-					if(locationPermissionState.permissions[0].status.isGranted || locationPermissionState.permissions[1].status.isGranted)
+					if (locationPermissionState.permissions[0].status.isGranted || locationPermissionState.permissions[1].status.isGranted)
 					{
-						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,true))
+						viewModel.handleEvent(
+								SettingsViewModel.SettingsEvent.LocationToggle(
+										context ,
+										true
+																			  )
+											 )
 						viewModelPrayerTimes.handleEvent(
 								context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 								PrayerTimesParamMapper.getParams(context)
-																					  )
+																								  )
 														)
-						viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
+						viewModelPrayerTimes.handleEvent(
+								context ,
+								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+										context
+																				   )
+														)
 						isChecked.value = true
 					}
 				}
@@ -255,7 +293,7 @@ fun LocationToggleSwitch(
 						highlight = PlaceholderHighlight.shimmer(
 								highlightColor = Color.White ,
 																)
-											   )  ,
+											   ) ,
 				state = state ,
 				icon = {
 					Icon(
@@ -265,9 +303,11 @@ fun LocationToggleSwitch(
 						)
 				} ,
 				title = {
-					if(isIntro){
+					if (isIntro)
+					{
 						Text(text = "Enable Auto Location")
-					}else{
+					} else
+					{
 						if (state.value)
 						{
 							Text(text = "Automatic")
@@ -279,7 +319,8 @@ fun LocationToggleSwitch(
 				} ,
 				subtitle = {
 					//if the permission is granted, show a checkmark and text saying "Allowed"
-					if (isIntro){
+					if (isIntro)
+					{
 						if (isChecked.value)
 						{
 							Row(
@@ -304,39 +345,63 @@ fun LocationToggleSwitch(
 								Text(text = "Disabled")
 							}
 						}
-					}else{
+					} else
+					{
 						if (isLocationAuto.value)
 						{
 							Text(text = locationNameState.value)
 						}
 					}
-				},
+				} ,
 				onCheckedChange = {
 					if (it)
 					{
 						if (locationPermissionState.allPermissionsGranted)
 						{
-							viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,true))
+							viewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.LocationToggle(
+											context ,
+											true
+																				  )
+												 )
 							viewModelPrayerTimes.handleEvent(
-									context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-									PrayerTimesParamMapper.getParams(context)
-																									  )
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											PrayerTimesParamMapper.getParams(context)
+																							)
 															)
-							viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
-						}else{
+							viewModelPrayerTimes.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+															)
+						} else
+						{
 							locationPermissionState.launchMultiplePermissionRequest()
 						}
 					} else
 					{
-						viewModel.handleEvent(SettingsViewModel.SettingsEvent.LocationToggle(context,it))
+						viewModel.handleEvent(
+								SettingsViewModel.SettingsEvent.LocationToggle(
+										context ,
+										it
+																			  )
+											 )
 						viewModelPrayerTimes.handleEvent(
 								context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 								PrayerTimesParamMapper.getParams(context)
 																								  )
 														)
-						viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
+						viewModelPrayerTimes.handleEvent(
+								context ,
+								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+										context
+																				   )
+														)
 						isChecked.value = false
-						if(isIntro){
+						if (isIntro)
+						{
 							Toasty.info(
 									context ,
 									"Please disable location permission for Nimaz in \n Permissions -> Location -> Don't Allow" ,
@@ -359,7 +424,8 @@ fun LocationToggleSwitch(
 
 	if (state.value && isIntro)
 	{
-		if (locationNameState.value.isBlank()){
+		if (locationNameState.value.isBlank())
+		{
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
@@ -368,11 +434,13 @@ fun LocationToggleSwitch(
 						) {
 				Text(
 						textAlign = TextAlign.Center ,
-						text = "Current Location: Loading...",
+						text = "Current Location: Loading..." ,
 						modifier = Modifier.padding(16.dp) ,
-						style = MaterialTheme.typography.bodyMedium)
+						style = MaterialTheme.typography.bodyMedium
+					)
 			}
-		}else{
+		} else
+		{
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
@@ -381,9 +449,10 @@ fun LocationToggleSwitch(
 						) {
 				Text(
 						textAlign = TextAlign.Center ,
-						text = "Current Location: " +  locationNameState.value ,
+						text = "Current Location: " + locationNameState.value ,
 						modifier = Modifier.padding(16.dp) ,
-						style = MaterialTheme.typography.bodyMedium)
+						style = MaterialTheme.typography.bodyMedium
+					)
 			}
 		}
 	}

@@ -30,6 +30,7 @@ interface PrayerTrackerDao
 	//delete all trackers
 	@Query("DELETE FROM PrayersTracker")
 	suspend fun deleteAllTrackers()
+
 	@Query("SELECT EXISTS(SELECT * FROM PrayersTracker WHERE date = :date)")
 	suspend fun trackerExistsForDate(date : String) : Boolean
 

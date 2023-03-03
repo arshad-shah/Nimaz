@@ -26,7 +26,10 @@ fun DateSelector(
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
 				)
 {
-	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	val dateState = remember {
 		viewModel.dateState
 	}.collectAsState()
@@ -70,8 +73,7 @@ fun DateSelector(
 							newMonth.value = date.value.monthValue
 							newYear.value = date.value.year
 							hijrahDate.value = HijrahDate.from(date.value)
-						}
-					,
+						} ,
 					horizontalAlignment = Alignment.CenterHorizontally ,
 					verticalArrangement = Arrangement.Center
 				  ) {
@@ -82,8 +84,7 @@ fun DateSelector(
 							text = "Today" ,
 							style = MaterialTheme.typography.titleSmall
 						)
-				}
-				else
+				} else
 				{
 					Row(
 							horizontalArrangement = Arrangement.Center ,
@@ -104,8 +105,7 @@ fun DateSelector(
 										.padding(start = 4.dp)
 										.alpha(0.5f)
 								)
-						}
-						else
+						} else
 						{
 							Text(
 									text = "Today" ,

@@ -47,7 +47,7 @@ class PrayerTimesViewModel : ViewModel()
 
 	private var countDownTimer : CountDownTimer? = null
 
-	private val _countDownTimeState = MutableStateFlow(CountDownTime(0 , 0 , 0 ))
+	private val _countDownTimeState = MutableStateFlow(CountDownTime(0 , 0 , 0))
 	val timer = _countDownTimeState.asStateFlow()
 
 	//current prayer name
@@ -85,8 +85,6 @@ class PrayerTimesViewModel : ViewModel()
 	//error
 	private val _error = MutableStateFlow("")
 	val error = _error.asStateFlow()
-
-
 
 
 	//event that starts the timer
@@ -139,7 +137,7 @@ class PrayerTimesViewModel : ViewModel()
 	{
 		val appWidgetManager = AppWidgetManager.getInstance(context)
 		val widgetIds = appWidgetManager.getAppWidgetIds(
-				ComponentName(context, Nimaz::class.java)
+				ComponentName(context , Nimaz::class.java)
 														)
 
 		// Update the widget UI on the main thread
@@ -161,23 +159,31 @@ class PrayerTimesViewModel : ViewModel()
 					val repository = PrayerTimesRepository.getPrayerTimes(context)
 					views.setTextViewText(
 							R.id.Fajr_time , repository.data?.fajr?.format(
-							DateTimeFormatter.ofPattern("hh:mm a")))
+							DateTimeFormatter.ofPattern("hh:mm a")
+																		  )
+										 )
 					views.setTextViewText(
 							R.id.Zuhar_time , repository.data?.dhuhr?.format(
-							DateTimeFormatter.ofPattern("hh:mm a")))
+							DateTimeFormatter.ofPattern("hh:mm a")
+																			)
+										 )
 					views.setTextViewText(
 							R.id.Asar_time , repository.data?.asr?.format(
-							DateTimeFormatter.ofPattern("hh:mm a")))
+							DateTimeFormatter.ofPattern("hh:mm a")
+																		 )
+										 )
 					views.setTextViewText(
 							R.id.Maghrib_time ,
 							repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 										 )
 					views.setTextViewText(
 							R.id.Ishaa_time , repository.data?.isha?.format(
-							DateTimeFormatter.ofPattern("hh:mm a")))
+							DateTimeFormatter.ofPattern("hh:mm a")
+																		   )
+										 )
 				}
 				// Update the widget
-				appWidgetManager.updateAppWidget(widgetId, views)
+				appWidgetManager.updateAppWidget(widgetId , views)
 				Log.d("WidgetService" , "Widget updated")
 			}
 		}
@@ -195,36 +201,44 @@ class PrayerTimesViewModel : ViewModel()
 				if (response.data != null)
 				{
 					val mapOfPrayerTimes = mapOf(
-							"fajr" to response.data .fajr ,
-							"sunrise" to response.data .sunrise ,
-							"dhuhr" to response.data .dhuhr ,
-							"asr" to response.data .asr ,
-							"maghrib" to response.data .maghrib ,
-							"isha" to response.data .isha
+							"fajr" to response.data.fajr ,
+							"sunrise" to response.data.sunrise ,
+							"dhuhr" to response.data.dhuhr ,
+							"asr" to response.data.asr ,
+							"maghrib" to response.data.maghrib ,
+							"isha" to response.data.isha
 												)
 
-					val currentPrayerName = currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-					val nextPrayerName = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-					if(currentPrayerName == "isha" && nextPrayerName == "fajr" && LocalTime.now().hour <= response.data .fajr!!.toLocalTime().hour && LocalTime.now().hour >=0){
+					val currentPrayerName =
+						currentPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+					val nextPrayerName = nextPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+					if (currentPrayerName == "isha" && nextPrayerName == "fajr" && LocalTime.now().hour <= response.data.fajr !!.toLocalTime().hour && LocalTime.now().hour >= 0)
+					{
 						//minus 1 day from current prayer times
 					}
-					if (nextPrayerName == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data .isha!!.toLocalTime().hour){
+					if (nextPrayerName == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data.isha !!.toLocalTime().hour)
+					{
 						//add 1 day to next prayer times
-						_nextPrayerName.value = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-						_nextPrayerTime.value = response.data .fajr!!.plusDays(1)
-					}else{
-						_nextPrayerName.value = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-						_nextPrayerTime.value = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).second
+						_nextPrayerName.value =
+							nextPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+						_nextPrayerTime.value = response.data.fajr !!.plusDays(1)
+					} else
+					{
+						_nextPrayerName.value =
+							nextPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+						_nextPrayerTime.value =
+							nextPrayer(LocalDateTime.now() , mapOfPrayerTimes).second
 					}
 
 					//set the current prayer name
-					_currentPrayerName.value = currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-					_fajrTimeState.value = response.data .fajr!!
-					_sunriseTimeState.value = response.data .sunrise!!
-					_dhuhrTimeState.value = response.data .dhuhr!!
-					_asrTimeState.value = response.data .asr!!
-					_maghribTimeState.value = response.data .maghrib!!
-					_ishaTimeState.value = response.data .isha!!
+					_currentPrayerName.value =
+						currentPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+					_fajrTimeState.value = response.data.fajr !!
+					_sunriseTimeState.value = response.data.sunrise !!
+					_dhuhrTimeState.value = response.data.dhuhr !!
+					_asrTimeState.value = response.data.asr !!
+					_maghribTimeState.value = response.data.maghrib !!
+					_ishaTimeState.value = response.data.isha !!
 					_isLoading.value = false
 
 				} else
@@ -258,39 +272,46 @@ class PrayerTimesViewModel : ViewModel()
 				{
 					val mapOfPrayerTimes = mapOf(
 							"fajr" to response.data.fajr ,
-							"sunrise" to response.data .sunrise ,
-							"dhuhr" to response.data .dhuhr ,
-							"asr" to response.data .asr ,
-							"maghrib" to response.data .maghrib ,
-							"isha" to response.data .isha
+							"sunrise" to response.data.sunrise ,
+							"dhuhr" to response.data.dhuhr ,
+							"asr" to response.data.asr ,
+							"maghrib" to response.data.maghrib ,
+							"isha" to response.data.isha
 												)
 //					val dataStore = LocalDataStore.getDataStore()
 //					val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().plusDays(1).toString())
 //
 					val currentDate = LocalDateTime.now()
-					val currentPrayerName = currentPrayer(currentDate, mapOfPrayerTimes).first
+					val currentPrayerName = currentPrayer(currentDate , mapOfPrayerTimes).first
 					Log.d("Nimaz: currentDatetime" , "$currentDate")
-					Log.d("Nimaz: FajrDatetime" , "${response.data .fajr}")
-					val nextPrayerName = nextPrayer(currentDate, mapOfPrayerTimes).first
-					if(currentPrayerName == "isha" && nextPrayerName == "fajr" && LocalTime.now().hour <= response.data .fajr!!.toLocalTime().hour && LocalTime.now().hour >=0){
+					Log.d("Nimaz: FajrDatetime" , "${response.data.fajr}")
+					val nextPrayerName = nextPrayer(currentDate , mapOfPrayerTimes).first
+					if (currentPrayerName == "isha" && nextPrayerName == "fajr" && LocalTime.now().hour <= response.data.fajr !!.toLocalTime().hour && LocalTime.now().hour >= 0)
+					{
 						//minus 1 day from current prayer times
 					}
-					if (nextPrayerName == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data .isha!!.toLocalTime().hour){
+					if (nextPrayerName == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data.isha !!.toLocalTime().hour)
+					{
 						//add 1 day to next prayer times
-						_nextPrayerName.value = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-						_nextPrayerTime.value = response.data .fajr!!.plusDays(1)
-					}else{
-						_nextPrayerName.value = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-						_nextPrayerTime.value = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).second
+						_nextPrayerName.value =
+							nextPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+						_nextPrayerTime.value = response.data.fajr !!.plusDays(1)
+					} else
+					{
+						_nextPrayerName.value =
+							nextPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+						_nextPrayerTime.value =
+							nextPrayer(LocalDateTime.now() , mapOfPrayerTimes).second
 					}
 					//set the current prayer name
-					_currentPrayerName.value = currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-					_fajrTimeState.value = response.data .fajr!!
-					_sunriseTimeState.value = response.data .sunrise!!
-					_dhuhrTimeState.value = response.data .dhuhr!!
-					_asrTimeState.value = response.data .asr!!
-					_maghribTimeState.value = response.data .maghrib!!
-					_ishaTimeState.value = response.data .isha!!
+					_currentPrayerName.value =
+						currentPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
+					_fajrTimeState.value = response.data.fajr !!
+					_sunriseTimeState.value = response.data.sunrise !!
+					_dhuhrTimeState.value = response.data.dhuhr !!
+					_asrTimeState.value = response.data.asr !!
+					_maghribTimeState.value = response.data.maghrib !!
+					_ishaTimeState.value = response.data.isha !!
 					_isLoading.value = false
 
 				} else
@@ -345,115 +366,150 @@ class PrayerTimesViewModel : ViewModel()
 }
 
 
-	fun currentPrayer(time: LocalDateTime, mapOfPrayerTimes : Map<String , LocalDateTime?>): Pair<String, LocalDateTime> {
-		val fajrTommorow = mapOfPrayerTimes["fajr"]?.plusDays(1)
-		val `when` = time.toInstant(ZoneOffset.UTC).toEpochMilli()
-		return when {
-			//if the difference between the current time and the isha time is less than 0 or equal to 0 than the current prayer is isha
-			mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-				Pair("isha" , mapOfPrayerTimes["isha"]!!)
-			}
+fun currentPrayer(
+	time : LocalDateTime ,
+	mapOfPrayerTimes : Map<String , LocalDateTime?> ,
+				 ) : Pair<String , LocalDateTime>
+{
+	val fajrTommorow = mapOfPrayerTimes["fajr"]?.plusDays(1)
+	val `when` = time.toInstant(ZoneOffset.UTC).toEpochMilli()
+	return when
+	{
+		//if the difference between the current time and the isha time is less than 0 or equal to 0 than the current prayer is isha
+		mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! - `when` <= 0 ->
+		{
+			Pair("isha" , mapOfPrayerTimes["isha"] !!)
+		}
 
-			mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-				Pair("maghrib" , mapOfPrayerTimes["maghrib"]!!)
-			}
+		mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! - `when` <= 0 ->
+		{
+			Pair("maghrib" , mapOfPrayerTimes["maghrib"] !!)
+		}
 
-			mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-				Pair("asr" , mapOfPrayerTimes["asr"]!!)
-			}
+		mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! - `when` <= 0 ->
+		{
+			Pair("asr" , mapOfPrayerTimes["asr"] !!)
+		}
 
-			mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-				Pair("dhuhr" , mapOfPrayerTimes["dhuhr"]!!)
-			}
+		mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! - `when` <= 0 ->
+		{
+			Pair("dhuhr" , mapOfPrayerTimes["dhuhr"] !!)
+		}
 
-			mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-				Pair("sunrise" , mapOfPrayerTimes["sunrise"]!!)
-			}
+		mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! - `when` <= 0 ->
+		{
+			Pair("sunrise" , mapOfPrayerTimes["sunrise"] !!)
+		}
 
-			mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
-			}
+		mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! - `when` <= 0 ->
+		{
+			Pair("fajr" , mapOfPrayerTimes["fajr"] !!)
+		}
 
-			`when` in fajrTommorow?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!..mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! -> {
-				Pair("isha" , mapOfPrayerTimes["isha"]!!)
-			}
+		`when` in fajrTommorow?.toInstant(ZoneOffset.UTC)
+			?.toEpochMilli() !! .. mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)
+			?.toEpochMilli() !! ->
+		{
+			Pair("isha" , mapOfPrayerTimes["isha"] !!)
+		}
 
-			`when` < mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! -> {
-				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
-			}
+		`when` < mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! ->
+		{
+			Pair("fajr" , mapOfPrayerTimes["fajr"] !!)
+		}
 
-			else -> {
-				Pair("none" , mapOfPrayerTimes["none"]!!)
-			}
+		else ->
+		{
+			Pair("none" , mapOfPrayerTimes["none"] !!)
 		}
 	}
+}
 
-	fun nextPrayer(time: LocalDateTime, mapOfPrayerTimes : Map<String, LocalDateTime?>): Pair<String, LocalDateTime> {
-		val `when` = time.toInstant(ZoneOffset.UTC).toEpochMilli()
-		val fajrTommorow = mapOfPrayerTimes["fajr"]?.plusDays(1)
-		val isha = mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-		val fajr = mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-		val sunrise = mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-		val dhuhr = mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-		val asr = mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-		val maghrib = mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
+fun nextPrayer(
+	time : LocalDateTime ,
+	mapOfPrayerTimes : Map<String , LocalDateTime?> ,
+			  ) : Pair<String , LocalDateTime>
+{
+	val `when` = time.toInstant(ZoneOffset.UTC).toEpochMilli()
+	val fajrTommorow = mapOfPrayerTimes["fajr"]?.plusDays(1)
+	val isha = mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !!
+	val fajr = mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !!
+	val sunrise = mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !!
+	val dhuhr = mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !!
+	val asr = mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !!
+	val maghrib = mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !!
 
-		return when {
-			//if the difference between the current time and the isha time is less than 0 or equal to 0 than the current prayer is isha
-			isha - `when` <= 0 -> {
-				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
-			}
+	return when
+	{
+		//if the difference between the current time and the isha time is less than 0 or equal to 0 than the current prayer is isha
+		isha - `when` <= 0 ->
+		{
+			Pair("fajr" , mapOfPrayerTimes["fajr"] !!)
+		}
 
-			maghrib - `when` <= 0 -> {
-				Pair("isha" , mapOfPrayerTimes["isha"]!!)
-			}
+		maghrib - `when` <= 0 ->
+		{
+			Pair("isha" , mapOfPrayerTimes["isha"] !!)
+		}
 
-			asr - `when` <= 0 -> {
-				Pair("maghrib" , mapOfPrayerTimes["maghrib"]!!)
-			}
+		asr - `when` <= 0 ->
+		{
+			Pair("maghrib" , mapOfPrayerTimes["maghrib"] !!)
+		}
 
-			dhuhr - `when` <= 0 -> {
-				Pair("asr" , mapOfPrayerTimes["asr"]!!)
-			}
+		dhuhr - `when` <= 0 ->
+		{
+			Pair("asr" , mapOfPrayerTimes["asr"] !!)
+		}
 
-			sunrise - `when` <= 0 -> {
-				Pair("dhuhr" , mapOfPrayerTimes["dhuhr"]!!)
-			}
+		sunrise - `when` <= 0 ->
+		{
+			Pair("dhuhr" , mapOfPrayerTimes["dhuhr"] !!)
+		}
 
-			fajr - `when` <= 0 -> {
-				Pair("sunrise" , mapOfPrayerTimes["sunrise"]!!)
-			}
+		fajr - `when` <= 0 ->
+		{
+			Pair("sunrise" , mapOfPrayerTimes["sunrise"] !!)
+		}
 
-			`when` in fajr..sunrise -> {
-				Pair("sunrise" , mapOfPrayerTimes["sunrise"]!!)
-			}
+		`when` in fajr .. sunrise ->
+		{
+			Pair("sunrise" , mapOfPrayerTimes["sunrise"] !!)
+		}
 
-			`when` in sunrise..dhuhr -> {
-				Pair("dhuhr" , mapOfPrayerTimes["dhuhr"]!!)
-			}
+		`when` in sunrise .. dhuhr ->
+		{
+			Pair("dhuhr" , mapOfPrayerTimes["dhuhr"] !!)
+		}
 
-			`when` in dhuhr..asr -> {
-				Pair("asr" , mapOfPrayerTimes["asr"]!!)
-			}
+		`when` in dhuhr .. asr ->
+		{
+			Pair("asr" , mapOfPrayerTimes["asr"] !!)
+		}
 
-			`when` in asr..maghrib -> {
-				Pair("maghrib" , mapOfPrayerTimes["maghrib"]!!)
-			}
+		`when` in asr .. maghrib ->
+		{
+			Pair("maghrib" , mapOfPrayerTimes["maghrib"] !!)
+		}
 
-			`when` in maghrib..isha -> {
-				Pair("isha" , mapOfPrayerTimes["isha"]!!)
-			}
+		`when` in maghrib .. isha ->
+		{
+			Pair("isha" , mapOfPrayerTimes["isha"] !!)
+		}
 
-			`when` in isha..fajrTommorow?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! -> {
-				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
-			}
-			//if the current time is less than the fajr time than the next prayer is fajr
-			`when` < fajr -> {
-				Pair("fajr" , mapOfPrayerTimes["fajr"]!!)
-			}
+		`when` in isha .. fajrTommorow?.toInstant(ZoneOffset.UTC)?.toEpochMilli() !! ->
+		{
+			Pair("fajr" , mapOfPrayerTimes["fajr"] !!)
+		}
+		//if the current time is less than the fajr time than the next prayer is fajr
+		`when` < fajr ->
+		{
+			Pair("fajr" , mapOfPrayerTimes["fajr"] !!)
+		}
 
-			else -> {
-				Pair("none" , mapOfPrayerTimes["none"]!!)
-			}
+		else ->
+		{
+			Pair("none" , mapOfPrayerTimes["none"] !!)
 		}
 	}
+}

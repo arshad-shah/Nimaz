@@ -22,12 +22,16 @@ import kotlin.reflect.KFunction1
 @Composable
 fun ManualLocationInput(
 	handleSettingEvents : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
-	locationNameState : State<String>
+	locationNameState : State<String> ,
 					   )
 {
 
 	val context = LocalContext.current
-	val viewModelPrayerTimes = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModelPrayerTimes = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+										)
 	val showDialog = remember { mutableStateOf(false) }
 	val name = remember {
 		mutableStateOf(locationNameState.value)
@@ -73,7 +77,12 @@ fun ManualLocationInput(
 									name.value
 																		 )
 									   )
-					viewModelPrayerTimes.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
+					viewModelPrayerTimes.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+									context
+																			   )
+													)
 
 					showDialog.value = false
 				}) { Text(text = "Confirm") }

@@ -7,7 +7,8 @@ import java.time.LocalDateTime
 
 object PrayerTimesParamMapper
 {
-	fun getParams(context: Context) : MutableMap<String , String>
+
+	fun getParams(context : Context) : MutableMap<String , String>
 	{
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)

@@ -86,7 +86,7 @@ fun CustomDialog(
 				Button(
 						onClick = {
 							setShowDialog(false)
-								  } ,
+						} ,
 						content = { Text(text = "Confirm") }
 					  )
 			} ,

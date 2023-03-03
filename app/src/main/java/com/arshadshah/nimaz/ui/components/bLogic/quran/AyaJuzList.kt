@@ -21,7 +21,7 @@ fun AyaJuzList(
 	scrollToAya : Int? ,
 			  )
 {
-	if( loading )
+	if (loading)
 	{
 		if (pageMode.value == "List")
 		{
@@ -36,7 +36,7 @@ fun AyaJuzList(
 					 )
 		} else
 		{
-			Page(state.value , paddingValues , true )
+			Page(state.value , paddingValues , true)
 		}
 	} else if (error.isNotEmpty())
 	{
@@ -53,7 +53,7 @@ fun AyaJuzList(
 					 )
 		} else
 		{
-			Page(state.value , paddingValues , false )
+			Page(state.value , paddingValues , false)
 		}
 	} else
 	{
@@ -70,7 +70,7 @@ fun AyaJuzList(
 					 )
 		} else
 		{
-			Page(state.value , paddingValues , false )
+			Page(state.value , paddingValues , false)
 		}
 	}
 }
