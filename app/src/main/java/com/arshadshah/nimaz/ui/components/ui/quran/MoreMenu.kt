@@ -116,7 +116,7 @@ fun MoreMenu(
 				setShowDialog = setShowDialog1 ,
 				state = state ,
 				valueState = pageTypeState ,
-				items = items1,
+				items = items1 ,
 				onStateChange = {
 					handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Display_Mode(it))
 				}
@@ -140,7 +140,7 @@ fun MoreMenu(
 				arabicFontSizeState ,
 				translationFontSizeState ,
 				fontStyleState ,
-				items3,
+				items3 ,
 				handleQuranEvents
 					  )
 	} else

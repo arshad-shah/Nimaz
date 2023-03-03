@@ -72,7 +72,11 @@ fun PrayerTimesRow(
 	loading : Boolean ,
 				  )
 {
-	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	val countDownTime = remember { viewModel.timer }.collectAsState()
 	//format the date to time based on device format
 	val formatter = DateTimeFormatter.ofPattern("hh:mm a")

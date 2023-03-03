@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_TASBIH
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.Counter
+import com.arshadshah.nimaz.ui.components.bLogic.tasbih.CustomCounter
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.TasbihRow
 
 @Composable
@@ -25,9 +26,10 @@ fun TasbihScreen(
 	vibrator : Vibrator ,
 	vibrationAllowed : MutableState<Boolean> ,
 	rOrl : MutableState<Int> ,
-	tasbihArabic: String = "",
-	tasbihEnglish: String = "",
-	tasbihTranslitration: String = "",
+	tasbihId : String = "" ,
+	tasbihArabic : String = "" ,
+	tasbihEnglish : String = "" ,
+	tasbihTranslitration : String = "" ,
 				)
 {
 	val context = LocalContext.current
@@ -37,18 +39,26 @@ fun TasbihScreen(
 
 	Column(
 			modifier = Modifier
-					.padding(paddingValues)
-				.testTag(TEST_TAG_TASBIH),
+				.padding(paddingValues)
+				.testTag(TEST_TAG_TASBIH) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Top ,
 
 			) {
 
-		if (tasbihArabic.isNotBlank() && tasbihEnglish.isNotBlank() && tasbihTranslitration.isNotBlank())
+		if (tasbihArabic.isNotBlank() && tasbihEnglish.isNotBlank() && tasbihTranslitration.isNotBlank() && tasbihId.isNotBlank())
 		{
-			Counter(vibrator , paddingValues , vibrationAllowed , reset , showResetDialog , rOrl, true)
-			LazyColumn(content ={
-				item{
+			CustomCounter(
+					vibrator ,
+					paddingValues ,
+					vibrationAllowed ,
+					reset ,
+					showResetDialog ,
+					rOrl ,
+					tasbihId
+						 )
+			LazyColumn(content = {
+				item {
 					TasbihRow(
 							englishName = tasbihEnglish ,
 							arabicName = tasbihArabic ,
@@ -56,8 +66,16 @@ fun TasbihScreen(
 							 )
 				}
 			})
-		}else{
-			Counter(vibrator , paddingValues , vibrationAllowed , reset , showResetDialog , rOrl)
+		} else
+		{
+			Counter(
+					vibrator ,
+					paddingValues ,
+					vibrationAllowed ,
+					reset ,
+					showResetDialog ,
+					rOrl ,
+				   )
 		}
 	}
 }

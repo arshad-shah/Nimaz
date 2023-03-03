@@ -35,7 +35,7 @@ fun BottomNavigationBar(navController : NavController)
 			NavigationBarItem(
 					modifier = Modifier.semantics {
 						contentDescription = bottomNavItem.title
-					},
+					} ,
 					colors = NavigationBarItemDefaults.colors(
 							selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer ,
 							selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer ,

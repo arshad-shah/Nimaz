@@ -38,7 +38,7 @@ sealed class OnBoardingPage(
 			image = R.drawable.tracker_icon ,
 			title = "Prayer and Fasting tracker" ,
 			description = "You can track your prayers and fasts." ,
-								 )
+								  )
 
 	//the Notification permission page
 	object Fifth : OnBoardingPage(
@@ -48,7 +48,7 @@ sealed class OnBoardingPage(
 			extra = {
 				NotificationScreenUI()
 			}
-								  )
+								 )
 
 	object Sixth : OnBoardingPage(
 			image = R.drawable.location_pin ,
@@ -68,7 +68,7 @@ sealed class OnBoardingPage(
 			extra = {
 				BatteryExemptionUI()
 			}
-								 )
+								   )
 
 	object Eighth : OnBoardingPage(
 			image = R.drawable.check_mark ,
@@ -77,5 +77,5 @@ sealed class OnBoardingPage(
 			extra = {
 
 			}
-								   )
+								  )
 }

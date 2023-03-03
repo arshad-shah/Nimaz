@@ -5,7 +5,6 @@
     <!-- Always include this permission -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Include only if your app benefits from precise location access. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -35,6 +34,7 @@
         android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+
         <service
             android:name=".widgets.WidgetService"
             android:enabled="true"

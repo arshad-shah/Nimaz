@@ -33,21 +33,32 @@ fun QuranScreen(
 			   )
 {
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "QuranViewModel", initializer = { QuranViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
 
 	viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
 
 	//save the state of the tab
 	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
-	val titles = listOf("Sura" , "Juz", "My Quran")
-	Column(modifier = Modifier
-		.padding(paddingValues)
-		.testTag(TEST_TAG_QURAN)) {
+	val titles = listOf("Sura" , "Juz" , "My Quran")
+	Column(
+			modifier = Modifier
+				.padding(paddingValues)
+				.testTag(TEST_TAG_QURAN)
+		  ) {
 
 		TabRow(selectedTabIndex = selectedTab) {
 			titles.forEachIndexed { index , title ->
 				Tab(
-						modifier = Modifier.testTag(TEST_TAG_QURAN_TAB.replace("{number}" , index.toString())) ,
+						modifier = Modifier.testTag(
+								TEST_TAG_QURAN_TAB.replace(
+										"{number}" ,
+										index.toString()
+														  )
+												   ) ,
 						selected = selectedTab == index ,
 						onClick = { setSelectedTab(index) } ,
 						text = {
@@ -98,6 +109,7 @@ fun QuranScreen(
 						error = errorJuz.value
 					   )
 			}
+
 			2 ->
 			{
 				val bookmarks = remember { viewModel.bookmarks }.collectAsState()

@@ -154,7 +154,11 @@ class MainActivity : ComponentActivity()
 
 		//this is used to show the full activity on the screen
 		setContent {
-			val viewModelSettings = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(this@MainActivity) }, viewModelStoreOwner = this as ComponentActivity)
+			val viewModelSettings = viewModel(
+					key = "SettingsViewModel" ,
+					initializer = { SettingsViewModel(this@MainActivity) } ,
+					viewModelStoreOwner = this as ComponentActivity
+											 )
 			val themeState = remember {
 				viewModelSettings.theme
 			}.collectAsState()
@@ -166,29 +170,36 @@ class MainActivity : ComponentActivity()
 				mutableStateOf(false)
 			}
 
-			when (themeState.value) {
-				"DYNAMIC" -> {
+			when (themeState.value)
+			{
+				"DYNAMIC" ->
+				{
 					dynamicTheme.value = true
 					darkTheme.value = isSystemInDarkTheme()
 				}
+
 				"SYSTEM" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isSystemInDarkTheme()
 				}
-				"LIGHT" -> {
+
+				"LIGHT" ->
+				{
 					dynamicTheme.value = false
 					darkTheme.value = false
 				}
-				"DARK" -> {
+
+				"DARK" ->
+				{
 					dynamicTheme.value = false
 					darkTheme.value = true
 				}
 			}
 
 			NimazTheme(
-					darkTheme = darkTheme.value,
-					dynamicColor = dynamicTheme.value,
+					darkTheme = darkTheme.value ,
+					dynamicColor = dynamicTheme.value ,
 					  ) {
 				val isPlaying = remember { mutableStateOf(false) }
 				val isPaused = remember { mutableStateOf(false) }
@@ -215,7 +226,11 @@ class MainActivity : ComponentActivity()
 				val networkConnection =
 					remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
 
-				val viewModel = viewModel(key = "QuranViewModel", initializer = { QuranViewModel(this@MainActivity) }, viewModelStoreOwner = this as ComponentActivity)
+				val viewModel = viewModel(
+						key = "QuranViewModel" ,
+						initializer = { QuranViewModel(this@MainActivity) } ,
+						viewModelStoreOwner = this as ComponentActivity
+										 )
 
 				LaunchedEffect(networkConnection.value) {
 					if (! networkConnection.value)
@@ -233,7 +248,10 @@ class MainActivity : ComponentActivity()
 
 //				this.startService(Intent(this , WidgetService::class.java))
 
-				Log.d(MAIN_ACTIVITY_TAG , "Is service running: " + isMyServiceRunning(WidgetService::class.java).toString())
+				Log.d(
+						MAIN_ACTIVITY_TAG ,
+						"Is service running: " + isMyServiceRunning(WidgetService::class.java).toString()
+					 )
 
 
 
@@ -256,7 +274,17 @@ class MainActivity : ComponentActivity()
 														)
 												} ,
 												navigationIcon = {
-													IconButton(onClick = { navController.navigateUp() }) {
+													IconButton(onClick = {
+														Log.d(
+																MAIN_ACTIVITY_TAG ,
+																"onCreate:  back button pressed"
+															 )
+														Log.d(
+																MAIN_ACTIVITY_TAG ,
+																"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
+															 )
+														navController.navigateUp()
+													}) {
 														Icon(
 																modifier = Modifier.size(24.dp) ,
 																painter = painterResource(id = R.drawable.angle_left_icon) ,
@@ -286,6 +314,7 @@ class MainActivity : ComponentActivity()
 																	handleQuranEvents = viewModel::handleQuranMenuEvents
 																	)
 														}
+
 														NAMESOFALLAH_SCREEN_ROUTE ->
 														{
 															if (! isStopped.value)
@@ -300,8 +329,12 @@ class MainActivity : ComponentActivity()
 																}
 																		  ) {
 																	Icon(
-																			modifier = Modifier.size(24.dp) ,
-																			painter = painterResource(id = R.drawable.stop_icon) ,
+																			modifier = Modifier.size(
+																					24.dp
+																									) ,
+																			painter = painterResource(
+																					id = R.drawable.stop_icon
+																									 ) ,
 																			contentDescription = "Stop playing"
 																		)
 																}
@@ -326,21 +359,30 @@ class MainActivity : ComponentActivity()
 																if (isPlaying.value)
 																{
 																	Icon(
-																			modifier = Modifier.size(24.dp) ,
-																			painter = painterResource(id = R.drawable.pause_icon) ,
+																			modifier = Modifier.size(
+																					24.dp
+																									) ,
+																			painter = painterResource(
+																					id = R.drawable.pause_icon
+																									 ) ,
 																			contentDescription = "Pause playing"
 																		)
 																} else
 																{
 																	Icon(
-																			modifier = Modifier.size(24.dp) ,
-																			painter = painterResource(id = R.drawable.play_icon) ,
+																			modifier = Modifier.size(
+																					24.dp
+																									) ,
+																			painter = painterResource(
+																					id = R.drawable.play_icon
+																									 ) ,
 																			contentDescription = "Play"
 																		)
 																}
 															}
 
 														}
+
 														TASBIH_SCREEN_ROUTE ->
 														{
 															//icon button to chenge the position of the button for right or left
@@ -457,10 +499,10 @@ class MainActivity : ComponentActivity()
 				CHAPTER_SCREEN_ROUTE ,
 				TASBIH_SCREEN_ROUTE ,
 				NAMESOFALLAH_SCREEN_ROUTE ,
-				PRAYER_TRACKER_SCREEN_ROUTE,
-				CALENDER_SCREEN_ROUTE,
-				QIBLA_SCREEN_ROUTE,
-				AppConstants.TASBIH_LIST_SCREEN,
+				PRAYER_TRACKER_SCREEN_ROUTE ,
+				CALENDER_SCREEN_ROUTE ,
+				QIBLA_SCREEN_ROUTE ,
+				AppConstants.TASBIH_LIST_SCREEN ,
 				AppConstants.MY_QURAN_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true

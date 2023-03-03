@@ -57,7 +57,10 @@ fun AyaListUI(
 {
 
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity)
 	val spaceFilesRepository = SpacesFileRepository(context)
 	val arabicFontSize = remember {
 		viewModel.arabic_Font_size
@@ -109,12 +112,12 @@ fun AyaListUI(
 			items(ayaList.size) { index ->
 				AyaListItemUI(
 						aya = ayaList[index] ,
-						mediaPlayer = mediaPlayer,
-						arabic_Font_size = arabicFontSize,
-						arabic_Font = arabicFont,
-						translation_Font_size = translationFontSize,
-						translation = translation,
-						spacesFileRepository = spaceFilesRepository,
+						mediaPlayer = mediaPlayer ,
+						arabic_Font_size = arabicFontSize ,
+						arabic_Font = arabicFont ,
+						translation_Font_size = translationFontSize ,
+						translation = translation ,
+						spacesFileRepository = spaceFilesRepository ,
 							 )
 			}
 		}
@@ -144,11 +147,10 @@ fun AyaListUI(
 		//when we reopen the app, we want to scroll to the last item viewed
 		LaunchedEffect(visibleItemIndex.value)
 		{
-			if(scrollToAya != null)
+			if (scrollToAya != null)
 			{
 				listState.animateScrollToItem(scrollToAya)
-			}
-			else
+			} else
 			{
 				if (visibleItemIndex.value != - 1)
 				{
@@ -160,18 +162,18 @@ fun AyaListUI(
 		}
 
 		LazyColumn(
-				modifier = Modifier.testTag(TEST_TAG_AYA),
+				modifier = Modifier.testTag(TEST_TAG_AYA) ,
 				userScrollEnabled = true , contentPadding = paddingValues , state = listState
 				  ) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
 						aya = ayaList[index] ,
 						mediaPlayer = mediaPlayer ,
-						arabic_Font_size = arabicFontSize,
-						arabic_Font = arabicFont,
-						translation_Font_size = translationFontSize,
-						translation = translation,
-						spacesFileRepository = spaceFilesRepository,
+						arabic_Font_size = arabicFontSize ,
+						arabic_Font = arabicFont ,
+						translation_Font_size = translationFontSize ,
+						translation = translation ,
+						spacesFileRepository = spaceFilesRepository ,
 							 )
 			}
 		}
@@ -181,7 +183,7 @@ fun AyaListUI(
 @Composable
 fun AyaListItemUI(
 	aya : Aya ,
-	spacesFileRepository : SpacesFileRepository,
+	spacesFileRepository : SpacesFileRepository ,
 	mediaPlayer : MediaPlayer ,
 	arabic_Font_size : State<Float> ,
 	translation_Font_size : State<Float> ,
@@ -190,7 +192,10 @@ fun AyaListItemUI(
 				 )
 {
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity)
 
 
 	val isLoading = remember {
@@ -283,7 +288,7 @@ fun AyaListItemUI(
 								aya.ayaNumberInSurah ,
 								aya.audioFileLocation
 															 )
-							)
+										)
 			} else
 			{
 				isDownloaded.value = false
@@ -311,7 +316,7 @@ fun AyaListItemUI(
 	{
 		//if the file isnull and there is no audio playing then prepare the media player and play the file
 		//else just start the current file that is playing
-		if (!isPaused.value)
+		if (! isPaused.value)
 		{
 			prepareMediaPlayer()
 			mediaPlayer.start()
@@ -344,7 +349,7 @@ fun AyaListItemUI(
 	//stop the file
 	fun stopFile()
 	{
-		if (!isStopped.value)
+		if (! isStopped.value)
 		{
 			mediaPlayer.stop()
 			mediaPlayer.reset()
@@ -488,7 +493,7 @@ fun AyaListItemUI(
 
 				Row(
 						modifier = Modifier.fillMaxWidth() ,
-						horizontalArrangement = Arrangement.SpaceBetween,
+						horizontalArrangement = Arrangement.SpaceBetween ,
 						verticalAlignment = Alignment.CenterVertically
 				   ) {
 					AyatFeatures(

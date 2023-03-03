@@ -106,7 +106,8 @@ fun FeatureThatRequiresNotificationPermission(
 		//show dialog
 		AlertDialog(
 				onDismissRequest = {
-					showRationale.value = false } ,
+					showRationale.value = false
+				} ,
 				title = { Text(text = "Notification Permission Required") } ,
 				text = { Text(text = descToShow.value) } ,
 				confirmButton = {

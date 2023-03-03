@@ -25,16 +25,16 @@ fun LocationTimeContainer(
 	handleEvent : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
 						 )
 {
-			val currentPrayerNameSentenceCase = currentPrayerName.value
-				.substring(0 , 1)
-				.uppercase(Locale.ROOT) + currentPrayerName.value
-				.substring(1).lowercase(Locale.ROOT)
+	val currentPrayerNameSentenceCase = currentPrayerName.value
+		.substring(0 , 1)
+		.uppercase(Locale.ROOT) + currentPrayerName.value
+		.substring(1).lowercase(Locale.ROOT)
 
-			ContainerUI(
-					currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
-					location = locationState ,
-					handleEvent = handleEvent
-					   )
+	ContainerUI(
+			currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
+			location = locationState ,
+			handleEvent = handleEvent
+			   )
 }
 
 @Composable
@@ -60,9 +60,9 @@ fun ContainerUI(
 					modifier = Modifier
 						.weight(0.5f)
 						.padding(8.dp)
-						.clickable{
+						.clickable {
 							handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
-						},
+						} ,
 					heading = "Location" , text = location.value
 					  )
 			//vertical divider line
@@ -75,7 +75,7 @@ fun ContainerUI(
 			CustomText(
 					modifier = Modifier
 						.weight(0.5f)
-						.padding(8.dp),
+						.padding(8.dp) ,
 					heading = "Current Prayer" ,
 					//fix the name to be sentence case,
 					text = currentPrayerNameSentenceCase
