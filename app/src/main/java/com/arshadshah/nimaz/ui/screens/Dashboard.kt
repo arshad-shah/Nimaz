@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -104,7 +105,10 @@ fun DashboardTasbihTracker(onNavigateToTasbihScreen : (String , String , String 
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
-	viewModel.handleEvent(TasbihViewModel.TasbihEvent.RecreateTasbih(LocalDate.now().toString()))
+	//run only once
+	LaunchedEffect(key1 = true) {
+		viewModel.handleEvent(TasbihViewModel.TasbihEvent.RecreateTasbih(LocalDate.now().toString()))
+	}
 	val listOfTasbih = remember {
 		viewModel.tasbihList
 	}.collectAsState()
