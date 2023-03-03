@@ -85,7 +85,7 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun NimazTheme(
-	darkTheme : Boolean = false,
+	darkTheme : Boolean = false ,
 	dynamicColor : Boolean = false ,
 	content : @Composable () -> Unit ,
 			  )

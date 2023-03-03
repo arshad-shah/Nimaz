@@ -14,14 +14,18 @@ class DataStore(db : AppDatabase)
 	private val prayerTimesDao = db.prayerTimes
 	private val duaDao = db.dua
 	private val prayerTrackerDao = db.prayersTracker
+
 	//fastTracker
 	private val fastTrackerDao = db.fastTracker
+
 	//tasbihTracker
 	private val tasbihTrackerDao = db.tasbihTracker
 
 
 	//update tasbih
-	suspend fun updateTasbih(tasbih : Tasbih) = tasbihTrackerDao.updateTasbih(tasbih.id,tasbih.count)
+	suspend fun updateTasbih(tasbih : Tasbih) =
+		tasbihTrackerDao.updateTasbih(tasbih.id , tasbih.count)
+
 	//save a tasbih to the database
 	suspend fun saveTasbih(tasbih : Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
 
@@ -30,11 +34,13 @@ class DataStore(db : AppDatabase)
 
 	//getLatestTasbih
 	suspend fun getLatestTasbih() = tasbihTrackerDao.getLatestTasbih().toTasbih()
+
 	//get all the tasbih
 	suspend fun getAllTasbih() = tasbihTrackerDao.getAll().map { it.toTasbih() }
 
 	//get all the tasbih for a specific date
-	suspend fun getTasbihForDate(date : String) = tasbihTrackerDao.getForDate(date).map { it.toTasbih() }
+	suspend fun getTasbihForDate(date : String) =
+		tasbihTrackerDao.getForDate(date).map { it.toTasbih() }
 
 	//get all the tasbih that are completed
 	suspend fun getCompletedTasbih() = tasbihTrackerDao.getCompleted().map { it.toTasbih() }
@@ -43,23 +49,28 @@ class DataStore(db : AppDatabase)
 	suspend fun getNotCompletedTasbih() = tasbihTrackerDao.getNotCompleted().map { it.toTasbih() }
 
 	//get all the tasbih that are completed today
-	suspend fun getCompletedTasbihToday(date : String) = tasbihTrackerDao.getCompletedToday(date).map { it.toTasbih() }
+	suspend fun getCompletedTasbihToday(date : String) =
+		tasbihTrackerDao.getCompletedToday(date).map { it.toTasbih() }
 
 	//get all the tasbih that are not completed today
-	suspend fun getNotCompletedTasbihToday(date : String) = tasbihTrackerDao.getNotCompletedToday(date).map { it.toTasbih() }
+	suspend fun getNotCompletedTasbihToday(date : String) =
+		tasbihTrackerDao.getNotCompletedToday(date).map { it.toTasbih() }
 
 	//delete a tasbih from the database
-	suspend fun deleteTasbih(tasbih : Tasbih) = tasbihTrackerDao.deleteTasbih(tasbih.toLocalTasbih())
+	suspend fun deleteTasbih(tasbih : Tasbih) =
+		tasbihTrackerDao.deleteTasbih(tasbih.toLocalTasbih())
 
 
 	//get trtacker for a specific date
-	suspend fun getTrackerForDate(date : String) = prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
+	suspend fun getTrackerForDate(date : String) =
+		prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
 
 	//get all the trackers
 	suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers().map { it.toPrayerTracker() }
 
 	//save a tracker
-	suspend fun saveTracker(tracker : PrayerTracker) = prayerTrackerDao.saveTracker(tracker.toLocalPrayersTracker())
+	suspend fun saveTracker(tracker : PrayerTracker) =
+		prayerTrackerDao.saveTracker(tracker.toLocalPrayersTracker())
 
 	//update a tracker
 	suspend fun updateTracker(tracker : PrayerTracker) =
@@ -78,13 +89,16 @@ class DataStore(db : AppDatabase)
 	//fasting tracker
 
 	//get tracker for a specific date
-	suspend fun getFastTrackerForDate(date : String) = fastTrackerDao.getFastTrackerForDate(date).toFastTracker()
+	suspend fun getFastTrackerForDate(date : String) =
+		fastTrackerDao.getFastTrackerForDate(date).toFastTracker()
 
 	//get all the trackers
-	suspend fun getAllFastTrackers() = fastTrackerDao.getAllFastTrackers().map { it.toFastTracker() }
+	suspend fun getAllFastTrackers() =
+		fastTrackerDao.getAllFastTrackers().map { it.toFastTracker() }
 
 	//save a tracker
-	suspend fun saveFastTracker(tracker : FastTracker) = fastTrackerDao.saveFastTracker(tracker.toLocalFastTracker())
+	suspend fun saveFastTracker(tracker : FastTracker) =
+		fastTrackerDao.saveFastTracker(tracker.toLocalFastTracker())
 
 	//update a tracker
 	suspend fun updateFastTracker(tracker : FastTracker) =
@@ -97,7 +111,8 @@ class DataStore(db : AppDatabase)
 	//delete all trackers
 	suspend fun deleteFastAllTrackers() = fastTrackerDao.deleteFastAllTrackers()
 
-	suspend fun fastTrackerExistsForDate(date : String) = fastTrackerDao.fastTrackerExistsForDate(date)
+	suspend fun fastTrackerExistsForDate(date : String) =
+		fastTrackerDao.fastTrackerExistsForDate(date)
 
 
 	//get all the ayas of a surah
@@ -195,7 +210,8 @@ class DataStore(db : AppDatabase)
 	suspend fun getAllPrayerTimes() = prayerTimesDao.getPrayerTimes().toPrayerTimes()
 
 	//getPrayerTimesForADate
-	suspend fun getPrayerTimesForADate(date : String) = prayerTimesDao.getPrayerTimesForADate(date).toPrayerTimes()
+	suspend fun getPrayerTimesForADate(date : String) =
+		prayerTimesDao.getPrayerTimesForADate(date).toPrayerTimes()
 
 	//delete all prayer times
 	suspend fun deleteAllPrayerTimes() = prayerTimesDao.deleteAllPrayerTimes()
@@ -312,19 +328,22 @@ private fun PrayerTimes.toLocalPrayerTimes() = LocalPrayerTimes(
 		isha = isha.toString() ,
 															   )
 
-private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes? {
+private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes?
+{
 	val date = LocalDate.parse(date)
-	return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null && date != null) {
+	return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null && date != null)
+	{
 		PrayerTimes(
-				date = date,
-				fajr = LocalDateTime.parse(fajr),
-				sunrise = LocalDateTime.parse(sunrise),
-				dhuhr = LocalDateTime.parse(dhuhr),
-				asr = LocalDateTime.parse(asr),
-				maghrib = LocalDateTime.parse(maghrib),
-				isha = LocalDateTime.parse(isha),
+				date = date ,
+				fajr = LocalDateTime.parse(fajr) ,
+				sunrise = LocalDateTime.parse(sunrise) ,
+				dhuhr = LocalDateTime.parse(dhuhr) ,
+				asr = LocalDateTime.parse(asr) ,
+				maghrib = LocalDateTime.parse(maghrib) ,
+				isha = LocalDateTime.parse(isha) ,
 				   )
-	} else {
+	} else
+	{
 		null
 	}
 }
@@ -370,9 +389,9 @@ private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
 		dhuhr = dhuhr ,
 		asr = asr ,
 		maghrib = maghrib ,
-		isha = isha,
-		progress = progress,
-																	 )
+		isha = isha ,
+		progress = progress ,
+																	   )
 
 private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
 		date = date ,
@@ -380,20 +399,20 @@ private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
 		dhuhr = dhuhr ,
 		asr = asr ,
 		maghrib = maghrib ,
-		isha = isha,
-		progress = progress,
-																	)
+		isha = isha ,
+		progress = progress ,
+																 )
 
 //fasting
 private fun FastTracker.toLocalFastTracker() = LocalFastTracker(
 		date = date ,
 		isFasting = isFasting ,
-																	   )
+															   )
 
 private fun LocalFastTracker.toFastTracker() = FastTracker(
 		date = date ,
 		isFasting = isFasting ,
-																	  )
+														  )
 
 private fun Tasbih.toLocalTasbih() = LocalTasbih(
 		id = id ,

@@ -48,7 +48,8 @@ fun IntroPage1()
 
 	Column(modifier = Modifier
 		.fillMaxSize()
-		.padding(if (pages[pagerState.currentPage].extra == {}) 8.dp else 20.dp)) {
+		.padding(if (pages[pagerState.currentPage].extra == {}) 8.dp else 20.dp)
+		  ) {
 		HorizontalPager(
 				modifier = Modifier
 					.weight(10f)
@@ -57,7 +58,7 @@ fun IntroPage1()
 				state = pagerState ,
 				verticalAlignment = Alignment.Top
 					   ) { position ->
-			PagerScreen(onBoardingPage = pages[position], position)
+			PagerScreen(onBoardingPage = pages[position] , position)
 		}
 		HorizontalPagerIndicator(
 				pagerState = pagerState ,
@@ -85,36 +86,52 @@ fun IntroPage1()
 				} ,
 				verticalAlignment = Alignment.CenterVertically ,
 		   ) {
-			if (pagerState.currentPage == pages.size - 1){
-				BackButton(modifier = Modifier.padding(horizontal = 20.dp) , pagerState = pagerState) {
+			if (pagerState.currentPage == pages.size - 1)
+			{
+				BackButton(
+						modifier = Modifier.padding(horizontal = 20.dp) ,
+						pagerState = pagerState
+						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage - 1)
 					}
 				}
-				FinishButton(modifier = Modifier
-							 , pagerState = pagerState) {
+				FinishButton(
+						modifier = Modifier , pagerState = pagerState
+							) {
 					//check if the settings were completed or not
-					val isLocationSet = sharedPref.getData(AppConstants.LOCATION_INPUT, "").isNotBlank()
-					val isNotificationSet = sharedPref.getDataBoolean(AppConstants.NOTIFICATION_ALLOWED, false)
-					if (isLocationSet && isNotificationSet){
+					val isLocationSet =
+						sharedPref.getData(AppConstants.LOCATION_INPUT , "").isNotBlank()
+					val isNotificationSet =
+						sharedPref.getDataBoolean(AppConstants.NOTIFICATION_ALLOWED , false)
+					if (isLocationSet && isNotificationSet)
+					{
 						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
 						context.startActivity(Intent(context , MainActivity::class.java))
 						//remove the activity from the back stack
 						(context as Introduction).finish()
-					}else{
-						Toasty.error(context , "Please complete the settings before proceeding").show()
+					} else
+					{
+						Toasty.error(context , "Please complete the settings before proceeding")
+							.show()
 					}
 				}
-			}else{
-				BackButton(modifier = Modifier.padding(horizontal = 20.dp) , pagerState = pagerState) {
+			} else
+			{
+				BackButton(
+						modifier = Modifier.padding(horizontal = 20.dp) ,
+						pagerState = pagerState
+						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage - 1)
 					}
 				}
-				NextButton(modifier = Modifier
-					.padding(horizontal = 20.dp)
-					.testTag("introNextButton") ,
-						   pagerState = pagerState) {
+				NextButton(
+						modifier = Modifier
+							.padding(horizontal = 20.dp)
+							.testTag("introNextButton") ,
+						pagerState = pagerState
+						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage + 1)
 					}

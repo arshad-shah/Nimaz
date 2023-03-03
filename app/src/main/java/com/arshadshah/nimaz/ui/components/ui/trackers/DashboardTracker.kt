@@ -14,7 +14,11 @@ import com.arshadshah.nimaz.ui.screens.tracker.PrayerTrackerList
 fun DashboardPrayerTracker()
 {
 
-	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 
 	val dateState = remember {
 		viewModel.dateState
@@ -71,14 +75,14 @@ fun DashboardPrayerTracker()
 
 	PrayerTrackerList(
 			viewModel::onEvent ,
-			stateOfTrackerForToday.value,
-			fajrState.value,
-			zuhrState.value,
-			asrState.value,
-			maghribState.value,
-			ishaState.value,
-			showDateSelector,
-			dateState,
+			stateOfTrackerForToday.value ,
+			fajrState.value ,
+			zuhrState.value ,
+			asrState.value ,
+			maghribState.value ,
+			ishaState.value ,
+			showDateSelector ,
+			dateState ,
 			progressState
 					 )
 }

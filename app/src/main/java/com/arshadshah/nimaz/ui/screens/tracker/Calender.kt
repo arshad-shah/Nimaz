@@ -47,14 +47,18 @@ fun Calender(paddingValues : PaddingValues)
 
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
-	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
 
 	Column(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(paddingValues)
-				.testTag(TEST_TAG_CALENDER),
+				.testTag(TEST_TAG_CALENDER) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Top
 		  ) {
@@ -64,7 +68,7 @@ fun Calender(paddingValues : PaddingValues)
 					) {
 			SelectableCalendar(
 					dayContent = {
-						CalenderDay(dayState = it,)
+						CalenderDay(dayState = it)
 					} ,
 					weekHeader = { weekState ->
 						CalenderWeekHeader(weekState = weekState)
@@ -78,7 +82,7 @@ fun Calender(paddingValues : PaddingValues)
 					calendarState = rememberSelectableCalendarState()
 							  )
 		}
-		PrayerTracker(paddingValues = PaddingValues(0.dp), isIntegrated = true)
+		PrayerTracker(paddingValues = PaddingValues(0.dp) , isIntegrated = true)
 	}
 }
 
@@ -86,7 +90,11 @@ fun Calender(paddingValues : PaddingValues)
 @Composable
 fun CalenderHeader(monthState : MonthState)
 {
-	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	val currentMonth = monthState.currentMonth
 	val currentYear = monthState.currentMonth.year
 
@@ -135,8 +143,16 @@ fun CalenderHeader(monthState : MonthState)
 			if (currentYearMonth != currentMonth)
 			{
 				monthState.currentMonth = currentYearMonth
-				viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now().toString()))
-				viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(LocalDate.now().toString()))
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.SET_DATE(
+								LocalDate.now().toString()
+															  )
+								 )
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+								LocalDate.now().toString()
+																		  )
+								 )
 			}
 			showCurrentMonth.value = false
 			inCurrentMonth.value = true
@@ -182,12 +198,11 @@ fun CalenderHeader(monthState : MonthState)
 				{
 					Text(
 							modifier = Modifier
-								.padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
+								.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
 							text = "Today" ,
 							style = MaterialTheme.typography.titleSmall
 						)
-				}
-				else
+				} else
 				{
 					Row(
 							horizontalArrangement = Arrangement.Center ,
@@ -203,17 +218,16 @@ fun CalenderHeader(monthState : MonthState)
 								)
 							Text(
 									text = "Today" ,
-									style = MaterialTheme.typography.titleSmall,
+									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
 										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
 										.alpha(0.5f)
 								)
-						}
-						else
+						} else
 						{
 							Text(
 									text = "Today" ,
-									style = MaterialTheme.typography.titleSmall,
+									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
 										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
 										.alpha(0.5f)
@@ -278,8 +292,7 @@ fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 						color = if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY)
 						{
 							MaterialTheme.colorScheme.error
-						}
-						else
+						} else
 						{
 							MaterialTheme.colorScheme.onSurface
 						} ,
@@ -308,7 +321,11 @@ fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
 			   )
 {
-	val viewModel = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
 	val currentDate = dayState.date
@@ -333,10 +350,14 @@ fun CalenderDay(
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)
 					{
-						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f) else if (today) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer.copy(
+								alpha = 0.8f
+																											   ) else if (today) MaterialTheme.colorScheme.secondaryContainer.copy(
+								alpha = 0.8f
+																																												  ) else MaterialTheme.colorScheme.surface
 						true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
 					}
-							)
+													)
 				) {
 
 		Column(
@@ -361,7 +382,11 @@ fun CalenderDay(
 							{
 								dayState.selectionState.onDateSelected(dayState.date)
 								viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
-								viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dayState.date.toString()))
+								viewModel.onEvent(
+										TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+												dayState.date.toString()
+																						  )
+												 )
 							}
 
 							else ->
@@ -369,8 +394,16 @@ fun CalenderDay(
 								if (dayState.isFromCurrentMonth)
 								{
 									dayState.selectionState.onDateSelected(dayState.date)
-									viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
-									viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dayState.date.toString()))
+									viewModel.onEvent(
+											TrackerViewModel.TrackerEvent.SET_DATE(
+													dayState.date.toString()
+																				  )
+													 )
+									viewModel.onEvent(
+											TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+													dayState.date.toString()
+																							  )
+													 )
 								}
 								//show the description of the day
 								hasDescription.value = ! hasDescription.value
@@ -384,7 +417,7 @@ fun CalenderDay(
 					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(6.dp),
+					modifier = Modifier.padding(6.dp) ,
 					color = when (importantDay.first)
 					{
 						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
@@ -402,7 +435,7 @@ fun CalenderDay(
 					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(6.dp),
+					modifier = Modifier.padding(6.dp) ,
 					color = when (importantDay.first)
 					{
 						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer
@@ -427,7 +460,7 @@ fun CalenderDay(
 						} ,
 						) {
 				Text(
-						text = importantDay.second  ,
+						text = importantDay.second ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier.padding(8.dp)
 					)
@@ -454,6 +487,7 @@ fun getGradientForProgress(progressState : Int) : Brush
 								   )
 										 )
 		}
+
 		80 ->
 		{
 			return Brush.verticalGradient(
@@ -466,6 +500,7 @@ fun getGradientForProgress(progressState : Int) : Brush
 								   )
 										 )
 		}
+
 		60 ->
 		{
 			return Brush.verticalGradient(
@@ -478,6 +513,7 @@ fun getGradientForProgress(progressState : Int) : Brush
 								   )
 										 )
 		}
+
 		40 ->
 		{
 			return Brush.verticalGradient(
@@ -490,6 +526,7 @@ fun getGradientForProgress(progressState : Int) : Brush
 								   )
 										 )
 		}
+
 		20 ->
 		{
 			return Brush.verticalGradient(
@@ -502,6 +539,7 @@ fun getGradientForProgress(progressState : Int) : Brush
 								   )
 										 )
 		}
+
 		0 ->
 		{
 			return Brush.verticalGradient(
@@ -514,6 +552,7 @@ fun getGradientForProgress(progressState : Int) : Brush
 								   )
 										 )
 		}
+
 		else -> return Brush.verticalGradient(
 				colors = listOf(
 						Color.Transparent ,

@@ -13,7 +13,7 @@ import com.arshadshah.nimaz.data.local.models.*
 		TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class, LocalFastTracker::class , LocalTasbih::class] ,
+		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
 		version = 11 ,
 		exportSchema = false
 		 )
@@ -131,6 +131,7 @@ abstract class AppDatabase : RoomDatabase()
 	//migration from version 6 to 7
 	class Migration6To7 : Migration(6 , 7)
 	{
+
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
 			//drop table PrayersTracker and create a new one
@@ -146,6 +147,7 @@ abstract class AppDatabase : RoomDatabase()
 	//a migration to add a new table for the new feature of the app
 	class Migration7To8 : Migration(7 , 8)
 	{
+
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
 			//create a new table
@@ -161,6 +163,7 @@ abstract class AppDatabase : RoomDatabase()
 	//	val currentPrayer : LocalPrayertime = LocalPrayertime("" , "") , are removed
 	class Migration8To9 : Migration(8 , 9)
 	{
+
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
 			//rename column timestamp to date
@@ -181,6 +184,7 @@ abstract class AppDatabase : RoomDatabase()
 	//a migration to add a new primary key to the table Tasbih
 	class Migration9To10 : Migration(9 , 10)
 	{
+
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
 			//drop the table Tasbih
@@ -196,6 +200,7 @@ abstract class AppDatabase : RoomDatabase()
 	//remove the column isCompleted from the table Tasbih and completed is renamed to count
 	class Migration10To11 : Migration(10 , 11)
 	{
+
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
 			//drop the column isCompleted

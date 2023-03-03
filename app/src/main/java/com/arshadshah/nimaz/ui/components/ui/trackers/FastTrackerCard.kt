@@ -28,13 +28,13 @@ fun FastTrackerCard(
 	showDateSelector : State<Boolean> ,
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
 	dateState : State<String> ,
-	isFastingToday : MutableState<Boolean>
+	isFastingToday : MutableState<Boolean> ,
 				   )
 {
 	val context = LocalContext.current
 	val dateForTracker = LocalDate.parse(dateState.value)
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
-	if(showDateSelector.value)
+	if (showDateSelector.value)
 	{
 		DateSelector(
 				handleEvent = handleEvent
@@ -45,49 +45,51 @@ fun FastTrackerCard(
 				.fillMaxWidth()
 				.padding(4.dp)
 				) {
-			Row(
+		Row(
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth() ,
+				horizontalArrangement = Arrangement.Start ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
+			ToggleableItem(
+					text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,
+					checked = isFastingToday.value ,
+					onCheckedChange = {
+						//if the date is after today then don't allow the user to change the value
+						if (isAfterToday)
+						{
+							Toasty.info(
+									context ,
+									"Oops! you cant update the tracker for a date in the future" ,
+									Toasty.LENGTH_SHORT ,
+									true
+									   ).show()
+							return@ToggleableItem
+						}
+						isFastingToday.value = ! isFastingToday.value
+						handleEvent(
+								TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
+										FastTracker(
+												date = dateState.value ,
+												isFasting = isFastingToday.value
+												   )
+																				 )
+								   )
+					} ,
 					modifier = Modifier
 						.padding(8.dp)
-						.fillMaxWidth(),
-					horizontalArrangement = Arrangement.Start ,
-					verticalAlignment = Alignment.CenterVertically
-			   ) {
-				ToggleableItem(
-						text = if (isFastingToday.value) "Fasting" else "Not Fasting"  ,
-						checked = isFastingToday.value ,
-						onCheckedChange = {
-							//if the date is after today then don't allow the user to change the value
-							if (isAfterToday)
-							{
-								Toasty.info(
-										context ,
-										"Oops! you cant update the tracker for a date in the future" ,
-										Toasty.LENGTH_SHORT ,
-										true
-											).show()
-								return@ToggleableItem
-							}
-							isFastingToday.value = !isFastingToday.value
-							handleEvent(TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-									FastTracker(
-											date = dateState.value ,
-											isFasting = isFastingToday.value
-											   )
-																						 ))
-						} ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth()
-							.placeholder(
-									visible = false ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
-						showDateSelector = showDateSelector.value
-							  )
-			}
+						.fillMaxWidth()
+						.placeholder(
+								visible = false ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									) ,
+					showDateSelector = showDateSelector.value
+						  )
+		}
 	}
 }

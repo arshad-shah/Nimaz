@@ -36,7 +36,11 @@ fun BatteryExemptionUI()
 {
 	val context = LocalContext.current
 
-	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "SettingsViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
 	val isBatteryExempt = remember {
 		viewModel.isBatteryExempt
 	}.collectAsState()
@@ -68,7 +72,8 @@ fun BatteryExemptionUI()
 																		 )
 										 )
 					state.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
-					isChecked.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+					isChecked.value =
+						powerManager.isIgnoringBatteryOptimizations(context.packageName)
 				}
 
 				else ->
@@ -86,7 +91,7 @@ fun BatteryExemptionUI()
 
 
 	SettingsSwitch(
-			modifier = Modifier.testTag("BatteryExemptionSwitch"),
+			modifier = Modifier.testTag("BatteryExemptionSwitch") ,
 			state = state ,
 			onCheckedChange = {
 				if (it)

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.Tasbih
@@ -9,40 +10,61 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
-class TasbihViewModel(context: Context): ViewModel()
+class TasbihViewModel(context : Context) : ViewModel()
 {
+
 	//state for the tasbih
-	private var _tasbih = MutableStateFlow(
+	private var _tasbihLoading = MutableStateFlow(false)
+	val tasbihLoading = _tasbihLoading.asStateFlow()
+
+	//tasbijh error
+	private var _tasbihError = MutableStateFlow("")
+	val tasbihError = _tasbihError.asStateFlow()
+
+	private var _tasbihCreated = MutableStateFlow(
 			Tasbih(
 					id = 0 ,
-		arabicName = "" ,
-		englishName = "" ,
-		translationName = "" ,
-		goal = 0 ,
-		count = 0 ,
+					arabicName = "" ,
+					englishName = "" ,
+					translationName = "" ,
+					count = 0 ,
+					date = "" ,
+					goal = 0
 				  )
-										  )
-	val tasbih = _tasbih.asStateFlow()
+												 )
+
+	val tasbihCreated = _tasbihCreated.asStateFlow()
 
 	//list of tasbih for today
 	private var _tasbihList = MutableStateFlow(
 			listOf<Tasbih>()
-												)
+											  )
 	val tasbihList = _tasbihList.asStateFlow()
 
 	sealed class TasbihEvent
 	{
+
 		data class SetTasbih(val tasbih : Tasbih) : TasbihEvent()
+
 		//update the tasbih
 		data class UpdateTasbih(val tasbih : Tasbih) : TasbihEvent()
+
 		//get the tasbih by id
 		data class GetTasbih(val id : Int) : TasbihEvent()
 
 		//get the tasbih list for today
 		data class GetTasbihList(val date : String) : TasbihEvent()
+
 		//get all the tasbih
 		object GetAllTasbih : TasbihEvent()
+
+		//delete the tasbih
+		data class DeleteTasbih(val tasbih : Tasbih) : TasbihEvent()
+
+		//recreate the tasbih from last date for today
+		data class RecreateTasbih(val date : String) : TasbihEvent()
 	}
 
 	//event for the tasbih
@@ -52,31 +74,118 @@ class TasbihViewModel(context: Context): ViewModel()
 		{
 			is TasbihEvent.SetTasbih ->
 			{
-				_tasbih.value = event.tasbih
 				createTasbih(event.tasbih)
 			}
+
 			is TasbihEvent.UpdateTasbih ->
 			{
-				_tasbih.value = event.tasbih
 				updateTasbih(event.tasbih)
 			}
+
 			is TasbihEvent.GetTasbih ->
 			{
 				getTasbih(event.id)
 			}
+
 			is TasbihEvent.GetTasbihList ->
 			{
 				getTasbihList(event.date)
 			}
+
 			is TasbihEvent.GetAllTasbih ->
 			{
 				getAllTasbih()
+			}
+
+			is TasbihEvent.DeleteTasbih ->
+			{
+				deleteTasbih(event.tasbih)
+			}
+			is TasbihEvent.RecreateTasbih ->
+			{
+				recreateTasbih(event.date)
+			}
+		}
+	}
+
+	private fun recreateTasbih(date : String)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_tasbihLoading.value = true
+				_tasbihError.value = ""
+				val datastore = LocalDataStore.getDataStore()
+				//get all the tasbih
+				val tasbihList = datastore.getAllTasbih()
+				//create a unique list of tasbih by date
+				val tasbihListByDate = tasbihList.groupBy { it.date }
+				//recreate the tasbih for today from the yesterday tasbih
+				//we need to basically copy the tasbih from yesterday to today
+				//alter the date, id and count where date is today, id is 0 and count is 0
+				//then insert the tasbih into the database
+				//then get the tasbih list for today
+				//yersterday date
+				val yesterday = LocalDate.parse(date).minusDays(1).toString()
+				val yesterdayTasbihList = tasbihListByDate[yesterday]
+				if (yesterdayTasbihList != null)
+				{
+					for (tasbih in yesterdayTasbihList)
+					{
+						val newTasbih = Tasbih(
+								id = 0 ,
+								arabicName = tasbih.arabicName ,
+								englishName = tasbih.englishName ,
+								translationName = tasbih.translationName ,
+								count = 0 ,
+								date = date ,
+								goal = tasbih.goal
+											  )
+						datastore.saveTasbih(newTasbih)
+					}
+				}
+				else
+				{
+					_tasbihError.value = "No tasbih for yesterday"
+				}
+				//get the tasbih list for today
+				getTasbihList(date)
+				_tasbihLoading.value = false
+			} catch (e : Exception)
+			{
+				_tasbihError.value = e.message.toString()
+			}
+		}
+	}
+
+	private fun deleteTasbih(tasbih : Tasbih)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_tasbihLoading.value = true
+				_tasbihError.value = ""
+				_tasbihCreated.value = Tasbih(
+						id = 0 ,
+						arabicName = "" ,
+						englishName = "" ,
+						translationName = "" ,
+						count = 0 ,
+						date = "" ,
+						goal = 0
+											 )
+				val datastore = LocalDataStore.getDataStore()
+				datastore.deleteTasbih(tasbih)
+				_tasbihLoading.value = false
+			} catch (e : Exception)
+			{
+				_tasbihError.value = e.message.toString()
 			}
 		}
 	}
 
 	//get the tasbih list for today
-	fun getTasbihList(date: String)
+	private fun getTasbihList(date : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			val datastore = LocalDataStore.getDataStore()
@@ -86,7 +195,7 @@ class TasbihViewModel(context: Context): ViewModel()
 	}
 
 	//get all the tasbih
-	fun getAllTasbih()
+	private fun getAllTasbih()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			val datastore = LocalDataStore.getDataStore()
@@ -95,35 +204,65 @@ class TasbihViewModel(context: Context): ViewModel()
 		}
 	}
 
-	fun getTasbih(id: Int)
+	fun getTasbih(id : Int)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			val datastore = LocalDataStore.getDataStore()
-			val tasbih = datastore.getLatestTasbih()
-			_tasbih.value = tasbih
+			try
+			{
+				_tasbihLoading.value = true
+				_tasbihError.value = ""
+				val datastore = LocalDataStore.getDataStore()
+				val tasbih = datastore.getTasbihById(id)
+				_tasbihCreated.value = tasbih
+				_tasbihLoading.value = false
+			} catch (e : Exception)
+			{
+				_tasbihError.value = e.message.toString()
+			}
 		}
 	}
 
 
-	fun createTasbih(tasbih: Tasbih)
+	private fun createTasbih(tasbih : Tasbih)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			val datastore = LocalDataStore.getDataStore()
-			datastore.saveTasbih(tasbih)
-			//get the tasbih that was just created
-			val tasbih = datastore.getLatestTasbih()
-			_tasbih.value = tasbih
+			try
+			{
+				_tasbihLoading.value = true
+				_tasbihError.value = ""
+				val datastore = LocalDataStore.getDataStore()
+				val idOfTasbih = datastore.saveTasbih(tasbih)
+				Log.d("TasbihViewModel" , "id of tasbih is ${idOfTasbih.toInt()}")
+				//get the tasbih that was just created
+				val tasbihJustCreated = datastore.getTasbihById(idOfTasbih.toInt())
+				//update the tasbih state on the main thread
+				_tasbihCreated.value = tasbihJustCreated
+				_tasbihLoading.value = false
+			} catch (e : Exception)
+			{
+				_tasbihError.value = e.message.toString()
+			}
 		}
 	}
 
-	fun updateTasbih(tasbih: Tasbih)
+	private fun updateTasbih(tasbih : Tasbih)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			val datastore = LocalDataStore.getDataStore()
-			datastore.updateTasbih(tasbih)
-			//get the tasbih that was just updated
-			val tasbih = datastore.getLatestTasbih()
-			_tasbih.value = tasbih
+			try
+			{
+				_tasbihLoading.value = true
+				_tasbihError.value = ""
+				val datastore = LocalDataStore.getDataStore()
+				datastore.updateTasbih(tasbih)
+				//get the tasbih that was just created
+				val tasbihJustUpdated = datastore.getTasbihById(tasbih.id)
+				//update the tasbih state on the main thread
+				_tasbihCreated.value = tasbihJustUpdated
+				_tasbihLoading.value = false
+			} catch (e : Exception)
+			{
+				_tasbihError.value = e.message.toString()
+			}
 		}
 	}
 }

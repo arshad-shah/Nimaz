@@ -61,6 +61,7 @@ fun NavigationGraph(
 	AnimatedNavHost(
 			navController = navController as NavHostController ,
 			startDestination = BottomNavItem.Dashboard.screen_route ,
+//			startDestination = TASBIH_LIST_SCREEN ,
 			enterTransition = {
 				when (initialState.destination.route)
 				{
@@ -408,19 +409,41 @@ fun NavigationGraph(
 			}
 				   ) {
 
-		composable(BottomNavItem.Dashboard.screen_route){
+		composable(BottomNavItem.Dashboard.screen_route) {
 			Dashboard(
+					paddingValues = paddingValues,
 					onNavigateToPrayerTimes = {
-						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route){
-							 popUpTo(navController.graph.startDestinationId) { inclusive = true }
+						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route) {
+							popUpTo(navController.graph.startDestinationId) { inclusive = true }
 						}
 
-					},
+					} ,
 					onNavigateToCalender = {
 						navController.navigate(CALENDER_SCREEN_ROUTE)
-					},
+					} ,
 					onNavigateToTracker = {
 						navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
+					},
+					onNavigateToTasbihScreen =  { id : String , arabic : String , translation : String , transliteration : String ->
+						navController.navigate(
+								TASBIH_SCREEN_ROUTE
+									.replace(
+											"{id}" ,
+											id
+											)
+									.replace(
+											"{arabic}" ,
+											arabic
+											)
+									.replace(
+											"{translation}" ,
+											translation
+											)
+									.replace(
+											"{transliteration}" ,
+											transliteration
+											)
+											  )
 					}
 					 )
 		}
@@ -434,7 +457,7 @@ fun NavigationGraph(
 			}
 		}
 
-		composable(CALENDER_SCREEN_ROUTE){
+		composable(CALENDER_SCREEN_ROUTE) {
 			Calender(paddingValues)
 		}
 
@@ -451,7 +474,7 @@ fun NavigationGraph(
 							MY_QURAN_SCREEN_ROUTE.replace(
 									"{number}" ,
 									number
-														  )
+														 )
 								.replace(
 										"{isSurah}" ,
 										isSurah.toString()
@@ -465,13 +488,12 @@ fun NavigationGraph(
 										scrollToAya.toString()
 										)
 										  ) {
-							popUpTo(MY_QURAN_SCREEN_ROUTE) {
-								inclusive = true
-							}
-							launchSingleTop = true
+						popUpTo(MY_QURAN_SCREEN_ROUTE) {
+							inclusive = true
 						}
-				}
-				else
+						launchSingleTop = true
+					}
+				} else
 				{
 					navController.navigate(
 							QURAN_AYA_SCREEN_ROUTE.replace(
@@ -495,7 +517,7 @@ fun NavigationGraph(
 					number = it.arguments?.getString("number") ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
-					scrollToAya = it.arguments?.getString("scrollTo") !! .toInt() ,
+					scrollToAya = it.arguments?.getString("scrollTo") !!.toInt() ,
 					paddingValues = paddingValues ,
 					  )
 		}
@@ -513,14 +535,17 @@ fun NavigationGraph(
 		composable(BottomNavItem.MoreScreen.screen_route) {
 			MoreScreen(
 					paddingValues ,
-					onNavigateToTasbihScreen = { arabic : String , translation: String , transliteration:String ->
-						//replace the placeholder with the actual route TASBIH_SCREEN_ROUTE
-						//tasbih_screen/{arabic}/{translation}/{transliteration}
+					onNavigateToTasbihScreen = { id : String , arabic : String , translation : String , transliteration : String ->
 						navController.navigate(
-								TASBIH_SCREEN_ROUTE.replace(
-										"{arabic}" ,
-										arabic
-														   )
+								TASBIH_SCREEN_ROUTE
+									.replace(
+											"{id}" ,
+											id
+											)
+									.replace(
+											"{arabic}" ,
+											arabic
+											)
 									.replace(
 											"{translation}" ,
 											translation
@@ -558,15 +583,20 @@ fun NavigationGraph(
 					  )
 		}
 
-		composable(TASBIH_LIST_SCREEN){
-			ListOfTasbih(paddingValues) { arabic : String , translation : String , transliteration : String ->
+		composable(TASBIH_LIST_SCREEN) {
+			ListOfTasbih(paddingValues) { id : String , arabic : String , translation : String , transliteration : String ->
 				//replace the placeholder with the actual route TASBIH_SCREEN_ROUTE
 				//tasbih_screen/{arabic}/{translation}/{transliteration}
 				navController.navigate(
-						TASBIH_SCREEN_ROUTE.replace(
-								"{arabic}" ,
-								arabic
-												   )
+						TASBIH_SCREEN_ROUTE
+							.replace(
+									"{id}" ,
+									id
+									)
+							.replace(
+									"{arabic}" ,
+									arabic
+									)
 							.replace(
 									"{translation}" ,
 									translation
@@ -585,11 +615,12 @@ fun NavigationGraph(
 
 		composable(TASBIH_SCREEN_ROUTE) {
 			TasbihScreen(
+					tasbihId = it.arguments?.getString("id") !! ,
 					tasbihArabic = it.arguments?.getString("arabic") !! ,
 					tasbihEnglish = it.arguments?.getString("translation") !! ,
 					tasbihTranslitration = it.arguments?.getString("transliteration") !! ,
 					paddingValues = paddingValues ,
-					showResetDialog = showResetDialog,
+					showResetDialog = showResetDialog ,
 					vibrator = vibrator ,
 					vibrationAllowed = vibrationAllowed ,
 					rOrl = rOrl

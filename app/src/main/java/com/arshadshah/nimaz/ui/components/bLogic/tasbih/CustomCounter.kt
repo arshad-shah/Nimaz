@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
 import android.os.Vibrator
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,60 +14,105 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Counter(
+fun CustomCounter(
 	vibrator : Vibrator ,
 	paddingValues : PaddingValues ,
 	vibrationAllowed : MutableState<Boolean> ,
 	reset : MutableState<Boolean> ,
 	showResetDialog : MutableState<Boolean> ,
 	rOrl : MutableState<Int> ,
-		   )
+	tasbihId : String ,
+				 )
 {
 	val context = LocalContext.current
+	val viewModel = viewModel(
+			key = "TasbihViewModel" ,
+			initializer = { TasbihViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
+
+	viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetTasbih(tasbihId.toInt()))
+
+	val tasbih = remember {
+		viewModel.tasbihCreated
+	}.collectAsState()
+
+	val error = remember { viewModel.tasbihError }.collectAsState()
+
 	val count = remember {
-		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
-					  )
+		mutableStateOf(tasbih.value.count)
+	}
+
+	LaunchedEffect(key1 = count.value) {
+		//update the tasbih
+		viewModel.handleEvent(
+				TasbihViewModel.TasbihEvent.UpdateTasbih(
+						Tasbih(
+								id = tasbih.value?.id !! ,
+								date = tasbih.value.date ,
+								arabicName = tasbih.value.arabicName ,
+								englishName = tasbih.value.englishName ,
+								translationName = tasbih.value.translationName ,
+								goal = tasbih.value.goal ,
+								count = count.value ,
+							  )
+														)
+							 )
 	}
 
 	val objective = remember {
-		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getString("objective" , "33") !!
-					  )
+		mutableStateOf(tasbih.value.goal.toString())
 	}
 
 	val showObjectiveDialog = remember { mutableStateOf(false) }
 
 	//lap counter
-	val lap =
-		remember {
-			mutableStateOf(
-					context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)
-						  )
-		}
+	val lap = remember {
+		mutableStateOf(
+				context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih.value?.id !!}" , 0)
+					  )
+	}
 	val lapCountCounter = remember {
 		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)
+				context.getSharedPreferences("tasbih" , 0)
+					.getInt("lapCountCounter-${tasbih.value?.id !!}" , 0)
 					  )
+	}
+
+	//when we firrst launch the composable, we want to set the count to the tasbih count
+	LaunchedEffect(key1 = tasbih.value.id) {
+		count.value =
+			context.getSharedPreferences("tasbih" , 0).getInt("count-${tasbih.value?.id !!}" , 0)
+		objective.value = context.getSharedPreferences("tasbih" , 0)
+			.getString("objective-${tasbih.value.id}" , tasbih.value.goal.toString()) !!
+		lap.value = context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih.value.id}" , 0)
+		lapCountCounter.value = context.getSharedPreferences("tasbih" , 0)
+			.getInt("lapCountCounter-${tasbih.value.id}" , 0)
 	}
 
 	//persist all the values in shared preferences if the activity is destroyed
 	LaunchedEffect(key1 = count.value , key2 = objective.value , key3 = lap.value)
 	{
 		//save the count
-		context.getSharedPreferences("tasbih" , 0).edit().putInt("count" , count.value).apply()
+		context.getSharedPreferences("tasbih" , 0).edit()
+			.putInt("count-${tasbih.value?.id !!}" , count.value).apply()
 		//save the objective
-		context.getSharedPreferences("tasbih" , 0).edit().putString("objective" , objective.value)
+		context.getSharedPreferences("tasbih" , 0).edit()
+			.putString("objective-${tasbih.value.id}" , objective.value)
 			.apply()
 		//save the lap
-		context.getSharedPreferences("tasbih" , 0).edit().putInt("lap" , lap.value).apply()
+		context.getSharedPreferences("tasbih" , 0).edit()
+			.putInt("lap-${tasbih.value.id}" , lap.value).apply()
 		//save the lap count counter
 		context.getSharedPreferences("tasbih" , 0).edit()
-			.putInt("lapCountCounter" , lapCountCounter.value).apply()
+			.putInt("lapCountCounter-${tasbih.value.id}" , lapCountCounter.value).apply()
 	}
 
 	Column(
@@ -94,12 +140,13 @@ fun Counter(
 				fontSize = 100.sp ,
 				color = MaterialTheme.colorScheme.onSurface
 			)
-		Editbutton(
-				count = count ,
-				context = LocalContext.current ,
-				showObjectiveDialog = showObjectiveDialog ,
-				objective = objective ,
-				  )
+		Text(
+				modifier = Modifier
+					.align(Alignment.CenterHorizontally) ,
+				text = tasbih.value?.goal.toString() ,
+				style = MaterialTheme.typography.bodyMedium ,
+				color = MaterialTheme.colorScheme.onSurface
+			)
 
 		Spacer(modifier = Modifier.height(32.dp))
 		IncrementDecrement(

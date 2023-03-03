@@ -19,6 +19,7 @@ import java.util.*
 
 class QuranViewModel(context : Context) : ViewModel()
 {
+
 	//repository
 	private val quranRepository = QuranRepository
 
@@ -70,11 +71,14 @@ class QuranViewModel(context : Context) : ViewModel()
 	//events for quran menu features like page display, font size, font type, etc
 	sealed class QuranMenuEvents
 	{
+
 		//change arabic font
 		data class Change_Arabic_Font(val font : String) : QuranMenuEvents()
+
 		//change translation font
 		data class Change_Translation(val lang : String) : QuranMenuEvents()
 		data class Change_Arabic_Font_Size(val size : Float) : QuranMenuEvents()
+
 		//change translation font size
 		data class Change_Translation_Font_Size(val size : Float) : QuranMenuEvents()
 
@@ -93,28 +97,36 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				_arabic_Font.value = event.font
 			}
+
 			is QuranMenuEvents.Change_Translation ->
 			{
 				_translation.value = event.lang
 			}
+
 			is QuranMenuEvents.Change_Arabic_Font_Size ->
 			{
 				_arabic_Font_size.value = event.size
 			}
+
 			is QuranMenuEvents.Change_Translation_Font_Size ->
 			{
 				_translation_Font_size.value = event.size
 			}
+
 			is QuranMenuEvents.Change_Display_Mode ->
 			{
 				_display_Mode.value = event.mode
 			}
+
 			is QuranMenuEvents.Initialize_Quran ->
 			{
 				_arabic_Font.value = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
-				_translation.value = sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE , "English")
-				_arabic_Font_size.value = sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
-				_translation_Font_size.value = sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
+				_translation.value =
+					sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE , "English")
+				_arabic_Font_size.value =
+					sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
+				_translation_Font_size.value =
+					sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
 				_display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE , "List")
 			}
 		}
@@ -148,14 +160,14 @@ class QuranViewModel(context : Context) : ViewModel()
 					{
 						_surahListState.value = ArrayList()
 						_loadingState.value = false
-						_errorState.value = response.message!!
+						_errorState.value = response.message !!
 					}
 				}
 			} catch (e : Exception)
 			{
 				_surahListState.value = ArrayList()
 				_loadingState.value = false
-				_errorState.value = e.message!!
+				_errorState.value = e.message !!
 			}
 		}
 	}
@@ -188,14 +200,14 @@ class QuranViewModel(context : Context) : ViewModel()
 					{
 						_juzListState.value = ArrayList()
 						_loadingState.value = false
-						_errorState.value = response.message!!
+						_errorState.value = response.message !!
 					}
 				}
 			} catch (e : Exception)
 			{
 				_juzListState.value = ArrayList()
 				_loadingState.value = false
-				_errorState.value = e.message!!
+				_errorState.value = e.message !!
 			}
 		}
 	}
@@ -239,14 +251,14 @@ class QuranViewModel(context : Context) : ViewModel()
 					{
 						_ayaListState.value = ArrayList()
 						_loadingState.value = false
-						_errorState.value = response.message!!
+						_errorState.value = response.message !!
 					}
 				}
 			} catch (e : Exception)
 			{
 				_ayaListState.value = ArrayList()
 				_loadingState.value = false
-				_errorState.value = e.message!!
+				_errorState.value = e.message !!
 			}
 		}
 	}
@@ -363,7 +375,7 @@ class QuranViewModel(context : Context) : ViewModel()
 					{
 						_ayaListState.value = ArrayList()
 						_loadingState.value = false
-						_errorState.value = response.message!!
+						_errorState.value = response.message !!
 					}
 				}
 
@@ -371,7 +383,7 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				_ayaListState.value = ArrayList()
 				_loadingState.value = false
-				_errorState.value = e.message!!
+				_errorState.value = e.message !!
 			}
 		}
 	}
@@ -674,13 +686,13 @@ class QuranViewModel(context : Context) : ViewModel()
 
 	//state for bookmarking, favoriting, adding a note
 	private val _bookmarks = MutableStateFlow(listOf<Aya>())
-	val bookmarks =  _bookmarks.asStateFlow()
+	val bookmarks = _bookmarks.asStateFlow()
 
 	private val _favorites = MutableStateFlow(listOf<Aya>())
-	val favorites =  _favorites.asStateFlow()
+	val favorites = _favorites.asStateFlow()
 
 	private val _notes = MutableStateFlow(listOf<Aya>())
-	val notes =  _notes.asStateFlow()
+	val notes = _notes.asStateFlow()
 
 	fun getAllNotes()
 	{

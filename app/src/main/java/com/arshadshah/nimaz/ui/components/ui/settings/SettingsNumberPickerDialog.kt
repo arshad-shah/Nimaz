@@ -30,7 +30,7 @@ fun SettingsNumberPickerDialog(
 	subtitle : @Composable() (() -> Unit)? = null ,
 	action : @Composable() (() -> Unit)? = null ,
 	valueState : SettingValueState<String> = rememberStringSettingState() ,
-	onChange : (Int) -> Unit = { },
+	onChange : (Int) -> Unit = { } ,
 							  )
 {
 

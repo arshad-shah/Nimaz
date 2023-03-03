@@ -24,10 +24,11 @@ fun ToggleableItem(
 	showDateSelector : Boolean ,
 				  )
 {
-	if(showDateSelector){
+	if (showDateSelector)
+	{
 		Row(
 				modifier = modifier.clickable {
-					onCheckedChange(!checked)
+					onCheckedChange(! checked)
 				} ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
@@ -39,16 +40,18 @@ fun ToggleableItem(
 						.size(32.dp)
 						.border(1.dp , MaterialTheme.colorScheme.primary , CircleShape) ,
 					onClick = {
-						onCheckedChange(!checked)
+						onCheckedChange(! checked)
 					}) {
-				if (!checked){
+				if (! checked)
+				{
 					Icon(
 							painter = painterResource(id = R.drawable.cross_icon) ,
 							contentDescription = "Close" ,
 							tint = MaterialTheme.colorScheme.primary ,
 							modifier = Modifier.size(48.dp)
 						)
-				}else{
+				} else
+				{
 					Icon(
 							painter = painterResource(id = R.drawable.check_icon) ,
 							contentDescription = "Check" ,
@@ -65,10 +68,11 @@ fun ToggleableItem(
 					style = MaterialTheme.typography.bodyLarge
 				)
 		}
-	}else{
+	} else
+	{
 		Column(
 				modifier = modifier.clickable {
-					onCheckedChange(!checked)
+					onCheckedChange(! checked)
 				} ,
 				horizontalAlignment = Alignment.CenterHorizontally ,
 				verticalArrangement = Arrangement.Center
@@ -80,16 +84,18 @@ fun ToggleableItem(
 						.size(24.dp)
 						.border(1.dp , MaterialTheme.colorScheme.primary , CircleShape) ,
 					onClick = {
-						onCheckedChange(!checked)
+						onCheckedChange(! checked)
 					}) {
-				if (!checked){
+				if (! checked)
+				{
 					Icon(
 							painter = painterResource(id = R.drawable.cross_icon) ,
 							contentDescription = "Close" ,
 							tint = MaterialTheme.colorScheme.primary ,
 							modifier = Modifier.size(26.dp)
 						)
-				}else{
+				} else
+				{
 					Icon(
 							painter = painterResource(id = R.drawable.check_icon) ,
 							contentDescription = "Check" ,

@@ -23,7 +23,15 @@ class BootReciever : BroadcastReceiver()
 
 			runBlocking {
 				val repository = PrayerTimesRepository.getPrayerTimes(context)
-				CreateAlarms().exact(context , repository.data?.fajr!!, repository.data.sunrise!! , repository.data.dhuhr!! , repository.data.asr!! , repository.data.maghrib!! , repository.data.isha!!)
+				CreateAlarms().exact(
+						context ,
+						repository.data?.fajr !! ,
+						repository.data.sunrise !! ,
+						repository.data.dhuhr !! ,
+						repository.data.asr !! ,
+						repository.data.maghrib !! ,
+						repository.data.isha !!
+									)
 			}
 
 			Log.d(AppConstants.BOOT_RECEIVER_TAG , "Alarms Reset after BootUp!")
