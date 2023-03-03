@@ -148,7 +148,7 @@ object AppConstants
 
 	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen"
 	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}"
-	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{arabic}/{translation}/{transliteration}"
+	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{id}/{arabic}/{translation}/{transliteration}"
 	const val NAMESOFALLAH_SCREEN_ROUTE = "namesofallah_screen"
 
 	const val SETTINGS_SCREEN_ROUTE = "settings_screen"
@@ -172,7 +172,6 @@ object AppConstants
 
 	const val TEST_TAG_MORE = "More"
 	const val TEST_TAG_MORE_LINK = "More Link {title}"
-
 
 
 	const val TEST_TAG_SETTINGS = "Settings"

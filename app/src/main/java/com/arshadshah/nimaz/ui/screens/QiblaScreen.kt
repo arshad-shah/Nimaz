@@ -28,7 +28,11 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 fun QiblaScreen(paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "QiblaViewModel", initializer = { QiblaViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "QiblaViewModel" ,
+			initializer = { QiblaViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
 
 	val state = remember { viewModel.qiblaState }.collectAsState()
 	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "QiblaScreen: ${state.value}")
@@ -59,7 +63,7 @@ fun QiblaScreen(paddingValues : PaddingValues)
 			modifier = Modifier
 				.padding(paddingValues)
 				.fillMaxSize()
-				.testTag(TEST_TAG_QIBLA),
+				.testTag(TEST_TAG_QIBLA) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {

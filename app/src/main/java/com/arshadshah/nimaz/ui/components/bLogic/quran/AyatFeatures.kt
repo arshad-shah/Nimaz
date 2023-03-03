@@ -32,7 +32,7 @@ fun AyatFeatures(
 	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit> ,
 	aya : Aya ,
 	showNoteDialog : MutableState<Boolean> ,
-	noteContent : MutableState<String>
+	noteContent : MutableState<String> ,
 				)
 {
 	Row(
@@ -148,5 +148,5 @@ fun AyatFeaturesPreview()
 			aya = aya ,
 			showNoteDialog = remember { mutableStateOf(false) } ,
 			noteContent = remember { mutableStateOf("") }
-					)
+				)
 }

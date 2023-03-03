@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_MORE_LINK
 
 @Composable
 fun FeatureCard(
-	onNavigateToTasbihScreen : (String , String , String) -> Unit ,
+	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
 	onNavigateToNames : () -> Unit ,
 	paddingValues : PaddingValues ,
 	onNavigateToListOfTasbeeh : () -> Unit ,
@@ -39,14 +39,14 @@ fun FeatureCard(
 				.testTag(AppConstants.TEST_TAG_MORE) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
-		  ) {
-		item{
+			  ) {
+		item {
 			//website link
 			LinkButton(
 					painter = painterResource(id = R.drawable.tasbih) ,
 					content = "Tasbih" ,
 					onClick = {
-						onNavigateToTasbihScreen(" ", " ", " ")
+						onNavigateToTasbihScreen(" " , " " , " " , " ")
 					} ,
 					title = "Tasbih" ,
 					  )
@@ -143,7 +143,7 @@ fun LinkButton(
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
-				.testTag(TEST_TAG_MORE_LINK.replace("{title}" , title)),
+				.testTag(TEST_TAG_MORE_LINK.replace("{title}" , title)) ,
 			onClick = onClick
 				) {
 		Row(

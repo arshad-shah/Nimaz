@@ -33,8 +33,16 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 {
 
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = context as ComponentActivity)
-	val settingViewModel = viewModel(key = "SettingViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+	val settingViewModel = viewModel(
+			key = "SettingViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context
+									)
 	LaunchedEffect(Unit) {
 		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
 		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
@@ -73,26 +81,27 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				.fillMaxWidth()
 				.clickable {
 					onNavigateToPrayerTimes()
-				},
+				} ,
 				) {
 		Column(
 				modifier = Modifier
-					.padding(8.dp),
-				verticalArrangement = Arrangement.SpaceEvenly,
+					.padding(8.dp) ,
+				verticalArrangement = Arrangement.SpaceEvenly ,
 				horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
 			Text(
 					modifier = Modifier
-						.padding(4.dp),
+						.padding(4.dp) ,
 					textAlign = TextAlign.Start ,
 					text = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
 					style = MaterialTheme.typography.titleMedium
 				)
 			Text(
 					modifier = Modifier
-						.padding(4.dp),
+						.padding(4.dp) ,
 					textAlign = TextAlign.Start ,
-					text = HijrahDate.from(LocalDate.now()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+					text = HijrahDate.from(LocalDate.now())
+						.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
 					style = MaterialTheme.typography.titleSmall
 				)
 			Row(
@@ -110,27 +119,41 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				   ) {
 					Image(
 							modifier = Modifier
-								.size(100.dp),
-							painter = when(nextPrayerName.value) {
-								"sunrise" -> {
+								.size(100.dp) ,
+							painter = when (nextPrayerName.value)
+							{
+								"sunrise" ->
+								{
 									painterResource(id = R.drawable.sunrise_icon)
 								}
-								"fajr" -> {
+
+								"fajr" ->
+								{
 									painterResource(id = R.drawable.fajr_icon)
 								}
-								"dhuhr" -> {
+
+								"dhuhr" ->
+								{
 									painterResource(id = R.drawable.dhuhr_icon)
 								}
-								"asr" -> {
+
+								"asr" ->
+								{
 									painterResource(id = R.drawable.asr_icon)
 								}
-								"maghrib" -> {
+
+								"maghrib" ->
+								{
 									painterResource(id = R.drawable.maghrib_icon)
 								}
-								"isha" -> {
+
+								"isha" ->
+								{
 									painterResource(id = R.drawable.isha_icon)
 								}
-								else -> {
+
+								else ->
+								{
 									painterResource(id = R.drawable.sunrise_icon)
 								}
 							} ,
@@ -142,16 +165,26 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						verticalArrangement = Arrangement.Center ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
-					Text(text = nextPrayerName.value.first().uppercase() + nextPrayerName.value.substring(1)
-						.lowercase(
-								Locale.ROOT
-								  ),
-						 style = MaterialTheme.typography.titleLarge
+					Text(
+							text = nextPrayerName.value.first()
+								.uppercase() + nextPrayerName.value.substring(1)
+								.lowercase(
+										Locale.ROOT
+										  ) ,
+							style = MaterialTheme.typography.titleLarge
 						)
-					Text(text = nextPrayerTime.value.format(DateTimeFormatter.ofPattern("hh:mm a")) , style = MaterialTheme.typography.titleLarge)
-					Text(text = "-${timer.value.hours}:${timer.value.minutes}:${timer.value.seconds}" , style = MaterialTheme.typography.titleMedium , textAlign = TextAlign.Center , modifier = Modifier
-						.fillMaxWidth()
-						.padding(8.dp))
+					Text(
+							text = nextPrayerTime.value.format(DateTimeFormatter.ofPattern("hh:mm a")) ,
+							style = MaterialTheme.typography.titleLarge
+						)
+					Text(
+							text = "-${timer.value.hours}:${timer.value.minutes}:${timer.value.seconds}" ,
+							style = MaterialTheme.typography.titleMedium ,
+							textAlign = TextAlign.Center ,
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(8.dp)
+						)
 				}
 			}
 		}

@@ -8,10 +8,15 @@ import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import java.time.LocalDate
 
 @Composable
-fun DashboardFastTracker() {
+fun DashboardFastTracker()
+{
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
-	val viewModelTracker = viewModel(key="TrackerViewModel",initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModelTracker = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+									)
 	LaunchedEffect(key1 = "getTrackerForDate") {
 		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(false))
 		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
@@ -33,9 +38,9 @@ fun DashboardFastTracker() {
 
 	isFastingToday.value = isFasting.value
 	FastTrackerCard(
-			showDateSelector = showTrackerDateSelector,
-			dateState = dateState,
-			isFastingToday = isFastingToday,
+			showDateSelector = showTrackerDateSelector ,
+			dateState = dateState ,
+			isFastingToday = isFastingToday ,
 			handleEvent = viewModelTracker::onEvent
 				   )
 }

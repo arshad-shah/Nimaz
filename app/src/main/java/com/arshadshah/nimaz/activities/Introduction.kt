@@ -22,41 +22,53 @@ class Introduction : ComponentActivity()
 	{
 		super.onCreate(savedInstanceState)
 		setContent {
-				val viewModelSettings = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(this@Introduction) }, viewModelStoreOwner = this as ComponentActivity)
-				val themeState = remember {
-					viewModelSettings.theme
-				}.collectAsState()
+			val viewModelSettings = viewModel(
+					key = "SettingsViewModel" ,
+					initializer = { SettingsViewModel(this@Introduction) } ,
+					viewModelStoreOwner = this as ComponentActivity
+											 )
+			val themeState = remember {
+				viewModelSettings.theme
+			}.collectAsState()
 
-				val darkTheme = remember {
-					mutableStateOf(false)
-				}
-				val dynamicTheme = remember {
-					mutableStateOf(false)
-				}
+			val darkTheme = remember {
+				mutableStateOf(false)
+			}
+			val dynamicTheme = remember {
+				mutableStateOf(false)
+			}
 
-				when (themeState.value) {
-					"DYNAMIC" -> {
-						dynamicTheme.value = true
-						darkTheme.value = isSystemInDarkTheme()
-					}
-					"SYSTEM" ->
-					{
-						dynamicTheme.value = false
-						darkTheme.value = isSystemInDarkTheme()
-					}
-					"LIGHT" -> {
-						dynamicTheme.value = false
-						darkTheme.value = false
-					}
-					"DARK" -> {
-						dynamicTheme.value = false
-						darkTheme.value = true
-					}
+			when (themeState.value)
+			{
+				"DYNAMIC" ->
+				{
+					dynamicTheme.value = true
+					darkTheme.value = isSystemInDarkTheme()
 				}
 
-				NimazTheme(
-						darkTheme = darkTheme.value,
-						dynamicColor = dynamicTheme.value,){
+				"SYSTEM" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isSystemInDarkTheme()
+				}
+
+				"LIGHT" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = false
+				}
+
+				"DARK" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = true
+				}
+			}
+
+			NimazTheme(
+					darkTheme = darkTheme.value ,
+					dynamicColor = dynamicTheme.value ,
+					  ) {
 				Scaffold {
 					it
 					IntroPage1()

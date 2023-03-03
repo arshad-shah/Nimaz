@@ -3,10 +3,7 @@ package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,14 +24,40 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihRow(
-	englishName : String ,
 	arabicName : String ,
+	englishName : String ,
 	translationName : String ,
-	onNavigateToTasbihScreen : ((String , String , String) -> Unit)? = null
+	onNavigateToTasbihScreen : ((String , String , String , String) -> Unit)? = null ,
 			 )
 {
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "TasbihViewModel", initializer = { TasbihViewModel(context) }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+	val viewModel = viewModel(
+			key = "TasbihViewModel" ,
+			initializer = { TasbihViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+							 )
+	val tasbih = remember {
+		viewModel.tasbihCreated
+	}.collectAsState()
+
+	val navigateToTasbihScreen = remember {
+		mutableStateOf(false)
+	}
+
+	LaunchedEffect(key1 = navigateToTasbihScreen.value) {
+		if (navigateToTasbihScreen.value)
+		{
+			viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetTasbih(tasbih.value.id))
+			//navigate to tasbih screen
+			onNavigateToTasbihScreen?.invoke(
+					tasbih.value.id.toString() ,
+					tasbih.value.arabicName ,
+					tasbih.value.englishName ,
+					tasbih.value.translationName
+											)
+			navigateToTasbihScreen.value = false
+		}
+	}
 	val showTasbihDialog = remember {
 		mutableStateOf(false)
 	}
@@ -61,7 +84,7 @@ fun TasbihRow(
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(4.dp)
-						.weight(0.80f),
+						.weight(0.80f) ,
 					horizontalAlignment = Alignment.Start ,
 					verticalArrangement = Arrangement.Center ,
 				  ) {
@@ -94,7 +117,7 @@ fun TasbihRow(
 						color = MaterialTheme.colorScheme.onSurface ,
 					)
 			}
-			if(onNavigateToTasbihScreen != null)
+			if (onNavigateToTasbihScreen != null)
 			{
 				Icon(
 						painter = painterResource(id = R.drawable.angle_small_right_icon) ,
@@ -124,7 +147,7 @@ fun TasbihRow(
 							horizontalAlignment = Alignment.CenterHorizontally ,
 						  ) {
 						OutlinedTextField(
-								value = goal.value,
+								value = goal.value ,
 								onValueChange = {
 									goal.value = it
 								} ,
@@ -135,34 +158,31 @@ fun TasbihRow(
 				confirmButton = {
 					Button(
 							onClick = {
-									viewModel.handleEvent(
-											TasbihViewModel.TasbihEvent.SetTasbih(
-													Tasbih(
-															date = LocalDate.now().toString() ,
-															arabicName = arabicName ,
-															englishName = englishName ,
-															translationName = translationName ,
-															goal = goal.value.toInt() ,
-															count = 0 ,
-														  )
-																				 )
-														 )
-								if (onNavigateToTasbihScreen != null)
-								{
-									onNavigateToTasbihScreen(arabicName , englishName , translationName)
-								}
+								viewModel.handleEvent(
+										TasbihViewModel.TasbihEvent.SetTasbih(
+												Tasbih(
+														date = LocalDate.now().toString() ,
+														arabicName = arabicName ,
+														englishName = englishName ,
+														translationName = translationName ,
+														goal = goal.value.toInt() ,
+														count = 0 ,
+													  )
+																			 )
+													 )
+								navigateToTasbihScreen.value = true
 								showTasbihDialog.value = false
 							} ,
 							content = { Text(text = "Confirm") } ,
-						)
+						  )
 				} ,
 				dismissButton = {
 					Button(
 							onClick = { showTasbihDialog.value = false } ,
 							content = { Text(text = "Cancel") } ,
-						)
+						  )
 				} ,
-			)
+				   )
 	}
 
 }

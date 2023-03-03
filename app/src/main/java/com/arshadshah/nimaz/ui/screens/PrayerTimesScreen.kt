@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.ui.screens
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,8 +24,16 @@ fun PrayerTimesScreen(
 {
 	val context = LocalContext.current
 
-	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
-	val settingViewModel = viewModel(key = "SettingViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+							 )
+	val settingViewModel = viewModel(
+			key = "SettingViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+									)
 
 	//reload the data when the screen is resumed
 	LaunchedEffect(Unit) {
@@ -37,7 +43,7 @@ fun PrayerTimesScreen(
 
 	// Collecting the state of the view model
 	val state by remember { viewModel.prayerTimesState }.collectAsState()
-	val locationState  =  remember { settingViewModel.locationName }.collectAsState()
+	val locationState = remember { settingViewModel.locationName }.collectAsState()
 
 	val currentPrayerName = remember {
 		viewModel.currentPrayerName

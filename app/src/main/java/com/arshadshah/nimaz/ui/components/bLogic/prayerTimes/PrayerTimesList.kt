@@ -21,7 +21,11 @@ fun PrayerTimesList()
 {
 	val context = LocalContext.current
 
-	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 
 	val fajrTime = remember {
 		viewModel.fajrTime
@@ -63,12 +67,13 @@ fun PrayerTimesList()
 		viewModel.nextPrayerTime
 	}.collectAsState()
 
-	if (isError.value.isNotBlank()){
-		Toasty.error(context, isError.value).show()
-	}else if (isLoading.value)
+	if (isError.value.isNotBlank())
+	{
+		Toasty.error(context , isError.value).show()
+	} else if (isLoading.value)
 	{
 		PrayerTimesListUI(
-				name = nextPrayerName.value ?: "" ,
+				name = nextPrayerName.value ,
 				prayerTimesMap = mapOf(
 						"Fajr" to fajrTime.value ,
 						"Sunrise" to sunriseTime.value ,
@@ -79,7 +84,8 @@ fun PrayerTimesList()
 									  ) ,
 				loading = true ,
 						 )
-	}else{
+	} else
+	{
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 

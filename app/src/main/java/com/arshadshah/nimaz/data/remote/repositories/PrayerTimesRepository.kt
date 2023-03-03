@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 
 object PrayerTimesRepository
 {
+
 	/**
 	 * Creates a map of prayer times parameters to be used in the API call
 	 * all the parameters are taken from the user's settings
@@ -26,7 +27,7 @@ object PrayerTimesRepository
 	{
 
 		//check if the local datastore has been initialized if not initialize it
-		if (!LocalDataStore.isInitialized())
+		if (! LocalDataStore.isInitialized())
 		{
 			LocalDataStore.init(context)
 		}
@@ -85,7 +86,8 @@ object PrayerTimesRepository
 				val dateYear = date?.year
 				if (dateMonth != currentMonth || dateYear != currentYear)
 				{
-					val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
+					val prayerTimesResponse =
+						NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
 					val prayerTimes = mutableListOf<PrayerTimes>()
 					dataStore.deleteAllPrayerTimes()
 					for (prayerTimeResponse in prayerTimesResponse)
@@ -94,14 +96,15 @@ object PrayerTimesRepository
 						prayerTimes.add(prayerTime)
 						dataStore.saveAllPrayerTimes(prayerTime)
 					}
-					return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() }!!)
+					return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 				}
 
 				if (prayerTimesLocal != null)
 				{
 					return ApiResponse.Success(prayerTimesLocal)
 				}
-			}else{
+			} else
+			{
 				val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
 				val prayerTimes = mutableListOf<PrayerTimes>()
 				for (prayerTimeResponse in prayerTimesResponse)
@@ -110,7 +113,7 @@ object PrayerTimesRepository
 					prayerTimes.add(prayerTime)
 					dataStore.saveAllPrayerTimes(prayerTime)
 				}
-				return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() }!!)
+				return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 			}
 			ApiResponse.Error("Prayer Times Not Available" , null)
 		} catch (e : ClientRequestException)
@@ -136,7 +139,7 @@ object PrayerTimesRepository
 			prayerTimes.add(prayerTime)
 			dataStore.saveAllPrayerTimes(prayerTime)
 		}
-		return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() }!!)
+		return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 	}
 
 	//a function to map a prayer times response to a prayer times object

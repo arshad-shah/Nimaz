@@ -47,14 +47,15 @@ object NimazServicesImpl : NimazService
 
 	override suspend fun getPrayerTimesMonthly(
 		mapOfParams : Map<String , String> ,
-									   ) : List<PrayerTimeResponse>
+											  ) : List<PrayerTimeResponse>
 	{
 		//create a post request with stuff in body and return the response
-		val response : List<PrayerTimeResponse> = httpClient.request(AppConstants.PRAYER_TIMES_URL) {
-			method = HttpMethod.Post
-			setBody(mapOfParams)
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : List<PrayerTimeResponse> =
+			httpClient.request(AppConstants.PRAYER_TIMES_URL) {
+				method = HttpMethod.Post
+				setBody(mapOfParams)
+				header("Content-Type" , "application/json")
+			}.body() !!
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getPrayerTimes: $response")
 
@@ -63,14 +64,15 @@ object NimazServicesImpl : NimazService
 
 	override suspend fun getPrayerTimesMonthlyCustom(
 		mapOfParams : Map<String , String> ,
-									   ) : List<PrayerTimeResponse>
+													) : List<PrayerTimeResponse>
 	{
 		//create a post request with stuff in body and return the response
-		val response : List<PrayerTimeResponse> = httpClient.request(AppConstants.PRAYER_TIMES_MONTHLY_CUSTOM_URL) {
-			method = HttpMethod.Post
-			setBody(mapOfParams)
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : List<PrayerTimeResponse> =
+			httpClient.request(AppConstants.PRAYER_TIMES_MONTHLY_CUSTOM_URL) {
+				method = HttpMethod.Post
+				setBody(mapOfParams)
+				header("Content-Type" , "application/json")
+			}.body() !!
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getPrayerTimes: $response")
 

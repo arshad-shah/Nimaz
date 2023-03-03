@@ -1,14 +1,12 @@
 package com.arshadshah.nimaz.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 
 @Dao
 interface TasbihTrackerDao
 {
+
 	@Query("SELECT * FROM Tasbih")
 	fun getAll() : List<LocalTasbih>
 
@@ -42,9 +40,8 @@ interface TasbihTrackerDao
 
 	//save a tasbih to the database
 	@Insert(LocalTasbih::class)
-	fun saveTasbih(tasbih : LocalTasbih)
+	fun saveTasbih(tasbih : LocalTasbih) : Long
 
-	//update a tasbih in the database
 	@Query("UPDATE Tasbih SET count = :count WHERE id = :id")
 	fun updateTasbih(id : Int , count : Int)
 

@@ -44,102 +44,104 @@ fun PrayerTrackerListItems(
 	val dateForTracker = LocalDate.parse(dateState.value)
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 
-	if(showDateSelector.value){
+	if (showDateSelector.value)
+	{
 		DateSelector(
 				handleEvent = handleEvent
 					)
-				ElevatedCard(
+		ElevatedCard(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(4.dp)
+					.background(
+							if (isAfterToday) MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
+							   ) ,
+					) {
+			items.forEachIndexed { index , item ->
+				//if not the first item add a divider
+				if (index != 0)
+				{
+					Divider(
+							color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
+							thickness = 1.dp
+						   )
+				}
+				//the toggleable item
+				ToggleableItem(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(4.dp)
-							.background(
-									if (isAfterToday) MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
-									   ),
-							) {
-					items.forEachIndexed { index , item ->
-						//if not the first item add a divider
-						if (index != 0)
+							.padding(8.dp)
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										) ,
+						text = item ,
+						checked = when (item)
 						{
-							Divider(
-									color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
-									thickness = 1.dp
-								   )
-						}
-						//the toggleable item
-						ToggleableItem(
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(8.dp)
-									.placeholder(
-											visible = loading ,
-											color = MaterialTheme.colorScheme.outline ,
-											shape = RoundedCornerShape(4.dp) ,
-											highlight = PlaceholderHighlight.shimmer(
-													highlightColor = Color.White ,
-																					)
-												) ,
-								text = item ,
-								checked = when (item)
-								{
-									//if the date is after today then disable the toggle
-									"Fajr" -> if (isAfterToday) false else fajrChecked.value
-									"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
-									"Asr" -> if (isAfterToday) false else asrChecked.value
-									"Maghrib" -> if (isAfterToday) false else maghribChecked.value
-									"Isha" -> if (isAfterToday) false else ishaChecked.value
-									else -> false
-								} ,
-								onCheckedChange = {
-									if (isAfterToday)
-									{
-										Toasty.info(
-												context ,
-												"Oops! you cant update the tracker for a date in the future" ,
-												Toasty.LENGTH_SHORT ,
-												true
-												   ).show()
-										return@ToggleableItem
-									}
-									when (item)
-									{
-										//if the date is after today then disable the toggle
-										"Fajr" -> fajrChecked.value = it
-										"Dhuhr" -> zuhrChecked.value = it
-										"Asr" -> asrChecked.value = it
-										"Maghrib" -> maghribChecked.value = it
-										"Isha" -> ishaChecked.value = it
-									}
+							//if the date is after today then disable the toggle
+							"Fajr" -> if (isAfterToday) false else fajrChecked.value
+							"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
+							"Asr" -> if (isAfterToday) false else asrChecked.value
+							"Maghrib" -> if (isAfterToday) false else maghribChecked.value
+							"Isha" -> if (isAfterToday) false else ishaChecked.value
+							else -> false
+						} ,
+						onCheckedChange = {
+							if (isAfterToday)
+							{
+								Toasty.info(
+										context ,
+										"Oops! you cant update the tracker for a date in the future" ,
+										Toasty.LENGTH_SHORT ,
+										true
+										   ).show()
+								return@ToggleableItem
+							}
+							when (item)
+							{
+								//if the date is after today then disable the toggle
+								"Fajr" -> fajrChecked.value = it
+								"Dhuhr" -> zuhrChecked.value = it
+								"Asr" -> asrChecked.value = it
+								"Maghrib" -> maghribChecked.value = it
+								"Isha" -> ishaChecked.value = it
+							}
 
-									//for each of the checked items add 20 to the progress any unchecked item subtracts 20
-									progress.value = when (item)
-									{
-										"Fajr" -> if (it) progress.value + 20 else progress.value - 20
-										"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
-										"Asr" -> if (it) progress.value + 20 else progress.value - 20
-										"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
-										"Isha" -> if (it) progress.value + 20 else progress.value - 20
-										else -> 0f
-									}
+							//for each of the checked items add 20 to the progress any unchecked item subtracts 20
+							progress.value = when (item)
+							{
+								"Fajr" -> if (it) progress.value + 20 else progress.value - 20
+								"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
+								"Asr" -> if (it) progress.value + 20 else progress.value - 20
+								"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
+								"Isha" -> if (it) progress.value + 20 else progress.value - 20
+								else -> 0f
+							}
 
-									handleEvent(
-											TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
-													PrayerTracker(
-															fajr = fajrChecked.value ,
-															dhuhr = zuhrChecked.value ,
-															asr = asrChecked.value ,
-															maghrib = maghribChecked.value ,
-															isha = ishaChecked.value ,
-															date = dateState.value,
-															progress = progress.value.toInt()
-																 )
-																						)
-											   )
-								},
-								showDateSelector = showDateSelector.value
-									  )
-					}
+							handleEvent(
+									TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
+											PrayerTracker(
+													fajr = fajrChecked.value ,
+													dhuhr = zuhrChecked.value ,
+													asr = asrChecked.value ,
+													maghrib = maghribChecked.value ,
+													isha = ishaChecked.value ,
+													date = dateState.value ,
+													progress = progress.value.toInt()
+														 )
+																				)
+									   )
+						} ,
+						showDateSelector = showDateSelector.value
+							  )
+			}
 		}
-	}else{
+	} else
+	{
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -151,7 +153,7 @@ fun PrayerTrackerListItems(
 						.padding(8.dp) ,
 					horizontalArrangement = Arrangement.SpaceBetween ,
 					verticalAlignment = Alignment.CenterVertically
-			   ){
+			   ) {
 				items.forEachIndexed { index , item ->
 					//the toggleable item
 					ToggleableItem(
@@ -222,7 +224,7 @@ fun PrayerTrackerListItems(
 												highlightColor = Color.White ,
 																				)
 											) ,
-										showDateSelector = showDateSelector.value
+							showDateSelector = showDateSelector.value
 								  )
 				}
 			}
