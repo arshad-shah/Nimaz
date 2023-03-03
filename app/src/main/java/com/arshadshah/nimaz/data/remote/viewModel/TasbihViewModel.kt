@@ -132,6 +132,19 @@ class TasbihViewModel(context : Context) : ViewModel()
 				{
 					for (tasbih in yesterdayTasbihList)
 					{
+						//check if the tasbih for today already exists by checking both arabic name and goal
+						val todayTasbihList = tasbihListByDate[date]
+						if (todayTasbihList != null)
+						{
+							val tasbihExists = todayTasbihList.find {
+								it.arabicName == tasbih.arabicName && it.goal == tasbih.goal
+							}
+							if (tasbihExists != null)
+							{
+								//if the tasbih exists for today then we don't need to recreate it
+								continue
+							}
+						}
 						val newTasbih = Tasbih(
 								id = 0 ,
 								arabicName = tasbih.arabicName ,
