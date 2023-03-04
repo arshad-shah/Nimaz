@@ -26,6 +26,10 @@ class DataStore(db : AppDatabase)
 	suspend fun updateTasbih(tasbih : Tasbih) =
 		tasbihTrackerDao.updateTasbih(tasbih.id , tasbih.count)
 
+	//update tasbih goal
+	suspend fun updateTasbihGoal(tasbih : Tasbih) =
+		tasbihTrackerDao.updateTasbihGoal(tasbih.id , tasbih.goal)
+
 	//save a tasbih to the database
 	suspend fun saveTasbih(tasbih : Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
 

@@ -65,6 +65,9 @@ class TasbihViewModel(context : Context) : ViewModel()
 
 		//recreate the tasbih from last date for today
 		data class RecreateTasbih(val date : String) : TasbihEvent()
+
+		//update tasbih goal
+		data class UpdateTasbihGoal(val tasbih : Tasbih) : TasbihEvent()
 	}
 
 	//event for the tasbih
@@ -104,6 +107,10 @@ class TasbihViewModel(context : Context) : ViewModel()
 			is TasbihEvent.RecreateTasbih ->
 			{
 				recreateTasbih(event.date)
+			}
+			is TasbihEvent.UpdateTasbihGoal ->
+			{
+				updateTasbihGoal(event.tasbih)
 			}
 		}
 	}
@@ -189,6 +196,8 @@ class TasbihViewModel(context : Context) : ViewModel()
 											 )
 				val datastore = LocalDataStore.getDataStore()
 				datastore.deleteTasbih(tasbih)
+				//refresh the tasbih list
+				getTasbihList(tasbih.date)
 				_tasbihLoading.value = false
 			} catch (e : Exception)
 			{
@@ -269,6 +278,30 @@ class TasbihViewModel(context : Context) : ViewModel()
 				datastore.updateTasbih(tasbih)
 				//get the tasbih that was just created
 				val tasbihJustUpdated = datastore.getTasbihById(tasbih.id)
+				//refresh the tasbih list
+				getTasbihList(tasbih.date)
+				//update the tasbih state on the main thread
+				_tasbihCreated.value = tasbihJustUpdated
+				_tasbihLoading.value = false
+			} catch (e : Exception)
+			{
+				_tasbihError.value = e.message.toString()
+			}
+		}
+	}
+	private fun updateTasbihGoal(tasbih : Tasbih)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				_tasbihLoading.value = true
+				_tasbihError.value = ""
+				val datastore = LocalDataStore.getDataStore()
+				datastore.updateTasbihGoal(tasbih)
+				//get the tasbih that was just created
+				val tasbihJustUpdated = datastore.getTasbihById(tasbih.id)
+				//refresh the tasbih list
+				getTasbihList(tasbih.date)
 				//update the tasbih state on the main thread
 				_tasbihCreated.value = tasbihJustUpdated
 				_tasbihLoading.value = false

@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
+import com.arshadshah.nimaz.ui.components.ui.trackers.TasbihGoalDialog
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import java.time.LocalDate
 
@@ -131,60 +132,27 @@ fun TasbihRow(
 		}
 	}
 
-	if (showTasbihDialog.value)
-	{
-		val goal = remember {
-			mutableStateOf("")
-		}
-		//an alert dialog with text field to enter the tasbih goal
-		AlertDialog(
-				onDismissRequest = { showTasbihDialog.value = false } ,
-				title = { Text(text = "Set Daily Goal") } ,
-				text = {
-					Column(
-							modifier = Modifier.padding(8.dp) ,
-							verticalArrangement = Arrangement.spacedBy(8.dp) ,
-							horizontalAlignment = Alignment.CenterHorizontally ,
-						  ) {
-						OutlinedTextField(
-								value = goal.value ,
-								onValueChange = {
-									goal.value = it
-								} ,
-								label = { Text(text = "Daily Goal") } ,
-										 )
-					}
-				} ,
-				confirmButton = {
-					Button(
-							onClick = {
-								viewModel.handleEvent(
-										TasbihViewModel.TasbihEvent.SetTasbih(
-												Tasbih(
-														date = LocalDate.now().toString() ,
-														arabicName = arabicName ,
-														englishName = englishName ,
-														translationName = translationName ,
-														goal = goal.value.toInt() ,
-														count = 0 ,
-													  )
-																			 )
-													 )
-								navigateToTasbihScreen.value = true
-								showTasbihDialog.value = false
-							} ,
-							content = { Text(text = "Confirm") } ,
-						  )
-				} ,
-				dismissButton = {
-					Button(
-							onClick = { showTasbihDialog.value = false } ,
-							content = { Text(text = "Cancel") } ,
-						  )
-				} ,
-				   )
+	val goal = remember {
+		mutableStateOf("")
 	}
 
+	TasbihGoalDialog(
+			state = goal ,
+			onConfirm = {
+				viewModel.handleEvent(TasbihViewModel.TasbihEvent.SetTasbih(
+						Tasbih(
+								arabicName = arabicName ,
+								englishName = englishName ,
+								translationName = translationName ,
+								goal = it.toInt() ,
+								count = 0 ,
+								date = LocalDate.now().toString() ,
+							  )
+																		   ))
+				navigateToTasbihScreen.value = true
+			} ,
+			isOpen = showTasbihDialog ,
+					)
 }
 
 @Preview
