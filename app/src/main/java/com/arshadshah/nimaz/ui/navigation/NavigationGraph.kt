@@ -446,6 +446,10 @@ fun NavigationGraph(
 											  )
 					}
 					 )
+			//tasbihListScreen
+			{
+				navController.navigate(TASBIH_LIST_SCREEN)
+			}
 		}
 
 		composable(BottomNavItem.PrayerTimesScreen.screen_route)
