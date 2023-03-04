@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.remote.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,7 @@ class TrackerViewModel : ViewModel()
 
 	sealed class TrackerState
 	{
+
 		object Loading : TrackerState()
 		data class Tracker(val tracker : PrayerTracker) : TrackerState()
 		data class Error(val message : String) : TrackerState()
@@ -21,6 +23,17 @@ class TrackerViewModel : ViewModel()
 
 	private var _trackerState = MutableStateFlow(TrackerState.Loading as TrackerState)
 	val trackerState = _trackerState.asStateFlow()
+
+	sealed class FastTrackerState
+	{
+
+		object Loading : FastTrackerState()
+		data class Tracker(val tracker : FastTracker) : FastTrackerState()
+		data class Error(val message : String) : FastTrackerState()
+	}
+
+	private var _fastTrackerState = MutableStateFlow(FastTrackerState.Loading as FastTrackerState)
+	val fastTrackerState = _fastTrackerState.asStateFlow()
 
 	//state of date
 	private var _dateState = MutableStateFlow(LocalDate.now().toString())
@@ -55,18 +68,31 @@ class TrackerViewModel : ViewModel()
 	private var _progressState = MutableStateFlow(0)
 	val progressState = _progressState.asStateFlow()
 
+	//a progressfor a specific date
+	private var _progressForDate = MutableStateFlow(Pair(LocalDate.now().toString() , 0))
+	val progressForDate = _progressForDate.asStateFlow()
+
 	//dates with trackers
 	private var _allTrackers = MutableStateFlow(listOf<PrayerTracker>())
 	val allTrackers = _allTrackers.asStateFlow()
 
+	private var _isFasting = MutableStateFlow(false)
+	val isFasting = _isFasting.asStateFlow()
 
 
 	//event for the tracker for prayer
 	sealed class TrackerEvent
 	{
-		class UPDATE_TRACKER(val tracker :PrayerTracker) : TrackerEvent()
+
+		class UPDATE_TRACKER(val tracker : PrayerTracker) : TrackerEvent()
+		class UPDATE_FAST_TRACKER(val tracker : FastTracker) : TrackerEvent()
 		class GET_TRACKER_FOR_DATE(val date : String) : TrackerEvent()
+
+		class GET_FAST_TRACKER_FOR_DATE(val date : String) : TrackerEvent()
+
 		class SAVE_TRACKER(val tracker : PrayerTracker) : TrackerEvent()
+
+		class SAVE_FAST_TRACKER(val tracker : FastTracker) : TrackerEvent()
 
 		//event for the date selector
 		class SHOW_DATE_SELECTOR(val shouldShow : Boolean) : TrackerEvent()
@@ -85,7 +111,7 @@ class TrackerViewModel : ViewModel()
 
 	fun onEvent(event : TrackerEvent)
 	{
-		when(event)
+		when (event)
 		{
 			is TrackerEvent.UPDATE_TRACKER -> updateTracker(event.tracker)
 			is TrackerEvent.GET_TRACKER_FOR_DATE -> getTrackerForDate(event.date)
@@ -95,6 +121,78 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.SET_PROGRESS -> _progressState.value = event.progress
 			is TrackerEvent.GET_PROGRESS_FOR_DATE -> getProgressForDate(event.date)
 			is TrackerEvent.GET_ALL_TRACKERS -> getAllTrackers()
+			is TrackerEvent.UPDATE_FAST_TRACKER -> updateFastTracker(event.tracker)
+			is TrackerEvent.GET_FAST_TRACKER_FOR_DATE -> getFastTrackerForDate(event.date)
+			is TrackerEvent.SAVE_FAST_TRACKER -> saveFastTracker(event.tracker)
+		}
+	}
+
+	fun updateFastTracker(tracker : FastTracker)
+	{
+		viewModelScope.launch {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				val trackerExists = dataStore.fastTrackerExistsForDate(tracker.date)
+				if (! trackerExists)
+				{
+					dataStore.saveFastTracker(tracker)
+					_isFasting.value = false
+					_fastTrackerState.value = FastTrackerState.Tracker(tracker)
+				} else
+				{
+					dataStore.updateFastTracker(tracker)
+					_isFasting.value = tracker.isFasting
+					_fastTrackerState.value = FastTrackerState.Tracker(tracker)
+				}
+			} catch (e : Exception)
+			{
+				_fastTrackerState.value =
+					FastTrackerState.Error(e.message ?: "An unknown error occurred")
+			}
+		}
+	}
+
+	fun getFastTrackerForDate(date : String)
+	{
+		viewModelScope.launch {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				val trackerExists = dataStore.fastTrackerExistsForDate(date)
+				if (! trackerExists)
+				{
+					val tracker = FastTracker(date)
+					dataStore.saveFastTracker(tracker)
+					_fastTrackerState.value = FastTrackerState.Tracker(tracker)
+					_isFasting.value = false
+				} else
+				{
+					val tracker = dataStore.getFastTrackerForDate(date)
+					_fastTrackerState.value = FastTrackerState.Tracker(tracker)
+					_isFasting.value = tracker.isFasting
+				}
+			} catch (e : Exception)
+			{
+				_fastTrackerState.value =
+					FastTrackerState.Error(e.message ?: "An unknown error occurred")
+			}
+		}
+	}
+
+	fun saveFastTracker(tracker : FastTracker)
+	{
+		viewModelScope.launch {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.saveFastTracker(tracker)
+				_fastTrackerState.value = FastTrackerState.Tracker(tracker)
+			} catch (e : Exception)
+			{
+				_fastTrackerState.value =
+					FastTrackerState.Error(e.message ?: "An unknown error occurred")
+			}
 		}
 	}
 
@@ -120,7 +218,7 @@ class TrackerViewModel : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val tracker = dataStore.getTrackerForDate(date)
-				_progressState.value = tracker.progress
+				_progressForDate.value = Pair(date , tracker.progress)
 			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
@@ -136,7 +234,7 @@ class TrackerViewModel : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val trackerExists = dataStore.checkIfTrackerExists(date)
-				if (!trackerExists)
+				if (! trackerExists)
 				{
 					val tracker = PrayerTracker(date)
 					dataStore.saveTracker(tracker)
@@ -149,7 +247,8 @@ class TrackerViewModel : ViewModel()
 					_ishaState.value = false
 					_progressState.value = 0
 
-				}else{
+				} else
+				{
 					val tracker = dataStore.getTrackerForDate(date)
 					_dateState.value = date
 					_fajrState.value = tracker.fajr
@@ -160,13 +259,13 @@ class TrackerViewModel : ViewModel()
 					_trackerState.value = TrackerState.Tracker(tracker)
 					_progressState.value = tracker.progress
 				}
-			}
-			catch (e : Exception)
+			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
 			}
 		}
 	}
+
 	//function to update a tracker
 	fun updateTracker(tracker : PrayerTracker)
 	{
@@ -189,8 +288,7 @@ class TrackerViewModel : ViewModel()
 					_maghribState.value = tracker.maghrib
 					_ishaState.value = tracker.isha
 					_progressState.value = tracker.progress
-				}
-				else
+				} else
 				{
 					dataStore.saveTracker(tracker)
 					//get the updated tracker
@@ -204,8 +302,7 @@ class TrackerViewModel : ViewModel()
 					_ishaState.value = tracker.isha
 					_progressState.value = tracker.progress
 				}
-			}
-			catch (e : Exception)
+			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
 			}
@@ -230,8 +327,7 @@ class TrackerViewModel : ViewModel()
 				_ishaState.value = tracker.isha
 				_trackerState.value = TrackerState.Tracker(updatedTracker)
 				_progressState.value = tracker.progress
-			}
-			catch (e : Exception)
+			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
 			}

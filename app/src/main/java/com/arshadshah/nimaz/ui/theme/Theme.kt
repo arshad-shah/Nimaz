@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.toArgb
@@ -86,8 +85,8 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun NimazTheme(
-	darkTheme : Boolean = isSystemInDarkTheme() ,
-	dynamicColor : Boolean = true ,
+	darkTheme : Boolean = false ,
+	dynamicColor : Boolean = false ,
 	content : @Composable () -> Unit ,
 			  )
 {

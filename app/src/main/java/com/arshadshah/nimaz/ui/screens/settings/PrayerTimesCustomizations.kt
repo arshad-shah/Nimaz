@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,8 +40,21 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val context = LocalContext.current
 	val sharedPreferences = PrivateSharedPreferences(context)
 
-	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
-	val settingViewModel = viewModel(key = "SettingViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity)
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
+	val settingViewModel = viewModel(
+			key = "SettingViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+									)
+
+
+	LaunchedEffect(Unit) {
+		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+	}
 
 	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
@@ -95,6 +109,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaAngleVisibility
 	}.collectAsState()
 
+	val ishaInterval = remember {
+		settingViewModel.ishaInterval
+	}.collectAsState()
+
 	val calculationMethod = remember {
 		settingViewModel.calculationMethod
 	}.collectAsState()
@@ -139,25 +157,28 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaOffset
 	}.collectAsState()
 
-	LaunchedEffect(Unit){
-		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
-		calculationMethodState.value = calculationMethod.value
-		madhabState.value = madhab.value
-		highLatitudeRuleState.value = highLatitudeRule.value
-		fajrAngleState.value = fajrAngle.value
-		ishaAngleState.value = ishaAngle.value
-		fajrAdjustment.value = fajrAdjustmentValue.value
-		sunriseAdjustment.value = sunriseAdjustmentValue.value
-		dhuhrAdjustment.value = dhuhrAdjustmentValue.value
-		asrAdjustment.value = asrAdjustmentValue.value
-		maghribAdjustment.value = maghribAdjustmentValue.value
-		ishaAdjustment.value = ishaAdjustmentValue.value
-	}
+	val isLoading = remember {
+		settingViewModel.isLoading
+	}.collectAsState()
+
+	calculationMethodState.value = calculationMethod.value
+	madhabState.value = madhab.value
+	highLatitudeRuleState.value = highLatitudeRule.value
+	fajrAngleState.value = fajrAngle.value
+	ishaAngleState.value = ishaAngle.value
+	ishaIntervalState.value = ishaInterval.value
+	fajrAdjustment.value = fajrAdjustmentValue.value
+	sunriseAdjustment.value = sunriseAdjustmentValue.value
+	dhuhrAdjustment.value = dhuhrAdjustmentValue.value
+	asrAdjustment.value = asrAdjustmentValue.value
+	maghribAdjustment.value = maghribAdjustmentValue.value
+	ishaAdjustment.value = ishaAdjustmentValue.value
 
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
 				.padding(paddingValues)
+				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION)
 		  ) {
 		SettingsGroup(title = {
 			Text(text = "Prayer Parameters")
@@ -180,9 +201,29 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						} ,
 						items = mapOfMethods ,
 						valueState = calculationMethodState ,
-						onChange = { method: String ->
-							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.CalculationMethod(method))
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						onChange = { method : String ->
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.CalculationMethod(
+											method
+																					 )
+														)
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.UpdateSettings(
+											method
+																				  )
+														)
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											getParams(context)
+																							)
+												 )
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+												 )
 						} ,
 						height = 500.dp
 							)
@@ -210,9 +251,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.Madhab(
 									madhab
-																			 )
+																  )
 												)
-					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+					viewModel.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+									getParams(context)
+																					)
+										 )
+					viewModel.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+									context
+																			   )
+										 )
 				}
 			}
 			ElevatedCard(
@@ -238,9 +290,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.HighLatitude(
 									highLatRule
-																			 )
+																		)
 												)
-					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+					viewModel.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+									getParams(context)
+																					)
+										 )
+					viewModel.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+									context
+																			   )
+										 )
 				}
 			}
 		}
@@ -269,7 +332,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						valueState = fajrAngleState ,
 										  ) { angle : Int ->
 					settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.FajrAngle(angle.toString()))
-					viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+					viewModel.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+									getParams(context)
+																					)
+										 )
+					viewModel.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+									context
+																			   )
+										 )
 				}
 			}
 			if (ishaaAngleVisible.value)
@@ -296,9 +370,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						settingViewModel.handleEvent(
 								SettingsViewModel.SettingsEvent.IshaAngle(
 										angle.toString()
-																													)
+																		 )
 													)
-						viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+						viewModel.handleEvent(
+								context ,
+								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+										getParams(context)
+																						)
+											 )
+						viewModel.handleEvent(
+								context ,
+								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+										context
+																				   )
+											 )
 					}
 				}
 			} else
@@ -336,11 +421,11 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp),
+												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.fajr_icon) ,
-										  contentDescription = "Fajr Time"
-										)
-								},
+											contentDescription = "Fajr Time"
+										 )
+								} ,
 								title = {
 									Text(text = "Fajr Time")
 								} ,
@@ -356,9 +441,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.FajrOffset(
 											adjustment.toString()
-																														)
+																			  )
 														)
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											getParams(context)
+																							)
+												 )
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+												 )
 						}
 					}
 					ElevatedCard(
@@ -371,11 +467,11 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp),
+												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.sunrise_icon) ,
 											contentDescription = "Fajr Time"
 										 )
-								},
+								} ,
 								title = {
 									Text(text = "Sunrise Time")
 								} ,
@@ -391,9 +487,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.SunriseOffset(
 											adjustment.toString()
-																														)
+																				 )
 														)
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											getParams(context)
+																							)
+												 )
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+												 )
 						}
 					}
 					ElevatedCard(
@@ -406,11 +513,11 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp),
+												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.dhuhr_icon) ,
 											contentDescription = "Dhuhr Time"
 										 )
-								},
+								} ,
 								title = {
 									Text(text = "Dhuhr Time")
 								} ,
@@ -426,9 +533,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.DhuhrOffset(
 											adjustment.toString()
-																														)
+																			   )
 														)
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											getParams(context)
+																							)
+												 )
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+												 )
 						}
 					}
 					ElevatedCard(
@@ -441,11 +559,11 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp),
+												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.asr_icon) ,
 											contentDescription = "Asr Time"
 										 )
-								},
+								} ,
 								title = {
 									Text(text = "Asr Time")
 								} ,
@@ -461,9 +579,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.AsrOffset(
 											adjustment.toString()
-																														)
+																			 )
 														)
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											getParams(context)
+																							)
+												 )
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+												 )
 						}
 					}
 					ElevatedCard(
@@ -476,11 +605,11 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp),
+												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.maghrib_icon) ,
 											contentDescription = "Maghrib Time"
 										 )
-								},
+								} ,
 								title = {
 									Text(text = "Maghrib Time")
 								} ,
@@ -496,9 +625,20 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.MaghribOffset(
 											adjustment.toString()
-																														)
+																				 )
 														)
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											getParams(context)
+																							)
+												 )
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+												 )
 						}
 					}
 					ElevatedCard(
@@ -511,11 +651,11 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp),
+												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.isha_icon) ,
 											contentDescription = "Isha Time"
 										 )
-								},
+								} ,
 								title = {
 									Text(text = "Isha Time")
 								} ,
@@ -531,15 +671,28 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.IshaOffset(
 											adjustment.toString()
-																														)
+																			  )
 														)
-							viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(getParams(context)))
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											getParams(context)
+																							)
+												 )
+							viewModel.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+												 )
 						}
 					}
 				}
 					 )
 	}
 }
+
+
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview()

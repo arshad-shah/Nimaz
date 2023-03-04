@@ -35,19 +35,20 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
-import kotlin.reflect.KFunction1
 
 @Composable
 fun Page(
 	AyaList : ArrayList<Aya> ,
 	paddingValues : PaddingValues ,
 	loading : Boolean ,
-	handleEvents : KFunction1<QuranViewModel.AyaEvent , Unit>
 		)
 {
 
 	val context = LocalContext.current
-	val viewModel = viewModel(key = "QuranViewModel" , initializer = { QuranViewModel(context) } , viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity)
 	val arabicFontSize = remember {
 		viewModel.arabic_Font_size
 	}.collectAsState()

@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.ui.components.ui.intro
 import android.Manifest
 import android.content.Intent
 import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -11,12 +11,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.arshadshah.nimaz.constants.AppConstants
@@ -29,7 +29,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun NotificationScreenUI()
@@ -37,6 +36,7 @@ fun NotificationScreenUI()
 	val context = LocalContext.current
 	//get shared preference
 	val sharedpref = PrivateSharedPreferences(context)
+
 	//notification permission state
 	val notificationPermissionState =
 		rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -95,6 +95,7 @@ fun NotificationScreenUI()
 	}
 
 	SettingsSwitch(
+			modifier = Modifier.testTag("notification_switch_on_intro_screen") ,
 			state = state ,
 			onCheckedChange = {
 				if (it)
@@ -140,18 +141,21 @@ fun NotificationScreenUI()
 				}
 			} ,
 			title = {
-				Text(text = "Allow Notifications")
+				Text(text = "Enable Notifications")
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
 				if (isChecked.value)
 				{
-					Row {
+					Row(
+							horizontalArrangement = Arrangement.Start ,
+							verticalAlignment = Alignment.CenterVertically
+					   ) {
 						Icon(
 								imageVector = Icons.Filled.CheckCircle ,
 								contentDescription = "Notifications Allowed"
 							)
-						Text(text = "Allowed")
+						Text(text = "Enabled")
 					}
 				} else
 				{
@@ -161,7 +165,7 @@ fun NotificationScreenUI()
 								imageVector = Icons.Filled.Close ,
 								contentDescription = "Notifications Not Allowed"
 							)
-						Text(text = "Not Allowed")
+						Text(text = "Disabled")
 					}
 				}
 			} ,

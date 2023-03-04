@@ -14,18 +14,23 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
@@ -34,7 +39,6 @@ import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
 import com.arshadshah.nimaz.utils.NotificationHelper
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import es.dmoral.toasty.Toasty
@@ -49,17 +53,54 @@ fun SettingsScreen(
 				  )
 {
 	val context = LocalContext.current
-
-	val sharedPreferences = PrivateSharedPreferences(context)
-	val viewModelSettings = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModelSettings = viewModel(
+			key = "SettingsViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+									 )
 	val themeState = remember {
 		viewModelSettings.theme
+	}.collectAsState()
+
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
+
+	LaunchedEffect(Unit) {
+		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+	}
+
+	val fajrTime = remember {
+		viewModel.fajrTime
+	}.collectAsState()
+
+	val sunriseTime = remember {
+		viewModel.sunriseTime
+	}.collectAsState()
+
+	val dhuhrTime = remember {
+		viewModel.dhuhrTime
+	}.collectAsState()
+
+	val asrTime = remember {
+		viewModel.asrTime
+	}.collectAsState()
+
+	val maghribTime = remember {
+		viewModel.maghribTime
+	}.collectAsState()
+
+	val ishaTime = remember {
+		viewModel.ishaTime
 	}.collectAsState()
 
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
 				.padding(paddingValues)
+				.testTag(AppConstants.TEST_TAG_SETTINGS)
 		  ) {
 		LocationSettings()
 
@@ -68,6 +109,7 @@ fun SettingsScreen(
 					.padding(8.dp)
 					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON)
 					) {
 			SettingsMenuLink(
 					title = { Text(text = "Prayer Times Adjustments") } ,
@@ -82,7 +124,8 @@ fun SettingsScreen(
 							)
 		}
 
-		val stateOfTheme = rememberPreferenceStringSettingState(key =THEME, defaultValue = themeState.value)
+		val stateOfTheme =
+			rememberPreferenceStringSettingState(key = THEME , defaultValue = themeState.value)
 
 		stateOfTheme.value = themeState.value
 
@@ -91,14 +134,14 @@ fun SettingsScreen(
 		val themeMapForDynamic = mapOf(
 				"LIGHT" to "Light" ,
 				"DARK" to "Dark" ,
-				"SYSTEM" to "System Default",
+				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
-							)
+									  )
 		val themeMapForNonDynamic = mapOf(
 				"LIGHT" to "Light" ,
 				"DARK" to "Dark" ,
-				"SYSTEM" to "System Default",
-										)
+				"SYSTEM" to "System Default" ,
+										 )
 
 		//theme
 		ElevatedCard(
@@ -110,8 +153,9 @@ fun SettingsScreen(
 			SettingsList(
 					onChange = {
 						viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
-						Toasty.success(context , "Theme Changed to $it" , Toast.LENGTH_SHORT , true).show()
-					},
+						Toasty.success(context , "Theme Changed to $it" , Toast.LENGTH_SHORT , true)
+							.show()
+					} ,
 					height = 400.dp ,
 					subtitle = {
 						Text(text = "Change the theme of the app")
@@ -122,25 +166,15 @@ fun SettingsScreen(
 								painter = painterResource(id = R.drawable.theme_icon) ,
 								contentDescription = "Theme"
 							)
-					},
-					valueState = stateOfTheme,
-					title ={ Text(text = "Theme") },
-		 			items = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic,
+					} ,
+					valueState = stateOfTheme ,
+					title = { Text(text = "Theme") } ,
+					items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
 						)
 		}
 
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
-			//get all the prayer times from the shared preferences
-			val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR , "00:00"))
-			val sunrise =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE , "00:00"))
-			val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR , "00:00"))
-			val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR , "00:00"))
-			val maghrib =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB , "00:00"))
-			val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA , "00:00"))
-
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
@@ -152,12 +186,12 @@ fun SettingsScreen(
 						onClick = {
 							CreateAlarms().exact(
 									context ,
-									fajr ,
-									sunrise ,
-									dhuhr ,
-									asr ,
-									maghrib ,
-									isha
+									fajrTime.value ,
+									sunriseTime.value ,
+									dhuhrTime.value ,
+									asrTime.value ,
+									maghribTime.value ,
+									ishaTime.value
 												)
 							Toasty.success(context , "Alarms Reset" , Toast.LENGTH_SHORT , true)
 								.show()
@@ -322,6 +356,7 @@ fun SettingsScreen(
 					.padding(8.dp)
 					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_ABOUT)
 					) {
 			SettingsMenuLink(
 					title = { Text(text = "About") } ,

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.screens
 
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,11 +11,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QIBLA
 import com.arshadshah.nimaz.data.remote.viewModel.QiblaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.compass.BearingAndLocationContainer
 import com.arshadshah.nimaz.ui.components.bLogic.compass.Dial
@@ -24,7 +28,11 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 fun QiblaScreen(paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
-	val viewModel = QiblaViewModel(context)
+	val viewModel = viewModel(
+			key = "QiblaViewModel" ,
+			initializer = { QiblaViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
 
 	val state = remember { viewModel.qiblaState }.collectAsState()
 	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "QiblaScreen: ${state.value}")
@@ -54,7 +62,8 @@ fun QiblaScreen(paddingValues : PaddingValues)
 	Column(
 			modifier = Modifier
 				.padding(paddingValues)
-				.fillMaxSize() ,
+				.fillMaxSize()
+				.testTag(TEST_TAG_QIBLA) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {

@@ -28,6 +28,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
+//an annotation to indicate that this should be public in tests
 private fun <T> getItemIndexForOffset(
 	range : List<T> ,
 	value : T ,

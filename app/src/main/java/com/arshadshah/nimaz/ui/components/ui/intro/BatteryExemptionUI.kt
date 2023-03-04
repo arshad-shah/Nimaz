@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -35,7 +36,11 @@ fun BatteryExemptionUI()
 {
 	val context = LocalContext.current
 
-	val viewModel = viewModel(key = "SettingsViewModel", initializer = { SettingsViewModel(context) }, viewModelStoreOwner = context as ComponentActivity)
+	val viewModel = viewModel(
+			key = "SettingsViewModel" ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
 	val isBatteryExempt = remember {
 		viewModel.isBatteryExempt
 	}.collectAsState()
@@ -67,7 +72,8 @@ fun BatteryExemptionUI()
 																		 )
 										 )
 					state.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
-					isChecked.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+					isChecked.value =
+						powerManager.isIgnoringBatteryOptimizations(context.packageName)
 				}
 
 				else ->
@@ -85,6 +91,7 @@ fun BatteryExemptionUI()
 
 
 	SettingsSwitch(
+			modifier = Modifier.testTag("BatteryExemptionSwitch") ,
 			state = state ,
 			onCheckedChange = {
 				if (it)
@@ -102,7 +109,7 @@ fun BatteryExemptionUI()
 				}
 			} ,
 			title = {
-				Text(text = "Battery Optimization")
+				Text(text = "Enable Battery Exemption")
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
@@ -111,9 +118,9 @@ fun BatteryExemptionUI()
 					Row {
 						Icon(
 								imageVector = Icons.Filled.CheckCircle ,
-								contentDescription = "Battery Optimization Allowed"
+								contentDescription = "Battery Exemption Allowed"
 							)
-						Text(text = "Allowed")
+						Text(text = "Exempt")
 					}
 				} else
 				{
@@ -121,9 +128,9 @@ fun BatteryExemptionUI()
 					Row {
 						Icon(
 								imageVector = Icons.Filled.Close ,
-								contentDescription = "Battery Optimization Not Allowed"
+								contentDescription = "Battery Exemption Not Allowed"
 							)
-						Text(text = "Not Allowed")
+						Text(text = "Optimizing")
 					}
 				}
 			} ,

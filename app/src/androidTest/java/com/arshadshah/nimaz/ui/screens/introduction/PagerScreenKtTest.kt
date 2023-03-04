@@ -22,17 +22,17 @@ class PagerScreenKtTest
 	private val title = onboarding.title
 	private val description = onboarding.description
 
-	private val onboardingwithextra = OnBoardingPage.Seventh
+	private val onboardingwithextra = OnBoardingPage.Sixth
 	private val titlewithextra = onboardingwithextra.title
 	private val descriptionwithextra = onboardingwithextra.description
 
 	@Test
 	fun testPagerScreen() {
 		composeTestRule.setContent {
-			PagerScreen(onboarding)
+			PagerScreen(onboarding , 6)
 		}
 
-		composeTestRule.onNodeWithTag("pagerScreen").assertExists().assertIsDisplayed()
+		composeTestRule.onNodeWithTag("pagerScreen 6").assertExists().assertIsDisplayed()
 		composeTestRule.onNodeWithTag("pagerScreenTitle").assertExists().assertIsDisplayed()
 		composeTestRule.onNodeWithTag("pagerScreenImage").assertExists().assertIsDisplayed()
 		composeTestRule.onNodeWithTag("pagerScreenDescription").assertExists().assertIsDisplayed()
@@ -44,10 +44,10 @@ class PagerScreenKtTest
 	@Test
 	fun testPagerScreenWithExtra() {
 		composeTestRule.setContent {
-			PagerScreen(onboardingwithextra)
+			PagerScreen(onboardingwithextra , 6)
 		}
 
-		composeTestRule.onNodeWithTag("pagerScreen").assertExists().assertIsDisplayed()
+		composeTestRule.onNodeWithTag("pagerScreen 6").assertExists().assertIsDisplayed()
 		composeTestRule.onNodeWithTag("pagerScreenTitle").assertExists().assertIsDisplayed()
 		composeTestRule.onNodeWithTag("pagerScreenImage").assertExists().assertIsDisplayed()
 		composeTestRule.onNodeWithTag("pagerScreenDescription").assertExists().assertIsDisplayed()

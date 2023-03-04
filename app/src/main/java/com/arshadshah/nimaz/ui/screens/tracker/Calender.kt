@@ -12,9 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
@@ -31,7 +34,6 @@ import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.header.MonthState
 import io.github.boguszpawlowski.composecalendar.rememberSelectableCalendarState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
-import io.github.boguszpawlowski.composecalendar.selection.SelectionMode
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,27 +44,31 @@ import java.time.temporal.ChronoField
 @Composable
 fun Calender(paddingValues : PaddingValues)
 {
+
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
-	val viewModel = viewModel(initializer = { TrackerViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
-
 
 	Column(
 			modifier = Modifier
 				.fillMaxSize()
-				.padding(paddingValues),
+				.padding(paddingValues)
+				.testTag(TEST_TAG_CALENDER) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Center
+			verticalArrangement = Arrangement.Top
 		  ) {
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top = 0.dp , start = 8.dp , end = 8.dp , bottom = 4.dp)
 					) {
 			SelectableCalendar(
 					dayContent = {
-						CalenderDay(dayState = it,)
+						CalenderDay(dayState = it)
 					} ,
 					weekHeader = { weekState ->
 						CalenderWeekHeader(weekState = weekState)
@@ -73,53 +79,10 @@ fun Calender(paddingValues : PaddingValues)
 					monthHeader = { monthState ->
 						CalenderHeader(monthState = monthState)
 					} ,
-					calendarState = rememberSelectableCalendarState(
-							confirmSelectionChange = {
-								mutableDate.value = it.size
-									.let { size ->
-										if (size == 0)
-										{
-											LocalDate.now()
-										}
-										else
-										{
-											it.first()
-										}
-									}
-								true
-							},
-							selectionState = DynamicSelectionState(
-									selectionMode = SelectionMode.Single,
-									selection = mutableDate.value
-										.let { date ->
-											if (date == null)
-											{
-												setOf(LocalDate.now())
-											} else
-											{
-												setOf(date)
-											}
-										}.toList(),
-									confirmSelectionChange = {
-										mutableDate.value = it.size
-											.let { size ->
-												if (size == 0)
-												{
-													LocalDate.now()
-												}
-												else
-												{
-													it.first()
-												}
-											}
-										true
-									}
-
-							),
-																   )
+					calendarState = rememberSelectableCalendarState()
 							  )
 		}
-		PrayerTracker(paddingValues = PaddingValues(4.dp), isIntegrated = true)
+		PrayerTracker(paddingValues = PaddingValues(0.dp) , isIntegrated = true)
 	}
 }
 
@@ -127,6 +90,11 @@ fun Calender(paddingValues : PaddingValues)
 @Composable
 fun CalenderHeader(monthState : MonthState)
 {
+	val viewModel = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	val currentMonth = monthState.currentMonth
 	val currentYear = monthState.currentMonth.year
 
@@ -175,6 +143,16 @@ fun CalenderHeader(monthState : MonthState)
 			if (currentYearMonth != currentMonth)
 			{
 				monthState.currentMonth = currentYearMonth
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.SET_DATE(
+								LocalDate.now().toString()
+															  )
+								 )
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+								LocalDate.now().toString()
+																		  )
+								 )
 			}
 			showCurrentMonth.value = false
 			inCurrentMonth.value = true
@@ -219,11 +197,12 @@ fun CalenderHeader(monthState : MonthState)
 				if (monthState.currentMonth == YearMonth.now())
 				{
 					Text(
+							modifier = Modifier
+								.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
 							text = "Today" ,
 							style = MaterialTheme.typography.titleSmall
 						)
-				}
-				else
+				} else
 				{
 					Row(
 							horizontalArrangement = Arrangement.Center ,
@@ -239,19 +218,18 @@ fun CalenderHeader(monthState : MonthState)
 								)
 							Text(
 									text = "Today" ,
-									style = MaterialTheme.typography.titleSmall,
+									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp)
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
 										.alpha(0.5f)
 								)
-						}
-						else
+						} else
 						{
 							Text(
 									text = "Today" ,
-									style = MaterialTheme.typography.titleSmall,
+									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp)
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
 										.alpha(0.5f)
 								)
 							Icon(
@@ -267,14 +245,14 @@ fun CalenderHeader(monthState : MonthState)
 						text = currentMonthYear ,
 						style = MaterialTheme.typography.titleLarge ,
 						maxLines = 1 ,
-						modifier = Modifier.padding(8.dp)
+						modifier = Modifier.padding(4.dp)
 					)
 
 				Text(
 						text = hijriFormated ,
 						style = MaterialTheme.typography.bodySmall ,
 						maxLines = 1 ,
-						modifier = Modifier.padding(8.dp)
+						modifier = Modifier.padding(4.dp)
 					)
 			}
 
@@ -299,23 +277,31 @@ fun CalenderHeader(monthState : MonthState)
 fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 {
 	ElevatedCard(
-			modifier = Modifier.padding(vertical = 8.dp) ,
+			modifier = Modifier.padding(top = 8.dp) ,
 				) {
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(8.dp) ,
+					.padding(horizontal = 4.dp , vertical = 8.dp) ,
 				horizontalArrangement = Arrangement.Center
 		   ) {
 			weekState.forEach { dayOfWeek ->
 				Text(
 						text = dayOfWeek.name.substring(0 , 3) ,
-						style = MaterialTheme.typography.titleSmall ,
+						style = MaterialTheme.typography.titleMedium ,
+						color = if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY)
+						{
+							MaterialTheme.colorScheme.error
+						} else
+						{
+							MaterialTheme.colorScheme.onSurface
+						} ,
 						maxLines = 1 ,
 						overflow = TextOverflow.Ellipsis ,
 						textAlign = TextAlign.Center ,
 						modifier = Modifier
 							.weight(1f)
+							.padding(4.dp)
 					)
 			}
 		}
@@ -326,7 +312,7 @@ fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 {
 	ElevatedCard {
-		monthState(PaddingValues(8.dp))
+		monthState(PaddingValues(0.dp))
 	}
 }
 
@@ -335,7 +321,11 @@ fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
 			   )
 {
-
+	val viewModel = viewModel(
+			key = "TrackerViewModel" ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
 	val currentDate = dayState.date
@@ -351,15 +341,36 @@ fun CalenderDay(
 	val importantDay = isImportantDay(hijriDayOfMonth , hijriMonth)
 	ElevatedCard(
 			modifier = Modifier
-				.padding(4.dp)
-				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f) ,
+				.padding(2.dp)
+				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
+				.shadow(
+						if (today || isSelectedDay) 6.dp else 0.dp ,
+						shape = MaterialTheme.shapes.medium
+					   ) ,
+			colors = CardDefaults.elevatedCardColors(
+					containerColor = when (importantDay.first)
+					{
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer.copy(
+								alpha = 0.8f
+																											   ) else if (today) MaterialTheme.colorScheme.secondaryContainer.copy(
+								alpha = 0.8f
+																																												  ) else MaterialTheme.colorScheme.surface
+						true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+					}
+													)
 				) {
 
 		Column(
 				modifier = Modifier
 					.border(
-							width = 1.dp ,
-							color = if (today || isSelectedDay) MaterialTheme.colorScheme.primary else Color.Transparent ,
+							width = if (today || isSelectedDay) 2.dp else 1.dp ,
+							color = when (importantDay.first)
+							{
+								false -> if (today) MaterialTheme.colorScheme.secondary else if (isSelectedDay) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(
+										alpha = 0.3f
+																																															  )
+								true -> MaterialTheme.colorScheme.primary
+							} ,
 							shape = MaterialTheme.shapes.medium
 						   )
 					.clickable(
@@ -370,6 +381,12 @@ fun CalenderDay(
 							false -> if (dayState.isFromCurrentMonth)
 							{
 								dayState.selectionState.onDateSelected(dayState.date)
+								viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
+								viewModel.onEvent(
+										TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+												dayState.date.toString()
+																						  )
+												 )
 							}
 
 							else ->
@@ -377,6 +394,16 @@ fun CalenderDay(
 								if (dayState.isFromCurrentMonth)
 								{
 									dayState.selectionState.onDateSelected(dayState.date)
+									viewModel.onEvent(
+											TrackerViewModel.TrackerEvent.SET_DATE(
+													dayState.date.toString()
+																				  )
+													 )
+									viewModel.onEvent(
+											TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+													dayState.date.toString()
+																							  )
+													 )
 								}
 								//show the description of the day
 								hasDescription.value = ! hasDescription.value
@@ -387,30 +414,32 @@ fun CalenderDay(
 			  ) {
 			Text(
 					text = dayState.date.dayOfMonth.toString() ,
-					style = MaterialTheme.typography.titleSmall ,
+					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
+					modifier = Modifier.padding(6.dp) ,
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
-						true -> MaterialTheme.colorScheme.primary
+						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+						true -> MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
 			Divider(
 					modifier = Modifier
 						.fillMaxWidth() ,
-					color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
 				   )
 			Text(
 					//put a letter scissor ha in front of the day to show that it is a hijri day
 					text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
-					style = MaterialTheme.typography.titleSmall ,
+					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
+					modifier = Modifier.padding(6.dp) ,
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
-						else -> MaterialTheme.colorScheme.primary
+						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer
+						else -> MaterialTheme.colorScheme.onTertiaryContainer
 					}
 				)
 		}
@@ -421,7 +450,7 @@ fun CalenderDay(
 	{
 		Popup(
 				alignment = Alignment.TopCenter ,
-				offset = IntOffset(0 , - 130) ,
+				offset = IntOffset(0 , - 120) ,
 			 ) {
 			ElevatedCard(
 					modifier = Modifier
@@ -444,82 +473,96 @@ fun CalenderDay(
 fun getGradientForProgress(progressState : Int) : Brush
 {
 	//if the day is selected then we need to change the color of the background to the progress color
-	if (progressState == 100)
+	when (progressState)
 	{
-		return Brush.verticalGradient(
+		100 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+								   )
+										 )
+		}
+
+		80 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent
+								   )
+										 )
+		}
+
+		60 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+
+		40 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+
+		20 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+
+		0 ->
+		{
+			return Brush.verticalGradient(
+					colors = listOf(
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent ,
+							Color.Transparent
+								   )
+										 )
+		}
+
+		else -> return Brush.verticalGradient(
 				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-							   )
-									)
-	}else if (progressState == 80)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent ,
+						Color.Transparent ,
 						Color.Transparent
 							   )
-									)
-	}else if (progressState == 60)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
-	}else if (progressState == 40)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
-	}else if (progressState == 20)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
-	}else if (progressState == 0)
-	{
-		return Brush.verticalGradient(
-				colors = listOf(
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent
-							   )
-									)
+											 )
 	}
-	return Brush.verticalGradient(
-			colors = listOf(
-					Color.Transparent ,
-					Color.Transparent ,
-					Color.Transparent ,
-					Color.Transparent ,
-					Color.Transparent
-						   )
-								)
 }
 
 //function to check if a day is an important day
@@ -590,7 +633,7 @@ fun isImportantDay(day : Int , month : Int) : Pair<Boolean , String>
 @Composable
 fun PrayerTrackerPreview()
 {
-	NimazTheme {
+	NimazTheme(darkTheme = true) {
 		Calender(PaddingValues(8.dp))
 	}
 }

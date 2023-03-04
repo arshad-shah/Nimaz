@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.ui.components.ui.compass
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.animation.core.Animatable
@@ -32,11 +31,6 @@ import kotlin.math.abs
 @Composable
 fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 {
-
-	val hasSensor =
-		LocalContext.current.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && LocalContext.current.packageManager.hasSystemFeature(
-				PackageManager.FEATURE_SENSOR_COMPASS
-																																								 )
 	val yaw by derivedStateOf { (data?.yaw ?: 0f) }
 	val pitch by derivedStateOf { (data?.pitch ?: 0f) }
 	val roll by derivedStateOf { (data?.roll ?: 0f) }

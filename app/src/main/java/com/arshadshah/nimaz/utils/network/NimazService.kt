@@ -11,6 +11,14 @@ interface NimazService
 		mapOfParams : Map<String , String> ,
 							  ) : PrayerTimeResponse
 
+	suspend fun getPrayerTimesMonthly(
+		mapOfParams : Map<String , String> ,
+									 ) : List<PrayerTimeResponse>
+
+	suspend fun getPrayerTimesMonthlyCustom(
+		mapOfParams : Map<String , String> ,
+										   ) : List<PrayerTimeResponse>
+
 	suspend fun getSurahs() : ArrayList<SurahResponse>
 
 	suspend fun getJuzs() : ArrayList<JuzResponse>

@@ -5,9 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import java.time.LocalDateTime
+import kotlinx.coroutines.runBlocking
 
 class BootReciever : BroadcastReceiver()
 {
@@ -21,18 +21,18 @@ class BootReciever : BroadcastReceiver()
 			Log.d(AppConstants.BOOT_RECEIVER_TAG , "Boot Completed or Locked Boot Completed!")
 			Log.d(AppConstants.BOOT_RECEIVER_TAG , "Resetting Alarms after BootUp!")
 
-			val sharedPreferences = PrivateSharedPreferences(context)
-
-			val fajr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.FAJR , LocalDateTime.now().toString()))
-			val sunrise =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.SUNRISE , LocalDateTime.now().toString()))
-			val dhuhr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.DHUHR , LocalDateTime.now().toString()))
-			val asr = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ASR , LocalDateTime.now().toString()))
-			val maghrib =
-				LocalDateTime.parse(sharedPreferences.getData(AppConstants.MAGHRIB , LocalDateTime.now().toString()))
-			val isha = LocalDateTime.parse(sharedPreferences.getData(AppConstants.ISHA , LocalDateTime.now().toString()))
-
-			CreateAlarms().exact(context , fajr , sunrise , dhuhr , asr , maghrib , isha)
+			runBlocking {
+				val repository = PrayerTimesRepository.getPrayerTimes(context)
+				CreateAlarms().exact(
+						context ,
+						repository.data?.fajr !! ,
+						repository.data.sunrise !! ,
+						repository.data.dhuhr !! ,
+						repository.data.asr !! ,
+						repository.data.maghrib !! ,
+						repository.data.isha !!
+									)
+			}
 
 			Log.d(AppConstants.BOOT_RECEIVER_TAG , "Alarms Reset after BootUp!")
 

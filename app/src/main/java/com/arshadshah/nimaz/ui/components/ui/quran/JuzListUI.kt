@@ -13,10 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_JUZ_ITEM
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -27,11 +30,14 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun JuzListUI(
 	juz : ArrayList<Juz> ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	loading : Boolean ,
 			 )
 {
-	LazyColumn(userScrollEnabled = true) {
+	LazyColumn(
+			userScrollEnabled = ! loading ,
+			modifier = Modifier.testTag(TEST_TAG_QURAN_JUZ)
+			  ) {
 		items(juz.size) { index ->
 			JuzListItemUI(
 					loading = loading ,
@@ -49,7 +55,7 @@ fun JuzListItemUI(
 	juzNumber : String ,
 	name : String ,
 	tname : String ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	context : Context = LocalContext.current ,
 	loading : Boolean ,
 				 )
@@ -78,10 +84,11 @@ fun JuzListItemUI(
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_JUZ_ITEM)
 					.clickable(
-							enabled = true
+							enabled = ! loading ,
 							  ) {
-						onNavigateToAyatScreen(juzNumber , false , translation)
+						onNavigateToAyatScreen(juzNumber , false , translation , null)
 					}
 		   ) {
 

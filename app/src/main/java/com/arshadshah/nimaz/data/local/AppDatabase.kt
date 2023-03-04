@@ -9,13 +9,12 @@ import com.arshadshah.nimaz.data.local.dao.*
 import com.arshadshah.nimaz.data.local.models.*
 
 @TypeConverters(
-		LocalPrayertimeConverter::class ,
 		TimestampTypeConvertor::class ,
 		TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class] ,
-		version = 7 ,
+		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
+		version = 11 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -27,6 +26,8 @@ abstract class AppDatabase : RoomDatabase()
 	abstract val prayerTimes : PrayerTimesDao
 	abstract val dua : DuaDao
 	abstract val prayersTracker : PrayerTrackerDao
+	abstract val fastTracker : FastTrackerDao
+	abstract val tasbihTracker : TasbihTrackerDao
 
 	class Migration1To2 : Migration(1 , 2)
 	{
@@ -130,6 +131,7 @@ abstract class AppDatabase : RoomDatabase()
 	//migration from version 6 to 7
 	class Migration6To7 : Migration(6 , 7)
 	{
+
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
 			//drop table PrayersTracker and create a new one
@@ -138,6 +140,78 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("DROP TABLE IF EXISTS PrayersTracker")
 			//rename new table
 			database.execSQL("ALTER TABLE PrayersTracker_new RENAME TO PrayersTracker")
+		}
+	}
+
+	//migration from version 7 to 8
+	//a migration to add a new table for the new feature of the app
+	class Migration7To8 : Migration(7 , 8)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//create a new table
+//			database.execSQL("CREATE TABLE IF NOT EXISTS `QuranTracker_new` (`date` TEXT NOT NULL, `ayaNumber` INTEGER NOT NULL, `suraNumber` INTEGER NOT NULL, `ayaNumberInSurah` INTEGER NOT NULL, `progress` INTEGER NOT NULL, PRIMARY KEY(`date`))")
+
+			//fasting tracker
+			database.execSQL("CREATE TABLE IF NOT EXISTS `FastTracker` (`date` TEXT NOT NULL, `isFasting` INTEGER NOT NULL, PRIMARY KEY(`date`))")
+		}
+	}
+
+	//migration from version 8 to 9
+	//a migration to alter the table prayer_times so that the timestamp column is renamed to date, and 	val nextPrayer : LocalPrayertime = LocalPrayertime("" , "") ,
+	//	val currentPrayer : LocalPrayertime = LocalPrayertime("" , "") , are removed
+	class Migration8To9 : Migration(8 , 9)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//rename column timestamp to date
+			database.execSQL("ALTER TABLE prayer_times RENAME COLUMN timestamp TO date")
+			//drop the column nextPrayer
+			//1. Create the new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `prayer_times_new` (`date` TEXT NOT NULL, `fajr` TEXT NOT NULL,`sunrise` TEXT NOT NULL, `dhuhr` TEXT NOT NULL, `asr` TEXT NOT NULL, `maghrib` TEXT NOT NULL, `isha` TEXT NOT NULL, PRIMARY KEY(`date`))")
+			//2. Copy the data`dhuhr` TEXT NOT NULL,
+			database.execSQL("INSERT INTO prayer_times_new SELECT date, fajr,sunrise, dhuhr, asr, maghrib, isha FROM prayer_times")
+			//3. Remove the old table
+			database.execSQL("DROP TABLE IF EXISTS prayer_times")
+			//4. Change the table name to the correct one
+			database.execSQL("ALTER TABLE prayer_times_new RENAME TO prayer_times")
+		}
+	}
+
+	//migration from version 9 to 10
+	//a migration to add a new primary key to the table Tasbih
+	class Migration9To10 : Migration(9 , 10)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//drop the table Tasbih
+			database.execSQL("DROP TABLE IF EXISTS Tasbih")
+			//create a new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Tasbih_new` (`id` INTEGER NOT NULL, `date` TEXT NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `goal` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `isCompleted` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+			//rename new table
+			database.execSQL("ALTER TABLE Tasbih_new RENAME TO Tasbih")
+		}
+	}
+
+	//migration from version 10 to 11
+	//remove the column isCompleted from the table Tasbih and completed is renamed to count
+	class Migration10To11 : Migration(10 , 11)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//drop the column isCompleted
+			//1. Create the new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Tasbih_new` (`id` INTEGER NOT NULL, `date` TEXT NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `goal` INTEGER NOT NULL, `count` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+			//2. Copy the data
+			database.execSQL("INSERT INTO Tasbih_new SELECT id, date, arabicName, englishName, translationName, goal, completed FROM Tasbih")
+			//3. Remove the old table
+			database.execSQL("DROP TABLE Tasbih")
+			//4. Change the table name to the correct one
+			database.execSQL("ALTER TABLE Tasbih_new RENAME TO Tasbih")
 		}
 	}
 }

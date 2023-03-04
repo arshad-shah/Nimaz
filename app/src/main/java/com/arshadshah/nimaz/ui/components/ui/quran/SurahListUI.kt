@@ -16,10 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_SURAH_ITEM
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -30,11 +32,14 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun SurahListUI(
 	surahs : ArrayList<Surah> ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	loading : Boolean ,
 			   )
 {
-	LazyColumn(userScrollEnabled = true) {
+	LazyColumn(
+			userScrollEnabled = ! loading ,
+			modifier = Modifier.testTag(AppConstants.TEST_TAG_QURAN_SURAH)
+			  ) {
 		items(surahs.size) { index ->
 			SurahListItemUI(
 					loading = loading ,
@@ -60,7 +65,7 @@ fun SurahListItemUI(
 	englishNameTranslation : String ,
 	type : String ,
 	rukus : String ,
-	onNavigateToAyatScreen : (String , Boolean , String) -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
 	context : Context = LocalContext.current ,
 	loading : Boolean ,
 				   )
@@ -89,14 +94,14 @@ fun SurahListItemUI(
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
+					.testTag(TEST_TAG_SURAH_ITEM + surahNumber)
 					.clickable(
-							enabled = true ,
+							enabled = ! loading ,
 							onClick = {
-								onNavigateToAyatScreen(surahNumber , true , language)
+								onNavigateToAyatScreen(surahNumber , true , language , null)
 							}
 							  )
 		   ) {
-
 			Text(
 					modifier = Modifier
 						.align(Alignment.CenterVertically)

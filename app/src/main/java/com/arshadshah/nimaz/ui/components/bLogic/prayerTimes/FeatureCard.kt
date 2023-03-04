@@ -3,20 +3,24 @@ package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_MORE_LINK
 
 
 @Composable
 fun FeatureCard(
-	onNavigateToTasbihScreen : (String) -> Unit ,
+	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
 	onNavigateToNames : () -> Unit ,
 	paddingValues : PaddingValues ,
 	onNavigateToListOfTasbeeh : () -> Unit ,
@@ -24,61 +28,81 @@ fun FeatureCard(
 	onNavigateToZakat : () -> Unit ,
 	onNavigateToPrayerTracker : () -> Unit ,
 	onNavigateToCalender : () -> Unit ,
+	onNavigateToQibla : () -> Unit ,
+	onNavigateToTasbihListScreen : () -> Unit ,
 			   )
 {
-	Column(
+	LazyColumn(
 			modifier = Modifier
 				.fillMaxSize()
-				.padding(paddingValues) ,
+				.padding(paddingValues)
+				.testTag(AppConstants.TEST_TAG_MORE) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
-		  ) {
-		//website link
-		LinkButton(
-				painter = painterResource(id = R.drawable.tasbih) ,
-				content = "Tasbih" ,
-				onClick = {
-					onNavigateToTasbihScreen(" ")
-				} ,
-				title = "Tasbih" ,
-				  )
+			  ) {
+		item {
+			//website link
+			LinkButton(
+					painter = painterResource(id = R.drawable.tasbih) ,
+					content = "Tasbih" ,
+					onClick = {
+						onNavigateToTasbihScreen(" " , " " , " " , " ")
+					} ,
+					title = "Tasbih" ,
+					  )
+			LinkButton(
+					painter = painterResource(id = R.drawable.tasbih) ,
+					content = "Tasbih List" ,
+					onClick = {
+						onNavigateToTasbihListScreen()
+					} ,
+					title = "Tasbih List" ,
+					  )
+			LinkButton(
+					painter = painterResource(id = R.drawable.qibla) ,
+					content = "Qibla" ,
+					onClick = {
+						onNavigateToQibla()
+					} ,
+					title = "Qibla" ,
+					  )
 
-		//linkdIn link
-		LinkButton(
-				painter = painterResource(id = R.drawable.names_of_allah) ,
-				content = "Names of Allah" ,
-				onClick = {
-					onNavigateToNames()
-				} ,
-				title = "Names of Allah" ,
-				  )
-		//email link
-		LinkButton(
-				painter = painterResource(id = R.drawable.dua) ,
-				content = "Dua" ,
-				onClick = {
-					onNavigateToListOfTasbeeh()
-				} ,
-				title = "Duas" ,
-				  )
-		LinkButton(
-				painter = painterResource(id = R.drawable.tracker_icon) ,
-				content = "Prayer Tracker" ,
-				onClick = {
-					onNavigateToPrayerTracker()
-				} ,
-				title = "Prayer Tracker" ,
-				  )
+			//linkdIn link
+			LinkButton(
+					painter = painterResource(id = R.drawable.names_of_allah) ,
+					content = "Names of Allah" ,
+					onClick = {
+						onNavigateToNames()
+					} ,
+					title = "Names of Allah" ,
+					  )
+			//email link
+			LinkButton(
+					painter = painterResource(id = R.drawable.dua) ,
+					content = "Dua" ,
+					onClick = {
+						onNavigateToListOfTasbeeh()
+					} ,
+					title = "Duas" ,
+					  )
+			LinkButton(
+					painter = painterResource(id = R.drawable.tracker_icon) ,
+					content = "Trackers" ,
+					onClick = {
+						onNavigateToPrayerTracker()
+					} ,
+					title = "Trackers" ,
+					  )
 
-		LinkButton(
-				painter = painterResource(id = R.drawable.calendar_icon) ,
-				content = "Calender" ,
-				onClick = {
-					onNavigateToCalender()
-				} ,
-				title = "Calender" ,
-				  )
-		//TODO: IN PROGRESS
+			LinkButton(
+					painter = painterResource(id = R.drawable.calendar_icon) ,
+					content = "Calender" ,
+					onClick = {
+						onNavigateToCalender()
+					} ,
+					title = "Calender" ,
+					  )
+			//TODO: IN PROGRESS
 //		LinkButton(
 //				icon = {
 //					//get the icon from drawable folder
@@ -93,14 +117,15 @@ fun FeatureCard(
 //				},
 //				title = "Zakah Calculator"
 //				  )
-		LinkButton(
-				painter = painterResource(id = R.drawable.shahadah) ,
-				content = "Shahadah" ,
-				onClick = {
-					onNavigateToShadah()
-				} ,
-				title = "Shahadah"
-				  )
+			LinkButton(
+					painter = painterResource(id = R.drawable.shahadah) ,
+					content = "Shahadah" ,
+					onClick = {
+						onNavigateToShadah()
+					} ,
+					title = "Shahadah"
+					  )
+		}
 
 	}
 }
@@ -117,7 +142,8 @@ fun LinkButton(
 	ElevatedCard(
 			modifier = Modifier
 				.padding(8.dp)
-				.fillMaxWidth() ,
+				.fillMaxWidth()
+				.testTag(TEST_TAG_MORE_LINK.replace("{title}" , title)) ,
 			onClick = onClick
 				) {
 		Row(

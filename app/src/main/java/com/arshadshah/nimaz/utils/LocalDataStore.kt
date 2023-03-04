@@ -22,6 +22,10 @@ object LocalDataStore
 				.addMigrations(AppDatabase.Migration4To5())
 				.addMigrations(AppDatabase.Migration5To6())
 				.addMigrations(AppDatabase.Migration6To7())
+				.addMigrations(AppDatabase.Migration7To8())
+				.addMigrations(AppDatabase.Migration8To9())
+				.addMigrations(AppDatabase.Migration9To10())
+				.addMigrations(AppDatabase.Migration10To11())
 				.build()
 			dataStore = DataStore(db)
 			Log.d(AppConstants.DATA_STORE_TAG , "DataStore initialized")
@@ -35,6 +39,12 @@ object LocalDataStore
 			throw IllegalStateException("DataStore not initialized. Call init(context) first.")
 		}
 		return dataStore !!
+	}
+
+	// a function to check if the data store has been initialized
+	fun isInitialized() : Boolean
+	{
+		return dataStore != null
 	}
 
 }

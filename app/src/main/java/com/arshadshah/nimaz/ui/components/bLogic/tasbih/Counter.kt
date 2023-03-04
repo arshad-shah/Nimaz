@@ -1,24 +1,18 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
-import android.content.Context
-import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.R
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,27 +21,33 @@ fun Counter(
 	vibrator : Vibrator ,
 	paddingValues : PaddingValues ,
 	vibrationAllowed : MutableState<Boolean> ,
-	count : MutableState<Int> ,
 	reset : MutableState<Boolean> ,
 	showResetDialog : MutableState<Boolean> ,
 	rOrl : MutableState<Int> ,
 		   )
 {
-
-	//get all the values from the shared preferences
-
 	val context = LocalContext.current
+	val count = remember {
+		mutableStateOf(
+				context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
+					  )
+	}
+
 	val objective = remember {
 		mutableStateOf(
 				context.getSharedPreferences("tasbih" , 0).getString("objective" , "33") !!
 					  )
 	}
 
-	var showObjectiveDialog = remember { mutableStateOf(false) }
+	val showObjectiveDialog = remember { mutableStateOf(false) }
 
 	//lap counter
 	val lap =
-		remember { mutableStateOf(context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)) }
+		remember {
+			mutableStateOf(
+					context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)
+						  )
+		}
 	val lapCountCounter = remember {
 		mutableStateOf(
 				context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)
@@ -72,7 +72,6 @@ fun Counter(
 	Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.fillMaxHeight()
 				.padding(16.dp)
 				.padding(paddingValues) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
@@ -95,7 +94,6 @@ fun Counter(
 				fontSize = 100.sp ,
 				color = MaterialTheme.colorScheme.onSurface
 			)
-
 		Editbutton(
 				count = count ,
 				context = LocalContext.current ,
@@ -205,254 +203,4 @@ fun Counter(
 				}
 				   )
 	}
-}
-
-@Composable
-fun Editbutton(
-	count : MutableState<Int> ,
-	context : Context ,
-	showObjectiveDialog : MutableState<Boolean> ,
-	objective : MutableState<String> ,
-			  )
-{
-	Row(
-			modifier = Modifier.fillMaxWidth() ,
-			horizontalArrangement = Arrangement.SpaceBetween ,
-			verticalAlignment = Alignment.CenterVertically
-	   ) {
-		ElevatedButton(
-				modifier = Modifier.shadow(3.dp , RoundedCornerShape(50)) ,
-				onClick = {
-					//if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
-					if (count.value > 0)
-					{
-						Toasty.info(
-								context ,
-								"Objective can only be changed when the tasbih count is 0" ,
-								Toasty.LENGTH_SHORT
-								   ).show()
-					} else
-					{
-						showObjectiveDialog.value = true
-					}
-				}) {
-			Row(
-					horizontalArrangement = Arrangement.Start ,
-					verticalAlignment = Alignment.CenterVertically
-			   ) {
-				Text(
-						modifier = Modifier.padding(8.dp) ,
-						text = objective.value ,
-						style = MaterialTheme.typography.titleLarge ,
-						fontSize = 26.sp
-					)
-				Icon(
-						modifier = Modifier.size(24.dp) ,
-						painter = painterResource(id = R.drawable.edit_icon) ,
-						contentDescription = "Edit"
-					)
-			}
-		}
-	}
-}
-
-@Composable
-fun IncrementDecrement(
-	count : MutableState<Int> ,
-	lap : MutableState<Int> ,
-	lapCountCounter : MutableState<Int> ,
-	objective : MutableState<String> ,
-	vibrationAllowed : MutableState<Boolean> ,
-	vibrator : Vibrator ,
-	context : Context ,
-	rOrl : MutableState<Int> ,
-					  )
-{
-	//if rorl is 0 then switch the place of the increment and decrement buttons to right side and if its 1 then switch the place of the increment and decrement buttons to left side
-	if (rOrl.value == 0)
-	{
-		Row(
-				modifier = Modifier.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
-
-			Decrementbutton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
-						   )
-
-			Spacer(modifier = Modifier.width(16.dp))
-			IncrementButton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
-					context = context
-						   )
-		}
-	} else
-	{
-		Row(
-				modifier = Modifier.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
-			IncrementButton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
-					context = context
-						   )
-			Spacer(modifier = Modifier.width(16.dp))
-			Decrementbutton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
-						   )
-
-		}
-	}
-}
-
-
-@Composable
-fun IncrementButton(
-	count : MutableState<Int> ,
-	lap : MutableState<Int> ,
-	lapCountCounter : MutableState<Int> ,
-	objective : MutableState<String> ,
-	vibrationAllowed : MutableState<Boolean> ,
-	vibrator : Vibrator ,
-	context : Context ,
-				   )
-{
-	ElevatedButton(
-			contentPadding = PaddingValues(38.dp) ,
-			modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
-			onClick = {
-				if (vibrationAllowed.value)
-				{
-					vibrator.vibrate(
-							VibrationEffect.createOneShot(
-									50 ,
-									VibrationEffect.DEFAULT_AMPLITUDE
-														 )
-									)
-				} else
-				{
-					//can't vibrate
-					vibrator.cancel()
-				}
-				count.value ++
-				lapCountCounter.value ++
-				if (lapCountCounter.value == objective.value.toInt())
-				{
-					if (vibrationAllowed.value)
-					{
-						vibrator.vibrate(
-								VibrationEffect.createOneShot(
-										200 ,
-										VibrationEffect.DEFAULT_AMPLITUDE
-															 )
-										)
-					} else
-					{
-						//can't vibrate
-						vibrator.cancel()
-					}
-					lap.value ++
-					lapCountCounter.value = 0
-					Toasty
-						.info(
-								context ,
-								"Objective of ${objective.value.toInt()} has been reached" ,
-								Toasty.LENGTH_SHORT
-							 )
-						.show()
-				}
-			}) {
-		Icon(
-				modifier = Modifier.size(48.dp) ,
-				painter = painterResource(id = R.drawable.plus_icon) ,
-				contentDescription = "Add"
-			)
-	}
-}
-
-@Composable
-fun Decrementbutton(
-	count : MutableState<Int> ,
-	lap : MutableState<Int> ,
-	lapCountCounter : MutableState<Int> ,
-	objective : MutableState<String> ,
-	vibrationAllowed : MutableState<Boolean> ,
-	vibrator : Vibrator ,
-				   )
-{
-	ElevatedButton(
-			contentPadding = PaddingValues(16.dp) ,
-			modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
-			onClick = {
-				//count should not go below 0
-				if (count.value > 0)
-				{
-					if (vibrationAllowed.value)
-					{
-						vibrator.vibrate(
-								VibrationEffect.createOneShot(
-										200 ,
-										VibrationEffect.DEFAULT_AMPLITUDE
-															 )
-										)
-					} else
-					{
-						//can't vibrate
-						vibrator.cancel()
-					}
-					count.value --
-					if (count.value == objective.value.toInt())
-					{
-						if (vibrationAllowed.value)
-						{
-							vibrator.vibrate(
-									VibrationEffect.createOneShot(
-											200 ,
-											VibrationEffect.DEFAULT_AMPLITUDE
-																 )
-											)
-						} else
-						{
-							//can't vibrate
-							vibrator.cancel()
-						}
-						lap.value --
-					}
-				}
-				//if count is 0 then set all values to default
-				if (count.value == 0)
-				{
-					lap.value = 0
-					lapCountCounter.value = 0
-				}
-			}) {
-		Icon(
-				modifier = Modifier.size(24.dp) ,
-				painter = painterResource(id = R.drawable.minus_icon) ,
-				contentDescription = "Delete"
-			)
-	}
-
 }

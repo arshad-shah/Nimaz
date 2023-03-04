@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
@@ -11,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import kotlin.reflect.KFunction1
 
@@ -19,11 +22,16 @@ import kotlin.reflect.KFunction1
 @Composable
 fun ManualLocationInput(
 	handleSettingEvents : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
-	locationNameState : State<String>
+	locationNameState : State<String> ,
 					   )
 {
 
 	val context = LocalContext.current
+	val viewModelPrayerTimes = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+										)
 	val showDialog = remember { mutableStateOf(false) }
 	val name = remember {
 		mutableStateOf(locationNameState.value)
@@ -69,6 +77,12 @@ fun ManualLocationInput(
 									name.value
 																		 )
 									   )
+					viewModelPrayerTimes.handleEvent(
+							context ,
+							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+									context
+																			   )
+													)
 
 					showDialog.value = false
 				}) { Text(text = "Confirm") }

@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NAMES_OF_ALLAH
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
@@ -47,7 +48,7 @@ fun NamesOfAllah(paddingValues : PaddingValues)
 			//the tag is used to find the column in the hierarchy
 			modifier = Modifier
 				.fillMaxSize()
-				.testTag("NamesOfAllah") ,
+				.testTag(TEST_TAG_NAMES_OF_ALLAH) ,
 			contentPadding = paddingValues
 			  ) {
 		items(englishNames.size) { index ->

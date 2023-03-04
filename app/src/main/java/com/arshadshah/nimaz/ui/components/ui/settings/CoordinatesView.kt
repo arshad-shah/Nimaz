@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
@@ -29,6 +30,7 @@ fun CoordinatesView(latitudeState : State<Double> , longitudeState : State<Doubl
 				.height(IntrinsicSize.Max)
 				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				.fillMaxWidth()
+				.testTag("coordinatesView")
 				) {
 		Row(
 				horizontalArrangement = Arrangement.Center ,
@@ -39,6 +41,7 @@ fun CoordinatesView(latitudeState : State<Double> , longitudeState : State<Doubl
 					modifier = Modifier
 						.weight(0.5f)
 						.padding(8.dp) ,
+					textModifier = Modifier.testTag("latitudeText") ,
 					text = latitudeRounded ,
 					heading = "Latitude"
 					  )
@@ -52,6 +55,7 @@ fun CoordinatesView(latitudeState : State<Double> , longitudeState : State<Doubl
 					modifier = Modifier
 						.weight(0.5f)
 						.padding(8.dp) ,
+					textModifier = Modifier.testTag("longitudeText") ,
 					text = longitudeRounded ,
 					heading = "Longitude"
 					  )

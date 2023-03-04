@@ -28,7 +28,6 @@ import java.util.*
 fun PrayerTimesListUI(
 	prayerTimesMap : Map<String , LocalDateTime?> ,
 	name : String ,
-	state : PrayerTimesViewModel.PrayerTimesState ,
 	loading : Boolean ,
 					 )
 {
@@ -52,7 +51,7 @@ fun PrayerTimesListUI(
 						   )
 				}
 				//check if the row is to be highlighted
-				val isHighlighted = getHighlightRow(name , key)
+				val isHighlighted = key == name
 				PrayerTimesRow(
 						prayerName = key ,
 						prayerTime = value ,
@@ -73,7 +72,11 @@ fun PrayerTimesRow(
 	loading : Boolean ,
 				  )
 {
-	val viewModel = viewModel(key = "PrayerTimesViewModel", initializer = { PrayerTimesViewModel() }, viewModelStoreOwner = LocalContext.current as ComponentActivity)
+	val viewModel = viewModel(
+			key = "PrayerTimesViewModel" ,
+			initializer = { PrayerTimesViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 	val countDownTime = remember { viewModel.timer }.collectAsState()
 	//format the date to time based on device format
 	val formatter = DateTimeFormatter.ofPattern("hh:mm a")
@@ -141,12 +144,4 @@ fun PrayerTimesRow(
 				style = MaterialTheme.typography.titleLarge
 			)
 	}
-}
-
-//fnction to figure out which row to highlight
-fun getHighlightRow(prayerName : String , name : String) : Boolean
-{
-	//convert to lower case
-	val prayerNameLower = name.uppercase(Locale.ROOT)
-	return prayerName == prayerNameLower
 }
