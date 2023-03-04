@@ -21,6 +21,8 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DashboardPrayertimesCard
+import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlAdhaCard
+import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.RamadanCard
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
@@ -37,6 +39,7 @@ fun Dashboard(
 	onNavigateToPrayerTimes : () -> Unit ,
 	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
 	paddingValues : PaddingValues ,
+	onNavigateToTasbihListScreen : () -> Unit ,
 			 )
 {
 
@@ -68,6 +71,12 @@ fun Dashboard(
 				RamadanCard(
 						onNavigateToCalender = onNavigateToCalender
 						   )
+				EidUlFitrCard {
+					onNavigateToCalender()
+				}
+				EidUlAdhaCard {
+					onNavigateToCalender()
+				}
 			}
 		}
 		item{
@@ -88,7 +97,7 @@ fun Dashboard(
 						style = MaterialTheme.typography.titleMedium
 					)
 				DashboardPrayerTracker()
-				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen)
+				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen,onNavigateToTasbihListScreen = onNavigateToTasbihListScreen)
 			}
 		}
 	}
@@ -96,7 +105,10 @@ fun Dashboard(
 }
 
 @Composable
-fun DashboardTasbihTracker(onNavigateToTasbihScreen : (String , String , String , String) -> Unit)
+fun DashboardTasbihTracker(
+	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
+	onNavigateToTasbihListScreen : () -> Unit
+						  )
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
@@ -114,65 +126,90 @@ fun DashboardTasbihTracker(onNavigateToTasbihScreen : (String , String , String 
 
 	if(listOfTasbih.value.isEmpty())
 	{
-		return
-	}
+		//a message to the user that there are no tasbih for the day
+		ElevatedCard(
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth()
+					.clickable {
+						onNavigateToTasbihListScreen()
+					}
+					) {
+			Text(
+					text = "No Tasbih set for today" ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth() ,
+					textAlign = TextAlign.Center ,
+					style = MaterialTheme.typography.titleMedium
+				)
+			Text(
+					text = "Click here to add a tasbih" ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth() ,
+					textAlign = TextAlign.Center ,
+					style = MaterialTheme.typography.bodyMedium
+				)
+		}
+	}else{
+		val showTasbihDialog = remember {
+			mutableStateOf(false)
+		}
+		val tasbihToEdit = remember {
+			mutableStateOf(
+					Tasbih(
+							0 ,
+							"" ,
+							"" ,
+							"" ,
+							"" ,
+							0 ,
+							0 ,
+						  )
+						  )
+		}
 
-	val showTasbihDialog = remember {
-		mutableStateOf(false)
-	}
-	val tasbihToEdit = remember {
-		mutableStateOf(
-				Tasbih(
-				0 ,
-				"" ,
-				"" ,
-				"" ,
-				"" ,
-				0 ,
-				0 ,
-					  )
-					  )
-	}
-
-	FeaturesDropDown(
-			header = {
-				DropDownHeader(
-						headerLeft = "Name" ,
-						headerRight = "Count" ,
-						headerMiddle = "Goal"
-							  )
-			} ,
-			//the list of tasbih for the date at the index
-			items = listOfTasbih.value,
-			label = "Tasbih" ,
-			dropDownItem = {
-				TasbihDropdownItem(
-						it ,
-						onClick = {tasbih ->
-							onNavigateToTasbihScreen(
-									tasbih.id.toString() ,
-									tasbih.arabicName ,
-									tasbih.englishName ,
-									tasbih.translationName
-													)
-						},
-						onDelete = { tasbih ->
-							viewModel.handleEvent(
-									TasbihViewModel.TasbihEvent.DeleteTasbih(
-											tasbih
-																			)
-												 )
-						},
-						onEdit = { tasbih ->
-							showTasbihDialog.value = true
-							tasbihToEdit.value = tasbih
-						} ,
+		FeaturesDropDown(
+				header = {
+					DropDownHeader(
+							headerLeft = "Name" ,
+							headerRight = "Count" ,
+							headerMiddle = "Goal"
 								  )
-			}
+				} ,
+				//the list of tasbih for the date at the index
+				items = listOfTasbih.value,
+				label = "Tasbih" ,
+				dropDownItem = {
+					TasbihDropdownItem(
+							it ,
+							onClick = {tasbih ->
+								onNavigateToTasbihScreen(
+										tasbih.id.toString() ,
+										tasbih.arabicName ,
+										tasbih.englishName ,
+										tasbih.translationName
+														)
+							},
+							onDelete = { tasbih ->
+								viewModel.handleEvent(
+										TasbihViewModel.TasbihEvent.DeleteTasbih(
+												tasbih
+																				)
+													 )
+							},
+							onEdit = { tasbih ->
+								showTasbihDialog.value = true
+								tasbihToEdit.value = tasbih
+							} ,
+									  )
+				}
 
-					)
+						)
 
-	GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
+		GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
+	}
 }
 
 
@@ -189,6 +226,7 @@ fun DashboardPreview()
 				onNavigateToPrayerTimes = { } ,
 				onNavigateToTasbihScreen = { _, _, _, _ -> } ,
 				paddingValues = PaddingValues(8.dp) ,
+				onNavigateToTasbihListScreen = { } ,
 				 )
 	}
 }

@@ -129,6 +129,8 @@ class DataStore(db : AppDatabase)
 
 	//insert all the ayas
 	suspend fun insertAyats(aya : List<Aya>) = ayaDao.insert(aya.map { it.toLocalAya() })
+	//getRandomAya
+	suspend fun getRandomAya() = ayaDao.getRandomAya().toAya()
 
 	//count the number of ayas
 	suspend fun countSurahAyat(
