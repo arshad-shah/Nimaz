@@ -43,7 +43,7 @@ fun FeatureCard(
 		item {
 			//website link
 			LinkButton(
-					painter = painterResource(id = R.drawable.tasbih) ,
+					painter = painterResource(id = R.drawable.counter_icon) ,
 					content = "Tasbih" ,
 					onClick = {
 						onNavigateToTasbihScreen(" " , " " , " " , " ")
