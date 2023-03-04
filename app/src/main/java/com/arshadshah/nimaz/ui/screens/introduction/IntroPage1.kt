@@ -38,6 +38,7 @@ fun IntroPage1()
 			OnBoardingPage.Sixth ,
 			OnBoardingPage.Seventh ,
 			OnBoardingPage.Eighth ,
+			OnBoardingPage.Ninth ,
 					  )
 
 	val pagerState = rememberPagerState()
@@ -110,9 +111,17 @@ fun IntroPage1()
 						context.startActivity(Intent(context , MainActivity::class.java))
 						//remove the activity from the back stack
 						(context as Introduction).finish()
-					} else
+					} else if (!isLocationSet)
 					{
-						Toasty.error(context , "Please complete the settings before proceeding")
+						Toasty.error(context , "Please set your location first" , Toasty.LENGTH_SHORT)
+							.show()
+					} else if (!isNotificationSet)
+					{
+						Toasty.error(context , "Please allow notifications first" , Toasty.LENGTH_SHORT)
+							.show()
+					}else
+					{
+						Toasty.error(context , "Please set your location and allow notifications first" , Toasty.LENGTH_SHORT)
 							.show()
 					}
 				}

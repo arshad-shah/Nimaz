@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
+	const val AUTO_PARAMETERS = "AutoParameters"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 

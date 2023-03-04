@@ -5,6 +5,7 @@ import android.content.Intent.*
 import androidx.compose.runtime.Composable
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
+import com.arshadshah.nimaz.ui.components.ui.intro.CalculationMethodUI
 import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
 
@@ -58,10 +59,18 @@ sealed class OnBoardingPage(
 				LocationSettings(isIntro = true)
 			}
 								 )
+	object Seventh : OnBoardingPage(
+			image = R.drawable.time_calculation ,
+			title = "Calculation Method" ,
+			description = "Nimaz uses the Muslim World League method by default in manual mode and uses altitude of the sun to calculate prayer times in automatic mode." ,
+			extra = {
+				CalculationMethodUI()
+			}
+								   )
 
 	//a page to ask for the battery optimization exemption
 	@SuppressLint("BatteryLife")
-	object Seventh : OnBoardingPage(
+	object Eighth : OnBoardingPage(
 			image = R.drawable.battery ,
 			title = "Battery Exemption" ,
 			description = "Nimaz needs to be exempted from battery optimization to show adhan notifications Correctly." ,
@@ -70,12 +79,11 @@ sealed class OnBoardingPage(
 			}
 								   )
 
-	object Eighth : OnBoardingPage(
+	object Ninth : OnBoardingPage(
 			image = R.drawable.check_mark ,
 			title = "Onboarding Complete" ,
 			description = "You are all set to use Nimaz. You can always change these settings later. I hope Nimaz helps you in your daily life and Kindly keep me and my family in your prayers." ,
 			extra = {
-
 			}
 								  )
 }
