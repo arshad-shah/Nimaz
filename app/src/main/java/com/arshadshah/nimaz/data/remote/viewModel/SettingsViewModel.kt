@@ -91,6 +91,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 												)
 	val highLatitude = _highLatitude.asStateFlow()
 
+	private val _autoParams = MutableStateFlow(
+			sharedPreferences.getDataBoolean(
+					AppConstants.AUTO_PARAMETERS ,
+					false
+									 )
+												)
+	val autoParams = _autoParams.asStateFlow()
+
 	//fajr angle state
 	private var _fajrAngle =
 		MutableStateFlow(sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18"))
@@ -179,6 +187,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 		//update settings based on calculation method
 		class UpdateSettings(val method : String) : SettingsEvent()
+		class AutoParameters(val checked : Boolean) : SettingsEvent()
 	}
 
 	//events for the settings screen
@@ -191,6 +200,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.saveDataBoolean(LOCATION_TYPE , event.checked)
 				_isLocationAuto.value = event.checked
 				loadLocation(event.context , event.checked)
+				Log.d("Nimaz: SettingsViewModel" , "Location toggle : ${event.checked}")
 			}
 
 			is SettingsEvent.LocationInput ->
@@ -198,6 +208,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_locationName.value = event.location
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , event.location)
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Location input : ${event.location}")
 			}
 
 			is SettingsEvent.Latitude ->
@@ -205,6 +216,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_latitude.value = event.latitude
 				sharedPreferences.saveData(AppConstants.LATITUDE , event.latitude.toString())
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Latitude : ${event.latitude}")
 			}
 
 			is SettingsEvent.Longitude ->
@@ -212,47 +224,55 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_longitude.value = event.longitude
 				sharedPreferences.saveData(AppConstants.LONGITUDE , event.longitude.toString())
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Longitude : ${event.longitude}")
 			}
 
 			is SettingsEvent.LoadLocation ->
 			{
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Load location")
 			}
 
 			is SettingsEvent.BatteryExempt ->
 			{
 				_isBatteryExempt.value = event.exempt
 				sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , event.exempt)
+				Log.d("Nimaz: SettingsViewModel" , "Battery exempt : ${event.exempt}")
 			}
 
 			is SettingsEvent.CalculationMethod ->
 			{
 				_calculationMethod.value = event.method
 				sharedPreferences.saveData(AppConstants.CALCULATION_METHOD , event.method)
+				Log.d("Nimaz: SettingsViewModel" , "Calculation method : ${event.method}")
 			}
 
 			is SettingsEvent.Madhab ->
 			{
 				_madhab.value = event.madhab
 				sharedPreferences.saveData(AppConstants.MADHAB , event.madhab)
+				Log.d("Nimaz: SettingsViewModel" , "Madhab : ${event.madhab}")
 			}
 
 			is SettingsEvent.HighLatitude ->
 			{
 				_highLatitude.value = event.rule
 				sharedPreferences.saveData(AppConstants.HIGH_LATITUDE_RULE , event.rule)
+				Log.d("Nimaz: SettingsViewModel" , "High latitude rule : ${event.rule}")
 			}
 
 			is SettingsEvent.FajrAngle ->
 			{
 				_fajrAngle.value = event.angle
 				sharedPreferences.saveData(AppConstants.FAJR_ANGLE , event.angle)
+				Log.d("Nimaz: SettingsViewModel" , "Fajr angle : ${event.angle}")
 			}
 
 			is SettingsEvent.IshaAngle ->
 			{
 				_ishaAngle.value = event.angle
 				sharedPreferences.saveData(AppConstants.ISHA_ANGLE , event.angle)
+				Log.d("Nimaz: SettingsViewModel" , "Isha angle : ${event.angle}")
 			}
 
 			is SettingsEvent.IshaAngleVisibility ->
@@ -263,12 +283,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 					_ishaAngle.value = "0"
 					sharedPreferences.saveData(AppConstants.ISHA_ANGLE , "0")
 				}
+				Log.d("Nimaz: SettingsViewModel" , "Isha angle visibility : ${event.visible}")
 			}
 
 			is SettingsEvent.IshaInterval ->
 			{
 				_ishaInterval.value = event.interval
 				sharedPreferences.saveData(AppConstants.ISHA_INTERVAL , event.interval)
+				Log.d("Nimaz: SettingsViewModel" , "Isha interval : ${event.interval}")
 			}
 			//offset
 			is SettingsEvent.FajrOffset ->
@@ -342,12 +364,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 					sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
 				_ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
 				_isLoading.value = false
+				Log.d("Nimaz: SettingsViewModel" , "Settings loaded")
 			}
 
 			is SettingsEvent.Theme ->
 			{
 				_theme.value = event.theme
 				sharedPreferences.saveData(AppConstants.THEME , event.theme)
+				Log.d("Nimaz: SettingsViewModel" , "Theme : ${event.theme}")
 			}
 
 			is SettingsEvent.UpdateSettings ->
@@ -410,7 +434,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 						AppConstants.ISHA_ADJUSTMENT ,
 						defaultsForMethod["ishaAdjustment"] !!
 										  )
+				Log.d("Nimaz: SettingsViewModel" , "Settings updated")
 
+			}
+			is SettingsEvent.AutoParameters ->
+			{
+				sharedPreferences.saveDataBoolean(AppConstants.AUTO_PARAMETERS , event.checked)
+				_autoParams.value = event.checked
+				Log.d("Nimaz: SettingsViewModel" , "Auto parameters : ${event.checked}")
 			}
 		}
 	}

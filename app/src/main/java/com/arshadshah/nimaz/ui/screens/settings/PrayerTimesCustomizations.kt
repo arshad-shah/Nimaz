@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
+import com.arshadshah.nimaz.ui.components.ui.intro.CalculationMethodUI
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
@@ -55,15 +56,13 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	LaunchedEffect(Unit) {
 		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
 	}
-
-	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
 
 	val calculationMethodState =
 		rememberPreferenceStringSettingState(
 				AppConstants.CALCULATION_METHOD ,
-				"IRELAND" ,
+				"MWL" ,
 				sharedPreferences
 											)
 	val madhabState =
@@ -183,51 +182,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		SettingsGroup(title = {
 			Text(text = "Prayer Parameters")
 		}) {
-			ElevatedCard(
-					modifier = Modifier
-						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-						.fillMaxWidth()
-						) {
-				SettingsList(
-						title = {
-							Text(text = "Calculation Method")
-						} ,
-						subtitle = {
-							Text(text = calculationMethodState.value)
-						} ,
-						description = {
-							Text(text = "The method used to calculate the prayer times.")
-						} ,
-						items = mapOfMethods ,
-						valueState = calculationMethodState ,
-						onChange = { method : String ->
-							settingViewModel.handleEvent(
-									SettingsViewModel.SettingsEvent.CalculationMethod(
-											method
-																					 )
-														)
-							settingViewModel.handleEvent(
-									SettingsViewModel.SettingsEvent.UpdateSettings(
-											method
-																				  )
-														)
-							viewModel.handleEvent(
-									context ,
-									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-											getParams(context)
-																							)
-												 )
-							viewModel.handleEvent(
-									context ,
-									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-											context
-																					   )
-												 )
-						} ,
-						height = 500.dp
-							)
-			}
+			CalculationMethodUI()
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
