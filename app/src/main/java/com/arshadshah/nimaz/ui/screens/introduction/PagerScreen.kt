@@ -95,7 +95,7 @@ fun FinishButton(
 			horizontalArrangement = Arrangement.Center
 	   ) {
 		AnimatedVisibility(
-				visible = pagerState.currentPage == 7
+				visible = pagerState.currentPage == 8
 						  ) {
 			Button(
 					onClick = onClick ,
@@ -148,7 +148,7 @@ fun NextButton(
 {
 
 	AnimatedVisibility(
-			visible = pagerState.currentPage != 7
+			visible = pagerState.currentPage != 8
 					  ) {
 		Button(
 				modifier = Modifier

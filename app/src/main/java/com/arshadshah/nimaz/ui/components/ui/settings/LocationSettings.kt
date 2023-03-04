@@ -34,8 +34,10 @@ import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
@@ -44,6 +46,7 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -103,7 +106,7 @@ fun LocationSettings(isIntro : Boolean = false)
 		val state =
 			rememberPreferenceBooleanSettingState(
 					AppConstants.LOCATION_TYPE ,
-					locationPermissionState.allPermissionsGranted
+					false
 												 )
 
 
@@ -114,22 +117,75 @@ fun LocationSettings(isIntro : Boolean = false)
 			FeatureThatRequiresLocationPermission(locationPermissionState , state)
 		}
 
+		val latitude = remember {
+			viewModel.latitude
+		}.collectAsState()
+		val longitude = remember {
+			viewModel.longitude
+		}.collectAsState()
+
+		val autoParams = remember {
+			viewModel.autoParams
+		}.collectAsState()
+
 		LaunchedEffect(
 				key1 = locationNameState.value ,
 				key2 = latitudeState.value ,
 				key3 = longitudeState.value
 					  ) {
+
+			val sunCalc = SunMoonCalc(latitude.value , longitude.value, context)
+			val times = sunCalc.getTimes()
+			val sunPositionAtFajr = sunCalc.getSunPositionForDate(times.nauticalDawn)
+			val sunPositionAtIshaa = sunCalc.getSunPositionForDate(times.nauticalDusk)
+
+			val altitudeInDegreesFajr = Math.toDegrees(sunPositionAtFajr.altitude).roundToInt()
+			val altitudeInDegreesIshaa = Math.toDegrees(sunPositionAtIshaa.altitude).roundToInt()
+
+			if(autoParams.value){
+				//set method to other
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.CalculationMethod(
+								"OTHER"
+																		 )
+											)
+				//set fajr angle
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.FajrAngle(
+								altitudeInDegreesFajr.toString()
+																 )
+											)
+				//set ishaa angle
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.IshaAngle(
+								altitudeInDegreesIshaa.toString()
+																 )
+											)
+				//set high latitude method
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.HighLatitude(
+								"TWILIGHT_ANGLE"
+																	)
+											)
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.LoadSettings
+											)
+			}
+
+
 			viewModelPrayerTimes.handleEvent(
 					context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 					PrayerTimesParamMapper.getParams(context)
 																					  )
 											)
+
 			viewModelPrayerTimes.handleEvent(
 					context ,
 					PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
 							context
 																	   )
 											)
+
 		}
 
 		if (isIntro)
@@ -244,24 +300,40 @@ fun LocationToggleSwitch(
 				{
 					if (locationPermissionState.permissions[0].status.isGranted || locationPermissionState.permissions[1].status.isGranted)
 					{
-						viewModel.handleEvent(
-								SettingsViewModel.SettingsEvent.LocationToggle(
-										context ,
-										true
-																			  )
-											 )
-						viewModelPrayerTimes.handleEvent(
-								context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-								PrayerTimesParamMapper.getParams(context)
-																								  )
-														)
-						viewModelPrayerTimes.handleEvent(
-								context ,
-								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-										context
-																				   )
-														)
-						isChecked.value = true
+						//check if the value saved in the shared preferences is true
+						val isLocationAutoInPref = PrivateSharedPreferences(context).getDataBoolean(
+								AppConstants.LOCATION_TYPE ,
+								false
+																							)
+						if(isLocationAutoInPref)
+						{
+							viewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.LocationToggle(
+											context ,
+											true
+																				  )
+													 )
+							viewModelPrayerTimes.handleEvent(
+									context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+									PrayerTimesParamMapper.getParams(context)
+																									  )
+															)
+							viewModelPrayerTimes.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+															)
+							isChecked.value = true
+						}else{
+							viewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.LocationToggle(
+											context ,
+											false
+																				  )
+													 )
+							isChecked.value = false
+						}
 					}
 				}
 
