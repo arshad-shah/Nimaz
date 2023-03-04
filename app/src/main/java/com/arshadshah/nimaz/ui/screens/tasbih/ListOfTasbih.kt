@@ -2,13 +2,12 @@ package com.arshadshah.nimaz.ui.screens.tasbih
 
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,15 +18,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.TasbihRow
-import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
+import com.arshadshah.nimaz.ui.components.ui.trackers.DropDownHeader
+import com.arshadshah.nimaz.ui.components.ui.trackers.GoalEditDialog
+import com.arshadshah.nimaz.ui.components.ui.trackers.TasbihDropdownItem
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -153,6 +154,20 @@ fun ListOfTasbih(
 					}
 				} else
 				{
+					val showTasbihDialog = remember {
+						mutableStateOf(false)
+					}
+					val tasbihToEdit = remember {
+						mutableStateOf(Tasbih(
+								0 ,
+								"" ,
+								"" ,
+								"" ,
+								"" ,
+								0 ,
+								0 ,
+											 ))
+					}
 					LazyColumn(
 							userScrollEnabled = true ,
 							  ) {
@@ -189,97 +204,28 @@ fun ListOfTasbih(
 											label = LocalDate.parse(dates[index])
 												.format(DateTimeFormatter.ofPattern("dd MMMM")) ,
 											dropDownItem = {
-												FeatureDropdownItem(
-														item = it ,
-														onClick = { tasbih ->
+												TasbihDropdownItem(
+														it ,
+														onClick = {tasbih ->
 															onNavigateToTasbihScreen(
 																	tasbih.id.toString() ,
 																	tasbih.arabicName ,
 																	tasbih.englishName ,
 																	tasbih.translationName
 																					)
-														} ,
-														itemContent = { tasbih ->
-															//trim the text if it is too long
-															val trimmedText =
-																if (tasbih.englishName.length > 20)
-																{
-																	tasbih.englishName.substring(
-																			0 ,
-																			20
-																								) + "..."
-																} else
-																{
-																	tasbih.englishName
-																}
-															Row(
-																	modifier = Modifier
-																		.fillMaxWidth() ,
-																	verticalAlignment = Alignment.CenterVertically
-															   ) {
-																//an icon to indicate if the tasbih is completed
-																if(tasbih.count == tasbih.goal)
-																{
-																	Icon(
-																			imageVector = Icons.Default.CheckCircle ,
-																			contentDescription = "Completed" ,
-																			modifier = Modifier
-																				.size(24.dp)
-																		)
-																}
-																//name
-																Text(
-																		modifier = Modifier
-																			.weight(1f) ,
-																		text = trimmedText ,
-																		textAlign = TextAlign.Center ,
-																		maxLines = 2 ,
-																		overflow = TextOverflow.Ellipsis ,
-																		style = MaterialTheme.typography.bodySmall
+														},
+														onDelete = { tasbih ->
+															viewModel.handleEvent(
+																	TasbihViewModel.TasbihEvent.DeleteTasbih(
+																			tasbih
 																	)
-																//divider
-																Divider(
-																		modifier = Modifier
-																			.width(1.dp)
-																			.height(24.dp) ,
-																		color = MaterialTheme.colorScheme.onSurface.copy(
-																				alpha = 0.08f
-																														) ,
-																		thickness = 1.dp ,
-																	   )
-																//goal
-																Text(
-																		modifier = Modifier
-																			.weight(1f) ,
-																		text = tasbih.goal.toString() ,
-																		textAlign = TextAlign.Center ,
-																		maxLines = 2 ,
-																		overflow = TextOverflow.Ellipsis ,
-																		style = MaterialTheme.typography.bodySmall
-																	)
-																//divider
-																Divider(
-																		modifier = Modifier
-																			.width(1.dp)
-																			.height(24.dp) ,
-																		color = MaterialTheme.colorScheme.onSurface.copy(
-																				alpha = 0.08f
-																														) ,
-																		thickness = 1.dp ,
-																	   )
-																//count
-																Text(
-																		modifier = Modifier
-																			.weight(1f) ,
-																		text = tasbih.count.toString() ,
-																		textAlign = TextAlign.Center ,
-																		maxLines = 2 ,
-																		overflow = TextOverflow.Ellipsis ,
-																		style = MaterialTheme.typography.bodySmall
-																	)
-															}
-														} ,
-																   )
+																				)
+														},
+														onEdit = { tasbih ->
+															showTasbihDialog.value = true
+															tasbihToEdit.value = tasbih
+														}
+														 )
 											}
 
 													)
@@ -287,78 +233,12 @@ fun ListOfTasbih(
 							}
 						}
 					}
+					GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
 				}
 			}
 		}
 	}
 }
-
-//my tasbih drop down item for each tasbih
-@Composable
-fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : String)
-{
-	// a three section row for the tasbih name, goal and count
-	//divider between each section
-	//should look like this
-	//Name - Goal - Count
-
-	Row(
-			modifier = Modifier
-				.fillMaxWidth() ,
-			verticalAlignment = Alignment.CenterVertically
-	   ) {
-		//name
-		Text(
-				modifier = Modifier
-					.weight(1f)
-					.padding(8.dp) ,
-				text = headerLeft ,
-				textAlign = TextAlign.Center ,
-				maxLines = 2 ,
-				overflow = TextOverflow.Ellipsis ,
-				style = MaterialTheme.typography.bodyLarge
-			)
-		//divider
-		Divider(
-				modifier = Modifier
-					.width(1.dp)
-					.height(24.dp) ,
-				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
-				thickness = 1.dp ,
-			   )
-		//goal
-		Text(
-				modifier = Modifier
-					.weight(1f)
-					.padding(8.dp) ,
-				text = headerMiddle ,
-				textAlign = TextAlign.Center ,
-				maxLines = 2 ,
-				overflow = TextOverflow.Ellipsis ,
-				style = MaterialTheme.typography.bodyLarge
-			)
-		//divider
-		Divider(
-				modifier = Modifier
-					.width(1.dp)
-					.height(24.dp) ,
-				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
-				thickness = 1.dp ,
-			   )
-		//count
-		Text(
-				modifier = Modifier
-					.weight(1f)
-					.padding(8.dp) ,
-				text = headerRight ,
-				textAlign = TextAlign.Center ,
-				maxLines = 2 ,
-				overflow = TextOverflow.Ellipsis ,
-				style = MaterialTheme.typography.bodyLarge
-			)
-	}
-}
-
 @Preview(
 		showBackground = true ,
 		uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL

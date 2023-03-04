@@ -2,32 +2,31 @@ package com.arshadshah.nimaz.ui.screens
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
+import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DashboardPrayertimesCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.RamadanCard
-import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
-import com.arshadshah.nimaz.ui.screens.tasbih.DropDownHeader
+import com.arshadshah.nimaz.ui.components.ui.trackers.DropDownHeader
+import com.arshadshah.nimaz.ui.components.ui.trackers.GoalEditDialog
+import com.arshadshah.nimaz.ui.components.ui.trackers.TasbihDropdownItem
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 
@@ -118,6 +117,23 @@ fun DashboardTasbihTracker(onNavigateToTasbihScreen : (String , String , String 
 		return
 	}
 
+	val showTasbihDialog = remember {
+		mutableStateOf(false)
+	}
+	val tasbihToEdit = remember {
+		mutableStateOf(
+				Tasbih(
+				0 ,
+				"" ,
+				"" ,
+				"" ,
+				"" ,
+				0 ,
+				0 ,
+					  )
+					  )
+	}
+
 	FeaturesDropDown(
 			header = {
 				DropDownHeader(
@@ -130,100 +146,33 @@ fun DashboardTasbihTracker(onNavigateToTasbihScreen : (String , String , String 
 			items = listOfTasbih.value,
 			label = "Tasbih" ,
 			dropDownItem = {
-				FeatureDropdownItem(
-						item = it ,
-						onClick = { tasbih ->
+				TasbihDropdownItem(
+						it ,
+						onClick = {tasbih ->
 							onNavigateToTasbihScreen(
 									tasbih.id.toString() ,
 									tasbih.arabicName ,
 									tasbih.englishName ,
 									tasbih.translationName
 													)
+						},
+						onDelete = { tasbih ->
+							viewModel.handleEvent(
+									TasbihViewModel.TasbihEvent.DeleteTasbih(
+											tasbih
+																			)
+												 )
+						},
+						onEdit = { tasbih ->
+							showTasbihDialog.value = true
+							tasbihToEdit.value = tasbih
 						} ,
-						itemContent = { tasbih ->
-							//trim the text if it is too long
-							val trimmedText =
-								if (tasbih.englishName.length > 20)
-								{
-									tasbih.englishName.substring(
-											0 ,
-											20
-																) + "..."
-								} else
-								{
-									tasbih.englishName
-								}
-							Row(
-									modifier = Modifier
-										.fillMaxWidth() ,
-									verticalAlignment = Alignment.CenterVertically
-							   ) {
-								//an icon to indicate if the tasbih is completed
-								if(tasbih.count == tasbih.goal)
-								{
-									Icon(
-											imageVector = Icons.Default.CheckCircle ,
-											contentDescription = "Completed" ,
-											modifier = Modifier
-												.size(24.dp)
-										)
-								}
-								//name
-								Text(
-										modifier = Modifier
-											.weight(1f) ,
-										text = trimmedText ,
-										textAlign = TextAlign.Center ,
-										maxLines = 2 ,
-										overflow = TextOverflow.Ellipsis ,
-										style = MaterialTheme.typography.bodySmall
-									)
-								//divider
-								Divider(
-										modifier = Modifier
-											.width(1.dp)
-											.height(24.dp) ,
-										color = MaterialTheme.colorScheme.onSurface.copy(
-												alpha = 0.08f
-																						) ,
-										thickness = 1.dp ,
-									   )
-								//goal
-								Text(
-										modifier = Modifier
-											.weight(1f) ,
-										text = tasbih.goal.toString() ,
-										textAlign = TextAlign.Center ,
-										maxLines = 2 ,
-										overflow = TextOverflow.Ellipsis ,
-										style = MaterialTheme.typography.bodySmall
-									)
-								//divider
-								Divider(
-										modifier = Modifier
-											.width(1.dp)
-											.height(24.dp) ,
-										color = MaterialTheme.colorScheme.onSurface.copy(
-												alpha = 0.08f
-																						) ,
-										thickness = 1.dp ,
-									   )
-								//count
-								Text(
-										modifier = Modifier
-											.weight(1f) ,
-										text = tasbih.count.toString() ,
-										textAlign = TextAlign.Center ,
-										maxLines = 2 ,
-										overflow = TextOverflow.Ellipsis ,
-										style = MaterialTheme.typography.bodySmall
-									)
-							}
-						} ,
-								   )
+								  )
 			}
 
 					)
+
+	GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
 }
 
 
