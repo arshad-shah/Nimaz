@@ -45,6 +45,10 @@ interface TasbihTrackerDao
 	@Query("UPDATE Tasbih SET count = :count WHERE id = :id")
 	fun updateTasbih(id : Int , count : Int)
 
+	//ipdate a tasbih goal in the database
+	@Query("UPDATE Tasbih SET goal = :goal WHERE id = :id")
+	fun updateTasbihGoal(id : Int , goal : Int)
+
 	//delete a tasbih from the database
 	@Delete
 	fun deleteTasbih(tasbih : LocalTasbih)
