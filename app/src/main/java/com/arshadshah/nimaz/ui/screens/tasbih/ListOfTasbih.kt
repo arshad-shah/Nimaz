@@ -25,7 +25,6 @@ import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.TasbihRow
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.trackers.DropDownHeader
 import com.arshadshah.nimaz.ui.components.ui.trackers.GoalEditDialog
 import com.arshadshah.nimaz.ui.components.ui.trackers.TasbihDropdownItem
@@ -176,69 +175,160 @@ fun ListOfTasbih(
 							tasbih.date
 						}.distinct()
 
-						//for each date, render the tasbih drop down
-						for (index in dates.indices)
+						//find out what year the dates are in
+						val years = dates.map { date ->
+							LocalDate.parse(date)
+								.format(DateTimeFormatter.ofPattern("YYYY"))
+						}.distinct()
+
+						//find out for each year in what month the tasbih are in
+						val months = years.map { year ->
+							dates.filter { date ->
+								LocalDate.parse(date)
+									.format(DateTimeFormatter.ofPattern("YYYY")) == year
+							}.map { date ->
+								LocalDate.parse(date)
+									.format(DateTimeFormatter.ofPattern("MMMM"))
+							}.distinct()
+						}
+
+						//if we have less than a months worth of tasbih, then we don't need to show the year header
+						if(dates.size < 20)
 						{
 							item {
-								SettingsGroup(
-										title = {
-											Text(
-													text = LocalDate.parse(dates[index])
-														.format(DateTimeFormatter.ofPattern("YYYY")) ,
-													style = MaterialTheme.typography.titleLarge
-												)
-										}
-											 ) {
-									FeaturesDropDown(
-											header = {
-												DropDownHeader(
-														headerLeft = "Name" ,
-														headerRight = "Count" ,
-														headerMiddle = "Goal"
-															  )
-											} ,
-											//the list of tasbih for the date at the index
-											items = listOfTasbih.value.filter { tasbih ->
-												tasbih.date == dates[index]
-											} ,
-											label = LocalDate.parse(dates[index])
-												.format(DateTimeFormatter.ofPattern("dd MMMM")) ,
-											dropDownItem = {
-												TasbihDropdownItem(
-														it ,
-														onClick = {tasbih ->
-															onNavigateToTasbihScreen(
-																	tasbih.id.toString() ,
-																	tasbih.arabicName ,
-																	tasbih.englishName ,
-																	tasbih.translationName
-																					)
-														},
-														onDelete = { tasbih ->
-															viewModel.handleEvent(
-																	TasbihViewModel.TasbihEvent.DeleteTasbih(
-																			tasbih
-																	)
-																				)
-														},
-														onEdit = { tasbih ->
-															showTasbihDialog.value = true
-															tasbihToEdit.value = tasbih
-														}
-														 )
-											}
+											//for each date in the month, render the date header
+											for (dateIndex in dates.indices)
+											{
+													FeaturesDropDown(
+															header = {
+																DropDownHeader(
+																		headerLeft = "Name" ,
+																		headerRight = "Count" ,
+																		headerMiddle = "Goal"
+																			  )
+															} ,
+															//the list of tasbih for the date at the index
+															items = listOfTasbih.value ,
+															label = LocalDate.parse(dates[dateIndex])
+																.format(
+																		DateTimeFormatter.ofPattern(
+																				"E dd MMMM"
+																								   )
+																	   ) ,
+															dropDownItem = {
+																TasbihDropdownItem(
+																		it ,
+																		onClick = { tasbih ->
+																			onNavigateToTasbihScreen(
+																					tasbih.id.toString() ,
+																					tasbih.arabicName ,
+																					tasbih.englishName ,
+																					tasbih.translationName
+																									)
+																		} ,
+																		onDelete = { tasbih ->
+																			viewModel.handleEvent(
+																					TasbihViewModel.TasbihEvent.DeleteTasbih(
+																							tasbih
+																															)
+																								 )
+																		} ,
+																		onEdit = { tasbih ->
+																			showTasbihDialog.value =
+																				true
+																			tasbihToEdit.value =
+																				tasbih
+																		} ,
+																				  )
+															}
 
+																	)
+											}
+							}
+						}else{
+							//for each year, render the year header
+							for (index in years.indices)
+							{
+								item {
+									FeaturesDropDown(
+											//the list of tasbih for the date at the index
+											items = months[index],
+											label = years[index],
+											dropDownItem = {
+												//for each month in the year, render the month header
+												for (monthIndex in months[index].indices)
+												{
+													FeaturesDropDown(
+															//the list of tasbih for the date at the index
+															items = dates,
+															label = months[index][monthIndex] ,
+															dropDownItem = {
+																//for each date in the month, render the date header
+																for (dateIndex in dates.indices)
+																{
+																	if (LocalDate.parse(dates[dateIndex])
+																			.format(DateTimeFormatter.ofPattern("MMMM")) == months[index][monthIndex]
+																		&& LocalDate.parse(dates[dateIndex])
+																			.format(DateTimeFormatter.ofPattern("YYYY")) == years[index]
+																	)
+																	{
+																		FeaturesDropDown(
+																				header = {
+																					DropDownHeader(
+																							headerLeft = "Name" ,
+																							headerRight = "Count" ,
+																							headerMiddle = "Goal"
+																								  )
+																				} ,
+																				//the list of tasbih for the date at the index
+																				items = listOfTasbih.value,
+																				label = LocalDate.parse(dates[dateIndex])
+																					.format(DateTimeFormatter.ofPattern("E dd ")) ,
+																				dropDownItem = {
+																					TasbihDropdownItem(
+																							it ,
+																							onClick = {tasbih ->
+																								onNavigateToTasbihScreen(
+																										tasbih.id.toString() ,
+																										tasbih.arabicName ,
+																										tasbih.englishName ,
+																										tasbih.translationName
+																														)
+																							},
+																							onDelete = { tasbih ->
+																								viewModel.handleEvent(
+																										TasbihViewModel.TasbihEvent.DeleteTasbih(
+																												tasbih
+																																				)
+																													 )
+																							},
+																							onEdit = { tasbih ->
+																								showTasbihDialog.value = true
+																								tasbihToEdit.value = tasbih
+																							} ,
+																									  )
+																				}
+
+																						)
+																	}
+																}
+															}
+
+																	)
+												}
+											}
 													)
 								}
 							}
 						}
-					}
+						}
 					GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
+					}
 				}
+
 			}
 		}
 	}
-}
 @Preview(
 		showBackground = true ,
 		uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
