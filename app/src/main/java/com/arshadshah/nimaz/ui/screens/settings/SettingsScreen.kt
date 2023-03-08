@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.ui.screens.settings
 
 import android.app.NotificationManager
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -50,6 +49,7 @@ fun SettingsScreen(
 	onNavigateToPrayerTimeCustomizationScreen : () -> Unit ,
 	onNavigateToAboutScreen : () -> Unit ,
 	paddingValues : PaddingValues ,
+	onNavigateToWebViewScreen : (String) -> Unit ,
 				  )
 {
 	val context = LocalContext.current
@@ -306,12 +306,7 @@ fun SettingsScreen(
 				SettingsMenuLink(
 						title = { Text(text = "Privacy Policy") } ,
 						onClick = {
-							//open the privacy policy in the browser
-							val url =
-								"https://nimaz.arshadshah.com/static/media/Privacy%20Policy.06ada0df63d36ef44b56.pdf"
-							val i = Intent(Intent.ACTION_VIEW)
-							i.data = Uri.parse(url)
-							context.startActivity(i)
+							onNavigateToWebViewScreen("privacy_policy")
 						} ,
 						icon = {
 							Icon(
@@ -332,12 +327,7 @@ fun SettingsScreen(
 				SettingsMenuLink(
 						title = { Text(text = "Terms and Conditions") } ,
 						onClick = {
-							//open the terms and conditions in the browser
-							val url =
-								"https://nimaz.arshadshah.com/static/media/Terms%20and%20Condition.c2cb253a0ddd3b258abf.pdf"
-							val i = Intent(Intent.ACTION_VIEW)
-							i.data = Uri.parse(url)
-							context.startActivity(i)
+							onNavigateToWebViewScreen("terms_of_service")
 						} ,
 						icon = {
 							Icon(

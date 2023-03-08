@@ -89,7 +89,7 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 				  ) {
 				if (isAfterEidUlFitrStart)
 				{
-					Text(text = "Eid ul Fitr" , style = MaterialTheme.typography.titleLarge)
+					Text(text = "Eid Mubarak" , style = MaterialTheme.typography.titleLarge)
 				} else
 				{
 					Text(text = "Eid ul Fitr is coming" , style = MaterialTheme.typography.titleLarge)
@@ -124,7 +124,7 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 						{
 							//estimated end
 							Text(
-									text = "Estimated end" ,
+									text = "Eid Mubarak" ,
 									style = MaterialTheme.typography.titleSmall
 								)
 						} else

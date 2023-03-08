@@ -15,13 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
+import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
@@ -60,6 +65,22 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		viewModel.timer
 	}.collectAsState()
 
+	val locationName = remember {
+		settingViewModel.locationName
+	}.collectAsState()
+
+	val latitude = remember {
+		settingViewModel.latitude
+	}.collectAsState()
+
+	val longitude = remember {
+		settingViewModel.longitude
+	}.collectAsState()
+
+	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0, context = context).getMoonPhase()
+
+
+
 	val timeToNextPrayerLong =
 		nextPrayerTime.value?.atZone(java.time.ZoneId.systemDefault())
 			?.toInstant()
@@ -79,6 +100,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
+				.testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD)
 				.clickable {
 					onNavigateToPrayerTimes()
 				} ,
@@ -86,28 +108,45 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		Column(
 				modifier = Modifier
 					.padding(8.dp) ,
-				verticalArrangement = Arrangement.SpaceEvenly ,
+				verticalArrangement = Arrangement.SpaceBetween ,
 				horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
-			Text(
+			Row (
 					modifier = Modifier
-						.padding(4.dp) ,
-					textAlign = TextAlign.Start ,
-					text = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-					style = MaterialTheme.typography.titleMedium
-				)
-			Text(
-					modifier = Modifier
-						.padding(4.dp) ,
-					textAlign = TextAlign.Start ,
-					text = HijrahDate.from(LocalDate.now())
-						.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-					style = MaterialTheme.typography.titleSmall
-				)
+						.padding(horizontal = 8.dp)
+						.fillMaxWidth() ,
+					verticalAlignment = Alignment.CenterVertically ,
+					horizontalArrangement = Arrangement.SpaceBetween
+					){
+				Column(
+						modifier = Modifier.padding(4.dp) ,
+						verticalArrangement = Arrangement.SpaceBetween ,
+						horizontalAlignment = Alignment.CenterHorizontally
+					  ) {
+					Text(
+							modifier = Modifier
+								.padding(4.dp) ,
+							textAlign = TextAlign.Start ,
+							text = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							style = MaterialTheme.typography.titleMedium
+						)
+					Text(
+							modifier = Modifier
+								.padding(4.dp) ,
+							textAlign = TextAlign.Start ,
+							text = HijrahDate.from(LocalDate.now())
+								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							style = MaterialTheme.typography.titleSmall
+						)
+				}
+				Text(text = locationName.value ?: "" , style = MaterialTheme.typography.titleMedium)
+
+				//emoji for moon phase
+				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge)
+			}
 			Row(
 					modifier = Modifier
-						.fillMaxWidth()
-						.padding(top = 16.dp) ,
+						.fillMaxWidth(),
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
@@ -119,7 +158,8 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				   ) {
 					Image(
 							modifier = Modifier
-								.size(100.dp) ,
+								.size(100.dp)
+								.testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD) ,
 							painter = when (nextPrayerName.value)
 							{
 								"sunrise" ->
@@ -178,7 +218,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleLarge
 						)
 					Text(
-							text = "-${timer.value.hours}:${timer.value.minutes}:${timer.value.seconds}" ,
+							text = getTimerText(timer.value) ,
 							style = MaterialTheme.typography.titleMedium ,
 							textAlign = TextAlign.Center ,
 							modifier = Modifier
@@ -187,6 +227,96 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						)
 				}
 			}
+		}
+	}
+}
+
+//a function to return in text how much time is left for the next prayer
+fun getTimerText(timeToNextPrayer : CountDownTime): String
+{
+	return when
+	{
+		timeToNextPrayer.hours > 1 ->
+		{
+			//check if there are minutes left
+			if (timeToNextPrayer.minutes > 1)
+			{
+				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minutes Left"
+			}else if (timeToNextPrayer.minutes == 1L)
+			{
+				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minute Left"
+			}else{
+				"${timeToNextPrayer.hours} hours Left"
+			}
+		}
+		timeToNextPrayer.hours == 1L ->
+		{
+			//check if there are minutes left
+			if (timeToNextPrayer.minutes > 1)
+			{
+				"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minutes Left"
+			}else if (timeToNextPrayer.minutes == 1L)
+			{
+				//check if there are seconds left
+				if (timeToNextPrayer.seconds > 1)
+				{
+					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
+				}
+				else if (timeToNextPrayer.seconds == 1L)
+				{
+					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
+				}else{
+					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute Left"
+				}
+			}
+			else
+			{
+				"${timeToNextPrayer.hours} hour Left"
+			}
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes > 1 ->
+		{
+			//check if there are seconds left
+			if (timeToNextPrayer.seconds > 1)
+			{
+				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} seconds Left"
+			}
+			else if (timeToNextPrayer.seconds == 1L)
+			{
+				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} second Left"
+			}
+			else
+			{
+				"${timeToNextPrayer.minutes} minutes Left"
+			}
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 1L ->
+		{
+			//check if there are seconds left
+			if (timeToNextPrayer.seconds > 1)
+			{
+				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
+			}
+			else if (timeToNextPrayer.seconds == 1L)
+			{
+				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
+			}
+			else
+			{
+				"${timeToNextPrayer.minutes} minute Left"
+			}
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds > 1 ->
+		{
+			"${timeToNextPrayer.seconds} seconds Left"
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds == 1L ->
+		{
+			"${timeToNextPrayer.seconds} second Left"
+		}
+		else ->
+		{
+			"Prayer Time"
 		}
 	}
 }

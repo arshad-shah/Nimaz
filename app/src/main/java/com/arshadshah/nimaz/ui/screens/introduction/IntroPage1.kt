@@ -113,16 +113,24 @@ fun IntroPage1()
 						(context as Introduction).finish()
 					} else if (!isLocationSet)
 					{
-						Toasty.error(context , "Please set your location first" , Toasty.LENGTH_SHORT)
+						Toasty.error(context , "Please set your location in settings" , Toasty.LENGTH_SHORT)
 							.show()
+						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
+						context.startActivity(Intent(context , MainActivity::class.java))
+						//remove the activity from the back stack
+						(context as Introduction).finish()
 					} else if (!isNotificationSet)
 					{
-						Toasty.error(context , "Please allow notifications first" , Toasty.LENGTH_SHORT)
+						Toasty.error(
+								context ,
+								"Please allow notifications in settings" ,
+								Toasty.LENGTH_SHORT
+									)
 							.show()
-					}else
-					{
-						Toasty.error(context , "Please set your location and allow notifications first" , Toasty.LENGTH_SHORT)
-							.show()
+						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
+						context.startActivity(Intent(context , MainActivity::class.java))
+						//remove the activity from the back stack
+						(context as Introduction).finish()
 					}
 				}
 			} else

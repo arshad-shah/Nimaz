@@ -29,6 +29,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.*
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
@@ -145,6 +146,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					WEB_VIEW_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -227,6 +233,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
 					MY_QURAN_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					WEB_VIEW_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -317,6 +328,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					WEB_VIEW_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					else -> EnterTransition.None
 				}
 			} ,
@@ -399,6 +415,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
 					MY_QURAN_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					WEB_VIEW_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -676,7 +697,22 @@ fun NavigationGraph(
 								AppConstants.ABOUT_SCREEN_ROUTE
 											  )
 					} ,
+					onNavigateToWebViewScreen = { url : String ->
+						navController.navigate(
+								WEB_VIEW_SCREEN_ROUTE
+									.replace(
+											"{url}" ,
+											url
+											),
+											  )
+					} ,
 					paddingValues = paddingValues)
+		}
+		composable(WEB_VIEW_SCREEN_ROUTE) {
+			WebViewScreen(
+					url = it.arguments?.getString("url") !! ,
+					paddingValues = paddingValues
+							)
 		}
 		composable(AppConstants.ABOUT_SCREEN_ROUTE) {
 			About(paddingValues)
