@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
+import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import java.time.LocalDate
@@ -63,6 +64,10 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		viewModel.timer
 	}.collectAsState()
 
+	val locationName = remember {
+		settingViewModel.locationName
+	}.collectAsState()
+
 	val timeToNextPrayerLong =
 		nextPrayerTime.value?.atZone(java.time.ZoneId.systemDefault())
 			?.toInstant()
@@ -93,25 +98,39 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				verticalArrangement = Arrangement.SpaceEvenly ,
 				horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
-			Text(
+			Row (
 					modifier = Modifier
-						.padding(4.dp) ,
-					textAlign = TextAlign.Start ,
-					text = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-					style = MaterialTheme.typography.titleMedium
-				)
-			Text(
-					modifier = Modifier
-						.padding(4.dp) ,
-					textAlign = TextAlign.Start ,
-					text = HijrahDate.from(LocalDate.now())
-						.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-					style = MaterialTheme.typography.titleSmall
-				)
+						.fillMaxWidth() ,
+					verticalAlignment = Alignment.CenterVertically ,
+					horizontalArrangement = Arrangement.SpaceEvenly
+					){
+				Column(
+						modifier = Modifier.padding(4.dp) ,
+						verticalArrangement = Arrangement.SpaceEvenly ,
+						horizontalAlignment = Alignment.CenterHorizontally
+					  ) {
+					Text(
+							modifier = Modifier
+								.padding(4.dp) ,
+							textAlign = TextAlign.Start ,
+							text = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							style = MaterialTheme.typography.titleMedium
+						)
+					Text(
+							modifier = Modifier
+								.padding(4.dp) ,
+							textAlign = TextAlign.Start ,
+							text = HijrahDate.from(LocalDate.now())
+								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							style = MaterialTheme.typography.titleSmall
+						)
+				}
+				Text(text = locationName.value ?: "" , style = MaterialTheme.typography.titleMedium)
+
+			}
 			Row(
 					modifier = Modifier
-						.fillMaxWidth()
-						.padding(top = 16.dp) ,
+						.fillMaxWidth(),
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
@@ -183,7 +202,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleLarge
 						)
 					Text(
-							text = "-${timer.value.hours}:${timer.value.minutes}:${timer.value.seconds}" ,
+							text = getTimerText(timer.value) ,
 							style = MaterialTheme.typography.titleMedium ,
 							textAlign = TextAlign.Center ,
 							modifier = Modifier
@@ -192,6 +211,42 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						)
 				}
 			}
+		}
+	}
+}
+
+//a function to return in text how much time is left for the next prayer
+fun getTimerText(timeToNextPrayer : CountDownTime): String
+{
+	return when
+	{
+		timeToNextPrayer.hours > 1 ->
+		{
+			"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minutes Left"
+		}
+		timeToNextPrayer.hours == 1L ->
+		{
+			"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minutes Left"
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes > 1 ->
+		{
+			"${timeToNextPrayer.minutes} minutes Left"
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 1L ->
+		{
+			"${timeToNextPrayer.minutes} minute Left"
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds > 1 ->
+		{
+			"${timeToNextPrayer.seconds} seconds Left"
+		}
+		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds == 1L ->
+		{
+			"${timeToNextPrayer.seconds} second Left"
+		}
+		else ->
+		{
+			"Prayer Time"
 		}
 	}
 }

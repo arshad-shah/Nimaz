@@ -97,8 +97,7 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 
 				Row(
 						modifier = Modifier
-							.fillMaxWidth()
-							.padding(top = 16.dp) ,
+							.fillMaxWidth(),
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
