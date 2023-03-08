@@ -15,8 +15,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 91
-        versionName '1.5.20'
+        versionCode 92
+        versionName '1.5.21'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -92,8 +92,6 @@ dependencies {
     implementation 'androidx.test:monitor:1.6.1'
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
     implementation 'androidx.test:runner:1.5.2'
-
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 
     testImplementation "junit:junit:$junit_version"
     //mockito

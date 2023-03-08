@@ -37,7 +37,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
-import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
+import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
@@ -46,7 +46,6 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
-import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -134,14 +133,6 @@ fun LocationSettings(isIntro : Boolean = false)
 				key3 = longitudeState.value
 					  ) {
 
-			val sunCalc = SunMoonCalc(latitude.value , longitude.value, context)
-			val times = sunCalc.getTimes()
-			val sunPositionAtFajr = sunCalc.getSunPositionForDate(times.nauticalDawn)
-			val sunPositionAtIshaa = sunCalc.getSunPositionForDate(times.nauticalDusk)
-
-			val altitudeInDegreesFajr = Math.toDegrees(sunPositionAtFajr.altitude).roundToInt()
-			val altitudeInDegreesIshaa = Math.toDegrees(sunPositionAtIshaa.altitude).roundToInt()
-
 			if(autoParams.value){
 				//set method to other
 				viewModel.handleEvent(
@@ -152,13 +143,13 @@ fun LocationSettings(isIntro : Boolean = false)
 				//set fajr angle
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.FajrAngle(
-								altitudeInDegreesFajr.toString()
+								AutoAnglesCalc().calculateFajrAngle(context , latitude.value , longitude.value).toString()
 																 )
 											)
 				//set ishaa angle
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.IshaAngle(
-								altitudeInDegreesIshaa.toString()
+								AutoAnglesCalc().calculateIshaaAngle(context , latitude.value , longitude.value).toString()
 																 )
 											)
 				//set high latitude method

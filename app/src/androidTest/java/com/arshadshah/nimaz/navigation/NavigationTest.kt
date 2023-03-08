@@ -17,7 +17,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_SETTINGS
 import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import org.junit.Rule
 import org.junit.Test
-
+import org.junit.runner.RunWith
 class NavigationTest
 {
 
@@ -131,6 +131,7 @@ class NavigationTest
 		//verify that the more screen is displayed
 		composeTestRule.onNodeWithTag(AppConstants.TEST_TAG_TASBIH_LIST).assertIsDisplayed()
 	}
+
 	@Test
 	fun navHost_verify_click_on_Qibla_in_more_screen_opens_qibla(){
 		//click on the more button in the bottom navigation bar

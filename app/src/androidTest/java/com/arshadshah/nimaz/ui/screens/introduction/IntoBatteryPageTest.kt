@@ -24,6 +24,8 @@ class IntoBatteryPageTest
 		composeTestRule.onNodeWithText("Next").performClick()
 		composeTestRule.onNodeWithText("Next").performClick()
 		composeTestRule.onNodeWithText("Next").performClick()
+		composeTestRule.onNodeWithText("Next").performClick()
+		composeTestRule.onNodeWithText("Next").performClick()
 	}
 
 
