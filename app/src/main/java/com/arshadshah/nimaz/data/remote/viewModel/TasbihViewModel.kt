@@ -144,7 +144,7 @@ class TasbihViewModel(context : Context) : ViewModel()
 						if (todayTasbihList != null)
 						{
 							val tasbihExists = todayTasbihList.find {
-								it.arabicName == tasbih.arabicName && it.goal == tasbih.goal
+								it.arabicName == tasbih.arabicName || it.goal == tasbih.goal && it.date == date
 							}
 							if (tasbihExists != null)
 							{
