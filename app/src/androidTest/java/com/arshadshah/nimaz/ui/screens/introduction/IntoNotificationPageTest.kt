@@ -22,6 +22,7 @@ class IntoNotificationPageTest
 		composeTestRule.onNodeWithText("Next").performClick()
 		composeTestRule.onNodeWithText("Next").performClick()
 		composeTestRule.onNodeWithText("Next").performClick()
+		composeTestRule.onNodeWithText("Next").performClick()
 	}
 
 
@@ -30,7 +31,7 @@ class IntoNotificationPageTest
 	{
 		composeTestRule.onNodeWithText("Adhan Notifications").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Enable Adhan Notifications for Nimaz to get Prayer alerts in the form of Adhan.").assertIsDisplayed()
-		composeTestRule.onNodeWithText("Enable Adhan Notifications").assertIsDisplayed()
+		composeTestRule.onNodeWithText("Enable Notifications").assertIsDisplayed()
 		composeTestRule.onNodeWithTag("notification_switch_on_intro_screen").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Next").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Back").assertIsDisplayed()
