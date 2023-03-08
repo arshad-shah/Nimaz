@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.utils.sunMoonUtils
 
-import android.graphics.drawable.Drawable
-
 /**
  * Represents the moon phase
  * @property fraction illuminated fraction of the moon; varies from 0.0 (new moon) to 1.0 (full moon)
@@ -13,5 +11,5 @@ data class MoonPhaseInfo(
 	val phase : Double ,
 	val angle : Double ,
 	val phaseName : MoonPhase ,
-	val phaseSvg : Drawable ,
+	val phaseSvg : String ,
 						)

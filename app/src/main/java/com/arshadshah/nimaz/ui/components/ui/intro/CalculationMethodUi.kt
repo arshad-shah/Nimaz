@@ -26,8 +26,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
-import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
-import kotlin.math.roundToInt
+import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 
 @Composable
 fun CalculationMethodUI()
@@ -66,15 +65,6 @@ fun CalculationMethodUI()
 		settingViewModel.longitude
 	}.collectAsState()
 
-	//sun position
-	val sunCalc = SunMoonCalc(latitude.value , longitude.value, context)
-	val times = sunCalc.getTimes()
-	val sunPositionAtFajr = sunCalc.getSunPositionForDate(times.nauticalDawn)
-	val sunPositionAtIshaa = sunCalc.getSunPositionForDate(times.nauticalDusk)
-
-	val altitudeInDegreesFajr = Math.toDegrees(sunPositionAtFajr.altitude).roundToInt()
-	val altitudeInDegreesIshaa = Math.toDegrees(sunPositionAtIshaa.altitude).roundToInt()
-
 	ElevatedCard {
 		SettingsSwitch(
 				state = state ,
@@ -112,13 +102,13 @@ fun CalculationMethodUI()
 					//set fajr angle
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.FajrAngle(
-									altitudeInDegreesFajr.toString()
+									AutoAnglesCalc().calculateFajrAngle(context, latitude.value, longitude.value).toString()
 																	 )
 												)
 					//set ishaa angle
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.IshaAngle(
-									altitudeInDegreesIshaa.toString()
+									AutoAnglesCalc().calculateIshaaAngle(context, latitude.value, longitude.value).toString()
 																	  )
 												)
 					//set high latitude method
