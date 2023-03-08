@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -612,6 +613,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								} ,
 								valueState = ishaAdjustment ,
 												  ) { adjustment : Int ->
+							Log.d("SettingsScreen" , "ishaAdjustment: $adjustment")
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.IshaOffset(
 											adjustment.toString()
