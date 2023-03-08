@@ -208,7 +208,9 @@ fun ListOfTasbih(
 																			  )
 															} ,
 															//the list of tasbih for the date at the index
-															items = listOfTasbih.value ,
+															items = listOfTasbih.value.filter { tasbih ->
+																tasbih.date == dates[dateIndex]
+															} ,
 															label = LocalDate.parse(dates[dateIndex])
 																.format(
 																		DateTimeFormatter.ofPattern(
@@ -281,7 +283,9 @@ fun ListOfTasbih(
 																								  )
 																				} ,
 																				//the list of tasbih for the date at the index
-																				items = listOfTasbih.value,
+																				items = listOfTasbih.value.filter { tasbih ->
+																					tasbih.date == dates[dateIndex]
+																				},
 																				label = LocalDate.parse(dates[dateIndex])
 																					.format(DateTimeFormatter.ofPattern("E dd ")) ,
 																				dropDownItem = {

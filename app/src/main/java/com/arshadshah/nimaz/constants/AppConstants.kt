@@ -2,8 +2,6 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants
 {
-
-	const val AUTO_PARAMETERS = "AutoParameters"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -56,13 +54,7 @@ object AppConstants
 	const val LOCATION_TYPE = "location_type"
 	const val LOCATION_INPUT = "location_input"
 	const val ALARM_LOCK = "alarmLock"
-	const val FAJR = "fajr"
-	const val SUNRISE = "sunrise"
-	const val DHUHR = "dhuhr"
-	const val ASR = "asr"
-	const val MAGHRIB = "maghrib"
-	const val ISHA = "isha"
-	const val CURRENT_PRAYER = "currentPrayer"
+	const val AUTO_PARAMETERS = "AutoParameters"
 	const val PAGE_TYPE = "PageType"
 	const val TRANSLATION_LANGUAGE = "Translation"
 	const val NOTIFICATION_ALLOWED = "notificationAllowed"
@@ -190,6 +182,13 @@ object AppConstants
 	const val TEST_TAG_JUZ_ITEM = "juz item"
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON = "Prayer times customization button"
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION = "Prayer times customization screen"
+	const val TEST_TAG_HOME_PRAYER_TIMES_CARD = "Home prayer times card"
+	//TEST_TAG_EVENTS_CARD
+	const val TEST_TAG_EVENTS_CARD = "Events card"
+	//TEST_TAG_TRACKERS_CARD
+	const val TEST_TAG_TRACKERS_CARD = "Trackers card"
+	//TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
+	const val TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD = "Next prayer icon dashboard"
 
 
 	//logging tags

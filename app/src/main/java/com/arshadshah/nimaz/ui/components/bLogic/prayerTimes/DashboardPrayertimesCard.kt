@@ -15,11 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
+import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import java.time.LocalDate
@@ -79,6 +82,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
+				.testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD)
 				.clickable {
 					onNavigateToPrayerTimes()
 				} ,
@@ -119,7 +123,8 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				   ) {
 					Image(
 							modifier = Modifier
-								.size(100.dp) ,
+								.size(100.dp)
+								.testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD) ,
 							painter = when (nextPrayerName.value)
 							{
 								"sunrise" ->
