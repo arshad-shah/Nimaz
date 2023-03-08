@@ -59,12 +59,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
 
-	val calculationMethodState =
-		rememberPreferenceStringSettingState(
-				AppConstants.CALCULATION_METHOD ,
-				"MWL" ,
-				sharedPreferences
-											)
 	val madhabState =
 		rememberPreferenceStringSettingState(AppConstants.MADHAB , "SHAFI" , sharedPreferences)
 	val highLatitudeRuleState = rememberPreferenceStringSettingState(
@@ -112,10 +106,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaInterval
 	}.collectAsState()
 
-	val calculationMethod = remember {
-		settingViewModel.calculationMethod
-	}.collectAsState()
-
 	val madhab = remember {
 		settingViewModel.madhab
 	}.collectAsState()
@@ -160,7 +150,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.isLoading
 	}.collectAsState()
 
-	calculationMethodState.value = calculationMethod.value
 	madhabState.value = madhab.value
 	highLatitudeRuleState.value = highLatitudeRule.value
 	fajrAngleState.value = fajrAngle.value
@@ -424,7 +413,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											modifier = Modifier
 												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.sunrise_icon) ,
-											contentDescription = "Fajr Time"
+											contentDescription = "Sunrise Time"
 										 )
 								} ,
 								title = {

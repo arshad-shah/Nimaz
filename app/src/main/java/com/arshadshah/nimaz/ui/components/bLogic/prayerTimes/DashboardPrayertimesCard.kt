@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DAS
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
@@ -68,6 +69,18 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		settingViewModel.locationName
 	}.collectAsState()
 
+	val latitude = remember {
+		settingViewModel.latitude
+	}.collectAsState()
+
+	val longitude = remember {
+		settingViewModel.longitude
+	}.collectAsState()
+
+	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0, context = context).getMoonPhase()
+
+
+
 	val timeToNextPrayerLong =
 		nextPrayerTime.value?.atZone(java.time.ZoneId.systemDefault())
 			?.toInstant()
@@ -95,18 +108,19 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		Column(
 				modifier = Modifier
 					.padding(8.dp) ,
-				verticalArrangement = Arrangement.SpaceEvenly ,
+				verticalArrangement = Arrangement.SpaceBetween ,
 				horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
 			Row (
 					modifier = Modifier
+						.padding(horizontal = 8.dp)
 						.fillMaxWidth() ,
 					verticalAlignment = Alignment.CenterVertically ,
-					horizontalArrangement = Arrangement.SpaceEvenly
+					horizontalArrangement = Arrangement.SpaceBetween
 					){
 				Column(
 						modifier = Modifier.padding(4.dp) ,
-						verticalArrangement = Arrangement.SpaceEvenly ,
+						verticalArrangement = Arrangement.SpaceBetween ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
 					Text(
@@ -127,6 +141,8 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				}
 				Text(text = locationName.value ?: "" , style = MaterialTheme.typography.titleMedium)
 
+				//emoji for moon phase
+				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge)
 			}
 			Row(
 					modifier = Modifier
@@ -222,19 +238,73 @@ fun getTimerText(timeToNextPrayer : CountDownTime): String
 	{
 		timeToNextPrayer.hours > 1 ->
 		{
-			"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minutes Left"
+			//check if there are minutes left
+			if (timeToNextPrayer.minutes > 1)
+			{
+				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minutes Left"
+			}else if (timeToNextPrayer.minutes == 1L)
+			{
+				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minute Left"
+			}else{
+				"${timeToNextPrayer.hours} hours Left"
+			}
 		}
 		timeToNextPrayer.hours == 1L ->
 		{
-			"${timeToNextPrayer.minutes} minutes Left"
+			//check if there are minutes left
+			if (timeToNextPrayer.minutes > 1)
+			{
+				"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minutes Left"
+			}else if (timeToNextPrayer.minutes == 1L)
+			{
+				//check if there are seconds left
+				if (timeToNextPrayer.seconds > 1)
+				{
+					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
+				}
+				else if (timeToNextPrayer.seconds == 1L)
+				{
+					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
+				}else{
+					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute Left"
+				}
+			}
+			else
+			{
+				"${timeToNextPrayer.hours} hour Left"
+			}
 		}
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes > 1 ->
 		{
-			"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} seconds Left"
+			//check if there are seconds left
+			if (timeToNextPrayer.seconds > 1)
+			{
+				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} seconds Left"
+			}
+			else if (timeToNextPrayer.seconds == 1L)
+			{
+				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} second Left"
+			}
+			else
+			{
+				"${timeToNextPrayer.minutes} minutes Left"
+			}
 		}
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 1L ->
 		{
-			"${timeToNextPrayer.minutes} minute Left ${timeToNextPrayer.seconds} seconds Left"
+			//check if there are seconds left
+			if (timeToNextPrayer.seconds > 1)
+			{
+				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
+			}
+			else if (timeToNextPrayer.seconds == 1L)
+			{
+				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
+			}
+			else
+			{
+				"${timeToNextPrayer.minutes} minute Left"
+			}
 		}
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds > 1 ->
 		{

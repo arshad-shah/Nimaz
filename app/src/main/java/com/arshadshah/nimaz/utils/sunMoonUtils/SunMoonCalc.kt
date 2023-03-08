@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.utils.sunMoonUtils
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import com.arshadshah.nimaz.helperClasses.utils.sunMoonUtils.MoonCalculations
 import com.arshadshah.nimaz.utils.sunMoonUtils.MathUtils.astroRefraction
 import com.arshadshah.nimaz.utils.sunMoonUtils.MathUtils.azimuth
@@ -211,21 +210,24 @@ class SunMoonCalc constructor(
 		}
 	}
 
-	private fun getPhaseSvgByPhasePosition(value : Int) : Drawable
+	private fun getPhaseSvgByPhasePosition(value : Int) : String
 	{
 		return when (value)
 		{
-//			0 -> context.resources.getDrawable(R.drawable.ic_new_moon)
-//			1 -> context.resources.getDrawable(R.drawable.ic_waxing_cresent)
-//			2 -> context.resources.getDrawable(R.drawable.ic_first_quarter)
-//			3 -> context.resources.getDrawable(R.drawable.ic_waxing_gibous)
-//			4 -> context.resources.getDrawable(R.drawable.ic_full_moon)
-//			5 -> context.resources.getDrawable(R.drawable.ic_waning_gibous)
-//			6 -> context.resources.getDrawable(R.drawable.ic_last_quarter)
-//			7 -> context.resources.getDrawable(R.drawable.ic_waning_cresent)
+			0 -> "\uD83C\uDF11"
+			1 -> "\uD83C\uDF12"
+			2 -> "\uD83C\uDF13"
+			3 -> "\uD83C\uDF14"
+			4 -> "\uD83C\uDF15"
+			5 -> "\uD83C\uDF16"
+			6 -> "\uD83C\uDF17"
+			7 -> "\uD83C\uDF18"
 			else -> throw IllegalStateException("Moon phase position should be between 0-7")
 		}
 	}
+
+	//phase emoji
+	//https://emojipedia.org/new-moon/
 
 	/**
 	 *
