@@ -151,6 +151,7 @@ object AppConstants
 	const val CALENDER_SCREEN_ROUTE : String = "calendar_screen"
 	const val DASHBOARD_SCREEN = "dashboard_screen"
 	const val TASBIH_LIST_SCREEN = "tasbih_list_screen"
+	const val WEB_VIEW_SCREEN_ROUTE = "web_view_screen/{url}"
 
 	//Test tags
 	//navigation tags

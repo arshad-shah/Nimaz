@@ -226,15 +226,15 @@ fun getTimerText(timeToNextPrayer : CountDownTime): String
 		}
 		timeToNextPrayer.hours == 1L ->
 		{
-			"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minutes Left"
+			"${timeToNextPrayer.minutes} minutes Left"
 		}
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes > 1 ->
 		{
-			"${timeToNextPrayer.minutes} minutes Left"
+			"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} seconds Left"
 		}
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 1L ->
 		{
-			"${timeToNextPrayer.minutes} minute Left"
+			"${timeToNextPrayer.minutes} minute Left ${timeToNextPrayer.seconds} seconds Left"
 		}
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds > 1 ->
 		{

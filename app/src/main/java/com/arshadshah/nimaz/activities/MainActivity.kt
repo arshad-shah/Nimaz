@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
@@ -44,6 +45,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
@@ -269,7 +271,7 @@ class MainActivity : ComponentActivity()
 										TopAppBar(
 												title = {
 													Text(
-															text = processPageTitle(route.value.toString()) ,
+															text = processPageTitle(route.value.toString(), navController) ,
 															style = MaterialTheme.typography.titleMedium
 														)
 												} ,
@@ -462,7 +464,7 @@ class MainActivity : ComponentActivity()
 		}
 	}
 
-	fun processPageTitle(route : String) : String
+	private fun processPageTitle(route : String , navController : NavHostController) : String
 	{
 		return when (route)
 		{
@@ -470,23 +472,60 @@ class MainActivity : ComponentActivity()
 			ABOUT_SCREEN_ROUTE -> "About"
 			PRAYER_TIMES_SETTINGS_SCREEN_ROUTE -> "Prayer Times Customization"
 			QURAN_SCREEN_ROUTE -> "Quran"
-			QURAN_AYA_SCREEN_ROUTE -> "Aya"
+			QURAN_AYA_SCREEN_ROUTE -> {
+				//check if the url of the route is for surah or juz using the nav controller
+				val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah")
+				val number = navController.currentBackStackEntry?.arguments?.getString("number")
+				if (isSurah == "true")
+				{
+					"Surah $number"
+				} else
+				{
+					"Juz $number"
+				}
+			}
 			SHAHADAH_SCREEN_ROUTE -> "Shahadah"
 			CHAPTERS_SCREEN_ROUTE -> "Categories of Dua"
-			CHAPTER_SCREEN_ROUTE -> "Dua"
+			CHAPTER_SCREEN_ROUTE -> {
+				//check if the url of the route is for surah or juz using the nav controller
+				val chapterId = navController.currentBackStackEntry?.arguments?.getString("chapterId")
+				"Chapter $chapterId"
+			}
 			TASBIH_SCREEN_ROUTE -> "Tasbih"
 			NAMESOFALLAH_SCREEN_ROUTE -> "Allah"
 			PRAYER_TRACKER_SCREEN_ROUTE -> "Prayer Tracker"
 			CALENDER_SCREEN_ROUTE -> "Calender"
 			QIBLA_SCREEN_ROUTE -> "Qibla"
 			AppConstants.TASBIH_LIST_SCREEN -> "Tasbih List"
-			AppConstants.MY_QURAN_SCREEN_ROUTE -> "Aya"
+			AppConstants.MY_QURAN_SCREEN_ROUTE -> {
+				//check if the url of the route is for surah or juz using the nav controller
+				val isSurah = navController.currentBackStackEntry?.arguments?.getBoolean("isSurah")
+				val number = navController.currentBackStackEntry?.arguments?.getString("number")
+				if (isSurah == true)
+				{
+					"Surah $number"
+				} else
+				{
+					"Juz $number"
+				}
+			}
+			WEB_VIEW_SCREEN_ROUTE -> {
+				//check if the url of the route is privacy_policy using the nav controller
+				val url = navController.currentBackStackEntry?.arguments?.getString("url")
+				if (url == "privacy_policy")
+				{
+					"Privacy Policy"
+				} else
+				{
+					"Terms and Conditions"
+				}
+			}
 			else -> ""
 		}
 	}
 
 	//a fuinction to check a givenm route and return a boolean
-	fun checkRoute(route : String) : Boolean
+	private fun checkRoute(route : String ) : Boolean
 	{
 		val routeToCheck = listOf(
 				SETTINGS_SCREEN_ROUTE ,
@@ -503,7 +542,8 @@ class MainActivity : ComponentActivity()
 				CALENDER_SCREEN_ROUTE ,
 				QIBLA_SCREEN_ROUTE ,
 				AppConstants.TASBIH_LIST_SCREEN ,
-				AppConstants.MY_QURAN_SCREEN_ROUTE
+				AppConstants.MY_QURAN_SCREEN_ROUTE,
+				WEB_VIEW_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
