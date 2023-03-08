@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -63,6 +64,7 @@ fun SettingsNumberPickerDialog(
 	val coroutineScope = rememberCoroutineScope()
 	val onSelected : (Int) -> Unit = { selectedIndex ->
 		coroutineScope.launch {
+			Log.d("Nimaz: SettingsNumberPickerDialog" , "onSelected: $selectedIndex")
 			val index = items.indexOf(selectedIndex)
 			state.value = index
 			valueState.value = selectedIndex.toString()

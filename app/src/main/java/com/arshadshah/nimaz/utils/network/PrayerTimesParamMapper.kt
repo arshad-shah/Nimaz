@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.utils.network
 
 import android.content.Context
+import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import java.time.LocalDateTime
@@ -30,6 +31,16 @@ object PrayerTimesParamMapper
 		val maghribAdjustment : String =
 			sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
 		val ishaAdjustment : String = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
+
+		//log the adjustments
+		Log.d("Nimaz: PrayerTimesParamMapper" , "fajrAdjustment: $fajrAdjustment")
+		Log.d("Nimaz: PrayerTimesParamMapper" , "sunriseAdjustment: $sunriseAdjustment")
+		Log.d("Nimaz: PrayerTimesParamMapper" , "dhuhrAdjustment: $dhuhrAdjustment")
+		Log.d("Nimaz: PrayerTimesParamMapper" , "asrAdjustment: $asrAdjustment")
+		Log.d("Nimaz: PrayerTimesParamMapper" , "maghribAdjustment: $maghribAdjustment")
+		Log.d("Nimaz: PrayerTimesParamMapper" , "ishaAdjustment: $ishaAdjustment")
+
+
 
 		val mapOfParams = mutableMapOf<String , String>()
 		mapOfParams["latitude"] = latitude.toString()
