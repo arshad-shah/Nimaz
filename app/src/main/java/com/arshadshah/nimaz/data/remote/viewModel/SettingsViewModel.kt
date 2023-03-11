@@ -449,7 +449,9 @@ class SettingsViewModel(context : Context) : ViewModel()
 				if (checked)
 				{
 					_isLoading.value = true
-					AutoLocationUtils.init(context)
+					if(!AutoLocationUtils.isInitialized()){
+						AutoLocationUtils.init(context)
+					}
 					AutoLocationUtils.startLocationUpdates()
 					AutoLocationUtils.setLocationDataCallback {
 						location ->

@@ -19,6 +19,12 @@ object AutoLocationUtils
 		Log.d("Nimaz: Location" , "Location Client initialized")
 	}
 
+	//check if the client is initialized or not
+	fun isInitialized() : Boolean
+	{
+		return fusedLocationProviderClient != null
+	}
+
 	private const val ONE_MINUTE = 60 * 1000
 
 	val locationRequest : LocationRequest = LocationRequest.Builder(
