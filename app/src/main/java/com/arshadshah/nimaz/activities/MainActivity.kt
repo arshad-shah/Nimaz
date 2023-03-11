@@ -53,6 +53,7 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.WidgetService

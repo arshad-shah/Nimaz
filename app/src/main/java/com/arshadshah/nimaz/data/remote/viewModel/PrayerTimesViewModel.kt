@@ -240,7 +240,10 @@ class PrayerTimesViewModel : ViewModel()
 					_maghribTimeState.value = response.data.maghrib !!
 					_ishaTimeState.value = response.data.isha !!
 					_isLoading.value = false
-
+					Log.d(
+							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							"UpdatePrayerTimes: ${response.data}"
+						 )
 				} else
 				{
 					_error.value = response.message.toString()

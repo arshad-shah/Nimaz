@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
+import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 
 @Composable
 fun PrayerTimesScreen(
@@ -44,6 +45,17 @@ fun PrayerTimesScreen(
 	// Collecting the state of the view model
 	val state by remember { viewModel.prayerTimesState }.collectAsState()
 	val locationState = remember { settingViewModel.locationName }.collectAsState()
+	val latitude = remember { settingViewModel.latitude }.collectAsState()
+	val longitude = remember { settingViewModel.longitude }.collectAsState()
+
+	LaunchedEffect(locationState.value, latitude.value, longitude.value) {
+		viewModel.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				PrayerTimesParamMapper.getParams(context)
+																				  )
+							 )
+	}
+
 
 	val currentPrayerName = remember {
 		viewModel.currentPrayerName
