@@ -94,12 +94,14 @@ class MainActivity : ComponentActivity()
 	{
 		super.onDestroy()
 		mediaPlayer.release()
+		AutoLocationUtils.stopLocationUpdates()
 	}
 
 	override fun onPause()
 	{
 		super.onPause()
 		mediaPlayer.release()
+		AutoLocationUtils.stopLocationUpdates()
 	}
 
 	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class)
