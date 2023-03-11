@@ -1,18 +1,15 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
-import android.location.Location
-import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.google.android.gms.location.*
+import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,9 +22,6 @@ class SettingsViewModel(context : Context) : ViewModel()
 	val sharedPreferences = PrivateSharedPreferences(context)
 
 	private val geocoder = Geocoder(context , Locale.getDefault())
-
-	private val fusedLocationProviderClient =
-		LocationServices.getFusedLocationProviderClient(context)
 
 	//theme state
 	//it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
@@ -455,12 +449,25 @@ class SettingsViewModel(context : Context) : ViewModel()
 				if (checked)
 				{
 					_isLoading.value = true
-					startLocationUpdates()
+					AutoLocationUtils.init(context)
+					AutoLocationUtils.startLocationUpdates()
+					AutoLocationUtils.setLocationDataCallback {
+						location ->
+						sharedPreferences.saveData(
+								AppConstants.LATITUDE ,
+								location.latitude.toString()
+												  )
+						sharedPreferences.saveData(
+								AppConstants.LONGITUDE ,
+								location.longitude.toString()
+												  )
+						reverseGeocode(location.latitude , location.longitude)
+					}
 					_isLoading.value = false
 				} else
 				{
 					_isLoading.value = true
-					stopLocationUpdates()
+					AutoLocationUtils.stopLocationUpdates()
 					forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
 					_isLoading.value = false
 				}
@@ -486,14 +493,26 @@ class SettingsViewModel(context : Context) : ViewModel()
 			if (addresses.isNotEmpty())
 			{
 				val address : Address = addresses[0]
-				_locationName.value = address.locality
-				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				//check if locality is available if not then use admin area instead if admin area is also not available then use country name
+				if (address.locality != null)
+				{
+					_locationName.value = address.locality
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				} else if (address.adminArea != null)
+				{
+					_locationName.value = address.adminArea
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.adminArea)
+				} else
+				{
+					_locationName.value = address.countryName
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.countryName)
+				}
 				_latitude.value = latitude
 				_longitude.value = longitude
 				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , latitude)
 				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , longitude)
 
-				Log.i("Location" , "Location Found From value $latitude $longitude")
+				Log.d("Nimaz: Location" , "Location Found From value $latitude $longitude")
 			} else
 			{
 				_latitude.value =
@@ -502,7 +521,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 					sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				val cityNameFromStorage =
 					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-				Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+				Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 			}
 		} catch (e : Exception)
 		{
@@ -513,7 +532,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 			val cityNameFromStorage =
 				sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-			Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+			Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 		}
 	}
 
@@ -527,13 +546,27 @@ class SettingsViewModel(context : Context) : ViewModel()
 			if (addresses.isNotEmpty())
 			{
 				val address : Address = addresses[0]
+				//check if locality is available if not then use admin area instead if admin area is also not available then use country name
+				if (address.locality != null)
+				{
+					_locationName.value = address.locality
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				} else if (address.adminArea != null)
+				{
+					_locationName.value = address.adminArea
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.adminArea)
+				} else
+				{
+					_locationName.value = address.countryName
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.countryName)
+				}
 				_locationName.value = address.locality
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
 				_latitude.value = address.latitude
 				_longitude.value = address.longitude
 				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , address.latitude)
 				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , address.longitude)
-				Log.i("Location" , "Location Found From value $cityName")
+				Log.d("Nimaz: Location" , "Location Found From value $cityName")
 			} else
 			{
 				_latitude.value =
@@ -542,7 +575,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 					sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				val cityNameFromStorage =
 					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-				Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+				Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 			}
 		} catch (e : Exception)
 		{
@@ -553,60 +586,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 			val cityNameFromStorage =
 				sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-			Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+			Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 		}
 	}
-
-
-	private val ONE_MINUTE = 1000 * 60
-	val locationRequest : LocationRequest = LocationRequest.Builder(
-			Priority.PRIORITY_BALANCED_POWER_ACCURACY ,
-			ONE_MINUTE.toLong()
-																   ).build()
-
-	@SuppressLint("MissingPermission")
-	private fun startLocationUpdates()
-	{
-		fusedLocationProviderClient.requestLocationUpdates(
-				locationRequest ,
-				locationCallback ,
-				Looper.getMainLooper()
-														  )
-	}
-
-	private fun stopLocationUpdates()
-	{
-		fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-	}
-
-	private val locationCallback = object : LocationCallback()
-	{
-		override fun onLocationResult(p0 : LocationResult)
-		{
-			super.onLocationResult(p0)
-			locationRequest
-			for (location in p0.locations)
-			{
-				setLocationData(location)
-				Log.d(
-						"Nimaz: Location" ,
-						"Latitude: ${location.latitude} Longitude: ${location.longitude}"
-					 )
-			}
-		}
-	}
-
-	private fun setLocationData(location : Location?)
-	{
-		location?.let {
-			_latitude.value = location.latitude
-			_longitude.value = location.longitude
-			reverseGeocode(
-					location.latitude ,
-					location.longitude
-						  )
-		}
-	}
-
-
 }

@@ -87,6 +87,13 @@ fun LocationSettings(isIntro : Boolean = false)
 		viewModel.isError
 	}.collectAsState()
 
+	LaunchedEffect(locationNameState.value, latitudeState.value, longitudeState.value) {
+		viewModelPrayerTimes.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				PrayerTimesParamMapper.getParams(context)
+																				  )
+							 )
+	}
 
 	if (isError.value.isNotBlank())
 	{
@@ -487,6 +494,14 @@ fun LocationToggleSwitch(
 
 	if (state.value && isIntro)
 	{
+		//if locationNameState is longer than 10 characters, than add an ellipsis
+		val locationName = if (locationNameState.value.length > 10)
+		{
+			locationNameState.value.substring(0 , 10) + "..."
+		} else
+		{
+			locationNameState.value
+		}
 		if (locationNameState.value.isBlank())
 		{
 			ElevatedCard(
@@ -512,7 +527,7 @@ fun LocationToggleSwitch(
 						) {
 				Text(
 						textAlign = TextAlign.Center ,
-						text = "Current Location: " + locationNameState.value ,
+						text = "Current Location: $locationName" ,
 						modifier = Modifier.padding(16.dp) ,
 						style = MaterialTheme.typography.bodyMedium
 					)

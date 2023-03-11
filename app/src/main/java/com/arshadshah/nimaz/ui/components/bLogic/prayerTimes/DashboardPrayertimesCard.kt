@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DAS
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -76,6 +77,14 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 	val longitude = remember {
 		settingViewModel.longitude
 	}.collectAsState()
+
+	LaunchedEffect(locationName.value , latitude.value , longitude.value) {
+		viewModel.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				PrayerTimesParamMapper.getParams(context)
+																				  )
+							 )
+	}
 
 	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0, context = context).getMoonPhase()
 
@@ -139,7 +148,12 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleSmall
 						)
 				}
-				Text(text = locationName.value ?: "" , style = MaterialTheme.typography.titleMedium)
+				//process the location name to show only 10 characters and add ... if more than 10 characters
+				val locationNameValue = locationName.value ?: ""
+				val locationNameValueLength = locationNameValue.length
+				val locationNameValueSubstring = locationNameValue.substring(0 , if (locationNameValueLength > 10) 10 else locationNameValueLength)
+				val locationNameValueFinal = if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
+				Text(text = locationNameValueFinal , style = MaterialTheme.typography.titleMedium)
 
 				//emoji for moon phase
 				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge)
