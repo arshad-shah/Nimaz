@@ -231,12 +231,6 @@ class MainActivity : ComponentActivity()
 				val networkConnection =
 					remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
 
-				val viewModel = viewModel(
-						key = "QuranViewModel" ,
-						initializer = { QuranViewModel(this@MainActivity) } ,
-						viewModelStoreOwner = this as ComponentActivity
-										 )
-
 				LaunchedEffect(networkConnection.value) {
 					if (! networkConnection.value)
 					{
@@ -316,7 +310,6 @@ class MainActivity : ComponentActivity()
 															MoreMenu(
 																	menuOpen = menuOpen ,
 																	setMenuOpen = setMenuOpen ,
-																	handleQuranEvents = viewModel::handleQuranMenuEvents
 																	)
 														}
 

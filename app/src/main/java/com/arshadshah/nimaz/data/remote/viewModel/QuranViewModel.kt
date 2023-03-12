@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.FULL_QURAN_DOWNLOADED
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
@@ -12,6 +13,7 @@ import com.arshadshah.nimaz.data.remote.repositories.QuranRepository
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -25,6 +27,29 @@ class QuranViewModel(context : Context) : ViewModel()
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
+//	val spaceFilesRepository = SpacesFileRepository(context)
+//	//for each surah, download all the audio files
+//	for (aya in response.data)
+//	{
+//		//get the audio file
+//		spaceFilesRepository.downloadAyaFile(
+//				aya.suraNumber ,
+//				aya.ayaNumberInSurah
+//											){ file: File? , error: Exception? , progress: Int , isCompleted: Boolean  ->
+//			//if file is downloaded, save the location in database
+//			if (isCompleted)
+//			{
+//				CoroutineScope(Dispatchers.IO).launch {
+//					dataStore.addAudioToAya(
+//							aya.suraNumber ,
+//							aya.ayaNumberInSurah ,
+//							file?.absolutePath.toString()
+//										   )
+//				}
+//			}
+//		}
+//	}
+
 
 	//general state for error and loading
 	private val _errorState = MutableStateFlow("")
@@ -34,14 +59,14 @@ class QuranViewModel(context : Context) : ViewModel()
 
 
 	//surah list state
-	private var _surahListState = MutableStateFlow(ArrayList<Surah>())
+	private var _surahListState = MutableStateFlow(ArrayList<Surah>(114))
 	val surahListState = _surahListState.asStateFlow()
 
 	//juz list state
-	private var _juzListState = MutableStateFlow(ArrayList<Juz>())
+	private var _juzListState = MutableStateFlow(ArrayList<Juz>(30))
 	val juzListState = _juzListState.asStateFlow()
 
-	private val _ayaListState = MutableStateFlow(ArrayList<Aya>())
+	private val _ayaListState = MutableStateFlow(ArrayList<Aya>(100))
 	val ayaListState = _ayaListState.asStateFlow()
 
 	//state for quran menu features like page display, font size, font type, etc
@@ -59,6 +84,10 @@ class QuranViewModel(context : Context) : ViewModel()
 
 	private val _display_Mode = MutableStateFlow("List")
 	val display_Mode = _display_Mode.asStateFlow()
+
+	//download button state
+	private val _downloadButtonState = MutableStateFlow(sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED, true))
+	val downloadButtonState = _downloadButtonState.asStateFlow()
 
 
 	init
@@ -84,6 +113,14 @@ class QuranViewModel(context : Context) : ViewModel()
 
 		//change display mode
 		data class Change_Display_Mode(val mode : String) : QuranMenuEvents()
+
+		object Download_Quran : QuranMenuEvents()
+
+		//to check progress of download
+		object Check_Download_Progress : QuranMenuEvents()
+
+		//cancel download
+		object Cancel_Download : QuranMenuEvents()
 
 		//initialize quran using settings
 		object Initialize_Quran : QuranMenuEvents()
@@ -128,6 +165,104 @@ class QuranViewModel(context : Context) : ViewModel()
 				_translation_Font_size.value =
 					sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
 				_display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE , "List")
+			}
+			is QuranMenuEvents.Download_Quran ->
+			{
+				downloadQuran()
+			}
+			is QuranMenuEvents.Check_Download_Progress ->
+			{
+				checkDownloadProgress()
+			}
+			is QuranMenuEvents.Cancel_Download ->
+			{
+				cancelDownload()
+			}
+		}
+	}
+
+	//progress of download
+	private val _downloadProgress = MutableStateFlow(0)
+	val downloadProgress = _downloadProgress.asStateFlow()
+
+	private fun checkDownloadProgress()
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			_errorState.value = ""
+			try
+			{
+				//check if quran is downloaded by checking if database has 6236 ayats
+				val dataStore = LocalDataStore.getDataStore()
+				val ayats = dataStore.countAllAyat()
+				_downloadProgress.value = (ayats * 100) / 6236
+			} catch (e : Exception)
+			{
+				_errorState.value = e.message.toString()
+			}
+		}
+	}
+
+	//download coroutine
+	private var downloadJob : Job? = null
+
+	//cancel download
+	private fun cancelDownload()
+	{
+		//cancel download coroutine
+		downloadJob?.cancel()
+	}
+
+	private fun downloadQuran()
+	{
+		//cancel previous download
+		cancelDownload()
+		//start new download
+		downloadJob = viewModelScope.launch(Dispatchers.IO) {
+			_errorState.value = ""
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				//find out what is the last surah downloaded
+				val ayat = dataStore.getAllAyat()
+				//array of the surah numbers from 1 to 114
+				val surahs = IntArray(114) { it + 1 }
+				//check which surahs are already downloaded
+				val downloadedSurahs = ayat.map { it.suraNumber }.distinct()
+				//remove downloaded surahs from array
+				val surahsToDownload = surahs.filter { !downloadedSurahs.contains(it) }
+				//if all surahs are downloaded, return
+				if (surahsToDownload.isEmpty())
+				{
+					_loadingState.value = false
+					return@launch
+				}
+				//for 114 surahs, get all ayats
+				for (i in surahsToDownload)
+				{
+					val response = quranRepository.getAyaForSurah(i)
+					if (response.data != null)
+					{
+						dataStore.insertAyats(response.data)
+					} else
+					{
+						_loadingState.value = false
+						_errorState.value = response.message.toString()
+					}
+				}
+
+
+				//check if all ayats are downloaded
+				val ayats = dataStore.countAllAyat()
+				if (ayats == 6236)
+				{
+					//save that quran is downloaded
+					sharedPreferences.saveDataBoolean(FULL_QURAN_DOWNLOADED , true)
+					//disable download button
+					_downloadButtonState.value = false
+				}
+			} catch (e : Exception)
+			{
+				_errorState.value = e.message.toString()
 			}
 		}
 	}
@@ -221,7 +356,7 @@ class QuranViewModel(context : Context) : ViewModel()
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
-				val surahTotalAya = (dataStore.getSurahById(surahNumber).numberOfAyahs)
+				val surahTotalAya = dataStore.getSurahById(surahNumber).numberOfAyahs
 				val languageConverted = language.uppercase(Locale.ROOT)
 				val ayaInDatabase = dataStore.countSurahAyat(surahNumber)
 				//check if the ayat are teh same as the surah total ayat
@@ -238,7 +373,7 @@ class QuranViewModel(context : Context) : ViewModel()
 					_errorState.value = ""
 				} else
 				{
-					val response = quranRepository.getAyaForSurah(surahNumber , language)
+					val response = quranRepository.getAyaForSurah(surahNumber)
 					if (response.data != null)
 					{
 						dataStore.insertAyats(response.data)
@@ -345,7 +480,7 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val languageConverted = language.uppercase(Locale.ROOT)
-				val areAyatAvailable = dataStore.countJuzAyat(juzNumber , languageConverted)
+				val areAyatAvailable = dataStore.countJuzAyat(juzNumber)
 				val juzStartAya = dataStore.getJuzById(juzNumber).juzStartAyaInQuran
 				val juzEndAya =
 					if (juzNumber != 30) (dataStore.getJuzById(juzNumber + 1).juzStartAyaInQuran) else 6236
@@ -362,7 +497,7 @@ class QuranViewModel(context : Context) : ViewModel()
 
 				} else
 				{
-					val response = quranRepository.getAyaForJuz(juzNumber , language)
+					val response = quranRepository.getAyaForJuz(juzNumber)
 					if (response.data != null)
 					{
 						dataStore.insertAyats(response.data)
