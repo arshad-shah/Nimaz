@@ -124,10 +124,10 @@ class SpacesFileRepository(context : Context)
 												 {
 													 Log.i("S3 Download" , "Completed")
 													 callback(file , null , 100 , true)
-													 Toasty.success(
-															 appContext ,
-															 "Downloaded successfully!"
-																   ).show()
+//													 Toasty.success(
+//															 appContext ,
+//															 "Downloaded successfully!"
+//																   ).show()
 												 }
 
 												 TransferState.IN_PROGRESS ->

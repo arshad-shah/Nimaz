@@ -53,6 +53,7 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.WidgetService
@@ -93,12 +94,14 @@ class MainActivity : ComponentActivity()
 	{
 		super.onDestroy()
 		mediaPlayer.release()
+		AutoLocationUtils.stopLocationUpdates()
 	}
 
 	override fun onPause()
 	{
 		super.onPause()
 		mediaPlayer.release()
+		AutoLocationUtils.stopLocationUpdates()
 	}
 
 	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class)
@@ -228,12 +231,6 @@ class MainActivity : ComponentActivity()
 				val networkConnection =
 					remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
 
-				val viewModel = viewModel(
-						key = "QuranViewModel" ,
-						initializer = { QuranViewModel(this@MainActivity) } ,
-						viewModelStoreOwner = this as ComponentActivity
-										 )
-
 				LaunchedEffect(networkConnection.value) {
 					if (! networkConnection.value)
 					{
@@ -313,7 +310,6 @@ class MainActivity : ComponentActivity()
 															MoreMenu(
 																	menuOpen = menuOpen ,
 																	setMenuOpen = setMenuOpen ,
-																	handleQuranEvents = viewModel::handleQuranMenuEvents
 																	)
 														}
 

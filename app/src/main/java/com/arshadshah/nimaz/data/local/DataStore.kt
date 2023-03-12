@@ -132,13 +132,19 @@ class DataStore(db : AppDatabase)
 	//getRandomAya
 	suspend fun getRandomAya() = ayaDao.getRandomAya().toAya()
 
+	//countAllAyas
+	suspend fun countAllAyat() = ayaDao.countAllAyas()
+
+	//get allAyas
+	suspend fun getAllAyat() = ayaDao.getAllAyas().map { it.toAya() }
+
 	//count the number of ayas
 	suspend fun countSurahAyat(
 		surahNumber : Int ,
 							  ) =
 		ayaDao.countSurahAya(surahNumber)
 
-	suspend fun countJuzAyat(juzNumber : Int , translationLanguage : String) =
+	suspend fun countJuzAyat(juzNumber : Int) =
 		ayaDao.countJuzAya(juzNumber)
 
 	//bookmark an aya
