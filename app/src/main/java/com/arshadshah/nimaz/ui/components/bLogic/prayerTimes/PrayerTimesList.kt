@@ -89,7 +89,6 @@ fun PrayerTimesList()
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 
-
 		if (! alarmLock)
 		{
 			CreateAlarms().exact(
