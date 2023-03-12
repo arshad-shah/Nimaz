@@ -1,14 +1,19 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
@@ -17,19 +22,20 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
-import kotlin.reflect.KFunction1
+import kotlinx.coroutines.*
 
 @Composable
 fun MoreMenu(
 	menuOpen : Boolean = false ,
 	setMenuOpen : (Boolean) -> Unit ,
 	state : SettingValueState<Int> = rememberIntSettingState() ,
-	handleQuranEvents : KFunction1<QuranViewModel.QuranMenuEvents , Unit> ,
 			)
 {
 
+	val context = LocalContext.current
 
-	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
+
+	val sharedPreferences = PrivateSharedPreferences(context)
 
 	val pageTypeState =
 		rememberPreferenceStringSettingState(AppConstants.PAGE_TYPE , "List" , sharedPreferences)
@@ -48,7 +54,7 @@ fun MoreMenu(
 
 	//a dialog with two sliders to control the font size of quran
 	val (showDialog3 , setShowDialog3) = remember { mutableStateOf(false) }
-	val context = LocalContext.current
+	val (showDialog4 , setShowDialog4) = remember { mutableStateOf(false) }
 
 
 	val arabicFontSizeState = rememberPreferenceFloatSettingState(
@@ -66,6 +72,16 @@ fun MoreMenu(
 			defaultValue = "Default" ,
 			sharedPreferences
 															 )
+
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+
+	val isDownloadButtonEnabled = remember {
+		viewModel.downloadButtonState
+	}.collectAsState(initial = true)
 
 	DropdownMenu(
 			expanded = menuOpen ,
@@ -105,6 +121,15 @@ fun MoreMenu(
 					setShowDialog3(true)
 					setMenuOpen(false)
 				} , text = { Text(text = "Font") })
+
+				//download quran
+				DropdownMenuItem(
+						enabled = isDownloadButtonEnabled.value ,
+						onClick = {
+					viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Download_Quran)
+					setShowDialog4(true)
+					setMenuOpen(false)
+				} , text = { Text(text = "Download Quran") })
 			}
 				)
 
@@ -118,7 +143,7 @@ fun MoreMenu(
 				valueState = pageTypeState ,
 				items = items1 ,
 				onStateChange = {
-					handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Display_Mode(it))
+					viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Change_Display_Mode(it))
 				}
 					)
 	} else if (showDialog2)
@@ -130,7 +155,7 @@ fun MoreMenu(
 				state = state ,
 				valueState = translationState ,
 				onStateChange = {
-					handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Translation(it))
+					viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Change_Translation(it))
 				}
 					)
 	} else if (showDialog3)
@@ -141,10 +166,113 @@ fun MoreMenu(
 				translationFontSizeState ,
 				fontStyleState ,
 				items3 ,
-				handleQuranEvents
+				viewModel::handleQuranMenuEvents
 					  )
-	} else
+	}else if (showDialog4)
+	{
+		val downloadState = remember {
+			viewModel.downloadProgress
+		}.collectAsState()
+		DownloadQuranDialog(setShowDialog4, downloadState, viewModel::handleQuranMenuEvents)
+	}
+	else
 	{
 		return
 	}
+}
+
+@Composable
+fun DownloadQuranDialog(
+	showDialog4 : (Boolean) -> Unit ,
+	downloadProgress : State<Int> ,
+	handleEvents : (QuranViewModel.QuranMenuEvents) -> Unit
+					   )
+{
+
+	val progress = remember { mutableStateOf(0f) }
+	//every few seconds check if the download is complete
+	LaunchedEffect(Unit) {
+		launch {
+			while (isActive)
+			{
+				delay(10)
+				handleEvents(QuranViewModel.QuranMenuEvents.Check_Download_Progress)
+				progress.value = downloadProgress.value.toFloat()
+				when (progress.value)
+				{
+					-1f ->
+					{
+						showDialog4(false)
+						cancel(
+								cause = CancellationException(
+										"Download Failed"
+															 )
+							  )
+						Log.d("Nimaz: DownloadQuranDialog" , "Download Failed")
+					}
+					-2f ->
+					{
+						showDialog4(false)
+						cancel(
+								cause = CancellationException(
+										"Download Cancelled"
+															 )
+							  )
+						Log.d("Nimaz: DownloadQuranDialog" , "Download Cancelled")
+					}
+					100f ->
+					{
+						showDialog4(false)
+						cancel(
+								cause = CancellationException(
+										"Download Complete"
+															 )
+							  )
+						Log.d("Nimaz: DownloadQuranDialog" , "Download Complete")
+					}
+				}
+			}
+		}
+	}
+	//a progress bar to show the progress of the download in an alert dialog
+	AlertDialog(
+			icon = {
+				Icon(
+						painter = painterResource(id = R.drawable.download_icon) ,
+						modifier = Modifier.size(24.dp),
+						contentDescription = "Download Quran" ,
+						tint = MaterialTheme.colorScheme.primary
+					)
+			},
+			onDismissRequest = { showDialog4(false) } ,
+			title = { Text(text = "Quran Download") } ,
+			text = {
+				Column {
+					Row(
+							modifier = Modifier.fillMaxWidth(),
+							verticalAlignment = Alignment.CenterVertically ,
+							horizontalArrangement = Arrangement.SpaceBetween
+					   ) {
+						Text(text = "Downloading Quran", modifier = Modifier.padding(4.dp), style = MaterialTheme.typography.titleMedium)
+						Text(text = "${progress.value.toInt()}%", modifier = Modifier.padding(4.dp) , style = MaterialTheme.typography.titleMedium)
+					}
+					LinearProgressIndicator(progress = progress.value / 100f,
+											modifier = Modifier
+												.fillMaxWidth()
+												.padding(4.dp)
+												.height(8.dp) ,
+											strokeCap = StrokeCap.Round ,)
+				}
+			} ,
+			confirmButton = {
+			} ,
+			dismissButton = {
+				Button(onClick = {
+					handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
+					showDialog4(false)
+								 } , modifier = Modifier.padding(4.dp)) {
+					Text(text = "Cancel Download")
+				}
+			}
+			   )
 }

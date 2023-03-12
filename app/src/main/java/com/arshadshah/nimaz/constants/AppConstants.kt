@@ -62,6 +62,8 @@ object AppConstants
 	const val CHANNEL_LOCK = "channelLock"
 	const val THEME = "theme"
 	const val FONT_STYLE = "font_style"
+	//full quran downloaded
+	const val FULL_QURAN_DOWNLOADED = "full_quran_downloaded"
 
 	//codes
 	const val APP_UPDATE_REQUEST_CODE = 100
