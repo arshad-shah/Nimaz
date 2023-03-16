@@ -1,18 +1,20 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
-import android.content.Context
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
@@ -21,6 +23,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,10 +34,10 @@ import com.arshadshah.nimaz.ui.theme.amiri
 import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
-import es.dmoral.toasty.Toasty
 
 @Composable
 fun Page(
@@ -56,30 +59,37 @@ fun Page(
 		viewModel.arabic_Font
 	}.collectAsState()
 
-	Verses(
+	val state = rememberLazyListState()
+
+	Log.d("Nimaz: ListState" , remember { derivedStateOf { state.firstVisibleItemIndex } }.toString())
+
+	LazyColumn(
+			state = state,
 			modifier = Modifier
+				.fillMaxWidth()
 				.padding(paddingValues)
-				.padding(4.dp)
-		  ) {
-		AyaList.forEach { aya ->
-			val isNotBismillah =
-				aya.ayaNumber != 0 || aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾"
-			Verse(
-					context = context ,
-					isNotBismillah = isNotBismillah ,
-					//split the aya into words
-					word = aya.ayaArabic ,
-					loading = loading ,
-					arabicFontSize = arabicFontSize.value ,
-					fontStyle = arabicFont.value
-				 )
+				.padding(4.dp),
+			content ={
+		item{
+			Verses {
+				AyaList.forEach { aya ->
+					Verse(
+
+							isNotBismillah = aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾"  && aya.ayaNumber != 0,
+							//split the aya into words
+							word = aya.ayaArabic ,
+							loading = loading ,
+							arabicFontSize = arabicFontSize.value ,
+							fontStyle = arabicFont.value
+						 )
+				}
+			}
 		}
-	}
+	})
 }
 
 @Composable
 fun Verse(
-	context : Context ,
 	isNotBismillah : Boolean ,
 	loading : Boolean ,
 	arabicFontSize : Float ,
@@ -87,83 +97,97 @@ fun Verse(
 	fontStyle : String ,
 		 )
 {
-	CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-		ClickableText(
-				modifier = if (isNotBismillah)
-				{
-					Modifier
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
-				} else
-				{
-					Modifier
-						.fillMaxWidth()
-						.border(
-								2.dp ,
-								MaterialTheme.colorScheme.outline ,
-								RoundedCornerShape(8.dp)
-							   )
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
-				} ,
-				text = AnnotatedString(word) ,
-				softWrap = true ,
-				maxLines = 2 ,
-				style = TextStyle(
-						fontFamily = when (fontStyle)
-						{
-							"Default" ->
-							{
-								utmaniQuranFont
+	val isSelected = remember { mutableStateOf(false) }
+	SelectionContainer {
+		CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+			Text(
+					modifier = if (isNotBismillah)
+					{
+						Modifier
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
+							.background(
+									color = if (isSelected.value) MaterialTheme.colorScheme.primary.copy(
+											alpha = 0.5f
+																										) else Color.Transparent ,
+									shape = RoundedCornerShape(8.dp)
+									   )
+							.clickable {
+								isSelected.value = ! isSelected.value
 							}
+					} else
+					{
+						Modifier
+							.fillMaxWidth()
+							.border(
+									2.dp ,
+									MaterialTheme.colorScheme.outline ,
+									RoundedCornerShape(8.dp)
+								   )
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
+							.background(
+									color = if (isSelected.value) MaterialTheme.colorScheme.primary.copy(
+											alpha = 0.5f
+																										) else Color.Transparent ,
+									shape = RoundedCornerShape(8.dp)
+									   )
+					} ,
+					text = AnnotatedString(word) ,
+					style = TextStyle(
+							fontFamily = when (fontStyle)
+							{
+								"Default" ->
+								{
+									utmaniQuranFont
+								}
 
-							"Quranme" ->
-							{
-								quranFont
-							}
+								"Quranme" ->
+								{
+									quranFont
+								}
 
-							"Hidayat" ->
-							{
-								hidayat
-							}
+								"Hidayat" ->
+								{
+									hidayat
+								}
 
-							"Amiri" ->
-							{
-								amiri
-							}
+								"Amiri" ->
+								{
+									amiri
+								}
 
-							else ->
-							{
-								utmaniQuranFont
-							}
-						} ,
-						//if arabic font size is not set then use default font size
-						fontSize = if (arabicFontSize == 0f) 24.sp else arabicFontSize.sp ,
-						lineHeight = 60.sp ,
-						color = MaterialTheme.colorScheme.onSurface ,
-						textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
-								 ) ,
-				onClick = {
-					Toasty.info(context , word).show()
-				}
-					 )
+								else ->
+								{
+									utmaniQuranFont
+								}
+							} ,
+							//if arabic font size is not set then use default font size
+							fontSize = if (arabicFontSize == 0f) 24.sp else arabicFontSize.sp ,
+							lineHeight = 50.sp ,
+							color = MaterialTheme.colorScheme.onSurface ,
+							textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
+									 ) ,
+						 )
+		}
 	}
 }
 
 @Composable
-fun Verses(modifier : Modifier , content : @Composable () -> Unit)
+fun Verses(modifier : Modifier = Modifier ,
+		   content : @Composable () -> Unit)
 {
 	Layout(
 			//scroll until content height is reached
@@ -202,4 +226,48 @@ fun Verses(modifier : Modifier , content : @Composable () -> Unit)
 				}
 			}
 		  )
+}
+
+
+//preview of page
+@Preview(showBackground = true)
+@Composable
+fun PagePreview()
+{
+	val context = LocalContext.current
+	LocalDataStore.init(context)
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity)
+	viewModel.getAllAyaForJuz(1, "English")
+
+	val listOfAya = remember {
+		viewModel.ayaListState
+	}.collectAsState()
+
+	val loading = remember {
+		viewModel.loadingState
+	}.collectAsState()
+
+	Page(
+			AyaList = listOfAya.value ,
+		 paddingValues =  PaddingValues(16.dp) ,
+			loading = loading.value ,
+		)
+}
+
+//preview of verse
+@Preview(showBackground = true)
+@Composable
+fun VersePreview()
+{
+	Verse(
+			isNotBismillah = true ,
+			loading = false ,
+			arabicFontSize = 24f ,
+			//something long to test the text wrapping
+			word = "الرَّحْمَٰنِ الرَّحِيمِ ۚ إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ ۖ فَصَلِّ لِرَبِّكَ وَانْحَرْ ۚ إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمْ" ,
+			fontStyle = "Default" ,
+		   )
 }

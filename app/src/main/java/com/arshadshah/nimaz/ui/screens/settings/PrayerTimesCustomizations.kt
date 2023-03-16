@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -176,7 +174,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsList(
@@ -215,7 +212,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsList(
@@ -260,7 +256,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsNumberPickerDialog(
@@ -296,7 +291,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
-							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							) {
 					SettingsNumberPickerDialog(
@@ -336,7 +330,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
-							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							) {
 					SettingsMenuLink(
@@ -359,7 +352,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -405,7 +397,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -451,7 +442,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -497,7 +487,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -543,7 +532,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -589,7 +577,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(

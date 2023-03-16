@@ -5,7 +5,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -20,7 +19,6 @@ fun SettingsGroup(
 	ElevatedCard(
 			modifier = modifier
 				.padding(8.dp)
-				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		Column(
 				modifier = modifier.fillMaxWidth() ,

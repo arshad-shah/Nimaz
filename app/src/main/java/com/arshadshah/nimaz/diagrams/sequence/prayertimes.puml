@@ -1,7 +1,7 @@
 @startuml
 'https://plantuml.com/sequence-diagram
 
-title Custom Prayer Times
+title Prayer Times
 autonumber
 
 'the main system consists of the ui, viewmodel, repository, httpclient, datasource
@@ -9,8 +9,9 @@ actor User as user
 participant "UI" as ui
 participant "ViewModel" as vm
 participant "Repository" as repo
+participant "Local DataSource" as lds
 participant "HttpClient" as http
-participant "DataSource" as ds
+participant "Remote DataSource" as ds
 
 
 'the view model has state that is updated by change to the data it has from repository
@@ -20,23 +21,34 @@ vm --> ui: setStateToLoading()
 ui --> user: showLoadingSkeleton()
 
 vm -> repo: getPrayerTimes()
-repo -> repo: getParametersFromStorage()
-repo -> repo: generateMapOfParameters()
+'repo checks if local data is available
+repo -> lds: arePrayerTimesAvailable()
+lds --> repo: true/false
+'if local data is available, the repo asks the local data source for the data
+alt local data is available
+repo -> lds: getPrayerTimes(today: LocalDateTime)
+lds --> repo: PrayerTimes
+else local data is not available
+'repo asks the http client to get the data from the remote data source
+repo -> repo: getMapOfParameters()
 repo -> http: getPrayerTimes(params: Map<String,String>)
 
 'now http makes a post resquest to the datasource
 http -> ds: getPrayerTimes(POST params)
+
 'request comes back
 ds --> http: JSONOBJECT(PrayerTimes)
-http -> repo: JSONOBJECT((PrayerTimes)
+'now http parses the json object into a model
+http -> http: Serialize prayer times to model
+http -> repo: List<PrayerTimes>
 
-repo -> repo: Serialize prayertimes to model
+'now the repo saves the data to the local data source
+repo -> lds: savePrayerTimes(List<PrayerTimes>)
+end
 
 repo --> vm: PrayerTimes
 
-vm --> ui:setStateToSuccess((PrayerTimes)
-
-ui --> user: diplayPrayerTimes
-
-
+'now the view model updates the state and in turn triggers the UI recomposition
+vm --> ui: setStateToPrayerTimes()
+ui --> user: showPrayerTimes()
 @enduml

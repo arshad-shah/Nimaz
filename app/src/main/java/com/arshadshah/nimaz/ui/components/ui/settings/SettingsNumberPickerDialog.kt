@@ -73,7 +73,6 @@ fun SettingsNumberPickerDialog(
 	}
 
 	AlertDialog(
-			shape = CardDefaults.elevatedShape ,
 			title = title ,
 			text = {
 				Column {

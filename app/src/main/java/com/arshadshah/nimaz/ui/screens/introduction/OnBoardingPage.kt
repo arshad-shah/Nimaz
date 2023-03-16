@@ -19,8 +19,8 @@ sealed class OnBoardingPage(
 
 	object First : OnBoardingPage(
 			image = R.drawable.praying ,
-			title = "Assalamu alaikum" ,
-			description = "Nimaz is a muslim lifestyle companion app that helps you with your daily prayers." ,
+			title = "Assalamu alaykum" ,
+			description = "A user-friendly, Beautifully designed app for Muslims, completely Ad-Free." ,
 								 )
 
 	object Second : OnBoardingPage(
@@ -32,20 +32,20 @@ sealed class OnBoardingPage(
 	object Third : OnBoardingPage(
 			image = R.drawable.quran ,
 			title = "Quran" ,
-			description = "Quran with urdu and english translations. You can also listen to the recitation of the Quran. You can also bookmark ayahs and read them later." ,
+			description = "Quran with Urdu and English Translations, Audio Recitation, and Bookmarking Feature for Saving Ayahs to Read Later." ,
 								 )
 
 	object Fourth : OnBoardingPage(
 			image = R.drawable.tracker_icon ,
 			title = "Prayer and Fasting tracker" ,
-			description = "You can track your prayers and fasts." ,
+			description = "Stay on track with your prayers and fasts with the Prayer and Fasting tracker." ,
 								  )
 
 	//the Notification permission page
 	object Fifth : OnBoardingPage(
 			image = R.drawable.adhan ,
 			title = "Adhan Notifications" ,
-			description = "Enable Adhan Notifications for Nimaz to get Prayer alerts in the form of Adhan." ,
+			description = "Enable Adhan Notifications for Nimaz to get Prayer reminders in the form of Adhan." ,
 			extra = {
 				NotificationScreenUI()
 			}
@@ -54,7 +54,7 @@ sealed class OnBoardingPage(
 	object Sixth : OnBoardingPage(
 			image = R.drawable.location_pin ,
 			title = "Location" ,
-			description = "Nimaz needs your location to get accurate prayer times. You can also use manual location." ,
+			description = "Nimaz needs your location to get accurate prayer times and calculate Qibla direction. You can also use manual location." ,
 			extra = {
 				LocationSettings(isIntro = true)
 			}
@@ -73,7 +73,7 @@ sealed class OnBoardingPage(
 	object Eighth : OnBoardingPage(
 			image = R.drawable.battery ,
 			title = "Battery Exemption" ,
-			description = "Nimaz needs to be exempted from battery optimization to show adhan notifications Correctly." ,
+			description = "Battery optimization can cause issues with Adhan Notifications. Please exempt Nimaz from battery optimization." ,
 			extra = {
 				BatteryExemptionUI()
 			}

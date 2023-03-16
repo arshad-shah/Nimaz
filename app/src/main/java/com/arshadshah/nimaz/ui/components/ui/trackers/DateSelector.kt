@@ -125,11 +125,11 @@ fun DateSelector(
 				}
 				Text(
 						text = date.value.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy")) ,
-						style = MaterialTheme.typography.titleSmall
+						style = MaterialTheme.typography.titleMedium
 					)
 				Text(
 						text = hijrahDate.value.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-						style = MaterialTheme.typography.titleSmall
+						style = MaterialTheme.typography.bodySmall
 					)
 			}
 			IconButton(onClick = {
