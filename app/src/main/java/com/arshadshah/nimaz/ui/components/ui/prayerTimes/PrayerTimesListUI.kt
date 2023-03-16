@@ -4,13 +4,16 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -35,7 +38,6 @@ fun PrayerTimesListUI(
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(vertical = 8.dp)
-				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				) {
 		Column {
 			//iterate over the map
@@ -47,7 +49,7 @@ fun PrayerTimesListUI(
 					Divider(
 							modifier = Modifier.fillMaxWidth() ,
 							thickness = 1.dp ,
-							color = MaterialTheme.colorScheme.outline
+							color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
 						   )
 				}
 				//check if the row is to be highlighted
@@ -91,6 +93,7 @@ fun PrayerTimesRow(
 				Modifier
 					.fillMaxWidth()
 					.background(MaterialTheme.colorScheme.secondaryContainer)
+					.clip(RoundedCornerShape(topStart = 8.dp , topEnd = 8.dp , bottomStart = 8.dp , bottomEnd = 8.dp))
 			} else
 			{
 				Modifier

@@ -3,11 +3,10 @@ package com.arshadshah.nimaz.ui.components.ui.intro
 import android.Manifest
 import android.content.Intent
 import android.os.Build
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -17,8 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
@@ -148,11 +150,11 @@ fun NotificationScreenUI()
 				if (isChecked.value)
 				{
 					Row(
-							horizontalArrangement = Arrangement.Start ,
 							verticalAlignment = Alignment.CenterVertically
-					   ) {
+					   ){
 						Icon(
-								imageVector = Icons.Filled.CheckCircle ,
+								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								painter = painterResource(id = R.drawable.checkbox_icon) ,
 								contentDescription = "Notifications Allowed"
 							)
 						Text(text = "Enabled")
@@ -160,9 +162,12 @@ fun NotificationScreenUI()
 				} else
 				{
 					//if the permission is not granted, show a notification icon and text saying "Not Allowed"
-					Row {
+					Row(
+							verticalAlignment = Alignment.CenterVertically,
+					   ) {
 						Icon(
-								imageVector = Icons.Filled.Close ,
+								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								painter = painterResource(id = R.drawable.cross_circle_icon) ,
 								contentDescription = "Notifications Not Allowed"
 							)
 						Text(text = "Disabled")

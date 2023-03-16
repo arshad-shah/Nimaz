@@ -74,12 +74,12 @@ fun SettingsList(
 		}
 	}
 	AlertDialog(
+			icon = icon,
 			modifier = Modifier.height(height) ,
-			shape = CardDefaults.elevatedShape ,
 			title = title ,
 			text = {
 				Column {
-					Row(modifier.padding(bottom = 8.dp)) {
+					Row(modifier.padding(bottom = 4.dp)) {
 						description?.invoke()
 					}
 					Divider(color = MaterialTheme.colorScheme.outline)

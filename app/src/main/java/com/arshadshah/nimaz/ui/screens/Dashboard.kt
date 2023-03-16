@@ -48,7 +48,7 @@ fun Dashboard(
 		item {
 			ElevatedCard(
 					modifier = Modifier
-						.padding(8.dp)
+						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						.testTag(TEST_TAG_EVENTS_CARD)
 						.clickable {
 							onNavigateToCalender()
@@ -77,7 +77,7 @@ fun Dashboard(
 			ElevatedCard(
 					modifier = Modifier
 						.fillMaxWidth()
-						.padding(8.dp)
+						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						.testTag(TEST_TAG_TRACKERS_CARD)
 						.clickable {
 							onNavigateToTracker()

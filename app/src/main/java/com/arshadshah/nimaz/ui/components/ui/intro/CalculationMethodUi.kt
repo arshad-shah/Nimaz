@@ -6,14 +6,12 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,7 +63,11 @@ fun CalculationMethodUI()
 		settingViewModel.longitude
 	}.collectAsState()
 
-	ElevatedCard {
+	ElevatedCard(
+			modifier = Modifier
+				.padding(8.dp)
+				.fillMaxWidth()
+				) {
 		SettingsSwitch(
 				state = state ,
 				title = {
@@ -140,7 +142,6 @@ fun CalculationMethodUI()
 		ElevatedCard(
 				modifier = Modifier
 					.padding(8.dp)
-					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
 					) {
 			SettingsList(

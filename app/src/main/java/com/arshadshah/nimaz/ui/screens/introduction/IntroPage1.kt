@@ -66,12 +66,12 @@ fun IntroPage1()
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
 					//if the onBoardingPage.extra is not {} then add 20.dp padding else add 0.dp padding
-					.padding(20.dp)
+					.padding(16.dp)
 					.testTag("introPagerIndicator") ,
 				activeColor = MaterialTheme.colorScheme.primary ,
 				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f) ,
-				indicatorWidth = 12.dp ,
-				indicatorHeight = 12.dp
+				indicatorWidth = 10.dp ,
+				indicatorHeight = 10.dp
 								)
 
 

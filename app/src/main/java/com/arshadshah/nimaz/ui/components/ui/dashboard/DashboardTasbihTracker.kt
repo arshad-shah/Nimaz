@@ -2,9 +2,7 @@ package com.arshadshah.nimaz.ui.components.ui.dashboard
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +47,7 @@ fun DashboardTasbihTracker(
 		//a message to the user that there are no tasbih for the day
 		ElevatedCard(
 				modifier = Modifier
-					.padding(8.dp)
+					.padding(4.dp)
 					.fillMaxWidth()
 					.clickable {
 						onNavigateToTasbihListScreen()
@@ -63,7 +61,6 @@ fun DashboardTasbihTracker(
 					textAlign = TextAlign.Center ,
 					style = MaterialTheme.typography.titleMedium
 				)
-			Spacer(modifier = Modifier.height(8.dp))
 			Text(
 					text = "click here to add a tasbih" ,
 					modifier = Modifier
