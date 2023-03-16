@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -34,24 +31,11 @@ fun FastTrackerCard(
 	val context = LocalContext.current
 	val dateForTracker = LocalDate.parse(dateState.value)
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
-	if (showDateSelector.value)
-	{
-		DateSelector(
-				handleEvent = handleEvent
-					)
-	}
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(4.dp)
+				.padding(8.dp)
 				) {
-		Row(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.Start ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
 			ToggleableItem(
 					text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,
 					checked = isFastingToday.value ,
@@ -78,7 +62,7 @@ fun FastTrackerCard(
 								   )
 					} ,
 					modifier = Modifier
-						.padding(8.dp)
+						.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
 						.fillMaxWidth()
 						.placeholder(
 								visible = false ,
@@ -90,6 +74,5 @@ fun FastTrackerCard(
 									) ,
 					showDateSelector = showDateSelector.value
 						  )
-		}
 	}
 }

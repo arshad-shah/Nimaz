@@ -46,7 +46,6 @@ import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
@@ -269,7 +268,7 @@ class MainActivity : ComponentActivity()
 												title = {
 													Text(
 															text = processPageTitle(route.value.toString(), navController) ,
-															style = MaterialTheme.typography.titleMedium
+															style = MaterialTheme.typography.titleLarge
 														)
 												} ,
 												navigationIcon = {

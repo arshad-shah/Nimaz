@@ -114,7 +114,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 
 	ElevatedCard(
 			modifier = Modifier
-				.padding(8.dp)
+				.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 				.fillMaxWidth()
 				.testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD)
 				.clickable {

@@ -5,19 +5,15 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -193,12 +189,14 @@ fun LocationSettings(isIntro : Boolean = false)
 					locationPermissionState = locationPermissionState ,
 					isIntro = true ,
 								)
-			if (! state.value)
-			{
+			AnimatedVisibility(
+					visible = ! state.value ,
+					enter = expandVertically() ,
+					exit = shrinkVertically()
+							  ) {
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
-							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							.placeholder(
 									visible = isLoading.value ,
@@ -223,31 +221,35 @@ fun LocationSettings(isIntro : Boolean = false)
 						locationPermissionState = locationPermissionState ,
 						isIntro = false ,
 									)
-				if (! state.value)
-				{
-					ElevatedCard(
-							modifier = Modifier
-								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-								.fillMaxWidth()
-								.placeholder(
-										visible = isLoading.value ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
-								) {
-						ManualLocationInput(
-								handleSettingEvents = viewModel::handleEvent ,
-								locationNameState = locationNameState ,
-										   )
+				AnimatedVisibility(
+						visible = ! state.value ,
+						enter = expandVertically() ,
+						exit = shrinkVertically()
+								  ) {
+					Column {
+						ElevatedCard(
+								modifier = Modifier
+									.padding(8.dp)
+									.fillMaxWidth()
+									.placeholder(
+											visible = isLoading.value ,
+											color = MaterialTheme.colorScheme.outline ,
+											shape = RoundedCornerShape(4.dp) ,
+											highlight = PlaceholderHighlight.shimmer(
+													highlightColor = Color.White ,
+																					)
+												)
+									) {
+							ManualLocationInput(
+									handleSettingEvents = viewModel::handleEvent ,
+									locationNameState = locationNameState ,
+											   )
+						}
+						CoordinatesView(
+								longitudeState = longitudeState ,
+								latitudeState = latitudeState ,
+									   )
 					}
-					CoordinatesView(
-							longitudeState = longitudeState ,
-							latitudeState = latitudeState ,
-								   )
 				}
 			}
 		}
@@ -351,19 +353,10 @@ fun LocationToggleSwitch(
 	ElevatedCard(
 			modifier = Modifier
 				.padding(8.dp)
-				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				.fillMaxWidth()
 				.testTag("LocationSwitch")
 				) {
 		SettingsSwitch(
-				modifier = Modifier.placeholder(
-						visible = isLoading.value ,
-						color = MaterialTheme.colorScheme.outline ,
-						shape = RoundedCornerShape(4.dp) ,
-						highlight = PlaceholderHighlight.shimmer(
-								highlightColor = Color.White ,
-																)
-											   ) ,
 				state = state ,
 				icon = {
 					Icon(
@@ -397,7 +390,10 @@ fun LocationToggleSwitch(
 									verticalAlignment = Alignment.CenterVertically
 							   ) {
 								Icon(
-										imageVector = Icons.Filled.CheckCircle ,
+										modifier = Modifier
+											.size(18.dp)
+											.padding(end = 4.dp) ,
+										painter = painterResource(id = R.drawable.checkbox_icon) ,
 										contentDescription = "Location Allowed"
 									)
 								Text(text = "Enabled")
@@ -409,7 +405,10 @@ fun LocationToggleSwitch(
 									verticalAlignment = Alignment.CenterVertically
 							   ) {
 								Icon(
-										imageVector = Icons.Filled.Close ,
+										modifier = Modifier
+											.size(18.dp)
+											.padding(end = 4.dp) ,
+										painter = painterResource(id = R.drawable.cross_circle_icon) ,
 										contentDescription = "Location Not Allowed"
 									)
 								Text(text = "Disabled")
@@ -495,9 +494,9 @@ fun LocationToggleSwitch(
 	if (state.value && isIntro)
 	{
 		//if locationNameState is longer than 10 characters, than add an ellipsis
-		val locationName = if (locationNameState.value.length > 10)
+		val locationName = if (locationNameState.value.length > 15)
 		{
-			locationNameState.value.substring(0 , 10) + "..."
+			locationNameState.value.substring(0 , 15) + "..."
 		} else
 		{
 			locationNameState.value
@@ -507,7 +506,6 @@ fun LocationToggleSwitch(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				Text(
@@ -522,7 +520,6 @@ fun LocationToggleSwitch(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				Text(

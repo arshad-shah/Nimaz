@@ -374,9 +374,7 @@ fun AyaListItemUI(
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
 		MaterialTheme.colorScheme.outline
-	} else
-	{
-		//use default color
+	}else{
 		MaterialTheme.colorScheme.surface
 	}
 	ElevatedCard(
@@ -566,7 +564,7 @@ fun AyaListItemUIPreview()
 		LocalDataStore.init(LocalContext.current)
 		//create a dummy aya
 		val aya = Aya(
-				ayaNumber = 1 ,
+				ayaNumber = 0 ,
 				ayaNumberInQuran = 1 ,
 				ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
 				ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
