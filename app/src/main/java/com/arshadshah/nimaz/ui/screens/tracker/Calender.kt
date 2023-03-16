@@ -350,12 +350,8 @@ fun CalenderDay(
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)
 					{
-						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer.copy(
-								alpha = 0.8f
-																											   ) else if (today) MaterialTheme.colorScheme.secondaryContainer.copy(
-								alpha = 0.8f
-																																												  ) else MaterialTheme.colorScheme.surface
-						true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer else if (today) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+						true -> MaterialTheme.colorScheme.primaryContainer
 					}
 													)
 				) {

@@ -70,13 +70,13 @@ class QuranViewModel(context : Context) : ViewModel()
 	val ayaListState = _ayaListState.asStateFlow()
 
 	//state for quran menu features like page display, font size, font type, etc
-	private val _arabic_Font_size = MutableStateFlow(24.0f)
+	private val _arabic_Font_size = MutableStateFlow(26.0f)
 	val arabic_Font_size = _arabic_Font_size.asStateFlow()
 
 	private val _arabic_Font = MutableStateFlow("Default")
 	val arabic_Font = _arabic_Font.asStateFlow()
 
-	private val _translation_Font_size = MutableStateFlow(14.0f)
+	private val _translation_Font_size = MutableStateFlow(16.0f)
 	val translation_Font_size = _translation_Font_size.asStateFlow()
 
 	private val _translation = MutableStateFlow("English")
@@ -86,9 +86,8 @@ class QuranViewModel(context : Context) : ViewModel()
 	val display_Mode = _display_Mode.asStateFlow()
 
 	//download button state
-	private val _downloadButtonState = MutableStateFlow(sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED, true))
+	private val _downloadButtonState = MutableStateFlow(!sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false))
 	val downloadButtonState = _downloadButtonState.asStateFlow()
-
 
 	init
 	{
@@ -160,11 +159,34 @@ class QuranViewModel(context : Context) : ViewModel()
 				_arabic_Font.value = sharedPreferences.getData(AppConstants.FONT_STYLE , "Default")
 				_translation.value =
 					sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE , "English")
-				_arabic_Font_size.value =
+
+				//if the font size is not set, set it to default 26 and 16
+
+				_arabic_Font_size.value = if (sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE) == 0.0f)
+				{
+					//save the default font size and also return it
+					sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE , 26.0f)
+					26.0f
+				}
+				else
+				{
 					sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
-				_translation_Font_size.value =
+				}
+				_translation_Font_size.value = if (sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE) == 0.0f)
+				{
+					//save the default font size and also return it
+					sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE , 16.0f)
+					16.0f
+				}
+				else
+				{
 					sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
+				}
+
 				_display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE , "List")
+
+				//downloadButtonState
+				_downloadButtonState.value = !sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false)
 			}
 			is QuranMenuEvents.Download_Quran ->
 			{
@@ -255,10 +277,10 @@ class QuranViewModel(context : Context) : ViewModel()
 				val ayats = dataStore.countAllAyat()
 				if (ayats == 6236)
 				{
+					//downloadButtonState
+					_downloadButtonState.value = false
 					//save that quran is downloaded
 					sharedPreferences.saveDataBoolean(FULL_QURAN_DOWNLOADED , true)
-					//disable download button
-					_downloadButtonState.value = false
 				}
 			} catch (e : Exception)
 			{

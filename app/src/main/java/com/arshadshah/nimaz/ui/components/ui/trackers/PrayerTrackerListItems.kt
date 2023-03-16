@@ -52,9 +52,9 @@ fun PrayerTrackerListItems(
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(4.dp)
+					.padding(8.dp)
 					.background(
-							if (isAfterToday) MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) else MaterialTheme.colorScheme.surface
+							if (isAfterToday) MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) else MaterialTheme.colorScheme.outline
 							   ) ,
 					) {
 			items.forEachIndexed { index , item ->
@@ -70,7 +70,7 @@ fun PrayerTrackerListItems(
 				ToggleableItem(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(8.dp)
+							.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
 							.placeholder(
 									visible = loading ,
 									color = MaterialTheme.colorScheme.outline ,
@@ -145,7 +145,7 @@ fun PrayerTrackerListItems(
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(4.dp)
+					.padding(8.dp)
 					) {
 			Row(
 					modifier = Modifier

@@ -1,26 +1,32 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
 import android.content.Context
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_JUZ_ITEM
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.remote.models.Juz
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -62,11 +68,8 @@ fun JuzListItemUI(
 {
 	ElevatedCard(
 			modifier = Modifier
-				.padding(4.dp)
-				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
+				.padding(vertical = 4.dp , horizontal = 8.dp)
 				.fillMaxWidth()
-				.background(color = MaterialTheme.colorScheme.surface) ,
-			shape = RoundedCornerShape(8.dp)
 				) {
 		//get the translation type from shared preferences
 		val translationType =
@@ -89,7 +92,9 @@ fun JuzListItemUI(
 							enabled = ! loading ,
 							  ) {
 						onNavigateToAyatScreen(juzNumber , false , translation , null)
-					}
+					},
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 
 			Text(
@@ -105,7 +110,8 @@ fun JuzListItemUI(
 																		)
 									) ,
 					text = "$juzNumber." ,
-					style = MaterialTheme.typography.bodyLarge
+					style = MaterialTheme.typography.bodyLarge,
+					textAlign = TextAlign.Center
 				)
 
 			Column(
@@ -113,14 +119,18 @@ fun JuzListItemUI(
 						.padding(16.dp , 0.dp)
 						.align(Alignment.CenterVertically)
 						.weight(0.80f)
+						.fillMaxWidth()
 				  ) {
 				//apply quran font
 				Text(
 						text = name ,
 						style = MaterialTheme.typography.titleLarge ,
 						fontFamily = utmaniQuranFont ,
+						fontWeight = FontWeight.SemiBold ,
+						fontSize = 32.sp ,
 						modifier = Modifier
 							.padding(vertical = 4.dp)
+							.fillMaxWidth()
 							.placeholder(
 									visible = loading ,
 									color = MaterialTheme.colorScheme.outline ,
@@ -128,19 +138,23 @@ fun JuzListItemUI(
 									highlight = PlaceholderHighlight.shimmer(
 											highlightColor = Color.White ,
 																			)
-										)
+										) ,
+						textAlign = TextAlign.Center
 					)
 				Text(
 						text = tname ,
 						style = MaterialTheme.typography.titleSmall ,
-						modifier = Modifier.placeholder(
+						modifier = Modifier
+							.fillMaxWidth()
+							.placeholder(
 								visible = loading ,
 								color = MaterialTheme.colorScheme.outline ,
 								shape = RoundedCornerShape(4.dp) ,
 								highlight = PlaceholderHighlight.shimmer(
 										highlightColor = Color.White ,
 																		)
-													   )
+													   ),
+						textAlign = TextAlign.Center
 					)
 			}
 			//an arrow right icon
@@ -162,5 +176,21 @@ fun JuzListItemUI(
 									)
 				)
 		}
+	}
+}
+
+//preview of the juz list item
+@Preview
+@Composable
+fun JuzListItemUIPreview()
+{
+	NimazTheme {
+		JuzListItemUI(
+				juzNumber = "1" ,
+				name = "الفاتحة" ,
+				tname = "Al-Faatiha" ,
+				onNavigateToAyatScreen = { _, _, _, _ -> } ,
+				loading = false ,
+					 )
 	}
 }

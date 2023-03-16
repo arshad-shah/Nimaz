@@ -18,9 +18,9 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
+import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.*
 
@@ -34,18 +34,6 @@ fun MoreMenu(
 
 	val context = LocalContext.current
 
-
-	val sharedPreferences = PrivateSharedPreferences(context)
-
-	val pageTypeState =
-		rememberPreferenceStringSettingState(AppConstants.PAGE_TYPE , "List" , sharedPreferences)
-	val translationState =
-		rememberPreferenceStringSettingState(
-				AppConstants.TRANSLATION_LANGUAGE ,
-				"English" ,
-				sharedPreferences
-											)
-
 	val items1 : List<String> = listOf("List" , "Page (Experimental)")
 	val items2 : List<String> = listOf("English" , "Urdu")
 	val items3 : List<String> = listOf("Default" , "Quranme" , "Hidayat" , "Amiri")
@@ -56,10 +44,30 @@ fun MoreMenu(
 	val (showDialog3 , setShowDialog3) = remember { mutableStateOf(false) }
 	val (showDialog4 , setShowDialog4) = remember { mutableStateOf(false) }
 
+	val viewModel = viewModel(
+			key = "QuranViewModel" ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+	//downloadButtonState
+	val isDownloadButtonEnabled = remember {
+		viewModel.downloadButtonState
+	}.collectAsState()
+
+	viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
+
+	val pageTypeState =
+		rememberPreferenceStringSettingState(AppConstants.PAGE_TYPE , "List" ,)
+	val translationState =
+		rememberPreferenceStringSettingState(
+				AppConstants.TRANSLATION_LANGUAGE ,
+				"English" ,
+											)
+
 
 	val arabicFontSizeState = rememberPreferenceFloatSettingState(
 			key = AppConstants.ARABIC_FONT_SIZE ,
-			defaultValue = 24f
+			defaultValue = 26f
 																 )
 	val translationFontSizeState = rememberPreferenceFloatSettingState(
 			key = AppConstants.TRANSLATION_FONT_SIZE ,
@@ -70,18 +78,18 @@ fun MoreMenu(
 	val fontStyleState = rememberPreferenceStringSettingState(
 			key = AppConstants.FONT_STYLE ,
 			defaultValue = "Default" ,
-			sharedPreferences
 															 )
 
-	val viewModel = viewModel(
-			key = "QuranViewModel" ,
-			initializer = { QuranViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
-							 )
+	val isFullQuranDownloaded = rememberPreferenceBooleanSettingState(
+			key = AppConstants.FULL_QURAN_DOWNLOADED ,
+			defaultValue = false ,
+															 )
 
-	val isDownloadButtonEnabled = remember {
-		viewModel.downloadButtonState
-	}.collectAsState(initial = true)
+	//log the initial state of the font size
+	Log.d("MoreMenu" , "arabicFontSizeState.value = ${arabicFontSizeState.value}")
+	Log.d("MoreMenu" , "translationFontSizeState.value = ${translationFontSizeState.value}")
+	Log.d("MoreMenu" , "fontStyleState.value = ${fontStyleState.value}")
+	Log.d("MoreMenu" , "isDownloadButtonEnabled.value = ${isFullQuranDownloaded.value}")
 
 	DropdownMenu(
 			expanded = menuOpen ,
@@ -124,12 +132,24 @@ fun MoreMenu(
 
 				//download quran
 				DropdownMenuItem(
-						enabled = isDownloadButtonEnabled.value ,
 						onClick = {
-					viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Download_Quran)
-					setShowDialog4(true)
-					setMenuOpen(false)
-				} , text = { Text(text = "Download Quran") })
+							//if isDownloadButtonEnabled.value then gray out the download button
+							//else download the quran
+							if (!isDownloadButtonEnabled.value){
+								Toasty.info(
+										context ,
+										"Quran is already downloaded" ,
+										Toasty.LENGTH_SHORT ,
+										true
+										   ).show()
+								return@DropdownMenuItem
+							}else{
+								//if the quran is not downloaded then download it
+								viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Download_Quran)
+								setShowDialog4(true)
+								setMenuOpen(false)
+							}
+				} , text = { Text(text = "Download Quran", color = if (!isDownloadButtonEnabled.value) Color.Gray else MaterialTheme.colorScheme.onBackground,) })
 			}
 				)
 
