@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,9 +52,6 @@ fun PrayerTrackerListItems(
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(8.dp)
-					.background(
-							if (isAfterToday) MaterialTheme.colorScheme.surface.copy(alpha = 0.8f) else MaterialTheme.colorScheme.outline
-							   ) ,
 					) {
 			items.forEachIndexed { index , item ->
 				//if not the first item add a divider

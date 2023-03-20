@@ -9,9 +9,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
@@ -39,9 +42,10 @@ fun ShahadahScreen(paddingValues : PaddingValues)
 						fontFamily = utmaniQuranFont ,
 						textAlign = TextAlign.Center ,
 						modifier = Modifier
-							.padding(4.dp)
+							.padding(8.dp)
 							.fillMaxWidth() ,
 						color = MaterialTheme.colorScheme.onSurface ,
+						fontWeight = FontWeight.SemiBold
 					)
 			}
 			//Shadaah transliteration
@@ -50,7 +54,7 @@ fun ShahadahScreen(paddingValues : PaddingValues)
 					style = MaterialTheme.typography.titleLarge ,
 					textAlign = TextAlign.Left ,
 					modifier = Modifier
-						.padding(4.dp)
+						.padding(8.dp)
 						.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.onSurface ,
 				)
@@ -61,11 +65,21 @@ fun ShahadahScreen(paddingValues : PaddingValues)
 					style = MaterialTheme.typography.titleLarge ,
 					textAlign = TextAlign.Left ,
 					modifier = Modifier
-						.padding(4.dp)
+						.padding(8.dp)
 						.fillMaxWidth() ,
 					color = MaterialTheme.colorScheme.onSurface ,
 				)
 
 		}
+	}
+}
+
+//preview
+@Preview(showBackground = true)
+@Composable
+fun ShahadahScreenPreview()
+{
+	NimazTheme {
+		ShahadahScreen(paddingValues = PaddingValues(8.dp))
 	}
 }

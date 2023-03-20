@@ -220,7 +220,8 @@ fun CustomCounter(
 								.padding(horizontal = 16.dp) ,
 							keyboardActions = KeyboardActions(
 									onDone = {
-										if (objective.value.toInt() > 0)
+										val isInt = objective.value.toIntOrNull()
+										if (isInt != null && objective.value != "" || isInt != 0)
 										{
 											showObjectiveDialog.value = false
 										} else
@@ -238,7 +239,20 @@ fun CustomCounter(
 				} ,
 				confirmButton = {
 					Button(onClick = {
-						showObjectiveDialog.value = false
+						val isInt = objective.value.toIntOrNull()
+						if (isInt != null && objective.value != "" || isInt != 0)
+						{
+							showObjectiveDialog.value = false
+						} else
+						{
+							Toasty
+								.error(
+										context ,
+										"Objective must be greater than 0" ,
+										Toasty.LENGTH_SHORT
+									  )
+								.show()
+						}
 					}) {
 						Text(text = "Set" , style = MaterialTheme.typography.titleLarge)
 					}
