@@ -494,9 +494,9 @@ class MainActivity : ComponentActivity()
 			AppConstants.TASBIH_LIST_SCREEN -> "Tasbih List"
 			AppConstants.MY_QURAN_SCREEN_ROUTE -> {
 				//check if the url of the route is for surah or juz using the nav controller
-				val isSurah = navController.currentBackStackEntry?.arguments?.getBoolean("isSurah")
+				val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
 				val number = navController.currentBackStackEntry?.arguments?.getString("number")
-				if (isSurah == true)
+				if (isSurah)
 				{
 					"Surah $number"
 				} else

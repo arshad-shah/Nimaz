@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
@@ -89,7 +90,15 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 				  ) {
 				if (isAfterRamadanStart)
 				{
-					Text(text = "Ramadan is here" , style = MaterialTheme.typography.titleLarge)
+					//if its the first day of ramadan then show ramadan mubarak
+					//else show ramadan
+					if (todayHijri[ChronoField.DAY_OF_MONTH] == 1)
+					{
+						Text(text = "Ramadan Mubarak" , style = MaterialTheme.typography.titleLarge)
+					} else
+					{
+						Text(text = "Ramadan" , style = MaterialTheme.typography.titleLarge)
+					}
 				} else
 				{
 					Text(text = "Ramadan is coming" , style = MaterialTheme.typography.titleLarge)
@@ -154,9 +163,11 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	}
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun RamadanCardPreview()
 {
-	RamadanCard(onNavigateToCalender = { })
+	NimazTheme {
+		RamadanCard(onNavigateToCalender = { })
+	}
 }

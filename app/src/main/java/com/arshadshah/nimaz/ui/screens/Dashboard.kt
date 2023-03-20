@@ -14,14 +14,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_EVENTS_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_TRACKERS_CARD
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DashboardPrayertimesCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlAdhaCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.RamadanCard
 import com.arshadshah.nimaz.ui.components.ui.dashboard.DashboardTasbihTracker
+import com.arshadshah.nimaz.ui.components.ui.quran.DashboardRandomAyatCard
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
@@ -33,6 +34,7 @@ fun Dashboard(
 	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
 	paddingValues : PaddingValues ,
 	onNavigateToTasbihListScreen : () -> Unit ,
+	onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit ,
 			 )
 {
 
@@ -78,7 +80,7 @@ fun Dashboard(
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-						.testTag(TEST_TAG_TRACKERS_CARD)
+						.testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
 						.clickable {
 							onNavigateToTracker()
 						}
@@ -93,6 +95,23 @@ fun Dashboard(
 					)
 				DashboardPrayerTracker()
 				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen,onNavigateToTasbihListScreen = onNavigateToTasbihListScreen)
+			}
+		}
+		item {
+			ElevatedCard(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
+						) {
+				Text(
+						text = "Daily Verses" ,
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth() ,
+						textAlign = TextAlign.Center ,
+						style = MaterialTheme.typography.titleMedium
+					)
+				DashboardRandomAyatCard(onNavigateToAyatScreen = onNavigateToAyatScreen)
 			}
 		}
 	}
@@ -110,9 +129,10 @@ fun DashboardPreview()
 				onNavigateToTracker = { } ,
 				onNavigateToCalender = { } ,
 				onNavigateToPrayerTimes = { } ,
-				onNavigateToTasbihScreen = { _, _, _, _ -> } ,
+				onNavigateToTasbihScreen = { _ , _ , _ , _ -> } ,
 				paddingValues = PaddingValues(8.dp) ,
 				onNavigateToTasbihListScreen = { } ,
+				onNavigateToAyatScreen = { _ , _ , _ , _ -> } ,
 				 )
 	}
 }

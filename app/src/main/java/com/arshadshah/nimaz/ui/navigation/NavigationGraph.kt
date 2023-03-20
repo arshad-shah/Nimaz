@@ -476,6 +476,26 @@ fun NavigationGraph(
 					onNavigateToTracker = {
 						navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
 					},
+					onNavigateToAyatScreen = { number : String , isSurah : Boolean , language : String , scrollToAya : Int ->
+						navController.navigate(
+								MY_QURAN_SCREEN_ROUTE.replace(
+										"{number}" ,
+										number
+															 )
+									.replace(
+											"{isSurah}" ,
+											isSurah.toString()
+											)
+									.replace(
+											"{language}" ,
+											language
+											)
+									.replace(
+											"{scrollTo}" ,
+											scrollToAya.toString()
+											)
+											  )
+					},
 					onNavigateToTasbihScreen =  { id : String , arabic : String , translation : String , transliteration : String ->
 						navController.navigate(
 								TASBIH_SCREEN_ROUTE
@@ -496,11 +516,12 @@ fun NavigationGraph(
 											transliteration
 											)
 											  )
+					},
+					onNavigateToTasbihListScreen = {
+						navController.navigate(TASBIH_LIST_SCREEN)
 					}
 					 )
-			{
-				navController.navigate(TASBIH_LIST_SCREEN)
-			}
+
 		}
 
 		composable(BottomNavItem.PrayerTimesScreen.screen_route)
