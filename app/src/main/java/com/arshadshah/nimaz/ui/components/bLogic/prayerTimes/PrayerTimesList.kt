@@ -115,18 +115,20 @@ fun PrayerTimesList()
 				LocalContext.current ,
 				PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
 							 )
+
+		val mapOfPrayerTimes = mapOf(
+				"Fajr" to fajrTime.value !! ,
+				"Sunrise" to sunriseTime.value !! ,
+				"Dhuhr" to dhuhrTime.value !! ,
+				"Asr" to asrTime.value !! ,
+				"Maghrib" to maghribTime.value !! ,
+				"Isha" to ishaTime.value !! ,
+									)
 		PrayerTimesListUI(
 				name = nextPrayerName.value.first()
 					.uppercaseChar() + nextPrayerName.value.substring(1) ,
 				loading = false ,
-				prayerTimesMap = mapOf(
-						"Fajr" to fajrTime.value !! ,
-						"Sunrise" to sunriseTime.value !! ,
-						"Dhuhr" to dhuhrTime.value !! ,
-						"Asr" to asrTime.value !! ,
-						"Maghrib" to maghribTime.value !! ,
-						"Isha" to ishaTime.value !! ,
-									  ) ,
+				prayerTimesMap = mapOfPrayerTimes,
 						 )
 	}
 

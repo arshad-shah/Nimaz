@@ -286,8 +286,6 @@ class PrayerTimesViewModel : ViewModel()
 //
 					val currentDate = LocalDateTime.now()
 					val currentPrayerName = currentPrayer(currentDate , mapOfPrayerTimes).first
-					Log.d("Nimaz: currentDatetime" , "$currentDate")
-					Log.d("Nimaz: FajrDatetime" , "${response.data.fajr}")
 					val nextPrayerName = nextPrayer(currentDate , mapOfPrayerTimes).first
 					if (currentPrayerName == "isha" && nextPrayerName == "fajr" && LocalTime.now().hour <= response.data.fajr !!.toLocalTime().hour && LocalTime.now().hour >= 0)
 					{

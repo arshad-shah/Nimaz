@@ -51,7 +51,7 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 		}
 	} else
 	{
-		eidUlFitrTimeLeft.value = eidUlFitrEnd.toEpochDay() - todayHijri.toEpochDay()
+		eidUlFitrTimeLeft.value = eidUlFitrStart.toEpochDay() - todayHijri.toEpochDay()
 	}
 	//list of images to pick from
 	//we will pick a random image from the list
@@ -68,8 +68,8 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 	//save the image to show in the card
 	val imageToShow = remember { mutableStateOf(randomImage) }
 
-	//show card if its before month 10 and 40 days are left for ramadan
-	val showCard = todayHijri[ChronoField.MONTH_OF_YEAR] < 10 && todayHijri[ChronoField.DAY_OF_MONTH] < 3
+	//show card when there are 3 days left for eid ul fitr
+	val showCard = eidUlFitrTimeLeft.value <= 3
 
 	//is ramadan time left less than 40 days
 	//if yes then show the card
@@ -87,18 +87,17 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 					verticalArrangement = Arrangement.Center ,
 					horizontalAlignment = Alignment.CenterHorizontally
 				  ) {
-				if (isAfterEidUlFitrStart)
+				if (isAfterEidUlFitrStart || eidUlFitrTimeLeft.value == 0L)
 				{
 					Text(text = "Eid Mubarak" , style = MaterialTheme.typography.titleLarge)
 				} else
 				{
-					Text(text = "Eid ul Fitr is coming" , style = MaterialTheme.typography.titleLarge)
+					Text(text = "Eid ul Fitr" , style = MaterialTheme.typography.titleLarge)
 				}
 
 				Row(
 						modifier = Modifier
-							.fillMaxWidth()
-							.padding(top = 16.dp) ,
+							.fillMaxWidth(),
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
@@ -120,14 +119,7 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 							verticalArrangement = Arrangement.Center ,
 							horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
-						if (isAfterEidUlFitrStart)
-						{
-							//estimated end
-							Text(
-									text = "Eid Mubarak" ,
-									style = MaterialTheme.typography.titleSmall
-								)
-						} else
+						if (!isAfterEidUlFitrStart || eidUlFitrTimeLeft.value == 0L)
 						{
 							//estimated start
 							Text(
@@ -135,8 +127,9 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 									style = MaterialTheme.typography.titleSmall
 								)
 						}
+						//if its 0 then show today if its 1 then show tomorrow else show the days left
 						Text(
-								text = "${eidUlFitrTimeLeft.value} days" ,
+								text = if (eidUlFitrTimeLeft.value == 0L) "Today" else if (eidUlFitrTimeLeft.value == 1L) "Tomorrow" else "In ${eidUlFitrTimeLeft.value} days" ,
 								style = MaterialTheme.typography.headlineMedium
 							)
 						if (isAfterEidUlFitrStart)
