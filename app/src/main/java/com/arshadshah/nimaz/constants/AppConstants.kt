@@ -335,8 +335,8 @@ object AppConstants
 
 			"DUBAI" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "18.2"
-				mapOfDefaultParameters["ishaAngle"] = "18.2"
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "18"
 				mapOfDefaultParameters["ishaInterval"] = "0"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
 				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
@@ -380,7 +380,7 @@ object AppConstants
 
 			"TEHRAN" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "17.7"
+				mapOfDefaultParameters["fajrAngle"] = "17"
 				mapOfDefaultParameters["ishaAngle"] = "14"
 				mapOfDefaultParameters["ishaInterval"] = "0"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
@@ -515,17 +515,17 @@ object AppConstants
 
 			"IRELAND" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "13"
-				mapOfDefaultParameters["ishaAngle"] = "13"
+				mapOfDefaultParameters["fajrAngle"] = "15"
+				mapOfDefaultParameters["ishaAngle"] = "15"
 				mapOfDefaultParameters["ishaInterval"] = "0"
-				mapOfDefaultParameters["madhab"] = "HANAFI"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
 				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
-				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["fajrAdjustment"] = "-3"
 				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
-				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
-				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "2"
+				mapOfDefaultParameters["asrAdjustment"] = "1"
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
-				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+				mapOfDefaultParameters["ishaAdjustment"] = "-3"
 			}
 
 			"OTHER" ->
