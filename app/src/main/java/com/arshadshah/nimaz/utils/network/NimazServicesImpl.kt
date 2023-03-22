@@ -51,7 +51,7 @@ object NimazServicesImpl : NimazService
 	{
 		//create a post request with stuff in body and return the response
 		val response : List<PrayerTimeResponse> =
-			httpClient.request(AppConstants.PRAYER_TIMES_URL) {
+			httpClient.request(AppConstants.PRAYER_TIMES_MONTHLY_URL) {
 				method = HttpMethod.Post
 				setBody(mapOfParams)
 				header("Content-Type" , "application/json")

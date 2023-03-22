@@ -54,6 +54,7 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	{
 		ramadanTimeLeft.value = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
 	}
+
 	//list of images to pick from
 	//we will pick a random image from the list
 	val imagesToShow =

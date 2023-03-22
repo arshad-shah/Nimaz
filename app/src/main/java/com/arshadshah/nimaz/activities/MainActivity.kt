@@ -54,6 +54,7 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.WidgetService
 import com.arshadshah.nimaz.widgets.updateAppWidget
@@ -250,6 +251,8 @@ class MainActivity : ComponentActivity()
 						MAIN_ACTIVITY_TAG ,
 						"Is service running: " + isMyServiceRunning(WidgetService::class.java).toString()
 					 )
+
+				AutoAnglesCalc().calculateFajrAngle(this@MainActivity, 53.0, -7.3)
 
 
 

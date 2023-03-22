@@ -12,6 +12,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class NamesOfAllahTest {
+
 	@get:Rule
 	val composeTestRule = createAndroidComposeRule<MainActivity>()
 
@@ -74,9 +75,6 @@ class NamesOfAllahTest {
 		composeTestRule.onNodeWithText(resources.getStringArray(R.array.translation)[0]).assertExists()
 	}
 
-	//test that names of allah is rederering a list of 99 names it is a list so we need to scroll to see all the names
-	//gtet all the names from the resources
-	//loop through the names and check that they are displayed
 	@Test
 	fun test_NamesOfAllah_displays_99_names() {
 //click on the more button in the bottom navigation bar
@@ -99,7 +97,6 @@ class NamesOfAllahTest {
 		}
 	}
 
-	//test that the player is playing the audio when the play button is clicked
 	@Test
 	fun test_NamesOfAllahRow_play_audio()
 	{
@@ -119,4 +116,5 @@ class NamesOfAllahTest {
 		composeTestRule.onNodeWithContentDescription("Stop playing").assertExists()
 		composeTestRule.onNodeWithContentDescription("Pause playing").assertExists()
 	}
+
 }

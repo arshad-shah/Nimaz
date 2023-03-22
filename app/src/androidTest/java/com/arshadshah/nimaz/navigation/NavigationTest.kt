@@ -17,7 +17,6 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_SETTINGS
 import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 class NavigationTest
 {
 
@@ -62,6 +61,15 @@ class NavigationTest
 		composeTestRule.onNodeWithTag("QURAN TAB 0").performClick()
 		//verify that the sura screen is displayed
 		composeTestRule.onNodeWithTag(TEST_TAG_QURAN_SURAH).assertIsDisplayed()
+	}
+
+	@Test
+	fun navHost_verify_click_on_tab_0_opens_my_quran_screen(){
+		//click on the tab 2 in the bottom navigation bar
+		composeTestRule.onNodeWithContentDescription(BottomNavItem.QuranScreen.title).performClick()
+		composeTestRule.onNodeWithTag("QURAN TAB 2").performClick()
+		//verify that the sura screen is displayed
+		composeTestRule.onNodeWithTag("MyQuranScreen").assertIsDisplayed()
 	}
 
 	@Test
