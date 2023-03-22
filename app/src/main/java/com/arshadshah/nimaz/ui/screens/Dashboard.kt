@@ -22,6 +22,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlAdhaCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.RamadanCard
 import com.arshadshah.nimaz.ui.components.ui.dashboard.DashboardTasbihTracker
+import com.arshadshah.nimaz.ui.components.ui.quran.DashboardQuranTracker
 import com.arshadshah.nimaz.ui.components.ui.quran.DashboardRandomAyatCard
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -81,9 +82,6 @@ fun Dashboard(
 						.fillMaxWidth()
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						.testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
-						.clickable {
-							onNavigateToTracker()
-						}
 						) {
 				Text(
 						text = "Trackers" ,
@@ -93,8 +91,10 @@ fun Dashboard(
 						textAlign = TextAlign.Center ,
 						style = MaterialTheme.typography.titleMedium
 					)
-				DashboardPrayerTracker()
-				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen,onNavigateToTasbihListScreen = onNavigateToTasbihListScreen)
+				DashboardPrayerTracker(onNavigateToTracker = onNavigateToTracker)
+				DashboardQuranTracker(onNavigateToAyatScreen = onNavigateToAyatScreen)
+				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen,
+									   onNavigateToTasbihListScreen = onNavigateToTasbihListScreen)
 			}
 		}
 		item {
@@ -117,7 +117,6 @@ fun Dashboard(
 	}
 
 }
-
 @Preview
 @Composable
 fun DashboardPreview()

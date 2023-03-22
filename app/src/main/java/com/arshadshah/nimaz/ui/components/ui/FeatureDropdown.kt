@@ -81,11 +81,15 @@ fun <T> FeaturesDropDown(
 							//if the list is empty then the bubble is not shown
 							if (items.isNotEmpty())
 							{
-								Badge()
+								Badge(
+										containerColor = MaterialTheme.colorScheme.primary ,
+										contentColor = MaterialTheme.colorScheme.onPrimary ,
+									 )
 								{
 									Text(
 											text = items.size.toString() ,
-											style = MaterialTheme.typography.bodyLarge
+											style = MaterialTheme.typography.bodyMedium,
+											textAlign = TextAlign.Center ,
 										)
 								}
 							}

@@ -1,17 +1,20 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTrackerList
 
 @Composable
-fun DashboardPrayerTracker()
+fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 {
 
 	val viewModel = viewModel(
@@ -73,16 +76,22 @@ fun DashboardPrayerTracker()
 		viewModel.fastTrackerState
 	}.collectAsState()
 
-	PrayerTrackerList(
-			viewModel::onEvent ,
-			stateOfTrackerForToday.value ,
-			fajrState.value ,
-			zuhrState.value ,
-			asrState.value ,
-			maghribState.value ,
-			ishaState.value ,
-			showDateSelector ,
-			dateState ,
-			progressState
-					 )
+	Box(
+			modifier = Modifier.clickable{
+				onNavigateToTracker()
+			}
+	   ){
+		PrayerTrackerList(
+				viewModel::onEvent ,
+				stateOfTrackerForToday.value ,
+				fajrState.value ,
+				zuhrState.value ,
+				asrState.value ,
+				maghribState.value ,
+				ishaState.value ,
+				showDateSelector ,
+				dateState ,
+				progressState
+						 )
+	}
 }

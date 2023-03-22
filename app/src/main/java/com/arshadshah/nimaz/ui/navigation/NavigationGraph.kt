@@ -590,7 +590,7 @@ fun NavigationGraph(
 		}
 		composable(MY_QURAN_SCREEN_ROUTE) {
 			AyatScreen(
-					number = it.arguments?.getString("number") ,
+					number = it.arguments?.getString("number") !!,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
 					scrollToAya = it.arguments?.getString("scrollTo") !!.toInt() ,
@@ -600,7 +600,7 @@ fun NavigationGraph(
 
 		composable(QURAN_AYA_SCREEN_ROUTE) {
 			AyatScreen(
-					number = it.arguments?.getString("number") ,
+					number = it.arguments?.getString("number") !! ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
 					paddingValues = paddingValues ,
