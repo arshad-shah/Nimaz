@@ -15,6 +15,7 @@ import org.junit.Test
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 class DashboardPrayertimesCardKtTest
 {
@@ -50,7 +51,11 @@ class DashboardPrayertimesCardKtTest
 		val nextPrayerName = viewModel.nextPrayerName.value
 		val nextPrayerTime = viewModel.nextPrayerTime.value
 		val timer = viewModel.timer.value
-		composeTestRule.onNodeWithText(nextPrayerName!!.capitalize()).assertIsDisplayed()
+		composeTestRule.onNodeWithText(nextPrayerName!!.replaceFirstChar {
+			if (it.isLowerCase()) it.titlecase(
+					Locale.getDefault()
+											  ) else it.toString()
+		}).assertIsDisplayed()
 		composeTestRule.onNodeWithText(nextPrayerTime!!.format(DateTimeFormatter.ofPattern("hh:mm a"))).assertIsDisplayed()
 	}
 
@@ -70,6 +75,16 @@ class DashboardPrayertimesCardKtTest
 			DashboardPrayertimesCard(onNavigateToPrayerTimes = {})
 		}
 
-		composeTestRule.onNodeWithTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD).assertIsDisplayed()
+		composeTestRule.onNodeWithTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD, useUnmergedTree = true).assertIsDisplayed()
+	}
+
+	//correct phase of moon icon is shown
+	@Test
+	fun dashboardPrayerTimesCard_displaysMoonIcon() {
+		composeTestRule.setContent {
+			DashboardPrayertimesCard(onNavigateToPrayerTimes = {})
+		}
+
+		composeTestRule.onNodeWithTag("moon_phase", useUnmergedTree = true).assertIsDisplayed()
 	}
 }

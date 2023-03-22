@@ -12,7 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 //a composable that shows a placeholder when the data is not available in the database
 @Composable
@@ -44,4 +46,15 @@ fun Placeholder(nameOfDropdown : String)
 				}
 			}
 				)
+}
+
+
+//a preview of the placeholder
+@Preview
+@Composable
+fun PlaceholderPreview()
+{
+	NimazTheme {
+		Placeholder(nameOfDropdown = "Bookmarks")
+	}
 }

@@ -7,17 +7,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.ui.trackers.Placeholder
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlin.reflect.KFunction1
 
@@ -52,6 +50,7 @@ fun MyQuranScreen(
 	}
 
 	LazyColumn(
+			modifier = Modifier.testTag("MyQuranScreen"),
 			userScrollEnabled = true ,
 			  ) {
 		item {
@@ -147,86 +146,5 @@ fun MyQuranScreen(
 					}
 							)
 		}
-	}
-}
-
-
-//FeaturesDropDown preview
-@Preview
-@Composable
-fun FeaturesDropDownPreview()
-{
-	//a dummy list of ayas
-	//aya
-	//al ayaNumberInQuran: Int,
-	//    val ayaNumber: Int,
-	//    val ayaArabic: String,
-	//    val ayaTranslationEnglish: String,
-	//    val ayaTranslationUrdu: String,
-	//    val suraNumber: Int,
-	//    val ayaNumberInSurah: Int,
-	//    val bookmark: Boolean,
-	//    val favorite: Boolean,
-	//    val note: String,
-	//    val audioFileLocation: String,
-	//    val sajda: Boolean,
-	//    val sajdaType: String,
-	//    val ruku: Int,
-	//    val juzNumber: Int,
-	val ayas = listOf(
-			Aya(
-					ayaNumberInQuran = 1 ,
-					ayaNumber = 1 ,
-					ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-					ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-					ayaTranslationUrdu = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-					suraNumber = 1 ,
-					ayaNumberInSurah = 1 ,
-					bookmark = false ,
-					favorite = false ,
-					note = "" ,
-					audioFileLocation = "" ,
-					sajda = false ,
-					sajdaType = "" ,
-					ruku = 1 ,
-					juzNumber = 1
-			   ) ,
-					 )
-	NimazTheme {
-		FeaturesDropDown(
-				items = ayas ,
-				label = "Bookmarks" ,
-				dropDownItem = {
-					FeatureDropdownItem(
-							item = it ,
-							onClick = { aya ->
-								//do nothing
-							} ,
-							itemContent = { aya ->
-								//the text
-								Text(
-										modifier = Modifier
-											.padding(8.dp) ,
-										text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-										textAlign = TextAlign.Start ,
-										maxLines = 2 ,
-										overflow = TextOverflow.Ellipsis ,
-										style = MaterialTheme.typography.bodyLarge
-									)
-							} ,
-									   )
-				}
-						) {
-		}
-	}
-}
-
-//a preview of the placeholder
-@Preview
-@Composable
-fun PlaceholderPreview()
-{
-	NimazTheme {
-		Placeholder(nameOfDropdown = "Notes")
 	}
 }
