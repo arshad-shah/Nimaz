@@ -88,26 +88,10 @@ class QuranViewModel(context : Context) : ViewModel()
 	//random aya state a map of aya, surah, juz data
 	private val _randomAyaState = MutableStateFlow(Aya(0 , 0 , "" , "" , "" , 0 , 0 , false , false , "" , "" , false , "" , 0 , 0))
 	val randomAyaState = _randomAyaState.asStateFlow()
-	//random aya surah state
-	//al number: Int,
-	//    val numberOfAyahs: Int,
-	//    val startAya: Int,
-	//    val name: String,
-	//    val englishName: String,
-	//    val englishNameTranslation: String,
-	//    val revelationType: String,
-	//    val revelationOrder: Int,
-	//    val rukus:
 	private val _randomAyaSurahState = MutableStateFlow(Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0))
 	val randomAyaSurahState = _randomAyaSurahState.asStateFlow()
-	//random aya juz state
-	//val number: Int,
-	//    val name: String,
-	//    val tname: String,
-	//    val juzStartAyaInQuran: Int
 	private val _randomAyaJuzState = MutableStateFlow(Juz(0 , "" , "" , 0))
 	val randomAyaJuzState = _randomAyaJuzState.asStateFlow()
-
 	//download button state
 	private val _downloadButtonState = MutableStateFlow(!sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false))
 	val downloadButtonState = _downloadButtonState.asStateFlow()
@@ -921,7 +905,6 @@ class QuranViewModel(context : Context) : ViewModel()
 			}
 		}
 	}
-
 	//get random aya from database
 	fun getRandomAya()
 	{

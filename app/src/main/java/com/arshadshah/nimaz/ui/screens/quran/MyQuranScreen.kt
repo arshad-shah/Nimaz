@@ -73,7 +73,7 @@ fun MyQuranScreen(
 									Text(
 											modifier = Modifier
 												.padding(8.dp) ,
-											text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
+											text = "Chapter " + aya.suraNumber.toString() + ":" + " Verse " + aya.ayaNumber.toString() ,
 											textAlign = TextAlign.Start ,
 											maxLines = 2 ,
 											overflow = TextOverflow.Ellipsis ,

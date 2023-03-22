@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
+import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
@@ -48,6 +49,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -269,10 +271,23 @@ class MainActivity : ComponentActivity()
 
 										TopAppBar(
 												title = {
-													Text(
-															text = processPageTitle(route.value.toString(), navController) ,
-															style = MaterialTheme.typography.titleLarge
-														)
+													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
+													{
+														val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
+														val number = navController.currentBackStackEntry?.arguments?.getString("number")
+														if (isSurah)
+														{
+															TopBarMenu(number = number!!.toInt() , isSurah = true)
+														} else
+														{
+															TopBarMenu(number = number!!.toInt() , isSurah = false)
+														}
+													}else{
+														Text(
+																text = processPageTitle(route.value.toString(), navController) ,
+																style = MaterialTheme.typography.titleLarge
+															)
+													}
 												} ,
 												navigationIcon = {
 													IconButton(onClick = {
@@ -299,6 +314,7 @@ class MainActivity : ComponentActivity()
 													{
 														QURAN_SCREEN_ROUTE ,
 														QURAN_AYA_SCREEN_ROUTE ,
+														MY_QURAN_SCREEN_ROUTE,
 														->
 														{
 															//open the menu
