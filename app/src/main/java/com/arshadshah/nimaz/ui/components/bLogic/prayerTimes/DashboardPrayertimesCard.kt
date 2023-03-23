@@ -93,7 +93,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		}
 	}
 
-	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0, context = context).getMoonPhase()
+	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0).getMoonPhase()
 
 
 

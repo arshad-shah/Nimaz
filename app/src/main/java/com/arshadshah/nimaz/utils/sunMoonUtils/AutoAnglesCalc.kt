@@ -7,20 +7,24 @@ class AutoAnglesCalc
 {
 	private lateinit var sunCalc: SunMoonCalc
 	fun calculateFajrAngle(context: Context , latitude: Double , longitude: Double): Int{
-		sunCalc = SunMoonCalc(latitude , longitude, context)
+		sunCalc = SunMoonCalc(latitude , longitude)
 		val times = sunCalc.getTimes()
-		val sunPositionAtFajr = sunCalc.getSunPositionForDate(times.nightEnd)
+		val sunPositionAtFajr = sunCalc.getSunPositionForTime(times.nightEnd)
 
 		val altitudeInDegreesFajr = Math.toDegrees(sunPositionAtFajr.altitude).roundToInt()
 		return altitudeInDegreesFajr
 	}
 
 	fun calculateIshaaAngle(context: Context , latitude: Double , longitude: Double): Int{
-		sunCalc = SunMoonCalc(latitude , longitude, context)
+		sunCalc = SunMoonCalc(latitude , longitude)
 		val times = sunCalc.getTimes()
-		val sunPositionAtIshaa = sunCalc.getSunPositionForDate(times.dusk)
+		val sunPositionAtIshaa = sunCalc.getSunPositionForTime(times.dusk)
 
 		val altitudeInDegreesIshaa = Math.toDegrees(sunPositionAtIshaa.altitude).roundToInt()
 		return altitudeInDegreesIshaa
 	}
+
+
+
+
 }

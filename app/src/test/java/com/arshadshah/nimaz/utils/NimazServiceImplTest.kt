@@ -23,16 +23,39 @@ class NimazServiceImplTest
 			val password = AppConstants.USER_PASSWORD
 			val loginResponse = nimazServicesImpl.login(username, password)
 			assertNotNull(loginResponse)
+			assertTrue(loginResponse.token.length > 100)
+			//check the content of the response to be alphanumeric with some special characters
+			val regex = Regex("[a-zA-Z0-9!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]+")
+			assertTrue(loginResponse.token.matches(regex))
 		}
 	}
 
 	@Test
 	fun testGetPrayerTimes() {
 		runBlocking {
-			val mapOfParams = mapOf("param1" to "value1", "param2" to "value2")
-			val prayerTimeResponse = nimazServicesImpl.getPrayerTimes(mapOfParams)
+			val mapOfParams = mutableMapOf<String, String>()
+			mapOfParams["latitude"] = "33.6844"
+			mapOfParams["longitude"] = "73.0479"
+			mapOfParams["date"] = "2023-03-01T00:14:00"
+			mapOfParams["fajrAngle"] = "18"
+			mapOfParams["ishaAngle"] = "18"
+			mapOfParams["ishaInterval"] = "0"
+			mapOfParams["method"] = "MWL"
+			mapOfParams["madhab"] = "SHAFI"
+			mapOfParams["highLatitudeRule"] = "MIDDLE_OF_THE_NIGHT"
+			mapOfParams["fajrAdjustment"] = "0"
+			mapOfParams["sunriseAdjustment"] = "0"
+			mapOfParams["dhuhrAdjustment"] = "0"
+			mapOfParams["asrAdjustment"] = "0"
+			mapOfParams["maghribAdjustment"] = "0"
+			mapOfParams["ishaAdjustment"] = "0"
+			mapOfParams["ishaInterval"] = "0"
+			val prayerTimeResponse = nimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
+			println(prayerTimeResponse)
 			assertNotNull(prayerTimeResponse)
 			// additional tests to check the content of the response
+			//check that the response is a list of 31 items
+			assertTrue(prayerTimeResponse.size == 31)
 		}
 	}
 

@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
+import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
@@ -48,12 +49,14 @@ import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.WidgetService
 import com.arshadshah.nimaz.widgets.updateAppWidget
@@ -251,6 +254,8 @@ class MainActivity : ComponentActivity()
 						"Is service running: " + isMyServiceRunning(WidgetService::class.java).toString()
 					 )
 
+				AutoAnglesCalc().calculateFajrAngle(this@MainActivity, 53.0, -7.3)
+
 
 
 
@@ -266,10 +271,23 @@ class MainActivity : ComponentActivity()
 
 										TopAppBar(
 												title = {
-													Text(
-															text = processPageTitle(route.value.toString(), navController) ,
-															style = MaterialTheme.typography.titleLarge
-														)
+													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
+													{
+														val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
+														val number = navController.currentBackStackEntry?.arguments?.getString("number")
+														if (isSurah)
+														{
+															TopBarMenu(number = number!!.toInt() , isSurah = true)
+														} else
+														{
+															TopBarMenu(number = number!!.toInt() , isSurah = false)
+														}
+													}else{
+														Text(
+																text = processPageTitle(route.value.toString(), navController) ,
+																style = MaterialTheme.typography.titleLarge
+															)
+													}
 												} ,
 												navigationIcon = {
 													IconButton(onClick = {
@@ -296,6 +314,7 @@ class MainActivity : ComponentActivity()
 													{
 														QURAN_SCREEN_ROUTE ,
 														QURAN_AYA_SCREEN_ROUTE ,
+														MY_QURAN_SCREEN_ROUTE,
 														->
 														{
 															//open the menu
@@ -494,9 +513,9 @@ class MainActivity : ComponentActivity()
 			AppConstants.TASBIH_LIST_SCREEN -> "Tasbih List"
 			AppConstants.MY_QURAN_SCREEN_ROUTE -> {
 				//check if the url of the route is for surah or juz using the nav controller
-				val isSurah = navController.currentBackStackEntry?.arguments?.getBoolean("isSurah")
+				val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
 				val number = navController.currentBackStackEntry?.arguments?.getString("number")
-				if (isSurah == true)
+				if (isSurah)
 				{
 					"Surah $number"
 				} else

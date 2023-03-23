@@ -89,4 +89,8 @@ interface AyaDao
 	//get a random aya
 	@Query("SELECT * FROM Aya ORDER BY RANDOM() LIMIT 1")
 	suspend fun getRandomAya() : LocalAya
+
+	//get ayat by aya number in surah
+	@Query("SELECT * FROM Aya WHERE ayaNumberInSurah = :ayaNumberInSurah")
+	suspend fun getAyatByAyaNumberInSurah(ayaNumberInSurah : Int) : LocalAya
 }

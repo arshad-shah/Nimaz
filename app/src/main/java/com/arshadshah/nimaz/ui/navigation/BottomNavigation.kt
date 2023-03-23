@@ -8,9 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun BottomNavigationBar(navController : NavController)
@@ -33,7 +36,8 @@ fun BottomNavigationBar(navController : NavController)
 		val currentRoute = navBackStackEntry?.destination?.route
 		bottomNavItems.forEach { bottomNavItem ->
 			NavigationBarItem(
-					modifier = Modifier.semantics {
+					modifier = Modifier
+						.semantics {
 						contentDescription = bottomNavItem.title
 					} ,
 					colors = NavigationBarItemDefaults.colors(
@@ -45,13 +49,18 @@ fun BottomNavigationBar(navController : NavController)
 															 ) ,
 					icon = {
 						Icon(
-								modifier = Modifier.size(28.dp) ,
+								modifier = Modifier.size(24.dp),
 								painter = painterResource(id = bottomNavItem.icon) ,
 								contentDescription = bottomNavItem.iconDescription
 							)
 					} ,
-					alwaysShowLabel = true ,
-					label = { Text(text = bottomNavItem.title) } ,
+					label = { Text(
+							text = bottomNavItem.title,
+							modifier = Modifier
+								.semantics {
+								contentDescription = bottomNavItem.title
+							}
+								  ) } ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
 						navController.navigate(bottomNavItem.screen_route) {
@@ -65,5 +74,18 @@ fun BottomNavigationBar(navController : NavController)
 							 )
 		}
 
+	}
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun BottomNavigationBarPreview()
+{
+	val navController = rememberNavController()
+	NimazTheme(
+			darkTheme = true
+			  ) {
+		BottomNavigationBar(navController = navController)
 	}
 }

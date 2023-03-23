@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.helperClasses.utils.sunMoonUtils
+package com.arshadshah.nimaz.utils.sunMoonUtils
 
 internal class MoonCalculations(
 	val phi : Double ,
