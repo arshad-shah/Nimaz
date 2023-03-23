@@ -33,7 +33,7 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 
 	val today = LocalDate.now()
 	val todayHijri = HijrahDate.from(today)
-	val eidUlAdhaStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 12 , 10)
+	val eidUlAdhaStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 12 , 9)
 	val eidUlAdhaEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 12 , 13)
 	//get date of ramadan start in gregorian
 	val eidUlAdhaStartGregorian = LocalDate.from(eidUlAdhaStart)
@@ -74,8 +74,8 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 	//save the image to show in the card
 	val imageToShow = remember { mutableStateOf(randomImage) }
 
-	//show card
-	val showCard = todayHijri[ChronoField.MONTH_OF_YEAR] <= 12 && eidUlAdhaTimeLeft.value <= 20
+	//show card where there are 3 days left for eid ul adha
+	val showCard = eidUlAdhaTimeLeft.value <= 3
 
 	//is ramadan time left less than 40 days
 	//if yes then show the card

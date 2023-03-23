@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -13,12 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NAMES_OF_ALLAH
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
@@ -74,8 +75,7 @@ fun NamesOfAllahRow(
 
 	ElevatedCard(
 			modifier = Modifier
-				.padding(4.dp) ,
-			shape = RoundedCornerShape(8.dp)
+				.padding(8.dp) ,
 				) {
 		Row(
 				verticalAlignment = Alignment.CenterVertically ,
@@ -84,15 +84,20 @@ fun NamesOfAllahRow(
 					.padding(8.dp) ,
 		   ) {
 			Text(
-					modifier = Modifier.padding(start = 8.dp) ,
+					modifier = Modifier
+						.padding(start = 8.dp)
+						.fillMaxWidth()
+						.weight(0.15f) ,
 					text = "${index + 1}." ,
 					style = MaterialTheme.typography.titleLarge ,
+					textAlign = TextAlign.Center ,
 					color = MaterialTheme.colorScheme.onSurface ,
 				)
 			Column(
 					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth() ,
+						.padding(horizontal = 0.dp, vertical = 8.dp)
+						.fillMaxWidth()
+						.weight(0.85f),
 				  ) {
 				Text(
 						textAlign = TextAlign.Center ,
@@ -108,9 +113,9 @@ fun NamesOfAllahRow(
 							text = arabicName ,
 							style = MaterialTheme.typography.headlineLarge ,
 							fontFamily = utmaniQuranFont ,
+							fontWeight = FontWeight.SemiBold,
 							textAlign = TextAlign.Center ,
 							modifier = Modifier
-								.padding(4.dp)
 								.fillMaxWidth() ,
 							color = MaterialTheme.colorScheme.onSurface ,
 						)
@@ -129,9 +134,13 @@ fun NamesOfAllahRow(
 	}
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun NamesOfAllahRowPreview()
 {
-	NamesOfAllahRow(1 , "Al 'Aleem" , "العليم" , "The All Knowing")
+	NimazTheme(
+			darkTheme = true
+			  ) {
+		NamesOfAllahRow(1 , "Al 'Aleem" , "العليم" , "The All Knowing")
+	}
 }

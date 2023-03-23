@@ -85,6 +85,13 @@ class QuranViewModel(context : Context) : ViewModel()
 	private val _display_Mode = MutableStateFlow("List")
 	val display_Mode = _display_Mode.asStateFlow()
 
+	//random aya state a map of aya, surah, juz data
+	private val _randomAyaState = MutableStateFlow(Aya(0 , 0 , "" , "" , "" , 0 , 0 , false , false , "" , "" , false , "" , 0 , 0))
+	val randomAyaState = _randomAyaState.asStateFlow()
+	private val _randomAyaSurahState = MutableStateFlow(Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0))
+	val randomAyaSurahState = _randomAyaSurahState.asStateFlow()
+	private val _randomAyaJuzState = MutableStateFlow(Juz(0 , "" , "" , 0))
+	val randomAyaJuzState = _randomAyaJuzState.asStateFlow()
 	//download button state
 	private val _downloadButtonState = MutableStateFlow(!sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false))
 	val downloadButtonState = _downloadButtonState.asStateFlow()
@@ -895,6 +902,78 @@ class QuranViewModel(context : Context) : ViewModel()
 			} catch (e : Exception)
 			{
 				Log.d("getAllBookmarks" , e.message ?: "Unknown error")
+			}
+		}
+	}
+	//get random aya from database
+	fun getRandomAya()
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				//check if there are any ayas in the database
+				val ayas = dataStore.countAllAyat()
+				if (ayas > 0)
+				{
+					//get a random aya
+					val randomAya = dataStore.getRandomAya()
+					if (randomAya.ayaNumberInSurah == 0 || randomAya.ayaNumberInSurah == 1)
+					{
+						getRandomAya()
+					}
+					val surahOfTheAya = dataStore.getSurahById(randomAya.suraNumber)
+					val juzOfTheAya = dataStore.getJuzById(randomAya.juzNumber)
+					_randomAyaState.value = randomAya
+					_randomAyaSurahState.value = surahOfTheAya
+					_randomAyaJuzState.value = juzOfTheAya
+					sharedPreferences.saveDataInt(
+							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , randomAya.ayaNumberInSurah)
+
+				} else
+				{
+					val ayat = QuranRepository.getAyaForSurah(1)
+					//add the ayat to the database
+					dataStore.insertAyats(ayat.data!!)
+					//get a random aya
+					val randomAya = dataStore.getRandomAya()
+					if (randomAya.ayaNumberInSurah == 0 || randomAya.ayaNumberInSurah == 1)
+					{
+						getRandomAya()
+					}
+					val surahOfTheAya = dataStore.getSurahById(randomAya.suraNumber)
+					val juzOfTheAya = dataStore.getJuzById(randomAya.juzNumber)
+					_randomAyaState.value = randomAya
+					_randomAyaSurahState.value = surahOfTheAya
+					_randomAyaJuzState.value = juzOfTheAya
+					sharedPreferences.saveDataInt(
+							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , randomAya.ayaNumberInSurah)
+				}
+			} catch (e : Exception)
+			{
+				Log.d("getRandomAya" , e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	//getAyatByAyaNumberInSurah
+	fun getAyatByAyaNumberInSurah(ayaNumberInSurah : Int)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				val ayat = dataStore.getAyatByAyaNumberInSurah(ayaNumberInSurah)
+				val surahOfTheAya = dataStore.getSurahById(ayat.suraNumber)
+				val juzOfTheAya = dataStore.getJuzById(ayat.juzNumber)
+				_randomAyaSurahState.value = surahOfTheAya
+				_randomAyaJuzState.value = juzOfTheAya
+				_randomAyaState.value = ayat
+				sharedPreferences.saveDataInt(
+						AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , ayaNumberInSurah)
+			} catch (e : Exception)
+			{
+				Log.d("getAyatByAyaNumberInSurah" , e.message ?: "Unknown error")
 			}
 		}
 	}

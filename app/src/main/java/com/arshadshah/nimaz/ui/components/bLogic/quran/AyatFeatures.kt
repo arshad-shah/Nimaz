@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,6 +24,9 @@ import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.NoteInput
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import kotlin.reflect.KFunction1
 
 @Composable
@@ -33,6 +38,7 @@ fun AyatFeatures(
 	aya : Aya ,
 	showNoteDialog : MutableState<Boolean> ,
 	noteContent : MutableState<String> ,
+	isLoading : Boolean ,
 				)
 {
 	Row(
@@ -48,6 +54,14 @@ fun AyatFeatures(
 					modifier = Modifier
 						.size(24.dp)
 						.padding(4.dp)
+						.placeholder(
+								visible = isLoading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
 				)
 		}
 
@@ -60,6 +74,14 @@ fun AyatFeatures(
 					modifier = Modifier
 						.size(24.dp)
 						.padding(4.dp)
+						.placeholder(
+								visible = isLoading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
 				)
 		}
 
@@ -72,6 +94,14 @@ fun AyatFeatures(
 					modifier = Modifier
 						.size(24.dp)
 						.padding(4.dp)
+						.placeholder(
+								visible = isLoading,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
 						.clickable {
 							handleEvents(
 									QuranViewModel.AyaEvent.getNoteForAya(
@@ -147,6 +177,7 @@ fun AyatFeaturesPreview()
 			handleEvents = viewModel::handleAyaEvent ,
 			aya = aya ,
 			showNoteDialog = remember { mutableStateOf(false) } ,
-			noteContent = remember { mutableStateOf("") }
+			noteContent = remember { mutableStateOf("") } ,
+			isLoading = false ,
 				)
 }

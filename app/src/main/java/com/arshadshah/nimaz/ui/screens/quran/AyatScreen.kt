@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -15,7 +16,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.quran.AyaSurahList
 
 @Composable
 fun AyatScreen(
-	number : String? ,
+	number : String ,
 	isSurah : String ,
 	language : String ,
 	paddingValues : PaddingValues ,
@@ -36,7 +37,11 @@ fun AyatScreen(
 	if (isSurah.toBoolean())
 	{
 		Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: isSurah")
-		viewModel.getAllAyaForSurah(number !!.toInt() , language)
+		//execute it once
+		LaunchedEffect(key1 = number)
+		{
+			viewModel.getAllAyaForSurah(number !!.toInt() , language)
+		}
 		val ayatSurah = remember { viewModel.ayaListState }.collectAsState()
 		val loadingAyatSurah = remember { viewModel.loadingState }.collectAsState()
 		val errorAyatSurah = remember { viewModel.errorState }.collectAsState()
@@ -54,7 +59,11 @@ fun AyatScreen(
 	} else
 	{
 		Log.d(AppConstants.QURAN_SCREEN_TAG , "AyatScreen: isJuz")
-		viewModel.getAllAyaForJuz(number !!.toInt() , language)
+		//execute it once
+		LaunchedEffect(key1 = number)
+		{
+			viewModel.getAllAyaForJuz(number !!.toInt() , language)
+		}
 		val ayatJuz = remember { viewModel.ayaListState }.collectAsState()
 		val loadingAyatJuz = remember { viewModel.loadingState }.collectAsState()
 		val errorAyatJuz = remember { viewModel.errorState }.collectAsState()
