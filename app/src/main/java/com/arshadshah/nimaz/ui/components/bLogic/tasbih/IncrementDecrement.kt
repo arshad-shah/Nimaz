@@ -1,13 +1,17 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
-import android.content.Context
-import android.os.Vibrator
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 
 @Composable
 fun IncrementDecrement(
@@ -15,14 +19,20 @@ fun IncrementDecrement(
 	lap : MutableState<Int> ,
 	lapCountCounter : MutableState<Int> ,
 	objective : MutableState<String> ,
-	vibrationAllowed : MutableState<Boolean> ,
-	vibrator : Vibrator ,
-	context : Context ,
-	rOrl : MutableState<Int> ,
 					  )
 {
+	val context = LocalContext.current
+	val viewModel = viewModel(
+			key = "TasbihViewModel" ,
+			initializer = { TasbihViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
+	val rOrl = remember {
+		viewModel.orientationButtonState
+	}.collectAsState()
+
 	//if rorl is 0 then switch the place of the increment and decrement buttons to right side and if its 1 then switch the place of the increment and decrement buttons to left side
-	if (rOrl.value == 0)
+	if (rOrl.value)
 	{
 		Row(
 				modifier = Modifier.fillMaxWidth() ,
@@ -35,8 +45,6 @@ fun IncrementDecrement(
 					lap = lap ,
 					lapCountCounter = lapCountCounter ,
 					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
 						   )
 
 			Spacer(modifier = Modifier.width(16.dp))
@@ -45,8 +53,6 @@ fun IncrementDecrement(
 					lap = lap ,
 					lapCountCounter = lapCountCounter ,
 					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
 					context = context
 						   )
 		}
@@ -62,8 +68,6 @@ fun IncrementDecrement(
 					lap = lap ,
 					lapCountCounter = lapCountCounter ,
 					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
 					context = context
 						   )
 			Spacer(modifier = Modifier.width(16.dp))
@@ -72,8 +76,6 @@ fun IncrementDecrement(
 					lap = lap ,
 					lapCountCounter = lapCountCounter ,
 					objective = objective ,
-					vibrationAllowed = vibrationAllowed ,
-					vibrator = vibrator ,
 						   )
 
 		}

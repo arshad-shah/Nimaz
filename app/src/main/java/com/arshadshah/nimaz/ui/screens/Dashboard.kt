@@ -24,6 +24,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.RamadanCard
 import com.arshadshah.nimaz.ui.components.ui.dashboard.DashboardTasbihTracker
 import com.arshadshah.nimaz.ui.components.ui.quran.DashboardQuranTracker
 import com.arshadshah.nimaz.ui.components.ui.quran.DashboardRandomAyatCard
+import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardFastTracker
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
@@ -92,6 +93,9 @@ fun Dashboard(
 						style = MaterialTheme.typography.titleMedium
 					)
 				DashboardPrayerTracker(onNavigateToTracker = onNavigateToTracker)
+				//if its ramaadan then show the fast tracker
+				//DashboardFastTracker
+				DashboardFastTracker()
 				DashboardQuranTracker(onNavigateToAyatScreen = onNavigateToAyatScreen)
 				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen,
 									   onNavigateToTasbihListScreen = onNavigateToTasbihListScreen)

@@ -190,7 +190,6 @@ fun Verses(modifier : Modifier = Modifier ,
 		   content : @Composable () -> Unit)
 {
 	Layout(
-			//scroll until content height is reached
 			modifier = modifier ,
 			content = content ,
 			measurePolicy = { measurables , constraints ->
@@ -199,7 +198,8 @@ fun Verses(modifier : Modifier = Modifier ,
 					val width = constraints.maxWidth
 					measurable.measure(constraints.copy(minWidth = 0 , maxWidth = width))
 				}
-				// Place the children in the parent layout in a layout where the children are placed one after the other
+				// Place the children in the parent layout in a layout
+				// where the children are placed one after the other
 				// like sentences in a paragraph
 				layout(constraints.maxWidth , constraints.maxHeight) {
 					var currentX = constraints.maxWidth
