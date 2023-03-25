@@ -2,11 +2,7 @@ package com.arshadshah.nimaz.ui.screens.tracker
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -14,23 +10,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
 import com.arshadshah.nimaz.ui.components.ui.trackers.PrayerTrackerListItems
-import com.arshadshah.nimaz.ui.components.ui.trackers.ToggleableItem
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -107,8 +95,6 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 						end = 0.dp
 										   ) ,
 					) {
-			if (showDateSelector.value)
-			{
 				Column {
 							PrayerTrackerList(
 									viewModel::onEvent ,
@@ -124,52 +110,11 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 											 )
 							Fasting(
 									viewModel::onEvent ,
-									showDateSelector ,
 									dateState ,
 									isFasting.value ,
 									fastingState.value
 								   )
 				}
-			} else
-			{
-
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
-						horizontalArrangement = Arrangement.SpaceBetween ,
-						verticalAlignment = Alignment.CenterVertically
-				   ) {
-					Text(
-							text = "Prayer Tracker" , style = MaterialTheme.typography.titleMedium
-						)
-					Text(
-							text = LocalDate.parse(dateState.value)
-								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							style = MaterialTheme.typography.titleMedium
-						)
-				}
-				Column(
-						modifier = Modifier.scrollable(
-								state = rememberScrollState() ,
-								orientation = Orientation.Vertical ,
-								enabled = true
-													  )
-					  ) {
-					PrayerTrackerList(
-							viewModel::onEvent ,
-							stateOfTrackerForToday.value ,
-							fajrState.value ,
-							zuhrState.value ,
-							asrState.value ,
-							maghribState.value ,
-							ishaState.value ,
-							showDateSelector ,
-							dateState ,
-							progressState
-									 )
-				}
-			}
 		}
 	}
 }
@@ -177,7 +122,6 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 @Composable
 fun Fasting(
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
-	showDateSelector : State<Boolean> ,
 	dateState : State<String> ,
 	isFasting : Boolean ,
 	fastingState : TrackerViewModel.FastTrackerState ,
@@ -206,7 +150,6 @@ fun Fasting(
 			isFastingToday.value = isFasting
 			FastTrackerCard(
 					handleEvent = handleEvent ,
-					showDateSelector = showDateSelector ,
 					dateState = dateState ,
 					isFastingToday = isFastingToday
 						   )
@@ -314,45 +257,6 @@ fun PrayerTrackerList(
 
 		else ->
 		{
-		}
-	}
-}
-
-//preview of the toggleable item
-@Preview
-@Composable
-fun ToggleableItemPreview()
-{
-	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
-
-	ElevatedCard(
-			modifier = Modifier.fillMaxWidth()
-				) {
-		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp) ,
-				horizontalArrangement = Arrangement.SpaceBetween ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
-			items.forEachIndexed { index , item ->
-				ToggleableItem(
-						text = item ,
-						checked = true ,
-						onCheckedChange = { } ,
-						modifier = Modifier
-							.padding(8.dp)
-							.placeholder(
-									visible = false ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
-						showDateSelector = false
-							  )
-			}
 		}
 	}
 }

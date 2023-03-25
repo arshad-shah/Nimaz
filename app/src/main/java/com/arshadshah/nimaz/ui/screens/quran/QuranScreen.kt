@@ -50,7 +50,9 @@ fun QuranScreen(
 				.testTag(TEST_TAG_QURAN)
 		  ) {
 
-		TabRow(selectedTabIndex = selectedTab) {
+		TabRow(
+				selectedTabIndex = selectedTab,
+			  ) {
 			titles.forEachIndexed { index , title ->
 				Tab(
 						modifier = Modifier.testTag(
@@ -64,7 +66,7 @@ fun QuranScreen(
 						text = {
 							Text(
 									text = title ,
-									maxLines = 2 ,
+									maxLines = 1 ,
 									overflow = TextOverflow.Ellipsis ,
 									style = MaterialTheme.typography.titleSmall
 								)

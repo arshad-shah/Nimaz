@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.ui.navigation
 
-import android.media.MediaPlayer
 import android.os.Build
-import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterTransition
@@ -11,7 +9,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.activity
@@ -53,11 +50,6 @@ import com.google.accompanist.navigation.animation.composable
 fun NavigationGraph(
 	navController : NavController ,
 	paddingValues : PaddingValues ,
-	showResetDialog : MutableState<Boolean> ,
-	vibrator : Vibrator ,
-	vibrationAllowed : MutableState<Boolean> ,
-	rOrl : MutableState<Int> ,
-	mediaPlayer : MediaPlayer ,
 				   )
 {
 
@@ -696,10 +688,6 @@ fun NavigationGraph(
 					tasbihEnglish = it.arguments?.getString("translation") !! ,
 					tasbihTranslitration = it.arguments?.getString("transliteration") !! ,
 					paddingValues = paddingValues ,
-					showResetDialog = showResetDialog ,
-					vibrator = vibrator ,
-					vibrationAllowed = vibrationAllowed ,
-					rOrl = rOrl
 						)
 		}
 
