@@ -4,11 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -28,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.day.DayState
@@ -54,7 +53,11 @@ fun Calender(paddingValues : PaddingValues)
 							 )
 	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
 
-	Column(
+	val dateState = remember {
+		viewModel.dateState
+	}.collectAsState()
+
+	LazyColumn(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(paddingValues)
@@ -62,27 +65,55 @@ fun Calender(paddingValues : PaddingValues)
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Top
 		  ) {
-		ElevatedCard(
-				modifier = Modifier
-					.fillMaxWidth()
-					) {
-			SelectableCalendar(
-					dayContent = {
-						CalenderDay(dayState = it)
-					} ,
-					weekHeader = { weekState ->
-						CalenderWeekHeader(weekState = weekState)
-					} ,
-					monthContainer = {
-						CalenderMonth(monthState = it)
-					} ,
-					monthHeader = { monthState ->
-						CalenderHeader(monthState = monthState)
-					} ,
-					calendarState = rememberSelectableCalendarState()
-							  )
+		item{
+			ElevatedCard(
+					modifier = Modifier
+						.fillMaxWidth()
+						) {
+				SelectableCalendar(
+						dayContent = {
+							CalenderDay(dayState = it)
+						} ,
+						weekHeader = { weekState ->
+							CalenderWeekHeader(weekState = weekState)
+						} ,
+						monthContainer = {
+							CalenderMonth(monthState = it)
+						} ,
+						monthHeader = { monthState ->
+							CalenderHeader(monthState = monthState)
+						} ,
+						calendarState = rememberSelectableCalendarState()
+								  )
+			}
 		}
-		PrayerTracker(paddingValues = PaddingValues(0.dp) , isIntegrated = true)
+		item{
+			ElevatedCard(
+					modifier = Modifier
+						.padding(top = 8.dp)
+						.fillMaxWidth()
+						) {
+				Row(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
+						horizontalArrangement = Arrangement.SpaceBetween ,
+						verticalAlignment = Alignment.CenterVertically
+				   ) {
+					Text(
+							text = "Prayer Tracker" , style = MaterialTheme.typography.titleMedium
+						)
+					Text(
+							text = LocalDate.parse(dateState.value)
+								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							style = MaterialTheme.typography.titleMedium
+						)
+				}
+				DashboardPrayerTracker(
+						onNavigateToTracker = {}
+									  )
+			}
+		}
 	}
 }
 

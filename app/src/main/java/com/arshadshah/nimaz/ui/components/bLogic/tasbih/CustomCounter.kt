@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
-import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -22,12 +21,7 @@ import es.dmoral.toasty.Toasty
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomCounter(
-	vibrator : Vibrator ,
 	paddingValues : PaddingValues ,
-	vibrationAllowed : MutableState<Boolean> ,
-	reset : MutableState<Boolean> ,
-	showResetDialog : MutableState<Boolean> ,
-	rOrl : MutableState<Int> ,
 	tasbihId : String ,
 				 )
 {
@@ -39,6 +33,10 @@ fun CustomCounter(
 							 )
 
 	viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetTasbih(tasbihId.toInt()))
+
+	val resetTasbih = remember {
+		viewModel.resetButtonState
+	}.collectAsState()
 
 	val tasbih = remember {
 		viewModel.tasbihCreated
@@ -150,21 +148,18 @@ fun CustomCounter(
 
 		Spacer(modifier = Modifier.height(32.dp))
 		IncrementDecrement(
-				vibrator = vibrator ,
-				vibrationAllowed = vibrationAllowed ,
 				count = count ,
 				lap = lap ,
 				lapCountCounter = lapCountCounter ,
 				objective = objective ,
-				context = LocalContext.current ,
-				rOrl = rOrl ,
 						  )
 	}
 
-	if (showResetDialog.value)
-	{
+	if (resetTasbih.value) {
 		AlertDialog(
-				onDismissRequest = { showResetDialog.value = false } ,
+				onDismissRequest = {
+					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+				} ,
 				title = { Text(text = "Reset Counter") } ,
 				text = {
 					Text(
@@ -177,16 +172,15 @@ fun CustomCounter(
 						count.value = 0
 						lap.value = 1
 						lapCountCounter.value = 0
-
-						reset.value = true
-
-						showResetDialog.value = false
+						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
 					}) {
 						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
 					}
 				} ,
 				dismissButton = {
-					TextButton(onClick = { showResetDialog.value = false }) {
+					TextButton(onClick = {
+						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+					}) {
 						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
 					}
 				}

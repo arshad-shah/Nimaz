@@ -9,7 +9,6 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Vibrator
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -48,6 +48,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
@@ -56,7 +57,6 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
-import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.WidgetService
 import com.arshadshah.nimaz.widgets.updateAppWidget
@@ -169,6 +169,9 @@ class MainActivity : ComponentActivity()
 			val themeState = remember {
 				viewModelSettings.theme
 			}.collectAsState()
+			val isDarkTheme = remember {
+				viewModelSettings.isDarkMode
+			}.collectAsState()
 
 			val darkTheme = remember {
 				mutableStateOf(false)
@@ -176,37 +179,52 @@ class MainActivity : ComponentActivity()
 			val dynamicTheme = remember {
 				mutableStateOf(false)
 			}
+			val themeName = remember {
+				mutableStateOf("Default")
+			}
 
 			when (themeState.value)
 			{
 				"DYNAMIC" ->
 				{
 					dynamicTheme.value = true
-					darkTheme.value = isSystemInDarkTheme()
+					darkTheme.value = isDarkTheme.value
 				}
-
 				"SYSTEM" ->
 				{
-					dynamicTheme.value = false
 					darkTheme.value = isSystemInDarkTheme()
+					themeName.value = "Default"
 				}
-
-				"LIGHT" ->
+				"DEFAULT" ->
 				{
 					dynamicTheme.value = false
-					darkTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Default"
 				}
-
-				"DARK" ->
+				"Raisin_Black" ->
 				{
 					dynamicTheme.value = false
-					darkTheme.value = true
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Raisin_Black"
+				}
+				"Dark_Red" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Dark_Red"
+				}
+				"Dark_Liver" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Dark_Liver"
 				}
 			}
 
 			NimazTheme(
 					darkTheme = darkTheme.value ,
 					dynamicColor = dynamicTheme.value ,
+					ThemeName = themeName.value
 					  ) {
 				val isPlaying = remember { mutableStateOf(false) }
 				val isPaused = remember { mutableStateOf(false) }
@@ -220,11 +238,8 @@ class MainActivity : ComponentActivity()
 				val (menuOpen , setMenuOpen) = remember { mutableStateOf(false) }
 				val CustomAnimation = remember { CustomAnimation() }
 
-				val showResetDialog = remember { mutableStateOf(false) }
-
-				val vibrator = this.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 				val vibrationAllowed = remember { mutableStateOf(true) }
-				val rOrl = remember { mutableStateOf(0) }
+				val rOrl = remember { mutableStateOf(true) }
 
 				val snackbarHostState = remember { SnackbarHostState() }
 				val scope = rememberCoroutineScope()
@@ -254,10 +269,11 @@ class MainActivity : ComponentActivity()
 						"Is service running: " + isMyServiceRunning(WidgetService::class.java).toString()
 					 )
 
-				AutoAnglesCalc().calculateFajrAngle(this@MainActivity, 53.0, -7.3)
-
-
-
+				val viewModelTasbih = viewModel(
+						key = "TasbihViewModel" ,
+						initializer = { TasbihViewModel(this@MainActivity) } ,
+						viewModelStoreOwner = LocalContext.current as ComponentActivity
+										 )
 
 				Scaffold(
 						modifier = Modifier.testTag("mainActivity") ,
@@ -403,12 +419,13 @@ class MainActivity : ComponentActivity()
 														{
 															//icon button to chenge the position of the button for right or left
 															IconButton(onClick = {
-																rOrl.value =
-																	if (rOrl.value == 0) 1 else 0
+																rOrl.value = ! rOrl.value
+																viewModelTasbih.handleEvent(TasbihViewModel.TasbihEvent.UpdateOrientationButtonState(rOrl.value))
 															}) {
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
-																		painter = if (rOrl.value == 0) painterResource(
+																		painter = if (rOrl.value)
+																			painterResource(
 																				id = R.drawable.corner_right_down_icon
 																													  )
 																		else painterResource(id = R.drawable.corner_left_down_icon) ,
@@ -419,11 +436,7 @@ class MainActivity : ComponentActivity()
 															IconButton(onClick = {
 																vibrationAllowed.value =
 																	! vibrationAllowed.value
-																//mute the vibration
-																if (! vibrationAllowed.value)
-																{
-																	vibrator.cancel()
-																}
+																viewModelTasbih.handleEvent(TasbihViewModel.TasbihEvent.UpdateVibrationButtonState(vibrationAllowed.value))
 															}) {
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
@@ -439,7 +452,7 @@ class MainActivity : ComponentActivity()
 
 															//a reset button to reset the count
 															IconButton(onClick = {
-																showResetDialog.value = true
+																viewModelTasbih.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(true))
 															}) {
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
@@ -464,15 +477,7 @@ class MainActivity : ComponentActivity()
 									})
 						}
 						) { it ->
-					NavigationGraph(
-							navController = navController ,
-							it ,
-							showResetDialog ,
-							vibrator ,
-							vibrationAllowed ,
-							rOrl ,
-							mediaPlayer ,
-								   )
+					NavigationGraph(navController = navController , it)
 				}
 			}
 		}
@@ -507,7 +512,7 @@ class MainActivity : ComponentActivity()
 			}
 			TASBIH_SCREEN_ROUTE -> "Tasbih"
 			NAMESOFALLAH_SCREEN_ROUTE -> "Allah"
-			PRAYER_TRACKER_SCREEN_ROUTE -> "Prayer Tracker"
+			PRAYER_TRACKER_SCREEN_ROUTE -> "Trackers"
 			CALENDER_SCREEN_ROUTE -> "Calender"
 			QIBLA_SCREEN_ROUTE -> "Qibla"
 			AppConstants.TASBIH_LIST_SCREEN -> "Tasbih List"
