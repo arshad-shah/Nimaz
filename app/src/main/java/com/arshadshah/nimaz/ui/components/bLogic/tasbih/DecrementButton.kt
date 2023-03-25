@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
 import android.os.VibrationEffect
-import android.os.Vibrator
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,11 +9,16 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 
 @Composable
 fun Decrementbutton(
@@ -21,10 +26,18 @@ fun Decrementbutton(
 	lap : MutableState<Int> ,
 	lapCountCounter : MutableState<Int> ,
 	objective : MutableState<String> ,
-	vibrationAllowed : MutableState<Boolean> ,
-	vibrator : Vibrator ,
 				   )
 {
+	val context = LocalContext.current
+	val viewModel = viewModel(
+			key = "TasbihViewModel" ,
+			initializer = { TasbihViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
+	val vibrationAllowed = remember {
+		viewModel.vibrationButtonState
+	}.collectAsState()
+	val vibrator = viewModel.vibrator
 	ElevatedButton(
 			contentPadding = PaddingValues(16.dp) ,
 			modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,

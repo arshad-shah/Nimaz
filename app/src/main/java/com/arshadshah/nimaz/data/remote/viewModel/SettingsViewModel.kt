@@ -28,6 +28,10 @@ class SettingsViewModel(context : Context) : ViewModel()
 	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , "SYSTEM"))
 	val theme = _theme.asStateFlow()
 
+	//dark mode state
+	private var _isDarkMode = MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE , false))
+	val isDarkMode = _isDarkMode.asStateFlow()
+
 
 	//state for switch of location toggle between manual and automatic
 	private var _isLocationAuto =
@@ -178,6 +182,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 		//theme
 		class Theme(val theme : String) : SettingsEvent()
+		//dark mode
+		class DarkMode(val darkMode : Boolean) : SettingsEvent()
 
 		//update settings based on calculation method
 		class UpdateSettings(val method : String) : SettingsEvent()
@@ -366,6 +372,12 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_theme.value = event.theme
 				sharedPreferences.saveData(AppConstants.THEME , event.theme)
 				Log.d("Nimaz: SettingsViewModel" , "Theme : ${event.theme}")
+			}
+			is SettingsEvent.DarkMode ->
+			{
+				_isDarkMode.value = event.darkMode
+				sharedPreferences.saveDataBoolean(AppConstants.DARK_MODE , event.darkMode)
+				Log.d("Nimaz: SettingsViewModel" , "Dark mode : ${event.darkMode}")
 			}
 
 			is SettingsEvent.UpdateSettings ->

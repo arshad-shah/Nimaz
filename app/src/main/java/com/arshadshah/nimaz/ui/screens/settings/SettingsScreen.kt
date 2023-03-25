@@ -24,17 +24,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.DARK_MODE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
-import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
+import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
@@ -58,6 +57,10 @@ fun SettingsScreen(
 									 )
 	val themeState = remember {
 		viewModelSettings.theme
+	}.collectAsState()
+
+	val isDarkMode = remember {
+		viewModelSettings.isDarkMode
 	}.collectAsState()
 
 	val viewModel = viewModel(
@@ -129,46 +132,111 @@ fun SettingsScreen(
 		//map of theme to theme name
 //		keys are like this LIGHT , DARK , SYSTEM
 		val themeMapForDynamic = mapOf(
-				"LIGHT" to "Light" ,
-				"DARK" to "Dark" ,
+				"DEFAULT" to "App Default" ,
+				"Raisin_Black" to "Raisin Black" ,
+				"Dark_Red" to "Burgundy" ,
+				"Dark_Liver" to "Dark Liver" ,
 				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
 									  )
 		val themeMapForNonDynamic = mapOf(
-				"LIGHT" to "Light" ,
-				"DARK" to "Dark" ,
+				"DEFAULT" to "App Default" ,
+				"Raisin_Black" to "Raisin Black" ,
+				"Dark_Red" to "Burgundy" ,
+				"Dark_Liver" to "Dark Liver" ,
 				"SYSTEM" to "System Default" ,
 										 )
 
-		//theme
-		ElevatedCard(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth()
-					) {
-			SettingsList(
-					onChange = {
-						viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
-						Toasty.success(context , "Theme Changed to $it" , Toast.LENGTH_SHORT , true)
-							.show()
-					} ,
-					height = 350.dp ,
-					subtitle = {
-						Text(text = "Change the theme of the app")
-					} ,
-					icon = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.theme_icon) ,
-								contentDescription = "Theme"
-							)
-					} ,
-					valueState = stateOfTheme ,
-					title = { Text(text = "Theme") } ,
-					items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
-						)
-		}
+		val stateDarkMode =
+			rememberPreferenceBooleanSettingState(
+					DARK_MODE ,
+					false
+												 )
+		stateDarkMode.value = isDarkMode.value
 
+		SettingsGroup(
+				title = { Text(text = "Theme") } ,
+					 ) {
+			if (stateOfTheme.value != "SYSTEM") {
+				ElevatedCard(
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth()
+							) {
+					//switch for theme mode dark/light when its not dynamic
+					SettingsSwitch(
+							state = stateDarkMode ,
+							title = { Text(text = "Theme Mode") } ,
+							onCheckedChange = {
+								viewModelSettings.handleEvent(
+										SettingsViewModel.SettingsEvent.DarkMode(
+												it
+																				)
+															 )
+							} ,
+							subtitle = {
+								Text(
+										text = if (stateDarkMode.value) "Dark" else "Light"
+									)
+							} ,
+							icon = {
+								if (stateDarkMode.value)
+								{
+									Icon(
+											modifier = Modifier.size(24.dp) ,
+											painter = painterResource(id = R.drawable.dark_icon) ,
+											contentDescription = "Dark Mode"
+										)
+								} else
+								{
+									Icon(
+											modifier = Modifier.size(24.dp) ,
+											painter = painterResource(id = R.drawable.light_icon) ,
+											contentDescription = "Light Mode"
+										)
+								}
+							}
+								  )
+				}
+			}
+			//theme
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						) {
+				SettingsList(
+						onChange = {
+							viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
+						} ,
+						height = 400.dp ,
+						icon = {
+							Icon(
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.theme_icon) ,
+									contentDescription = "Theme"
+								)
+						} ,
+						useSelectedValueAsSubtitle = false,
+						valueState = stateOfTheme ,
+						title = {
+							Text(text =
+								when (stateOfTheme.value)
+								{
+									"DEFAULT" -> "App Default"
+									"Raisin_Black" -> "Raisin Black"
+									"Dark_Red" -> "Burgundy"
+									"Dark_Liver" -> "Dark Liver"
+									"SYSTEM" -> "System Default"
+									"DYNAMIC" -> "Dynamic"
+									else -> "App Default"
+								}
+								)
+								} ,
+						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
+							)
+			}
+		}
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			ElevatedCard(

@@ -22,7 +22,6 @@ import java.time.LocalDate
 
 @Composable
 fun FastTrackerCard(
-	showDateSelector : State<Boolean> ,
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
 	dateState : State<String> ,
 	isFastingToday : MutableState<Boolean> ,
@@ -36,7 +35,7 @@ fun FastTrackerCard(
 				.fillMaxWidth()
 				.padding(8.dp)
 				) {
-			ToggleableItem(
+			ToggleableItemColumn(
 					text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,
 					checked = isFastingToday.value ,
 					onCheckedChange = {
@@ -49,7 +48,7 @@ fun FastTrackerCard(
 									Toasty.LENGTH_SHORT ,
 									true
 									   ).show()
-							return@ToggleableItem
+							return@ToggleableItemColumn
 						}
 						isFastingToday.value = ! isFastingToday.value
 						handleEvent(
@@ -72,7 +71,6 @@ fun FastTrackerCard(
 										highlightColor = Color.White ,
 																		)
 									) ,
-					showDateSelector = showDateSelector.value
-						  )
+								)
 	}
 }
