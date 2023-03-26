@@ -43,7 +43,7 @@ class Alarms
 		//recieverEnabled(context)
 
 		//logs
-		Log.i("Alarms for Adhan" , "Reset alarm for 1 Oclock each night set.")
+		Log.i("Nimaz: Alarms for Adhan" , "Reset alarm for 1 Oclock each night set.")
 	} // end of alarm set
 
 
@@ -59,15 +59,16 @@ class Alarms
 	{
 		// get alarm manager
 		val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
-		alarmManager.setExactAndAllowWhileIdle(
-				AlarmManager.RTC_WAKEUP , timeToNotify , pendingIntent
-											  )
+		alarmManager.setAlarmClock(
+				AlarmManager.AlarmClockInfo(timeToNotify , pendingIntent) ,
+				pendingIntent
+								  )
 
 
 		//recieverEnabled(context)
 
 		//logs
-		Log.i("Alarms for Adhan" , "Alarm for $timeToNotify is successfully created")
+		Log.i("Nimaz: Alarms for Adhan" , "Alarm for $timeToNotify is successfully created")
 	} // end of alarm set
 
 

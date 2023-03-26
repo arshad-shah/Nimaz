@@ -164,7 +164,7 @@ class NotificationHelper
 
 		val builder =
 			NotificationCompat.Builder(context , channel_id).apply {
-				setSmallIcon(R.mipmap.ic_launcher)
+				setSmallIcon(R.mipmap.ic_launcher_round)
 				setContentTitle("$title at $timeFormated")
 				when (title)
 				{

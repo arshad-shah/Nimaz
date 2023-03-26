@@ -57,6 +57,7 @@ class AdhanReciever : BroadcastReceiver()
 					Notify_Id ,
 					Time_of_alarm
 												   )
+			Toasty.info(context , "Time to pray $title").show()
 
 			Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Alarm for $title is Successfully executed!")
 		} // end of if
