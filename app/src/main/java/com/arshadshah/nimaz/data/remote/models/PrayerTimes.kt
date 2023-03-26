@@ -5,10 +5,10 @@ import java.time.LocalDateTime
 
 data class PrayerTimes(
 	val date : LocalDate? ,
-	val fajr : LocalDateTime? ,
-	val sunrise : LocalDateTime? ,
-	val dhuhr : LocalDateTime? ,
-	val asr : LocalDateTime? ,
-	val maghrib : LocalDateTime? ,
-	val isha : LocalDateTime? ,
+	var fajr : LocalDateTime? ,
+	var sunrise : LocalDateTime? ,
+	var dhuhr : LocalDateTime? ,
+	var asr : LocalDateTime? ,
+	var maghrib : LocalDateTime? ,
+	var isha : LocalDateTime? ,
 					  )
