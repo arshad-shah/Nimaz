@@ -129,7 +129,7 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 			{
 				Toasty.error(
 						context ,
-						"Error" ,
+						(stateOfTrackerForToday.value as TrackerViewModel.TrackerState.Error).message ,
 						Toast.LENGTH_SHORT ,
 						true
 							).show()
