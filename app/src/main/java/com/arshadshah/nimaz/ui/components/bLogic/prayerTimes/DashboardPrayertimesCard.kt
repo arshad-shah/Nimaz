@@ -174,7 +174,6 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				Box(
 						modifier = Modifier
 							.clip(MaterialTheme.shapes.extraLarge)
-							.padding(8.dp)
 							.size(100.dp)
 				   ) {
 					Image(

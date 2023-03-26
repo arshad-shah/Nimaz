@@ -81,15 +81,6 @@ object PrayerTimesRepository
 			{
 				val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
 
-				if(isDaylightSavingTime){
-					prayerTimesLocal?.fajr = prayerTimesLocal?.fajr?.plusHours(1)
-					prayerTimesLocal?.sunrise = prayerTimesLocal?.sunrise?.plusHours(1)
-					prayerTimesLocal?.dhuhr = prayerTimesLocal?.dhuhr?.plusHours(1)
-					prayerTimesLocal?.asr = prayerTimesLocal?.asr?.plusHours(1)
-					prayerTimesLocal?.maghrib = prayerTimesLocal?.maghrib?.plusHours(1)
-					prayerTimesLocal?.isha = prayerTimesLocal?.isha?.plusHours(1)
-				}
-
 				//check if the date is for current month if not update the prayer times
 				val date = prayerTimesLocal?.date
 				val currentDate = LocalDate.now()
