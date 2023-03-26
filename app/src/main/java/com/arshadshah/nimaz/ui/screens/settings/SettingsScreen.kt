@@ -91,7 +91,6 @@ fun SettingsScreen(
 	}
 	//execute once
 	LaunchedEffect(Unit) {
-
 		// Checks that the platform will allow the specified type of update.
 		appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
 			updateAvailabile.value = (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
