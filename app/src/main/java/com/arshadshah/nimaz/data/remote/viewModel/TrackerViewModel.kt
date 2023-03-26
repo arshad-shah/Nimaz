@@ -1,10 +1,12 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.utils.LocalDataStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -69,7 +71,7 @@ class TrackerViewModel : ViewModel()
 	val progressState = _progressState.asStateFlow()
 
 	//a progressfor a specific date
-	private var _progressForDate = MutableStateFlow(Pair(LocalDate.now().toString() , 0))
+	private var _progressForDate = MutableStateFlow(Pair("" , 0))
 	val progressForDate = _progressForDate.asStateFlow()
 
 	//dates with trackers
@@ -130,7 +132,7 @@ class TrackerViewModel : ViewModel()
 
 	fun updateFastTracker(tracker : FastTracker)
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -156,7 +158,7 @@ class TrackerViewModel : ViewModel()
 
 	fun getFastTrackerForDate(date : String)
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -183,7 +185,7 @@ class TrackerViewModel : ViewModel()
 
 	fun saveFastTracker(tracker : FastTracker)
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -199,7 +201,7 @@ class TrackerViewModel : ViewModel()
 
 	private fun getAllTrackers()
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -214,12 +216,21 @@ class TrackerViewModel : ViewModel()
 
 	private fun getProgressForDate(date : String)
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
-				val tracker = dataStore.getTrackerForDate(date)
-				_progressForDate.value = Pair(date , tracker.progress)
+				val trackerExists = dataStore.checkIfTrackerExists(date)
+				if (! trackerExists)
+				{
+					Log.d("TrackerViewModel highlightDay" , "Tracker does not exist for date $date")
+					_progressForDate.value = Pair(date , 0)
+				} else
+				{
+					Log.d("TrackerViewModel highlightDay" , "Tracker exists for date $date")
+					val tracker = dataStore.getProgressForDate(date)
+					_progressForDate.value = Pair(date , tracker)
+				}
 			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
@@ -230,7 +241,7 @@ class TrackerViewModel : ViewModel()
 	//function to get the tracker for a specific date
 	fun getTrackerForDate(date : String)
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -285,7 +296,7 @@ class TrackerViewModel : ViewModel()
 	//function to update a tracker
 	fun updateTracker(tracker : PrayerTracker)
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()
@@ -328,7 +339,7 @@ class TrackerViewModel : ViewModel()
 	//function to save a tracker
 	fun saveTracker(tracker : PrayerTracker)
 	{
-		viewModelScope.launch {
+		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
 				val dataStore = LocalDataStore.getDataStore()

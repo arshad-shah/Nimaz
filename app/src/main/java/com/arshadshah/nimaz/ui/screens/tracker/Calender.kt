@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -41,6 +40,7 @@ import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
+import kotlin.reflect.KFunction1
 
 @Composable
 fun Calender(paddingValues : PaddingValues)
@@ -53,8 +53,11 @@ fun Calender(paddingValues : PaddingValues)
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
-	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
-	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
+	//call this effect only once
+	LaunchedEffect(key1 = "getTrackerForDate") {
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
+	}
 
 	val dateState = remember {
 		viewModel.dateState
@@ -75,7 +78,7 @@ fun Calender(paddingValues : PaddingValues)
 						) {
 				SelectableCalendar(
 						dayContent = {
-							CalenderDay(dayState = it)
+							CalenderDay(dayState = it, handleEvents = viewModel::onEvent)
 						} ,
 						weekHeader = { weekState ->
 							CalenderWeekHeader(weekState = weekState)
@@ -356,13 +359,9 @@ fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 @Composable
 fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
+	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
 			   )
 {
-	val viewModel = viewModel(
-			key = "TrackerViewModel" ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
 	val currentDate = dayState.date
@@ -405,8 +404,8 @@ fun CalenderDay(
 									if (today) MaterialTheme.colorScheme.secondary
 									else if (isSelectedDay) MaterialTheme.colorScheme.tertiary
 									else MaterialTheme.colorScheme.outline.copy(
-										alpha = 0.3f
-																																															  )
+											alpha = 0.3f
+																			   )
 								true -> MaterialTheme.colorScheme.primary
 							} ,
 							shape = MaterialTheme.shapes.medium
@@ -419,17 +418,21 @@ fun CalenderDay(
 									false -> if (dayState.isFromCurrentMonth)
 									{
 										dayState.selectionState.onDateSelected(dayState.date)
-										viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
-										viewModel.onEvent(
+										handleEvents(
+												TrackerViewModel.TrackerEvent.SET_DATE(
+														dayState.date.toString()
+																					  )
+													)
+										handleEvents(
 												TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
 														dayState.date.toString()
 																								  )
-														 )
-										viewModel.onEvent(
+													)
+										handleEvents(
 												TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
 														dayState.date.toString()
 																									   )
-														 )
+													)
 									}
 
 									else ->
@@ -437,25 +440,25 @@ fun CalenderDay(
 										if (dayState.isFromCurrentMonth)
 										{
 											dayState.selectionState.onDateSelected(dayState.date)
-											viewModel.onEvent(
+											handleEvents(
 													TrackerViewModel.TrackerEvent.SET_DATE(
 															dayState.date.toString()
 																						  )
-															 )
-											viewModel.onEvent(
+														)
+											handleEvents(
 													TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																									  )
-															 )
-											viewModel.onEvent(
+														)
+											handleEvents(
 													TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																										   )
-															 )
+														)
 										}
 									}
 								}
-							},
+							} ,
 							onLongClick = {
 								hasDescription.value = ! hasDescription.value
 							}
@@ -517,51 +520,6 @@ fun CalenderDay(
 					)
 			}
 		}
-	}
-}
-
-//a function to highlight the day if the progress is greater than 0 using a gradient color background
-@Composable
-fun highlightDay(progress : Int) : Brush
-{
-	return when (progress)
-	{
-		0 -> Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) ,
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-							   )
-								  )
-		in 1.. 25 -> Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) ,
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-							   )
-										  )
-		in 26.. 50 -> Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) ,
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-							   )
-										   )
-		in 51.. 75 -> Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) ,
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-							   )
-										   )
-		in 76.. 100 -> Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) ,
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-							   )
-											)
-		else -> Brush.verticalGradient(
-				colors = listOf(
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) ,
-						MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-							   )
-									  )
 	}
 }
 
