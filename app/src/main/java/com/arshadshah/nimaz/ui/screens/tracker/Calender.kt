@@ -1,8 +1,10 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -12,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -26,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardFastTracker
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
@@ -52,6 +54,7 @@ fun Calender(paddingValues : PaddingValues)
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
+	viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
 
 	val dateState = remember {
 		viewModel.dateState
@@ -112,6 +115,8 @@ fun Calender(paddingValues : PaddingValues)
 				DashboardPrayerTracker(
 						onNavigateToTracker = {}
 									  )
+
+				DashboardFastTracker()
 			}
 		}
 	}
@@ -347,6 +352,7 @@ fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 	}
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
@@ -381,7 +387,9 @@ fun CalenderDay(
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)
 					{
-						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer else if (today) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
+						else if (today) MaterialTheme.colorScheme.secondaryContainer
+						else MaterialTheme.colorScheme.surface
 						true -> MaterialTheme.colorScheme.primaryContainer
 					}
 													)
@@ -393,50 +401,65 @@ fun CalenderDay(
 							width = if (today || isSelectedDay) 2.dp else 1.dp ,
 							color = when (importantDay.first)
 							{
-								false -> if (today) MaterialTheme.colorScheme.secondary else if (isSelectedDay) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(
+								false ->
+									if (today) MaterialTheme.colorScheme.secondary
+									else if (isSelectedDay) MaterialTheme.colorScheme.tertiary
+									else MaterialTheme.colorScheme.outline.copy(
 										alpha = 0.3f
 																																															  )
 								true -> MaterialTheme.colorScheme.primary
 							} ,
 							shape = MaterialTheme.shapes.medium
 						   )
-					.clickable(
+					.combinedClickable(
 							enabled = dayState.isFromCurrentMonth ,
-							  ) {
-						when (importantDay.first)
-						{
-							false -> if (dayState.isFromCurrentMonth)
-							{
-								dayState.selectionState.onDateSelected(dayState.date)
-								viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
-								viewModel.onEvent(
-										TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-												dayState.date.toString()
-																						  )
-												 )
-							}
-
-							else ->
-							{
-								if (dayState.isFromCurrentMonth)
+							onClick = {
+								when (importantDay.first)
 								{
-									dayState.selectionState.onDateSelected(dayState.date)
-									viewModel.onEvent(
-											TrackerViewModel.TrackerEvent.SET_DATE(
-													dayState.date.toString()
-																				  )
-													 )
-									viewModel.onEvent(
-											TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-													dayState.date.toString()
-																							  )
-													 )
+									false -> if (dayState.isFromCurrentMonth)
+									{
+										dayState.selectionState.onDateSelected(dayState.date)
+										viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(dayState.date.toString()))
+										viewModel.onEvent(
+												TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+														dayState.date.toString()
+																								  )
+														 )
+										viewModel.onEvent(
+												TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+														dayState.date.toString()
+																									   )
+														 )
+									}
+
+									else ->
+									{
+										if (dayState.isFromCurrentMonth)
+										{
+											dayState.selectionState.onDateSelected(dayState.date)
+											viewModel.onEvent(
+													TrackerViewModel.TrackerEvent.SET_DATE(
+															dayState.date.toString()
+																						  )
+															 )
+											viewModel.onEvent(
+													TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+															dayState.date.toString()
+																									  )
+															 )
+											viewModel.onEvent(
+													TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+															dayState.date.toString()
+																										   )
+															 )
+										}
+									}
 								}
-								//show the description of the day
+							},
+							onLongClick = {
 								hasDescription.value = ! hasDescription.value
 							}
-						}
-					} ,
+									  ) ,
 				horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
 			Text(
@@ -478,6 +501,7 @@ fun CalenderDay(
 		Popup(
 				alignment = Alignment.TopCenter ,
 				offset = IntOffset(0 , - 120) ,
+				onDismissRequest = { hasDescription.value = false }
 			 ) {
 			ElevatedCard(
 					modifier = Modifier
@@ -496,99 +520,48 @@ fun CalenderDay(
 	}
 }
 
+//a function to highlight the day if the progress is greater than 0 using a gradient color background
 @Composable
-fun getGradientForProgress(progressState : Int) : Brush
+fun highlightDay(progress : Int) : Brush
 {
-	//if the day is selected then we need to change the color of the background to the progress color
-	when (progressState)
+	return when (progress)
 	{
-		100 ->
-		{
-			return Brush.verticalGradient(
-					colors = listOf(
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-								   )
-										 )
-		}
-
-		80 ->
-		{
-			return Brush.verticalGradient(
-					colors = listOf(
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							Color.Transparent
-								   )
-										 )
-		}
-
-		60 ->
-		{
-			return Brush.verticalGradient(
-					colors = listOf(
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							Color.Transparent ,
-							Color.Transparent
-								   )
-										 )
-		}
-
-		40 ->
-		{
-			return Brush.verticalGradient(
-					colors = listOf(
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							Color.Transparent ,
-							Color.Transparent ,
-							Color.Transparent
-								   )
-										 )
-		}
-
-		20 ->
-		{
-			return Brush.verticalGradient(
-					colors = listOf(
-							MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f) ,
-							Color.Transparent ,
-							Color.Transparent ,
-							Color.Transparent ,
-							Color.Transparent
-								   )
-										 )
-		}
-
-		0 ->
-		{
-			return Brush.verticalGradient(
-					colors = listOf(
-							Color.Transparent ,
-							Color.Transparent ,
-							Color.Transparent ,
-							Color.Transparent ,
-							Color.Transparent
-								   )
-										 )
-		}
-
-		else -> return Brush.verticalGradient(
+		0 -> Brush.verticalGradient(
 				colors = listOf(
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent ,
-						Color.Transparent
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) ,
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
 							   )
-											 )
+								  )
+		in 1.. 25 -> Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) ,
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+							   )
+										  )
+		in 26.. 50 -> Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) ,
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+							   )
+										   )
+		in 51.. 75 -> Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) ,
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+							   )
+										   )
+		in 76.. 100 -> Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) ,
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+							   )
+											)
+		else -> Brush.verticalGradient(
+				colors = listOf(
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) ,
+						MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+							   )
+									  )
 	}
 }
 

@@ -30,10 +30,11 @@ fun FastTrackerCard(
 	val context = LocalContext.current
 	val dateForTracker = LocalDate.parse(dateState.value)
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
+
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(8.dp)
+				.padding(8.dp),
 				) {
 			ToggleableItemColumn(
 					text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,

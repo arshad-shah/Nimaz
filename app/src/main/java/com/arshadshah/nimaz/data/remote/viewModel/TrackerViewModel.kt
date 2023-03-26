@@ -1,13 +1,10 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
-import com.patrykandpatrick.vico.core.entry.FloatEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -34,9 +31,6 @@ class TrackerViewModel : ViewModel()
 		data class Tracker(val tracker : FastTracker) : FastTrackerState()
 		data class Error(val message : String) : FastTrackerState()
 	}
-
-	//chart data List<FloatEntry>
-	internal val multiDataSetChartEntryModelProducer: ChartEntryModelProducer = ChartEntryModelProducer()
 
 	private var _fastTrackerState = MutableStateFlow(FastTrackerState.Loading as FastTrackerState)
 	val fastTrackerState = _fastTrackerState.asStateFlow()
@@ -210,58 +204,6 @@ class TrackerViewModel : ViewModel()
 			{
 				val dataStore = LocalDataStore.getDataStore()
 				val trackers = dataStore.getAllTrackers()
-				val datesAndProgress = trackers.map {
-					val date = LocalDate.parse(it.date)
-					//get the day of the week
-					val dayOfMonth = date.dayOfMonth
-					val progress = it.progress
-					FloatEntry(
-							dayOfMonth.toFloat() ,
-							progress.toFloat()
-							  )
-				}
-				//check how many prayers are completed for each day
-				val completedPrayers = mutableListOf<Int>()
-
-				//loop through the dates and progress
-				for (date in datesAndProgress)
-				{
-					//get the day of the week
-					val dayOfMonth = date.x.toInt()
-					//get the progress
-					val progress = date.y
-					//get the number of prayers completed
-					val prayersCompleted = progress / 20
-					//add the entry
-					completedPrayers.add(prayersCompleted.toInt())
-				}
-
-				//for each of the completedPrayers createa  list of float entries
-				val entriesByDay = mutableListOf<List<FloatEntry>>()
-				//loop through the completed prayers
-				for (prayer in completedPrayers)
-				{
-					//create a list of float entries
-					val entries = mutableListOf<FloatEntry>()
-					//loop through the number of prayers completed
-					for (i in 0 until prayer)
-					{
-						//add the entry
-						entries.add(FloatEntry(datesAndProgress[i].x , datesAndProgress[i].y))
-					}
-					//add the entries to the list
-					entriesByDay.add(entries)
-				}
-
-				//log the entries
-				Log.d("Entries" , entriesByDay.toString())
-
-				multiDataSetChartEntryModelProducer.setEntries(entriesByDay)
-
-
-
-
-
 				_allTrackers.value = trackers
 			} catch (e : Exception)
 			{

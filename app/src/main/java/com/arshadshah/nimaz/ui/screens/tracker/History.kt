@@ -1,34 +1,27 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
-import com.arshadshah.nimaz.ui.components.ui.trackers.rememberChartStyle
-import com.arshadshah.nimaz.ui.components.ui.trackers.rememberMarker
+import com.arshadshah.nimaz.ui.components.ProgressBarCustom
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.patrykandpatrick.vico.compose.axis.horizontal.bottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.endAxis
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.column.columnChart
-import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
-import com.patrykandpatrick.vico.compose.style.currentChartStyle
-import com.patrykandpatrick.vico.core.DefaultDimens
-import com.patrykandpatrick.vico.core.chart.column.ColumnChart
-import com.patrykandpatrick.vico.core.component.shape.LineComponent
-import com.patrykandpatrick.vico.core.component.shape.Shapes
-import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
-
+import java.time.LocalDate
 @Composable
 fun History() {
 
@@ -43,9 +36,13 @@ fun History() {
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_ALL_TRACKERS)
 	}
 
-	val allTrackerData = remember {
-		viewModel.multiDataSetChartEntryModelProducer
-	}
+	val allTracers = remember{
+		viewModel.allTrackers
+	}.collectAsState()
+
+	//filter the data and get tracker for today
+	val trackerForToday = allTracers.value.filter { it.date == LocalDate.now().toString() }
+	Log.d("trackerForToday" , trackerForToday.toString())
 
 	Column(
 			modifier = Modifier
@@ -53,59 +50,45 @@ fun History() {
 				.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
 			horizontalAlignment = Alignment.CenterHorizontally
 		  ) {
-		Spacer(modifier = Modifier.height(16.dp))
-		ChartUI(
-				chartModelProducer = allTrackerData ,
-			 )
+		if (trackerForToday.isNotEmpty())
+		{
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						) {
+				Row(
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth() ,
+						horizontalArrangement = Arrangement.SpaceEvenly ,
+						verticalAlignment = Alignment.CenterVertically
+				   ) {
+					Column {
+						Text(text = "Your Progress Today" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "${getCompletedPrayers(trackerForToday[0])} of 5 Completed" , style = MaterialTheme.typography.titleSmall)
+					}
+					ProgressBarCustom(
+							progress = trackerForToday[0].progress.toFloat() ,
+							radius = 50.dp ,
+									 )
+				}
+			}
+		}
 	}
 }
 
-//charts composable
-@Composable
-fun ChartUI(
-	chartModelProducer : ChartEntryModelProducer ,
-		 )
+//function to get completed prayers from a tracker
+fun getCompletedPrayers(tracker : PrayerTracker) : Int
 {
-	ProvideChartStyle(rememberChartStyle(chartColors)) {
-		val defaultColumns = currentChartStyle.columnChart.columns
-		Chart(
-				chart = columnChart(
-						columns = remember(defaultColumns) {
-							defaultColumns.mapIndexed { index, defaultColumn ->
-								val topCornerRadiusPercent =
-									if (index == defaultColumns.lastIndex) DefaultDimens.COLUMN_ROUNDNESS_PERCENT else 0
-								val bottomCornerRadiusPercent = if (index == 0) DefaultDimens.COLUMN_ROUNDNESS_PERCENT else 0
-								LineComponent(
-										defaultColumn.color,
-										defaultColumn.thicknessDp,
-										Shapes.roundedCornerShape(
-												topCornerRadiusPercent,
-												topCornerRadiusPercent,
-												bottomCornerRadiusPercent,
-												bottomCornerRadiusPercent,
-																 ),
-											 )
-							}
-						} ,
-						mergeMode = ColumnChart.MergeMode.Stack ,
-								   ) ,
-				chartModelProducer = chartModelProducer ,
-				endAxis = endAxis(
-						maxLabelCount = START_AXIS_LABEL_COUNT,
-									 ) ,
-				bottomAxis = bottomAxis() ,
-				marker = rememberMarker() ,
-			 )
-	}
+	var completedPrayers = 0
+	if (tracker.fajr) completedPrayers++
+	if (tracker.dhuhr) completedPrayers++
+	if (tracker.asr) completedPrayers++
+	if (tracker.maghrib) completedPrayers++
+	if (tracker.isha) completedPrayers++
+	return completedPrayers
 }
-private const val START_AXIS_LABEL_COUNT = 5
-
-private val color1 = Color(0xFFC62828)
-private val color2 = Color(0xFFF9A825)
-private val color3 = Color(0xFF9E9D24)
-private val color4 = Color(0xFF558B2F)
-private val color5 = Color(0xFF2E7D32)
-private val chartColors = listOf(color1, color2, color3, color4, color5)
 
 //preview
 @Preview
