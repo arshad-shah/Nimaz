@@ -281,9 +281,6 @@ class PrayerTimesViewModel : ViewModel()
 							"maghrib" to response.data.maghrib ,
 							"isha" to response.data.isha
 												)
-//					val dataStore = LocalDataStore.getDataStore()
-//					val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().plusDays(1).toString())
-//
 					val currentDate = LocalDateTime.now()
 					val currentPrayerName = currentPrayer(currentDate , mapOfPrayerTimes).first
 					val nextPrayerName = nextPrayer(currentDate , mapOfPrayerTimes).first
@@ -307,12 +304,13 @@ class PrayerTimesViewModel : ViewModel()
 					//set the current prayer name
 					_currentPrayerName.value =
 						currentPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
-					_fajrTimeState.value = response.data.fajr !!
-					_sunriseTimeState.value = response.data.sunrise !!
-					_dhuhrTimeState.value = response.data.dhuhr !!
-					_asrTimeState.value = response.data.asr !!
-					_maghribTimeState.value = response.data.maghrib !!
-					_ishaTimeState.value = response.data.isha !!
+						_fajrTimeState.value = response.data.fajr !!
+						_sunriseTimeState.value = response.data.sunrise !!
+						_dhuhrTimeState.value = response.data.dhuhr !!
+						_asrTimeState.value = response.data.asr !!
+						_maghribTimeState.value = response.data.maghrib !!
+						_ishaTimeState.value = response.data.isha !!
+
 					_isLoading.value = false
 
 				} else
