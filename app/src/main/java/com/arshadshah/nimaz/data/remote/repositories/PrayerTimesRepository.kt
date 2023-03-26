@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
 import android.content.Context
+import android.icu.util.TimeZone
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.utils.LocalDataStore
@@ -12,6 +13,7 @@ import io.ktor.client.plugins.*
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 object PrayerTimesRepository
 {
@@ -73,9 +75,20 @@ object PrayerTimesRepository
 		return try
 		{
 			val prayerTimesAvailable = dataStore.countPrayerTimes() > 0
+			val timeZone = TimeZone.getDefault()
+			val isDaylightSavingTime = timeZone.inDaylightTime(Date())
 			if (prayerTimesAvailable)
 			{
 				val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
+
+				if(isDaylightSavingTime){
+					prayerTimesLocal?.fajr = prayerTimesLocal?.fajr?.plusHours(1)
+					prayerTimesLocal?.sunrise = prayerTimesLocal?.sunrise?.plusHours(1)
+					prayerTimesLocal?.dhuhr = prayerTimesLocal?.dhuhr?.plusHours(1)
+					prayerTimesLocal?.asr = prayerTimesLocal?.asr?.plusHours(1)
+					prayerTimesLocal?.maghrib = prayerTimesLocal?.maghrib?.plusHours(1)
+					prayerTimesLocal?.isha = prayerTimesLocal?.isha?.plusHours(1)
+				}
 
 				//check if the date is for current month if not update the prayer times
 				val date = prayerTimesLocal?.date
@@ -93,6 +106,14 @@ object PrayerTimesRepository
 					for (prayerTimeResponse in prayerTimesResponse)
 					{
 						val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
+						if(isDaylightSavingTime){
+							prayerTime.fajr = prayerTime.fajr?.plusHours(1)
+							prayerTime.sunrise = prayerTime.sunrise?.plusHours(1)
+							prayerTime.dhuhr = prayerTime.dhuhr?.plusHours(1)
+							prayerTime.asr = prayerTime.asr?.plusHours(1)
+							prayerTime.maghrib = prayerTime.maghrib?.plusHours(1)
+							prayerTime.isha = prayerTime.isha?.plusHours(1)
+						}
 						prayerTimes.add(prayerTime)
 						dataStore.saveAllPrayerTimes(prayerTime)
 					}
@@ -110,6 +131,14 @@ object PrayerTimesRepository
 				for (prayerTimeResponse in prayerTimesResponse)
 				{
 					val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
+					if(isDaylightSavingTime){
+						prayerTime.fajr = prayerTime.fajr?.plusHours(1)
+						prayerTime.sunrise = prayerTime.sunrise?.plusHours(1)
+						prayerTime.dhuhr = prayerTime.dhuhr?.plusHours(1)
+						prayerTime.asr = prayerTime.asr?.plusHours(1)
+						prayerTime.maghrib = prayerTime.maghrib?.plusHours(1)
+						prayerTime.isha = prayerTime.isha?.plusHours(1)
+					}
 					prayerTimes.add(prayerTime)
 					dataStore.saveAllPrayerTimes(prayerTime)
 				}
@@ -129,6 +158,8 @@ object PrayerTimesRepository
 
 	suspend fun updatePrayerTimes(mapOfParameters : Map<String , String>) : ApiResponse<PrayerTimes>
 	{
+		val timeZone = TimeZone.getDefault()
+		val isDaylightSavingTime = timeZone.inDaylightTime(Date())
 		val dataStore = LocalDataStore.getDataStore()
 		val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParameters)
 		val prayerTimes = mutableListOf<PrayerTimes>()
@@ -136,6 +167,14 @@ object PrayerTimesRepository
 		for (prayerTimeResponse in prayerTimesResponse)
 		{
 			val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
+			if(isDaylightSavingTime){
+				prayerTime.fajr = prayerTime.fajr?.plusHours(1)
+				prayerTime.sunrise = prayerTime.sunrise?.plusHours(1)
+				prayerTime.dhuhr = prayerTime.dhuhr?.plusHours(1)
+				prayerTime.asr = prayerTime.asr?.plusHours(1)
+				prayerTime.maghrib = prayerTime.maghrib?.plusHours(1)
+				prayerTime.isha = prayerTime.isha?.plusHours(1)
+			}
 			prayerTimes.add(prayerTime)
 			dataStore.saveAllPrayerTimes(prayerTime)
 		}
