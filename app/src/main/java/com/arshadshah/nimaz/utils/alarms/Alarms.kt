@@ -59,10 +59,9 @@ class Alarms
 	{
 		// get alarm manager
 		val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
-		alarmManager.setAlarmClock(
-				AlarmManager.AlarmClockInfo(timeToNotify , pendingIntent) ,
-				pendingIntent
-								  )
+		alarmManager.setExactAndAllowWhileIdle(
+				AlarmManager.RTC_WAKEUP , timeToNotify , pendingIntent
+														  )
 
 
 		//recieverEnabled(context)
