@@ -38,6 +38,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.NotificationHelper
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -124,6 +125,8 @@ fun SettingsScreen(
 		viewModel.ishaTime
 	}.collectAsState()
 
+	val sharedPreferences = PrivateSharedPreferences(context)
+
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
@@ -164,6 +167,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
+				"Rustic_brown" to "Rustic Brown",
 				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
 									  )
@@ -172,6 +176,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
+				"Rustic_brown" to "Rustic Brown",
 				"SYSTEM" to "System Default" ,
 										 )
 
@@ -257,6 +262,7 @@ fun SettingsScreen(
 									"Raisin_Black" -> "Raisin Black"
 									"Dark_Red" -> "Burgundy"
 									"Dark_Liver" -> "Dark Liver"
+									"Rustic_brown" -> "Rustic Brown"
 									"SYSTEM" -> "System Default"
 									"DYNAMIC" -> "Dynamic"
 									else -> "App Default"
@@ -278,15 +284,21 @@ fun SettingsScreen(
 				SettingsMenuLink(
 						title = { Text(text = "Force Reset Alarms") } ,
 						onClick = {
-							CreateAlarms().exact(
-									context ,
-									fajrTime.value ,
-									sunriseTime.value ,
-									dhuhrTime.value ,
-									asrTime.value ,
-									maghribTime.value ,
-									ishaTime.value
-												)
+							sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+							if (! alarmLock)
+							{
+								CreateAlarms().exact(
+										context ,
+										fajrTime.value !! ,
+										sunriseTime.value !! ,
+										dhuhrTime.value !! ,
+										asrTime.value !! ,
+										maghribTime.value !! ,
+										ishaTime.value !! ,
+													)
+								sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+							}
 							Toasty.success(context , "Alarms Reset" , Toast.LENGTH_SHORT , true)
 								.show()
 						} ,

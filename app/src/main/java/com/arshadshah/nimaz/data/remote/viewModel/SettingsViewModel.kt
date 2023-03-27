@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
+import com.arshadshah.nimaz.utils.location.NetworkChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -458,32 +459,40 @@ class SettingsViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				if (checked)
-				{
-					_isLoading.value = true
-					if(!AutoLocationUtils.isInitialized()){
-						AutoLocationUtils.init(context)
+				if(NetworkChecker().networkCheck(context)){
+					if (checked)
+					{
+						_isLoading.value = true
+						if(!AutoLocationUtils.isInitialized()){
+							AutoLocationUtils.init(context)
+							AutoLocationUtils.startLocationUpdates()
+						}
+						AutoLocationUtils.setLocationDataCallback {
+							location ->
+							sharedPreferences.saveData(
+									AppConstants.LATITUDE ,
+									location.latitude.toString()
+													  )
+							sharedPreferences.saveData(
+									AppConstants.LONGITUDE ,
+									location.longitude.toString()
+													  )
+							reverseGeocode(location.latitude , location.longitude)
+						}
+						_isLoading.value = false
+					} else
+					{
+						_isLoading.value = true
+						AutoLocationUtils.stopLocationUpdates()
+						forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
+						_isLoading.value = false
 					}
-					AutoLocationUtils.startLocationUpdates()
-					AutoLocationUtils.setLocationDataCallback {
-						location ->
-						sharedPreferences.saveData(
-								AppConstants.LATITUDE ,
-								location.latitude.toString()
-												  )
-						sharedPreferences.saveData(
-								AppConstants.LONGITUDE ,
-								location.longitude.toString()
-												  )
-						reverseGeocode(location.latitude , location.longitude)
-					}
-					_isLoading.value = false
-				} else
-				{
-					_isLoading.value = true
-					AutoLocationUtils.stopLocationUpdates()
-					forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
-					_isLoading.value = false
+				}else{
+					_locationName.value = "No Network"
+					_latitude.value =
+						sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+					_longitude.value =
+						sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				}
 			} catch (e : Exception)
 			{
@@ -574,8 +583,6 @@ class SettingsViewModel(context : Context) : ViewModel()
 					_locationName.value = address.countryName
 					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.countryName)
 				}
-				_locationName.value = address.locality
-				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
 				_latitude.value = address.latitude
 				_longitude.value = address.longitude
 				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , address.latitude)

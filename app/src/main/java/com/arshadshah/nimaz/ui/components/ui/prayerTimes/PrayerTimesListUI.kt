@@ -2,7 +2,10 @@ package com.arshadshah.nimaz.ui.components.ui.prayerTimes
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
@@ -49,7 +52,13 @@ fun PrayerTimesListUI(
 				.fillMaxWidth()
 				.padding(vertical = 8.dp)
 				) {
-		Column {
+		Column(
+				modifier = Modifier.scrollable(
+						orientation = Orientation.Vertical ,
+						enabled = true ,
+						state = rememberScrollState()
+											  )
+			  ) {
 			//iterate over the map
 			for ((key , value) in prayerTimesMap)
 			{
@@ -112,7 +121,14 @@ fun PrayerTimesRow(
 				Modifier
 					.fillMaxWidth()
 					.background(MaterialTheme.colorScheme.secondaryContainer)
-					.clip(RoundedCornerShape(topStart = 8.dp , topEnd = 8.dp , bottomStart = 8.dp , bottomEnd = 8.dp))
+					.clip(
+							RoundedCornerShape(
+									topStart = 8.dp ,
+									topEnd = 8.dp ,
+									bottomStart = 8.dp ,
+									bottomEnd = 8.dp
+											  )
+						 )
 			} else
 			{
 				Modifier

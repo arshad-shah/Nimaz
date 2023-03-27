@@ -53,11 +53,9 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
-import com.arshadshah.nimaz.utils.recievers.AdhanReciever
-import com.arshadshah.nimaz.utils.recievers.BootReciever
-import com.arshadshah.nimaz.utils.recievers.ResetAdhansReciever
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.WidgetService
 import com.arshadshah.nimaz.widgets.updateAppWidget
@@ -70,16 +68,20 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity()
 {
-
-	private val adhanReciever = AdhanReciever()
-	private val bootReciever = BootReciever()
-	private val resetAdhansReciever = ResetAdhansReciever()
-
 	//on resume to check if the update is stalled
 	override fun onResume()
 	{
 		super.onResume()
 		Log.d(MAIN_ACTIVITY_TAG , "onResume:  called")
+
+		if(PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE , true)){
+			if(!AutoLocationUtils.isInitialized()){
+				AutoLocationUtils.init(this)
+				Log.d(MAIN_ACTIVITY_TAG , "onResume:  location is initialized")
+			}
+			AutoLocationUtils.startLocationUpdates()
+		}
+
 		val appUpdateManager = AppUpdateManagerFactory.create(this)
 		appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
 			if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
@@ -98,13 +100,19 @@ class MainActivity : ComponentActivity()
 	override fun onDestroy()
 	{
 		super.onDestroy()
-		AutoLocationUtils.stopLocationUpdates()
+		if(PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE , true)){
+			AutoLocationUtils.stopLocationUpdates()
+			Log.d(MAIN_ACTIVITY_TAG , "onDestroy:  location is stopped")
+		}
 	}
 
 	override fun onPause()
 	{
 		super.onPause()
-		AutoLocationUtils.stopLocationUpdates()
+		if(PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE , true)){
+			AutoLocationUtils.stopLocationUpdates()
+			Log.d(MAIN_ACTIVITY_TAG , "onPause:  location is stopped")
+		}
 	}
 
 	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class)
@@ -113,8 +121,10 @@ class MainActivity : ComponentActivity()
 	{
 		this.actionBar?.hide()
 
-		LocalDataStore.init(this@MainActivity)
-		Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
+		if(!LocalDataStore.isInitialized()){
+			LocalDataStore.init(this)
+			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
+		}
 
 		val appWidgetManager = AppWidgetManager.getInstance(this)
 		val appWidgetIds : IntArray = appWidgetManager.getAppWidgetIds(
@@ -214,6 +224,12 @@ class MainActivity : ComponentActivity()
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Liver"
+				}
+				"Rustic_brown" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Rustic_brown"
 				}
 			}
 

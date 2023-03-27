@@ -21,18 +21,27 @@ fun LocationTimeContainer(
 	locationState : State<String> ,
 	currentPrayerName : State<String> ,
 	handleEvent : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
+	isLoading : State<Boolean> ,
 						 )
 {
-	val currentPrayerNameSentenceCase = currentPrayerName.value
-		.substring(0 , 1)
-		.uppercase(Locale.ROOT) + currentPrayerName.value
-		.substring(1).lowercase(Locale.ROOT)
+	if (isLoading.value){
+		ContainerUI(
+				currentPrayerNameSentenceCase = "Loading..." ,
+				location = locationState ,
+				handleEvent = handleEvent
+				   )
+	}else{
+		val currentPrayerNameSentenceCase = currentPrayerName.value
+			.substring(0 , 1)
+			.uppercase(Locale.ROOT) + currentPrayerName.value
+			.substring(1).lowercase(Locale.ROOT)
 
-	ContainerUI(
-			currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
-			location = locationState ,
-			handleEvent = handleEvent
-			   )
+		ContainerUI(
+				currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
+				location = locationState ,
+				handleEvent = handleEvent
+				   )
+	}
 }
 
 @Composable

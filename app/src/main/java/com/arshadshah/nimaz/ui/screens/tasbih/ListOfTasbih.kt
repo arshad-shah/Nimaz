@@ -254,6 +254,7 @@ fun ListOfTasbih(
 									  )
 					}
 					LazyColumn(
+							modifier = Modifier.fillMaxSize(),
 							userScrollEnabled = true ,
 							  ) {
 						//extract the dates from the list of tasbih

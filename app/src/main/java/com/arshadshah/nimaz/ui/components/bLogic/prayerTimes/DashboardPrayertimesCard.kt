@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -83,17 +82,18 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		settingViewModel.longitude
 	}.collectAsState()
 
+	val isLoading = remember {
+		viewModel.isLoading
+	}.collectAsState()
+
 	val sharedPreferences = remember { PrivateSharedPreferences(context) }
 
 	LaunchedEffect(locationName.value, latitude.value, longitude.value) {
-		//check if the location has changed
-		if (locationName.value != sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")) {
 			//update the prayer times
 			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 					PrayerTimesParamMapper.getParams(context)
 																									)
 								 )
-		}
 	}
 
 	val fajrTime = remember {
@@ -123,14 +123,6 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 	val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 	if (! alarmLock)
 	{
-		//log all the prayer times
-		Log.d("Nimaz: PrayerTimes" , "Fajr: ${fajrTime.value}")
-		Log.d("Nimaz: PrayerTimes" , "Sunrise: ${sunriseTime.value}")
-		Log.d("Nimaz: PrayerTimes" , "Dhuhr: ${dhuhrTime.value}")
-		Log.d("Nimaz: PrayerTimes" , "Asr: ${asrTime.value}")
-		Log.d("Nimaz: PrayerTimes" , "Maghrib: ${maghribTime.value}")
-		Log.d("Nimaz: PrayerTimes" , "Isha: ${ishaTime.value}")
-
 		CreateAlarms().exact(
 				context ,
 				fajrTime.value !! ,
@@ -206,12 +198,16 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleSmall
 						)
 				}
-				//process the location name to show only 10 characters and add ... if more than 10 characters
-				val locationNameValue = locationName.value ?: ""
-				val locationNameValueLength = locationNameValue.length
-				val locationNameValueSubstring = locationNameValue.substring(0 , if (locationNameValueLength > 10) 10 else locationNameValueLength)
-				val locationNameValueFinal = if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
-				Text(text = locationNameValueFinal , style = MaterialTheme.typography.titleMedium)
+				if(isLoading.value){
+					Text(text = "Loading..." , style = MaterialTheme.typography.titleMedium)
+				}else{
+					//process the location name to show only 10 characters and add ... if more than 10 characters
+					val locationNameValue = locationName.value ?: ""
+					val locationNameValueLength = locationNameValue.length
+					val locationNameValueSubstring = locationNameValue.substring(0 , if (locationNameValueLength > 10) 10 else locationNameValueLength)
+					val locationNameValueFinal = if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
+					Text(text = locationNameValueFinal , style = MaterialTheme.typography.titleMedium)
+				}
 
 				//emoji for moon phase
 				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge)
