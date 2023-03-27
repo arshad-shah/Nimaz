@@ -35,6 +35,7 @@ object AppConstants
 
 	//animation duration
 	const val SCREEN_ANIMATION_DURATION = 500
+	const val SCREEN_ANIMATION_DURATION_Exit = 300
 
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"
@@ -79,6 +80,7 @@ object AppConstants
 	const val ASR_CHANNEL_ID = "asr_channel_id"
 	const val MAGHRIB_CHANNEL_ID = "maghrib_channel_id"
 	const val ISHA_CHANNEL_ID = "isha_channel_id"
+	const val TEST_CHANNEL_ID = "test_channel_id"
 
 	const val FAJR_NOTIFY_ID = 2000
 	const val SUNRISE_NOTIFY_ID = 2001
@@ -86,6 +88,7 @@ object AppConstants
 	const val ASR_NOTIFY_ID = 2003
 	const val MAGHRIB_NOTIFY_ID = 2004
 	const val ISHA_NOTIFY_ID = 2005
+	const val TEST_NOTIFY_ID = 2006
 
 	const val FAJR_PI_REQUEST_CODE = 1000
 	const val SUNRISE_PI_REQUEST_CODE = 1001
@@ -93,6 +96,7 @@ object AppConstants
 	const val ASR_PI_REQUEST_CODE = 1003
 	const val MAGHRIB_PI_REQUEST_CODE = 1004
 	const val ISHA_PI_REQUEST_CODE = 1005
+	const val TEST_PI_REQUEST_CODE = 1006
 
 	//channels titles
 	const val CHANNEL_FAJR = "Fajr"
@@ -101,6 +105,7 @@ object AppConstants
 	const val CHANNEL_ASAR = "Asar"
 	const val CHANNEL_MAGHRIB = "Maghrib"
 	const val CHANNEL_ISHAA = "Ishaa"
+	const val CHANNEL_TEST = "Test"
 
 	//channel descriptions
 	const val CHANNEL_DESC = "Prayer Adhan Notification"
@@ -110,6 +115,7 @@ object AppConstants
 	const val CHANNEL_DESC_ASAR = "Asar $CHANNEL_DESC"
 	const val CHANNEL_DESC_MAGHRIB = "Maghrib $CHANNEL_DESC"
 	const val CHANNEL_DESC_ISHAA = "Ishaa $CHANNEL_DESC"
+	const val CHANNEL_DESC_TEST = "Test $CHANNEL_DESC"
 
 
 	//pending intent request codes

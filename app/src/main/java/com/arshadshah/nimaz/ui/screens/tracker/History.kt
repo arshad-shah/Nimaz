@@ -53,6 +53,7 @@ fun History() {
 		if (trackerForToday.isNotEmpty())
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()

@@ -3,10 +3,7 @@ package com.arshadshah.nimaz.ui.components.bLogic.settings
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +20,10 @@ fun AuthorLinks()
 
 	val context = LocalContext.current
 
-	ElevatedCard(modifier = Modifier.padding(8.dp)) {
+	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
+			modifier = Modifier.padding(8.dp)
+				) {
 		Row(
 				modifier = Modifier.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.SpaceEvenly ,

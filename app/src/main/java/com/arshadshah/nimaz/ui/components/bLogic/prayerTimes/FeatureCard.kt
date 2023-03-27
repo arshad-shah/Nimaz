@@ -140,6 +140,7 @@ fun LinkButton(
 			  )
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -168,8 +169,7 @@ fun LinkButton(
 			//an icon of arrow to indicate that it is a link
 			Icon(
 					modifier = Modifier
-						.size(24.dp)
-						.padding(start = 8.dp) ,
+						.size(24.dp) ,
 					painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 					contentDescription = "Link" ,
 				)

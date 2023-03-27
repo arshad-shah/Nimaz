@@ -27,11 +27,7 @@ object AutoLocationUtils
 
 	private const val ONE_MINUTE = 60 * 1000
 
-	val locationRequest : LocationRequest = LocationRequest.Builder(
-			Priority.PRIORITY_HIGH_ACCURACY ,
-			ONE_MINUTE.toLong()
-																   ).build()
-
+	val locationRequest : LocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY , ONE_MINUTE.toLong()).build()
 	//a single instance of location callback
 	private val locationCallback = object : LocationCallback()
 	{

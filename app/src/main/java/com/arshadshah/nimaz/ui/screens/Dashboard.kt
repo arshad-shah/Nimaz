@@ -39,7 +39,6 @@ fun Dashboard(
 	onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit ,
 			 )
 {
-
 	LazyColumn(
 			modifier = Modifier.testTag(TEST_TAG_HOME),
 			contentPadding = paddingValues
@@ -51,6 +50,7 @@ fun Dashboard(
 		}
 		item {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						.testTag(TEST_TAG_EVENTS_CARD)
@@ -79,6 +79,7 @@ fun Dashboard(
 		}
 		item{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
@@ -103,6 +104,7 @@ fun Dashboard(
 		}
 		item {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)

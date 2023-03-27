@@ -30,6 +30,9 @@ class Introduction : ComponentActivity()
 			val themeState = remember {
 				viewModelSettings.theme
 			}.collectAsState()
+			val isDarkTheme = remember {
+				viewModelSettings.isDarkMode
+			}.collectAsState()
 
 			val darkTheme = remember {
 				mutableStateOf(false)
@@ -37,37 +40,58 @@ class Introduction : ComponentActivity()
 			val dynamicTheme = remember {
 				mutableStateOf(false)
 			}
+			val themeName = remember {
+				mutableStateOf("Default")
+			}
 
 			when (themeState.value)
 			{
 				"DYNAMIC" ->
 				{
 					dynamicTheme.value = true
-					darkTheme.value = isSystemInDarkTheme()
+					darkTheme.value = isDarkTheme.value
 				}
-
 				"SYSTEM" ->
 				{
-					dynamicTheme.value = false
 					darkTheme.value = isSystemInDarkTheme()
+					themeName.value = "Default"
 				}
-
-				"LIGHT" ->
+				"DEFAULT" ->
 				{
 					dynamicTheme.value = false
-					darkTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Default"
 				}
-
-				"DARK" ->
+				"Raisin_Black" ->
 				{
 					dynamicTheme.value = false
-					darkTheme.value = true
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Raisin_Black"
+				}
+				"Dark_Red" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Dark_Red"
+				}
+				"Dark_Liver" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Dark_Liver"
+				}
+				"Rustic_brown" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Rustic_brown"
 				}
 			}
 
 			NimazTheme(
 					darkTheme = darkTheme.value ,
 					dynamicColor = dynamicTheme.value ,
+					ThemeName = themeName.value
 					  ) {
 				Scaffold {
 					it

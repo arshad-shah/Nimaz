@@ -71,6 +71,7 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 	}.collectAsState()
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -91,7 +92,9 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
-			ElevatedCard {
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+						) {
 				Row(
 						modifier = Modifier.padding(4.dp) ,
 				   ) {

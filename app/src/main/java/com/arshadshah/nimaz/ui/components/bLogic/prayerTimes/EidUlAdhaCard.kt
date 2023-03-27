@@ -83,6 +83,7 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 	{
 		//show the card
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(8.dp)

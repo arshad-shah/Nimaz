@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
@@ -75,12 +77,12 @@
             android:name=".utils.recievers.ResetAdhansReciever"
             android:enabled="true"
             android:exported="true"
-            android:permission="com.android.alarm.permission.SET_ALARM" />
+            android:permission="android.permission.POST_NOTIFICATIONS" />
         <receiver
             android:name=".utils.recievers.AdhanReciever"
             android:enabled="true"
             android:exported="true"
-            android:permission="com.android.alarm.permission.SET_ALARM" />
+            android:permission="android.permission.POST_NOTIFICATIONS" />
 
         <activity
             android:name=".activities.Introduction"

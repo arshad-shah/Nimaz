@@ -25,6 +25,7 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
+import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
@@ -163,87 +164,87 @@ fun NavigationGraph(
 					BottomNavItem.PrayerTimesScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					QIBLA_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.QuranScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.MoreScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.SettingsScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					ABOUT_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					CHAPTERS_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					TASBIH_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					NAMESOFALLAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					SHAHADAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					PRAYER_TRACKER_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					CALENDER_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.Dashboard.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					TASBIH_LIST_SCREEN ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					MY_QURAN_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					WEB_VIEW_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					else -> ExitTransition.None
 				}
@@ -355,97 +356,97 @@ fun NavigationGraph(
 					BottomNavItem.PrayerTimesScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					QIBLA_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.QuranScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.MoreScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.SettingsScreen.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					ABOUT_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					QURAN_AYA_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					CHAPTER_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					CHAPTERS_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					TASBIH_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					NAMESOFALLAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					SHAHADAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					PRAYER_TRACKER_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					CALENDER_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					BottomNavItem.Dashboard.screen_route ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					TASBIH_LIST_SCREEN ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					MY_QURAN_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 					WEB_VIEW_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
-								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+								animationSpec = tween(SCREEN_ANIMATION_DURATION_Exit)
 										   )
 
 					else -> ExitTransition.None

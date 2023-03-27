@@ -31,6 +31,7 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
@@ -130,6 +131,34 @@ fun LocationSettings(isIntro : Boolean = false)
 			viewModel.autoParams
 		}.collectAsState()
 
+		val fajrTime = remember {
+			viewModelPrayerTimes.fajrTime
+		}.collectAsState()
+
+		val sunriseTime = remember {
+			viewModelPrayerTimes.sunriseTime
+		}.collectAsState()
+
+		val dhuhrTime = remember {
+			viewModelPrayerTimes.dhuhrTime
+		}.collectAsState()
+
+		val asrTime = remember {
+			viewModelPrayerTimes.asrTime
+		}.collectAsState()
+
+		val maghribTime = remember {
+			viewModelPrayerTimes.maghribTime
+		}.collectAsState()
+
+		val ishaTime = remember {
+			viewModelPrayerTimes.ishaTime
+		}.collectAsState()
+
+		val sharedPreferences = PrivateSharedPreferences(context)
+
+
+
 		LaunchedEffect(
 				key1 = locationNameState.value ,
 				key2 = latitudeState.value ,
@@ -179,6 +208,20 @@ fun LocationSettings(isIntro : Boolean = false)
 							context
 																	   )
 											)
+			val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+			if (! alarmLock)
+			{
+				CreateAlarms().exact(
+						context ,
+						fajrTime.value !! ,
+						sunriseTime.value !! ,
+						dhuhrTime.value !! ,
+						asrTime.value !! ,
+						maghribTime.value !! ,
+						ishaTime.value !! ,
+									)
+				sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+			}
 
 		}
 
@@ -195,6 +238,7 @@ fun LocationSettings(isIntro : Boolean = false)
 					exit = shrinkVertically()
 							  ) {
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -228,6 +272,7 @@ fun LocationSettings(isIntro : Boolean = false)
 								  ) {
 					Column {
 						ElevatedCard(
+								shape = MaterialTheme.shapes.extraLarge ,
 								modifier = Modifier
 									.padding(8.dp)
 									.fillMaxWidth()
@@ -351,6 +396,7 @@ fun LocationToggleSwitch(
 	}
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -504,6 +550,7 @@ fun LocationToggleSwitch(
 		if (locationNameState.value.isBlank())
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -518,6 +565,7 @@ fun LocationToggleSwitch(
 		} else
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()

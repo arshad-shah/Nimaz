@@ -22,6 +22,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.widgets.Nimaz
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -86,6 +87,10 @@ class PrayerTimesViewModel : ViewModel()
 	private val _error = MutableStateFlow("")
 	val error = _error.asStateFlow()
 
+	private val _isRefreshing = MutableStateFlow(false)
+	val isRefreshing: StateFlow<Boolean>
+		get() = _isRefreshing.asStateFlow()
+
 
 	//event that starts the timer
 	sealed class PrayerTimesEvent
@@ -98,6 +103,10 @@ class PrayerTimesViewModel : ViewModel()
 		class UPDATE_PRAYERTIMES(val mapOfParameters : Map<String , String>) : PrayerTimesEvent()
 
 		class UPDATE_WIDGET(val context : Context) : PrayerTimesEvent()
+
+		class REFRESH(val isRefreshingUI : Boolean) : PrayerTimesEvent()
+
+		class SET_LOADING(val isLoading : Boolean) : PrayerTimesEvent()
 	}
 
 	//function to handle the timer event
@@ -125,6 +134,16 @@ class PrayerTimesViewModel : ViewModel()
 			is PrayerTimesEvent.UPDATE_WIDGET ->
 			{
 				updateWidget(event.context)
+			}
+			//event to refresh the UI
+			is PrayerTimesEvent.REFRESH ->
+			{
+				_isRefreshing.value = event.isRefreshingUI
+			}
+			//event to set the loading state
+			is PrayerTimesEvent.SET_LOADING ->
+			{
+				_isLoading.value = event.isLoading
 			}
 
 			else ->
@@ -193,8 +212,8 @@ class PrayerTimesViewModel : ViewModel()
 	fun updatePrayerTimes(mapOfParameters : Map<String , String>)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-
-
+			_isLoading.value = true
+			_error.value = ""
 			try
 			{
 				val response = PrayerTimesRepository.updatePrayerTimes(mapOfParameters)
@@ -239,11 +258,12 @@ class PrayerTimesViewModel : ViewModel()
 					_asrTimeState.value = response.data.asr !!
 					_maghribTimeState.value = response.data.maghrib !!
 					_ishaTimeState.value = response.data.isha !!
-					_isLoading.value = false
 					Log.d(
 							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 							"UpdatePrayerTimes: ${response.data}"
 						 )
+					_isLoading.value = false
+					_isRefreshing.value = false
 				} else
 				{
 					_error.value = response.message.toString()
@@ -312,6 +332,7 @@ class PrayerTimesViewModel : ViewModel()
 						_ishaTimeState.value = response.data.isha !!
 
 					_isLoading.value = false
+					_isRefreshing.value = false
 
 				} else
 				{
