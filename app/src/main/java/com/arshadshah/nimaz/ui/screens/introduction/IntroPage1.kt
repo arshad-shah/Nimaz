@@ -2,12 +2,18 @@ package com.arshadshah.nimaz.ui.screens.introduction
 
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,15 +23,11 @@ import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.rememberPagerState
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalPagerApi::class , ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class , ExperimentalFoundationApi::class ,)
 @Composable
 fun IntroPage1()
 {
@@ -48,35 +50,45 @@ fun IntroPage1()
 	val scope = rememberCoroutineScope()
 
 	Column(modifier = Modifier
+		.padding(bottom = 20.dp)
 		.fillMaxSize()
-		.padding(if (pages[pagerState.currentPage].extra == {}) 8.dp else 20.dp)
 		  ) {
 		HorizontalPager(
 				modifier = Modifier
 					.weight(10f)
 					.testTag("introPager") ,
-				count = pages.size ,
+				pageCount = pages.size ,
 				state = pagerState ,
 				verticalAlignment = Alignment.Top
 					   ) { position ->
 			PagerScreen(onBoardingPage = pages[position] , position)
 		}
-		HorizontalPagerIndicator(
-				pagerState = pagerState ,
-				modifier = Modifier
-					.align(Alignment.CenterHorizontally)
-					//if the onBoardingPage.extra is not {} then add 20.dp padding else add 0.dp padding
-					.padding(16.dp)
-					.testTag("introPagerIndicator") ,
-				activeColor = MaterialTheme.colorScheme.primary ,
-				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f) ,
-				indicatorWidth = 10.dp ,
-				indicatorHeight = 10.dp
-								)
+		Row(
+				Modifier
+					.padding(vertical = 8.dp)
+					.height(30.dp)
+					.fillMaxWidth(),
+				horizontalArrangement = Arrangement.Center,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
+			repeat(pages.size) { iteration ->
+				val color = if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary
+				else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+				Box(
+						modifier = Modifier
+							.padding(4.dp)
+							.clip(CircleShape)
+							.background(color)
+							.size(14.dp)
+
+				   )
+			}
+		}
 
 
 		Row(
 				modifier = Modifier
+					.padding(horizontal = 16.dp)
 					.fillMaxWidth()
 					.testTag("introButtons") ,
 				//if we are on firts or last page than use space between else use end for page 1 and start for last page

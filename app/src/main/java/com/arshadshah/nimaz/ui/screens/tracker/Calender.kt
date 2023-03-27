@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -73,6 +72,7 @@ fun Calender(paddingValues : PaddingValues)
 		  ) {
 		item{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.fillMaxWidth()
 						) {
@@ -95,6 +95,7 @@ fun Calender(paddingValues : PaddingValues)
 		}
 		item{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(top = 8.dp)
 						.fillMaxWidth()
@@ -199,9 +200,10 @@ fun CalenderHeader(monthState : MonthState)
 	}
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.clickable(
-						enabled = ! inCurrentMonth.value ,
+						enabled = ! inCurrentMonth.value
 						  ) {
 					showCurrentMonth.value = true
 				} ,
@@ -316,6 +318,7 @@ fun CalenderHeader(monthState : MonthState)
 fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier.padding(top = 8.dp) ,
 				) {
 		Row(
@@ -350,7 +353,9 @@ fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 @Composable
 fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 {
-	ElevatedCard {
+	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
+				) {
 		monthState(PaddingValues(0.dp))
 	}
 }
@@ -376,12 +381,25 @@ fun CalenderDay(
 	//check if today is an important day and if so, display the description of the day and highlight the day
 	val importantDay = isImportantDay(hijriDayOfMonth , hijriMonth)
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
+			elevation = CardDefaults.elevatedCardElevation(
+					defaultElevation = if (dayState.isFromCurrentMonth) 2.dp else 0.dp ,
+														  ),
 			modifier = Modifier
 				.padding(2.dp)
 				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
-				.shadow(
-						if (today || isSelectedDay) 6.dp else 0.dp ,
-						shape = MaterialTheme.shapes.medium
+				.border(
+						width = 2.dp ,
+						color = when (importantDay.first)
+						{
+							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary
+							else if (today) MaterialTheme.colorScheme.secondary
+							else MaterialTheme.colorScheme.surface
+							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary
+							else if (today) MaterialTheme.colorScheme.secondary
+							else MaterialTheme.colorScheme.primary
+						},
+						shape = MaterialTheme.shapes.extraLarge
 					   ) ,
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)
@@ -389,27 +407,15 @@ fun CalenderDay(
 						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
 						else if (today) MaterialTheme.colorScheme.secondaryContainer
 						else MaterialTheme.colorScheme.surface
-						true -> MaterialTheme.colorScheme.primaryContainer
+						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
+						else if (today) MaterialTheme.colorScheme.secondaryContainer
+						else MaterialTheme.colorScheme.primaryContainer
 					}
 													)
 				) {
 
 		Column(
 				modifier = Modifier
-					.border(
-							width = if (today || isSelectedDay) 2.dp else 1.dp ,
-							color = when (importantDay.first)
-							{
-								false ->
-									if (today) MaterialTheme.colorScheme.secondary
-									else if (isSelectedDay) MaterialTheme.colorScheme.tertiary
-									else MaterialTheme.colorScheme.outline.copy(
-											alpha = 0.3f
-																			   )
-								true -> MaterialTheme.colorScheme.primary
-							} ,
-							shape = MaterialTheme.shapes.medium
-						   )
 					.combinedClickable(
 							enabled = dayState.isFromCurrentMonth ,
 							onClick = {
@@ -470,7 +476,7 @@ fun CalenderDay(
 					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(6.dp) ,
+					modifier = Modifier.padding(horizontal = 6.dp , vertical = 4.dp) ,
 					color = when (importantDay.first)
 					{
 						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
@@ -488,7 +494,7 @@ fun CalenderDay(
 					style = MaterialTheme.typography.titleMedium ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(6.dp) ,
+					modifier = Modifier.padding(horizontal = 6.dp , vertical = 4.dp) ,
 					color = when (importantDay.first)
 					{
 						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer
@@ -507,6 +513,7 @@ fun CalenderDay(
 				onDismissRequest = { hasDescription.value = false }
 			 ) {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.clickable {

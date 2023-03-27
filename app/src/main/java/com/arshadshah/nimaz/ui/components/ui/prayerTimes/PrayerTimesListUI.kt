@@ -44,6 +44,7 @@ fun PrayerTimesListUI(
 	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 29)
 	val isRamadan = todayHijri.isAfter(ramadanStart) && todayHijri.isBefore(ramadanEnd)
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(vertical = 8.dp)

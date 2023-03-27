@@ -4,7 +4,6 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -400,17 +399,25 @@ fun AyaListItemUI(
 
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
-		MaterialTheme.colorScheme.outline
+		MaterialTheme.colorScheme.secondaryContainer
 	}else{
 		MaterialTheme.colorScheme.surface
 	}
+	val cardTextColor = if (aya.ayaNumber == 0)
+	{
+		MaterialTheme.colorScheme.onSecondaryContainer
+	}else{
+		MaterialTheme.colorScheme.onSurface
+	}
 	ElevatedCard(
+			colors = CardDefaults.elevatedCardColors(
+					containerColor = cardBackgroundColor ,
+													),
 			modifier = Modifier
 				.padding(4.dp)
 				.fillMaxHeight()
-				.fillMaxWidth()
-				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp)) ,
-			shape = RoundedCornerShape(8.dp)
+				.fillMaxWidth(),
+			shape = MaterialTheme.shapes.extraLarge ,
 				) {
 		Row(
 				modifier = Modifier
@@ -485,7 +492,7 @@ fun AyaListItemUI(
 									.fillMaxWidth()
 									.padding(horizontal = 4.dp)
 									.placeholder(
-											visible =loading ,
+											visible = loading ,
 											color = MaterialTheme.colorScheme.outline ,
 											shape = RoundedCornerShape(4.dp) ,
 											highlight = PlaceholderHighlight.shimmer(

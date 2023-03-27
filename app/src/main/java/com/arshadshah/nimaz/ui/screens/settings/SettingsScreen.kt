@@ -48,7 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 
 @Composable
 fun SettingsScreen(
@@ -133,6 +133,7 @@ fun SettingsScreen(
 		LocationSettings()
 
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
@@ -186,6 +187,7 @@ fun SettingsScreen(
 					 ) {
 			if (stateOfTheme.value != "SYSTEM") {
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -228,6 +230,7 @@ fun SettingsScreen(
 			}
 			//theme
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -267,6 +270,7 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -297,6 +301,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -321,10 +326,9 @@ fun SettingsScreen(
 										TEST_CHANNEL_ID ,
 										zuharAdhan
 																			)
-								val timeToNotify = LocalDateTime.now().plusSeconds(10).toInstant(
-										ZoneOffset.UTC
-																								)
-									.toEpochMilli()
+								val currentTime = LocalDateTime.now()
+								val timeToNotify = currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
+									.toInstant().toEpochMilli()
 								val testPendingIntent = CreateAlarms().createPendingIntent(
 										context ,
 										TEST_PI_REQUEST_CODE ,
@@ -354,6 +358,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -382,6 +387,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -392,6 +398,7 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Legal") }) {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -412,6 +419,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -433,6 +441,7 @@ fun SettingsScreen(
 		}
 
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
@@ -453,6 +462,7 @@ fun SettingsScreen(
 		}
 
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()

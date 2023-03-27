@@ -35,6 +35,7 @@ object AppConstants
 
 	//animation duration
 	const val SCREEN_ANIMATION_DURATION = 500
+	const val SCREEN_ANIMATION_DURATION_Exit = 300
 
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"

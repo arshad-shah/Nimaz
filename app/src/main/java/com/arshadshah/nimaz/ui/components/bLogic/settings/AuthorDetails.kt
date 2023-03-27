@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -29,10 +28,10 @@ fun AuthorDetails()
 	//it is created as part of my final year project for my BSc in Computer Science.
 	//it is a free and open source project that I hope will be useful to many people. I hope you enjoy it.
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth() ,
-			shape = RoundedCornerShape(8.dp) ,
 			content = {
 				Column(
 						modifier = Modifier

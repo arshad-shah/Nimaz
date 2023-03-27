@@ -198,6 +198,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						offset = IntOffset(0 , 150) ,
 					 ) {
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
 								) {
 						Text(
@@ -212,6 +213,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		}) {
 			CalculationMethodUI()
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -250,6 +252,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				}
 			}
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -318,6 +321,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						offset = IntOffset(0 , 150) ,
 					 ) {
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
 								) {
 						Text(
@@ -332,6 +336,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		}) {
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -367,6 +372,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			if (ishaaAngleVisible.value)
 			{
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -406,6 +412,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			} else
 			{
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -452,6 +459,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								offset = IntOffset(0 , 150) ,
 							 ) {
 							ElevatedCard(
+									shape = MaterialTheme.shapes.extraLarge ,
 									modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
 										) {
 								Text(
@@ -466,6 +474,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				} ,
 				content = {
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -511,6 +520,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -556,6 +566,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -601,6 +612,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -646,6 +658,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -691,6 +704,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
