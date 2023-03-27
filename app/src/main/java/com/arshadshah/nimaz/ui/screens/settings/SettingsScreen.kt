@@ -44,6 +44,9 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import es.dmoral.toasty.Toasty
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -303,34 +306,41 @@ fun SettingsScreen(
 						//we are goping to set the alarm in next 10 seconds
 						subtitle = { Text(text = "Alarm will be set in 10 seconds") } ,
 						onClick = {
-							val zuharAdhan =
-								"android.resource://" + context.packageName + "/" + R.raw.zuhar
-							//create notification channels
-							val notificationHelper = NotificationHelper()
-							//test channel
-							notificationHelper.createNotificationChannel(
+							CoroutineScope(Dispatchers.IO).launch {
+								val zuharAdhan =
+									"android.resource://" + context.packageName + "/" + R.raw.zuhar
+								//create notification channels
+								val notificationHelper = NotificationHelper()
+								//test channel
+								notificationHelper.createNotificationChannel(
+										context ,
+										NotificationManager.IMPORTANCE_MAX ,
+										true ,
+										CHANNEL_TEST ,
+										CHANNEL_DESC_TEST ,
+										TEST_CHANNEL_ID ,
+										zuharAdhan
+																			)
+								val timeToNotify = LocalDateTime.now().plusSeconds(10).toInstant(
+										ZoneOffset.UTC
+																								)
+									.toEpochMilli()
+								val testPendingIntent = CreateAlarms().createPendingIntent(
+										context ,
+										TEST_PI_REQUEST_CODE ,
+										TEST_NOTIFY_ID ,
+										timeToNotify ,
+										"Test Adhan" ,
+										TEST_CHANNEL_ID
+																						  )
+								Alarms().setExactAlarm(context , timeToNotify , testPendingIntent)
+							}
+							Toasty.success(
 									context ,
-									NotificationManager.IMPORTANCE_MAX ,
-									true ,
-									CHANNEL_TEST,
-									CHANNEL_DESC_TEST,
-									TEST_CHANNEL_ID ,
-									zuharAdhan
-																		)
-							val timeToNotify = LocalDateTime.now().plusSeconds(10).toInstant(
-									ZoneOffset.UTC
-																							)
-								.toEpochMilli()
-							val testPendingIntent = CreateAlarms().createPendingIntent(
-									context ,
-									TEST_PI_REQUEST_CODE ,
-									TEST_NOTIFY_ID ,
-									timeToNotify ,
-									"Test Adhan" ,
-									TEST_CHANNEL_ID
-																					  )
-							Alarms().setExactAlarm(context , timeToNotify , testPendingIntent)
-							Toasty.success(context , "Test Alarm set" , Toast.LENGTH_SHORT , true)
+									"Test Alarm set" ,
+									Toast.LENGTH_SHORT ,
+									true
+										  )
 								.show()
 						} ,
 						icon = {

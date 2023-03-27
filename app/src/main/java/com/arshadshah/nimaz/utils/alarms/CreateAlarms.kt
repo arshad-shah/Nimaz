@@ -142,7 +142,7 @@ class CreateAlarms
 				context ,
 				requestCode ,
 				intent ,
-				PendingIntent.FLAG_IMMUTABLE
+				PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 										 )
 	}
 

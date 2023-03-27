@@ -39,7 +39,6 @@ fun Dashboard(
 	onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit ,
 			 )
 {
-
 	LazyColumn(
 			modifier = Modifier.testTag(TEST_TAG_HOME),
 			contentPadding = paddingValues
