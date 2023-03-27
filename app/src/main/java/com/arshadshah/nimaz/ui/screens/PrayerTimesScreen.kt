@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,8 +18,10 @@ import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,
@@ -49,21 +53,60 @@ fun PrayerTimesScreen(
 	val latitude = remember { settingViewModel.latitude }.collectAsState()
 	val longitude = remember { settingViewModel.longitude }.collectAsState()
 
-	val sharedPreferences = remember { PrivateSharedPreferences(context) }
+	val isLoading = remember {
+		viewModel.isLoading
+	}.collectAsState()
 
+	val fajrTime = remember {
+		viewModel.fajrTime
+	}.collectAsState()
+
+	val sunriseTime = remember {
+		viewModel.sunriseTime
+	}.collectAsState()
+
+	val dhuhrTime = remember {
+		viewModel.dhuhrTime
+	}.collectAsState()
+
+	val asrTime = remember {
+		viewModel.asrTime
+	}.collectAsState()
+
+	val maghribTime = remember {
+		viewModel.maghribTime
+	}.collectAsState()
+
+	val ishaTime = remember {
+		viewModel.ishaTime
+	}.collectAsState()
+
+	val sharedPreferences = PrivateSharedPreferences(context)
 
 	LaunchedEffect(locationState.value, latitude.value, longitude.value) {
-		//check if the location has changed
-		if (locationState.value != sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")) {
+		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(true))
 			//update the prayer times
 			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
 							 )
+		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+		if (! alarmLock)
+		{
+			CreateAlarms().exact(
+					context ,
+					fajrTime.value !! ,
+					sunriseTime.value !! ,
+					dhuhrTime.value !! ,
+					asrTime.value !! ,
+					maghribTime.value !! ,
+					ishaTime.value !! ,
+								)
+			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 		}
+		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(false))
+		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.REFRESH(false))
 	}
-
-
 	val currentPrayerName = remember {
 		viewModel.currentPrayerName
 	}.collectAsState()
@@ -73,26 +116,29 @@ fun PrayerTimesScreen(
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "locationState: $locationState")
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "currentPrayerName: $currentPrayerName")
 
-	Column(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(paddingValues)
-				.padding(8.dp)
-				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
-			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.SpaceEvenly
-		  ) {
-		// Calling the LocationTimeContainer composable
-		LocationTimeContainer(
-				currentPrayerName = currentPrayerName ,
-				locationState = locationState ,
-				handleEvent = settingViewModel::handleEvent ,
-							 )
+		LazyColumn(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(paddingValues)
+					.padding(8.dp)
+					.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
+				horizontalAlignment = Alignment.CenterHorizontally ,
+				verticalArrangement = Arrangement.SpaceEvenly
+				  ) {
+			item {
+				// Calling the LocationTimeContainer composable
+				LocationTimeContainer(
+						currentPrayerName = currentPrayerName ,
+						locationState = locationState ,
+						handleEvent = settingViewModel::handleEvent ,
+						isLoading = isLoading
+									 )
 
-		// Calling the DatesContainer composable
-		DatesContainer(onNavigateToTracker = onNavigateToTracker)
+				// Calling the DatesContainer composable
+				DatesContainer(onNavigateToTracker = onNavigateToTracker)
 
-		// Calling the PrayerTimesList composable
-		PrayerTimesList()
-	}
+				// Calling the PrayerTimesList composable
+				PrayerTimesList()
+			}
+		}
 }

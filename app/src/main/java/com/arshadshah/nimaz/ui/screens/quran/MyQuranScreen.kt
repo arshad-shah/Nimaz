@@ -50,7 +50,7 @@ fun MyQuranScreen(
 	}
 
 	LazyColumn(
-			modifier = Modifier.testTag("MyQuranScreen"),
+			modifier = Modifier.testTag("MyQuranScreen").fillMaxSize(),
 			userScrollEnabled = true ,
 			  ) {
 		item {

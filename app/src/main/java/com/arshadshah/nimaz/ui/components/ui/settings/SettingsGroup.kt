@@ -17,6 +17,7 @@ fun SettingsGroup(
 				 )
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = modifier
 				.padding(8.dp)
 				) {

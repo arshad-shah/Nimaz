@@ -21,10 +21,10 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 fun Placeholder(nameOfDropdown : String)
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth() ,
-			shape = MaterialTheme.shapes.medium ,
 			content = {
 				Column(
 						modifier = Modifier

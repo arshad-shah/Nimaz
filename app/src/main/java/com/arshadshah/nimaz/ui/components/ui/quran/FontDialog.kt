@@ -1,17 +1,16 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.StringPreferenceSettingValueState
@@ -57,6 +56,12 @@ fun FontSizeDialog(
 				translationFontSizeState.value = 16f
 			}
 		}
+	}
+
+	val icon = when (fontMenuExpanded.value)
+	{
+		true -> painterResource(id = R.drawable.arrow_up_icon)
+		false -> painterResource(id = R.drawable.arrow_down_icon)
 	}
 	//a dialog with two sliders to control the font size of quran
 	//after the user selects the font size then save it in shared preferences
@@ -134,58 +139,77 @@ fun FontSizeDialog(
 							horizontalArrangement = Arrangement.SpaceBetween
 					   ) {
 						Text(text = "Font Style (Arabic)")
-						Column {
-							Row(
+							ElevatedCard(
+									shape = MaterialTheme.shapes.extraLarge ,
+									elevation = CardDefaults.elevatedCardElevation(
+											defaultElevation = 4.dp
+																				  ) ,
 									modifier = Modifier
-										.clickable { fontMenuExpanded.value = true }
-										.padding(8.dp)
-										.height(48.dp)
-										.border(
-												width = 1.dp ,
-												color = MaterialTheme.colorScheme.onSurface.copy(
-														alpha = 0.2f
-																								) ,
-												shape = MaterialTheme.shapes.small
-											   ) ,
-									verticalAlignment = Alignment.CenterVertically
-							   ) {
-								//find the font style from the list of font styles
-								//and then show it in the text
-								Text(
-										text = items3[items3.indexOf(fontStyleState.value)] ,
-										modifier = Modifier.padding(start = 8.dp)
-									)
-								Icon(
-										modifier = Modifier.padding(start = 8.dp) ,
-										imageVector = Icons.Outlined.ArrowDropDown ,
-										contentDescription = null
-									)
-							}
-							DropdownMenu(
-									modifier = Modifier
-										.wrapContentWidth()
-										.wrapContentHeight() ,
-									expanded = fontMenuExpanded.value ,
-									onDismissRequest = { fontMenuExpanded.value = false } ,
-									content = {
-										items3.forEach { item ->
-											DropdownMenuItem(
-													onClick = {
-														fontStyleState.value = item
-														setFontBasedOnFontStyle(fontStyleState.value)
+										.width(120.dp)
+										){
+								//an elevation card that shows the text and icon
+								ElevatedCard(
+										modifier = Modifier
+											.fillMaxWidth()
+											.clickable {
+												fontMenuExpanded.value = ! fontMenuExpanded.value
+											} ,
+										content = {
+											Row(
+													modifier = Modifier
+														.fillMaxWidth()
+														.padding(8.dp) ,
+													verticalAlignment = Alignment.CenterVertically,
+													horizontalArrangement = Arrangement.SpaceBetween
+											   ) {
+												//find the font style from the list of font styles
+												//and then show it in the text
+												Text(
+														text = items3[items3.indexOf(fontStyleState.value)] ,
+														modifier = Modifier.padding(start = 8.dp),
+														style = MaterialTheme.typography.bodyMedium,
+													)
+												Icon(
+														modifier = Modifier
+															.padding(start = 8.dp)
+															.size(18.dp) ,
+														painter = icon ,
+														contentDescription = null
+													)
+											}
+											DropdownMenu(
+													modifier = Modifier
+														.wrapContentWidth()
+														.wrapContentHeight() ,
+													expanded = fontMenuExpanded.value ,
+													onDismissRequest = {
 														fontMenuExpanded.value = false
-														handleQuranEvents(
-																QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
-																		fontStyleState.value
-																												 )
-																		 )
 													} ,
-													text = { Text(text = item) }
-															)
+													content = {
+														items3.forEach { item ->
+															DropdownMenuItem(
+																	onClick = {
+																		fontStyleState.value = item
+																		setFontBasedOnFontStyle(
+																				fontStyleState.value
+																							   )
+																		fontMenuExpanded.value =
+																			false
+																		handleQuranEvents(
+																				QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
+																						fontStyleState.value
+																																 )
+																						 )
+																	} ,
+																	text = { Text(text = item, style = MaterialTheme.typography.bodyMedium)
+																	}
+																			)
+														}
+													}
+														)
 										}
-									}
-										)
-						}
+											)
+							}
 					}
 				}
 			} ,

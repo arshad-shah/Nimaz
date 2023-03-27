@@ -78,6 +78,7 @@ fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 	}
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(16.dp) ,

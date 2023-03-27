@@ -15,8 +15,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 98
-        versionName '1.5.27'
+        versionCode 99
+        versionName '1.5.28'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -115,10 +115,6 @@ dependencies {
     ksp "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
-
-    //accompanist
-    implementation "com.google.accompanist:accompanist-pager:$accompanist_pager_version"
-    implementation "com.google.accompanist:accompanist-pager-indicators:$accompanist_pager_version"
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
     implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_placeholder_material_version"

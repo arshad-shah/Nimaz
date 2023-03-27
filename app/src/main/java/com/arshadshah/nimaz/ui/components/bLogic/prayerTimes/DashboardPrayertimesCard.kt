@@ -28,6 +28,7 @@ import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
 import java.time.LocalDate
@@ -41,6 +42,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 {
 
 	val context = LocalContext.current
+
 	val viewModel = viewModel(
 			key = "PrayerTimesViewModel" ,
 			initializer = { PrayerTimesViewModel() } ,
@@ -80,17 +82,57 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		settingViewModel.longitude
 	}.collectAsState()
 
+	val isLoading = remember {
+		viewModel.isLoading
+	}.collectAsState()
+
 	val sharedPreferences = remember { PrivateSharedPreferences(context) }
 
 	LaunchedEffect(locationName.value, latitude.value, longitude.value) {
-		//check if the location has changed
-		if (locationName.value != sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")) {
 			//update the prayer times
 			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 					PrayerTimesParamMapper.getParams(context)
 																									)
 								 )
-		}
+	}
+
+	val fajrTime = remember {
+		viewModel.fajrTime
+	}.collectAsState()
+
+	val sunriseTime = remember {
+		viewModel.sunriseTime
+	}.collectAsState()
+
+	val dhuhrTime = remember {
+		viewModel.dhuhrTime
+	}.collectAsState()
+
+	val asrTime = remember {
+		viewModel.asrTime
+	}.collectAsState()
+
+	val maghribTime = remember {
+		viewModel.maghribTime
+	}.collectAsState()
+
+	val ishaTime = remember {
+		viewModel.ishaTime
+	}.collectAsState()
+
+	val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+	if (! alarmLock)
+	{
+		CreateAlarms().exact(
+				context ,
+				fajrTime.value !! ,
+				sunriseTime.value !! ,
+				dhuhrTime.value !! ,
+				asrTime.value !! ,
+				maghribTime.value !! ,
+				ishaTime.value !! ,
+							)
+		sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 	}
 
 	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0).getMoonPhase()
@@ -113,6 +155,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						 )
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 				.fillMaxWidth()
@@ -155,12 +198,16 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleSmall
 						)
 				}
-				//process the location name to show only 10 characters and add ... if more than 10 characters
-				val locationNameValue = locationName.value ?: ""
-				val locationNameValueLength = locationNameValue.length
-				val locationNameValueSubstring = locationNameValue.substring(0 , if (locationNameValueLength > 10) 10 else locationNameValueLength)
-				val locationNameValueFinal = if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
-				Text(text = locationNameValueFinal , style = MaterialTheme.typography.titleMedium)
+				if(isLoading.value){
+					Text(text = "Loading..." , style = MaterialTheme.typography.titleMedium)
+				}else{
+					//process the location name to show only 10 characters and add ... if more than 10 characters
+					val locationNameValue = locationName.value ?: ""
+					val locationNameValueLength = locationNameValue.length
+					val locationNameValueSubstring = locationNameValue.substring(0 , if (locationNameValueLength > 10) 10 else locationNameValueLength)
+					val locationNameValueFinal = if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
+					Text(text = locationNameValueFinal , style = MaterialTheme.typography.titleMedium)
+				}
 
 				//emoji for moon phase
 				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge)

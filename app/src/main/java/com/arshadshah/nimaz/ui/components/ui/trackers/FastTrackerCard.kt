@@ -32,6 +32,7 @@ fun FastTrackerCard(
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(8.dp),

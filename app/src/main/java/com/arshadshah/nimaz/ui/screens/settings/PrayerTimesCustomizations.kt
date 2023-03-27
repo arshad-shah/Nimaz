@@ -5,19 +5,20 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -167,11 +168,52 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				.padding(paddingValues)
 				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION)
 		  ) {
+
 		SettingsGroup(title = {
-			Text(text = "Prayer Parameters")
+			val openPopUp = remember { mutableStateOf(false) }
+			Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceBetween
+			   ) {
+				Text(text = "Prayer Parameters")
+				Spacer(modifier = Modifier.width(8.dp))
+				IconButton(onClick = {
+					openPopUp.value = !openPopUp.value
+				}) {
+					Icon(
+							modifier = Modifier.size(24.dp) ,
+							painter = painterResource(id = R.drawable.info_icon) ,
+							contentDescription = "Info",
+							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+						)
+				}
+			}
+			if(openPopUp.value){
+				Popup(
+						onDismissRequest = {
+							openPopUp.value = !openPopUp.value
+						} ,
+						alignment = Alignment.BottomEnd ,
+						offset = IntOffset(0 , 150) ,
+					 ) {
+					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
+							modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
+								) {
+						Text(
+								text = "Prayer times are calculated using the parameters you set here. " +
+										"Please refer to the Help documentation for more information." ,
+								modifier = Modifier.padding(8.dp) ,
+								style = MaterialTheme.typography.bodySmall
+							)
+					}
+				}
+			}
 		}) {
 			CalculationMethodUI()
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -210,6 +252,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				}
 			}
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -250,10 +293,50 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		}
 
 		SettingsGroup(title = {
-			Text(text = "Prayer Angles")
+			val openPopUp = remember { mutableStateOf(false) }
+			Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceBetween
+			   ) {
+				Text(text = "Prayer Angles")
+				Spacer(modifier = Modifier.width(8.dp))
+				IconButton(onClick = {
+					openPopUp.value = !openPopUp.value
+				}) {
+					Icon(
+							modifier = Modifier.size(24.dp) ,
+							painter = painterResource(id = R.drawable.info_icon) ,
+							contentDescription = "Info",
+							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+						)
+				}
+			}
+			if(openPopUp.value){
+				Popup(
+						onDismissRequest = {
+							openPopUp.value = !openPopUp.value
+						} ,
+						alignment = Alignment.BottomEnd ,
+						offset = IntOffset(0 , 150) ,
+					 ) {
+					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
+							modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
+								) {
+						Text(
+								text = "Fajr and isha prayer times are calculated using the angles you set here. " +
+										"Please refer to the Help documentation for more information." ,
+								modifier = Modifier.padding(8.dp) ,
+								style = MaterialTheme.typography.bodySmall
+							)
+					}
+				}
+			}
 		}) {
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -289,6 +372,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			if (ishaaAngleVisible.value)
 			{
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -328,6 +412,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			} else
 			{
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -346,10 +431,50 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 
 		SettingsGroup(
 				title = {
-					Text(text = "Prayer Time")
+					val openPopUp = remember { mutableStateOf(false) }
+					Row(
+							modifier = Modifier.fillMaxWidth(),
+							verticalAlignment = Alignment.CenterVertically,
+							horizontalArrangement = Arrangement.SpaceBetween
+					   ) {
+						Text(text = "Prayer Time")
+						Spacer(modifier = Modifier.width(8.dp))
+						IconButton(onClick = {
+							openPopUp.value = !openPopUp.value
+						}) {
+							Icon(
+									modifier = Modifier.size(24.dp),
+									painter = painterResource(id = R.drawable.info_icon) ,
+									contentDescription = "Info",
+									tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+								)
+						}
+					}
+					if(openPopUp.value){
+						Popup(
+								onDismissRequest = {
+									openPopUp.value = !openPopUp.value
+								} ,
+								alignment = Alignment.BottomEnd ,
+								offset = IntOffset(0 , 150) ,
+							 ) {
+							ElevatedCard(
+									shape = MaterialTheme.shapes.extraLarge ,
+									modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
+										) {
+								Text(
+										text = "Each prayer times can be adjusted individually using the settings below. " +
+												"Please refer to the Help documentation for more information." ,
+										modifier = Modifier.padding(8.dp) ,
+										style = MaterialTheme.typography.bodySmall
+									)
+							}
+						}
+					}
 				} ,
 				content = {
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -395,6 +520,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -440,6 +566,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -485,6 +612,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -530,6 +658,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()
@@ -575,6 +704,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						}
 					}
 					ElevatedCard(
+							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth()

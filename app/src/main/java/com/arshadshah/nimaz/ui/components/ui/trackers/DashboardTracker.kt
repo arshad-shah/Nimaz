@@ -159,6 +159,7 @@ fun PrayerTrackerListItemsRow(
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()

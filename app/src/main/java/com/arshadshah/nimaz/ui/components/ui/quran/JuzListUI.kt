@@ -67,6 +67,7 @@ fun JuzListItemUI(
 				 )
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(vertical = 4.dp , horizontal = 8.dp)
 				.fillMaxWidth()
