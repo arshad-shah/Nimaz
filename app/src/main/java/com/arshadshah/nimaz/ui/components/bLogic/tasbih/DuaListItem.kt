@@ -27,6 +27,7 @@ import com.google.accompanist.placeholder.shimmer
 fun DuaListItem(dua : Dua , loading : Boolean)
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(8.dp)

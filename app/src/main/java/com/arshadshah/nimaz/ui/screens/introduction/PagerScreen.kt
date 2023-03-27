@@ -2,8 +2,10 @@ package com.arshadshah.nimaz.ui.screens.introduction
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,10 +15,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 
-@OptIn(ExperimentalPagerApi::class)
+
 @Composable
 fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 {
@@ -67,7 +67,9 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 		if (onBoardingPage.extra != null)
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
+						.padding(horizontal = 8.dp)
 						.fillMaxWidth()
 						.testTag("pagerScreenExtra") ,
 						) {
@@ -79,8 +81,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
-@ExperimentalPagerApi
 @Composable
 fun FinishButton(
 	modifier : Modifier ,
@@ -99,7 +101,6 @@ fun FinishButton(
 						  ) {
 			Button(
 					onClick = onClick ,
-					shape = MaterialTheme.shapes.medium ,
 				  ) {
 				Text(text = "Let's Get Started")
 			}
@@ -107,8 +108,8 @@ fun FinishButton(
 	}
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
-@ExperimentalPagerApi
 @Composable
 fun BackButton(
 	modifier : Modifier ,
@@ -128,17 +129,16 @@ fun BackButton(
 					modifier = Modifier
 						.padding(horizontal = 8.dp)
 						.testTag("introBackButton") ,
-					shape = MaterialTheme.shapes.medium ,
 					onClick = onClick ,
 				  ) {
-				Text(text = "Back")
+				Text(text = "Back" , style = MaterialTheme.typography.labelLarge)
 			}
 		}
 	}
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
-@ExperimentalPagerApi
 @Composable
 fun NextButton(
 	modifier : Modifier ,
@@ -154,10 +154,9 @@ fun NextButton(
 				modifier = Modifier
 					.padding(horizontal = 8.dp)
 					.testTag("introNextButton") ,
-				shape = MaterialTheme.shapes.medium ,
 				onClick = onClick ,
 			  ) {
-			Text(text = "Next")
+			Text(text = "Next" , style = MaterialTheme.typography.labelLarge)
 		}
 	}
 }

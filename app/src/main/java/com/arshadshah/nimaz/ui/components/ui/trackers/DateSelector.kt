@@ -38,7 +38,9 @@ fun DateSelector(
 	val newDay = remember { mutableStateOf(date.value.dayOfMonth) }
 	val newMonth = remember { mutableStateOf(date.value.monthValue) }
 	val newYear = remember { mutableStateOf(date.value.year) }
-	ElevatedCard {
+	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
+				) {
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()

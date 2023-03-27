@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 fun DatesContainerUI(GregDate : String , islamDate : String , onNavigateToTracker : () -> Unit)
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
 				.clickable {

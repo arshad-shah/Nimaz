@@ -88,6 +88,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 		  ) {
 
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier.padding(
 						top = 4.dp ,
 						bottom = 8.dp ,

@@ -63,9 +63,10 @@ fun TasbihRow(
 		mutableStateOf(false)
 	}
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(8.dp)
+				.padding(horizontal = 8.dp, vertical = 4.dp)
 				.clickable(
 						//disable it if onNavigateToTasbihScreen has no implementation
 						enabled = onNavigateToTasbihScreen != null ,

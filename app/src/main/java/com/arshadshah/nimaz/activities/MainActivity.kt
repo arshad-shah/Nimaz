@@ -39,6 +39,7 @@ import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
+import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
@@ -305,28 +306,21 @@ class MainActivity : ComponentActivity()
 							AnimatedVisibility(
 									visible = checkRoute(route.value.toString()) ,
 									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
-									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION) ,
+									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
 									content = {
-
 										TopAppBar(
 												title = {
-													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
-													{
-														val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
-														val number = navController.currentBackStackEntry?.arguments?.getString("number")
-														if (isSurah)
+														if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
 														{
-															TopBarMenu(number = number!!.toInt() , isSurah = true)
-														} else
-														{
-															TopBarMenu(number = number!!.toInt() , isSurah = false)
+															val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
+															val number = navController.currentBackStackEntry?.arguments?.getString("number")
+															TopBarMenu(number = number!!.toInt() , isSurah = isSurah)
+														}else{
+															Text(
+																	text = processPageTitle(route.value.toString(), navController) ,
+																	style = MaterialTheme.typography.titleLarge
+																)
 														}
-													}else{
-														Text(
-																text = processPageTitle(route.value.toString(), navController) ,
-																style = MaterialTheme.typography.titleLarge
-															)
-													}
 												} ,
 												navigationIcon = {
 													IconButton(onClick = {
@@ -341,7 +335,7 @@ class MainActivity : ComponentActivity()
 														navController.navigateUp()
 													}) {
 														Icon(
-																modifier = Modifier.size(24.dp) ,
+																modifier = Modifier.size(20.dp) ,
 																painter = painterResource(id = R.drawable.angle_left_icon) ,
 																contentDescription = "Back"
 															)
@@ -351,7 +345,6 @@ class MainActivity : ComponentActivity()
 													//only show the menu button if the title is Quran
 													when (route.value)
 													{
-														QURAN_SCREEN_ROUTE ,
 														QURAN_AYA_SCREEN_ROUTE ,
 														MY_QURAN_SCREEN_ROUTE,
 														->
@@ -482,7 +475,7 @@ class MainActivity : ComponentActivity()
 							AnimatedVisibility(
 									visible = ! checkRoute(route.value.toString()) ,
 									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
-									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION) ,
+									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
 									content = {
 										BottomNavigationBar(navController = navController)
 									})
@@ -500,7 +493,7 @@ class MainActivity : ComponentActivity()
 		{
 			SETTINGS_SCREEN_ROUTE -> "Settings"
 			ABOUT_SCREEN_ROUTE -> "About"
-			PRAYER_TIMES_SETTINGS_SCREEN_ROUTE -> "Prayer Times Customization"
+			PRAYER_TIMES_SETTINGS_SCREEN_ROUTE -> "Prayer Times Settings"
 			QURAN_SCREEN_ROUTE -> "Quran"
 			QURAN_AYA_SCREEN_ROUTE -> {
 				//check if the url of the route is for surah or juz using the nav controller
@@ -611,6 +604,17 @@ class CustomAnimation
 	fun fadeOut(duration : Int) : ExitTransition =
 		shrinkVertically(
 				shrinkTowards = Alignment.Top ,
+				animationSpec = tween(durationMillis = duration)
+						)
+
+	fun expandHorizontally(duration : Int) : EnterTransition =
+		expandHorizontally(
+				expandFrom = Alignment.CenterHorizontally ,
+				animationSpec = tween(durationMillis = duration)
+						)
+	fun shrinkHorizontally(duration : Int) : ExitTransition =
+		shrinkHorizontally(
+				shrinkTowards = Alignment.CenterHorizontally ,
 				animationSpec = tween(durationMillis = duration)
 						)
 }

@@ -163,6 +163,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						 )
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 				.fillMaxWidth()

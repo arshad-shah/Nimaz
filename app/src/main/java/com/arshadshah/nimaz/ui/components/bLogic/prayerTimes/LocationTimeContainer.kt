@@ -44,6 +44,7 @@ fun ContainerUI(
 {
 	val context = LocalContext.current
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(vertical = 8.dp , horizontal = 0.dp)
 				.height(IntrinsicSize.Max)

@@ -195,6 +195,7 @@ fun LocationSettings(isIntro : Boolean = false)
 					exit = shrinkVertically()
 							  ) {
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -228,6 +229,7 @@ fun LocationSettings(isIntro : Boolean = false)
 								  ) {
 					Column {
 						ElevatedCard(
+								shape = MaterialTheme.shapes.extraLarge ,
 								modifier = Modifier
 									.padding(8.dp)
 									.fillMaxWidth()
@@ -351,6 +353,7 @@ fun LocationToggleSwitch(
 	}
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -504,6 +507,7 @@ fun LocationToggleSwitch(
 		if (locationNameState.value.isBlank())
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -518,6 +522,7 @@ fun LocationToggleSwitch(
 		} else
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()

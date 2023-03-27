@@ -72,6 +72,7 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	}
 	//size of the main button that opens the dropdown
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.width(150.dp)
 				){

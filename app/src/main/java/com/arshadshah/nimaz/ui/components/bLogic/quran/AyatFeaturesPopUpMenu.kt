@@ -4,15 +4,11 @@ import android.content.Intent
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
@@ -47,7 +43,10 @@ fun AyatFeaturesPopUpMenu(
 			offset = IntOffset(0 , - 150) ,
 		 ) {
 		ElevatedCard(
-				modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)) ,
+				shape = MaterialTheme.shapes.extraLarge ,
+				elevation = CardDefaults.elevatedCardElevation(
+						defaultElevation = 8.dp ,
+															  )
 					) {
 			Row(
 					modifier = Modifier

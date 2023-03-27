@@ -74,6 +74,7 @@ fun NamesOfAllahRow(
 {
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp) ,
 				) {

@@ -7,6 +7,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -64,6 +65,7 @@ fun CalculationMethodUI()
 	}.collectAsState()
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -140,6 +142,7 @@ fun CalculationMethodUI()
 			exit = shrinkVertically()
 					  ) {
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()

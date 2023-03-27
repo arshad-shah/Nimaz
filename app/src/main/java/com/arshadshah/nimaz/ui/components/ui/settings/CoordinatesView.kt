@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -11,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +23,7 @@ fun CoordinatesView(latitudeState : State<Double> , longitudeState : State<Doubl
 	val longitudeRounded = String.format("%.4f" , longitudeState.value)
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.height(IntrinsicSize.Max)

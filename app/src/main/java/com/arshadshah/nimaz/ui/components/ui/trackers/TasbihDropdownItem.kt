@@ -39,6 +39,7 @@ fun TasbihDropdownItem(
 	Log.d("SwipeState" , swipeState.offset.value.toString())
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			elevation = CardDefaults.elevatedCardElevation(
 					defaultElevation = 4.dp ,
 														  ) ,
