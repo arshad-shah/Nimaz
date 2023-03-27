@@ -41,6 +41,10 @@ fun GoalEditDialog(tasbih : Tasbih , showTasbihDialog : MutableState<Boolean>)
 								date = LocalDate.now().toString() ,
 							  )
 																))
+				//save the objective
+				context.getSharedPreferences("tasbih" , 0).edit()
+					.putString("objective-${tasbih.id}" , it)
+					.apply()
 			} ,
 			isOpen = showTasbihDialog ,
 			state = goal

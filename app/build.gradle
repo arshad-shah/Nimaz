@@ -15,8 +15,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 90
-        versionName '1.5.19'
+        versionCode 98
+        versionName '1.5.27'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -93,8 +93,6 @@ dependencies {
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
     implementation 'androidx.test:runner:1.5.2'
 
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
-
     testImplementation "junit:junit:$junit_version"
     //mockito
     testImplementation "org.mockito:mockito-core:$mockito_version"
@@ -138,5 +136,7 @@ dependencies {
     implementation 'com.amazonaws:aws-android-sdk-s3:2.12.5'
 
     //charts
-    implementation "com.github.tehras:charts:$charts_version"
+    implementation "com.patrykandpatrick.vico:core:1.6.4"
+    implementation "com.patrykandpatrick.vico:compose:1.6.4"
+    implementation "com.patrykandpatrick.vico:compose-m3:1.6.4"
 }

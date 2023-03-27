@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
-import android.os.Vibrator
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,20 +13,27 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Counter(
-	vibrator : Vibrator ,
 	paddingValues : PaddingValues ,
-	vibrationAllowed : MutableState<Boolean> ,
-	reset : MutableState<Boolean> ,
-	showResetDialog : MutableState<Boolean> ,
-	rOrl : MutableState<Int> ,
 		   )
 {
 	val context = LocalContext.current
+	val viewModel = viewModel(
+			key = "TasbihViewModel" ,
+			initializer = { TasbihViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
+
+	val resetTasbih = remember {
+		viewModel.resetButtonState
+	}.collectAsState()
+
 	val count = remember {
 		mutableStateOf(
 				context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
@@ -45,7 +52,7 @@ fun Counter(
 	val lap =
 		remember {
 			mutableStateOf(
-					context.getSharedPreferences("tasbih" , 0).getInt("lap" , 0)
+					context.getSharedPreferences("tasbih" , 0).getInt("lap" , 1)
 						  )
 		}
 	val lapCountCounter = remember {
@@ -103,21 +110,19 @@ fun Counter(
 
 		Spacer(modifier = Modifier.height(32.dp))
 		IncrementDecrement(
-				vibrator = vibrator ,
-				vibrationAllowed = vibrationAllowed ,
 				count = count ,
 				lap = lap ,
 				lapCountCounter = lapCountCounter ,
 				objective = objective ,
-				context = LocalContext.current ,
-				rOrl = rOrl ,
 						  )
 	}
 
-	if (showResetDialog.value)
+	if (resetTasbih.value)
 	{
 		AlertDialog(
-				onDismissRequest = { showResetDialog.value = false } ,
+				onDismissRequest = {
+					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+				} ,
 				title = { Text(text = "Reset Counter") } ,
 				text = {
 					Text(
@@ -130,16 +135,15 @@ fun Counter(
 						count.value = 0
 						lap.value = 1
 						lapCountCounter.value = 0
-
-						reset.value = true
-
-						showResetDialog.value = false
+						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
 					}) {
 						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
 					}
 				} ,
 				dismissButton = {
-					TextButton(onClick = { showResetDialog.value = false }) {
+					TextButton(onClick = {
+						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+					}) {
 						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
 					}
 				}
@@ -173,9 +177,21 @@ fun Counter(
 								.padding(horizontal = 16.dp) ,
 							keyboardActions = KeyboardActions(
 									onDone = {
-										if (objective.value.toInt() > 0)
+										val isInt = objective.value.toIntOrNull()
+										if (isInt != null)
 										{
-											showObjectiveDialog.value = false
+											if (objective.value != "" || isInt != 0)
+											{
+												showObjectiveDialog.value = false
+											}else{
+												Toasty
+													.error(
+															context ,
+															"Objective must be greater than 0" ,
+															Toasty.LENGTH_SHORT
+														  )
+													.show()
+											}
 										} else
 										{
 											Toasty
@@ -191,7 +207,31 @@ fun Counter(
 				} ,
 				confirmButton = {
 					Button(onClick = {
-						showObjectiveDialog.value = false
+						val isInt = objective.value.toIntOrNull()
+						if (isInt != null)
+						{
+							if (objective.value != "" || isInt != 0)
+							{
+								showObjectiveDialog.value = false
+							}else{
+								Toasty
+									.error(
+											context ,
+											"Objective must be greater than 0" ,
+											Toasty.LENGTH_SHORT
+										  )
+									.show()
+							}
+						} else
+						{
+							Toasty
+								.error(
+										context ,
+										"Objective must be greater than 0" ,
+										Toasty.LENGTH_SHORT
+									  )
+								.show()
+						}
 					}) {
 						Text(text = "Set" , style = MaterialTheme.typography.titleLarge)
 					}

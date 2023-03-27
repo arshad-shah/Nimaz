@@ -240,7 +240,10 @@ class PrayerTimesViewModel : ViewModel()
 					_maghribTimeState.value = response.data.maghrib !!
 					_ishaTimeState.value = response.data.isha !!
 					_isLoading.value = false
-
+					Log.d(
+							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							"UpdatePrayerTimes: ${response.data}"
+						 )
 				} else
 				{
 					_error.value = response.message.toString()
@@ -278,13 +281,8 @@ class PrayerTimesViewModel : ViewModel()
 							"maghrib" to response.data.maghrib ,
 							"isha" to response.data.isha
 												)
-//					val dataStore = LocalDataStore.getDataStore()
-//					val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().plusDays(1).toString())
-//
 					val currentDate = LocalDateTime.now()
 					val currentPrayerName = currentPrayer(currentDate , mapOfPrayerTimes).first
-					Log.d("Nimaz: currentDatetime" , "$currentDate")
-					Log.d("Nimaz: FajrDatetime" , "${response.data.fajr}")
 					val nextPrayerName = nextPrayer(currentDate , mapOfPrayerTimes).first
 					if (currentPrayerName == "isha" && nextPrayerName == "fajr" && LocalTime.now().hour <= response.data.fajr !!.toLocalTime().hour && LocalTime.now().hour >= 0)
 					{
@@ -306,12 +304,13 @@ class PrayerTimesViewModel : ViewModel()
 					//set the current prayer name
 					_currentPrayerName.value =
 						currentPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
-					_fajrTimeState.value = response.data.fajr !!
-					_sunriseTimeState.value = response.data.sunrise !!
-					_dhuhrTimeState.value = response.data.dhuhr !!
-					_asrTimeState.value = response.data.asr !!
-					_maghribTimeState.value = response.data.maghrib !!
-					_ishaTimeState.value = response.data.isha !!
+						_fajrTimeState.value = response.data.fajr !!
+						_sunriseTimeState.value = response.data.sunrise !!
+						_dhuhrTimeState.value = response.data.dhuhr !!
+						_asrTimeState.value = response.data.asr !!
+						_maghribTimeState.value = response.data.maghrib !!
+						_ishaTimeState.value = response.data.isha !!
+
 					_isLoading.value = false
 
 				} else

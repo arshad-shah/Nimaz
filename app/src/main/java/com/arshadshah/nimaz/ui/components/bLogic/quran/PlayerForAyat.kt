@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.bLogic.quran
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -9,11 +10,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -30,6 +35,7 @@ fun PlayerForAyat(
 	onPlayClicked : () -> Unit ,
 	onPauseClicked : () -> Unit ,
 	onStopClicked : () -> Unit ,
+	isLoading : Boolean ,
 				 )
 {
 
@@ -94,7 +100,7 @@ fun PlayerForAyat(
 				//play and pause button
 				IconButton(
 						onClick = { onPlayClicked() } ,
-						enabled = true ,
+						enabled = ! isLoading ,
 						modifier = Modifier
 							.align(Alignment.CenterVertically)
 						  ) {
@@ -105,6 +111,14 @@ fun PlayerForAyat(
 							modifier = Modifier
 								.size(24.dp)
 								.padding(horizontal = 4.dp)
+								.placeholder(
+										visible = isLoading ,
+										color = MaterialTheme.colorScheme.outline ,
+										shape = RoundedCornerShape(4.dp) ,
+										highlight = PlaceholderHighlight.shimmer(
+												highlightColor = Color.White ,
+																				)
+											)
 						)
 				}
 			}
@@ -167,5 +181,6 @@ fun PlayerForAyatPreview()
 			onPlayClicked = { } ,
 			onPauseClicked = { } ,
 			onStopClicked = { } ,
+			isLoading = false ,
 				 )
 }

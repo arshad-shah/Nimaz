@@ -28,7 +28,6 @@ fun CoordinatesView(latitudeState : State<Double> , longitudeState : State<Doubl
 			modifier = Modifier
 				.padding(8.dp)
 				.height(IntrinsicSize.Max)
-				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				.fillMaxWidth()
 				.testTag("coordinatesView")
 				) {

@@ -124,14 +124,10 @@ fun TasbihDropdownItem(
 				)
 			AnimatedVisibility(
 					visible = swipeState.offset.value < -50 ,
-					modifier = Modifier
-						.padding(8.dp) ,
 					enter = fadeIn() + expandHorizontally() ,
 					exit = fadeOut() + shrinkHorizontally()
 							  ) {
 				Row(
-						modifier = Modifier
-							.padding(8.dp),
 						verticalAlignment = Alignment.CenterVertically,
 						horizontalArrangement = Arrangement.End
 				   ) {
@@ -141,7 +137,7 @@ fun TasbihDropdownItem(
 								onDelete(item)
 							} ,
 							modifier = Modifier
-								.size(28.dp)
+								.size(48.dp)
 							  ) {
 						Icon(
 								painter = painterResource(id = R.drawable.delete_icon) ,
@@ -157,7 +153,7 @@ fun TasbihDropdownItem(
 								onEdit(item)
 							} ,
 							modifier = Modifier
-								.size(28.dp)
+								.size(48.dp)
 							  ) {
 						Icon(
 								painter = painterResource(id = R.drawable.edit_icon) ,
@@ -168,7 +164,6 @@ fun TasbihDropdownItem(
 					}
 				}
 			}
-
 		}
 	}
 }

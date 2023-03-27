@@ -3,38 +3,27 @@ package com.arshadshah.nimaz.ui.screens.tracker
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
 import com.arshadshah.nimaz.ui.components.ui.trackers.PrayerTrackerListItems
-import com.arshadshah.nimaz.ui.components.ui.trackers.ToggleableItem
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 @Composable
 fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false)
 {
-	val (selectedTab , setSelectedTab) = rememberSaveable { mutableStateOf(0) }
-
 	val viewModel = viewModel(
 			key = "TrackerViewModel" ,
 			initializer = { TrackerViewModel() } ,
@@ -57,10 +46,6 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 
 	val showDateSelector = remember {
 		viewModel.showDateSelector
-	}.collectAsState()
-
-	val allTracker = remember {
-		viewModel.allTrackers
 	}.collectAsState()
 
 	val fajrState = remember {
@@ -95,10 +80,6 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 		viewModel.fastTrackerState
 	}.collectAsState()
 
-
-	val titles = listOf("Prayer Tracker" , "Fasting")
-
-
 	Column(
 			modifier = Modifier
 				.padding(paddingValues)
@@ -114,30 +95,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 						end = 0.dp
 										   ) ,
 					) {
-			if (showDateSelector.value)
-			{
 				Column {
-					TabRow(selectedTabIndex = selectedTab) {
-						titles.forEachIndexed { index , title ->
-							Tab(
-									selected = selectedTab == index ,
-									onClick = { setSelectedTab(index) } ,
-									text = {
-										Text(
-												textAlign = TextAlign.Center ,
-												text = title ,
-												maxLines = 2 ,
-												overflow = TextOverflow.Ellipsis ,
-												style = MaterialTheme.typography.titleSmall
-											)
-									}
-							   )
-						}
-					}
-					when (selectedTab)
-					{
-						0 ->
-						{
 							PrayerTrackerList(
 									viewModel::onEvent ,
 									stateOfTrackerForToday.value ,
@@ -150,101 +108,20 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 									dateState ,
 									progressState
 											 )
-						}
-
-						1 ->
-						{
 							Fasting(
 									viewModel::onEvent ,
-									showDateSelector ,
 									dateState ,
 									isFasting.value ,
 									fastingState.value
 								   )
-						}
-					}
 				}
-			} else
-			{
-
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
-						horizontalArrangement = Arrangement.SpaceBetween ,
-						verticalAlignment = Alignment.CenterVertically
-				   ) {
-					Text(
-							text = "Prayer Tracker" , style = MaterialTheme.typography.titleMedium
-						)
-					Text(
-							text = LocalDate.parse(dateState.value)
-								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							style = MaterialTheme.typography.titleMedium
-						)
-				}
-				PrayerTrackerList(
-						viewModel::onEvent ,
-						stateOfTrackerForToday.value ,
-						fajrState.value ,
-						zuhrState.value ,
-						asrState.value ,
-						maghribState.value ,
-						ishaState.value ,
-						showDateSelector ,
-						dateState ,
-						progressState
-								 )
-			}
 		}
-
-//		val mutablelist = mutableListOf<BarChartData.Bar>()
-//		for (tracker in allTracker.value)
-//		{
-//			mutablelist.add(
-//					BarChartData.Bar(
-//							value = tracker.progress.toFloat() ,
-//							//a random color
-//							color = Color(0xFF000000.toInt() + (Math.random() * 0x00FFFFFF).toInt()) ,
-//							label = LocalDate.parse(tracker.date).format(DateTimeFormatter.ofPattern("dd")) ,
-//									)
-//						   )
-//			Log.d("Tracker" , tracker.toString())
-//		}
-//		ElevatedCard(
-//				modifier = Modifier.padding(top = 8.dp , bottom = 8.dp , start = 8.dp , end = 8.dp) ,
-//					) {
-//			//if the list is empty show a placeholder
-//			if (mutablelist.isEmpty())
-//			{
-//				Text(text = "No data to show" , style = MaterialTheme.typography.titleMedium)
-//			}
-//			else{
-//				BarChart(
-//						modifier = Modifier
-//							.fillMaxWidth()
-//							.padding(8.dp) ,
-//						barChartData = BarChartData(
-//								bars = mutablelist ,
-//												   ),
-//						animation = simpleChartAnimation(),
-//				barDrawer = SimpleBarDrawer(),
-//				yAxisDrawer = SimpleYAxisDrawer(
-//						labelValueFormatter = { value ->
-//							"${value.toInt()}"
-//						}
-//											   ),
-//				labelDrawer = SimpleValueDrawer()
-//						)
-//			}
-//		}
 	}
 }
 
 @Composable
 fun Fasting(
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
-	showDateSelector : State<Boolean> ,
 	dateState : State<String> ,
 	isFasting : Boolean ,
 	fastingState : TrackerViewModel.FastTrackerState ,
@@ -273,7 +150,6 @@ fun Fasting(
 			isFastingToday.value = isFasting
 			FastTrackerCard(
 					handleEvent = handleEvent ,
-					showDateSelector = showDateSelector ,
 					dateState = dateState ,
 					isFastingToday = isFastingToday
 						   )
@@ -381,45 +257,6 @@ fun PrayerTrackerList(
 
 		else ->
 		{
-		}
-	}
-}
-
-//preview of the toggleable item
-@Preview
-@Composable
-fun ToggleableItemPreview()
-{
-	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
-
-	ElevatedCard(
-			modifier = Modifier.fillMaxWidth()
-				) {
-		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp) ,
-				horizontalArrangement = Arrangement.SpaceBetween ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
-			items.forEachIndexed { index , item ->
-				ToggleableItem(
-						text = item ,
-						checked = true ,
-						onCheckedChange = { } ,
-						modifier = Modifier
-							.padding(8.dp)
-							.placeholder(
-									visible = false ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
-						showDateSelector = false
-							  )
-			}
 		}
 	}
 }

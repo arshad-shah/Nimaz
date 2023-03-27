@@ -108,16 +108,45 @@ fun AyaListUI(
 	}
 	if (loading)
 	{
-		LazyColumn(contentPadding = paddingValues) {
-			items(ayaList.size) { index ->
+		//dumy list of 10 AYa
+		val dummyList = ArrayList<Aya>()
+		for (i in 0..9)
+		{
+			dummyList.add(
+					Aya(
+							ayaNumber = i ,
+							ayaNumberInQuran = 1 ,
+							ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
+							ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+							ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
+							audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
+							ayaNumberInSurah = 1 ,
+							bookmark = true ,
+							favorite = true ,
+							note = "dsfhsdhsgdfhstghs" ,
+							juzNumber = 1 ,
+							suraNumber = 1 ,
+							ruku = 1 ,
+							sajda = false ,
+							sajdaType = "" ,
+					   )
+						 )
+		}
+		LazyColumn(
+				contentPadding = paddingValues,
+				state = rememberLazyListState(),
+				userScrollEnabled = false,
+				  ) {
+			items(10) { index ->
 				AyaListItemUI(
-						aya = ayaList[index] ,
+						aya = dummyList[index] ,
 						mediaPlayer = mediaPlayer ,
 						arabic_Font_size = arabicFontSize ,
 						arabic_Font = arabicFont ,
 						translation_Font_size = translationFontSize ,
 						translation = translation ,
 						spacesFileRepository = spaceFilesRepository ,
+						loading = true ,
 							 )
 			}
 		}
@@ -163,17 +192,19 @@ fun AyaListUI(
 
 		LazyColumn(
 				modifier = Modifier.testTag(TEST_TAG_AYA) ,
-				userScrollEnabled = true , contentPadding = paddingValues , state = listState
+				userScrollEnabled = true ,
+				contentPadding = paddingValues , state = listState
 				  ) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
 						aya = ayaList[index] ,
+						spacesFileRepository = spaceFilesRepository ,
 						mediaPlayer = mediaPlayer ,
 						arabic_Font_size = arabicFontSize ,
-						arabic_Font = arabicFont ,
 						translation_Font_size = translationFontSize ,
+						arabic_Font = arabicFont ,
 						translation = translation ,
-						spacesFileRepository = spaceFilesRepository ,
+						loading = false ,
 							 )
 			}
 		}
@@ -189,6 +220,7 @@ fun AyaListItemUI(
 	translation_Font_size : State<Float> ,
 	arabic_Font : State<String> ,
 	translation : State<String> ,
+	loading : Boolean ,
 				 )
 {
 	val context = LocalContext.current
@@ -196,11 +228,6 @@ fun AyaListItemUI(
 			key = "QuranViewModel" ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
-
-
-	val isLoading = remember {
-		mutableStateOf(false)
-	}
 
 	val error = remember {
 		mutableStateOf("")
@@ -374,9 +401,7 @@ fun AyaListItemUI(
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
 		MaterialTheme.colorScheme.outline
-	} else
-	{
-		//use default color
+	}else{
 		MaterialTheme.colorScheme.surface
 	}
 	ElevatedCard(
@@ -436,7 +461,7 @@ fun AyaListItemUI(
 									.fillMaxWidth()
 									.padding(4.dp)
 									.placeholder(
-											visible = isLoading.value ,
+											visible = loading ,
 											color = MaterialTheme.colorScheme.outline ,
 											shape = RoundedCornerShape(4.dp) ,
 											highlight = PlaceholderHighlight.shimmer(
@@ -460,7 +485,7 @@ fun AyaListItemUI(
 									.fillMaxWidth()
 									.padding(horizontal = 4.dp)
 									.placeholder(
-											visible = isLoading.value ,
+											visible =loading ,
 											color = MaterialTheme.colorScheme.outline ,
 											shape = RoundedCornerShape(4.dp) ,
 											highlight = PlaceholderHighlight.shimmer(
@@ -481,7 +506,7 @@ fun AyaListItemUI(
 								.fillMaxWidth()
 								.padding(horizontal = 4.dp)
 								.placeholder(
-										visible = isLoading.value ,
+										visible = loading ,
 										color = MaterialTheme.colorScheme.outline ,
 										shape = RoundedCornerShape(4.dp) ,
 										highlight = PlaceholderHighlight.shimmer(
@@ -504,6 +529,7 @@ fun AyaListItemUI(
 							aya = aya ,
 							showNoteDialog = showNoteDialog ,
 							noteContent = noteContent ,
+							isLoading = loading ,
 								)
 
 					//more menu button that opens a popup menu
@@ -514,11 +540,19 @@ fun AyaListItemUI(
 								onClick = {
 									popUpOpen.value = ! popUpOpen.value
 								} ,
-								enabled = true ,
+								enabled = ! loading ,
 								  ) {
 							Icon(
 									modifier = Modifier
-										.size(24.dp) ,
+										.size(24.dp)
+										.placeholder(
+												visible = loading ,
+												color = MaterialTheme.colorScheme.outline ,
+												shape = RoundedCornerShape(4.dp) ,
+												highlight = PlaceholderHighlight.shimmer(
+														highlightColor = Color.White ,
+																						)
+													),
 									painter = painterResource(id = R.drawable.more_menu_icon) ,
 									contentDescription = "More Menu" ,
 								)
@@ -551,6 +585,7 @@ fun AyaListItemUI(
 						onPlayClicked = { playFile() } ,
 						onPauseClicked = { pauseFile() } ,
 						onStopClicked = { stopFile() } ,
+						isLoading = loading ,
 							 )
 			}
 		}
@@ -566,7 +601,7 @@ fun AyaListItemUIPreview()
 		LocalDataStore.init(LocalContext.current)
 		//create a dummy aya
 		val aya = Aya(
-				ayaNumber = 1 ,
+				ayaNumber = 0 ,
 				ayaNumberInQuran = 1 ,
 				ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
 				ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
@@ -585,12 +620,13 @@ fun AyaListItemUIPreview()
 
 		AyaListItemUI(
 				aya = aya ,
+				spacesFileRepository = SpacesFileRepository(LocalContext.current) ,
 				mediaPlayer = MediaPlayer() ,
 				arabic_Font_size = remember { mutableStateOf(0.0f) } ,
 				translation_Font_size = remember { mutableStateOf(0.0f) } ,
 				arabic_Font = remember { mutableStateOf("Amiri") } ,
 				translation = remember { mutableStateOf("English") } ,
-				spacesFileRepository = SpacesFileRepository(LocalContext.current) ,
+				loading = true ,
 					 )
 	}
 

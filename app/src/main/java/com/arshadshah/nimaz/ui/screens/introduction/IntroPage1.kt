@@ -38,6 +38,7 @@ fun IntroPage1()
 			OnBoardingPage.Sixth ,
 			OnBoardingPage.Seventh ,
 			OnBoardingPage.Eighth ,
+			OnBoardingPage.Ninth ,
 					  )
 
 	val pagerState = rememberPagerState()
@@ -65,12 +66,12 @@ fun IntroPage1()
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
 					//if the onBoardingPage.extra is not {} then add 20.dp padding else add 0.dp padding
-					.padding(20.dp)
+					.padding(16.dp)
 					.testTag("introPagerIndicator") ,
 				activeColor = MaterialTheme.colorScheme.primary ,
 				inactiveColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f) ,
-				indicatorWidth = 12.dp ,
-				indicatorHeight = 12.dp
+				indicatorWidth = 10.dp ,
+				indicatorHeight = 10.dp
 								)
 
 
@@ -110,10 +111,26 @@ fun IntroPage1()
 						context.startActivity(Intent(context , MainActivity::class.java))
 						//remove the activity from the back stack
 						(context as Introduction).finish()
-					} else
+					} else if (!isLocationSet)
 					{
-						Toasty.error(context , "Please complete the settings before proceeding")
+						Toasty.error(context , "Please set your location in settings" , Toasty.LENGTH_SHORT)
 							.show()
+						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
+						context.startActivity(Intent(context , MainActivity::class.java))
+						//remove the activity from the back stack
+						(context as Introduction).finish()
+					} else if (!isNotificationSet)
+					{
+						Toasty.error(
+								context ,
+								"Please allow notifications in settings" ,
+								Toasty.LENGTH_SHORT
+									)
+							.show()
+						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
+						context.startActivity(Intent(context , MainActivity::class.java))
+						//remove the activity from the back stack
+						(context as Introduction).finish()
 					}
 				}
 			} else

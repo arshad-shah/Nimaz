@@ -64,6 +64,8 @@ class IntroPage1KtTest
 		composeTestRule.onNodeWithText("Next").performClick()
 		composeTestRule.onNodeWithText("Next").performClick()
 		composeTestRule.onNodeWithText("Next").performClick()
+		composeTestRule.onNodeWithText("Next").performClick()
+		composeTestRule.onNodeWithText("Next").performClick()
 
 		composeTestRule.onNodeWithText("Let's Get Started").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Let's Get Started").performClick()

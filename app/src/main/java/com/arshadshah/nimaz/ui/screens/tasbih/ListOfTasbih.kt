@@ -23,6 +23,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
+import com.arshadshah.nimaz.ui.components.bLogic.tasbih.DeleteDialog
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.TasbihRow
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.ui.trackers.DropDownHeader
@@ -156,6 +157,9 @@ fun ListOfTasbih(
 					val showTasbihDialog = remember {
 						mutableStateOf(false)
 					}
+					val showDeleteDialog = remember {
+						mutableStateOf(false)
+					}
 					val tasbihToEdit = remember {
 						mutableStateOf(Tasbih(
 								0 ,
@@ -208,7 +212,9 @@ fun ListOfTasbih(
 																			  )
 															} ,
 															//the list of tasbih for the date at the index
-															items = listOfTasbih.value ,
+															items = listOfTasbih.value.filter { tasbih ->
+																tasbih.date == dates[dateIndex]
+															} ,
 															label = LocalDate.parse(dates[dateIndex])
 																.format(
 																		DateTimeFormatter.ofPattern(
@@ -227,11 +233,8 @@ fun ListOfTasbih(
 																									)
 																		} ,
 																		onDelete = { tasbih ->
-																			viewModel.handleEvent(
-																					TasbihViewModel.TasbihEvent.DeleteTasbih(
-																							tasbih
-																															)
-																								 )
+																			showDeleteDialog.value = true
+																			tasbihToEdit.value = tasbih
 																		} ,
 																		onEdit = { tasbih ->
 																			showTasbihDialog.value =
@@ -281,7 +284,9 @@ fun ListOfTasbih(
 																								  )
 																				} ,
 																				//the list of tasbih for the date at the index
-																				items = listOfTasbih.value,
+																				items = listOfTasbih.value.filter { tasbih ->
+																					tasbih.date == dates[dateIndex]
+																				},
 																				label = LocalDate.parse(dates[dateIndex])
 																					.format(DateTimeFormatter.ofPattern("E dd ")) ,
 																				dropDownItem = {
@@ -296,11 +301,8 @@ fun ListOfTasbih(
 																														)
 																							},
 																							onDelete = { tasbih ->
-																								viewModel.handleEvent(
-																										TasbihViewModel.TasbihEvent.DeleteTasbih(
-																												tasbih
-																																				)
-																													 )
+																								showDeleteDialog.value = true
+																								tasbihToEdit.value = tasbih
 																							},
 																							onEdit = { tasbih ->
 																								showTasbihDialog.value = true
@@ -323,6 +325,7 @@ fun ListOfTasbih(
 						}
 						}
 					GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
+					DeleteDialog(tasbih = tasbihToEdit.value, showDeleteDialog)
 					}
 				}
 

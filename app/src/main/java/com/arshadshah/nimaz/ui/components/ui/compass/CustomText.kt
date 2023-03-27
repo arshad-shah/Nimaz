@@ -27,6 +27,8 @@ fun CustomText(
 	text : String ,
 			  )
 {
+	//process the text to only show the 10 first characters of the text and add ... at the end
+	val processedText = if (text.length > 10) text.substring(0 , 10) + "..." else text
 	Column(modifier = modifier , horizontalAlignment = Alignment.CenterHorizontally) {
 		Text(
 				modifier = headingModifier ,
@@ -37,9 +39,9 @@ fun CustomText(
 		Spacer(modifier = Modifier.padding(4.dp))
 		Text(
 				modifier = textModifier ,
-				text = text ,
+				text = processedText ,
 				textAlign = TextAlign.Center ,
-				style = MaterialTheme.typography.titleLarge
+				style = MaterialTheme.typography.titleLarge,
 			)
 	}
 }
@@ -48,5 +50,5 @@ fun CustomText(
 @Composable
 fun CustomTextPreview()
 {
-	CustomText(modifier = Modifier.padding(8.dp) , heading = "Heading" , text = "Text")
+	CustomText(modifier = Modifier.padding(8.dp) , heading = "Heading" , text = "Long piece of text")
 }

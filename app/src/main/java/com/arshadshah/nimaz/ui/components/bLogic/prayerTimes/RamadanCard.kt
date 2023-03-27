@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
@@ -31,7 +32,7 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	val today = LocalDate.now()
 	val todayHijri = HijrahDate.from(today)
 	val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 1)
-	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 10 , 1)
+	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 29)
 	//get date of ramadan start in gregorian
 	val ramadanStartGregorian = LocalDate.from(ramadanStart)
 	val ramadanEndGregorian = LocalDate.from(ramadanEnd)
@@ -44,15 +45,16 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	val isAfterRamadanStart = todayHijri.isAfter(ramadanStart)
 	if (isAfterRamadanStart)
 	{
-		val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 10 , 1)
 		if (todayHijri.isBefore(ramadanEnd))
 		{
 			ramadanTimeLeft.value = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
 		}
 	} else
 	{
-		ramadanTimeLeft.value = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
+		val diff = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
+		ramadanTimeLeft.value = diff
 	}
+
 	//list of images to pick from
 	//we will pick a random image from the list
 	val imagesToShow =
@@ -87,18 +89,18 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 					verticalArrangement = Arrangement.Center ,
 					horizontalAlignment = Alignment.CenterHorizontally
 				  ) {
-				if (isAfterRamadanStart)
-				{
-					Text(text = "Ramadan is here" , style = MaterialTheme.typography.titleLarge)
-				} else
-				{
-					Text(text = "Ramadan is coming" , style = MaterialTheme.typography.titleLarge)
-				}
+
+					if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 && todayHijri[ChronoField.MONTH_OF_YEAR] == 9)
+					{
+						Text(text = "Ramadan Mubarak" , style = MaterialTheme.typography.titleLarge)
+					} else
+					{
+						Text(text = "Ramadan" , style = MaterialTheme.typography.titleLarge)
+					}
 
 				Row(
 						modifier = Modifier
-							.fillMaxWidth()
-							.padding(top = 16.dp) ,
+							.fillMaxWidth(),
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
@@ -123,14 +125,15 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 						if (isAfterRamadanStart)
 						{
 							//estimated end
-							Text(text = "Estimated end")
+							Text(text = "Estimated end",style = MaterialTheme.typography.titleSmall)
 						} else
 						{
 							//estimated start
-							Text(text = "Estimated start")
+							Text(text = "Estimated start",style = MaterialTheme.typography.titleSmall)
 						}
+						//if ramaadan time left is 1 then show that it ends today if its 2 then show that it ends tomorrow
 						Text(
-								text = "${ramadanTimeLeft.value} days" ,
+								text = if (ramadanTimeLeft.value == 0L) "Today" else if (ramadanTimeLeft.value == 1L) "Tomorrow" else "In ${ramadanTimeLeft.value} days" ,
 								style = MaterialTheme.typography.headlineMedium
 							)
 						if (isAfterRamadanStart)
@@ -155,9 +158,11 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	}
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun RamadanCardPreview()
 {
-	RamadanCard(onNavigateToCalender = { })
+	NimazTheme {
+		RamadanCard(onNavigateToCalender = { })
+	}
 }

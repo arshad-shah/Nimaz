@@ -1,18 +1,15 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
-import android.location.Location
-import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.google.android.gms.location.*
+import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,13 +23,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 	private val geocoder = Geocoder(context , Locale.getDefault())
 
-	private val fusedLocationProviderClient =
-		LocationServices.getFusedLocationProviderClient(context)
-
 	//theme state
 	//it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
 	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , "SYSTEM"))
 	val theme = _theme.asStateFlow()
+
+	//dark mode state
+	private var _isDarkMode = MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE , false))
+	val isDarkMode = _isDarkMode.asStateFlow()
 
 
 	//state for switch of location toggle between manual and automatic
@@ -90,6 +88,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 									 )
 												)
 	val highLatitude = _highLatitude.asStateFlow()
+
+	private val _autoParams = MutableStateFlow(
+			sharedPreferences.getDataBoolean(
+					AppConstants.AUTO_PARAMETERS ,
+					false
+									 )
+												)
+	val autoParams = _autoParams.asStateFlow()
 
 	//fajr angle state
 	private var _fajrAngle =
@@ -176,9 +182,12 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 		//theme
 		class Theme(val theme : String) : SettingsEvent()
+		//dark mode
+		class DarkMode(val darkMode : Boolean) : SettingsEvent()
 
 		//update settings based on calculation method
 		class UpdateSettings(val method : String) : SettingsEvent()
+		class AutoParameters(val checked : Boolean) : SettingsEvent()
 	}
 
 	//events for the settings screen
@@ -191,6 +200,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.saveDataBoolean(LOCATION_TYPE , event.checked)
 				_isLocationAuto.value = event.checked
 				loadLocation(event.context , event.checked)
+				Log.d("Nimaz: SettingsViewModel" , "Location toggle : ${event.checked}")
 			}
 
 			is SettingsEvent.LocationInput ->
@@ -198,6 +208,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_locationName.value = event.location
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , event.location)
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Location input : ${event.location}")
 			}
 
 			is SettingsEvent.Latitude ->
@@ -205,6 +216,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_latitude.value = event.latitude
 				sharedPreferences.saveData(AppConstants.LATITUDE , event.latitude.toString())
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Latitude : ${event.latitude}")
 			}
 
 			is SettingsEvent.Longitude ->
@@ -212,47 +224,55 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_longitude.value = event.longitude
 				sharedPreferences.saveData(AppConstants.LONGITUDE , event.longitude.toString())
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Longitude : ${event.longitude}")
 			}
 
 			is SettingsEvent.LoadLocation ->
 			{
 				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				Log.d("Nimaz: SettingsViewModel" , "Load location")
 			}
 
 			is SettingsEvent.BatteryExempt ->
 			{
 				_isBatteryExempt.value = event.exempt
 				sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , event.exempt)
+				Log.d("Nimaz: SettingsViewModel" , "Battery exempt : ${event.exempt}")
 			}
 
 			is SettingsEvent.CalculationMethod ->
 			{
 				_calculationMethod.value = event.method
 				sharedPreferences.saveData(AppConstants.CALCULATION_METHOD , event.method)
+				Log.d("Nimaz: SettingsViewModel" , "Calculation method : ${event.method}")
 			}
 
 			is SettingsEvent.Madhab ->
 			{
 				_madhab.value = event.madhab
 				sharedPreferences.saveData(AppConstants.MADHAB , event.madhab)
+				Log.d("Nimaz: SettingsViewModel" , "Madhab : ${event.madhab}")
 			}
 
 			is SettingsEvent.HighLatitude ->
 			{
 				_highLatitude.value = event.rule
 				sharedPreferences.saveData(AppConstants.HIGH_LATITUDE_RULE , event.rule)
+				Log.d("Nimaz: SettingsViewModel" , "High latitude rule : ${event.rule}")
 			}
 
 			is SettingsEvent.FajrAngle ->
 			{
 				_fajrAngle.value = event.angle
 				sharedPreferences.saveData(AppConstants.FAJR_ANGLE , event.angle)
+				Log.d("Nimaz: SettingsViewModel" , "Fajr angle : ${event.angle}")
 			}
 
 			is SettingsEvent.IshaAngle ->
 			{
 				_ishaAngle.value = event.angle
 				sharedPreferences.saveData(AppConstants.ISHA_ANGLE , event.angle)
+				Log.d("Nimaz: SettingsViewModel" , "Isha angle : ${event.angle}")
 			}
 
 			is SettingsEvent.IshaAngleVisibility ->
@@ -263,12 +283,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 					_ishaAngle.value = "0"
 					sharedPreferences.saveData(AppConstants.ISHA_ANGLE , "0")
 				}
+				Log.d("Nimaz: SettingsViewModel" , "Isha angle visibility : ${event.visible}")
 			}
 
 			is SettingsEvent.IshaInterval ->
 			{
 				_ishaInterval.value = event.interval
 				sharedPreferences.saveData(AppConstants.ISHA_INTERVAL , event.interval)
+				Log.d("Nimaz: SettingsViewModel" , "Isha interval : ${event.interval}")
 			}
 			//offset
 			is SettingsEvent.FajrOffset ->
@@ -342,12 +364,20 @@ class SettingsViewModel(context : Context) : ViewModel()
 					sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
 				_ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
 				_isLoading.value = false
+				Log.d("Nimaz: SettingsViewModel" , "Settings loaded")
 			}
 
 			is SettingsEvent.Theme ->
 			{
 				_theme.value = event.theme
 				sharedPreferences.saveData(AppConstants.THEME , event.theme)
+				Log.d("Nimaz: SettingsViewModel" , "Theme : ${event.theme}")
+			}
+			is SettingsEvent.DarkMode ->
+			{
+				_isDarkMode.value = event.darkMode
+				sharedPreferences.saveDataBoolean(AppConstants.DARK_MODE , event.darkMode)
+				Log.d("Nimaz: SettingsViewModel" , "Dark mode : ${event.darkMode}")
 			}
 
 			is SettingsEvent.UpdateSettings ->
@@ -410,7 +440,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 						AppConstants.ISHA_ADJUSTMENT ,
 						defaultsForMethod["ishaAdjustment"] !!
 										  )
+				Log.d("Nimaz: SettingsViewModel" , "Settings updated")
 
+			}
+			is SettingsEvent.AutoParameters ->
+			{
+				sharedPreferences.saveDataBoolean(AppConstants.AUTO_PARAMETERS , event.checked)
+				_autoParams.value = event.checked
+				Log.d("Nimaz: SettingsViewModel" , "Auto parameters : ${event.checked}")
 			}
 		}
 	}
@@ -424,12 +461,27 @@ class SettingsViewModel(context : Context) : ViewModel()
 				if (checked)
 				{
 					_isLoading.value = true
-					startLocationUpdates()
+					if(!AutoLocationUtils.isInitialized()){
+						AutoLocationUtils.init(context)
+					}
+					AutoLocationUtils.startLocationUpdates()
+					AutoLocationUtils.setLocationDataCallback {
+						location ->
+						sharedPreferences.saveData(
+								AppConstants.LATITUDE ,
+								location.latitude.toString()
+												  )
+						sharedPreferences.saveData(
+								AppConstants.LONGITUDE ,
+								location.longitude.toString()
+												  )
+						reverseGeocode(location.latitude , location.longitude)
+					}
 					_isLoading.value = false
 				} else
 				{
 					_isLoading.value = true
-					stopLocationUpdates()
+					AutoLocationUtils.stopLocationUpdates()
 					forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
 					_isLoading.value = false
 				}
@@ -455,14 +507,26 @@ class SettingsViewModel(context : Context) : ViewModel()
 			if (addresses.isNotEmpty())
 			{
 				val address : Address = addresses[0]
-				_locationName.value = address.locality
-				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				//check if locality is available if not then use admin area instead if admin area is also not available then use country name
+				if (address.locality != null)
+				{
+					_locationName.value = address.locality
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				} else if (address.adminArea != null)
+				{
+					_locationName.value = address.adminArea
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.adminArea)
+				} else
+				{
+					_locationName.value = address.countryName
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.countryName)
+				}
 				_latitude.value = latitude
 				_longitude.value = longitude
 				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , latitude)
 				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , longitude)
 
-				Log.i("Location" , "Location Found From value $latitude $longitude")
+				Log.d("Nimaz: Location" , "Location Found From value $latitude $longitude")
 			} else
 			{
 				_latitude.value =
@@ -471,7 +535,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 					sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				val cityNameFromStorage =
 					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-				Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+				Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 			}
 		} catch (e : Exception)
 		{
@@ -482,7 +546,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 			val cityNameFromStorage =
 				sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-			Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+			Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 		}
 	}
 
@@ -496,13 +560,27 @@ class SettingsViewModel(context : Context) : ViewModel()
 			if (addresses.isNotEmpty())
 			{
 				val address : Address = addresses[0]
+				//check if locality is available if not then use admin area instead if admin area is also not available then use country name
+				if (address.locality != null)
+				{
+					_locationName.value = address.locality
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
+				} else if (address.adminArea != null)
+				{
+					_locationName.value = address.adminArea
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.adminArea)
+				} else
+				{
+					_locationName.value = address.countryName
+					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.countryName)
+				}
 				_locationName.value = address.locality
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
 				_latitude.value = address.latitude
 				_longitude.value = address.longitude
 				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , address.latitude)
 				sharedPreferences.saveDataDouble(AppConstants.LONGITUDE , address.longitude)
-				Log.i("Location" , "Location Found From value $cityName")
+				Log.d("Nimaz: Location" , "Location Found From value $cityName")
 			} else
 			{
 				_latitude.value =
@@ -511,7 +589,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 					sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				val cityNameFromStorage =
 					sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-				Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+				Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 			}
 		} catch (e : Exception)
 		{
@@ -522,60 +600,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 			val cityNameFromStorage =
 				sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")
-			Log.i("Location" , "Location Found From Storage $cityNameFromStorage")
+			Log.d("Nimaz: Location" , "Location Found From Storage $cityNameFromStorage")
 		}
 	}
-
-
-	private val ONE_MINUTE = 1000 * 60
-	val locationRequest : LocationRequest = LocationRequest.Builder(
-			Priority.PRIORITY_BALANCED_POWER_ACCURACY ,
-			ONE_MINUTE.toLong()
-																   ).build()
-
-	@SuppressLint("MissingPermission")
-	private fun startLocationUpdates()
-	{
-		fusedLocationProviderClient.requestLocationUpdates(
-				locationRequest ,
-				locationCallback ,
-				Looper.getMainLooper()
-														  )
-	}
-
-	private fun stopLocationUpdates()
-	{
-		fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-	}
-
-	private val locationCallback = object : LocationCallback()
-	{
-		override fun onLocationResult(p0 : LocationResult)
-		{
-			super.onLocationResult(p0)
-			locationRequest
-			for (location in p0.locations)
-			{
-				setLocationData(location)
-				Log.d(
-						"Nimaz: Location" ,
-						"Latitude: ${location.latitude} Longitude: ${location.longitude}"
-					 )
-			}
-		}
-	}
-
-	private fun setLocationData(location : Location?)
-	{
-		location?.let {
-			_latitude.value = location.latitude
-			_longitude.value = location.longitude
-			reverseGeocode(
-					location.latitude ,
-					location.longitude
-						  )
-		}
-	}
-
-
 }

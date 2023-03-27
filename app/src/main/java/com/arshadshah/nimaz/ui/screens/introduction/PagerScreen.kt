@@ -30,18 +30,6 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 			verticalArrangement = Arrangement.Center
 		  ) {
 
-		Text(
-				modifier = Modifier
-					.fillMaxWidth()
-					//if fourth page than padding is 8 else 20 on bottom
-					.padding(bottom = if (position == 4) 0.dp else 20.dp)
-					.testTag("pagerScreenTitle") ,
-				text = onBoardingPage.title ,
-				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
-				fontWeight = FontWeight.Bold ,
-				textAlign = TextAlign.Center
-			)
-
 		Image(
 				modifier = Modifier
 					.fillMaxWidth(0.6f)
@@ -55,7 +43,19 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 		Text(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 16.dp)
+					//if fourth page than padding is 8 else 20 on bottom
+					.padding(bottom = if (position == 4) 0.dp else 20.dp)
+					.testTag("pagerScreenTitle") ,
+				text = onBoardingPage.title ,
+				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
+				fontWeight = FontWeight.Bold ,
+				textAlign = TextAlign.Center
+			)
+
+		Text(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 8.dp)
 					.padding(top = 0.dp , bottom = 20.dp)
 					.testTag("pagerScreenDescription") ,
 				text = onBoardingPage.description ,
@@ -95,7 +95,7 @@ fun FinishButton(
 			horizontalArrangement = Arrangement.Center
 	   ) {
 		AnimatedVisibility(
-				visible = pagerState.currentPage == 7
+				visible = pagerState.currentPage == 8
 						  ) {
 			Button(
 					onClick = onClick ,
@@ -148,7 +148,7 @@ fun NextButton(
 {
 
 	AnimatedVisibility(
-			visible = pagerState.currentPage != 7
+			visible = pagerState.currentPage != 8
 					  ) {
 		Button(
 				modifier = Modifier

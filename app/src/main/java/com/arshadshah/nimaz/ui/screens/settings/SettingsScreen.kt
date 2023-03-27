@@ -2,14 +2,12 @@ package com.arshadshah.nimaz.ui.screens.settings
 
 import android.app.NotificationManager
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -18,7 +16,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -27,17 +24,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.DARK_MODE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
-import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
+import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
@@ -50,6 +46,7 @@ fun SettingsScreen(
 	onNavigateToPrayerTimeCustomizationScreen : () -> Unit ,
 	onNavigateToAboutScreen : () -> Unit ,
 	paddingValues : PaddingValues ,
+	onNavigateToWebViewScreen : (String) -> Unit ,
 				  )
 {
 	val context = LocalContext.current
@@ -60,6 +57,10 @@ fun SettingsScreen(
 									 )
 	val themeState = remember {
 		viewModelSettings.theme
+	}.collectAsState()
+
+	val isDarkMode = remember {
+		viewModelSettings.isDarkMode
 	}.collectAsState()
 
 	val viewModel = viewModel(
@@ -107,7 +108,6 @@ fun SettingsScreen(
 		ElevatedCard(
 				modifier = Modifier
 					.padding(8.dp)
-					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
 					.testTag(TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON)
 					) {
@@ -132,53 +132,116 @@ fun SettingsScreen(
 		//map of theme to theme name
 //		keys are like this LIGHT , DARK , SYSTEM
 		val themeMapForDynamic = mapOf(
-				"LIGHT" to "Light" ,
-				"DARK" to "Dark" ,
+				"DEFAULT" to "App Default" ,
+				"Raisin_Black" to "Raisin Black" ,
+				"Dark_Red" to "Burgundy" ,
+				"Dark_Liver" to "Dark Liver" ,
 				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
 									  )
 		val themeMapForNonDynamic = mapOf(
-				"LIGHT" to "Light" ,
-				"DARK" to "Dark" ,
+				"DEFAULT" to "App Default" ,
+				"Raisin_Black" to "Raisin Black" ,
+				"Dark_Red" to "Burgundy" ,
+				"Dark_Liver" to "Dark Liver" ,
 				"SYSTEM" to "System Default" ,
 										 )
 
-		//theme
-		ElevatedCard(
-				modifier = Modifier
-					.padding(8.dp)
-					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-					.fillMaxWidth()
-					) {
-			SettingsList(
-					onChange = {
-						viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
-						Toasty.success(context , "Theme Changed to $it" , Toast.LENGTH_SHORT , true)
-							.show()
-					} ,
-					height = 400.dp ,
-					subtitle = {
-						Text(text = "Change the theme of the app")
-					} ,
-					icon = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.theme_icon) ,
-								contentDescription = "Theme"
-							)
-					} ,
-					valueState = stateOfTheme ,
-					title = { Text(text = "Theme") } ,
-					items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
-						)
-		}
+		val stateDarkMode =
+			rememberPreferenceBooleanSettingState(
+					DARK_MODE ,
+					false
+												 )
+		stateDarkMode.value = isDarkMode.value
 
+		SettingsGroup(
+				title = { Text(text = "Theme") } ,
+					 ) {
+			if (stateOfTheme.value != "SYSTEM") {
+				ElevatedCard(
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth()
+							) {
+					//switch for theme mode dark/light when its not dynamic
+					SettingsSwitch(
+							state = stateDarkMode ,
+							title = { Text(text = "Theme Mode") } ,
+							onCheckedChange = {
+								viewModelSettings.handleEvent(
+										SettingsViewModel.SettingsEvent.DarkMode(
+												it
+																				)
+															 )
+							} ,
+							subtitle = {
+								Text(
+										text = if (stateDarkMode.value) "Dark" else "Light"
+									)
+							} ,
+							icon = {
+								if (stateDarkMode.value)
+								{
+									Icon(
+											modifier = Modifier.size(24.dp) ,
+											painter = painterResource(id = R.drawable.dark_icon) ,
+											contentDescription = "Dark Mode"
+										)
+								} else
+								{
+									Icon(
+											modifier = Modifier.size(24.dp) ,
+											painter = painterResource(id = R.drawable.light_icon) ,
+											contentDescription = "Light Mode"
+										)
+								}
+							}
+								  )
+				}
+			}
+			//theme
+			ElevatedCard(
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						) {
+				SettingsList(
+						onChange = {
+							viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
+						} ,
+						height = 400.dp ,
+						icon = {
+							Icon(
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.theme_icon) ,
+									contentDescription = "Theme"
+								)
+						} ,
+						useSelectedValueAsSubtitle = false,
+						valueState = stateOfTheme ,
+						title = {
+							Text(text =
+								when (stateOfTheme.value)
+								{
+									"DEFAULT" -> "App Default"
+									"Raisin_Black" -> "Raisin Black"
+									"Dark_Red" -> "Burgundy"
+									"Dark_Liver" -> "Dark Liver"
+									"SYSTEM" -> "System Default"
+									"DYNAMIC" -> "Dynamic"
+									else -> "App Default"
+								}
+								)
+								} ,
+						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
+							)
+			}
+		}
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsMenuLink(
@@ -209,7 +272,6 @@ fun SettingsScreen(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsMenuLink(
@@ -260,7 +322,6 @@ fun SettingsScreen(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsMenuLink(
@@ -289,7 +350,6 @@ fun SettingsScreen(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				BatteryExemptionUI()
@@ -300,18 +360,12 @@ fun SettingsScreen(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsMenuLink(
 						title = { Text(text = "Privacy Policy") } ,
 						onClick = {
-							//open the privacy policy in the browser
-							val url =
-								"https://nimaz.arshadshah.com/static/media/Privacy%20Policy.06ada0df63d36ef44b56.pdf"
-							val i = Intent(Intent.ACTION_VIEW)
-							i.data = Uri.parse(url)
-							context.startActivity(i)
+							onNavigateToWebViewScreen("privacy_policy")
 						} ,
 						icon = {
 							Icon(
@@ -326,18 +380,12 @@ fun SettingsScreen(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsMenuLink(
 						title = { Text(text = "Terms and Conditions") } ,
 						onClick = {
-							//open the terms and conditions in the browser
-							val url =
-								"https://nimaz.arshadshah.com/static/media/Terms%20and%20Condition.c2cb253a0ddd3b258abf.pdf"
-							val i = Intent(Intent.ACTION_VIEW)
-							i.data = Uri.parse(url)
-							context.startActivity(i)
+							onNavigateToWebViewScreen("terms_of_service")
 						} ,
 						icon = {
 							Icon(
@@ -354,7 +402,6 @@ fun SettingsScreen(
 		ElevatedCard(
 				modifier = Modifier
 					.padding(8.dp)
-					.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 					.fillMaxWidth()
 					.testTag(TEST_TAG_ABOUT)
 					) {

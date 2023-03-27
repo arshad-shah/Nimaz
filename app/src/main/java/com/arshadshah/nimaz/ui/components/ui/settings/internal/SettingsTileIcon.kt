@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.ui.components.ui.settings.internal
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
@@ -18,12 +20,18 @@ internal fun SettingsTileIcon(
 	icon : @Composable (() -> Unit)? = null ,
 							 )
 {
-	Box(
-			modifier = modifier.size(64.dp) ,
-			contentAlignment = Alignment.Center ,
-	   ) {
-		if (icon != null)
-		{
+	if (icon == null)
+	{
+		Box(
+				modifier = modifier.height(64.dp).width(16.dp) ,
+				contentAlignment = Alignment.Center ,
+		   ) {
+		}
+	}else{
+		Box(
+				modifier = modifier.size(64.dp) ,
+				contentAlignment = Alignment.Center ,
+		   ) {
 			icon()
 		}
 	}

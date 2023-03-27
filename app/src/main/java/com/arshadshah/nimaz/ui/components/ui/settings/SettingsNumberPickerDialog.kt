@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -43,7 +44,10 @@ fun SettingsNumberPickerDialog(
 
 	val safeSubtitle = if (state.value >= 0 && useSelectedValueAsSubtitle)
 	{
-		{ Text(text = valueState.value) }
+		{ Text(text = if (items.size == 51)
+			if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Degree " else if (valueState.value.toInt() != - 1) "${valueState.value} Degrees" else "${valueState.value} Degree"
+		else
+			if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Minute " else if (valueState.value.toInt() != - 1) "${valueState.value} Minutes" else "${valueState.value} Minute") }
 	} else subtitle
 
 	SettingsMenuLink(
@@ -60,6 +64,7 @@ fun SettingsNumberPickerDialog(
 	val coroutineScope = rememberCoroutineScope()
 	val onSelected : (Int) -> Unit = { selectedIndex ->
 		coroutineScope.launch {
+			Log.d("Nimaz: SettingsNumberPickerDialog" , "onSelected: $selectedIndex")
 			val index = items.indexOf(selectedIndex)
 			state.value = index
 			valueState.value = selectedIndex.toString()
@@ -68,7 +73,6 @@ fun SettingsNumberPickerDialog(
 	}
 
 	AlertDialog(
-			shape = CardDefaults.elevatedShape ,
 			title = title ,
 			text = {
 				Column {
@@ -136,6 +140,24 @@ fun SettingsNumberPickerDialogPreview()
 				description = { Text(text = "Description") } ,
 				items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
 				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+				subtitle = { Text(text = "Subtitle") } ,
+				valueState = storage ,
+								  )
+	}
+}
+@Preview
+@Composable
+fun SettingsNumberPickerDialogNoIconPreview()
+{
+	val storage = rememberPreferenceStringSettingState(
+			key = "test" ,
+			defaultValue = "0"
+													  )
+	NimazTheme {
+		SettingsNumberPickerDialog(
+				title = { Text(text = "Title") } ,
+				description = { Text(text = "Description") } ,
+				items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
 				subtitle = { Text(text = "Subtitle") } ,
 				valueState = storage ,
 								  )

@@ -129,6 +129,20 @@ class DataStore(db : AppDatabase)
 
 	//insert all the ayas
 	suspend fun insertAyats(aya : List<Aya>) = ayaDao.insert(aya.map { it.toLocalAya() })
+	//getRandomAya
+	suspend fun getRandomAya() = ayaDao.getRandomAya().toAya()
+
+	//getAyatByAyaNumberInSurah
+	suspend fun getAyatByAyaNumberInSurah(
+		ayaNumberInSurah : Int ,
+										 ) =
+		ayaDao.getAyatByAyaNumberInSurah(ayaNumberInSurah).toAya()
+
+	//countAllAyas
+	suspend fun countAllAyat() = ayaDao.countAllAyas()
+
+	//get allAyas
+	suspend fun getAllAyat() = ayaDao.getAllAyas().map { it.toAya() }
 
 	//count the number of ayas
 	suspend fun countSurahAyat(
@@ -136,7 +150,7 @@ class DataStore(db : AppDatabase)
 							  ) =
 		ayaDao.countSurahAya(surahNumber)
 
-	suspend fun countJuzAyat(juzNumber : Int , translationLanguage : String) =
+	suspend fun countJuzAyat(juzNumber : Int) =
 		ayaDao.countJuzAya(juzNumber)
 
 	//bookmark an aya

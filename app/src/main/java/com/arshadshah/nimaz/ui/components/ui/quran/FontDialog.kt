@@ -133,7 +133,7 @@ fun FontSizeDialog(
 							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.SpaceBetween
 					   ) {
-						Text(text = "Font Style")
+						Text(text = "Font Style (Arabic)")
 						Column {
 							Row(
 									modifier = Modifier
@@ -187,8 +187,6 @@ fun FontSizeDialog(
 										)
 						}
 					}
-
-
 				}
 			} ,
 			confirmButton = {

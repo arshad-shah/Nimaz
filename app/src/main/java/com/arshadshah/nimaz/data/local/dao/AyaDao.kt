@@ -11,6 +11,10 @@ interface AyaDao
 	@Query("SELECT * FROM Aya")
 	suspend fun getAllAyas() : List<LocalAya>
 
+	//count all the ayas
+	@Query("SELECT COUNT(*) FROM Aya")
+	suspend fun countAllAyas() : Int
+
 	//get all the ayas of a surah
 	@Query("SELECT * FROM Aya WHERE suraNumber = :surahNumber")
 	suspend fun getAyasOfSurah(surahNumber : Int) : List<LocalAya>
@@ -81,4 +85,12 @@ interface AyaDao
 
 	@Query("SELECT COUNT(*) FROM Aya WHERE suraNumber = :surahNumber")
 	suspend fun countSurahAya(surahNumber : Int) : Int
+
+	//get a random aya
+	@Query("SELECT * FROM Aya ORDER BY RANDOM() LIMIT 1")
+	suspend fun getRandomAya() : LocalAya
+
+	//get ayat by aya number in surah
+	@Query("SELECT * FROM Aya WHERE ayaNumberInSurah = :ayaNumberInSurah")
+	suspend fun getAyatByAyaNumberInSurah(ayaNumberInSurah : Int) : LocalAya
 }

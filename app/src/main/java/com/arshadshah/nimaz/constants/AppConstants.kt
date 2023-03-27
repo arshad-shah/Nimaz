@@ -3,6 +3,9 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
+	val DARK_MODE : String = "darkMode"
+	val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String = "randomAyatNumberInSurahLastFetched"
+	val RANDOM_AYAT_LAST_FETCHED : String = "randomAyatLastFetched"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -55,13 +58,7 @@ object AppConstants
 	const val LOCATION_TYPE = "location_type"
 	const val LOCATION_INPUT = "location_input"
 	const val ALARM_LOCK = "alarmLock"
-	const val FAJR = "fajr"
-	const val SUNRISE = "sunrise"
-	const val DHUHR = "dhuhr"
-	const val ASR = "asr"
-	const val MAGHRIB = "maghrib"
-	const val ISHA = "isha"
-	const val CURRENT_PRAYER = "currentPrayer"
+	const val AUTO_PARAMETERS = "AutoParameters"
 	const val PAGE_TYPE = "PageType"
 	const val TRANSLATION_LANGUAGE = "Translation"
 	const val NOTIFICATION_ALLOWED = "notificationAllowed"
@@ -69,6 +66,8 @@ object AppConstants
 	const val CHANNEL_LOCK = "channelLock"
 	const val THEME = "theme"
 	const val FONT_STYLE = "font_style"
+	//full quran downloaded
+	const val FULL_QURAN_DOWNLOADED = "full_quran_downloaded"
 
 	//codes
 	const val APP_UPDATE_REQUEST_CODE = 100
@@ -158,6 +157,7 @@ object AppConstants
 	const val CALENDER_SCREEN_ROUTE : String = "calendar_screen"
 	const val DASHBOARD_SCREEN = "dashboard_screen"
 	const val TASBIH_LIST_SCREEN = "tasbih_list_screen"
+	const val WEB_VIEW_SCREEN_ROUTE = "web_view_screen/{url}"
 
 	//Test tags
 	//navigation tags
@@ -189,6 +189,13 @@ object AppConstants
 	const val TEST_TAG_JUZ_ITEM = "juz item"
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON = "Prayer times customization button"
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION = "Prayer times customization screen"
+	const val TEST_TAG_HOME_PRAYER_TIMES_CARD = "Home prayer times card"
+	//TEST_TAG_EVENTS_CARD
+	const val TEST_TAG_EVENTS_CARD = "Events card"
+	//TEST_TAG_TRACKERS_CARD
+	const val TEST_TAG_TRACKERS_CARD = "Trackers card"
+	//TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
+	const val TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD = "Next prayer icon dashboard"
 
 
 	//logging tags
@@ -284,8 +291,8 @@ object AppConstants
 
 			"EGYPTIAN" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "19.5"
-				mapOfDefaultParameters["ishaAngle"] = "17.5"
+				mapOfDefaultParameters["fajrAngle"] = "19"
+				mapOfDefaultParameters["ishaAngle"] = "17"
 				mapOfDefaultParameters["ishaInterval"] = "0"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
 				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
@@ -314,7 +321,7 @@ object AppConstants
 
 			"MAKKAH" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "18.5"
+				mapOfDefaultParameters["fajrAngle"] = "18"
 				mapOfDefaultParameters["ishaAngle"] = "0"
 				mapOfDefaultParameters["ishaInterval"] = "90"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
@@ -329,8 +336,8 @@ object AppConstants
 
 			"DUBAI" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "18.2"
-				mapOfDefaultParameters["ishaAngle"] = "18.2"
+				mapOfDefaultParameters["fajrAngle"] = "18"
+				mapOfDefaultParameters["ishaAngle"] = "18"
 				mapOfDefaultParameters["ishaInterval"] = "0"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
 				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
@@ -360,7 +367,7 @@ object AppConstants
 			"KUWAIT" ->
 			{
 				mapOfDefaultParameters["fajrAngle"] = "18"
-				mapOfDefaultParameters["ishaAngle"] = "17.5"
+				mapOfDefaultParameters["ishaAngle"] = "17"
 				mapOfDefaultParameters["ishaInterval"] = "0"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
 				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
@@ -374,7 +381,7 @@ object AppConstants
 
 			"TEHRAN" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "17.7"
+				mapOfDefaultParameters["fajrAngle"] = "17"
 				mapOfDefaultParameters["ishaAngle"] = "14"
 				mapOfDefaultParameters["ishaInterval"] = "0"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
@@ -404,7 +411,7 @@ object AppConstants
 
 			"GULF" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "19.5"
+				mapOfDefaultParameters["fajrAngle"] = "19"
 				mapOfDefaultParameters["ishaAngle"] = "0"
 				mapOfDefaultParameters["ishaInterval"] = "90"
 				mapOfDefaultParameters["madhab"] = "SHAFI"
@@ -509,17 +516,17 @@ object AppConstants
 
 			"IRELAND" ->
 			{
-				mapOfDefaultParameters["fajrAngle"] = "13.5"
-				mapOfDefaultParameters["ishaAngle"] = "13.5"
+				mapOfDefaultParameters["fajrAngle"] = "15"
+				mapOfDefaultParameters["ishaAngle"] = "15"
 				mapOfDefaultParameters["ishaInterval"] = "0"
-				mapOfDefaultParameters["madhab"] = "HANAFI"
+				mapOfDefaultParameters["madhab"] = "SHAFI"
 				mapOfDefaultParameters["highLatitudeRule"] = "TWILIGHT_ANGLE"
-				mapOfDefaultParameters["fajrAdjustment"] = "2"
+				mapOfDefaultParameters["fajrAdjustment"] = "-3"
 				mapOfDefaultParameters["sunriseAdjustment"] = "-1"
-				mapOfDefaultParameters["dhuhrAdjustment"] = "5"
-				mapOfDefaultParameters["asrAdjustment"] = "0"
+				mapOfDefaultParameters["dhuhrAdjustment"] = "2"
+				mapOfDefaultParameters["asrAdjustment"] = "1"
 				mapOfDefaultParameters["maghribAdjustment"] = "2"
-				mapOfDefaultParameters["ishaAdjustment"] = "-1"
+				mapOfDefaultParameters["ishaAdjustment"] = "-3"
 			}
 
 			"OTHER" ->

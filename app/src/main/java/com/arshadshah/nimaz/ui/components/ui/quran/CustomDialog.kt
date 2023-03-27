@@ -37,7 +37,6 @@ fun CustomDialog(
 	}
 
 	AlertDialog(
-			shape = CardDefaults.elevatedShape ,
 			title = { Text(text = title) } ,
 			text = {
 				Column(

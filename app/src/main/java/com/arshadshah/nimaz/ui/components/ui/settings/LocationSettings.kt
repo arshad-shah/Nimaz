@@ -5,19 +5,15 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -34,8 +30,10 @@ import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
@@ -85,6 +83,13 @@ fun LocationSettings(isIntro : Boolean = false)
 		viewModel.isError
 	}.collectAsState()
 
+	LaunchedEffect(locationNameState.value, latitudeState.value, longitudeState.value) {
+		viewModelPrayerTimes.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				PrayerTimesParamMapper.getParams(context)
+																				  )
+							 )
+	}
 
 	if (isError.value.isNotBlank())
 	{
@@ -103,7 +108,7 @@ fun LocationSettings(isIntro : Boolean = false)
 		val state =
 			rememberPreferenceBooleanSettingState(
 					AppConstants.LOCATION_TYPE ,
-					locationPermissionState.allPermissionsGranted
+					false
 												 )
 
 
@@ -114,22 +119,67 @@ fun LocationSettings(isIntro : Boolean = false)
 			FeatureThatRequiresLocationPermission(locationPermissionState , state)
 		}
 
+		val latitude = remember {
+			viewModel.latitude
+		}.collectAsState()
+		val longitude = remember {
+			viewModel.longitude
+		}.collectAsState()
+
+		val autoParams = remember {
+			viewModel.autoParams
+		}.collectAsState()
+
 		LaunchedEffect(
 				key1 = locationNameState.value ,
 				key2 = latitudeState.value ,
 				key3 = longitudeState.value
 					  ) {
+
+			if(autoParams.value){
+				//set method to other
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.CalculationMethod(
+								"OTHER"
+																		 )
+											)
+				//set fajr angle
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.FajrAngle(
+								AutoAnglesCalc().calculateFajrAngle(context , latitude.value , longitude.value).toString()
+																 )
+											)
+				//set ishaa angle
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.IshaAngle(
+								AutoAnglesCalc().calculateIshaaAngle(context , latitude.value , longitude.value).toString()
+																 )
+											)
+				//set high latitude method
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.HighLatitude(
+								"TWILIGHT_ANGLE"
+																	)
+											)
+				viewModel.handleEvent(
+						SettingsViewModel.SettingsEvent.LoadSettings
+											)
+			}
+
+
 			viewModelPrayerTimes.handleEvent(
 					context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 					PrayerTimesParamMapper.getParams(context)
 																					  )
 											)
+
 			viewModelPrayerTimes.handleEvent(
 					context ,
 					PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
 							context
 																	   )
 											)
+
 		}
 
 		if (isIntro)
@@ -139,12 +189,14 @@ fun LocationSettings(isIntro : Boolean = false)
 					locationPermissionState = locationPermissionState ,
 					isIntro = true ,
 								)
-			if (! state.value)
-			{
+			AnimatedVisibility(
+					visible = ! state.value ,
+					enter = expandVertically() ,
+					exit = shrinkVertically()
+							  ) {
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
-							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							.placeholder(
 									visible = isLoading.value ,
@@ -169,31 +221,35 @@ fun LocationSettings(isIntro : Boolean = false)
 						locationPermissionState = locationPermissionState ,
 						isIntro = false ,
 									)
-				if (! state.value)
-				{
-					ElevatedCard(
-							modifier = Modifier
-								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-								.fillMaxWidth()
-								.placeholder(
-										visible = isLoading.value ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
-								) {
-						ManualLocationInput(
-								handleSettingEvents = viewModel::handleEvent ,
-								locationNameState = locationNameState ,
-										   )
+				AnimatedVisibility(
+						visible = ! state.value ,
+						enter = expandVertically() ,
+						exit = shrinkVertically()
+								  ) {
+					Column {
+						ElevatedCard(
+								modifier = Modifier
+									.padding(8.dp)
+									.fillMaxWidth()
+									.placeholder(
+											visible = isLoading.value ,
+											color = MaterialTheme.colorScheme.outline ,
+											shape = RoundedCornerShape(4.dp) ,
+											highlight = PlaceholderHighlight.shimmer(
+													highlightColor = Color.White ,
+																					)
+												)
+									) {
+							ManualLocationInput(
+									handleSettingEvents = viewModel::handleEvent ,
+									locationNameState = locationNameState ,
+											   )
+						}
+						CoordinatesView(
+								longitudeState = longitudeState ,
+								latitudeState = latitudeState ,
+									   )
 					}
-					CoordinatesView(
-							longitudeState = longitudeState ,
-							latitudeState = latitudeState ,
-								   )
 				}
 			}
 		}
@@ -244,24 +300,40 @@ fun LocationToggleSwitch(
 				{
 					if (locationPermissionState.permissions[0].status.isGranted || locationPermissionState.permissions[1].status.isGranted)
 					{
-						viewModel.handleEvent(
-								SettingsViewModel.SettingsEvent.LocationToggle(
-										context ,
-										true
-																			  )
-											 )
-						viewModelPrayerTimes.handleEvent(
-								context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-								PrayerTimesParamMapper.getParams(context)
-																								  )
-														)
-						viewModelPrayerTimes.handleEvent(
-								context ,
-								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-										context
-																				   )
-														)
-						isChecked.value = true
+						//check if the value saved in the shared preferences is true
+						val isLocationAutoInPref = PrivateSharedPreferences(context).getDataBoolean(
+								AppConstants.LOCATION_TYPE ,
+								false
+																							)
+						if(isLocationAutoInPref)
+						{
+							viewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.LocationToggle(
+											context ,
+											true
+																				  )
+													 )
+							viewModelPrayerTimes.handleEvent(
+									context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+									PrayerTimesParamMapper.getParams(context)
+																									  )
+															)
+							viewModelPrayerTimes.handleEvent(
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+											context
+																					   )
+															)
+							isChecked.value = true
+						}else{
+							viewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.LocationToggle(
+											context ,
+											false
+																				  )
+													 )
+							isChecked.value = false
+						}
 					}
 				}
 
@@ -281,19 +353,10 @@ fun LocationToggleSwitch(
 	ElevatedCard(
 			modifier = Modifier
 				.padding(8.dp)
-				.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 				.fillMaxWidth()
 				.testTag("LocationSwitch")
 				) {
 		SettingsSwitch(
-				modifier = Modifier.placeholder(
-						visible = isLoading.value ,
-						color = MaterialTheme.colorScheme.outline ,
-						shape = RoundedCornerShape(4.dp) ,
-						highlight = PlaceholderHighlight.shimmer(
-								highlightColor = Color.White ,
-																)
-											   ) ,
 				state = state ,
 				icon = {
 					Icon(
@@ -327,7 +390,10 @@ fun LocationToggleSwitch(
 									verticalAlignment = Alignment.CenterVertically
 							   ) {
 								Icon(
-										imageVector = Icons.Filled.CheckCircle ,
+										modifier = Modifier
+											.size(18.dp)
+											.padding(end = 4.dp) ,
+										painter = painterResource(id = R.drawable.checkbox_icon) ,
 										contentDescription = "Location Allowed"
 									)
 								Text(text = "Enabled")
@@ -339,7 +405,10 @@ fun LocationToggleSwitch(
 									verticalAlignment = Alignment.CenterVertically
 							   ) {
 								Icon(
-										imageVector = Icons.Filled.Close ,
+										modifier = Modifier
+											.size(18.dp)
+											.padding(end = 4.dp) ,
+										painter = painterResource(id = R.drawable.cross_circle_icon) ,
 										contentDescription = "Location Not Allowed"
 									)
 								Text(text = "Disabled")
@@ -424,12 +493,19 @@ fun LocationToggleSwitch(
 
 	if (state.value && isIntro)
 	{
+		//if locationNameState is longer than 10 characters, than add an ellipsis
+		val locationName = if (locationNameState.value.length > 15)
+		{
+			locationNameState.value.substring(0 , 15) + "..."
+		} else
+		{
+			locationNameState.value
+		}
 		if (locationNameState.value.isBlank())
 		{
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				Text(
@@ -444,12 +520,11 @@ fun LocationToggleSwitch(
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				Text(
 						textAlign = TextAlign.Center ,
-						text = "Current Location: " + locationNameState.value ,
+						text = "Current Location: $locationName" ,
 						modifier = Modifier.padding(16.dp) ,
 						style = MaterialTheme.typography.bodyMedium
 					)

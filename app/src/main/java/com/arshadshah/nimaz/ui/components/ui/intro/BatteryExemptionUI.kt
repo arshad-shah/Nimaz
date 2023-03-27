@@ -8,13 +8,13 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -109,28 +109,40 @@ fun BatteryExemptionUI()
 				}
 			} ,
 			title = {
-				Text(text = "Enable Battery Exemption")
+				if (isBatteryExempt.value)
+				{
+					Text(text = "Optimization Disabled", style = MaterialTheme.typography.titleSmall)
+				} else
+				{
+					Text(text = "Disable Optimization", style = MaterialTheme.typography.titleSmall)
+				}
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
 				if (isBatteryExempt.value)
 				{
-					Row {
+					Row(
+							verticalAlignment = Alignment.CenterVertically
+					   ) {
 						Icon(
-								imageVector = Icons.Filled.CheckCircle ,
+								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								painter = painterResource(id = R.drawable.checkbox_icon) ,
 								contentDescription = "Battery Exemption Allowed"
 							)
-						Text(text = "Exempt")
+						Text(text = "Exempt", style = MaterialTheme.typography.bodySmall)
 					}
 				} else
 				{
 					//if the permission is not granted, show a notification icon and text saying "Not Allowed"
-					Row {
+					Row(
+							verticalAlignment = Alignment.CenterVertically
+					   ) {
 						Icon(
-								imageVector = Icons.Filled.Close ,
+								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								painter = painterResource(id = R.drawable.cross_circle_icon) ,
 								contentDescription = "Battery Exemption Not Allowed"
 							)
-						Text(text = "Optimizing")
+						Text(text = "Optimizing", style = MaterialTheme.typography.bodySmall)
 					}
 				}
 			} ,

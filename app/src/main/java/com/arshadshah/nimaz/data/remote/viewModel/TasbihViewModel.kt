@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
 import android.content.Context
+import android.os.Vibrator
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,8 @@ import java.time.LocalDate
 
 class TasbihViewModel(context : Context) : ViewModel()
 {
+
+	val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
 	//state for the tasbih
 	private var _tasbihLoading = MutableStateFlow(false)
@@ -43,6 +46,18 @@ class TasbihViewModel(context : Context) : ViewModel()
 											  )
 	val tasbihList = _tasbihList.asStateFlow()
 
+	//state for the reset button in top app bar
+	private var _resetButtonState = MutableStateFlow(false)
+	val resetButtonState = _resetButtonState.asStateFlow()
+
+	//state for the vibration button in top app bar
+	private var _vibrationButtonState = MutableStateFlow(true)
+	val vibrationButtonState = _vibrationButtonState.asStateFlow()
+
+	//state for the orientation button in top app bar
+	private var _orientationButtonState = MutableStateFlow(true)
+	val orientationButtonState = _orientationButtonState.asStateFlow()
+
 	sealed class TasbihEvent
 	{
 
@@ -68,6 +83,15 @@ class TasbihViewModel(context : Context) : ViewModel()
 
 		//update tasbih goal
 		data class UpdateTasbihGoal(val tasbih : Tasbih) : TasbihEvent()
+
+		//update the reset button state
+		data class UpdateResetButtonState(val state : Boolean) : TasbihEvent()
+
+		//update the vibration button state
+		data class UpdateVibrationButtonState(val state : Boolean) : TasbihEvent()
+
+		//update the orientation button state
+		data class UpdateOrientationButtonState(val state : Boolean) : TasbihEvent()
 	}
 
 	//event for the tasbih
@@ -112,6 +136,23 @@ class TasbihViewModel(context : Context) : ViewModel()
 			{
 				updateTasbihGoal(event.tasbih)
 			}
+			is TasbihEvent.UpdateResetButtonState ->
+			{
+				_resetButtonState.value = event.state
+			}
+			is TasbihEvent.UpdateVibrationButtonState ->
+			{
+				_vibrationButtonState.value = event.state
+				//vibrate if the vibration button is on
+				if (!event.state)
+				{
+					vibrator.cancel()
+				}
+			}
+			is TasbihEvent.UpdateOrientationButtonState ->
+			{
+				_orientationButtonState.value = event.state
+			}
 		}
 	}
 
@@ -144,7 +185,7 @@ class TasbihViewModel(context : Context) : ViewModel()
 						if (todayTasbihList != null)
 						{
 							val tasbihExists = todayTasbihList.find {
-								it.arabicName == tasbih.arabicName && it.goal == tasbih.goal
+								it.arabicName == tasbih.arabicName || it.goal == tasbih.goal && it.date == date
 							}
 							if (tasbihExists != null)
 							{

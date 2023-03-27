@@ -1,11 +1,11 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -26,6 +25,7 @@ import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
+import com.arshadshah.nimaz.ui.components.ui.intro.CalculationMethodUI
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
@@ -55,17 +55,9 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	LaunchedEffect(Unit) {
 		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
 	}
-
-	val mapOfMethods = AppConstants.getMethods()
 	val mapOfMadhabs = AppConstants.getAsrJuristic()
 	val mapOfHighLatitudeRules = AppConstants.getHighLatitudes()
 
-	val calculationMethodState =
-		rememberPreferenceStringSettingState(
-				AppConstants.CALCULATION_METHOD ,
-				"IRELAND" ,
-				sharedPreferences
-											)
 	val madhabState =
 		rememberPreferenceStringSettingState(AppConstants.MADHAB , "SHAFI" , sharedPreferences)
 	val highLatitudeRuleState = rememberPreferenceStringSettingState(
@@ -113,10 +105,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaInterval
 	}.collectAsState()
 
-	val calculationMethod = remember {
-		settingViewModel.calculationMethod
-	}.collectAsState()
-
 	val madhab = remember {
 		settingViewModel.madhab
 	}.collectAsState()
@@ -161,7 +149,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.isLoading
 	}.collectAsState()
 
-	calculationMethodState.value = calculationMethod.value
 	madhabState.value = madhab.value
 	highLatitudeRuleState.value = highLatitudeRule.value
 	fajrAngleState.value = fajrAngle.value
@@ -183,55 +170,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		SettingsGroup(title = {
 			Text(text = "Prayer Parameters")
 		}) {
+			CalculationMethodUI()
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
-						.fillMaxWidth()
-						) {
-				SettingsList(
-						title = {
-							Text(text = "Calculation Method")
-						} ,
-						subtitle = {
-							Text(text = calculationMethodState.value)
-						} ,
-						description = {
-							Text(text = "The method used to calculate the prayer times.")
-						} ,
-						items = mapOfMethods ,
-						valueState = calculationMethodState ,
-						onChange = { method : String ->
-							settingViewModel.handleEvent(
-									SettingsViewModel.SettingsEvent.CalculationMethod(
-											method
-																					 )
-														)
-							settingViewModel.handleEvent(
-									SettingsViewModel.SettingsEvent.UpdateSettings(
-											method
-																				  )
-														)
-							viewModel.handleEvent(
-									context ,
-									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-											getParams(context)
-																							)
-												 )
-							viewModel.handleEvent(
-									context ,
-									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-											context
-																					   )
-												 )
-						} ,
-						height = 500.dp
-							)
-			}
-			ElevatedCard(
-					modifier = Modifier
-						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsList(
@@ -270,7 +212,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsList(
@@ -315,7 +256,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			ElevatedCard(
 					modifier = Modifier
 						.padding(8.dp)
-						.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 						.fillMaxWidth()
 						) {
 				SettingsNumberPickerDialog(
@@ -351,7 +291,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
-							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							) {
 					SettingsNumberPickerDialog(
@@ -391,7 +330,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				ElevatedCard(
 						modifier = Modifier
 							.padding(8.dp)
-							.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 							.fillMaxWidth()
 							) {
 					SettingsMenuLink(
@@ -414,7 +352,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -460,7 +397,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -469,7 +405,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											modifier = Modifier
 												.size(48.dp) ,
 											painter = painterResource(id = R.drawable.sunrise_icon) ,
-											contentDescription = "Fajr Time"
+											contentDescription = "Sunrise Time"
 										 )
 								} ,
 								title = {
@@ -506,7 +442,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -552,7 +487,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -598,7 +532,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -644,7 +577,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							modifier = Modifier
 								.padding(8.dp)
-								.shadow(5.dp , shape = CardDefaults.elevatedShape , clip = true)
 								.fillMaxWidth()
 								) {
 						SettingsNumberPickerDialog(
@@ -668,6 +600,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								} ,
 								valueState = ishaAdjustment ,
 												  ) { adjustment : Int ->
+							Log.d("SettingsScreen" , "ishaAdjustment: $adjustment")
 							settingViewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.IshaOffset(
 											adjustment.toString()

@@ -72,6 +72,20 @@ internal fun SettingsMenuLinkPreview()
 
 @Preview
 @Composable
+internal fun SettingsMenuLinkNoIconPreview()
+{
+	NimazTheme {
+		SettingsMenuLink(
+				title = { Text(text = "Hello") } ,
+				subtitle = { Text(text = "This is a longer text") } ,
+						) {
+
+		}
+	}
+}
+
+@Preview
+@Composable
 internal fun SettingsMenuLinkActionPreview()
 {
 	var rememberCheckBoxState by remember { mutableStateOf(true) }

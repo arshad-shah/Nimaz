@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.ui.navigation
 
-import android.media.MediaPlayer
 import android.os.Build
-import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterTransition
@@ -11,17 +9,18 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.activity
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
@@ -29,6 +28,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.*
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
@@ -50,18 +50,12 @@ import com.google.accompanist.navigation.animation.composable
 fun NavigationGraph(
 	navController : NavController ,
 	paddingValues : PaddingValues ,
-	showResetDialog : MutableState<Boolean> ,
-	vibrator : Vibrator ,
-	vibrationAllowed : MutableState<Boolean> ,
-	rOrl : MutableState<Int> ,
-	mediaPlayer : MediaPlayer ,
 				   )
 {
 
 	AnimatedNavHost(
 			navController = navController as NavHostController ,
 			startDestination = BottomNavItem.Dashboard.screen_route ,
-//			startDestination = TASBIH_LIST_SCREEN ,
 			enterTransition = {
 				when (initialState.destination.route)
 				{
@@ -86,6 +80,16 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
 					BottomNavItem.SettingsScreen.screen_route ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					ABOUT_SCREEN_ROUTE ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -141,6 +145,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
 					MY_QURAN_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					WEB_VIEW_SCREEN_ROUTE ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -176,12 +185,12 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
-					QURAN_AYA_SCREEN_ROUTE ->
+					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
-					CHAPTER_SCREEN_ROUTE ->
+					ABOUT_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -227,6 +236,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
 					MY_QURAN_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					WEB_VIEW_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -262,6 +276,16 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
+					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					ABOUT_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
 					QURAN_AYA_SCREEN_ROUTE ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
@@ -313,6 +337,11 @@ fun NavigationGraph(
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										  )
 					MY_QURAN_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentScope.SlideDirection.Left ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										  )
+					WEB_VIEW_SCREEN_ROUTE ->
 						slideIntoContainer(
 								AnimatedContentScope.SlideDirection.Left ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
@@ -348,6 +377,16 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
+					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
+					ABOUT_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
 					QURAN_AYA_SCREEN_ROUTE ->
 						slideOutOfContainer(
 								AnimatedContentScope.SlideDirection.Right ,
@@ -403,6 +442,11 @@ fun NavigationGraph(
 								AnimatedContentScope.SlideDirection.Right ,
 								animationSpec = tween(SCREEN_ANIMATION_DURATION)
 										   )
+					WEB_VIEW_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentScope.SlideDirection.Right ,
+								animationSpec = tween(SCREEN_ANIMATION_DURATION)
+										   )
 
 					else -> ExitTransition.None
 				}
@@ -424,6 +468,26 @@ fun NavigationGraph(
 					onNavigateToTracker = {
 						navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
 					},
+					onNavigateToAyatScreen = { number : String , isSurah : Boolean , language : String , scrollToAya : Int ->
+						navController.navigate(
+								MY_QURAN_SCREEN_ROUTE.replace(
+										"{number}" ,
+										number
+															 )
+									.replace(
+											"{isSurah}" ,
+											isSurah.toString()
+											)
+									.replace(
+											"{language}" ,
+											language
+											)
+									.replace(
+											"{scrollTo}" ,
+											scrollToAya.toString()
+											)
+											  )
+					},
 					onNavigateToTasbihScreen =  { id : String , arabic : String , translation : String , transliteration : String ->
 						navController.navigate(
 								TASBIH_SCREEN_ROUTE
@@ -444,8 +508,12 @@ fun NavigationGraph(
 											transliteration
 											)
 											  )
+					},
+					onNavigateToTasbihListScreen = {
+						navController.navigate(TASBIH_LIST_SCREEN)
 					}
 					 )
+
 		}
 
 		composable(BottomNavItem.PrayerTimesScreen.screen_route)
@@ -514,7 +582,7 @@ fun NavigationGraph(
 		}
 		composable(MY_QURAN_SCREEN_ROUTE) {
 			AyatScreen(
-					number = it.arguments?.getString("number") ,
+					number = it.arguments?.getString("number") !!,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
 					scrollToAya = it.arguments?.getString("scrollTo") !!.toInt() ,
@@ -524,7 +592,7 @@ fun NavigationGraph(
 
 		composable(QURAN_AYA_SCREEN_ROUTE) {
 			AyatScreen(
-					number = it.arguments?.getString("number") ,
+					number = it.arguments?.getString("number") !! ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
 					paddingValues = paddingValues ,
@@ -620,10 +688,6 @@ fun NavigationGraph(
 					tasbihEnglish = it.arguments?.getString("translation") !! ,
 					tasbihTranslitration = it.arguments?.getString("transliteration") !! ,
 					paddingValues = paddingValues ,
-					showResetDialog = showResetDialog ,
-					vibrator = vibrator ,
-					vibrationAllowed = vibrationAllowed ,
-					rOrl = rOrl
 						)
 		}
 
@@ -672,7 +736,22 @@ fun NavigationGraph(
 								AppConstants.ABOUT_SCREEN_ROUTE
 											  )
 					} ,
+					onNavigateToWebViewScreen = { url : String ->
+						navController.navigate(
+								WEB_VIEW_SCREEN_ROUTE
+									.replace(
+											"{url}" ,
+											url
+											),
+											  )
+					} ,
 					paddingValues = paddingValues)
+		}
+		composable(WEB_VIEW_SCREEN_ROUTE) {
+			WebViewScreen(
+					url = it.arguments?.getString("url") !! ,
+					paddingValues = paddingValues
+							)
 		}
 		composable(AppConstants.ABOUT_SCREEN_ROUTE) {
 			About(paddingValues)
