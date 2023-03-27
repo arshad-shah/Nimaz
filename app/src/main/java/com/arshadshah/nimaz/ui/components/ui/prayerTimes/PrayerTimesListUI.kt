@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,8 +24,11 @@ import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
 import java.util.*
 
 @Composable
@@ -34,6 +38,11 @@ fun PrayerTimesListUI(
 	loading : Boolean ,
 					 )
 {
+	val today = LocalDate.now()
+	val todayHijri = HijrahDate.from(today)
+	val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 1)
+	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 29)
+	val isRamadan = todayHijri.isAfter(ramadanStart) && todayHijri.isBefore(ramadanEnd)
 	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
@@ -54,11 +63,19 @@ fun PrayerTimesListUI(
 				}
 				//check if the row is to be highlighted
 				val isHighlighted = key == name
+				val isBoldText = if (isRamadan)
+				{
+					key == "Fajr" || key == "Maghrib"
+				} else
+				{
+					false
+				}
 				PrayerTimesRow(
 						prayerName = key ,
 						prayerTime = value ,
 						isHighlighted = isHighlighted ,
 						loading = loading ,
+						isBoldText = isBoldText ,
 							  )
 			}
 		}
@@ -72,6 +89,7 @@ fun PrayerTimesRow(
 	prayerTime : LocalDateTime? ,
 	isHighlighted : Boolean ,
 	loading : Boolean ,
+	isBoldText : Boolean ,
 				  )
 {
 	val viewModel = viewModel(
@@ -112,7 +130,8 @@ fun PrayerTimesRow(
 									highlightColor = Color.White ,
 																	)
 								) ,
-				style = MaterialTheme.typography.titleLarge
+				style = MaterialTheme.typography.titleLarge,
+				fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
 			)
 		if (isHighlighted)
 		{
@@ -144,7 +163,8 @@ fun PrayerTimesRow(
 									highlightColor = Color.White ,
 																	)
 								) ,
-				style = MaterialTheme.typography.titleLarge
+				style = MaterialTheme.typography.titleLarge,
+				fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
 			)
 	}
 }

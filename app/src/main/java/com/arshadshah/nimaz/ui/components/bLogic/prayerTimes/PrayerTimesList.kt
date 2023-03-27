@@ -7,11 +7,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 
@@ -86,22 +83,6 @@ fun PrayerTimesList()
 						 )
 	} else
 	{
-		val sharedPreferences = PrivateSharedPreferences(context)
-		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-
-		if (! alarmLock)
-		{
-			CreateAlarms().exact(
-					context ,
-					fajrTime.value !! ,
-					sunriseTime.value !! ,
-					dhuhrTime.value !! ,
-					asrTime.value !! ,
-					maghribTime.value !! ,
-					ishaTime.value !! ,
-								)
-			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-		}
 		val timeToNextPrayerLong =
 			nextPrayerTime.value.atZone(java.time.ZoneId.systemDefault())
 				?.toInstant()

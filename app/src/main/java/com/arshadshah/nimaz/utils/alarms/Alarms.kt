@@ -5,6 +5,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class Alarms
@@ -59,15 +63,18 @@ class Alarms
 	{
 		// get alarm manager
 		val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
-		alarmManager.setExactAndAllowWhileIdle(
-				AlarmManager.RTC_WAKEUP , timeToNotify , pendingIntent
-														  )
+		alarmManager.setAlarmClock(
+				AlarmManager.AlarmClockInfo(timeToNotify , pendingIntent) ,
+				pendingIntent
+								  )
 
-
-		//recieverEnabled(context)
-
+		//format time by converting to LocalDateTime
+		val time = LocalDateTime.ofInstant(
+				Instant.ofEpochMilli(timeToNotify) ,
+				ZoneId.systemDefault()
+										  ).format(DateTimeFormatter.ofPattern("hh:mm a"))
 		//logs
-		Log.i("Nimaz: Alarms for Adhan" , "Alarm for $timeToNotify is successfully created")
+		Log.i("Nimaz: Alarms for Adhan" , "Alarm for $time is successfully created")
 	} // end of alarm set
 
 

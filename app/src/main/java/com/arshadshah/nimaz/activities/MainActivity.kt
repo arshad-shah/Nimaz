@@ -54,6 +54,9 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.arshadshah.nimaz.utils.recievers.AdhanReciever
+import com.arshadshah.nimaz.utils.recievers.BootReciever
+import com.arshadshah.nimaz.utils.recievers.ResetAdhansReciever
 import com.arshadshah.nimaz.widgets.Nimaz
 import com.arshadshah.nimaz.widgets.WidgetService
 import com.arshadshah.nimaz.widgets.updateAppWidget
@@ -66,6 +69,10 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity()
 {
+
+	private val adhanReciever = AdhanReciever()
+	private val bootReciever = BootReciever()
+	private val resetAdhansReciever = ResetAdhansReciever()
 
 	//on resume to check if the update is stalled
 	override fun onResume()
