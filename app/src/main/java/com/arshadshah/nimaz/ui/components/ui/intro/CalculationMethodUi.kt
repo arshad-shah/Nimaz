@@ -24,6 +24,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 
@@ -41,6 +42,29 @@ fun CalculationMethodUI()
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 									)
+	val fajrTime = remember {
+		viewModel.fajrTime
+	}.collectAsState()
+
+	val sunriseTime = remember {
+		viewModel.sunriseTime
+	}.collectAsState()
+
+	val dhuhrTime = remember {
+		viewModel.dhuhrTime
+	}.collectAsState()
+
+	val asrTime = remember {
+		viewModel.asrTime
+	}.collectAsState()
+
+	val maghribTime = remember {
+		viewModel.maghribTime
+	}.collectAsState()
+
+	val ishaTime = remember {
+		viewModel.ishaTime
+	}.collectAsState()
 	val autoParams = remember{
 		settingViewModel.autoParams
 	}.collectAsState()
@@ -63,6 +87,10 @@ fun CalculationMethodUI()
 	val longitude = remember{
 		settingViewModel.longitude
 	}.collectAsState()
+
+	val sharedPreferences = remember{
+		settingViewModel.sharedPreferences
+	}
 
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
@@ -127,6 +155,20 @@ fun CalculationMethodUI()
 									PrayerTimesParamMapper.getParams(context)
 																					)
 										 )
+					val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+					if (! alarmLock)
+					{
+						CreateAlarms().exact(
+								context ,
+								fajrTime.value !! ,
+								sunriseTime.value !! ,
+								dhuhrTime.value !! ,
+								asrTime.value !! ,
+								maghribTime.value !! ,
+								ishaTime.value !! ,
+											)
+						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+					}
 					viewModel.handleEvent(
 							context ,
 							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
@@ -182,6 +224,20 @@ fun CalculationMethodUI()
 										context
 																				   )
 											 )
+						val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+						if (! alarmLock)
+						{
+							CreateAlarms().exact(
+									context ,
+									fajrTime.value !! ,
+									sunriseTime.value !! ,
+									dhuhrTime.value !! ,
+									asrTime.value !! ,
+									maghribTime.value !! ,
+									ishaTime.value !! ,
+												)
+							sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+						}
 					} ,
 					height = 500.dp
 						)

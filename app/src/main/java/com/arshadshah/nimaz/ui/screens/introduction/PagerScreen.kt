@@ -141,7 +141,6 @@ fun BackButton(
 @ExperimentalAnimationApi
 @Composable
 fun NextButton(
-	modifier : Modifier ,
 	pagerState : PagerState ,
 	onClick : () -> Unit ,
 			  )

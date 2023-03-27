@@ -73,7 +73,7 @@ fun IntroPage1()
 		   ) {
 			repeat(pages.size) { iteration ->
 				val color = if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary
-				else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+				else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 				Box(
 						modifier = Modifier
 							.padding(4.dp)
@@ -102,7 +102,7 @@ fun IntroPage1()
 			if (pagerState.currentPage == pages.size - 1)
 			{
 				BackButton(
-						modifier = Modifier.padding(horizontal = 20.dp) ,
+						modifier = Modifier ,
 						pagerState = pagerState
 						  ) {
 					scope.launch {
@@ -156,9 +156,6 @@ fun IntroPage1()
 					}
 				}
 				NextButton(
-						modifier = Modifier
-							.padding(horizontal = 20.dp)
-							.testTag("introNextButton") ,
 						pagerState = pagerState
 						  ) {
 					scope.launch {
