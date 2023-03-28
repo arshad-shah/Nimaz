@@ -51,35 +51,41 @@ class Introduction : ComponentActivity()
 					dynamicTheme.value = true
 					darkTheme.value = isDarkTheme.value
 				}
+
 				"SYSTEM" ->
 				{
 					darkTheme.value = isSystemInDarkTheme()
 					themeName.value = "Default"
 				}
+
 				"DEFAULT" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Default"
 				}
+
 				"Raisin_Black" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Raisin_Black"
 				}
+
 				"Dark_Red" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Red"
 				}
+
 				"Dark_Liver" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Liver"
 				}
+
 				"Rustic_brown" ->
 				{
 					dynamicTheme.value = false

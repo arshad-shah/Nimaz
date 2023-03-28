@@ -65,9 +65,9 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 				R.drawable.eid ,
 				R.drawable.eid2 ,
 				R.drawable.eid3 ,
-				R.drawable.eid4,
-				R.drawable.eid5,
-				R.drawable.eid_al_adha,
+				R.drawable.eid4 ,
+				R.drawable.eid5 ,
+				R.drawable.eid_al_adha ,
 			  )
 	//pick a random image
 	val randomImage = imagesToShow.random()
@@ -99,7 +99,10 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 					Text(text = "Eid Mubarak" , style = MaterialTheme.typography.titleLarge)
 				} else
 				{
-					Text(text = "Eid ul Adha is coming" , style = MaterialTheme.typography.titleLarge)
+					Text(
+							text = "Eid ul Adha is coming" ,
+							style = MaterialTheme.typography.titleLarge
+						)
 				}
 
 				Row(

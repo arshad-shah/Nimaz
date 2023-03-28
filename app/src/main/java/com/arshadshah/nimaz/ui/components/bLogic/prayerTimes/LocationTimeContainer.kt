@@ -24,13 +24,15 @@ fun LocationTimeContainer(
 	isLoading : State<Boolean> ,
 						 )
 {
-	if (isLoading.value){
+	if (isLoading.value)
+	{
 		ContainerUI(
 				currentPrayerNameSentenceCase = "Loading..." ,
 				location = locationState ,
 				handleEvent = handleEvent
 				   )
-	}else{
+	} else
+	{
 		val currentPrayerNameSentenceCase = currentPrayerName.value
 			.substring(0 , 1)
 			.uppercase(Locale.ROOT) + currentPrayerName.value

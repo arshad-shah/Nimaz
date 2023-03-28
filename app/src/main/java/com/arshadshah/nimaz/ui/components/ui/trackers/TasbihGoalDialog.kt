@@ -22,7 +22,7 @@ fun TasbihGoalDialog(
 	onConfirm : (String) -> Unit ,
 	isOpen : MutableState<Boolean> ,
 	state : MutableState<String> ,
-)
+					)
 {
 	val context = LocalContext.current
 	if (isOpen.value)
@@ -40,17 +40,17 @@ fun TasbihGoalDialog(
 						OutlinedTextField(
 								shape = MaterialTheme.shapes.extraLarge ,
 								value = state.value ,
-								maxLines = 1,
+								maxLines = 1 ,
 								keyboardActions = KeyboardActions(
 										onDone = {
 											val isInt = state.value.toIntOrNull()
 											if (isInt != null && state.value != "")
 											{
-												if (state.value.toInt() > 0){
+												if (state.value.toInt() > 0)
+												{
 													onConfirm(state.value)
 													isOpen.value = false
-												}
-												else
+												} else
 												{
 													Toasty
 														.error(
@@ -88,11 +88,11 @@ fun TasbihGoalDialog(
 								val isInt = state.value.toIntOrNull()
 								if (isInt != null && state.value != "")
 								{
-									if (state.value.toInt() > 0){
+									if (state.value.toInt() > 0)
+									{
 										onConfirm(state.value)
 										isOpen.value = false
-									}
-									else
+									} else
 									{
 										Toasty
 											.error(
@@ -113,20 +113,29 @@ fun TasbihGoalDialog(
 										.show()
 								}
 							} ,
-							content = { Text(text = "Confirm", style = MaterialTheme.typography.titleMedium) } ,
+							content = {
+								Text(
+										text = "Confirm" ,
+										style = MaterialTheme.typography.titleMedium
+									)
+							} ,
 						  )
 				} ,
 				dismissButton = {
 					TextButton(
 							onClick = {
 								isOpen.value = false
-									  } ,
-							content = { Text(text = "Cancel", style = MaterialTheme.typography.titleMedium) } ,
-						  )
+							} ,
+							content = {
+								Text(
+										text = "Cancel" ,
+										style = MaterialTheme.typography.titleMedium
+									)
+							} ,
+							  )
 				} ,
 				   )
-	}
-	else
+	} else
 	{
 		//do nothing
 		return

@@ -87,13 +87,13 @@ fun ManualLocationInput(
 													)
 
 					showDialog.value = false
-				}) { Text(text = "Confirm", style = MaterialTheme.typography.titleMedium) }
+				}) { Text(text = "Confirm" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			dismissButton = {
 				TextButton(onClick = {
 					showDialog.value = false
 
-				}) { Text(text = "Cancel", style = MaterialTheme.typography.titleMedium) }
+				}) { Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			   )
 

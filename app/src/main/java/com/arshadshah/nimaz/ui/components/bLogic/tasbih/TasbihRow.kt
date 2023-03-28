@@ -66,7 +66,7 @@ fun TasbihRow(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 8.dp, vertical = 4.dp)
+				.padding(horizontal = 8.dp , vertical = 4.dp)
 				.clickable(
 						//disable it if onNavigateToTasbihScreen has no implementation
 						enabled = onNavigateToTasbihScreen != null ,
@@ -140,16 +140,18 @@ fun TasbihRow(
 	TasbihGoalDialog(
 			state = goal ,
 			onConfirm = {
-				viewModel.handleEvent(TasbihViewModel.TasbihEvent.SetTasbih(
-						Tasbih(
-								arabicName = arabicName ,
-								englishName = englishName ,
-								translationName = translationName ,
-								goal = it.toInt() ,
-								count = 0 ,
-								date = LocalDate.now().toString() ,
-							  )
-																		   ))
+				viewModel.handleEvent(
+						TasbihViewModel.TasbihEvent.SetTasbih(
+								Tasbih(
+										arabicName = arabicName ,
+										englishName = englishName ,
+										translationName = translationName ,
+										goal = it.toInt() ,
+										count = 0 ,
+										date = LocalDate.now().toString() ,
+									  )
+															 )
+									 )
 				navigateToTasbihScreen.value = true
 			} ,
 			isOpen = showTasbihDialog ,

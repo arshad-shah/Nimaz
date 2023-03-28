@@ -10,6 +10,7 @@ import es.dmoral.toasty.Toasty
 
 class AdhanReciever : BroadcastReceiver()
 {
+
 	override fun onReceive(context : Context , intent : Intent)
 	{
 		// When the reciever is called, it will send a notification to the user

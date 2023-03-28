@@ -36,7 +36,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 	val theme = _theme.asStateFlow()
 
 	//dark mode state
-	private var _isDarkMode = MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE , false))
+	private var _isDarkMode =
+		MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE , false))
 	val isDarkMode = _isDarkMode.asStateFlow()
 
 
@@ -100,8 +101,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 			sharedPreferences.getDataBoolean(
 					AppConstants.AUTO_PARAMETERS ,
 					false
-									 )
-												)
+											)
+											  )
 	val autoParams = _autoParams.asStateFlow()
 
 	//fajr angle state
@@ -192,6 +193,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 		//theme
 		class Theme(val theme : String) : SettingsEvent()
+
 		//dark mode
 		class DarkMode(val darkMode : Boolean) : SettingsEvent()
 
@@ -199,7 +201,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 		class UpdateSettings(val method : String) : SettingsEvent()
 		class AutoParameters(val checked : Boolean) : SettingsEvent()
 
-		class CheckUpdate(val context : Context, val doUpdate: Boolean) : SettingsEvent()
+		class CheckUpdate(val context : Context , val doUpdate : Boolean) : SettingsEvent()
 	}
 
 	//events for the settings screen
@@ -385,6 +387,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.saveData(AppConstants.THEME , event.theme)
 				Log.d("Nimaz: SettingsViewModel" , "Theme : ${event.theme}")
 			}
+
 			is SettingsEvent.DarkMode ->
 			{
 				_isDarkMode.value = event.darkMode
@@ -455,24 +458,32 @@ class SettingsViewModel(context : Context) : ViewModel()
 				Log.d("Nimaz: SettingsViewModel" , "Settings updated")
 
 			}
+
 			is SettingsEvent.AutoParameters ->
 			{
 				sharedPreferences.saveDataBoolean(AppConstants.AUTO_PARAMETERS , event.checked)
 				_autoParams.value = event.checked
 				Log.d("Nimaz: SettingsViewModel" , "Auto parameters : ${event.checked}")
 			}
+
 			is SettingsEvent.CheckUpdate ->
 			{
 				Log.d("Nimaz: SettingsViewModel" , "Checking for update")
 				val appUpdateManager = AppUpdateManagerFactory.create(event.context)
 				val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 				appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-					if(event.doUpdate){
-						Log.d("Nimaz: SettingsViewModel" , "Update available : ${appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-								AppUpdateType.IMMEDIATE)}")
+					if (event.doUpdate)
+					{
+						Log.d(
+								"Nimaz: SettingsViewModel" , "Update available : ${
+							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE
+																																		  )
+						}"
+							 )
 						if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-										AppUpdateType.IMMEDIATE
-																   )
+									AppUpdateType.IMMEDIATE
+																																		  )
 						)
 						{
 							try
@@ -484,17 +495,24 @@ class SettingsViewModel(context : Context) : ViewModel()
 										event.context as Activity ,
 										APP_UPDATE_REQUEST_CODE
 																		 )
-							}
-							catch (e : IntentSender.SendIntentException)
+							} catch (e : IntentSender.SendIntentException)
 							{
 								e.printStackTrace()
 							}
 						}
-					}else{
-						Log.d("Nimaz: SettingsViewModel" , "Update available : ${appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-								AppUpdateType.IMMEDIATE)}")
-						_isUpdateAvailable.value = appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-									AppUpdateType.IMMEDIATE)
+					} else
+					{
+						Log.d(
+								"Nimaz: SettingsViewModel" , "Update available : ${
+							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE
+																																		  )
+						}"
+							 )
+						_isUpdateAvailable.value =
+							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE
+																																		  )
 					}
 				}
 			}
@@ -507,16 +525,17 @@ class SettingsViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				if(NetworkChecker().networkCheck(context)){
+				if (NetworkChecker().networkCheck(context))
+				{
 					if (checked)
 					{
 						_isLoading.value = true
-						if(!AutoLocationUtils.isInitialized()){
+						if (! AutoLocationUtils.isInitialized())
+						{
 							AutoLocationUtils.init(context)
 							AutoLocationUtils.startLocationUpdates()
 						}
-						AutoLocationUtils.setLocationDataCallback {
-							location ->
+						AutoLocationUtils.setLocationDataCallback { location ->
 							sharedPreferences.saveData(
 									AppConstants.LATITUDE ,
 									location.latitude.toString()
@@ -535,7 +554,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 						forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
 						_isLoading.value = false
 					}
-				}else{
+				} else
+				{
 					_locationName.value = "No Network"
 					_latitude.value =
 						sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)

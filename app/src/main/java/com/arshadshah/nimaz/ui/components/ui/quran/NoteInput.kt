@@ -45,7 +45,7 @@ fun NoteInput(
 							}) {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
+									.size(24.dp) ,
 								painter = painterResource(id = R.drawable.delete_icon) ,
 								contentDescription = "Remove Note"
 							)
@@ -54,14 +54,14 @@ fun NoteInput(
 			} ,
 			text = {
 				OutlinedTextField(
-						textStyle = MaterialTheme.typography.bodyLarge,
+						textStyle = MaterialTheme.typography.bodyLarge ,
 						singleLine = false ,
 						shape = MaterialTheme.shapes.extraLarge ,
 						value = noteContent.value ,
 						onValueChange = { noteContent.value = it } ,
 						label = { Text(text = "Note") } ,
 						modifier = Modifier
-							.fillMaxWidth(),
+							.fillMaxWidth() ,
 						leadingIcon = {
 							Icon(
 									modifier = Modifier
@@ -104,13 +104,13 @@ fun NoteInput(
 					{
 						onClick()
 					}
-				}) { Text(text = "Save", style = MaterialTheme.typography.titleMedium) }
+				}) { Text(text = "Save" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			dismissButton = {
 				TextButton(onClick = {
 					//close dialog
 					showNoteDialog.value = false
-				}) { Text(text = "Cancel", style = MaterialTheme.typography.titleMedium) }
+				}) { Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			   )
 

@@ -84,15 +84,17 @@ fun SettingsScreen(
 		viewModelSettings.isUpdateAvailable
 	}.collectAsState()
 
-	val updateAvailableText = if (updateAvailabile.value) {
+	val updateAvailableText = if (updateAvailabile.value)
+	{
 		"Update Available"
-	} else {
+	} else
+	{
 		"Nimaz is up to date"
 	}
 
 	//execute once
 	LaunchedEffect(Unit) {
-			viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context,false))
+		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
 	}
 	val fajrTime = remember {
 		viewModel.fajrTime
@@ -160,7 +162,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
-				"Rustic_brown" to "Rustic Brown",
+				"Rustic_brown" to "Rustic Brown" ,
 				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
 									  )
@@ -169,7 +171,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
-				"Rustic_brown" to "Rustic Brown",
+				"Rustic_brown" to "Rustic Brown" ,
 				"SYSTEM" to "System Default" ,
 										 )
 
@@ -183,7 +185,8 @@ fun SettingsScreen(
 		SettingsGroup(
 				title = { Text(text = "Theme") } ,
 					 ) {
-			if (stateOfTheme.value != "SYSTEM") {
+			if (stateOfTheme.value != "SYSTEM")
+			{
 				ElevatedCard(
 						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
@@ -245,23 +248,24 @@ fun SettingsScreen(
 									contentDescription = "Theme"
 								)
 						} ,
-						useSelectedValueAsSubtitle = false,
+						useSelectedValueAsSubtitle = false ,
 						valueState = stateOfTheme ,
 						title = {
-							Text(text =
-								when (stateOfTheme.value)
-								{
-									"DEFAULT" -> "App Default"
-									"Raisin_Black" -> "Raisin Black"
-									"Dark_Red" -> "Burgundy"
-									"Dark_Liver" -> "Dark Liver"
-									"Rustic_brown" -> "Rustic Brown"
-									"SYSTEM" -> "System Default"
-									"DYNAMIC" -> "Dynamic"
-									else -> "App Default"
-								}
+							Text(
+									text =
+									when (stateOfTheme.value)
+									{
+										"DEFAULT" -> "App Default"
+										"Raisin_Black" -> "Raisin Black"
+										"Dark_Red" -> "Burgundy"
+										"Dark_Liver" -> "Dark Liver"
+										"Rustic_brown" -> "Rustic Brown"
+										"SYSTEM" -> "System Default"
+										"DYNAMIC" -> "Dynamic"
+										else -> "App Default"
+									}
 								)
-								} ,
+						} ,
 						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
 							)
 			}
@@ -278,7 +282,8 @@ fun SettingsScreen(
 						title = { Text(text = "Force Reset Alarms") } ,
 						onClick = {
 							sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
-							val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+							val alarmLock =
+								sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 							if (! alarmLock)
 							{
 								CreateAlarms().exact(
@@ -332,8 +337,9 @@ fun SettingsScreen(
 										zuharAdhan
 																			)
 								val currentTime = LocalDateTime.now()
-								val timeToNotify = currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
-									.toInstant().toEpochMilli()
+								val timeToNotify =
+									currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
+										.toInstant().toEpochMilli()
 								val testPendingIntent = CreateAlarms().createPendingIntent(
 										context ,
 										TEST_PI_REQUEST_CODE ,
@@ -488,10 +494,16 @@ fun SettingsScreen(
 							)
 					} ,
 					action = {
-						if (updateAvailabile.value) {
+						if (updateAvailabile.value)
+						{
 							Button(
 									onClick = {
-										viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context,true))
+										viewModelSettings.handleEvent(
+												SettingsViewModel.SettingsEvent.CheckUpdate(
+														context ,
+														true
+																						   )
+																	 )
 									} ,
 								  ) {
 								Text(text = "Update")
@@ -502,12 +514,12 @@ fun SettingsScreen(
 		}
 
 		//get the current year
-		val currentYear =  LocalDateTime.now().year
+		val currentYear = LocalDateTime.now().year
 		Text(
 				text = "© $currentYear Nimaz " + BuildConfig.VERSION_NAME ,
 				modifier = Modifier
 					.padding(8.dp)
-					.align(Alignment.CenterHorizontally),
+					.align(Alignment.CenterHorizontally) ,
 				style = MaterialTheme.typography.bodyMedium
 			)
 	}

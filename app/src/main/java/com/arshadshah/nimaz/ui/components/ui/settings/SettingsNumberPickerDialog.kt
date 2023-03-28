@@ -44,10 +44,14 @@ fun SettingsNumberPickerDialog(
 
 	val safeSubtitle = if (state.value >= 0 && useSelectedValueAsSubtitle)
 	{
-		{ Text(text = if (items.size == 51)
-			if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Degree " else if (valueState.value.toInt() != - 1) "${valueState.value} Degrees" else "${valueState.value} Degree"
-		else
-			if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Minute " else if (valueState.value.toInt() != - 1) "${valueState.value} Minutes" else "${valueState.value} Minute") }
+		{
+			Text(
+					text = if (items.size == 51)
+						if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Degree " else if (valueState.value.toInt() != - 1) "${valueState.value} Degrees" else "${valueState.value} Degree"
+					else
+						if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Minute " else if (valueState.value.toInt() != - 1) "${valueState.value} Minutes" else "${valueState.value} Minute"
+				)
+		}
 	} else subtitle
 
 	SettingsMenuLink(
@@ -112,13 +116,23 @@ fun SettingsNumberPickerDialog(
 			confirmButton = {
 				Button(
 						onClick = { showDialog = false } ,
-						content = { Text(text = "Confirm", style = MaterialTheme.typography.titleMedium) }
+						content = {
+							Text(
+									text = "Confirm" ,
+									style = MaterialTheme.typography.titleMedium
+								)
+						}
 					  )
 			} ,
 			dismissButton = {
 				TextButton(
 						onClick = { showDialog = false } ,
-						content = { Text(text = "Cancel", style = MaterialTheme.typography.titleMedium) }
+						content = {
+							Text(
+									text = "Cancel" ,
+									style = MaterialTheme.typography.titleMedium
+								)
+						}
 						  )
 			}
 			   )
@@ -145,6 +159,7 @@ fun SettingsNumberPickerDialogPreview()
 								  )
 	}
 }
+
 @Preview
 @Composable
 fun SettingsNumberPickerDialogNoIconPreview()

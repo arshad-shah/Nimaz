@@ -1,4 +1,5 @@
 package com.arshadshah.nimaz.ui.theme
+
 import androidx.compose.ui.graphics.Color
 
 val raison_black_md_theme_light_primary = Color(0xFF6A4AB4)

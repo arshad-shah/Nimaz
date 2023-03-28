@@ -40,7 +40,7 @@ fun Dashboard(
 			 )
 {
 	LazyColumn(
-			modifier = Modifier.testTag(TEST_TAG_HOME),
+			modifier = Modifier.testTag(TEST_TAG_HOME) ,
 			contentPadding = paddingValues
 			  ) {
 		item {
@@ -77,7 +77,7 @@ fun Dashboard(
 				}
 			}
 		}
-		item{
+		item {
 			ElevatedCard(
 					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
@@ -98,8 +98,10 @@ fun Dashboard(
 				//DashboardFastTracker
 				DashboardFastTracker()
 				DashboardQuranTracker(onNavigateToAyatScreen = onNavigateToAyatScreen)
-				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen,
-									   onNavigateToTasbihListScreen = onNavigateToTasbihListScreen)
+				DashboardTasbihTracker(
+						onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
+						onNavigateToTasbihListScreen = onNavigateToTasbihListScreen
+									  )
 			}
 		}
 		item {
@@ -123,6 +125,7 @@ fun Dashboard(
 	}
 
 }
+
 @Preview
 @Composable
 fun DashboardPreview()

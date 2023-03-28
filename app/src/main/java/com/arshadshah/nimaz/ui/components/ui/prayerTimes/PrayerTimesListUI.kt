@@ -147,7 +147,7 @@ fun PrayerTimesRow(
 									highlightColor = Color.White ,
 																	)
 								) ,
-				style = MaterialTheme.typography.titleLarge,
+				style = MaterialTheme.typography.titleLarge ,
 				fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
 			)
 		if (isHighlighted)
@@ -180,7 +180,7 @@ fun PrayerTimesRow(
 									highlightColor = Color.White ,
 																	)
 								) ,
-				style = MaterialTheme.typography.titleLarge,
+				style = MaterialTheme.typography.titleLarge ,
 				fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
 			)
 	}
