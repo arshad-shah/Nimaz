@@ -25,7 +25,7 @@ class Introduction : ComponentActivity()
 			val viewModelSettings = viewModel(
 					key = "SettingsViewModel" ,
 					initializer = { SettingsViewModel(this@Introduction) } ,
-					viewModelStoreOwner = this as ComponentActivity
+					viewModelStoreOwner = this@Introduction
 											 )
 			val themeState = remember {
 				viewModelSettings.theme

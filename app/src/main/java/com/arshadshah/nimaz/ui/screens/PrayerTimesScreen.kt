@@ -17,8 +17,6 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -80,9 +78,6 @@ fun PrayerTimesScreen(
 	val ishaTime = remember {
 		viewModel.ishaTime
 	}.collectAsState()
-
-	val sharedPreferences = PrivateSharedPreferences(context)
-
 	LaunchedEffect(locationState.value, latitude.value, longitude.value) {
 		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(true))
 			//update the prayer times
@@ -90,20 +85,6 @@ fun PrayerTimesScreen(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
 							 )
-		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-		if (! alarmLock)
-		{
-			CreateAlarms().exact(
-					context ,
-					fajrTime.value !! ,
-					sunriseTime.value !! ,
-					dhuhrTime.value !! ,
-					asrTime.value !! ,
-					maghribTime.value !! ,
-					ishaTime.value !! ,
-								)
-			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-		}
 		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(false))
 		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.REFRESH(false))
 	}

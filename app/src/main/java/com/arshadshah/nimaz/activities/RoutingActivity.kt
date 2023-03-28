@@ -21,9 +21,9 @@ class RoutingActivity : ComponentActivity()
 
 		super.onCreate(savedInstanceState)
 
-		val sharedPref = PrivateSharedPreferences(this@RoutingActivity)
+		val sharedPref = PrivateSharedPreferences(this.applicationContext)
 
-		LocalDataStore.init(this@RoutingActivity)
+		LocalDataStore.init(this.applicationContext)
 
 		//get the first time flag
 		val firstTime = sharedPref.getDataBoolean(AppConstants.IS_FIRST_INSTALL , true)
@@ -34,13 +34,13 @@ class RoutingActivity : ComponentActivity()
 					AppConstants.SPLASH_SCREEN_TAG ,
 					"First time install launching setup activity"
 				 )
-			val intent = Intent(this@RoutingActivity , Introduction::class.java)
+			val intent = Intent(this.applicationContext , Introduction::class.java)
 			startActivity(intent)
 			finish()
 		} else
 		{
 			Log.d(AppConstants.SPLASH_SCREEN_TAG , "Not first time returning to main activity")
-			val intent = Intent(this@RoutingActivity , MainActivity::class.java)
+			val intent = Intent(this.applicationContext , MainActivity::class.java)
 			startActivity(intent)
 			finish()
 		}

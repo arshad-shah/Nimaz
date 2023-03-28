@@ -31,7 +31,6 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
@@ -208,20 +207,6 @@ fun LocationSettings(isIntro : Boolean = false)
 							context
 																	   )
 											)
-			val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-			if (! alarmLock)
-			{
-				CreateAlarms().exact(
-						context ,
-						fajrTime.value !! ,
-						sunriseTime.value !! ,
-						dhuhrTime.value !! ,
-						asrTime.value !! ,
-						maghribTime.value !! ,
-						ishaTime.value !! ,
-									)
-				sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-			}
 
 		}
 
@@ -491,6 +476,7 @@ fun LocationToggleSwitch(
 											context
 																					   )
 															)
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						} else
 						{
 							locationPermissionState.launchMultiplePermissionRequest()
@@ -514,6 +500,7 @@ fun LocationToggleSwitch(
 										context
 																				   )
 														)
+						PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						isChecked.value = false
 						if (isIntro)
 						{
