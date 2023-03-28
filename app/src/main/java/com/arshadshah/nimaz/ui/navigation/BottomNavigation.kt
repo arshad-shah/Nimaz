@@ -38,8 +38,8 @@ fun BottomNavigationBar(navController : NavController)
 			NavigationBarItem(
 					modifier = Modifier
 						.semantics {
-						contentDescription = bottomNavItem.title
-					} ,
+							contentDescription = bottomNavItem.title
+						} ,
 					colors = NavigationBarItemDefaults.colors(
 							selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer ,
 							selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer ,
@@ -49,18 +49,20 @@ fun BottomNavigationBar(navController : NavController)
 															 ) ,
 					icon = {
 						Icon(
-								modifier = Modifier.size(24.dp),
+								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = bottomNavItem.icon) ,
 								contentDescription = bottomNavItem.iconDescription
 							)
 					} ,
-					label = { Text(
-							text = bottomNavItem.title,
-							modifier = Modifier
-								.semantics {
-								contentDescription = bottomNavItem.title
-							}
-								  ) } ,
+					label = {
+						Text(
+								text = bottomNavItem.title ,
+								modifier = Modifier
+									.semantics {
+										contentDescription = bottomNavItem.title
+									}
+							)
+					} ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
 						navController.navigate(bottomNavItem.screen_route) {

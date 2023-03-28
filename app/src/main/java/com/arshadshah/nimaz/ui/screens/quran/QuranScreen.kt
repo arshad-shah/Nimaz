@@ -54,22 +54,24 @@ fun QuranScreen(
 		  ) {
 
 		TabRow(
-				selectedTabIndex = pagerState.currentPage,
+				selectedTabIndex = pagerState.currentPage ,
 				modifier = Modifier
-					.padding(vertical = 4.dp, horizontal = 4.dp)
+					.padding(vertical = 4.dp , horizontal = 4.dp)
 					.clip(RoundedCornerShape(50))
-					.padding(1.dp),
-				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),
-				indicator = { tabPositions: List<TabPosition> ->
+					.padding(1.dp) ,
+				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f) ,
+				indicator = { tabPositions : List<TabPosition> ->
 					val indicatorStart by transition.animateDp(
 							transitionSpec = {
 								// Handle directionality here, if we are moving to the right, we
 								// want the right side of the indicator to move faster, if we are
 								// moving to the left, we want the left side to move faster.
-								if (initialState < targetState) {
-									spring(dampingRatio = 1f, stiffness = 50f)
-								} else {
-									spring(dampingRatio = 1f, stiffness = 1000f)
+								if (initialState < targetState)
+								{
+									spring(dampingRatio = 1f , stiffness = 50f)
+								} else
+								{
+									spring(dampingRatio = 1f , stiffness = 1000f)
 								}
 							} , label = "quranTabTransitionStart"
 															  ) {
@@ -81,10 +83,12 @@ fun QuranScreen(
 								// Handle directionality here, if we are moving to the right, we
 								// want the right side of the indicator to move faster, if we are
 								// moving to the left, we want the left side to move faster.
-								if (initialState < targetState) {
-									spring(dampingRatio = 1f, stiffness = 1000f)
-								} else {
-									spring(dampingRatio = 1f, stiffness = 50f)
+								if (initialState < targetState)
+								{
+									spring(dampingRatio = 1f , stiffness = 1000f)
+								} else
+								{
+									spring(dampingRatio = 1f , stiffness = 50f)
 								}
 							} , label = "quranTabTransitionEnd"
 															) {
@@ -97,7 +101,7 @@ fun QuranScreen(
 								// Make the width of the indicator follow the animated width as we move between tabs
 								.width(indicatorEnd - indicatorStart)
 					   ) {}
-				},
+				} ,
 				divider = { }
 			  ) {
 			titles.forEachIndexed { index , title ->
@@ -120,9 +124,8 @@ fun QuranScreen(
 											"{number}" ,
 											index.toString()
 																		   )
-									)
-						,
-						selected = pagerState.currentPage == index,
+									) ,
+						selected = pagerState.currentPage == index ,
 						onClick = {
 							scope.launch {
 								pagerState.animateScrollToPage(index)
@@ -133,7 +136,7 @@ fun QuranScreen(
 									text = title ,
 									maxLines = 1 ,
 									overflow = TextOverflow.Ellipsis ,
-									style = MaterialTheme.typography.titleMedium,
+									style = MaterialTheme.typography.titleMedium ,
 									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
 									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 								)
@@ -142,8 +145,8 @@ fun QuranScreen(
 			}
 		}
 		HorizontalPager(
-				pageCount = titles.size,
-				state = pagerState,
+				pageCount = titles.size ,
+				state = pagerState ,
 					   ) { page ->
 			when (page)
 			{

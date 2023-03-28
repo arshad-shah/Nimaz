@@ -93,8 +93,8 @@ internal fun SettingsMenuLinkActionPreview()
 				subtitle = { Text(text = "This is a longer text") } ,
 				action = {
 					Button(
-							onClick = { rememberCheckBoxState = !rememberCheckBoxState } ,
-							) {
+							onClick = { rememberCheckBoxState = ! rememberCheckBoxState } ,
+						  ) {
 						Text(text = "Action")
 					}
 				} ,

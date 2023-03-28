@@ -135,14 +135,22 @@ fun Counter(
 						count.value = 0
 						lap.value = 1
 						lapCountCounter.value = 0
-						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+						viewModel.handleEvent(
+								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+										false
+																				  )
+											 )
 					}) {
 						Text(text = "Reset" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = {
-						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+						viewModel.handleEvent(
+								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+										false
+																				  )
+											 )
 					}) {
 						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
@@ -184,7 +192,8 @@ fun Counter(
 											if (objective.value != "" || isInt != 0)
 											{
 												showObjectiveDialog.value = false
-											}else{
+											} else
+											{
 												Toasty
 													.error(
 															context ,
@@ -214,7 +223,8 @@ fun Counter(
 							if (objective.value != "" || isInt != 0)
 							{
 								showObjectiveDialog.value = false
-							}else{
+							} else
+							{
 								Toasty
 									.error(
 											context ,

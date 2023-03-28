@@ -96,9 +96,9 @@ fun NamesOfAllahRow(
 				)
 			Column(
 					modifier = Modifier
-						.padding(horizontal = 0.dp, vertical = 8.dp)
+						.padding(horizontal = 0.dp , vertical = 8.dp)
 						.fillMaxWidth()
-						.weight(0.85f),
+						.weight(0.85f) ,
 				  ) {
 				Text(
 						textAlign = TextAlign.Center ,
@@ -114,7 +114,7 @@ fun NamesOfAllahRow(
 							text = arabicName ,
 							style = MaterialTheme.typography.headlineLarge ,
 							fontFamily = utmaniQuranFont ,
-							fontWeight = FontWeight.SemiBold,
+							fontWeight = FontWeight.SemiBold ,
 							textAlign = TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth() ,

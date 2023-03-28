@@ -78,9 +78,10 @@ fun PrayerTimesScreen(
 	val ishaTime = remember {
 		viewModel.ishaTime
 	}.collectAsState()
-	LaunchedEffect(locationState.value, latitude.value, longitude.value) {
-			//update the prayer times
-			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+	LaunchedEffect(locationState.value , latitude.value , longitude.value) {
+		//update the prayer times
+		viewModel.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
 							 )
@@ -94,29 +95,29 @@ fun PrayerTimesScreen(
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "locationState: $locationState")
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "currentPrayerName: $currentPrayerName")
 
-		LazyColumn(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(paddingValues)
-					.padding(8.dp)
-					.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
-				horizontalAlignment = Alignment.CenterHorizontally ,
-				verticalArrangement = Arrangement.SpaceEvenly
-				  ) {
-			item {
-				// Calling the LocationTimeContainer composable
-				LocationTimeContainer(
-						currentPrayerName = currentPrayerName ,
-						locationState = locationState ,
-						handleEvent = settingViewModel::handleEvent ,
-						isLoading = isLoading
-									 )
+	LazyColumn(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(paddingValues)
+				.padding(8.dp)
+				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
+			horizontalAlignment = Alignment.CenterHorizontally ,
+			verticalArrangement = Arrangement.SpaceEvenly
+			  ) {
+		item {
+			// Calling the LocationTimeContainer composable
+			LocationTimeContainer(
+					currentPrayerName = currentPrayerName ,
+					locationState = locationState ,
+					handleEvent = settingViewModel::handleEvent ,
+					isLoading = isLoading
+								 )
 
-				// Calling the DatesContainer composable
-				DatesContainer(onNavigateToTracker = onNavigateToTracker)
+			// Calling the DatesContainer composable
+			DatesContainer(onNavigateToTracker = onNavigateToTracker)
 
-				// Calling the PrayerTimesList composable
-				PrayerTimesList()
-			}
+			// Calling the PrayerTimesList composable
+			PrayerTimesList()
 		}
+	}
 }

@@ -40,12 +40,14 @@ fun NimazTheme(
 	{
 		//if the name of the theme is not default then use the custom theme
 		ThemeName != "Default" && ! dynamicColor ->
-			CustomThemes.getTheme(ThemeName, darkTheme)
+			CustomThemes.getTheme(ThemeName , darkTheme)
+
 		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
 		{
 			val context = LocalContext.current
 			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 		}
+
 		else -> if (darkTheme) DarkColorsDefault else LightColorsDefault
 	}
 	val configuration = LocalConfiguration.current

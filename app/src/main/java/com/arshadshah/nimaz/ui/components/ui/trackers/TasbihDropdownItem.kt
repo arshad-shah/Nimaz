@@ -30,17 +30,16 @@ fun TasbihDropdownItem(
 	item : Tasbih ,
 	onClick : (Tasbih) -> Unit ,
 	onDelete : (Tasbih) -> Unit ,
-	onEdit : (Tasbih) -> Unit
+	onEdit : (Tasbih) -> Unit ,
 					  )
 {
 	val currentItem = rememberUpdatedState(newValue = item)
 	val dismissState = rememberDismissState(
 			confirmValueChange = {
-				if(it == DismissValue.DismissedToEnd)
+				if (it == DismissValue.DismissedToEnd)
 				{
 					onEdit(currentItem.value)
-				}
-				else if(it == DismissValue.DismissedToStart)
+				} else if (it == DismissValue.DismissedToStart)
 				{
 					onDelete(currentItem.value)
 				}
@@ -52,116 +51,121 @@ fun TasbihDropdownItem(
 			state = dismissState ,
 			background = {
 				SwipeBackground(dismissState = dismissState)
-			},
+			} ,
 			dismissContent = {
-	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			elevation = CardDefaults.elevatedCardElevation(
-					defaultElevation = 4.dp ,
-														  ) ,
-			modifier = Modifier
-				.padding(8.dp)
-				.clickable { onClick(currentItem.value) }
-				) {
-
-		//a row to contain the tasbih name, goal and count and the delete button
-		Row(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth() ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
-			if (currentItem.value.count == currentItem.value.goal)
-			{
-				Icon(
-						imageVector = Icons.Default.CheckCircle ,
-						contentDescription = "Completed" ,
+				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
+						elevation = CardDefaults.elevatedCardElevation(
+								defaultElevation = 4.dp ,
+																	  ) ,
 						modifier = Modifier
-							.size(24.dp)
-					)
-			}
-			//name
-			Text(
-					modifier = Modifier
-						.weight(1f)
-						.padding(8.dp) ,
-					text = currentItem.value.englishName ,
-					textAlign = TextAlign.Center ,
-					maxLines = 1 ,
-					overflow = TextOverflow.Ellipsis ,
-					style = MaterialTheme.typography.bodyMedium
-				)
-			//divider
-			Divider(
-					modifier = Modifier
-						.width(1.dp)
-						.height(24.dp) ,
-					color = MaterialTheme.colorScheme.onSurface.copy(
-							alpha = 0.08f
-																	) ,
-					thickness = 1.dp ,
-				   )
-			//goal
-			Text(
-					modifier = Modifier
-						.weight(1f)
-						.padding(8.dp) ,
-					text = currentItem.value.goal.toString() ,
-					textAlign = TextAlign.Center ,
-					maxLines = 2 ,
-					overflow = TextOverflow.Ellipsis ,
-					style = MaterialTheme.typography.bodySmall
-				)
-			//divider
-			Divider(
-					modifier = Modifier
-						.width(1.dp)
-						.height(24.dp) ,
-					color = MaterialTheme.colorScheme.onSurface.copy(
-							alpha = 0.08f
-																	) ,
-					thickness = 1.dp ,
-				   )
-			//count
-			Text(
-					modifier = Modifier
-						.weight(1f)
-						.padding(8.dp) ,
-					text = currentItem.value.count.toString() ,
-					textAlign = TextAlign.Center ,
-					maxLines = 2 ,
-					overflow = TextOverflow.Ellipsis ,
-					style = MaterialTheme.typography.bodySmall
-				)
-		}
-	}
-})
+							.padding(8.dp)
+							.clickable { onClick(currentItem.value) }
+							) {
+
+					//a row to contain the tasbih name, goal and count and the delete button
+					Row(
+							modifier = Modifier
+								.padding(8.dp)
+								.fillMaxWidth() ,
+							verticalAlignment = Alignment.CenterVertically
+					   ) {
+						if (currentItem.value.count == currentItem.value.goal)
+						{
+							Icon(
+									imageVector = Icons.Default.CheckCircle ,
+									contentDescription = "Completed" ,
+									modifier = Modifier
+										.size(24.dp)
+								)
+						}
+						//name
+						Text(
+								modifier = Modifier
+									.weight(1f)
+									.padding(8.dp) ,
+								text = currentItem.value.englishName ,
+								textAlign = TextAlign.Center ,
+								maxLines = 1 ,
+								overflow = TextOverflow.Ellipsis ,
+								style = MaterialTheme.typography.bodyMedium
+							)
+						//divider
+						Divider(
+								modifier = Modifier
+									.width(1.dp)
+									.height(24.dp) ,
+								color = MaterialTheme.colorScheme.onSurface.copy(
+										alpha = 0.08f
+																				) ,
+								thickness = 1.dp ,
+							   )
+						//goal
+						Text(
+								modifier = Modifier
+									.weight(1f)
+									.padding(8.dp) ,
+								text = currentItem.value.goal.toString() ,
+								textAlign = TextAlign.Center ,
+								maxLines = 2 ,
+								overflow = TextOverflow.Ellipsis ,
+								style = MaterialTheme.typography.bodySmall
+							)
+						//divider
+						Divider(
+								modifier = Modifier
+									.width(1.dp)
+									.height(24.dp) ,
+								color = MaterialTheme.colorScheme.onSurface.copy(
+										alpha = 0.08f
+																				) ,
+								thickness = 1.dp ,
+							   )
+						//count
+						Text(
+								modifier = Modifier
+									.weight(1f)
+									.padding(8.dp) ,
+								text = currentItem.value.count.toString() ,
+								textAlign = TextAlign.Center ,
+								maxLines = 2 ,
+								overflow = TextOverflow.Ellipsis ,
+								style = MaterialTheme.typography.bodySmall
+							)
+					}
+				}
+			})
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun SwipeBackground(dismissState: DismissState) {
+fun SwipeBackground(dismissState : DismissState)
+{
 	val direction = dismissState.dismissDirection ?: return
 
 	val color by animateColorAsState(
-			when (dismissState.targetValue) {
+			when (dismissState.targetValue)
+			{
 				DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
 				DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
 				DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
 			}
 									)
 	val iconTintColor by animateColorAsState(
-			when (dismissState.targetValue) {
+			when (dismissState.targetValue)
+			{
 				DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
 				DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.onPrimary
 				DismissValue.DismissedToStart -> MaterialTheme.colorScheme.onErrorContainer
 			}
-										   )
-	val alignment = when (direction) {
+											)
+	val alignment = when (direction)
+	{
 		DismissDirection.StartToEnd -> Alignment.CenterStart
 		DismissDirection.EndToStart -> Alignment.CenterEnd
 	}
-	val icon = when (direction) {
+	val icon = when (direction)
+	{
 		DismissDirection.StartToEnd -> painterResource(id = com.arshadshah.nimaz.R.drawable.edit_icon)
 		DismissDirection.EndToStart -> painterResource(id = com.arshadshah.nimaz.R.drawable.delete_icon)
 	}
@@ -170,8 +174,9 @@ fun SwipeBackground(dismissState: DismissState) {
 									)
 
 	val haptic = LocalHapticFeedback.current
-	LaunchedEffect(key1 = dismissState.targetValue, block = {
-		if (dismissState.targetValue != DismissValue.Default){
+	LaunchedEffect(key1 = dismissState.targetValue , block = {
+		if (dismissState.targetValue != DismissValue.Default)
+		{
 			haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 		}
 	})
@@ -180,13 +185,15 @@ fun SwipeBackground(dismissState: DismissState) {
 			Modifier
 				.fillMaxSize()
 				.background(color)
-				.padding(horizontal = 20.dp),
+				.padding(horizontal = 20.dp) ,
 			contentAlignment = alignment
 	   ) {
 		Icon(
-				painter = icon,
-				contentDescription = "Localized description",
-				modifier = Modifier.scale(scale).size(24.dp),
+				painter = icon ,
+				contentDescription = "Localized description" ,
+				modifier = Modifier
+					.scale(scale)
+					.size(24.dp) ,
 				tint = iconTintColor
 			)
 	}

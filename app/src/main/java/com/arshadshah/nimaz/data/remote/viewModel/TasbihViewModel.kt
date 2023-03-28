@@ -128,27 +128,32 @@ class TasbihViewModel(context : Context) : ViewModel()
 			{
 				deleteTasbih(event.tasbih)
 			}
+
 			is TasbihEvent.RecreateTasbih ->
 			{
 				recreateTasbih(event.date)
 			}
+
 			is TasbihEvent.UpdateTasbihGoal ->
 			{
 				updateTasbihGoal(event.tasbih)
 			}
+
 			is TasbihEvent.UpdateResetButtonState ->
 			{
 				_resetButtonState.value = event.state
 			}
+
 			is TasbihEvent.UpdateVibrationButtonState ->
 			{
 				_vibrationButtonState.value = event.state
 				//vibrate if the vibration button is on
-				if (!event.state)
+				if (! event.state)
 				{
 					vibrator.cancel()
 				}
 			}
+
 			is TasbihEvent.UpdateOrientationButtonState ->
 			{
 				_orientationButtonState.value = event.state
@@ -204,8 +209,7 @@ class TasbihViewModel(context : Context) : ViewModel()
 											  )
 						datastore.saveTasbih(newTasbih)
 					}
-				}
-				else
+				} else
 				{
 					_tasbihError.value = "No tasbih for yesterday"
 				}
@@ -330,6 +334,7 @@ class TasbihViewModel(context : Context) : ViewModel()
 			}
 		}
 	}
+
 	private fun updateTasbihGoal(tasbih : Tasbih)
 	{
 		viewModelScope.launch(Dispatchers.IO) {

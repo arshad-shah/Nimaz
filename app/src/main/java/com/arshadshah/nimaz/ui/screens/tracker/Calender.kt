@@ -69,8 +69,8 @@ fun Calender(paddingValues : PaddingValues)
 				.testTag(TEST_TAG_CALENDER) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Top
-		  ) {
-		item{
+			  ) {
+		item {
 			ElevatedCard(
 					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
@@ -78,7 +78,7 @@ fun Calender(paddingValues : PaddingValues)
 						) {
 				SelectableCalendar(
 						dayContent = {
-							CalenderDay(dayState = it, handleEvents = viewModel::onEvent)
+							CalenderDay(dayState = it , handleEvents = viewModel::onEvent)
 						} ,
 						weekHeader = { weekState ->
 							CalenderWeekHeader(weekState = weekState)
@@ -93,7 +93,7 @@ fun Calender(paddingValues : PaddingValues)
 								  )
 			}
 		}
-		item{
+		item {
 			ElevatedCard(
 					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
@@ -384,7 +384,7 @@ fun CalenderDay(
 			shape = MaterialTheme.shapes.extraLarge ,
 			elevation = CardDefaults.elevatedCardElevation(
 					defaultElevation = if (dayState.isFromCurrentMonth) 2.dp else 0.dp ,
-														  ),
+														  ) ,
 			modifier = Modifier
 				.padding(2.dp)
 				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
@@ -398,7 +398,7 @@ fun CalenderDay(
 							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary
 							else if (today) MaterialTheme.colorScheme.secondary
 							else MaterialTheme.colorScheme.primary
-						},
+						} ,
 						shape = MaterialTheme.shapes.extraLarge
 					   ) ,
 			colors = CardDefaults.elevatedCardColors(

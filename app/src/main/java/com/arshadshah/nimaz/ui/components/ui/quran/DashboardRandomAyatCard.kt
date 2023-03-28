@@ -41,10 +41,12 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 			viewModelStoreOwner = context as ComponentActivity)
 	//make sure this is called only once a day
 	val randomAyatLastFetched = PrivateSharedPreferences(context).getDataLong(
-			AppConstants.RANDOM_AYAT_LAST_FETCHED)
+			AppConstants.RANDOM_AYAT_LAST_FETCHED
+																			 )
 	//ayat last fetched number in surah
 	val randomAyatLastFetchedNumber = PrivateSharedPreferences(context).getDataInt(
-			AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED)
+			AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED
+																				  )
 
 	Log.d("RandomAyat" , "Random Ayat Last Fetched: $randomAyatLastFetched")
 	Log.d("RandomAyat" , "Random Ayat Last Fetched Number: $randomAyatLastFetchedNumber")
@@ -54,9 +56,9 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 	{
 		viewModel.getRandomAya()
 		PrivateSharedPreferences(context).saveDataLong(
-				AppConstants.RANDOM_AYAT_LAST_FETCHED , System.currentTimeMillis())
-	}
-	else
+				AppConstants.RANDOM_AYAT_LAST_FETCHED , System.currentTimeMillis()
+													  )
+	} else
 	{
 		viewModel.getAyatByAyaNumberInSurah(randomAyatLastFetchedNumber)
 	}
@@ -79,10 +81,13 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 					onNavigateToAyatScreen(
 							//number : String , isSurah : Boolean , language : String , scrollToAya : Int?
 							stateOfRandomAyat.value.suraNumber.toString() ,
-							true,
-							PrivateSharedPreferences(context).getData(AppConstants.TRANSLATION_LANGUAGE, "English") ,
+							true ,
+							PrivateSharedPreferences(context).getData(
+									AppConstants.TRANSLATION_LANGUAGE ,
+									"English"
+																	 ) ,
 							stateOfRandomAyat.value.ayaNumberInSurah
-						)
+										  )
 				} ,
 				) {
 		Row(
@@ -98,18 +103,27 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 				Row(
 						modifier = Modifier.padding(4.dp) ,
 				   ) {
-					CustomText(modifier = Modifier , heading = "Verse" , text = stateOfRandomAyat.value.ayaNumber.toString())
+					CustomText(
+							modifier = Modifier ,
+							heading = "Verse" ,
+							text = stateOfRandomAyat.value.ayaNumber.toString()
+							  )
 					Spacer(modifier = Modifier.width(4.dp))
-					CustomText(modifier = Modifier , heading = "Chapter" , text = stateOfRandomAyat.value.suraNumber.toString())
+					CustomText(
+							modifier = Modifier ,
+							heading = "Chapter" ,
+							text = stateOfRandomAyat.value.suraNumber.toString()
+							  )
 				}
 			}
 			Spacer(modifier = Modifier.width(4.dp))
-			Text(text = stateOfRandomAyatSurah.value.name ,
-				 style = MaterialTheme.typography.titleLarge ,
-				 fontSize = 26.sp ,
-				 fontFamily = utmaniQuranFont ,
-				 modifier = Modifier
-					 .padding(4.dp)
+			Text(
+					text = stateOfRandomAyatSurah.value.name ,
+					style = MaterialTheme.typography.titleLarge ,
+					fontSize = 26.sp ,
+					fontFamily = utmaniQuranFont ,
+					modifier = Modifier
+						.padding(4.dp)
 				)
 		}
 		Row(
@@ -139,7 +153,11 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 					}
 				}
 				Spacer(modifier = Modifier.height(4.dp))
-				if (PrivateSharedPreferences(context).getData(AppConstants.TRANSLATION_LANGUAGE, "English") == "Urdu")
+				if (PrivateSharedPreferences(context).getData(
+							AppConstants.TRANSLATION_LANGUAGE ,
+							"English"
+															 ) == "Urdu"
+				)
 				{
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
@@ -154,7 +172,11 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 							)
 					}
 				}
-				if (PrivateSharedPreferences(context).getData(AppConstants.TRANSLATION_LANGUAGE, "English") == "English")
+				if (PrivateSharedPreferences(context).getData(
+							AppConstants.TRANSLATION_LANGUAGE ,
+							"English"
+															 ) == "English"
+				)
 				{
 					stateOfRandomAyat.value.ayaTranslationEnglish.let {
 						Text(

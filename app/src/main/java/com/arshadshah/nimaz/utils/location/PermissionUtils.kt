@@ -56,14 +56,17 @@ fun FeatureThatRequiresLocationPermission(
 						showDialog.value = false
 						locationPermissionState.launchMultiplePermissionRequest()
 					}) {
-						Text(text = "Grant Permission", style = MaterialTheme.typography.titleMedium)
+						Text(
+								text = "Grant Permission" ,
+								style = MaterialTheme.typography.titleMedium
+							)
 					}
 				} ,
 				dismissButton = {
 					Button(onClick = {
 						showDialog.value = false
 					}) {
-						Text(text = "Cancel", style = MaterialTheme.typography.titleMedium)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )
@@ -113,12 +116,12 @@ fun FeatureThatRequiresNotificationPermission(
 				text = { Text(text = descToShow.value) } ,
 				confirmButton = {
 					Button(onClick = { notificationPermissionState.launchPermissionRequest() }) {
-						Text(text = "Allow", style = MaterialTheme.typography.titleMedium)
+						Text(text = "Allow" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					Button(onClick = { showRationale.value = false }) {
-						Text(text = "Cancel", style = MaterialTheme.typography.titleMedium)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )

@@ -31,16 +31,17 @@ fun GoalEditDialog(tasbih : Tasbih , showTasbihDialog : MutableState<Boolean>)
 			onConfirm = {
 				viewModel.handleEvent(
 						TasbihViewModel.TasbihEvent.UpdateTasbihGoal(
-						Tasbih(
-								id = tasbih.id ,
-								arabicName = tasbih.arabicName ,
-								englishName = tasbih.englishName ,
-								translationName = tasbih.translationName ,
-								goal = it.toInt() ,
-								count = tasbih.count ,
-								date = LocalDate.now().toString() ,
-							  )
-																))
+								Tasbih(
+										id = tasbih.id ,
+										arabicName = tasbih.arabicName ,
+										englishName = tasbih.englishName ,
+										translationName = tasbih.translationName ,
+										goal = it.toInt() ,
+										count = tasbih.count ,
+										date = LocalDate.now().toString() ,
+									  )
+																	)
+									 )
 				//save the objective
 				context.getSharedPreferences("tasbih" , 0).edit()
 					.putString("objective-${tasbih.id}" , it)

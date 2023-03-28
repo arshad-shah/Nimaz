@@ -19,7 +19,7 @@ import java.time.LocalDate
 @Composable
 fun DashboardTasbihTracker(
 	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
-	onNavigateToTasbihListScreen : () -> Unit
+	onNavigateToTasbihListScreen : () -> Unit ,
 						  )
 {
 	val context = LocalContext.current
@@ -30,13 +30,17 @@ fun DashboardTasbihTracker(
 							 )
 	//run only once
 	LaunchedEffect(key1 = true) {
-		viewModel.handleEvent(TasbihViewModel.TasbihEvent.RecreateTasbih(LocalDate.now().toString()))
+		viewModel.handleEvent(
+				TasbihViewModel.TasbihEvent.RecreateTasbih(
+						LocalDate.now().toString()
+														  )
+							 )
 	}
 	val listOfTasbih = remember {
 		viewModel.tasbihList
 	}.collectAsState()
 
-	if(listOfTasbih.value.isEmpty())
+	if (listOfTasbih.value.isEmpty())
 	{
 		Box(
 				modifier = Modifier.clickable {
@@ -45,7 +49,8 @@ fun DashboardTasbihTracker(
 		   ) {
 			Placeholder(nameOfDropdown = "Tasbih")
 		}
-	}else{
+	} else
+	{
 		val showTasbihDialog = remember {
 			mutableStateOf(false)
 		}
@@ -75,34 +80,34 @@ fun DashboardTasbihTracker(
 								  )
 				} ,
 				//the list of tasbih for the date at the index
-				items = listOfTasbih.value,
+				items = listOfTasbih.value ,
 				label = "Tasbih" ,
 				dropDownItem = {
 					TasbihDropdownItem(
-										it ,
-										onClick = { tasbih ->
-											onNavigateToTasbihScreen(
-													tasbih.id.toString() ,
-													tasbih.arabicName ,
-													tasbih.englishName ,
-													tasbih.translationName
-																	)
-										} ,
-										onDelete = { tasbih ->
-											showDeleteDialog.value = true
-											tasbihToEdit.value = tasbih
-										} ,
-										onEdit = { tasbih ->
-											showTasbihDialog.value =
-												true
-											tasbihToEdit.value =
-												tasbih
-										})
+							it ,
+							onClick = { tasbih ->
+								onNavigateToTasbihScreen(
+										tasbih.id.toString() ,
+										tasbih.arabicName ,
+										tasbih.englishName ,
+										tasbih.translationName
+														)
+							} ,
+							onDelete = { tasbih ->
+								showDeleteDialog.value = true
+								tasbihToEdit.value = tasbih
+							} ,
+							onEdit = { tasbih ->
+								showTasbihDialog.value =
+									true
+								tasbihToEdit.value =
+									tasbih
+							})
 				}
 
 						)
 
-		GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
-		DeleteDialog(tasbihToEdit.value, showDeleteDialog)
+		GoalEditDialog(tasbihToEdit.value , showTasbihDialog)
+		DeleteDialog(tasbihToEdit.value , showDeleteDialog)
 	}
 }

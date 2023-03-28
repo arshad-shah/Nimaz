@@ -88,7 +88,7 @@ class PrayerTimesViewModel : ViewModel()
 	val error = _error.asStateFlow()
 
 	private val _isRefreshing = MutableStateFlow(false)
-	val isRefreshing: StateFlow<Boolean>
+	val isRefreshing : StateFlow<Boolean>
 		get() = _isRefreshing.asStateFlow()
 
 
@@ -345,12 +345,12 @@ class PrayerTimesViewModel : ViewModel()
 					//set the current prayer name
 					_currentPrayerName.value =
 						currentPrayer(LocalDateTime.now() , mapOfPrayerTimes).first
-						_fajrTimeState.value = response.data.fajr !!
-						_sunriseTimeState.value = response.data.sunrise !!
-						_dhuhrTimeState.value = response.data.dhuhr !!
-						_asrTimeState.value = response.data.asr !!
-						_maghribTimeState.value = response.data.maghrib !!
-						_ishaTimeState.value = response.data.isha !!
+					_fajrTimeState.value = response.data.fajr !!
+					_sunriseTimeState.value = response.data.sunrise !!
+					_dhuhrTimeState.value = response.data.dhuhr !!
+					_asrTimeState.value = response.data.asr !!
+					_maghribTimeState.value = response.data.maghrib !!
+					_ishaTimeState.value = response.data.isha !!
 
 					_isLoading.value = false
 					_isRefreshing.value = false

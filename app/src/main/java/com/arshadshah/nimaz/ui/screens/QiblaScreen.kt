@@ -117,7 +117,7 @@ fun ImageSwitcherCard(changeImageIndex : (Int) -> Unit)
 							modifier = Modifier
 								.scale(animateFloatAsState(if (isSelected.value == index) 1.5f else 1f).value)
 								.size(80.dp)
-								.padding(vertical = 16.dp, horizontal = 8.dp)
+								.padding(vertical = 16.dp , horizontal = 8.dp)
 								.clickable(
 										role = Role.RadioButton ,
 										  ) {

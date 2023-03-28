@@ -74,7 +74,7 @@ fun SettingsList(
 		}
 	}
 	AlertDialog(
-			icon = icon,
+			icon = icon ,
 			modifier = Modifier.height(height) ,
 			title = title ,
 			text = {
@@ -140,13 +140,23 @@ fun SettingsList(
 			confirmButton = {
 				Button(
 						onClick = { showDialog = false } ,
-						content = { Text(text = "Confirm", style = MaterialTheme.typography.titleMedium) }
+						content = {
+							Text(
+									text = "Confirm" ,
+									style = MaterialTheme.typography.titleMedium
+								)
+						}
 					  )
 			} ,
 			dismissButton = {
 				TextButton(
 						onClick = { showDialog = false } ,
-						content = { Text(text = "Cancel", style = MaterialTheme.typography.titleMedium) }
+						content = {
+							Text(
+									text = "Cancel" ,
+									style = MaterialTheme.typography.titleMedium
+								)
+						}
 						  )
 			}
 			   )

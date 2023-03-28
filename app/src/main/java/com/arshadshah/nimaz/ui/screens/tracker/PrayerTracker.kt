@@ -96,26 +96,26 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 						end = 0.dp
 										   ) ,
 					) {
-				Column {
-							PrayerTrackerList(
-									viewModel::onEvent ,
-									stateOfTrackerForToday.value ,
-									fajrState.value ,
-									zuhrState.value ,
-									asrState.value ,
-									maghribState.value ,
-									ishaState.value ,
-									showDateSelector ,
-									dateState ,
-									progressState
-											 )
-							Fasting(
-									viewModel::onEvent ,
-									dateState ,
-									isFasting.value ,
-									fastingState.value
-								   )
-				}
+			Column {
+				PrayerTrackerList(
+						viewModel::onEvent ,
+						stateOfTrackerForToday.value ,
+						fajrState.value ,
+						zuhrState.value ,
+						asrState.value ,
+						maghribState.value ,
+						ishaState.value ,
+						showDateSelector ,
+						dateState ,
+						progressState
+								 )
+				Fasting(
+						viewModel::onEvent ,
+						dateState ,
+						isFasting.value ,
+						fastingState.value
+					   )
+			}
 		}
 	}
 }

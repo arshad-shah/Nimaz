@@ -59,7 +59,13 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 				val currentItem = rememberUpdatedState(newValue = Aya)
 				val dismissState = rememberDismissState(
 						confirmValueChange = {
-								viewModel.handleAyaEvent(QuranViewModel.AyaEvent.deleteBookmarkFromAya(currentItem.value.ayaNumber , currentItem.value.suraNumber , currentItem.value.ayaNumberInSurah))
+							viewModel.handleAyaEvent(
+									QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+											currentItem.value.ayaNumber ,
+											currentItem.value.suraNumber ,
+											currentItem.value.ayaNumberInSurah
+																				 )
+													)
 							false
 						}
 													   )
@@ -69,7 +75,7 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 						state = dismissState ,
 						background = {
 							SwipeBackground(dismissState = dismissState)
-						},
+						} ,
 						dismissContent = {
 							FeatureDropdownItem(
 									item = Aya ,

@@ -27,7 +27,7 @@ import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalAnimationApi::class , ExperimentalFoundationApi::class ,)
+@OptIn(ExperimentalAnimationApi::class , ExperimentalFoundationApi::class)
 @Composable
 fun IntroPage1()
 {
@@ -49,9 +49,10 @@ fun IntroPage1()
 	val sharedPref = PrivateSharedPreferences(context)
 	val scope = rememberCoroutineScope()
 
-	Column(modifier = Modifier
-		.padding(bottom = 20.dp)
-		.fillMaxSize()
+	Column(
+			modifier = Modifier
+				.padding(bottom = 20.dp)
+				.fillMaxSize()
 		  ) {
 		HorizontalPager(
 				modifier = Modifier
@@ -67,13 +68,14 @@ fun IntroPage1()
 				Modifier
 					.padding(vertical = 8.dp)
 					.height(30.dp)
-					.fillMaxWidth(),
-				horizontalArrangement = Arrangement.Center,
+					.fillMaxWidth() ,
+				horizontalArrangement = Arrangement.Center ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			repeat(pages.size) { iteration ->
-				val color = if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary
-				else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+				val color =
+					if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary
+					else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 				Box(
 						modifier = Modifier
 							.padding(4.dp)
@@ -123,15 +125,19 @@ fun IntroPage1()
 						context.startActivity(Intent(context , MainActivity::class.java))
 						//remove the activity from the back stack
 						(context as Introduction).finish()
-					} else if (!isLocationSet)
+					} else if (! isLocationSet)
 					{
-						Toasty.error(context , "Please set your location in settings" , Toasty.LENGTH_SHORT)
+						Toasty.error(
+								context ,
+								"Please set your location in settings" ,
+								Toasty.LENGTH_SHORT
+									)
 							.show()
 						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
 						context.startActivity(Intent(context , MainActivity::class.java))
 						//remove the activity from the back stack
 						(context as Introduction).finish()
-					} else if (!isNotificationSet)
+					} else if (! isNotificationSet)
 					{
 						Toasty.error(
 								context ,

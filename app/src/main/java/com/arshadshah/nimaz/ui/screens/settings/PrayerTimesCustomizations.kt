@@ -172,34 +172,37 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		SettingsGroup(title = {
 			val openPopUp = remember { mutableStateOf(false) }
 			Row(
-					modifier = Modifier.fillMaxWidth(),
-					verticalAlignment = Alignment.CenterVertically,
+					modifier = Modifier.fillMaxWidth() ,
+					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
 				Text(text = "Prayer Parameters")
 				Spacer(modifier = Modifier.width(8.dp))
 				IconButton(onClick = {
-					openPopUp.value = !openPopUp.value
+					openPopUp.value = ! openPopUp.value
 				}) {
 					Icon(
 							modifier = Modifier.size(24.dp) ,
 							painter = painterResource(id = R.drawable.info_icon) ,
-							contentDescription = "Info",
+							contentDescription = "Info" ,
 							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 						)
 				}
 			}
-			if(openPopUp.value){
+			if (openPopUp.value)
+			{
 				Popup(
 						onDismissRequest = {
-							openPopUp.value = !openPopUp.value
+							openPopUp.value = ! openPopUp.value
 						} ,
 						alignment = Alignment.BottomEnd ,
 						offset = IntOffset(0 , 150) ,
 					 ) {
 					ElevatedCard(
 							shape = MaterialTheme.shapes.extraLarge ,
-							modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
+							modifier = Modifier
+								.shadow(8.dp , RoundedCornerShape(8.dp))
+								.padding(8.dp) ,
 								) {
 						Text(
 								text = "Prayer times are calculated using the parameters you set here. " +
@@ -249,7 +252,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									context
 																			   )
 										 )
-					PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+					PrivateSharedPreferences(context).saveDataBoolean(
+							AppConstants.ALARM_LOCK ,
+							false
+																	 )
 				}
 			}
 			ElevatedCard(
@@ -289,7 +295,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									context
 																			   )
 										 )
-					PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+					PrivateSharedPreferences(context).saveDataBoolean(
+							AppConstants.ALARM_LOCK ,
+							false
+																	 )
 				}
 			}
 		}
@@ -297,34 +306,37 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		SettingsGroup(title = {
 			val openPopUp = remember { mutableStateOf(false) }
 			Row(
-					modifier = Modifier.fillMaxWidth(),
-					verticalAlignment = Alignment.CenterVertically,
+					modifier = Modifier.fillMaxWidth() ,
+					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
 				Text(text = "Prayer Angles")
 				Spacer(modifier = Modifier.width(8.dp))
 				IconButton(onClick = {
-					openPopUp.value = !openPopUp.value
+					openPopUp.value = ! openPopUp.value
 				}) {
 					Icon(
 							modifier = Modifier.size(24.dp) ,
 							painter = painterResource(id = R.drawable.info_icon) ,
-							contentDescription = "Info",
+							contentDescription = "Info" ,
 							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 						)
 				}
 			}
-			if(openPopUp.value){
+			if (openPopUp.value)
+			{
 				Popup(
 						onDismissRequest = {
-							openPopUp.value = !openPopUp.value
+							openPopUp.value = ! openPopUp.value
 						} ,
 						alignment = Alignment.BottomEnd ,
 						offset = IntOffset(0 , 150) ,
 					 ) {
 					ElevatedCard(
 							shape = MaterialTheme.shapes.extraLarge ,
-							modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
+							modifier = Modifier
+								.shadow(8.dp , RoundedCornerShape(8.dp))
+								.padding(8.dp) ,
 								) {
 						Text(
 								text = "Fajr and isha prayer times are calculated using the angles you set here. " +
@@ -369,7 +381,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									context
 																			   )
 										 )
-					PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+					PrivateSharedPreferences(context).saveDataBoolean(
+							AppConstants.ALARM_LOCK ,
+							false
+																	 )
 				}
 			}
 			if (ishaaAngleVisible.value)
@@ -410,7 +425,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 										context
 																				   )
 											 )
-						PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+						PrivateSharedPreferences(context).saveDataBoolean(
+								AppConstants.ALARM_LOCK ,
+								false
+																		 )
 					}
 				}
 			} else
@@ -437,34 +455,37 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				title = {
 					val openPopUp = remember { mutableStateOf(false) }
 					Row(
-							modifier = Modifier.fillMaxWidth(),
-							verticalAlignment = Alignment.CenterVertically,
+							modifier = Modifier.fillMaxWidth() ,
+							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.SpaceBetween
 					   ) {
 						Text(text = "Prayer Time")
 						Spacer(modifier = Modifier.width(8.dp))
 						IconButton(onClick = {
-							openPopUp.value = !openPopUp.value
+							openPopUp.value = ! openPopUp.value
 						}) {
 							Icon(
-									modifier = Modifier.size(24.dp),
+									modifier = Modifier.size(24.dp) ,
 									painter = painterResource(id = R.drawable.info_icon) ,
-									contentDescription = "Info",
+									contentDescription = "Info" ,
 									tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 								)
 						}
 					}
-					if(openPopUp.value){
+					if (openPopUp.value)
+					{
 						Popup(
 								onDismissRequest = {
-									openPopUp.value = !openPopUp.value
+									openPopUp.value = ! openPopUp.value
 								} ,
 								alignment = Alignment.BottomEnd ,
 								offset = IntOffset(0 , 150) ,
 							 ) {
 							ElevatedCard(
 									shape = MaterialTheme.shapes.extraLarge ,
-									modifier = Modifier.shadow(8.dp , RoundedCornerShape(8.dp)).padding(8.dp) ,
+									modifier = Modifier
+										.shadow(8.dp , RoundedCornerShape(8.dp))
+										.padding(8.dp) ,
 										) {
 								Text(
 										text = "Each prayer times can be adjusted individually using the settings below. " +
@@ -521,7 +542,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						}
 					}
 					ElevatedCard(
@@ -568,7 +592,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						}
 					}
 					ElevatedCard(
@@ -615,7 +642,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						}
 					}
 					ElevatedCard(
@@ -662,7 +692,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						}
 					}
 					ElevatedCard(
@@ -709,7 +742,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						}
 					}
 					ElevatedCard(
@@ -757,7 +793,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
-							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						}
 					}
 				}

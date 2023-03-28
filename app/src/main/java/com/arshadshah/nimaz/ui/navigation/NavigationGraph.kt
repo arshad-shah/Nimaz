@@ -456,7 +456,7 @@ fun NavigationGraph(
 
 		composable(BottomNavItem.Dashboard.screen_route) {
 			Dashboard(
-					paddingValues = paddingValues,
+					paddingValues = paddingValues ,
 					onNavigateToPrayerTimes = {
 						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route) {
 							popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -468,7 +468,7 @@ fun NavigationGraph(
 					} ,
 					onNavigateToTracker = {
 						navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
-					},
+					} ,
 					onNavigateToAyatScreen = { number : String , isSurah : Boolean , language : String , scrollToAya : Int ->
 						navController.navigate(
 								MY_QURAN_SCREEN_ROUTE.replace(
@@ -488,8 +488,8 @@ fun NavigationGraph(
 											scrollToAya.toString()
 											)
 											  )
-					},
-					onNavigateToTasbihScreen =  { id : String , arabic : String , translation : String , transliteration : String ->
+					} ,
+					onNavigateToTasbihScreen = { id : String , arabic : String , translation : String , transliteration : String ->
 						navController.navigate(
 								TASBIH_SCREEN_ROUTE
 									.replace(
@@ -509,7 +509,7 @@ fun NavigationGraph(
 											transliteration
 											)
 											  )
-					},
+					} ,
 					onNavigateToTasbihListScreen = {
 						navController.navigate(TASBIH_LIST_SCREEN)
 					}
@@ -583,7 +583,7 @@ fun NavigationGraph(
 		}
 		composable(MY_QURAN_SCREEN_ROUTE) {
 			AyatScreen(
-					number = it.arguments?.getString("number") !!,
+					number = it.arguments?.getString("number") !! ,
 					isSurah = it.arguments?.getString("isSurah") !! ,
 					language = it.arguments?.getString("language") !! ,
 					scrollToAya = it.arguments?.getString("scrollTo") !!.toInt() ,
@@ -729,12 +729,12 @@ fun NavigationGraph(
 			SettingsScreen(
 					onNavigateToPrayerTimeCustomizationScreen = {
 						navController.navigate(
-								AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
+								PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 											  )
 					} ,
 					onNavigateToAboutScreen = {
 						navController.navigate(
-								AppConstants.ABOUT_SCREEN_ROUTE
+								ABOUT_SCREEN_ROUTE
 											  )
 					} ,
 					onNavigateToWebViewScreen = { url : String ->
@@ -743,7 +743,7 @@ fun NavigationGraph(
 									.replace(
 											"{url}" ,
 											url
-											),
+											) ,
 											  )
 					} ,
 					paddingValues = paddingValues)
@@ -752,12 +752,12 @@ fun NavigationGraph(
 			WebViewScreen(
 					url = it.arguments?.getString("url") !! ,
 					paddingValues = paddingValues
-							)
+						 )
 		}
-		composable(AppConstants.ABOUT_SCREEN_ROUTE) {
+		composable(ABOUT_SCREEN_ROUTE) {
 			About(paddingValues)
 		}
-		composable(AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
+		composable(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
 			PrayerTimesCustomizations(paddingValues)
 		}
 	}

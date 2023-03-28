@@ -51,7 +51,9 @@ fun MyQuranScreen(
 	}
 
 	LazyColumn(
-			modifier = Modifier.testTag("MyQuranScreen").fillMaxSize(),
+			modifier = Modifier
+				.testTag("MyQuranScreen")
+				.fillMaxSize() ,
 			userScrollEnabled = true ,
 			  ) {
 		item {
@@ -62,7 +64,13 @@ fun MyQuranScreen(
 						val currentItem = rememberUpdatedState(newValue = bookmark)
 						val dismissState = rememberDismissState(
 								confirmValueChange = {
-										handleEvents(QuranViewModel.AyaEvent.deleteBookmarkFromAya(currentItem.value.ayaNumber , currentItem.value.suraNumber , currentItem.value.ayaNumberInSurah))
+									handleEvents(
+											QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+													currentItem.value.ayaNumber ,
+													currentItem.value.suraNumber ,
+													currentItem.value.ayaNumberInSurah
+																						 )
+												)
 									false
 								}
 															   )
@@ -72,7 +80,7 @@ fun MyQuranScreen(
 								state = dismissState ,
 								background = {
 									SwipeBackground(dismissState = dismissState)
-								},
+								} ,
 								dismissContent = {
 									FeatureDropdownItem(
 											item = bookmark ,
@@ -109,7 +117,13 @@ fun MyQuranScreen(
 						val currentItem = rememberUpdatedState(newValue = favourite)
 						val dismissState = rememberDismissState(
 								confirmValueChange = {
-										handleEvents(QuranViewModel.AyaEvent.deleteFavoriteFromAya(currentItem.value.ayaNumber , currentItem.value.suraNumber , currentItem.value.ayaNumberInSurah))
+									handleEvents(
+											QuranViewModel.AyaEvent.deleteFavoriteFromAya(
+													currentItem.value.ayaNumber ,
+													currentItem.value.suraNumber ,
+													currentItem.value.ayaNumberInSurah
+																						 )
+												)
 									false
 								}
 															   )
@@ -119,32 +133,32 @@ fun MyQuranScreen(
 								state = dismissState ,
 								background = {
 									SwipeBackground(dismissState = dismissState)
-								},
+								} ,
 								dismissContent = {
-						FeatureDropdownItem(
-								item = favourite ,
-								onClick = { aya ->
-									onNavigateToAyatScreen(
-											aya.suraNumber.toString() ,
-											true ,
-											translation ,
-											aya.ayaNumberInSurah
-														  )
-								} ,
-								itemContent = { aya ->
-									//the text
-									Text(
-											modifier = Modifier
-												.padding(8.dp) ,
-											text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-											textAlign = TextAlign.Start ,
-											maxLines = 2 ,
-											overflow = TextOverflow.Ellipsis ,
-											style = MaterialTheme.typography.bodyLarge
-										)
-								} ,
-										   )
-					})
+									FeatureDropdownItem(
+											item = favourite ,
+											onClick = { aya ->
+												onNavigateToAyatScreen(
+														aya.suraNumber.toString() ,
+														true ,
+														translation ,
+														aya.ayaNumberInSurah
+																	  )
+											} ,
+											itemContent = { aya ->
+												//the text
+												Text(
+														modifier = Modifier
+															.padding(8.dp) ,
+														text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
+														textAlign = TextAlign.Start ,
+														maxLines = 2 ,
+														overflow = TextOverflow.Ellipsis ,
+														style = MaterialTheme.typography.bodyLarge
+													)
+											} ,
+													   )
+								})
 					}
 							)
 		}
@@ -156,7 +170,13 @@ fun MyQuranScreen(
 						val currentItem = rememberUpdatedState(newValue = note)
 						val dismissState = rememberDismissState(
 								confirmValueChange = {
-										handleEvents(QuranViewModel.AyaEvent.deleteNoteFromAya(currentItem.value.ayaNumber , currentItem.value.suraNumber , currentItem.value.ayaNumberInSurah))
+									handleEvents(
+											QuranViewModel.AyaEvent.deleteNoteFromAya(
+													currentItem.value.ayaNumber ,
+													currentItem.value.suraNumber ,
+													currentItem.value.ayaNumberInSurah
+																					 )
+												)
 									false
 								}
 															   )
@@ -166,7 +186,7 @@ fun MyQuranScreen(
 								state = dismissState ,
 								background = {
 									SwipeBackground(dismissState = dismissState)
-								},
+								} ,
 								dismissContent = {
 									FeatureDropdownItem(
 											item = note ,
