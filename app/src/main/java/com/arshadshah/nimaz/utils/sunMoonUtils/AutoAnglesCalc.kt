@@ -5,8 +5,10 @@ import kotlin.math.roundToInt
 
 class AutoAnglesCalc
 {
-	private lateinit var sunCalc: SunMoonCalc
-	fun calculateFajrAngle(context: Context , latitude: Double , longitude: Double): Int{
+
+	private lateinit var sunCalc : SunMoonCalc
+	fun calculateFajrAngle(context : Context , latitude : Double , longitude : Double) : Int
+	{
 		sunCalc = SunMoonCalc(latitude , longitude)
 		val times = sunCalc.getTimes()
 		val sunPositionAtFajr = sunCalc.getSunPositionForTime(times.nightEnd)
@@ -15,7 +17,8 @@ class AutoAnglesCalc
 		return altitudeInDegreesFajr
 	}
 
-	fun calculateIshaaAngle(context: Context , latitude: Double , longitude: Double): Int{
+	fun calculateIshaaAngle(context : Context , latitude : Double , longitude : Double) : Int
+	{
 		sunCalc = SunMoonCalc(latitude , longitude)
 		val times = sunCalc.getTimes()
 		val sunPositionAtIshaa = sunCalc.getSunPositionForTime(times.dusk)
@@ -23,8 +26,6 @@ class AutoAnglesCalc
 		val altitudeInDegreesIshaa = Math.toDegrees(sunPositionAtIshaa.altitude).roundToInt()
 		return altitudeInDegreesIshaa
 	}
-
-
 
 
 }

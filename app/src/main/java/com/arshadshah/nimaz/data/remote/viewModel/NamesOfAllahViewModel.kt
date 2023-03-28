@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class NamesOfAllahViewModel: ViewModel()
+class NamesOfAllahViewModel : ViewModel()
 {
 
 	private val mediaPlayer = MediaPlayer()
@@ -31,6 +31,7 @@ class NamesOfAllahViewModel: ViewModel()
 
 	sealed class AudioEvent
 	{
+
 		class Play(val context : Context) : AudioEvent()
 		object Pause : AudioEvent()
 		object Stop : AudioEvent()
@@ -50,7 +51,7 @@ class NamesOfAllahViewModel: ViewModel()
 	//play audio
 	fun playAudio(context : Context)
 	{
-		viewModelScope.launch(Dispatchers.IO){
+		viewModelScope.launch(Dispatchers.IO) {
 			//if the audio is paused
 			if (isPaused.value)
 			{
@@ -62,7 +63,8 @@ class NamesOfAllahViewModel: ViewModel()
 				_isPaused.value = false
 				//set the stopped state to false
 				_isStopped.value = false
-			}else{
+			} else
+			{
 				//prepare the audio
 				prepareMediaPlayer(context)
 				//start the audio
@@ -123,11 +125,11 @@ class NamesOfAllahViewModel: ViewModel()
 		val myUri : Uri =
 			Uri.parse("android.resource://" + context.packageName + "/" + R.raw.asmaulhusna)
 		mediaPlayer.setAudioAttributes(
-					AudioAttributes.Builder()
-						.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-						.setUsage(AudioAttributes.USAGE_MEDIA)
-						.build()
-							  )
+				AudioAttributes.Builder()
+					.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+					.setUsage(AudioAttributes.USAGE_MEDIA)
+					.build()
+									  )
 		mediaPlayer.setDataSource(context , myUri)
 		mediaPlayer.prepare()
 	}

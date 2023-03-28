@@ -86,14 +86,35 @@ class QuranViewModel(context : Context) : ViewModel()
 	val display_Mode = _display_Mode.asStateFlow()
 
 	//random aya state a map of aya, surah, juz data
-	private val _randomAyaState = MutableStateFlow(Aya(0 , 0 , "" , "" , "" , 0 , 0 , false , false , "" , "" , false , "" , 0 , 0))
+	private val _randomAyaState = MutableStateFlow(
+			Aya(
+					0 ,
+					0 ,
+					"" ,
+					"" ,
+					"" ,
+					0 ,
+					0 ,
+					false ,
+					false ,
+					"" ,
+					"" ,
+					false ,
+					"" ,
+					0 ,
+					0
+			   )
+												  )
 	val randomAyaState = _randomAyaState.asStateFlow()
-	private val _randomAyaSurahState = MutableStateFlow(Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0))
+	private val _randomAyaSurahState =
+		MutableStateFlow(Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0))
 	val randomAyaSurahState = _randomAyaSurahState.asStateFlow()
 	private val _randomAyaJuzState = MutableStateFlow(Juz(0 , "" , "" , 0))
 	val randomAyaJuzState = _randomAyaJuzState.asStateFlow()
+
 	//download button state
-	private val _downloadButtonState = MutableStateFlow(!sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false))
+	private val _downloadButtonState =
+		MutableStateFlow(! sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false))
 	val downloadButtonState = _downloadButtonState.asStateFlow()
 
 	init
@@ -169,40 +190,44 @@ class QuranViewModel(context : Context) : ViewModel()
 
 				//if the font size is not set, set it to default 26 and 16
 
-				_arabic_Font_size.value = if (sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE) == 0.0f)
-				{
-					//save the default font size and also return it
-					sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE , 26.0f)
-					26.0f
-				}
-				else
-				{
-					sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
-				}
-				_translation_Font_size.value = if (sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE) == 0.0f)
-				{
-					//save the default font size and also return it
-					sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE , 16.0f)
-					16.0f
-				}
-				else
-				{
-					sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
-				}
+				_arabic_Font_size.value =
+					if (sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE) == 0.0f)
+					{
+						//save the default font size and also return it
+						sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE , 26.0f)
+						26.0f
+					} else
+					{
+						sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
+					}
+				_translation_Font_size.value =
+					if (sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE) == 0.0f)
+					{
+						//save the default font size and also return it
+						sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE , 16.0f)
+						16.0f
+					} else
+					{
+						sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
+					}
 
 				_display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE , "List")
 
 				//downloadButtonState
-				_downloadButtonState.value = !sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false)
+				_downloadButtonState.value =
+					! sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED , false)
 			}
+
 			is QuranMenuEvents.Download_Quran ->
 			{
 				downloadQuran()
 			}
+
 			is QuranMenuEvents.Check_Download_Progress ->
 			{
 				checkDownloadProgress()
 			}
+
 			is QuranMenuEvents.Cancel_Download ->
 			{
 				cancelDownload()
@@ -258,7 +283,7 @@ class QuranViewModel(context : Context) : ViewModel()
 				//check which surahs are already downloaded
 				val downloadedSurahs = ayat.map { it.suraNumber }.distinct()
 				//remove downloaded surahs from array
-				val surahsToDownload = surahs.filter { !downloadedSurahs.contains(it) }
+				val surahsToDownload = surahs.filter { ! downloadedSurahs.contains(it) }
 				//if all surahs are downloaded, return
 				if (surahsToDownload.isEmpty())
 				{
@@ -687,6 +712,27 @@ class QuranViewModel(context : Context) : ViewModel()
 			val ayaNumberInSurah : Int ,
 			val audio : String ,
 								) : AyaEvent()
+
+		//delete a note from an aya
+		data class deleteNoteFromAya(
+			val ayaNumber : Int ,
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+									) : AyaEvent()
+
+		//delete a bookmark from an aya
+		data class deleteBookmarkFromAya(
+			val ayaNumber : Int ,
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+										) : AyaEvent()
+
+		//delete a favorite from an aya
+		data class deleteFavoriteFromAya(
+			val ayaNumber : Int ,
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+										) : AyaEvent()
 	}
 
 	//events handler
@@ -751,6 +797,33 @@ class QuranViewModel(context : Context) : ViewModel()
 						ayaEvent.ayaNumberInSurah ,
 						ayaEvent.audio
 							 )
+			}
+
+			is AyaEvent.deleteNoteFromAya ->
+			{
+				deleteNoteFromAya(
+						ayaEvent.ayaNumber ,
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah
+								 )
+			}
+
+			is AyaEvent.deleteBookmarkFromAya ->
+			{
+				deleteBookmarkFromAya(
+						ayaEvent.ayaNumber ,
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah
+									 )
+			}
+
+			is AyaEvent.deleteFavoriteFromAya ->
+			{
+				deleteFavoriteFromAya(
+						ayaEvent.ayaNumber ,
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah
+									 )
 			}
 
 			else ->
@@ -858,6 +931,66 @@ class QuranViewModel(context : Context) : ViewModel()
 	private val _notes = MutableStateFlow(listOf<Aya>())
 	val notes = _notes.asStateFlow()
 
+	fun deleteNoteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+						 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.deleteNoteFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+				val notes = dataStore.getAyasWithNotes()
+				_notes.value = notes
+			} catch (e : Exception)
+			{
+				Log.d("deleteNoteFromAya" , e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	fun deleteBookmarkFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+							 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.deleteBookmarkFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+				val bookmarks = dataStore.getBookmarkedAyas()
+				_bookmarks.value = bookmarks
+			} catch (e : Exception)
+			{
+				Log.d("deleteBookmarkFromAya" , e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	fun deleteFavoriteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+							 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.deleteFavoriteFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+				val favorites = dataStore.getFavoritedAyas()
+				_favorites.value = favorites
+			} catch (e : Exception)
+			{
+				Log.d("deleteFavoriteFromAya" , e.message ?: "Unknown error")
+			}
+		}
+	}
+
 	fun getAllNotes()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
@@ -905,6 +1038,7 @@ class QuranViewModel(context : Context) : ViewModel()
 			}
 		}
 	}
+
 	//get random aya from database
 	fun getRandomAya()
 	{
@@ -928,13 +1062,15 @@ class QuranViewModel(context : Context) : ViewModel()
 					_randomAyaSurahState.value = surahOfTheAya
 					_randomAyaJuzState.value = juzOfTheAya
 					sharedPreferences.saveDataInt(
-							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , randomAya.ayaNumberInSurah)
+							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED ,
+							randomAya.ayaNumberInSurah
+												 )
 
 				} else
 				{
 					val ayat = QuranRepository.getAyaForSurah(1)
 					//add the ayat to the database
-					dataStore.insertAyats(ayat.data!!)
+					dataStore.insertAyats(ayat.data !!)
 					//get a random aya
 					val randomAya = dataStore.getRandomAya()
 					if (randomAya.ayaNumberInSurah == 0 || randomAya.ayaNumberInSurah == 1)
@@ -947,7 +1083,9 @@ class QuranViewModel(context : Context) : ViewModel()
 					_randomAyaSurahState.value = surahOfTheAya
 					_randomAyaJuzState.value = juzOfTheAya
 					sharedPreferences.saveDataInt(
-							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , randomAya.ayaNumberInSurah)
+							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED ,
+							randomAya.ayaNumberInSurah
+												 )
 				}
 			} catch (e : Exception)
 			{
@@ -970,7 +1108,8 @@ class QuranViewModel(context : Context) : ViewModel()
 				_randomAyaJuzState.value = juzOfTheAya
 				_randomAyaState.value = ayat
 				sharedPreferences.saveDataInt(
-						AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , ayaNumberInSurah)
+						AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , ayaNumberInSurah
+											 )
 			} catch (e : Exception)
 			{
 				Log.d("getAyatByAyaNumberInSurah" , e.message ?: "Unknown error")

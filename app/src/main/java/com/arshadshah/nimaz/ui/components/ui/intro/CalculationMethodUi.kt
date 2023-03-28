@@ -24,7 +24,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 
@@ -40,7 +40,7 @@ fun CalculationMethodUI()
 	val settingViewModel = viewModel(
 			key = "SettingViewModel" ,
 			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
+			viewModelStoreOwner = context
 									)
 	val fajrTime = remember {
 		viewModel.fajrTime
@@ -65,12 +65,12 @@ fun CalculationMethodUI()
 	val ishaTime = remember {
 		viewModel.ishaTime
 	}.collectAsState()
-	val autoParams = remember{
+	val autoParams = remember {
 		settingViewModel.autoParams
 	}.collectAsState()
 	val state =
 		rememberPreferenceBooleanSettingState(
-				AUTO_PARAMETERS,
+				AUTO_PARAMETERS ,
 				false
 											 )
 	state.value = autoParams.value
@@ -81,14 +81,14 @@ fun CalculationMethodUI()
 				AppConstants.CALCULATION_METHOD ,
 				"MWL"
 											)
-	val latitude = remember{
+	val latitude = remember {
 		settingViewModel.latitude
 	}.collectAsState()
-	val longitude = remember{
+	val longitude = remember {
 		settingViewModel.longitude
 	}.collectAsState()
 
-	val sharedPreferences = remember{
+	val sharedPreferences = remember {
 		settingViewModel.sharedPreferences
 	}
 
@@ -104,20 +104,21 @@ fun CalculationMethodUI()
 					if (state.value)
 					{
 						Text(text = "Auto Calculation")
-					}
-					else
+					} else
 					{
 						Text(text = "Manual Calculation")
 					}
-				},
+				} ,
 				onCheckedChange = {
-					if (it){
+					if (it)
+					{
 						settingViewModel.handleEvent(
 								SettingsViewModel.SettingsEvent.AutoParameters(
 										true
 																			  )
 													)
-					}else{
+					} else
+					{
 						settingViewModel.handleEvent(
 								SettingsViewModel.SettingsEvent.AutoParameters(
 										false
@@ -134,20 +135,28 @@ fun CalculationMethodUI()
 					//set fajr angle
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.FajrAngle(
-									AutoAnglesCalc().calculateFajrAngle(context, latitude.value, longitude.value).toString()
+									AutoAnglesCalc().calculateFajrAngle(
+											context ,
+											latitude.value ,
+											longitude.value
+																	   ).toString()
 																	 )
 												)
 					//set ishaa angle
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.IshaAngle(
-									AutoAnglesCalc().calculateIshaaAngle(context, latitude.value, longitude.value).toString()
-																	  )
+									AutoAnglesCalc().calculateIshaaAngle(
+											context ,
+											latitude.value ,
+											longitude.value
+																		).toString()
+																	 )
 												)
 					//set high latitude method
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.HighLatitude(
 									"TWILIGHT_ANGLE"
-																			  )
+																		)
 												)
 					viewModel.handleEvent(
 							context ,
@@ -155,31 +164,21 @@ fun CalculationMethodUI()
 									PrayerTimesParamMapper.getParams(context)
 																					)
 										 )
-					val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-					if (! alarmLock)
-					{
-						CreateAlarms().exact(
-								context ,
-								fajrTime.value !! ,
-								sunriseTime.value !! ,
-								dhuhrTime.value !! ,
-								asrTime.value !! ,
-								maghribTime.value !! ,
-								ishaTime.value !! ,
-											)
-						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-					}
 					viewModel.handleEvent(
 							context ,
 							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
 									context
 																			   )
 										 )
+					PrivateSharedPreferences(context).saveDataBoolean(
+							AppConstants.ALARM_LOCK ,
+							false
+																	 )
 				}
 					  )
 	}
 	AnimatedVisibility(
-			visible = !state.value,
+			visible = ! state.value ,
 			enter = expandVertically() ,
 			exit = shrinkVertically()
 					  ) {
@@ -224,20 +223,10 @@ fun CalculationMethodUI()
 										context
 																				   )
 											 )
-						val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-						if (! alarmLock)
-						{
-							CreateAlarms().exact(
-									context ,
-									fajrTime.value !! ,
-									sunriseTime.value !! ,
-									dhuhrTime.value !! ,
-									asrTime.value !! ,
-									maghribTime.value !! ,
-									ishaTime.value !! ,
-												)
-							sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-						}
+						PrivateSharedPreferences(context).saveDataBoolean(
+								AppConstants.ALARM_LOCK ,
+								false
+																		 )
 					} ,
 					height = 500.dp
 						)

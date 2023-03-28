@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
-import android.app.Activity
 import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
@@ -10,7 +9,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,7 +23,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_TEST
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_TEST
 import com.arshadshah.nimaz.constants.AppConstants.DARK_MODE
@@ -41,9 +42,6 @@ import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,24 +80,21 @@ fun SettingsScreen(
 	LaunchedEffect(Unit) {
 		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
 	}
-	val updateAvailabile = remember { mutableStateOf(false) }
-	//check if the current version is the latest version
-	val appUpdateManager = AppUpdateManagerFactory.create(context)
+	val updateAvailabile = remember {
+		viewModelSettings.isUpdateAvailable
+	}.collectAsState()
 
-	// Returns an intent object that you use to check for an update.
-	val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-	val updateAvailableText = if (updateAvailabile.value) {
+	val updateAvailableText = if (updateAvailabile.value)
+	{
 		"Update Available"
-	} else {
+	} else
+	{
 		"Nimaz is up to date"
 	}
+
 	//execute once
 	LaunchedEffect(Unit) {
-		// Checks that the platform will allow the specified type of update.
-		appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-			updateAvailabile.value = (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-					&& appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE))
-		}
+		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
 	}
 	val fajrTime = remember {
 		viewModel.fajrTime
@@ -167,7 +162,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
-				"Rustic_brown" to "Rustic Brown",
+				"Rustic_brown" to "Rustic Brown" ,
 				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
 									  )
@@ -176,7 +171,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
-				"Rustic_brown" to "Rustic Brown",
+				"Rustic_brown" to "Rustic Brown" ,
 				"SYSTEM" to "System Default" ,
 										 )
 
@@ -190,7 +185,8 @@ fun SettingsScreen(
 		SettingsGroup(
 				title = { Text(text = "Theme") } ,
 					 ) {
-			if (stateOfTheme.value != "SYSTEM") {
+			if (stateOfTheme.value != "SYSTEM")
+			{
 				ElevatedCard(
 						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
@@ -252,23 +248,24 @@ fun SettingsScreen(
 									contentDescription = "Theme"
 								)
 						} ,
-						useSelectedValueAsSubtitle = false,
+						useSelectedValueAsSubtitle = false ,
 						valueState = stateOfTheme ,
 						title = {
-							Text(text =
-								when (stateOfTheme.value)
-								{
-									"DEFAULT" -> "App Default"
-									"Raisin_Black" -> "Raisin Black"
-									"Dark_Red" -> "Burgundy"
-									"Dark_Liver" -> "Dark Liver"
-									"Rustic_brown" -> "Rustic Brown"
-									"SYSTEM" -> "System Default"
-									"DYNAMIC" -> "Dynamic"
-									else -> "App Default"
-								}
+							Text(
+									text =
+									when (stateOfTheme.value)
+									{
+										"DEFAULT" -> "App Default"
+										"Raisin_Black" -> "Raisin Black"
+										"Dark_Red" -> "Burgundy"
+										"Dark_Liver" -> "Dark Liver"
+										"Rustic_brown" -> "Rustic Brown"
+										"SYSTEM" -> "System Default"
+										"DYNAMIC" -> "Dynamic"
+										else -> "App Default"
+									}
 								)
-								} ,
+						} ,
 						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
 							)
 			}
@@ -285,7 +282,8 @@ fun SettingsScreen(
 						title = { Text(text = "Force Reset Alarms") } ,
 						onClick = {
 							sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
-							val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+							val alarmLock =
+								sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 							if (! alarmLock)
 							{
 								CreateAlarms().exact(
@@ -339,8 +337,9 @@ fun SettingsScreen(
 										zuharAdhan
 																			)
 								val currentTime = LocalDateTime.now()
-								val timeToNotify = currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
-									.toInstant().toEpochMilli()
+								val timeToNotify =
+									currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
+										.toInstant().toEpochMilli()
 								val testPendingIntent = CreateAlarms().createPendingIntent(
 										context ,
 										TEST_PI_REQUEST_CODE ,
@@ -495,16 +494,16 @@ fun SettingsScreen(
 							)
 					} ,
 					action = {
-						if (updateAvailabile.value) {
+						if (updateAvailabile.value)
+						{
 							Button(
 									onClick = {
-										//check for updates
-										appUpdateManager.startUpdateFlowForResult(
-												appUpdateInfoTask.result ,
-												AppUpdateType.IMMEDIATE ,
-												context as Activity ,
-												APP_UPDATE_REQUEST_CODE
-																				 )
+										viewModelSettings.handleEvent(
+												SettingsViewModel.SettingsEvent.CheckUpdate(
+														context ,
+														true
+																						   )
+																	 )
 									} ,
 								  ) {
 								Text(text = "Update")
@@ -515,12 +514,12 @@ fun SettingsScreen(
 		}
 
 		//get the current year
-		val currentYear =  LocalDateTime.now().year
+		val currentYear = LocalDateTime.now().year
 		Text(
 				text = "© $currentYear Nimaz " + BuildConfig.VERSION_NAME ,
 				modifier = Modifier
 					.padding(8.dp)
-					.align(Alignment.CenterHorizontally),
+					.align(Alignment.CenterHorizontally) ,
 				style = MaterialTheme.typography.bodyMedium
 			)
 	}

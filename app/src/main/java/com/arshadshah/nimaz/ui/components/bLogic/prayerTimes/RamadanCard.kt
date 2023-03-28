@@ -91,17 +91,17 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 					horizontalAlignment = Alignment.CenterHorizontally
 				  ) {
 
-					if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 && todayHijri[ChronoField.MONTH_OF_YEAR] == 9)
-					{
-						Text(text = "Ramadan Mubarak" , style = MaterialTheme.typography.titleLarge)
-					} else
-					{
-						Text(text = "Ramadan" , style = MaterialTheme.typography.titleLarge)
-					}
+				if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 && todayHijri[ChronoField.MONTH_OF_YEAR] == 9)
+				{
+					Text(text = "Ramadan Mubarak" , style = MaterialTheme.typography.titleLarge)
+				} else
+				{
+					Text(text = "Ramadan" , style = MaterialTheme.typography.titleLarge)
+				}
 
 				Row(
 						modifier = Modifier
-							.fillMaxWidth(),
+							.fillMaxWidth() ,
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
@@ -126,11 +126,17 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 						if (isAfterRamadanStart)
 						{
 							//estimated end
-							Text(text = "Estimated end",style = MaterialTheme.typography.titleSmall)
+							Text(
+									text = "Estimated end" ,
+									style = MaterialTheme.typography.titleSmall
+								)
 						} else
 						{
 							//estimated start
-							Text(text = "Estimated start",style = MaterialTheme.typography.titleSmall)
+							Text(
+									text = "Estimated start" ,
+									style = MaterialTheme.typography.titleSmall
+								)
 						}
 						//if ramaadan time left is 1 then show that it ends today if its 2 then show that it ends tomorrow
 						Text(

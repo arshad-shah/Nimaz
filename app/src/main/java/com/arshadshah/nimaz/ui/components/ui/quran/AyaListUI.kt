@@ -109,7 +109,7 @@ fun AyaListUI(
 	{
 		//dumy list of 10 AYa
 		val dummyList = ArrayList<Aya>()
-		for (i in 0..9)
+		for (i in 0 .. 9)
 		{
 			dummyList.add(
 					Aya(
@@ -132,9 +132,9 @@ fun AyaListUI(
 						 )
 		}
 		LazyColumn(
-				contentPadding = paddingValues,
-				state = rememberLazyListState(),
-				userScrollEnabled = false,
+				contentPadding = paddingValues ,
+				state = rememberLazyListState() ,
+				userScrollEnabled = false ,
 				  ) {
 			items(10) { index ->
 				AyaListItemUI(
@@ -400,23 +400,25 @@ fun AyaListItemUI(
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
 		MaterialTheme.colorScheme.secondaryContainer
-	}else{
+	} else
+	{
 		MaterialTheme.colorScheme.surface
 	}
 	val cardTextColor = if (aya.ayaNumber == 0)
 	{
 		MaterialTheme.colorScheme.onSecondaryContainer
-	}else{
+	} else
+	{
 		MaterialTheme.colorScheme.onSurface
 	}
 	ElevatedCard(
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = cardBackgroundColor ,
-													),
+													) ,
 			modifier = Modifier
 				.padding(4.dp)
 				.fillMaxHeight()
-				.fillMaxWidth(),
+				.fillMaxWidth() ,
 			shape = MaterialTheme.shapes.extraLarge ,
 				) {
 		Row(
@@ -559,7 +561,7 @@ fun AyaListItemUI(
 												highlight = PlaceholderHighlight.shimmer(
 														highlightColor = Color.White ,
 																						)
-													),
+													) ,
 									painter = painterResource(id = R.drawable.more_menu_icon) ,
 									contentDescription = "More Menu" ,
 								)

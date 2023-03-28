@@ -45,9 +45,14 @@ class Alarms
 								 )
 
 		//recieverEnabled(context)
+		//format time by converting to LocalDateTime
+		val time = LocalDateTime.ofInstant(
+				Instant.ofEpochMilli(calendar.timeInMillis) ,
+				ZoneId.systemDefault()
+										  ).format(DateTimeFormatter.ofPattern("hh:mm a"))
 
 		//logs
-		Log.i("Nimaz: Alarms for Adhan" , "Reset alarm for 1 Oclock each night set.")
+		Log.i("Nimaz: Alarms for Adhan" , "Reset alarm for $time is successfully created")
 	} // end of alarm set
 
 

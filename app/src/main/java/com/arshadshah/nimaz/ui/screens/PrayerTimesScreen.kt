@@ -17,8 +17,6 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
 import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -80,32 +78,13 @@ fun PrayerTimesScreen(
 	val ishaTime = remember {
 		viewModel.ishaTime
 	}.collectAsState()
-
-	val sharedPreferences = PrivateSharedPreferences(context)
-
-	LaunchedEffect(locationState.value, latitude.value, longitude.value) {
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(true))
-			//update the prayer times
-			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+	LaunchedEffect(locationState.value , latitude.value , longitude.value) {
+		//update the prayer times
+		viewModel.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
 							 )
-		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-		if (! alarmLock)
-		{
-			CreateAlarms().exact(
-					context ,
-					fajrTime.value !! ,
-					sunriseTime.value !! ,
-					dhuhrTime.value !! ,
-					asrTime.value !! ,
-					maghribTime.value !! ,
-					ishaTime.value !! ,
-								)
-			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-		}
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(false))
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.REFRESH(false))
 	}
 	val currentPrayerName = remember {
 		viewModel.currentPrayerName
@@ -116,29 +95,29 @@ fun PrayerTimesScreen(
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "locationState: $locationState")
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "currentPrayerName: $currentPrayerName")
 
-		LazyColumn(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(paddingValues)
-					.padding(8.dp)
-					.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
-				horizontalAlignment = Alignment.CenterHorizontally ,
-				verticalArrangement = Arrangement.SpaceEvenly
-				  ) {
-			item {
-				// Calling the LocationTimeContainer composable
-				LocationTimeContainer(
-						currentPrayerName = currentPrayerName ,
-						locationState = locationState ,
-						handleEvent = settingViewModel::handleEvent ,
-						isLoading = isLoading
-									 )
+	LazyColumn(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(paddingValues)
+				.padding(8.dp)
+				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
+			horizontalAlignment = Alignment.CenterHorizontally ,
+			verticalArrangement = Arrangement.SpaceEvenly
+			  ) {
+		item {
+			// Calling the LocationTimeContainer composable
+			LocationTimeContainer(
+					currentPrayerName = currentPrayerName ,
+					locationState = locationState ,
+					handleEvent = settingViewModel::handleEvent ,
+					isLoading = isLoading
+								 )
 
-				// Calling the DatesContainer composable
-				DatesContainer(onNavigateToTracker = onNavigateToTracker)
+			// Calling the DatesContainer composable
+			DatesContainer(onNavigateToTracker = onNavigateToTracker)
 
-				// Calling the PrayerTimesList composable
-				PrayerTimesList()
-			}
+			// Calling the PrayerTimesList composable
+			PrayerTimesList()
 		}
+	}
 }

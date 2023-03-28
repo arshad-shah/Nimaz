@@ -139,77 +139,81 @@ fun FontSizeDialog(
 							horizontalArrangement = Arrangement.SpaceBetween
 					   ) {
 						Text(text = "Font Style (Arabic)")
+						ElevatedCard(
+								shape = MaterialTheme.shapes.extraLarge ,
+								elevation = CardDefaults.elevatedCardElevation(
+										defaultElevation = 4.dp
+																			  ) ,
+								modifier = Modifier
+									.width(120.dp)
+									) {
+							//an elevation card that shows the text and icon
 							ElevatedCard(
-									shape = MaterialTheme.shapes.extraLarge ,
-									elevation = CardDefaults.elevatedCardElevation(
-											defaultElevation = 4.dp
-																				  ) ,
 									modifier = Modifier
-										.width(120.dp)
-										){
-								//an elevation card that shows the text and icon
-								ElevatedCard(
-										modifier = Modifier
-											.fillMaxWidth()
-											.clickable {
-												fontMenuExpanded.value = ! fontMenuExpanded.value
-											} ,
-										content = {
-											Row(
+										.fillMaxWidth()
+										.clickable {
+											fontMenuExpanded.value = ! fontMenuExpanded.value
+										} ,
+									content = {
+										Row(
+												modifier = Modifier
+													.fillMaxWidth()
+													.padding(8.dp) ,
+												verticalAlignment = Alignment.CenterVertically ,
+												horizontalArrangement = Arrangement.SpaceBetween
+										   ) {
+											//find the font style from the list of font styles
+											//and then show it in the text
+											Text(
+													text = items3[items3.indexOf(fontStyleState.value)] ,
+													modifier = Modifier.padding(start = 8.dp) ,
+													style = MaterialTheme.typography.bodyMedium ,
+												)
+											Icon(
 													modifier = Modifier
-														.fillMaxWidth()
-														.padding(8.dp) ,
-													verticalAlignment = Alignment.CenterVertically,
-													horizontalArrangement = Arrangement.SpaceBetween
-											   ) {
-												//find the font style from the list of font styles
-												//and then show it in the text
-												Text(
-														text = items3[items3.indexOf(fontStyleState.value)] ,
-														modifier = Modifier.padding(start = 8.dp),
-														style = MaterialTheme.typography.bodyMedium,
-													)
-												Icon(
-														modifier = Modifier
-															.padding(start = 8.dp)
-															.size(18.dp) ,
-														painter = icon ,
-														contentDescription = null
-													)
-											}
-											DropdownMenu(
-													modifier = Modifier
-														.wrapContentWidth()
-														.wrapContentHeight() ,
-													expanded = fontMenuExpanded.value ,
-													onDismissRequest = {
-														fontMenuExpanded.value = false
-													} ,
-													content = {
-														items3.forEach { item ->
-															DropdownMenuItem(
-																	onClick = {
-																		fontStyleState.value = item
-																		setFontBasedOnFontStyle(
-																				fontStyleState.value
-																							   )
-																		fontMenuExpanded.value =
-																			false
-																		handleQuranEvents(
-																				QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
-																						fontStyleState.value
-																																 )
-																						 )
-																	} ,
-																	text = { Text(text = item, style = MaterialTheme.typography.bodyMedium)
-																	}
-																			)
-														}
-													}
-														)
+														.padding(start = 8.dp)
+														.size(18.dp) ,
+													painter = icon ,
+													contentDescription = null
+												)
 										}
-											)
-							}
+										DropdownMenu(
+												modifier = Modifier
+													.wrapContentWidth()
+													.wrapContentHeight() ,
+												expanded = fontMenuExpanded.value ,
+												onDismissRequest = {
+													fontMenuExpanded.value = false
+												} ,
+												content = {
+													items3.forEach { item ->
+														DropdownMenuItem(
+																onClick = {
+																	fontStyleState.value = item
+																	setFontBasedOnFontStyle(
+																			fontStyleState.value
+																						   )
+																	fontMenuExpanded.value =
+																		false
+																	handleQuranEvents(
+																			QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
+																					fontStyleState.value
+																															 )
+																					 )
+																} ,
+																text = {
+																	Text(
+																			text = item ,
+																			style = MaterialTheme.typography.bodyMedium
+																		)
+																}
+																		)
+													}
+												}
+													)
+									}
+										)
+						}
 					}
 				}
 			} ,
@@ -220,7 +224,7 @@ fun FontSizeDialog(
 						} ,
 						modifier = Modifier.padding(8.dp)
 					  ) {
-					Text(text = "Confirm")
+					Text(text = "Confirm" , style = MaterialTheme.typography.titleMedium)
 				}
 			} ,
 			dismissButton = {
@@ -228,7 +232,7 @@ fun FontSizeDialog(
 						onClick = { showDialog3(false) } ,
 						modifier = Modifier.padding(8.dp)
 						  ) {
-					Text(text = "Cancel")
+					Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 				}
 			}
 			   )

@@ -86,13 +86,22 @@ fun CustomDialog(
 						onClick = {
 							setShowDialog(false)
 						} ,
-						content = { Text(text = "Confirm") }
+						content = {
+							Text(
+									text = "Confirm" , style = MaterialTheme.typography.titleMedium
+								)
+						}
 					  )
 			} ,
 			dismissButton = {
 				TextButton(
 						onClick = { setShowDialog(false) } ,
-						content = { Text(text = "Cancel") }
+						content = {
+							Text(
+									text = "Cancel" ,
+									style = MaterialTheme.typography.titleMedium
+								)
+						}
 						  )
 			}
 			   )

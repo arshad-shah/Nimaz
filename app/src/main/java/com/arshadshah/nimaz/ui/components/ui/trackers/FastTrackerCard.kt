@@ -35,44 +35,44 @@ fun FastTrackerCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(8.dp),
+				.padding(8.dp) ,
 				) {
-			ToggleableItemColumn(
-					text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,
-					checked = isFastingToday.value ,
-					onCheckedChange = {
-						//if the date is after today then don't allow the user to change the value
-						if (isAfterToday)
-						{
-							Toasty.info(
-									context ,
-									"Oops! you cant update the tracker for a date in the future" ,
-									Toasty.LENGTH_SHORT ,
-									true
-									   ).show()
-							return@ToggleableItemColumn
-						}
-						isFastingToday.value = ! isFastingToday.value
-						handleEvent(
-								TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-										FastTracker(
-												date = dateState.value ,
-												isFasting = isFastingToday.value
-												   )
-																				 )
-								   )
-					} ,
-					modifier = Modifier
-						.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
-						.fillMaxWidth()
-						.placeholder(
-								visible = false ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									) ,
-								)
+		ToggleableItemColumn(
+				text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,
+				checked = isFastingToday.value ,
+				onCheckedChange = {
+					//if the date is after today then don't allow the user to change the value
+					if (isAfterToday)
+					{
+						Toasty.info(
+								context ,
+								"Oops! you cant update the tracker for a date in the future" ,
+								Toasty.LENGTH_SHORT ,
+								true
+								   ).show()
+						return@ToggleableItemColumn
+					}
+					isFastingToday.value = ! isFastingToday.value
+					handleEvent(
+							TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
+									FastTracker(
+											date = dateState.value ,
+											isFasting = isFastingToday.value
+											   )
+																			 )
+							   )
+				} ,
+				modifier = Modifier
+					.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
+					.fillMaxWidth()
+					.placeholder(
+							visible = false ,
+							color = MaterialTheme.colorScheme.outline ,
+							shape = RoundedCornerShape(4.dp) ,
+							highlight = PlaceholderHighlight.shimmer(
+									highlightColor = Color.White ,
+																	)
+								) ,
+							)
 	}
 }

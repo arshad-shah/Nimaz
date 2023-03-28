@@ -111,10 +111,16 @@ fun BatteryExemptionUI()
 			title = {
 				if (isBatteryExempt.value)
 				{
-					Text(text = "Optimization Disabled", style = MaterialTheme.typography.titleSmall)
+					Text(
+							text = "Optimization Disabled" ,
+							style = MaterialTheme.typography.titleSmall
+						)
 				} else
 				{
-					Text(text = "Disable Optimization", style = MaterialTheme.typography.titleSmall)
+					Text(
+							text = "Disable Optimization" ,
+							style = MaterialTheme.typography.titleSmall
+						)
 				}
 			} ,
 			subtitle = {
@@ -125,11 +131,13 @@ fun BatteryExemptionUI()
 							verticalAlignment = Alignment.CenterVertically
 					   ) {
 						Icon(
-								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								modifier = Modifier
+									.size(18.dp)
+									.padding(end = 4.dp) ,
 								painter = painterResource(id = R.drawable.checkbox_icon) ,
 								contentDescription = "Battery Exemption Allowed"
 							)
-						Text(text = "Exempt", style = MaterialTheme.typography.bodySmall)
+						Text(text = "Exempt" , style = MaterialTheme.typography.bodySmall)
 					}
 				} else
 				{
@@ -138,11 +146,13 @@ fun BatteryExemptionUI()
 							verticalAlignment = Alignment.CenterVertically
 					   ) {
 						Icon(
-								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								modifier = Modifier
+									.size(18.dp)
+									.padding(end = 4.dp) ,
 								painter = painterResource(id = R.drawable.cross_circle_icon) ,
 								contentDescription = "Battery Exemption Not Allowed"
 							)
-						Text(text = "Optimizing", style = MaterialTheme.typography.bodySmall)
+						Text(text = "Optimizing" , style = MaterialTheme.typography.bodySmall)
 					}
 				}
 			} ,
