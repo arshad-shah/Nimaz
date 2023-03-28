@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.ui.dashboard
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -11,12 +12,10 @@ import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.DeleteDialog
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.ui.trackers.DropDownHeader
-import com.arshadshah.nimaz.ui.components.ui.trackers.GoalEditDialog
-import com.arshadshah.nimaz.ui.components.ui.trackers.Placeholder
-import com.arshadshah.nimaz.ui.components.ui.trackers.TasbihDropdownItem
+import com.arshadshah.nimaz.ui.components.ui.trackers.*
 import java.time.LocalDate
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardTasbihTracker(
 	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
@@ -80,24 +79,25 @@ fun DashboardTasbihTracker(
 				label = "Tasbih" ,
 				dropDownItem = {
 					TasbihDropdownItem(
-							it ,
-							onClick = {tasbih ->
-								onNavigateToTasbihScreen(
-										tasbih.id.toString() ,
-										tasbih.arabicName ,
-										tasbih.englishName ,
-										tasbih.translationName
-														)
-							},
-							onDelete = { tasbih ->
-								showDeleteDialog.value = true
-								tasbihToEdit.value = tasbih
-							},
-							onEdit = { tasbih ->
-								showTasbihDialog.value = true
-								tasbihToEdit.value = tasbih
-							} ,
-									  )
+										it ,
+										onClick = { tasbih ->
+											onNavigateToTasbihScreen(
+													tasbih.id.toString() ,
+													tasbih.arabicName ,
+													tasbih.englishName ,
+													tasbih.translationName
+																	)
+										} ,
+										onDelete = { tasbih ->
+											showDeleteDialog.value = true
+											tasbihToEdit.value = tasbih
+										} ,
+										onEdit = { tasbih ->
+											showTasbihDialog.value =
+												true
+											tasbihToEdit.value =
+												tasbih
+										})
 				}
 
 						)

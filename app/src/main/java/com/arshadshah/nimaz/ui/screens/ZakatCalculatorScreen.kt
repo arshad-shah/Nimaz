@@ -159,6 +159,7 @@ fun Category(label : String , value : String , onValueChange : (String) -> Unit)
 		// current users local currency
 		val currencySymbol = Currency.getInstance(Locale.getDefault()).symbol
 		OutlinedTextField(
+				shape = MaterialTheme.shapes.extraLarge ,
 				value = value ,
 				onValueChange = onValueChange ,
 				modifier = Modifier

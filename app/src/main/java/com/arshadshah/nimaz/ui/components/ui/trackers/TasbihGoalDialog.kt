@@ -38,6 +38,7 @@ fun TasbihGoalDialog(
 							horizontalAlignment = Alignment.CenterHorizontally ,
 						  ) {
 						OutlinedTextField(
+								shape = MaterialTheme.shapes.extraLarge ,
 								value = state.value ,
 								maxLines = 1,
 								keyboardActions = KeyboardActions(
@@ -112,7 +113,7 @@ fun TasbihGoalDialog(
 										.show()
 								}
 							} ,
-							content = { Text(text = "Confirm") } ,
+							content = { Text(text = "Confirm", style = MaterialTheme.typography.titleMedium) } ,
 						  )
 				} ,
 				dismissButton = {
@@ -120,7 +121,7 @@ fun TasbihGoalDialog(
 							onClick = {
 								isOpen.value = false
 									  } ,
-							content = { Text(text = "Cancel") } ,
+							content = { Text(text = "Cancel", style = MaterialTheme.typography.titleMedium) } ,
 						  )
 				} ,
 				   )

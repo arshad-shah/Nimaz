@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.utils.location
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -55,14 +56,14 @@ fun FeatureThatRequiresLocationPermission(
 						showDialog.value = false
 						locationPermissionState.launchMultiplePermissionRequest()
 					}) {
-						Text(text = "Grant Permission")
+						Text(text = "Grant Permission", style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					Button(onClick = {
 						showDialog.value = false
 					}) {
-						Text(text = "Cancel")
+						Text(text = "Cancel", style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )
@@ -112,12 +113,12 @@ fun FeatureThatRequiresNotificationPermission(
 				text = { Text(text = descToShow.value) } ,
 				confirmButton = {
 					Button(onClick = { notificationPermissionState.launchPermissionRequest() }) {
-						Text(text = "Allow")
+						Text(text = "Allow", style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					Button(onClick = { showRationale.value = false }) {
-						Text(text = "Cancel")
+						Text(text = "Cancel", style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )

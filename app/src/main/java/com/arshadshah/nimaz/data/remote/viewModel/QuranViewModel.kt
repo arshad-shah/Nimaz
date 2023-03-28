@@ -687,6 +687,27 @@ class QuranViewModel(context : Context) : ViewModel()
 			val ayaNumberInSurah : Int ,
 			val audio : String ,
 								) : AyaEvent()
+
+		//delete a note from an aya
+		data class deleteNoteFromAya(
+			val ayaNumber : Int ,
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+									) : AyaEvent()
+
+		//delete a bookmark from an aya
+		data class deleteBookmarkFromAya(
+			val ayaNumber : Int ,
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+										) : AyaEvent()
+
+		//delete a favorite from an aya
+		data class deleteFavoriteFromAya(
+			val ayaNumber : Int ,
+			val surahNumber : Int ,
+			val ayaNumberInSurah : Int ,
+										) : AyaEvent()
 	}
 
 	//events handler
@@ -751,6 +772,30 @@ class QuranViewModel(context : Context) : ViewModel()
 						ayaEvent.ayaNumberInSurah ,
 						ayaEvent.audio
 							 )
+			}
+			is AyaEvent.deleteNoteFromAya ->
+			{
+				deleteNoteFromAya(
+						ayaEvent.ayaNumber ,
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah
+								 )
+			}
+			is AyaEvent.deleteBookmarkFromAya ->
+			{
+				deleteBookmarkFromAya(
+						ayaEvent.ayaNumber ,
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah
+									 )
+			}
+			is AyaEvent.deleteFavoriteFromAya ->
+			{
+				deleteFavoriteFromAya(
+						ayaEvent.ayaNumber ,
+						ayaEvent.surahNumber ,
+						ayaEvent.ayaNumberInSurah
+									 )
 			}
 
 			else ->
@@ -857,6 +902,66 @@ class QuranViewModel(context : Context) : ViewModel()
 
 	private val _notes = MutableStateFlow(listOf<Aya>())
 	val notes = _notes.asStateFlow()
+
+	fun deleteNoteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+						 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.deleteNoteFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+				val notes = dataStore.getAyasWithNotes()
+				_notes.value = notes
+			} catch (e : Exception)
+			{
+				Log.d("deleteNoteFromAya" , e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	fun deleteBookmarkFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+							 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.deleteBookmarkFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+				val bookmarks = dataStore.getBookmarkedAyas()
+				_bookmarks.value = bookmarks
+			} catch (e : Exception)
+			{
+				Log.d("deleteBookmarkFromAya" , e.message ?: "Unknown error")
+			}
+		}
+	}
+
+	fun deleteFavoriteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+							 )
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				dataStore.deleteFavoriteFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+				val favorites = dataStore.getFavoritedAyas()
+				_favorites.value = favorites
+			} catch (e : Exception)
+			{
+				Log.d("deleteFavoriteFromAya" , e.message ?: "Unknown error")
+			}
+		}
+	}
 
 	fun getAllNotes()
 	{
