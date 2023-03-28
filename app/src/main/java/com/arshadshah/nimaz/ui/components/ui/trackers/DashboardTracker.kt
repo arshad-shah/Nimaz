@@ -82,10 +82,10 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 	val progress = remember { mutableStateOf(0f) }
 
 	Box(
-			modifier = Modifier.clickable{
+			modifier = Modifier.clickable {
 				onNavigateToTracker()
 			}
-	   ){
+	   ) {
 		when (stateOfTrackerForToday.value)
 		{
 			is TrackerViewModel.TrackerState.Loading ->
@@ -101,7 +101,7 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 						handleEvent = viewModel::onEvent ,
 						dateState = dateState ,
 						progress = progress
-											   )
+										 )
 			}
 
 			is TrackerViewModel.TrackerState.Tracker ->
@@ -122,7 +122,7 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 						handleEvent = viewModel::onEvent ,
 						dateState = dateState ,
 						progress = progress
-											   )
+										 )
 			}
 
 			is TrackerViewModel.TrackerState.Error ->
@@ -150,8 +150,8 @@ fun PrayerTrackerListItemsRow(
 	ishaChecked : MutableState<Boolean> ,
 	handleEvent : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
 	dateState : State<String> ,
-	progress : MutableState<Float>
-						  )
+	progress : MutableState<Float> ,
+							 )
 {
 	val context = LocalContext.current
 	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
@@ -164,85 +164,85 @@ fun PrayerTrackerListItemsRow(
 				.padding(8.dp)
 				.fillMaxWidth()
 				) {
-			//if not then show the items
-			Row(
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth() ,
-					horizontalArrangement = Arrangement.SpaceEvenly ,
-					verticalAlignment = Alignment.CenterVertically
-			   ) {
-				items.forEachIndexed { index , item ->
-					//the toggleable item
-					ToggleableItemRow(
-							text = item ,
-							checked = when (item)
+		//if not then show the items
+		Row(
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth() ,
+				horizontalArrangement = Arrangement.SpaceEvenly ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
+			items.forEachIndexed { index , item ->
+				//the toggleable item
+				ToggleableItemRow(
+						text = item ,
+						checked = when (item)
+						{
+							//if the date is after today then disable the toggle
+							"Fajr" -> if (isAfterToday) false else fajrChecked.value
+							"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
+							"Asr" -> if (isAfterToday) false else asrChecked.value
+							"Maghrib" -> if (isAfterToday) false else maghribChecked.value
+							"Isha" -> if (isAfterToday) false else ishaChecked.value
+							else -> false
+						} ,
+						onCheckedChange = {
+							if (isAfterToday)
+							{
+								Toasty.info(
+										context ,
+										"Oops! you cant update the tracker for a date in the future" ,
+										Toasty.LENGTH_SHORT ,
+										true
+										   ).show()
+								return@ToggleableItemRow
+							}
+							when (item)
 							{
 								//if the date is after today then disable the toggle
-								"Fajr" -> if (isAfterToday) false else fajrChecked.value
-								"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
-								"Asr" -> if (isAfterToday) false else asrChecked.value
-								"Maghrib" -> if (isAfterToday) false else maghribChecked.value
-								"Isha" -> if (isAfterToday) false else ishaChecked.value
-								else -> false
-							} ,
-							onCheckedChange = {
-								if (isAfterToday)
-								{
-									Toasty.info(
-											context ,
-											"Oops! you cant update the tracker for a date in the future" ,
-											Toasty.LENGTH_SHORT ,
-											true
-											   ).show()
-									return@ToggleableItemRow
-								}
-								when (item)
-								{
-									//if the date is after today then disable the toggle
-									"Fajr" -> fajrChecked.value = it
-									"Dhuhr" -> zuhrChecked.value = it
-									"Asr" -> asrChecked.value = it
-									"Maghrib" -> maghribChecked.value = it
-									"Isha" -> ishaChecked.value = it
-								}
+								"Fajr" -> fajrChecked.value = it
+								"Dhuhr" -> zuhrChecked.value = it
+								"Asr" -> asrChecked.value = it
+								"Maghrib" -> maghribChecked.value = it
+								"Isha" -> ishaChecked.value = it
+							}
 
-								//for each of the checked items add 20 to the progress any unchecked item subtracts 20
-								progress.value = when (item)
-								{
-									"Fajr" -> if (it) progress.value + 20 else progress.value - 20
-									"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
-									"Asr" -> if (it) progress.value + 20 else progress.value - 20
-									"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
-									"Isha" -> if (it) progress.value + 20 else progress.value - 20
-									else -> 0f
-								}
+							//for each of the checked items add 20 to the progress any unchecked item subtracts 20
+							progress.value = when (item)
+							{
+								"Fajr" -> if (it) progress.value + 20 else progress.value - 20
+								"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
+								"Asr" -> if (it) progress.value + 20 else progress.value - 20
+								"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
+								"Isha" -> if (it) progress.value + 20 else progress.value - 20
+								else -> 0f
+							}
 
-								handleEvent(
-										TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
-												PrayerTracker(
-														fajr = fajrChecked.value ,
-														dhuhr = zuhrChecked.value ,
-														asr = asrChecked.value ,
-														maghrib = maghribChecked.value ,
-														isha = ishaChecked.value ,
-														date = dateState.value ,
-														progress = progress.value.toInt()
-															 )
-																					)
-										   )
-							} ,
-							modifier = Modifier
-								.placeholder(
-										visible = loading ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
+							handleEvent(
+									TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
+											PrayerTracker(
+													fajr = fajrChecked.value ,
+													dhuhr = zuhrChecked.value ,
+													asr = asrChecked.value ,
+													maghrib = maghribChecked.value ,
+													isha = ishaChecked.value ,
+													date = dateState.value ,
+													progress = progress.value.toInt()
+														 )
 																				)
-											) ,
-									 )
-				}
+									   )
+						} ,
+						modifier = Modifier
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										) ,
+								 )
 			}
 		}
+	}
 }

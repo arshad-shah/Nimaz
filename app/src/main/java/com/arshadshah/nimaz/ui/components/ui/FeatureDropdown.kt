@@ -89,7 +89,7 @@ fun <T> FeaturesDropDown(
 								{
 									Text(
 											text = items.size.toString() ,
-											style = MaterialTheme.typography.bodyMedium,
+											style = MaterialTheme.typography.bodyMedium ,
 											textAlign = TextAlign.Center ,
 										)
 								}

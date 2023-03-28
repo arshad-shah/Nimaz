@@ -62,10 +62,12 @@ fun ManualLocationInput(
 			title = { Text(text = "Edit Location") } ,
 			text = {
 				OutlinedTextField(
+						shape = MaterialTheme.shapes.extraLarge ,
 						value = name.value ,
 						onValueChange = { name.value = it } ,
 						label = { Text(text = "Location") } ,
 						singleLine = true ,
+						maxLines = 1 ,
 						modifier = Modifier.fillMaxWidth()
 								 )
 			} ,
@@ -85,13 +87,13 @@ fun ManualLocationInput(
 													)
 
 					showDialog.value = false
-				}) { Text(text = "Confirm") }
+				}) { Text(text = "Confirm" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			dismissButton = {
 				TextButton(onClick = {
 					showDialog.value = false
 
-				}) { Text(text = "Cancel") }
+				}) { Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			   )
 

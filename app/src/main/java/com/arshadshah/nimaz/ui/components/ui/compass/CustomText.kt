@@ -41,7 +41,7 @@ fun CustomText(
 				modifier = textModifier ,
 				text = processedText ,
 				textAlign = TextAlign.Center ,
-				style = MaterialTheme.typography.titleLarge,
+				style = MaterialTheme.typography.titleLarge ,
 			)
 	}
 }
@@ -50,5 +50,9 @@ fun CustomText(
 @Composable
 fun CustomTextPreview()
 {
-	CustomText(modifier = Modifier.padding(8.dp) , heading = "Heading" , text = "Long piece of text")
+	CustomText(
+			modifier = Modifier.padding(8.dp) ,
+			heading = "Heading" ,
+			text = "Long piece of text"
+			  )
 }

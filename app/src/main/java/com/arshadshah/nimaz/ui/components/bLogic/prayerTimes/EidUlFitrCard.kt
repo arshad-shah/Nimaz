@@ -60,8 +60,8 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 				R.drawable.eid ,
 				R.drawable.eid2 ,
 				R.drawable.eid3 ,
-				R.drawable.eid4,
-				R.drawable.eid5,
+				R.drawable.eid4 ,
+				R.drawable.eid5 ,
 			  )
 	//pick a random image
 	val randomImage = imagesToShow.random()
@@ -98,7 +98,7 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 
 				Row(
 						modifier = Modifier
-							.fillMaxWidth(),
+							.fillMaxWidth() ,
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
@@ -120,7 +120,7 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 							verticalArrangement = Arrangement.Center ,
 							horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
-						if (!isAfterEidUlFitrStart || eidUlFitrTimeLeft.value == 0L)
+						if (! isAfterEidUlFitrStart || eidUlFitrTimeLeft.value == 0L)
 						{
 							//estimated start
 							Text(

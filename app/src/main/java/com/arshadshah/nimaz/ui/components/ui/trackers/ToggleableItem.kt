@@ -26,55 +26,55 @@ fun ToggleableItemRow(
 	checked : Boolean ,
 	onCheckedChange : (Boolean) -> Unit ,
 	modifier : Modifier ,
-				  )
+					 )
 {
 
-		Column(
-				modifier = modifier
-					.clickable {
+	Column(
+			modifier = modifier
+				.clickable {
 					onCheckedChange(! checked)
 				} ,
-				verticalArrangement = Arrangement.Center ,
-				horizontalAlignment = Alignment.CenterHorizontally
-		   ) {
-			//a icon button to toggle the state of the toggleable item
-			OutlinedIconToggleButton(
-					colors = IconButtonDefaults.outlinedIconToggleButtonColors(
-							containerColor = MaterialTheme.colorScheme.surface ,
-							contentColor = MaterialTheme.colorScheme.onSurface ,
-							checkedContainerColor = MaterialTheme.colorScheme.primary ,
-							checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
-																			  ),
-					checked = checked ,
-					onCheckedChange = {
-						Log.d("ToggleableItem" , "onCheckedChange: $it")
-						onCheckedChange(it)
-					} ,
-									){
-				if (! checked)
-				{
-					Icon(
-							painter = painterResource(id = R.drawable.cross_icon) ,
-							contentDescription = "Close" ,
-							modifier = Modifier.padding(10.dp)
-						)
-				} else
-				{
-					Icon(
-							painter = painterResource(id = R.drawable.check_icon) ,
-							contentDescription = "Check" ,
-							modifier = Modifier.padding(8.dp)
-						)
-				}
+			verticalArrangement = Arrangement.Center ,
+			horizontalAlignment = Alignment.CenterHorizontally
+		  ) {
+		//a icon button to toggle the state of the toggleable item
+		OutlinedIconToggleButton(
+				colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+						containerColor = MaterialTheme.colorScheme.surface ,
+						contentColor = MaterialTheme.colorScheme.onSurface ,
+						checkedContainerColor = MaterialTheme.colorScheme.primary ,
+						checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
+																		  ) ,
+				checked = checked ,
+				onCheckedChange = {
+					Log.d("ToggleableItem" , "onCheckedChange: $it")
+					onCheckedChange(it)
+				} ,
+								) {
+			if (! checked)
+			{
+				Icon(
+						painter = painterResource(id = R.drawable.cross_icon) ,
+						contentDescription = "Close" ,
+						modifier = Modifier.padding(10.dp)
+					)
+			} else
+			{
+				Icon(
+						painter = painterResource(id = R.drawable.check_icon) ,
+						contentDescription = "Check" ,
+						modifier = Modifier.padding(8.dp)
+					)
 			}
-
-
-			Text(
-					text = text ,
-					modifier = Modifier.padding(8.dp) ,
-					style = MaterialTheme.typography.bodySmall,
-				)
 		}
+
+
+		Text(
+				text = text ,
+				modifier = Modifier.padding(8.dp) ,
+				style = MaterialTheme.typography.bodySmall ,
+			)
+	}
 }
 
 //toggelable item variant columned
@@ -85,17 +85,17 @@ fun ToggleableItemColumn(
 	checked : Boolean ,
 	onCheckedChange : (Boolean) -> Unit ,
 	modifier : Modifier ,
-				  )
+						)
 {
 	Row(
 			modifier = modifier
 				.fillMaxWidth()
 				.clickable {
-				onCheckedChange(! checked)
-			} ,
-			verticalAlignment = Alignment.CenterVertically,
+					onCheckedChange(! checked)
+				} ,
+			verticalAlignment = Alignment.CenterVertically ,
 			horizontalArrangement = Arrangement.Start
-		  ) {
+	   ) {
 		//a icon button to toggle the state of the toggleable item
 		OutlinedIconToggleButton(
 				colors = IconButtonDefaults.outlinedIconToggleButtonColors(
@@ -103,13 +103,13 @@ fun ToggleableItemColumn(
 						contentColor = MaterialTheme.colorScheme.onSurface ,
 						checkedContainerColor = MaterialTheme.colorScheme.primary ,
 						checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
-																		  ),
+																		  ) ,
 				checked = checked ,
 				onCheckedChange = {
 					Log.d("ToggleableItem" , "onCheckedChange: $it")
 					onCheckedChange(it)
 				} ,
-								){
+								) {
 			if (! checked)
 			{
 				Icon(
@@ -127,7 +127,12 @@ fun ToggleableItemColumn(
 			}
 		}
 		Text(
-				modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 8.dp) ,
+				modifier = Modifier.padding(
+						top = 8.dp ,
+						start = 8.dp ,
+						end = 8.dp ,
+						bottom = 8.dp
+										   ) ,
 				text = text ,
 				style = MaterialTheme.typography.bodyLarge
 			)
@@ -152,14 +157,14 @@ fun ToggleableItemRowPreview()
 			Row(
 					modifier = Modifier
 						.padding(8.dp)
-						.fillMaxWidth(),
+						.fillMaxWidth() ,
 					horizontalArrangement = Arrangement.SpaceBetween ,
 					verticalAlignment = Alignment.CenterVertically
 			   ) {
 				items.forEachIndexed { index , item ->
 					ToggleableItemRow(
 							text = item ,
-							checked = isChecked,
+							checked = isChecked ,
 							onCheckedChange = {
 								Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
 								isChecked = it
@@ -173,7 +178,7 @@ fun ToggleableItemRowPreview()
 												highlightColor = Color.White ,
 																				)
 											) ,
-								  )
+									 )
 				}
 			}
 		}
@@ -203,7 +208,7 @@ fun ToggleableItemColumnPreview()
 				items.forEachIndexed { index , item ->
 					ToggleableItemColumn(
 							text = item ,
-							checked = isChecked,
+							checked = isChecked ,
 							onCheckedChange = {
 								Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
 								isChecked = it
@@ -217,7 +222,7 @@ fun ToggleableItemColumnPreview()
 												highlightColor = Color.White ,
 																				)
 											) ,
-								  )
+										)
 				}
 			}
 		}

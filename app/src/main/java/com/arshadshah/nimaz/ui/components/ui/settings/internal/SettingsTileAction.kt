@@ -17,7 +17,9 @@ import com.arshadshah.nimaz.R
 internal fun SettingsTileAction(content : @Composable () -> Unit)
 {
 	Box(
-			modifier = Modifier.height(64.dp).padding(horizontal = 8.dp) ,
+			modifier = Modifier
+				.height(64.dp)
+				.padding(horizontal = 8.dp) ,
 			contentAlignment = Alignment.Center ,
 	   ) {
 		content()
@@ -46,7 +48,8 @@ internal fun SettingsTileActionPreview2()
 	val update : (Boolean) -> Unit = { boolean ->
 	}
 
-	val iconForSwitch: (@Composable () -> Unit)? = if (true) {
+	val iconForSwitch : (@Composable () -> Unit)? = if (true)
+	{
 		{
 			Icon(
 					painter = painterResource(id = R.drawable.check_icon) ,
@@ -55,13 +58,14 @@ internal fun SettingsTileActionPreview2()
 						.size(SwitchDefaults.IconSize)
 				)
 		}
-	} else {
+	} else
+	{
 		null
 	}
 	SettingsTileAction {
 		Switch(
 				checked = true ,
-				onCheckedChange = update,
+				onCheckedChange = update ,
 				thumbContent = iconForSwitch ,
 			  )
 	}

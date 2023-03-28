@@ -262,7 +262,8 @@ class TrackerViewModel : ViewModel()
 						_maghribState.value = false
 						_ishaState.value = false
 						_progressState.value = 0
-					}else{
+					} else
+					{
 						val tracker = PrayerTracker(date)
 						dataStore.saveTracker(tracker)
 						_trackerState.value = TrackerState.Tracker(tracker)

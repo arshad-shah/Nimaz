@@ -16,14 +16,17 @@ object CustomThemes
 			{
 				if (darkTheme) DarkColorsRaisinBlack else LightColorsRaisinBlack
 			}
+
 			"Dark_Red" ->
 			{
 				if (darkTheme) DarkColorsDarkRed else LightColorsDarkRed
 			}
+
 			"Dark_Liver" ->
 			{
 				if (darkTheme) DarkColorsLiver else LightColorsLiver
 			}
+
 			"Rustic_brown" ->
 			{
 				if (darkTheme) DarkColorsRusticBrown else LightColorsRusticBrown
@@ -244,7 +247,7 @@ object CustomThemes
 			inverseOnSurface = liver_md_theme_light_inverseOnSurface ,
 			inverseSurface = liver_md_theme_light_inverseSurface ,
 			inversePrimary = liver_md_theme_light_inversePrimary ,
-													 )
+												   )
 
 	private val DarkColorsLiver = darkColorScheme(
 			primary = liver_md_theme_dark_primary ,
@@ -273,7 +276,7 @@ object CustomThemes
 			inverseOnSurface = liver_md_theme_dark_inverseOnSurface ,
 			inverseSurface = liver_md_theme_dark_inverseSurface ,
 			inversePrimary = liver_md_theme_dark_inversePrimary ,
-												   )
+												 )
 
 	//DarkColorsRusticBrown
 	//LightColorsRusticBrown
@@ -306,7 +309,7 @@ object CustomThemes
 			inverseOnSurface = rustic_md_theme_light_inverseOnSurface ,
 			inverseSurface = rustic_md_theme_light_inverseSurface ,
 			inversePrimary = rustic_md_theme_light_inversePrimary ,
-													 )
+														 )
 
 	private val DarkColorsRusticBrown = darkColorScheme(
 			primary = rustic_md_theme_dark_primary ,
@@ -335,6 +338,6 @@ object CustomThemes
 			inverseOnSurface = rustic_md_theme_dark_inverseOnSurface ,
 			inverseSurface = rustic_md_theme_dark_inverseSurface ,
 			inversePrimary = rustic_md_theme_dark_inversePrimary ,
-												   )
+													   )
 
 }

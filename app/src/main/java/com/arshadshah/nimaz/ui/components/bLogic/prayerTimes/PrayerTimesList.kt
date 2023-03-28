@@ -109,7 +109,7 @@ fun PrayerTimesList()
 				name = nextPrayerName.value.first()
 					.uppercaseChar() + nextPrayerName.value.substring(1) ,
 				loading = false ,
-				prayerTimesMap = mapOfPrayerTimes,
+				prayerTimesMap = mapOfPrayerTimes ,
 						 )
 	}
 

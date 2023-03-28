@@ -40,7 +40,7 @@ fun AyatScreen(
 		//execute it once
 		LaunchedEffect(key1 = number)
 		{
-			viewModel.getAllAyaForSurah(number !!.toInt() , language)
+			viewModel.getAllAyaForSurah(number.toInt() , language)
 		}
 		val ayatSurah = remember { viewModel.ayaListState }.collectAsState()
 		val loadingAyatSurah = remember { viewModel.loadingState }.collectAsState()
@@ -62,7 +62,7 @@ fun AyatScreen(
 		//execute it once
 		LaunchedEffect(key1 = number)
 		{
-			viewModel.getAllAyaForJuz(number !!.toInt() , language)
+			viewModel.getAllAyaForJuz(number.toInt() , language)
 		}
 		val ayatJuz = remember { viewModel.ayaListState }.collectAsState()
 		val loadingAyatJuz = remember { viewModel.loadingState }.collectAsState()

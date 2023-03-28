@@ -28,7 +28,6 @@ import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
 import java.time.LocalDate
@@ -88,55 +87,32 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 
 	val sharedPreferences = remember { PrivateSharedPreferences(context) }
 
-	LaunchedEffect(locationName.value, latitude.value, longitude.value) {
-			//update the prayer times
-			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-					PrayerTimesParamMapper.getParams(context)
-																									)
+	LaunchedEffect(locationName.value) {
+		//update the prayer times
+		viewModel.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				PrayerTimesParamMapper.getParams(context)
+																				  )
+							 )
+	}
+
+	LaunchedEffect(key1 = Unit) {
+		//set the alarms
+		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+		if (! alarmLock)
+		{
+			viewModel.handleEvent(
+					context ,
+					PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context)
 								 )
+			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+		}
 	}
 
-	val fajrTime = remember {
-		viewModel.fajrTime
-	}.collectAsState()
-
-	val sunriseTime = remember {
-		viewModel.sunriseTime
-	}.collectAsState()
-
-	val dhuhrTime = remember {
-		viewModel.dhuhrTime
-	}.collectAsState()
-
-	val asrTime = remember {
-		viewModel.asrTime
-	}.collectAsState()
-
-	val maghribTime = remember {
-		viewModel.maghribTime
-	}.collectAsState()
-
-	val ishaTime = remember {
-		viewModel.ishaTime
-	}.collectAsState()
-
-	val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-	if (! alarmLock)
-	{
-		CreateAlarms().exact(
-				context ,
-				fajrTime.value !! ,
-				sunriseTime.value !! ,
-				dhuhrTime.value !! ,
-				asrTime.value !! ,
-				maghribTime.value !! ,
-				ishaTime.value !! ,
-							)
-		sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-	}
-
-	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0).getMoonPhase()
-
+	val phaseOfMoon = SunMoonCalc(
+			latitude = latitude.value ,
+			longitude = longitude.value
+								 ).getMoonPhase()
 
 
 	val timeToNextPrayerLong =
@@ -170,13 +146,13 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				verticalArrangement = Arrangement.SpaceBetween ,
 				horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
-			Row (
+			Row(
 					modifier = Modifier
 						.padding(horizontal = 8.dp)
 						.fillMaxWidth() ,
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
-					){
+			   ) {
 				Column(
 						modifier = Modifier.padding(4.dp) ,
 						verticalArrangement = Arrangement.SpaceBetween ,
@@ -186,7 +162,8 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							modifier = Modifier
 								.padding(4.dp) ,
 							textAlign = TextAlign.Start ,
-							text = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							text = LocalDate.now()
+								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
 							style = MaterialTheme.typography.titleMedium
 						)
 					Text(
@@ -198,15 +175,24 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleSmall
 						)
 				}
-				if(isLoading.value){
+				if (isLoading.value)
+				{
 					Text(text = "Loading..." , style = MaterialTheme.typography.titleMedium)
-				}else{
+				} else
+				{
 					//process the location name to show only 10 characters and add ... if more than 10 characters
-					val locationNameValue = locationName.value ?: ""
+					val locationNameValue = locationName.value
 					val locationNameValueLength = locationNameValue.length
-					val locationNameValueSubstring = locationNameValue.substring(0 , if (locationNameValueLength > 10) 10 else locationNameValueLength)
-					val locationNameValueFinal = if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
-					Text(text = locationNameValueFinal , style = MaterialTheme.typography.titleMedium)
+					val locationNameValueSubstring = locationNameValue.substring(
+							0 ,
+							if (locationNameValueLength > 10) 10 else locationNameValueLength
+																				)
+					val locationNameValueFinal =
+						if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
+					Text(
+							text = locationNameValueFinal ,
+							style = MaterialTheme.typography.titleMedium
+						)
 				}
 
 				//emoji for moon phase
@@ -214,7 +200,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 			}
 			Row(
 					modifier = Modifier
-						.fillMaxWidth(),
+						.fillMaxWidth() ,
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
@@ -299,7 +285,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 }
 
 //a function to return in text how much time is left for the next prayer
-fun getTimerText(timeToNextPrayer : CountDownTime): String
+fun getTimerText(timeToNextPrayer : CountDownTime) : String
 {
 	return when
 	{
@@ -309,78 +295,80 @@ fun getTimerText(timeToNextPrayer : CountDownTime): String
 			if (timeToNextPrayer.minutes > 1)
 			{
 				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minutes Left"
-			}else if (timeToNextPrayer.minutes == 1L)
+			} else if (timeToNextPrayer.minutes == 1L)
 			{
 				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minute Left"
-			}else{
+			} else
+			{
 				"${timeToNextPrayer.hours} hours Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 1L ->
 		{
 			//check if there are minutes left
 			if (timeToNextPrayer.minutes > 1)
 			{
 				"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minutes Left"
-			}else if (timeToNextPrayer.minutes == 1L)
+			} else if (timeToNextPrayer.minutes == 1L)
 			{
 				//check if there are seconds left
 				if (timeToNextPrayer.seconds > 1)
 				{
 					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
-				}
-				else if (timeToNextPrayer.seconds == 1L)
+				} else if (timeToNextPrayer.seconds == 1L)
 				{
 					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
-				}else{
+				} else
+				{
 					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute Left"
 				}
-			}
-			else
+			} else
 			{
 				"${timeToNextPrayer.hours} hour Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes > 1 ->
 		{
 			//check if there are seconds left
 			if (timeToNextPrayer.seconds > 1)
 			{
 				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} seconds Left"
-			}
-			else if (timeToNextPrayer.seconds == 1L)
+			} else if (timeToNextPrayer.seconds == 1L)
 			{
 				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} second Left"
-			}
-			else
+			} else
 			{
 				"${timeToNextPrayer.minutes} minutes Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 1L ->
 		{
 			//check if there are seconds left
 			if (timeToNextPrayer.seconds > 1)
 			{
 				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
-			}
-			else if (timeToNextPrayer.seconds == 1L)
+			} else if (timeToNextPrayer.seconds == 1L)
 			{
 				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
-			}
-			else
+			} else
 			{
 				"${timeToNextPrayer.minutes} minute Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds > 1 ->
 		{
 			"${timeToNextPrayer.seconds} seconds Left"
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds == 1L ->
 		{
 			"${timeToNextPrayer.seconds} second Left"
 		}
+
 		else ->
 		{
 			"Prayer Time"

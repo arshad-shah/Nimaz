@@ -22,8 +22,10 @@ import com.arshadshah.nimaz.ui.components.ProgressBarCustom
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
 import java.time.LocalDate
+
 @Composable
-fun History() {
+fun History()
+{
 
 
 	val viewModel = viewModel(
@@ -36,7 +38,7 @@ fun History() {
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_ALL_TRACKERS)
 	}
 
-	val allTracers = remember{
+	val allTracers = remember {
 		viewModel.allTrackers
 	}.collectAsState()
 
@@ -66,8 +68,14 @@ fun History() {
 						verticalAlignment = Alignment.CenterVertically
 				   ) {
 					Column {
-						Text(text = "Your Progress Today" , style = MaterialTheme.typography.titleLarge)
-						Text(text = "${getCompletedPrayers(trackerForToday[0])} of 5 Completed" , style = MaterialTheme.typography.titleSmall)
+						Text(
+								text = "Your Progress Today" ,
+								style = MaterialTheme.typography.titleLarge
+							)
+						Text(
+								text = "${getCompletedPrayers(trackerForToday[0])} of 5 Completed" ,
+								style = MaterialTheme.typography.titleSmall
+							)
 					}
 					ProgressBarCustom(
 							progress = trackerForToday[0].progress.toFloat() ,
@@ -83,11 +91,11 @@ fun History() {
 fun getCompletedPrayers(tracker : PrayerTracker) : Int
 {
 	var completedPrayers = 0
-	if (tracker.fajr) completedPrayers++
-	if (tracker.dhuhr) completedPrayers++
-	if (tracker.asr) completedPrayers++
-	if (tracker.maghrib) completedPrayers++
-	if (tracker.isha) completedPrayers++
+	if (tracker.fajr) completedPrayers ++
+	if (tracker.dhuhr) completedPrayers ++
+	if (tracker.asr) completedPrayers ++
+	if (tracker.maghrib) completedPrayers ++
+	if (tracker.isha) completedPrayers ++
 	return completedPrayers
 }
 

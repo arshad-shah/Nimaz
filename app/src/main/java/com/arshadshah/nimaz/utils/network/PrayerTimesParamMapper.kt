@@ -41,7 +41,6 @@ object PrayerTimesParamMapper
 		Log.d("Nimaz: PrayerTimesParamMapper" , "ishaAdjustment: $ishaAdjustment")
 
 
-
 		val mapOfParams = mutableMapOf<String , String>()
 		mapOfParams["latitude"] = latitude.toString()
 		mapOfParams["longitude"] = longitude.toString()

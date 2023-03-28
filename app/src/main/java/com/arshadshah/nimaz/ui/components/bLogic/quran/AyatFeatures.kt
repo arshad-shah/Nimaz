@@ -95,7 +95,7 @@ fun AyatFeatures(
 						.size(24.dp)
 						.padding(4.dp)
 						.placeholder(
-								visible = isLoading,
+								visible = isLoading ,
 								color = MaterialTheme.colorScheme.outline ,
 								shape = RoundedCornerShape(4.dp) ,
 								highlight = PlaceholderHighlight.shimmer(

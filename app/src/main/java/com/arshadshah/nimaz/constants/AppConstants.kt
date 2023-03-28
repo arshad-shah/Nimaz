@@ -67,6 +67,7 @@ object AppConstants
 	const val CHANNEL_LOCK = "channelLock"
 	const val THEME = "theme"
 	const val FONT_STYLE = "font_style"
+
 	//full quran downloaded
 	const val FULL_QURAN_DOWNLOADED = "full_quran_downloaded"
 
@@ -196,10 +197,13 @@ object AppConstants
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON = "Prayer times customization button"
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION = "Prayer times customization screen"
 	const val TEST_TAG_HOME_PRAYER_TIMES_CARD = "Home prayer times card"
+
 	//TEST_TAG_EVENTS_CARD
 	const val TEST_TAG_EVENTS_CARD = "Events card"
+
 	//TEST_TAG_TRACKERS_CARD
 	const val TEST_TAG_TRACKERS_CARD = "Trackers card"
+
 	//TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 	const val TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD = "Next prayer icon dashboard"
 

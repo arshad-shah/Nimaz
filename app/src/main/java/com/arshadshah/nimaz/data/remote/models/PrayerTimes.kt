@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class PrayerTimes(
-	val date : LocalDate? ,
+	var date : LocalDate? ,
 	var fajr : LocalDateTime? ,
 	var sunrise : LocalDateTime? ,
 	var dhuhr : LocalDateTime? ,

@@ -31,7 +31,6 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.location.FeatureThatRequiresLocationPermission
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
@@ -84,12 +83,12 @@ fun LocationSettings(isIntro : Boolean = false)
 		viewModel.isError
 	}.collectAsState()
 
-	LaunchedEffect(locationNameState.value, latitudeState.value, longitudeState.value) {
+	LaunchedEffect(locationNameState.value , latitudeState.value , longitudeState.value) {
 		viewModelPrayerTimes.handleEvent(
 				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
-							 )
+										)
 	}
 
 	if (isError.value.isNotBlank())
@@ -165,34 +164,43 @@ fun LocationSettings(isIntro : Boolean = false)
 				key3 = longitudeState.value
 					  ) {
 
-			if(autoParams.value){
+			if (autoParams.value)
+			{
 				//set method to other
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.CalculationMethod(
 								"OTHER"
 																		 )
-											)
+									 )
 				//set fajr angle
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.FajrAngle(
-								AutoAnglesCalc().calculateFajrAngle(context , latitude.value , longitude.value).toString()
+								AutoAnglesCalc().calculateFajrAngle(
+										context ,
+										latitude.value ,
+										longitude.value
+																   ).toString()
 																 )
-											)
+									 )
 				//set ishaa angle
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.IshaAngle(
-								AutoAnglesCalc().calculateIshaaAngle(context , latitude.value , longitude.value).toString()
+								AutoAnglesCalc().calculateIshaaAngle(
+										context ,
+										latitude.value ,
+										longitude.value
+																	).toString()
 																 )
-											)
+									 )
 				//set high latitude method
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.HighLatitude(
 								"TWILIGHT_ANGLE"
 																	)
-											)
+									 )
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.LoadSettings
-											)
+									 )
 			}
 
 
@@ -208,20 +216,6 @@ fun LocationSettings(isIntro : Boolean = false)
 							context
 																	   )
 											)
-			val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-			if (! alarmLock)
-			{
-				CreateAlarms().exact(
-						context ,
-						fajrTime.value !! ,
-						sunriseTime.value !! ,
-						dhuhrTime.value !! ,
-						asrTime.value !! ,
-						maghribTime.value !! ,
-						ishaTime.value !! ,
-									)
-				sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-			}
 
 		}
 
@@ -349,19 +343,20 @@ fun LocationToggleSwitch(
 						val isLocationAutoInPref = PrivateSharedPreferences(context).getDataBoolean(
 								AppConstants.LOCATION_TYPE ,
 								false
-																							)
-						if(isLocationAutoInPref)
+																								   )
+						if (isLocationAutoInPref)
 						{
 							viewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.LocationToggle(
 											context ,
 											true
 																				  )
-													 )
+												 )
 							viewModelPrayerTimes.handleEvent(
-									context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-									PrayerTimesParamMapper.getParams(context)
-																									  )
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											PrayerTimesParamMapper.getParams(context)
+																							)
 															)
 							viewModelPrayerTimes.handleEvent(
 									context ,
@@ -370,13 +365,14 @@ fun LocationToggleSwitch(
 																					   )
 															)
 							isChecked.value = true
-						}else{
+						} else
+						{
 							viewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.LocationToggle(
 											context ,
 											false
 																				  )
-													 )
+												 )
 							isChecked.value = false
 						}
 					}
@@ -491,6 +487,10 @@ fun LocationToggleSwitch(
 											context
 																					   )
 															)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						} else
 						{
 							locationPermissionState.launchMultiplePermissionRequest()
@@ -514,6 +514,10 @@ fun LocationToggleSwitch(
 										context
 																				   )
 														)
+						PrivateSharedPreferences(context).saveDataBoolean(
+								AppConstants.ALARM_LOCK ,
+								false
+																		 )
 						isChecked.value = false
 						if (isIntro)
 						{
