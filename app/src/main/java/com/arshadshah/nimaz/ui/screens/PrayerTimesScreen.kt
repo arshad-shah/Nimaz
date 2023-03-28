@@ -79,14 +79,11 @@ fun PrayerTimesScreen(
 		viewModel.ishaTime
 	}.collectAsState()
 	LaunchedEffect(locationState.value, latitude.value, longitude.value) {
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(true))
 			//update the prayer times
 			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
 							 )
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.SET_LOADING(false))
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.REFRESH(false))
 	}
 	val currentPrayerName = remember {
 		viewModel.currentPrayerName

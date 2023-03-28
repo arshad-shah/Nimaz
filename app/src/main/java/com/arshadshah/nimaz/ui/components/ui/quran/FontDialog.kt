@@ -220,7 +220,7 @@ fun FontSizeDialog(
 						} ,
 						modifier = Modifier.padding(8.dp)
 					  ) {
-					Text(text = "Confirm")
+					Text(text = "Confirm", style = MaterialTheme.typography.titleMedium)
 				}
 			} ,
 			dismissButton = {
@@ -228,7 +228,7 @@ fun FontSizeDialog(
 						onClick = { showDialog3(false) } ,
 						modifier = Modifier.padding(8.dp)
 						  ) {
-					Text(text = "Cancel")
+					Text(text = "Cancel", style = MaterialTheme.typography.titleMedium)
 				}
 			}
 			   )

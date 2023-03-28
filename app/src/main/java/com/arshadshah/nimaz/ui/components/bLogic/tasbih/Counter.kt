@@ -137,14 +137,14 @@ fun Counter(
 						lapCountCounter.value = 0
 						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
 					}) {
-						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Reset" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = {
 						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
 					}) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )
@@ -158,6 +158,7 @@ fun Counter(
 				text = {
 					Spacer(modifier = Modifier.height(16.dp))
 					OutlinedTextField(
+							shape = MaterialTheme.shapes.extraLarge ,
 							textStyle = MaterialTheme.typography.titleLarge ,
 							value = objective.value ,
 							onValueChange = { objective.value = it } ,
@@ -233,12 +234,12 @@ fun Counter(
 								.show()
 						}
 					}) {
-						Text(text = "Set" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Set" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = { showObjectiveDialog.value = false }) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )

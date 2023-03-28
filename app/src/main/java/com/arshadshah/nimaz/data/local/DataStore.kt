@@ -194,6 +194,26 @@ class DataStore(db : AppDatabase)
 	//get all the ayas with notes
 	suspend fun getAyasWithNotes() =
 		ayaDao.getAyasWithNotes().map { it.toAya() }
+	suspend fun deleteNoteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+								 ) =
+		ayaDao.deleteNoteFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+
+	suspend fun deleteBookmarkFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+									 ) =
+		ayaDao.deleteBookmarkFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
+
+	suspend fun deleteFavoriteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+									 ) =
+		ayaDao.deleteFavoriteFromAya(ayaNumber , surahNumber , ayaNumberInSurah)
 
 	//addAudioToAya
 	suspend fun addAudioToAya(

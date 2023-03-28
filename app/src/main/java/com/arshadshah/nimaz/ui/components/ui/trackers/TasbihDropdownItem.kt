@@ -1,57 +1,67 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
-import android.util.Log
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material.swipeable
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Tasbih
-import kotlin.math.roundToInt
 
 // a dropdown item for each tasbih
 //to contain annimated visibility delete button and the tasbih name, goal and count
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class , ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihDropdownItem(
 	item : Tasbih ,
 	onClick : (Tasbih) -> Unit ,
-	onDelete : (Tasbih) -> Unit,
-	onEdit : (Tasbih) -> Unit,
+	onDelete : (Tasbih) -> Unit ,
+	onEdit : (Tasbih) -> Unit
 					  )
 {
-	val swipeState = rememberSwipeableState(initialValue = 0)
-	Log.d("SwipeState" , swipeState.offset.value.toString())
+	val currentItem = rememberUpdatedState(newValue = item)
+	val dismissState = rememberDismissState(
+			confirmValueChange = {
+				if(it == DismissValue.DismissedToEnd)
+				{
+					onEdit(currentItem.value)
+				}
+				else if(it == DismissValue.DismissedToStart)
+				{
+					onDelete(currentItem.value)
+				}
+				false
+			}
+										   )
 
+	SwipeToDismiss(
+			state = dismissState ,
+			background = {
+				SwipeBackground(dismissState = dismissState)
+			},
+			dismissContent = {
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			elevation = CardDefaults.elevatedCardElevation(
 					defaultElevation = 4.dp ,
 														  ) ,
 			modifier = Modifier
-				.offset { IntOffset(swipeState.offset.value.roundToInt() , 0) }
 				.padding(8.dp)
-				.clickable { onClick(item) }
-				.swipeable(
-						state = swipeState ,
-						anchors = mapOf(0f to 0 , - 100f to 1) ,
-						orientation = Orientation.Horizontal ,
-						  )
+				.clickable { onClick(currentItem.value) }
 				) {
 
 		//a row to contain the tasbih name, goal and count and the delete button
@@ -61,7 +71,7 @@ fun TasbihDropdownItem(
 					.fillMaxWidth() ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
-			if(item.count == item.goal)
+			if (currentItem.value.count == currentItem.value.goal)
 			{
 				Icon(
 						imageVector = Icons.Default.CheckCircle ,
@@ -75,7 +85,7 @@ fun TasbihDropdownItem(
 					modifier = Modifier
 						.weight(1f)
 						.padding(8.dp) ,
-					text = item.englishName ,
+					text = currentItem.value.englishName ,
 					textAlign = TextAlign.Center ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
@@ -96,7 +106,7 @@ fun TasbihDropdownItem(
 					modifier = Modifier
 						.weight(1f)
 						.padding(8.dp) ,
-					text = item.goal.toString() ,
+					text = currentItem.value.goal.toString() ,
 					textAlign = TextAlign.Center ,
 					maxLines = 2 ,
 					overflow = TextOverflow.Ellipsis ,
@@ -117,55 +127,68 @@ fun TasbihDropdownItem(
 					modifier = Modifier
 						.weight(1f)
 						.padding(8.dp) ,
-					text = item.count.toString() ,
+					text = currentItem.value.count.toString() ,
 					textAlign = TextAlign.Center ,
 					maxLines = 2 ,
 					overflow = TextOverflow.Ellipsis ,
 					style = MaterialTheme.typography.bodySmall
 				)
-			AnimatedVisibility(
-					visible = swipeState.offset.value < -50 ,
-					enter = fadeIn() + expandHorizontally() ,
-					exit = fadeOut() + shrinkHorizontally()
-							  ) {
-				Row(
-						verticalAlignment = Alignment.CenterVertically,
-						horizontalArrangement = Arrangement.End
-				   ) {
-					//a delete button
-					IconButton(
-							onClick = {
-								onDelete(item)
-							} ,
-							modifier = Modifier
-								.size(48.dp)
-							  ) {
-						Icon(
-								painter = painterResource(id = R.drawable.delete_icon) ,
-								contentDescription = "Delete" ,
-								modifier = Modifier
-									.size(24.dp)
-							)
-					}
-
-					//an edit button
-					IconButton(
-							onClick = {
-								onEdit(item)
-							} ,
-							modifier = Modifier
-								.size(48.dp)
-							  ) {
-						Icon(
-								painter = painterResource(id = R.drawable.edit_icon) ,
-								contentDescription = "Edit" ,
-								modifier = Modifier
-									.size(24.dp)
-							)
-					}
-				}
-			}
 		}
+	}
+})
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun SwipeBackground(dismissState: DismissState) {
+	val direction = dismissState.dismissDirection ?: return
+
+	val color by animateColorAsState(
+			when (dismissState.targetValue) {
+				DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
+				DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
+				DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
+			}
+									)
+	val iconTintColor by animateColorAsState(
+			when (dismissState.targetValue) {
+				DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
+				DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.onPrimary
+				DismissValue.DismissedToStart -> MaterialTheme.colorScheme.onErrorContainer
+			}
+										   )
+	val alignment = when (direction) {
+		DismissDirection.StartToEnd -> Alignment.CenterStart
+		DismissDirection.EndToStart -> Alignment.CenterEnd
+	}
+	val icon = when (direction) {
+		DismissDirection.StartToEnd -> painterResource(id = com.arshadshah.nimaz.R.drawable.edit_icon)
+		DismissDirection.EndToStart -> painterResource(id = com.arshadshah.nimaz.R.drawable.delete_icon)
+	}
+	val scale by animateFloatAsState(
+			if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+									)
+
+	val haptic = LocalHapticFeedback.current
+	LaunchedEffect(key1 = dismissState.targetValue, block = {
+		if (dismissState.targetValue != DismissValue.Default){
+			haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+		}
+	})
+
+	Box(
+			Modifier
+				.fillMaxSize()
+				.background(color)
+				.padding(horizontal = 20.dp),
+			contentAlignment = alignment
+	   ) {
+		Icon(
+				painter = icon,
+				contentDescription = "Localized description",
+				modifier = Modifier.scale(scale).size(24.dp),
+				tint = iconTintColor
+			)
 	}
 }
 
@@ -193,9 +216,13 @@ fun TasbihDropDownItemPreview()
 			count = 0
 					   )
 	TasbihDropdownItem(
-			item = tasbih,
+			item = tasbih ,
 			onClick = { } ,
-			onDelete = { },
-			onEdit = { }
+			onDelete = { tasbih ->
+
+			} ,
+			onEdit = { tasbih ->
+
+			} ,
 					  )
 }
