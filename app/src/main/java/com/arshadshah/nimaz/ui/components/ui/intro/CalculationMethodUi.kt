@@ -24,7 +24,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 
@@ -155,26 +155,13 @@ fun CalculationMethodUI()
 									PrayerTimesParamMapper.getParams(context)
 																					)
 										 )
-					val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-					if (! alarmLock)
-					{
-						CreateAlarms().exact(
-								context ,
-								fajrTime.value !! ,
-								sunriseTime.value !! ,
-								dhuhrTime.value !! ,
-								asrTime.value !! ,
-								maghribTime.value !! ,
-								ishaTime.value !! ,
-											)
-						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-					}
 					viewModel.handleEvent(
 							context ,
 							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
 									context
 																			   )
 										 )
+					PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				}
 					  )
 	}
@@ -224,20 +211,7 @@ fun CalculationMethodUI()
 										context
 																				   )
 											 )
-						val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-						if (! alarmLock)
-						{
-							CreateAlarms().exact(
-									context ,
-									fajrTime.value !! ,
-									sunriseTime.value !! ,
-									dhuhrTime.value !! ,
-									asrTime.value !! ,
-									maghribTime.value !! ,
-									ishaTime.value !! ,
-												)
-							sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-						}
+						PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 					} ,
 					height = 500.dp
 						)

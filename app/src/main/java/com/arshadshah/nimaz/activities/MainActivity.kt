@@ -44,9 +44,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.data.remote.viewModel.NamesOfAllahViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.*
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar

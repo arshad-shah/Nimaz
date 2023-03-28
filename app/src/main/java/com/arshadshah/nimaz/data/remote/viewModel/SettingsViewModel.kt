@@ -1,16 +1,22 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
+import android.app.Activity
 import android.content.Context
+import android.content.IntentSender
 import android.location.Address
 import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -148,6 +154,9 @@ class SettingsViewModel(context : Context) : ViewModel()
 		MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0"))
 	val ishaOffset = _ishaOffset.asStateFlow()
 
+	private var _isUpdateAvailable = MutableStateFlow(false)
+	val isUpdateAvailable = _isUpdateAvailable.asStateFlow()
+
 	//events
 	sealed class SettingsEvent
 	{
@@ -189,6 +198,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 		//update settings based on calculation method
 		class UpdateSettings(val method : String) : SettingsEvent()
 		class AutoParameters(val checked : Boolean) : SettingsEvent()
+
+		class CheckUpdate(val context : Context, val doUpdate: Boolean) : SettingsEvent()
 	}
 
 	//events for the settings screen
@@ -449,6 +460,43 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.saveDataBoolean(AppConstants.AUTO_PARAMETERS , event.checked)
 				_autoParams.value = event.checked
 				Log.d("Nimaz: SettingsViewModel" , "Auto parameters : ${event.checked}")
+			}
+			is SettingsEvent.CheckUpdate ->
+			{
+				Log.d("Nimaz: SettingsViewModel" , "Checking for update")
+				val appUpdateManager = AppUpdateManagerFactory.create(event.context)
+				val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+				appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+					if(event.doUpdate){
+						Log.d("Nimaz: SettingsViewModel" , "Update available : ${appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+								AppUpdateType.IMMEDIATE)}")
+						if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+										AppUpdateType.IMMEDIATE
+																   )
+						)
+						{
+							try
+							{
+								Log.d("Nimaz: SettingsViewModel" , "Starting update")
+								appUpdateManager.startUpdateFlowForResult(
+										appUpdateInfo ,
+										AppUpdateType.IMMEDIATE ,
+										event.context as Activity ,
+										APP_UPDATE_REQUEST_CODE
+																		 )
+							}
+							catch (e : IntentSender.SendIntentException)
+							{
+								e.printStackTrace()
+							}
+						}
+					}else{
+						Log.d("Nimaz: SettingsViewModel" , "Update available : ${appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+								AppUpdateType.IMMEDIATE)}")
+						_isUpdateAvailable.value = appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE)
+					}
+				}
 			}
 		}
 	}

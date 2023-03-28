@@ -28,7 +28,6 @@ import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
 import java.time.LocalDate
@@ -88,7 +87,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 
 	val sharedPreferences = remember { PrivateSharedPreferences(context) }
 
-	LaunchedEffect(locationName.value, latitude.value, longitude.value) {
+	LaunchedEffect(locationName.value) {
 			//update the prayer times
 			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 					PrayerTimesParamMapper.getParams(context)
@@ -96,43 +95,14 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 								 )
 	}
 
-	val fajrTime = remember {
-		viewModel.fajrTime
-	}.collectAsState()
-
-	val sunriseTime = remember {
-		viewModel.sunriseTime
-	}.collectAsState()
-
-	val dhuhrTime = remember {
-		viewModel.dhuhrTime
-	}.collectAsState()
-
-	val asrTime = remember {
-		viewModel.asrTime
-	}.collectAsState()
-
-	val maghribTime = remember {
-		viewModel.maghribTime
-	}.collectAsState()
-
-	val ishaTime = remember {
-		viewModel.ishaTime
-	}.collectAsState()
-
-	val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-	if (! alarmLock)
-	{
-		CreateAlarms().exact(
-				context ,
-				fajrTime.value !! ,
-				sunriseTime.value !! ,
-				dhuhrTime.value !! ,
-				asrTime.value !! ,
-				maghribTime.value !! ,
-				ishaTime.value !! ,
-							)
-		sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+	LaunchedEffect(key1 = Unit) {
+		//set the alarms
+		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+		if (! alarmLock)
+		{
+			viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context))
+			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+		}
 	}
 
 	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0).getMoonPhase()

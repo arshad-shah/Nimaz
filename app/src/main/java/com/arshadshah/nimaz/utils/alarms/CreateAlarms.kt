@@ -45,7 +45,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.util.*
 
 class CreateAlarms
@@ -69,13 +69,15 @@ class CreateAlarms
 				createAllNotificationChannels(context)
 				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK , true)
 			}
+			//time zne
+			val timeZone = ZoneId.systemDefault()
 			//convert the local date time to milliseconds
-			val fajrTime = fajr.toInstant(ZoneOffset.UTC).toEpochMilli()
-			val sunriseTime = sunrise.toInstant(ZoneOffset.UTC).toEpochMilli()
-			val dhuhrTime = dhuhr.toInstant(ZoneOffset.UTC).toEpochMilli()
-			val asrTime = asr.toInstant(ZoneOffset.UTC).toEpochMilli()
-			val maghribTime = maghrib.toInstant(ZoneOffset.UTC).toEpochMilli()
-			val ishaaTime = ishaa.toInstant(ZoneOffset.UTC).toEpochMilli()
+			val fajrTime = fajr.atZone(timeZone).toInstant().toEpochMilli()
+			val sunriseTime = sunrise.atZone(timeZone).toInstant().toEpochMilli()
+			val dhuhrTime = dhuhr.atZone(timeZone).toInstant().toEpochMilli()
+			val asrTime = asr.atZone(timeZone).toInstant().toEpochMilli()
+			val maghribTime = maghrib.atZone(timeZone).toInstant().toEpochMilli()
+			val ishaaTime = ishaa.atZone(timeZone).toInstant().toEpochMilli()
 
 			//alarm lock
 			val oneOClock = GregorianCalendar.getInstance().apply {

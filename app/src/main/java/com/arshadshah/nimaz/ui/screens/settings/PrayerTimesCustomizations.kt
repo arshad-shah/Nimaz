@@ -249,6 +249,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									context
 																			   )
 										 )
+					PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				}
 			}
 			ElevatedCard(
@@ -288,6 +289,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									context
 																			   )
 										 )
+					PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				}
 			}
 		}
@@ -367,6 +369,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 									context
 																			   )
 										 )
+					PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				}
 			}
 			if (ishaaAngleVisible.value)
@@ -407,6 +410,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 										context
 																				   )
 											 )
+						PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 					}
 				}
 			} else
@@ -517,6 +521,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						}
 					}
 					ElevatedCard(
@@ -563,6 +568,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						}
 					}
 					ElevatedCard(
@@ -609,6 +615,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						}
 					}
 					ElevatedCard(
@@ -655,6 +662,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						}
 					}
 					ElevatedCard(
@@ -701,6 +709,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						}
 					}
 					ElevatedCard(
@@ -748,6 +757,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 											context
 																					   )
 												 )
+							PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 						}
 					}
 				}

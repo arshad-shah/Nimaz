@@ -18,7 +18,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.Nimaz
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -107,6 +107,9 @@ class PrayerTimesViewModel : ViewModel()
 		class REFRESH(val isRefreshingUI : Boolean) : PrayerTimesEvent()
 
 		class SET_LOADING(val isLoading : Boolean) : PrayerTimesEvent()
+
+		//set alarms
+		class SET_ALARMS(val context : Context) : PrayerTimesEvent()
 	}
 
 	//function to handle the timer event
@@ -127,7 +130,6 @@ class PrayerTimesViewModel : ViewModel()
 			//event to update the prayer times
 			is PrayerTimesEvent.UPDATE_PRAYERTIMES ->
 			{
-				PrivateSharedPreferences(context).saveDataBoolean(AppConstants.ALARM_LOCK , false)
 				updatePrayerTimes(event.mapOfParameters)
 			}
 			//event to update the widget
@@ -145,11 +147,30 @@ class PrayerTimesViewModel : ViewModel()
 			{
 				_isLoading.value = event.isLoading
 			}
+			//event to set the alarms
+			is PrayerTimesEvent.SET_ALARMS ->
+			{
+				setAlarms(event.context)
+			}
 
 			else ->
 			{
 			}
 		}
+	}
+
+	private fun setAlarms(context : Context)
+	{
+		loadPrayerTimes(context)
+		CreateAlarms().exact(
+				context ,
+				fajrTime.value !! ,
+				sunriseTime.value !! ,
+				dhuhrTime.value !! ,
+				asrTime.value !! ,
+				maghribTime.value !! ,
+				ishaTime.value !! ,
+							)
 	}
 
 	private fun updateWidget(context : Context)
