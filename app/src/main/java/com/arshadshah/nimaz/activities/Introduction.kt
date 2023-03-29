@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.screens.introduction.IntroPage1
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -23,7 +24,7 @@ class Introduction : ComponentActivity()
 		super.onCreate(savedInstanceState)
 		setContent {
 			val viewModelSettings = viewModel(
-					key = "SettingsViewModel" ,
+					key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 					initializer = { SettingsViewModel(this@Introduction) } ,
 					viewModelStoreOwner = this@Introduction
 											 )

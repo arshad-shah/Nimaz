@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
@@ -27,6 +28,7 @@ fun DateSelector(
 				)
 {
 	val viewModel = viewModel(
+			key = AppConstants.TRACKING_VIEWMODEL_KEY,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

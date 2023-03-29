@@ -11,6 +11,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
@@ -24,7 +25,7 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
@@ -59,13 +60,16 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 				val currentItem = rememberUpdatedState(newValue = Aya)
 				val dismissState = rememberDismissState(
 						confirmValueChange = {
-							viewModel.handleAyaEvent(
-									QuranViewModel.AyaEvent.deleteBookmarkFromAya(
-											currentItem.value.ayaNumber ,
-											currentItem.value.suraNumber ,
-											currentItem.value.ayaNumberInSurah
-																				 )
-													)
+							if (it == DismissValue.DismissedToStart)
+							{
+								viewModel.handleAyaEvent(
+										QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+												currentItem.value.ayaNumber ,
+												currentItem.value.suraNumber ,
+												currentItem.value.ayaNumberInSurah
+																					 )
+														)
+							}
 							false
 						}
 													   )

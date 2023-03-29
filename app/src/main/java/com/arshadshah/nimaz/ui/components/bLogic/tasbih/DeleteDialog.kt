@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 
@@ -17,7 +18,7 @@ fun DeleteDialog(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

@@ -14,6 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import kotlin.reflect.KFunction1
@@ -28,7 +29,7 @@ fun ManualLocationInput(
 
 	val context = LocalContext.current
 	val viewModelPrayerTimes = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 										)

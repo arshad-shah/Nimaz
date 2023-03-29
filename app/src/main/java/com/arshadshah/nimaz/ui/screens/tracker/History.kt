@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.components.ProgressBarCustom
@@ -29,7 +30,7 @@ fun History()
 
 
 	val viewModel = viewModel(
-			key = "TrackerViewModel" ,
+			key = TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import java.time.LocalDate
 
@@ -13,7 +14,7 @@ fun DashboardFastTracker()
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
 	val viewModelTracker = viewModel(
-			key = "TrackerViewModel" ,
+			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 									)

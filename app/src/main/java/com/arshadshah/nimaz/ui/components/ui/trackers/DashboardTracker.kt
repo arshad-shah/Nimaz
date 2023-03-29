@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -29,7 +30,7 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 {
 
 	val viewModel = viewModel(
-			key = "TrackerViewModel" ,
+			key =TRACKING_VIEWMODEL_KEY,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
 import es.dmoral.toasty.Toasty
@@ -19,7 +20,7 @@ fun PrayerTimesList()
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
