@@ -33,12 +33,12 @@ fun CalculationMethodUI()
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = "SettingViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context
 									)
@@ -108,6 +108,9 @@ fun CalculationMethodUI()
 					{
 						Text(text = "Manual Calculation")
 					}
+				} ,
+				subtitle = {
+					Text(text = "Auto angles are Experimental")
 				} ,
 				onCheckedChange = {
 					if (it)

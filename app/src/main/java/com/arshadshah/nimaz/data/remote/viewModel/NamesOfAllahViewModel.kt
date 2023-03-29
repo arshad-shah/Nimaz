@@ -102,9 +102,6 @@ class NamesOfAllahViewModel : ViewModel()
 	fun stopAudio()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			//if the audio is playing
-			if (mediaPlayer.isPlaying)
-			{
 				//stop the audio
 				mediaPlayer.stop()
 				//reset the audio
@@ -115,7 +112,6 @@ class NamesOfAllahViewModel : ViewModel()
 				_isPaused.value = false
 				//set the stopped state to true
 				_isStopped.value = true
-			}
 		}
 	}
 

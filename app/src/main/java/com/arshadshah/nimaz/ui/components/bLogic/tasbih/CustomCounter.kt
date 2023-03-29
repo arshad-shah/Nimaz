@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
@@ -27,7 +28,7 @@ fun CustomCounter(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

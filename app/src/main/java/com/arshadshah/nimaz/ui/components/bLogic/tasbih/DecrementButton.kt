@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 
 @Composable
@@ -30,7 +31,7 @@ fun Decrementbutton(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

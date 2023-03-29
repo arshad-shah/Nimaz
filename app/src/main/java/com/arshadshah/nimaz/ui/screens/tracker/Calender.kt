@@ -24,6 +24,7 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
+import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardFastTracker
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
@@ -48,7 +49,7 @@ fun Calender(paddingValues : PaddingValues)
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
 	val viewModel = viewModel(
-			key = "TrackerViewModel" ,
+			key = TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -131,7 +132,7 @@ fun Calender(paddingValues : PaddingValues)
 fun CalenderHeader(monthState : MonthState)
 {
 	val viewModel = viewModel(
-			key = "TrackerViewModel" ,
+			key = TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

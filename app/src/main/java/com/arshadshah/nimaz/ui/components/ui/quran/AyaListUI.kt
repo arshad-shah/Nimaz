@@ -28,6 +28,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
@@ -57,7 +59,7 @@ fun AyaListUI(
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 	val spaceFilesRepository = SpacesFileRepository(context)
@@ -224,7 +226,7 @@ fun AyaListItemUI(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 
