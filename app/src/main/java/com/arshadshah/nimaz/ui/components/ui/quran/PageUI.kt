@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.theme.amiri
@@ -49,7 +50,7 @@ fun Page(
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 	val arabicFontSize = remember {
@@ -242,7 +243,7 @@ fun PagePreview()
 	val context = LocalContext.current
 	LocalDataStore.init(context)
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 	viewModel.getAllAyaForJuz(1 , "English")

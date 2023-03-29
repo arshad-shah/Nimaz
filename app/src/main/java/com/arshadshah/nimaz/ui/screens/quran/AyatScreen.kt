@@ -25,7 +25,7 @@ fun AyatScreen(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )

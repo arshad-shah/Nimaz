@@ -13,6 +13,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
@@ -36,7 +38,7 @@ fun QuranScreen(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
@@ -46,7 +48,6 @@ fun QuranScreen(
 	val titles = listOf("Sura" , "Juz" , "My Quran")
 	val pagerState = rememberPagerState()
 	val scope = rememberCoroutineScope()
-	val transition = updateTransition(pagerState.currentPage , label = "quranTabTransition")
 	Column(
 			modifier = Modifier
 				.padding(paddingValues)
@@ -61,17 +62,17 @@ fun QuranScreen(
 					.padding(1.dp) ,
 				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f) ,
 				indicator = { tabPositions : List<TabPosition> ->
+					val transition = updateTransition(pagerState.currentPage , label = "quranTabTransition")
 					val indicatorStart by transition.animateDp(
 							transitionSpec = {
 								// Handle directionality here, if we are moving to the right, we
 								// want the right side of the indicator to move faster, if we are
 								// moving to the left, we want the left side to move faster.
-								if (initialState < targetState)
-								{
-									spring(dampingRatio = 1f , stiffness = 50f)
-								} else
-								{
-									spring(dampingRatio = 1f , stiffness = 1000f)
+								//it should expand from left to right and return to normal once it reaches the en
+								if (initialState < targetState) {
+									spring(dampingRatio = 1f, stiffness = 1000f)
+								} else {
+									spring(dampingRatio = 1f, stiffness = 50f)
 								}
 							} , label = "quranTabTransitionStart"
 															  ) {
@@ -83,12 +84,10 @@ fun QuranScreen(
 								// Handle directionality here, if we are moving to the right, we
 								// want the right side of the indicator to move faster, if we are
 								// moving to the left, we want the left side to move faster.
-								if (initialState < targetState)
-								{
-									spring(dampingRatio = 1f , stiffness = 1000f)
-								} else
-								{
-									spring(dampingRatio = 1f , stiffness = 50f)
+								if (initialState < targetState) {
+									spring(dampingRatio = 1f, stiffness = 1000f)
+								} else {
+									spring(dampingRatio = 1f, stiffness = 50f)
 								}
 							} , label = "quranTabTransitionEnd"
 															) {
@@ -96,6 +95,9 @@ fun QuranScreen(
 					}
 					Box(
 							modifier = Modifier
+								// Fill up the entire TabRow, and place the indicator at the start
+								.fillMaxSize()
+								.wrapContentSize(align = Alignment.BottomStart)
 								// Apply an offset from the start to correctly position the indicator around the tab
 								.offset(x = indicatorStart)
 								// Make the width of the indicator follow the animated width as we move between tabs

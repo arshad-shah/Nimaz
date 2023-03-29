@@ -42,12 +42,12 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 	val sharedPreferences = PrivateSharedPreferences(context)
 
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = "SettingViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 									)

@@ -33,6 +33,7 @@ import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.NAMES_OF_ALLAH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
@@ -43,6 +44,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exi
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.remote.viewModel.*
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
@@ -172,7 +174,7 @@ class MainActivity : ComponentActivity()
 		//this is used to show the full activity on the screen
 		setContent {
 			val viewModelSettings = viewModel(
-					key = "SettingsViewModel" ,
+					key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 					initializer = { SettingsViewModel(this@MainActivity) } ,
 					viewModelStoreOwner = this as ComponentActivity
 											 )
@@ -203,8 +205,19 @@ class MainActivity : ComponentActivity()
 
 				"SYSTEM" ->
 				{
-					darkTheme.value = isSystemInDarkTheme()
-					themeName.value = "Default"
+					//if is dark theme is true then it will be dark theme
+					if (isDarkTheme.value)
+					{
+						dynamicTheme.value = false
+						darkTheme.value = isDarkTheme.value
+						themeName.value = "Default"
+					}
+					else
+					{
+						dynamicTheme.value = false
+						darkTheme.value = isSystemInDarkTheme()
+						themeName.value = "Default"
+					}
 				}
 
 				"DEFAULT" ->
@@ -289,12 +302,12 @@ class MainActivity : ComponentActivity()
 					 )
 
 				val viewModelTasbih = viewModel(
-						key = "TasbihViewModel" ,
+						key = TASBIH_VIEWMODEL_KEY ,
 						initializer = { TasbihViewModel(this@MainActivity) } ,
 						viewModelStoreOwner = LocalContext.current as ComponentActivity
 											   )
 				val viewModelNames = viewModel(
-						key = "NamesOfAllahViewModel" ,
+						key = NAMES_OF_ALLAH_VIEWMODEL_KEY ,
 						initializer = { NamesOfAllahViewModel() } ,
 						viewModelStoreOwner = LocalContext.current as ComponentActivity
 											  )

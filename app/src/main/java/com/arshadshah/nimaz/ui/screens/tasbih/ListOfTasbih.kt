@@ -51,7 +51,7 @@ fun ListOfTasbih(
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.QIBLA_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QIBLA
 import com.arshadshah.nimaz.data.remote.viewModel.QiblaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.compass.BearingAndLocationContainer
@@ -33,7 +34,7 @@ fun QiblaScreen(paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QiblaViewModel" ,
+			key = QIBLA_VIEWMODEL_KEY ,
 			initializer = { QiblaViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )

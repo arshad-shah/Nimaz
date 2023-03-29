@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.DeleteDialog
@@ -24,7 +25,7 @@ fun DashboardTasbihTracker(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
