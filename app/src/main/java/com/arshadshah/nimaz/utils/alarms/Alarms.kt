@@ -45,11 +45,12 @@ class Alarms
 								 )
 
 		//recieverEnabled(context)
-		//format time by converting to LocalDateTime
+		//format time by converting to LocalDateTime get the date and time
+
 		val time = LocalDateTime.ofInstant(
 				Instant.ofEpochMilli(calendar.timeInMillis) ,
 				ZoneId.systemDefault()
-										  ).format(DateTimeFormatter.ofPattern("hh:mm a"))
+										  ).format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a"))
 
 		//logs
 		Log.i("Nimaz: Alarms for Adhan" , "Reset alarm for $time is successfully created")

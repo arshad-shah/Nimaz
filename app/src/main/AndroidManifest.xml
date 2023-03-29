@@ -77,8 +77,7 @@
         <receiver
             android:name=".utils.recievers.ResetAdhansReciever"
             android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.POST_NOTIFICATIONS" />
+            android:exported="true" />
         <receiver
             android:name=".utils.recievers.AdhanReciever"
             android:enabled="true"
