@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
+import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
 import com.arshadshah.nimaz.ui.components.ui.trackers.PrayerTrackerListItems
@@ -25,7 +26,7 @@ import es.dmoral.toasty.Toasty
 fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false)
 {
 	val viewModel = viewModel(
-			key = "TrackerViewModel" ,
+			key = TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 							 )

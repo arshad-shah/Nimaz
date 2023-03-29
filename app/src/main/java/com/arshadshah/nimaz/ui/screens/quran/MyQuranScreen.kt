@@ -64,13 +64,16 @@ fun MyQuranScreen(
 						val currentItem = rememberUpdatedState(newValue = bookmark)
 						val dismissState = rememberDismissState(
 								confirmValueChange = {
-									handleEvents(
-											QuranViewModel.AyaEvent.deleteBookmarkFromAya(
-													currentItem.value.ayaNumber ,
-													currentItem.value.suraNumber ,
-													currentItem.value.ayaNumberInSurah
-																						 )
-												)
+									if (it == DismissValue.DismissedToStart)
+									{
+										handleEvents(
+												QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+														currentItem.value.ayaNumber ,
+														currentItem.value.suraNumber ,
+														currentItem.value.ayaNumberInSurah
+																							 )
+													)
+									}
 									false
 								}
 															   )
@@ -117,13 +120,16 @@ fun MyQuranScreen(
 						val currentItem = rememberUpdatedState(newValue = favourite)
 						val dismissState = rememberDismissState(
 								confirmValueChange = {
-									handleEvents(
-											QuranViewModel.AyaEvent.deleteFavoriteFromAya(
-													currentItem.value.ayaNumber ,
-													currentItem.value.suraNumber ,
-													currentItem.value.ayaNumberInSurah
-																						 )
-												)
+									if (it == DismissValue.DismissedToStart)
+									{
+										handleEvents(
+												QuranViewModel.AyaEvent.deleteFavoriteFromAya(
+														currentItem.value.ayaNumber ,
+														currentItem.value.suraNumber ,
+														currentItem.value.ayaNumberInSurah
+																							 )
+													)
+									}
 									false
 								}
 															   )
@@ -170,13 +176,16 @@ fun MyQuranScreen(
 						val currentItem = rememberUpdatedState(newValue = note)
 						val dismissState = rememberDismissState(
 								confirmValueChange = {
-									handleEvents(
-											QuranViewModel.AyaEvent.deleteNoteFromAya(
-													currentItem.value.ayaNumber ,
-													currentItem.value.suraNumber ,
-													currentItem.value.ayaNumberInSurah
-																					 )
-												)
+									if (it == DismissValue.DismissedToStart)
+									{
+										handleEvents(
+												QuranViewModel.AyaEvent.deleteNoteFromAya(
+														currentItem.value.ayaNumber ,
+														currentItem.value.suraNumber ,
+														currentItem.value.ayaNumberInSurah
+																						 )
+													)
+									}
 									false
 								}
 															   )

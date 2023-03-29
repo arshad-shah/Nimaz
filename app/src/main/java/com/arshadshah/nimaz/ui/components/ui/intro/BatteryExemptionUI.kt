@@ -37,7 +37,7 @@ fun BatteryExemptionUI()
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = "SettingsViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )

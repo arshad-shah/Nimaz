@@ -2,10 +2,6 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants
 {
-
-	val DARK_MODE : String = "darkMode"
-	val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String = "randomAyatNumberInSurahLastFetched"
-	val RANDOM_AYAT_LAST_FETCHED : String = "randomAyatLastFetched"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -67,6 +63,20 @@ object AppConstants
 	const val CHANNEL_LOCK = "channelLock"
 	const val THEME = "theme"
 	const val FONT_STYLE = "font_style"
+	const val DARK_MODE : String = "darkMode"
+	const val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String = "randomAyatNumberInSurahLastFetched"
+	const val RANDOM_AYAT_LAST_FETCHED : String = "randomAyatLastFetched"
+
+
+	//viewmodel keys
+	const val DUA_CHAPTERS_VIEWMODEL_KEY = "dua_chapters_viewmodel_key"
+	const val NAMES_OF_ALLAH_VIEWMODEL_KEY = "names_of_allah_viewmodel_key"
+	const val PRAYER_TIMES_VIEWMODEL_KEY = "prayer_times_viewmodel_key"
+	const val QIBLA_VIEWMODEL_KEY = "qibla_viewmodel_key"
+	const val QURAN_VIEWMODEL_KEY = "quran_viewmodel_key"
+	const val SETTINGS_VIEWMODEL_KEY = "settings_viewmodel_key"
+	const val TASBIH_VIEWMODEL_KEY = "tasbih_viewmodel_key"
+	const val TRACKING_VIEWMODEL_KEY = "tracking_viewmodel_key"
 
 	//full quran downloaded
 	const val FULL_QURAN_DOWNLOADED = "full_quran_downloaded"

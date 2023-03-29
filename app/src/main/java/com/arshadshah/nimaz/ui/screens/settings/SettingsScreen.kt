@@ -59,7 +59,7 @@ fun SettingsScreen(
 {
 	val context = LocalContext.current
 	val viewModelSettings = viewModel(
-			key = "SettingsViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 									 )
@@ -72,7 +72,7 @@ fun SettingsScreen(
 	}.collectAsState()
 
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

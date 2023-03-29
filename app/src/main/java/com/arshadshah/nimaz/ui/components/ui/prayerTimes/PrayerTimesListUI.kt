@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -50,7 +51,7 @@ fun PrayerTimesListUI(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(vertical = 8.dp)
+				.padding(vertical = 8.dp, horizontal = 8.dp)
 				) {
 		Column(
 				modifier = Modifier.scrollable(
@@ -103,13 +104,22 @@ fun PrayerTimesRow(
 				  )
 {
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	val countDownTime = remember { viewModel.timer }.collectAsState()
 	//format the date to time based on device format
-	val formatter = DateTimeFormatter.ofPattern("hh:mm a")
+	//get the device trime format
+	val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
+	//if the device time format is 24 hour then use the 24 hour format
+	val formatter = if (deviceTimeFormat)
+	{
+		DateTimeFormatter.ofPattern("HH:mm")
+	} else
+	{
+		DateTimeFormatter.ofPattern("hh:mm a")
+	}
 	val sentenceCase =
 		prayerName.lowercase(Locale.ROOT)
 			.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }

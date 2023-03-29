@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
@@ -43,12 +44,12 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = "SettingViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context
 									)

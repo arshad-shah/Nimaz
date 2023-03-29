@@ -577,6 +577,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 	fun reverseGeocode(latitude : Double , longitude : Double)
 	{
 		Log.d("Nimaz: reverseGeocode" , "reverseGeocode")
+		_locationName.value = "Loading..."
 		try
 		{
 			val gcd = geocoder.getFromLocation(latitude , longitude , 1)

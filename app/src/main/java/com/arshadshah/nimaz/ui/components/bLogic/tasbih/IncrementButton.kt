@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
 
@@ -34,7 +35,7 @@ fun IncrementButton(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

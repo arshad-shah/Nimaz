@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ProgressBarCustom
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
@@ -47,7 +48,7 @@ fun MoreMenu(
 	val (showDialog4 , setShowDialog4) = remember { mutableStateOf(false) }
 
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )

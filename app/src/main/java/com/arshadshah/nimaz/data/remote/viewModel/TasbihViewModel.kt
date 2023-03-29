@@ -299,7 +299,7 @@ class TasbihViewModel(context : Context) : ViewModel()
 				_tasbihError.value = ""
 				val datastore = LocalDataStore.getDataStore()
 				val idOfTasbih = datastore.saveTasbih(tasbih)
-				Log.d("TasbihViewModel" , "id of tasbih is ${idOfTasbih.toInt()}")
+				Log.d("Nimaz: TasbihViewModel" , "id of tasbih is ${idOfTasbih.toInt()}")
 				//get the tasbih that was just created
 				val tasbihJustCreated = datastore.getTasbihById(idOfTasbih.toInt())
 				//update the tasbih state on the main thread

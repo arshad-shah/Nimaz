@@ -51,12 +51,12 @@ fun LocationSettings(isIntro : Boolean = false)
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "SettingsViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val viewModelPrayerTimes = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 										)
@@ -129,34 +129,6 @@ fun LocationSettings(isIntro : Boolean = false)
 		val autoParams = remember {
 			viewModel.autoParams
 		}.collectAsState()
-
-		val fajrTime = remember {
-			viewModelPrayerTimes.fajrTime
-		}.collectAsState()
-
-		val sunriseTime = remember {
-			viewModelPrayerTimes.sunriseTime
-		}.collectAsState()
-
-		val dhuhrTime = remember {
-			viewModelPrayerTimes.dhuhrTime
-		}.collectAsState()
-
-		val asrTime = remember {
-			viewModelPrayerTimes.asrTime
-		}.collectAsState()
-
-		val maghribTime = remember {
-			viewModelPrayerTimes.maghribTime
-		}.collectAsState()
-
-		val ishaTime = remember {
-			viewModelPrayerTimes.ishaTime
-		}.collectAsState()
-
-		val sharedPreferences = PrivateSharedPreferences(context)
-
-
 
 		LaunchedEffect(
 				key1 = locationNameState.value ,
@@ -307,12 +279,12 @@ fun LocationToggleSwitch(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "SettingsViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val viewModelPrayerTimes = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 										)
