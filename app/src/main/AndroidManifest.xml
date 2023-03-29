@@ -91,9 +91,6 @@
             android:label="@string/title_activity_introduction"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Nimaz">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
         <activity
             android:name=".activities.RoutingActivity"
