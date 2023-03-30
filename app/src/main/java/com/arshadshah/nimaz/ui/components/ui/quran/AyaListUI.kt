@@ -191,10 +191,13 @@ fun AyaListUI(
 			}
 		}
 
+		val scope = rememberCoroutineScope()
+
 		LazyColumn(
 				modifier = Modifier.testTag(TEST_TAG_AYA) ,
 				userScrollEnabled = true ,
-				contentPadding = paddingValues , state = listState
+				contentPadding = paddingValues ,
+				state = listState
 				  ) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
