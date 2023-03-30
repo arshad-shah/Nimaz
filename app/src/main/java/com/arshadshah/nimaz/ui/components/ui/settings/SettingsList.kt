@@ -146,7 +146,7 @@ fun SettingsList(
 						onClick = { showDialog = false } ,
 						content = {
 							Text(
-									text = "Confirm" ,
+									text = "Done" ,
 									style = MaterialTheme.typography.titleMedium
 								)
 						}

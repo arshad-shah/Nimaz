@@ -51,7 +51,7 @@ fun ListOfTasbih(
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = AppConstants.TASBIH_VIEWMODEL_KEY,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -99,31 +99,34 @@ fun ListOfTasbih(
 				selectedTabIndex = pagerState.currentPage ,
 				modifier = Modifier
 					.padding(vertical = 4.dp , horizontal = 4.dp)
-					.clip(MaterialTheme.shapes.extraLarge)
-					.padding(1.dp) ,
+					.clip(MaterialTheme.shapes.extraLarge) ,
 				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f) ,
 				indicator = { tabPositions : List<TabPosition> ->
 					val transition = updateTransition(pagerState.currentPage , label = "")
 					val indicatorStart by transition.animateDp(
 							transitionSpec = {
-								if (initialState < targetState) {
-									spring(dampingRatio = 1f, stiffness = 50f)
-								} else {
-									spring(dampingRatio = 1f, stiffness = 1000f)
+								if (initialState < targetState)
+								{
+									spring(dampingRatio = 1f , stiffness = 50f)
+								} else
+								{
+									spring(dampingRatio = 1f , stiffness = 1000f)
 								}
-							}, label = ""
+							} , label = ""
 															  ) {
 						tabPositions[it].left
 					}
 
 					val indicatorEnd by transition.animateDp(
 							transitionSpec = {
-								if (initialState < targetState) {
-									spring(dampingRatio = 1f, stiffness = 1000f)
-								} else {
-									spring(dampingRatio = 1f, stiffness = 50f)
+								if (initialState < targetState)
+								{
+									spring(dampingRatio = 1f , stiffness = 1000f)
+								} else
+								{
+									spring(dampingRatio = 1f , stiffness = 50f)
 								}
-							}, label = ""
+							} , label = ""
 															) {
 						tabPositions[it].right
 					}
@@ -136,7 +139,7 @@ fun ListOfTasbih(
 								.padding(2.dp)
 								.fillMaxSize()
 								.background(
-										color = MaterialTheme.colorScheme.secondaryContainer,
+										color = MaterialTheme.colorScheme.secondaryContainer ,
 										MaterialTheme.shapes.extraLarge
 										   )
 								.zIndex(1f)

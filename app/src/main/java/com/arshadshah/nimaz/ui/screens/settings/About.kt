@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT_PAGE
@@ -18,7 +19,9 @@ fun About(paddingValues : PaddingValues)
 				.padding(paddingValues)
 				.fillMaxWidth()
 				.fillMaxHeight()
-				.testTag(TEST_TAG_ABOUT_PAGE)
+				.testTag(TEST_TAG_ABOUT_PAGE) ,
+			verticalArrangement = Arrangement.Center ,
+			horizontalAlignment = Alignment.CenterHorizontally
 		  ) {
 		AuthorDetails()
 	}

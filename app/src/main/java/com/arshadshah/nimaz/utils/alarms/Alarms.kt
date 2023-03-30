@@ -50,7 +50,8 @@ class Alarms
 		val time = LocalDateTime.ofInstant(
 				Instant.ofEpochMilli(calendar.timeInMillis) ,
 				ZoneId.systemDefault()
-										  ).format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a"))
+										  )
+			.format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a"))
 
 		//logs
 		Log.i("Nimaz: Alarms for Adhan" , "Reset alarm for $time is successfully created")

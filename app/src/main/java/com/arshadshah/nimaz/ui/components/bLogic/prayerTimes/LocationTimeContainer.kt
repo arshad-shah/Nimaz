@@ -57,7 +57,7 @@ fun ContainerUI(
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
-				.padding(vertical = 8.dp , horizontal = 0.dp)
+				.padding(vertical = 8.dp , horizontal = 8.dp)
 				.height(IntrinsicSize.Max)
 				) {
 		Row(

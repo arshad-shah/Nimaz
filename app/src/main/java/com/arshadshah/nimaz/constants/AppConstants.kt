@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants
 {
+
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -64,7 +65,8 @@ object AppConstants
 	const val THEME = "theme"
 	const val FONT_STYLE = "font_style"
 	const val DARK_MODE : String = "darkMode"
-	const val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String = "randomAyatNumberInSurahLastFetched"
+	const val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String =
+		"randomAyatNumberInSurahLastFetched"
 	const val RANDOM_AYAT_LAST_FETCHED : String = "randomAyatLastFetched"
 
 

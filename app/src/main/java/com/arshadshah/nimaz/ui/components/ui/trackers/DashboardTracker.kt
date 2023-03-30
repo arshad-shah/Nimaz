@@ -30,7 +30,7 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 {
 
 	val viewModel = viewModel(
-			key =TRACKING_VIEWMODEL_KEY,
+			key = TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

@@ -26,7 +26,7 @@ fun Counter(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.TASBIH_VIEWMODEL_KEY,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -126,7 +126,7 @@ fun Counter(
 				} ,
 				title = {
 					Text(text = "Reset Counter")
-						} ,
+				} ,
 				text = {
 					Text(
 							text = "Are you sure you want to reset the counter?" ,

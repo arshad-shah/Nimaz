@@ -79,6 +79,7 @@ fun SettingsScreen(
 
 	LaunchedEffect(Unit) {
 		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
 	}
 	val updateAvailabile = remember {
 		viewModelSettings.isUpdateAvailable
@@ -92,10 +93,6 @@ fun SettingsScreen(
 		"Nimaz is up to date"
 	}
 
-	//execute once
-	LaunchedEffect(Unit) {
-		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
-	}
 	val fajrTime = remember {
 		viewModel.fajrTime
 	}.collectAsState()

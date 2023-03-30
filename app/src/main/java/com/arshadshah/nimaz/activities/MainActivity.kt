@@ -121,8 +121,9 @@ class MainActivity : ComponentActivity()
 		}
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class ,
-		   ExperimentalMaterialApi::class
+	@OptIn(
+			ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class ,
+			ExperimentalMaterialApi::class
 		  )
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
@@ -148,30 +149,6 @@ class MainActivity : ComponentActivity()
 		}
 		Log.d(MAIN_ACTIVITY_TAG , "onCreate:  app widget updated")
 
-		val appUpdateManager = AppUpdateManagerFactory.create(this)
-
-		// Returns an intent object that you use to check for an update.
-		val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-
-		// Checks that the platform will allow the specified type of update.
-		appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-			if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-				&& appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-			)
-			{
-				Log.d(
-						MAIN_ACTIVITY_TAG ,
-						"onCreate:  update is available and immediate is allowed"
-					 )
-				// Request the update.
-				appUpdateManager.startUpdateFlowForResult(
-						appUpdateInfo ,
-						AppUpdateType.IMMEDIATE ,
-						this ,
-						APP_UPDATE_REQUEST_CODE
-														 )
-			}
-		}
 		super.onCreate(savedInstanceState)
 
 		//this is used to show the full activity on the screen
@@ -214,8 +191,7 @@ class MainActivity : ComponentActivity()
 						dynamicTheme.value = false
 						darkTheme.value = isDarkTheme.value
 						themeName.value = "Default"
-					}
-					else
+					} else
 					{
 						dynamicTheme.value = false
 						darkTheme.value = isSystemInDarkTheme()
