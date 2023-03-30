@@ -2,9 +2,9 @@ package com.arshadshah.nimaz.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Text
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -74,6 +74,7 @@ fun NamesOfAllahRow(
 {
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp) ,
 				) {
@@ -95,9 +96,9 @@ fun NamesOfAllahRow(
 				)
 			Column(
 					modifier = Modifier
-						.padding(horizontal = 0.dp, vertical = 8.dp)
+						.padding(horizontal = 0.dp , vertical = 8.dp)
 						.fillMaxWidth()
-						.weight(0.85f),
+						.weight(0.85f) ,
 				  ) {
 				Text(
 						textAlign = TextAlign.Center ,
@@ -113,7 +114,7 @@ fun NamesOfAllahRow(
 							text = arabicName ,
 							style = MaterialTheme.typography.headlineLarge ,
 							fontFamily = utmaniQuranFont ,
-							fontWeight = FontWeight.SemiBold,
+							fontWeight = FontWeight.SemiBold ,
 							textAlign = TextAlign.Center ,
 							modifier = Modifier
 								.fillMaxWidth() ,

@@ -8,13 +8,12 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -24,7 +23,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_TEST
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_TEST
 import com.arshadshah.nimaz.constants.AppConstants.DARK_MODE
+import com.arshadshah.nimaz.constants.AppConstants.TEST_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.TEST_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.TEST_PI_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
@@ -35,11 +39,15 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.NotificationHelper
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import es.dmoral.toasty.Toasty
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 
 @Composable
 fun SettingsScreen(
@@ -51,7 +59,7 @@ fun SettingsScreen(
 {
 	val context = LocalContext.current
 	val viewModelSettings = viewModel(
-			key = "SettingsViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 									 )
@@ -64,13 +72,25 @@ fun SettingsScreen(
 	}.collectAsState()
 
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
 	LaunchedEffect(Unit) {
 		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
+	}
+	val updateAvailabile = remember {
+		viewModelSettings.isUpdateAvailable
+	}.collectAsState()
+
+	val updateAvailableText = if (updateAvailabile.value)
+	{
+		"Update Available"
+	} else
+	{
+		"Nimaz is up to date"
 	}
 
 	val fajrTime = remember {
@@ -97,6 +117,8 @@ fun SettingsScreen(
 		viewModel.ishaTime
 	}.collectAsState()
 
+	val sharedPreferences = PrivateSharedPreferences(context)
+
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
@@ -106,6 +128,7 @@ fun SettingsScreen(
 		LocationSettings()
 
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
@@ -136,6 +159,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
+				"Rustic_brown" to "Rustic Brown" ,
 				"SYSTEM" to "System Default" ,
 				"DYNAMIC" to "Dynamic"
 									  )
@@ -144,6 +168,7 @@ fun SettingsScreen(
 				"Raisin_Black" to "Raisin Black" ,
 				"Dark_Red" to "Burgundy" ,
 				"Dark_Liver" to "Dark Liver" ,
+				"Rustic_brown" to "Rustic Brown" ,
 				"SYSTEM" to "System Default" ,
 										 )
 
@@ -157,8 +182,10 @@ fun SettingsScreen(
 		SettingsGroup(
 				title = { Text(text = "Theme") } ,
 					 ) {
-			if (stateOfTheme.value != "SYSTEM") {
+			if (stateOfTheme.value != "SYSTEM")
+			{
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -201,6 +228,7 @@ fun SettingsScreen(
 			}
 			//theme
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -217,22 +245,24 @@ fun SettingsScreen(
 									contentDescription = "Theme"
 								)
 						} ,
-						useSelectedValueAsSubtitle = false,
+						useSelectedValueAsSubtitle = false ,
 						valueState = stateOfTheme ,
 						title = {
-							Text(text =
-								when (stateOfTheme.value)
-								{
-									"DEFAULT" -> "App Default"
-									"Raisin_Black" -> "Raisin Black"
-									"Dark_Red" -> "Burgundy"
-									"Dark_Liver" -> "Dark Liver"
-									"SYSTEM" -> "System Default"
-									"DYNAMIC" -> "Dynamic"
-									else -> "App Default"
-								}
+							Text(
+									text =
+									when (stateOfTheme.value)
+									{
+										"DEFAULT" -> "App Default"
+										"Raisin_Black" -> "Raisin Black"
+										"Dark_Red" -> "Burgundy"
+										"Dark_Liver" -> "Dark Liver"
+										"Rustic_brown" -> "Rustic Brown"
+										"SYSTEM" -> "System Default"
+										"DYNAMIC" -> "Dynamic"
+										else -> "App Default"
+									}
 								)
-								} ,
+						} ,
 						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
 							)
 			}
@@ -240,6 +270,7 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -247,15 +278,22 @@ fun SettingsScreen(
 				SettingsMenuLink(
 						title = { Text(text = "Force Reset Alarms") } ,
 						onClick = {
-							CreateAlarms().exact(
-									context ,
-									fajrTime.value ,
-									sunriseTime.value ,
-									dhuhrTime.value ,
-									asrTime.value ,
-									maghribTime.value ,
-									ishaTime.value
-												)
+							sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
+							val alarmLock =
+								sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+							if (! alarmLock)
+							{
+								CreateAlarms().exact(
+										context ,
+										fajrTime.value !! ,
+										sunriseTime.value !! ,
+										dhuhrTime.value !! ,
+										asrTime.value !! ,
+										maghribTime.value !! ,
+										ishaTime.value !! ,
+													)
+								sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+							}
 							Toasty.success(context , "Alarms Reset" , Toast.LENGTH_SHORT , true)
 								.show()
 						} ,
@@ -270,6 +308,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -279,34 +318,41 @@ fun SettingsScreen(
 						//we are goping to set the alarm in next 10 seconds
 						subtitle = { Text(text = "Alarm will be set in 10 seconds") } ,
 						onClick = {
-							val zuharAdhan =
-								"android.resource://" + context.packageName + "/" + R.raw.zuhar
-							//create notification channels
-							val notificationHelper = NotificationHelper()
-							//fajr
-							notificationHelper.createNotificationChannel(
+							CoroutineScope(Dispatchers.IO).launch {
+								val zuharAdhan =
+									"android.resource://" + context.packageName + "/" + R.raw.zuhar
+								//create notification channels
+								val notificationHelper = NotificationHelper()
+								//test channel
+								notificationHelper.createNotificationChannel(
+										context ,
+										NotificationManager.IMPORTANCE_MAX ,
+										true ,
+										CHANNEL_TEST ,
+										CHANNEL_DESC_TEST ,
+										TEST_CHANNEL_ID ,
+										zuharAdhan
+																			)
+								val currentTime = LocalDateTime.now()
+								val timeToNotify =
+									currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
+										.toInstant().toEpochMilli()
+								val testPendingIntent = CreateAlarms().createPendingIntent(
+										context ,
+										TEST_PI_REQUEST_CODE ,
+										TEST_NOTIFY_ID ,
+										timeToNotify ,
+										"Test Adhan" ,
+										TEST_CHANNEL_ID
+																						  )
+								Alarms().setExactAlarm(context , timeToNotify , testPendingIntent)
+							}
+							Toasty.success(
 									context ,
-									NotificationManager.IMPORTANCE_MAX ,
-									true ,
-									"Test_channel" ,
-									"A test channel for adhan" ,
-									"Test_Channel" ,
-									zuharAdhan
-																		)
-							val timeToNotify = LocalDateTime.now().plusSeconds(10).toInstant(
-									ZoneOffset.UTC
-																							)
-								.toEpochMilli()
-							val testPendingIntent = CreateAlarms().createPendingIntent(
-									context ,
-									1006 ,
-									2006 ,
-									timeToNotify ,
-									"Test Adhan" ,
-									"Test_Channel"
-																					  )
-							Alarms().setExactAlarm(context , timeToNotify , testPendingIntent)
-							Toasty.success(context , "Test Alarm set" , Toast.LENGTH_SHORT , true)
+									"Test Alarm set" ,
+									Toast.LENGTH_SHORT ,
+									true
+										  )
 								.show()
 						} ,
 						icon = {
@@ -320,6 +366,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -348,6 +395,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -358,6 +406,7 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Legal") }) {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -378,6 +427,7 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -398,8 +448,29 @@ fun SettingsScreen(
 			}
 		}
 
+		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth()
+					) {
+			SettingsMenuLink(
+					title = { Text(text = "Help") } ,
+					onClick = {
+						onNavigateToWebViewScreen("help")
+					} ,
+					icon = {
+						Icon(
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.help_icon) ,
+								contentDescription = "Help documentation"
+							)
+					} ,
+							)
+		}
 
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
@@ -408,7 +479,7 @@ fun SettingsScreen(
 			SettingsMenuLink(
 					title = { Text(text = "About") } ,
 					//version of the app
-					subtitle = { Text(text = "Version: " + BuildConfig.VERSION_NAME) } ,
+					subtitle = { Text(text = updateAvailableText) } ,
 					onClick = {
 						onNavigateToAboutScreen()
 					} ,
@@ -419,7 +490,34 @@ fun SettingsScreen(
 								contentDescription = "About"
 							)
 					} ,
+					action = {
+						if (updateAvailabile.value)
+						{
+							Button(
+									onClick = {
+										viewModelSettings.handleEvent(
+												SettingsViewModel.SettingsEvent.CheckUpdate(
+														context ,
+														true
+																						   )
+																	 )
+									} ,
+								  ) {
+								Text(text = "Update")
+							}
+						}
+					}
 							)
 		}
+
+		//get the current year
+		val currentYear = LocalDateTime.now().year
+		Text(
+				text = "© $currentYear Nimaz " + BuildConfig.VERSION_NAME ,
+				modifier = Modifier
+					.padding(8.dp)
+					.align(Alignment.CenterHorizontally) ,
+				style = MaterialTheme.typography.bodyMedium
+			)
 	}
 }

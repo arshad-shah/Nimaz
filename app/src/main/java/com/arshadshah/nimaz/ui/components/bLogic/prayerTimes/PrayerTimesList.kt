@@ -10,8 +10,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.ui.components.ui.prayerTimes.PrayerTimesListUI
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import es.dmoral.toasty.Toasty
 import java.time.LocalDateTime
 
@@ -22,7 +20,7 @@ fun PrayerTimesList()
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -86,22 +84,6 @@ fun PrayerTimesList()
 						 )
 	} else
 	{
-		val sharedPreferences = PrivateSharedPreferences(context)
-		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-
-		if (! alarmLock)
-		{
-			CreateAlarms().exact(
-					context ,
-					fajrTime.value !! ,
-					sunriseTime.value !! ,
-					dhuhrTime.value !! ,
-					asrTime.value !! ,
-					maghribTime.value !! ,
-					ishaTime.value !! ,
-								)
-			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-		}
 		val timeToNextPrayerLong =
 			nextPrayerTime.value.atZone(java.time.ZoneId.systemDefault())
 				?.toInstant()
@@ -128,7 +110,7 @@ fun PrayerTimesList()
 				name = nextPrayerName.value.first()
 					.uppercaseChar() + nextPrayerName.value.substring(1) ,
 				loading = false ,
-				prayerTimesMap = mapOfPrayerTimes,
+				prayerTimesMap = mapOfPrayerTimes ,
 						 )
 	}
 

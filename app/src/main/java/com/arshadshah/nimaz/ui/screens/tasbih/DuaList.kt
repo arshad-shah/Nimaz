@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -8,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.data.remote.viewModel.DuaViewModel
@@ -18,7 +20,11 @@ import es.dmoral.toasty.Toasty
 fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
-	val viewModel = DuaViewModel(context)
+	val viewModel = viewModel(
+			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
+			initializer = { DuaViewModel(context) } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
 
 	val duaState = remember {
 		viewModel.duaState

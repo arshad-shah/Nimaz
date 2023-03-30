@@ -39,9 +39,8 @@ fun Dashboard(
 	onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit ,
 			 )
 {
-
 	LazyColumn(
-			modifier = Modifier.testTag(TEST_TAG_HOME),
+			modifier = Modifier.testTag(TEST_TAG_HOME) ,
 			contentPadding = paddingValues
 			  ) {
 		item {
@@ -51,6 +50,7 @@ fun Dashboard(
 		}
 		item {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						.testTag(TEST_TAG_EVENTS_CARD)
@@ -77,8 +77,9 @@ fun Dashboard(
 				}
 			}
 		}
-		item{
+		item {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
@@ -97,12 +98,15 @@ fun Dashboard(
 				//DashboardFastTracker
 				DashboardFastTracker()
 				DashboardQuranTracker(onNavigateToAyatScreen = onNavigateToAyatScreen)
-				DashboardTasbihTracker(onNavigateToTasbihScreen = onNavigateToTasbihScreen,
-									   onNavigateToTasbihListScreen = onNavigateToTasbihListScreen)
+				DashboardTasbihTracker(
+						onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
+						onNavigateToTasbihListScreen = onNavigateToTasbihListScreen
+									  )
 			}
 		}
 		item {
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
@@ -121,6 +125,7 @@ fun Dashboard(
 	}
 
 }
+
 @Preview
 @Composable
 fun DashboardPreview()

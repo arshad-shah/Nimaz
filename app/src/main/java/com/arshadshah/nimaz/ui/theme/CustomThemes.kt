@@ -16,13 +16,20 @@ object CustomThemes
 			{
 				if (darkTheme) DarkColorsRaisinBlack else LightColorsRaisinBlack
 			}
+
 			"Dark_Red" ->
 			{
 				if (darkTheme) DarkColorsDarkRed else LightColorsDarkRed
 			}
+
 			"Dark_Liver" ->
 			{
 				if (darkTheme) DarkColorsLiver else LightColorsLiver
+			}
+
+			"Rustic_brown" ->
+			{
+				if (darkTheme) DarkColorsRusticBrown else LightColorsRusticBrown
 			}
 
 			else -> if (darkTheme) DarkColorsDefault else LightColorsDefault
@@ -240,7 +247,7 @@ object CustomThemes
 			inverseOnSurface = liver_md_theme_light_inverseOnSurface ,
 			inverseSurface = liver_md_theme_light_inverseSurface ,
 			inversePrimary = liver_md_theme_light_inversePrimary ,
-													 )
+												   )
 
 	private val DarkColorsLiver = darkColorScheme(
 			primary = liver_md_theme_dark_primary ,
@@ -269,6 +276,68 @@ object CustomThemes
 			inverseOnSurface = liver_md_theme_dark_inverseOnSurface ,
 			inverseSurface = liver_md_theme_dark_inverseSurface ,
 			inversePrimary = liver_md_theme_dark_inversePrimary ,
-												   )
+												 )
+
+	//DarkColorsRusticBrown
+	//LightColorsRusticBrown
+	//rustic_md_theme
+	//each color starts as rustic_md_theme_
+	private val LightColorsRusticBrown = lightColorScheme(
+			primary = rustic_md_theme_light_primary ,
+			onPrimary = rustic_md_theme_light_onPrimary ,
+			primaryContainer = rustic_md_theme_light_primaryContainer ,
+			onPrimaryContainer = rustic_md_theme_light_onPrimaryContainer ,
+			secondary = rustic_md_theme_light_secondary ,
+			onSecondary = rustic_md_theme_light_onSecondary ,
+			secondaryContainer = rustic_md_theme_light_secondaryContainer ,
+			onSecondaryContainer = rustic_md_theme_light_onSecondaryContainer ,
+			tertiary = rustic_md_theme_light_tertiary ,
+			onTertiary = rustic_md_theme_light_onTertiary ,
+			tertiaryContainer = rustic_md_theme_light_tertiaryContainer ,
+			onTertiaryContainer = rustic_md_theme_light_onTertiaryContainer ,
+			error = rustic_md_theme_light_error ,
+			errorContainer = rustic_md_theme_light_errorContainer ,
+			onError = rustic_md_theme_light_onError ,
+			onErrorContainer = rustic_md_theme_light_onErrorContainer ,
+			background = rustic_md_theme_light_background ,
+			onBackground = rustic_md_theme_light_onBackground ,
+			surface = rustic_md_theme_light_surface ,
+			onSurface = rustic_md_theme_light_onSurface ,
+			surfaceVariant = rustic_md_theme_light_surfaceVariant ,
+			onSurfaceVariant = rustic_md_theme_light_onSurfaceVariant ,
+			outline = rustic_md_theme_light_outline ,
+			inverseOnSurface = rustic_md_theme_light_inverseOnSurface ,
+			inverseSurface = rustic_md_theme_light_inverseSurface ,
+			inversePrimary = rustic_md_theme_light_inversePrimary ,
+														 )
+
+	private val DarkColorsRusticBrown = darkColorScheme(
+			primary = rustic_md_theme_dark_primary ,
+			onPrimary = rustic_md_theme_dark_onPrimary ,
+			primaryContainer = rustic_md_theme_dark_primaryContainer ,
+			onPrimaryContainer = rustic_md_theme_dark_onPrimaryContainer ,
+			secondary = rustic_md_theme_dark_secondary ,
+			onSecondary = rustic_md_theme_dark_onSecondary ,
+			secondaryContainer = rustic_md_theme_dark_secondaryContainer ,
+			onSecondaryContainer = rustic_md_theme_dark_onSecondaryContainer ,
+			tertiary = rustic_md_theme_dark_tertiary ,
+			onTertiary = rustic_md_theme_dark_onTertiary ,
+			tertiaryContainer = rustic_md_theme_dark_tertiaryContainer ,
+			onTertiaryContainer = rustic_md_theme_dark_onTertiaryContainer ,
+			error = rustic_md_theme_dark_error ,
+			errorContainer = rustic_md_theme_dark_errorContainer ,
+			onError = rustic_md_theme_dark_onError ,
+			onErrorContainer = rustic_md_theme_dark_onErrorContainer ,
+			background = rustic_md_theme_dark_background ,
+			onBackground = rustic_md_theme_dark_onBackground ,
+			surface = rustic_md_theme_dark_surface ,
+			onSurface = rustic_md_theme_dark_onSurface ,
+			surfaceVariant = rustic_md_theme_dark_surfaceVariant ,
+			onSurfaceVariant = rustic_md_theme_dark_onSurfaceVariant ,
+			outline = rustic_md_theme_dark_outline ,
+			inverseOnSurface = rustic_md_theme_dark_inverseOnSurface ,
+			inverseSurface = rustic_md_theme_dark_inverseSurface ,
+			inversePrimary = rustic_md_theme_dark_inversePrimary ,
+													   )
 
 }

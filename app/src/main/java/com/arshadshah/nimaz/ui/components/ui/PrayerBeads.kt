@@ -1,28 +1,21 @@
 package com.arshadshah.nimaz.ui.components.ui
 
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.*
 import com.arshadshah.nimaz.R
-import java.util.*
 
 
-@OptIn(ExperimentalMotionApi::class)
 @Composable
 fun PrayerBeads()
 {
@@ -47,7 +40,6 @@ fun PrayerBeads()
 	}
 }
 
-@OptIn(ExperimentalMotionApi::class)
 @Composable
 fun PrayerBeadsMotionLayout(progress : Float)
 {
@@ -58,57 +50,8 @@ fun PrayerBeadsMotionLayout(progress : Float)
 			.decodeToString()
 	}
 	Log.d("motionSceneJson" , motionSceneJson)
-	MotionLayout(
-			motionScene = MotionScene(motionSceneJson) ,
-			debug = EnumSet.of(MotionLayoutDebugFlags.SHOW_ALL) ,
-			progress = progress ,
-			modifier = Modifier
-				.fillMaxWidth() ,
-				) {
-		val motionProperties = this.motionProperties(id = "bead")
-		Beads(motionProperties = motionProperties)
-	}
 }
 
-//beads
-@Composable
-fun Beads(motionProperties : MutableState<MotionLayoutScope.MotionProperties>)
-{
-	Box(
-			modifier = Modifier.layoutId("prayer_beads")
-	   ) {
-		Box(
-				modifier = Modifier
-					.fillMaxWidth()
-					.height(48.dp) ,
-				contentAlignment = Alignment.Center
-		   ) {
-			Divider(
-					modifier = Modifier
-						.height(3.dp)
-						.fillMaxWidth()
-						.layoutId("thread") ,
-					color = MaterialTheme.colorScheme.outline
-				   )
-		}
-		Row {
-			Box(
-					modifier = Modifier
-						.width(48.dp)
-						.height(48.dp)
-			   ) {
-				Image(
-						painter = painterResource(id = R.drawable.bead1) ,
-						contentDescription = "Prayer Beads" ,
-						modifier = Modifier
-							.size(48.dp)
-							.padding(vertical = 1.dp)
-							.layoutId("bead")
-					 )
-			}
-		}
-	}
-}
 
 @Preview(showBackground = true)
 @Composable

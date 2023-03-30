@@ -67,6 +67,30 @@ interface AyaDao
 	@Query("SELECT * FROM Aya WHERE note != ''")
 	suspend fun getAyasWithNotes() : List<LocalAya>
 
+	//delete a note from an aya
+	@Query("UPDATE Aya SET note = '' WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+	suspend fun deleteNoteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+								 )
+
+	//delete a bookmark from an aya
+	@Query("UPDATE Aya SET bookmark = 0 WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+	suspend fun deleteBookmarkFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+									 )
+
+	//delete a favorite from an aya
+	@Query("UPDATE Aya SET favorite = 0 WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+	suspend fun deleteFavoriteFromAya(
+		ayaNumber : Int ,
+		surahNumber : Int ,
+		ayaNumberInSurah : Int ,
+									 )
+
 	//add a audio local path to an aya
 	//audioFileLocation
 	@Query("UPDATE Aya SET audioFileLocation = :audioFileLocation WHERE suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")

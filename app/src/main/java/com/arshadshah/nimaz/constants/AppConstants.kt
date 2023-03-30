@@ -3,9 +3,6 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
-	val DARK_MODE : String = "darkMode"
-	val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String = "randomAyatNumberInSurahLastFetched"
-	val RANDOM_AYAT_LAST_FETCHED : String = "randomAyatLastFetched"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -35,6 +32,7 @@ object AppConstants
 
 	//animation duration
 	const val SCREEN_ANIMATION_DURATION = 500
+	const val SCREEN_ANIMATION_DURATION_Exit = 300
 
 	//pref keys
 	const val LOGIN_TOKEN = "login_token"
@@ -66,6 +64,22 @@ object AppConstants
 	const val CHANNEL_LOCK = "channelLock"
 	const val THEME = "theme"
 	const val FONT_STYLE = "font_style"
+	const val DARK_MODE : String = "darkMode"
+	const val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String =
+		"randomAyatNumberInSurahLastFetched"
+	const val RANDOM_AYAT_LAST_FETCHED : String = "randomAyatLastFetched"
+
+
+	//viewmodel keys
+	const val DUA_CHAPTERS_VIEWMODEL_KEY = "dua_chapters_viewmodel_key"
+	const val NAMES_OF_ALLAH_VIEWMODEL_KEY = "names_of_allah_viewmodel_key"
+	const val PRAYER_TIMES_VIEWMODEL_KEY = "prayer_times_viewmodel_key"
+	const val QIBLA_VIEWMODEL_KEY = "qibla_viewmodel_key"
+	const val QURAN_VIEWMODEL_KEY = "quran_viewmodel_key"
+	const val SETTINGS_VIEWMODEL_KEY = "settings_viewmodel_key"
+	const val TASBIH_VIEWMODEL_KEY = "tasbih_viewmodel_key"
+	const val TRACKING_VIEWMODEL_KEY = "tracking_viewmodel_key"
+
 	//full quran downloaded
 	const val FULL_QURAN_DOWNLOADED = "full_quran_downloaded"
 
@@ -79,6 +93,7 @@ object AppConstants
 	const val ASR_CHANNEL_ID = "asr_channel_id"
 	const val MAGHRIB_CHANNEL_ID = "maghrib_channel_id"
 	const val ISHA_CHANNEL_ID = "isha_channel_id"
+	const val TEST_CHANNEL_ID = "test_channel_id"
 
 	const val FAJR_NOTIFY_ID = 2000
 	const val SUNRISE_NOTIFY_ID = 2001
@@ -86,6 +101,7 @@ object AppConstants
 	const val ASR_NOTIFY_ID = 2003
 	const val MAGHRIB_NOTIFY_ID = 2004
 	const val ISHA_NOTIFY_ID = 2005
+	const val TEST_NOTIFY_ID = 2006
 
 	const val FAJR_PI_REQUEST_CODE = 1000
 	const val SUNRISE_PI_REQUEST_CODE = 1001
@@ -93,6 +109,7 @@ object AppConstants
 	const val ASR_PI_REQUEST_CODE = 1003
 	const val MAGHRIB_PI_REQUEST_CODE = 1004
 	const val ISHA_PI_REQUEST_CODE = 1005
+	const val TEST_PI_REQUEST_CODE = 1006
 
 	//channels titles
 	const val CHANNEL_FAJR = "Fajr"
@@ -101,6 +118,7 @@ object AppConstants
 	const val CHANNEL_ASAR = "Asar"
 	const val CHANNEL_MAGHRIB = "Maghrib"
 	const val CHANNEL_ISHAA = "Ishaa"
+	const val CHANNEL_TEST = "Test"
 
 	//channel descriptions
 	const val CHANNEL_DESC = "Prayer Adhan Notification"
@@ -110,6 +128,7 @@ object AppConstants
 	const val CHANNEL_DESC_ASAR = "Asar $CHANNEL_DESC"
 	const val CHANNEL_DESC_MAGHRIB = "Maghrib $CHANNEL_DESC"
 	const val CHANNEL_DESC_ISHAA = "Ishaa $CHANNEL_DESC"
+	const val CHANNEL_DESC_TEST = "Test $CHANNEL_DESC"
 
 
 	//pending intent request codes
@@ -190,10 +209,13 @@ object AppConstants
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON = "Prayer times customization button"
 	const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION = "Prayer times customization screen"
 	const val TEST_TAG_HOME_PRAYER_TIMES_CARD = "Home prayer times card"
+
 	//TEST_TAG_EVENTS_CARD
 	const val TEST_TAG_EVENTS_CARD = "Events card"
+
 	//TEST_TAG_TRACKERS_CARD
 	const val TEST_TAG_TRACKERS_CARD = "Trackers card"
+
 	//TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 	const val TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD = "Next prayer icon dashboard"
 

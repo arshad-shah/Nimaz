@@ -74,6 +74,7 @@ fun SurahListItemUI(
 				   )
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(vertical = 4.dp , horizontal = 8.dp)
 				.fillMaxWidth()
@@ -113,7 +114,7 @@ fun SurahListItemUI(
 																		)
 									) ,
 					text = "$surahNumber." ,
-					style = MaterialTheme.typography.bodyLarge,
+					style = MaterialTheme.typography.bodyLarge ,
 					textAlign = TextAlign.Center
 				)
 
@@ -134,7 +135,7 @@ fun SurahListItemUI(
 											highlightColor = Color.White ,
 																			)
 										)
-							.fillMaxWidth(),
+							.fillMaxWidth() ,
 						textAlign = TextAlign.Center
 					)
 				//apply quran font
@@ -159,14 +160,16 @@ fun SurahListItemUI(
 				Text(
 						text = englishNameTranslation ,
 						style = MaterialTheme.typography.titleSmall ,
-						modifier = Modifier.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-													   ).fillMaxWidth(),
+						modifier = Modifier
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
+							.fillMaxWidth() ,
 						textAlign = TextAlign.Center
 					)
 			}
@@ -225,7 +228,7 @@ fun MetadataTextUI(heading : String , value : String , loading : Boolean)
 {
 	Row(
 			modifier = Modifier ,
-			verticalAlignment = Alignment.CenterVertically,
+			verticalAlignment = Alignment.CenterVertically ,
 			horizontalArrangement = Arrangement.SpaceBetween
 	   ) {
 		//heading text
@@ -241,7 +244,7 @@ fun MetadataTextUI(heading : String , value : String , loading : Boolean)
 							highlight = PlaceholderHighlight.shimmer(
 									highlightColor = Color.White ,
 																	)
-								),
+								) ,
 				textAlign = TextAlign.Center
 			)
 		//value text
@@ -258,7 +261,7 @@ fun MetadataTextUI(heading : String , value : String , loading : Boolean)
 							highlight = PlaceholderHighlight.shimmer(
 									highlightColor = Color.White ,
 																	)
-								),
+								) ,
 				textAlign = TextAlign.Center
 			)
 	}
@@ -277,7 +280,7 @@ fun SurahListItemUIPreview()
 				surahAyaAmount = "7" ,
 				surahName = "الفاتحة" ,
 				englishName = "Al-Faatiha" ,
-				englishNameTranslation = "The Opening",
+				englishNameTranslation = "The Opening" ,
 				type = "Meccan" ,
 				rukus = "1" ,
 				onNavigateToAyatScreen = { surahNumber , isSurah , language , ayahNumber -> } ,

@@ -67,6 +67,7 @@ fun JuzListItemUI(
 				 )
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(vertical = 4.dp , horizontal = 8.dp)
 				.fillMaxWidth()
@@ -92,8 +93,8 @@ fun JuzListItemUI(
 							enabled = ! loading ,
 							  ) {
 						onNavigateToAyatScreen(juzNumber , false , translation , null)
-					},
-				verticalAlignment = Alignment.CenterVertically,
+					} ,
+				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 
@@ -110,7 +111,7 @@ fun JuzListItemUI(
 																		)
 									) ,
 					text = "$juzNumber." ,
-					style = MaterialTheme.typography.bodyLarge,
+					style = MaterialTheme.typography.bodyLarge ,
 					textAlign = TextAlign.Center
 				)
 
@@ -147,13 +148,13 @@ fun JuzListItemUI(
 						modifier = Modifier
 							.fillMaxWidth()
 							.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-													   ),
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										) ,
 						textAlign = TextAlign.Center
 					)
 			}
@@ -189,7 +190,7 @@ fun JuzListItemUIPreview()
 				juzNumber = "1" ,
 				name = "الفاتحة" ,
 				tname = "Al-Faatiha" ,
-				onNavigateToAyatScreen = { _, _, _, _ -> } ,
+				onNavigateToAyatScreen = { _ , _ , _ , _ -> } ,
 				loading = false ,
 					 )
 	}

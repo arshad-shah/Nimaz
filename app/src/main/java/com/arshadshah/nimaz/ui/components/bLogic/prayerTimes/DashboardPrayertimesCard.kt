@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
@@ -41,13 +42,14 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 {
 
 	val context = LocalContext.current
+
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = "SettingViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context
 									)
@@ -80,21 +82,38 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		settingViewModel.longitude
 	}.collectAsState()
 
+	val isLoading = remember {
+		viewModel.isLoading
+	}.collectAsState()
+
 	val sharedPreferences = remember { PrivateSharedPreferences(context) }
 
-	LaunchedEffect(locationName.value, latitude.value, longitude.value) {
-		//check if the location has changed
-		if (locationName.value != sharedPreferences.getData(AppConstants.LOCATION_INPUT , "")) {
-			//update the prayer times
-			viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-					PrayerTimesParamMapper.getParams(context)
-																									)
+	LaunchedEffect(locationName.value) {
+		//update the prayer times
+		viewModel.handleEvent(
+				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				PrayerTimesParamMapper.getParams(context)
+																				  )
+							 )
+	}
+
+	LaunchedEffect(key1 = Unit) {
+		//set the alarms
+		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+		if (! alarmLock)
+		{
+			viewModel.handleEvent(
+					context ,
+					PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context)
 								 )
+			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 		}
 	}
 
-	val phaseOfMoon = SunMoonCalc(latitude = latitude.value ?: 0.0 , longitude = longitude.value ?: 0.0).getMoonPhase()
-
+	val phaseOfMoon = SunMoonCalc(
+			latitude = latitude.value ,
+			longitude = longitude.value
+								 ).getMoonPhase()
 
 
 	val timeToNextPrayerLong =
@@ -113,6 +132,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						 )
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 				.fillMaxWidth()
@@ -127,13 +147,13 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				verticalArrangement = Arrangement.SpaceBetween ,
 				horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
-			Row (
+			Row(
 					modifier = Modifier
 						.padding(horizontal = 8.dp)
 						.fillMaxWidth() ,
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
-					){
+			   ) {
 				Column(
 						modifier = Modifier.padding(4.dp) ,
 						verticalArrangement = Arrangement.SpaceBetween ,
@@ -143,7 +163,8 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							modifier = Modifier
 								.padding(4.dp) ,
 							textAlign = TextAlign.Start ,
-							text = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							text = LocalDate.now()
+								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
 							style = MaterialTheme.typography.titleMedium
 						)
 					Text(
@@ -155,19 +176,32 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleSmall
 						)
 				}
-				//process the location name to show only 10 characters and add ... if more than 10 characters
-				val locationNameValue = locationName.value ?: ""
-				val locationNameValueLength = locationNameValue.length
-				val locationNameValueSubstring = locationNameValue.substring(0 , if (locationNameValueLength > 10) 10 else locationNameValueLength)
-				val locationNameValueFinal = if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
-				Text(text = locationNameValueFinal , style = MaterialTheme.typography.titleMedium)
+				if (isLoading.value)
+				{
+					Text(text = "Loading..." , style = MaterialTheme.typography.titleMedium)
+				} else
+				{
+					//process the location name to show only 10 characters and add ... if more than 10 characters
+					val locationNameValue = locationName.value
+					val locationNameValueLength = locationNameValue.length
+					val locationNameValueSubstring = locationNameValue.substring(
+							0 ,
+							if (locationNameValueLength > 10) 10 else locationNameValueLength
+																				)
+					val locationNameValueFinal =
+						if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
+					Text(
+							text = locationNameValueFinal ,
+							style = MaterialTheme.typography.titleMedium
+						)
+				}
 
 				//emoji for moon phase
 				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge)
 			}
 			Row(
 					modifier = Modifier
-						.fillMaxWidth(),
+						.fillMaxWidth() ,
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
@@ -252,7 +286,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 }
 
 //a function to return in text how much time is left for the next prayer
-fun getTimerText(timeToNextPrayer : CountDownTime): String
+fun getTimerText(timeToNextPrayer : CountDownTime) : String
 {
 	return when
 	{
@@ -262,78 +296,80 @@ fun getTimerText(timeToNextPrayer : CountDownTime): String
 			if (timeToNextPrayer.minutes > 1)
 			{
 				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minutes Left"
-			}else if (timeToNextPrayer.minutes == 1L)
+			} else if (timeToNextPrayer.minutes == 1L)
 			{
 				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minute Left"
-			}else{
+			} else
+			{
 				"${timeToNextPrayer.hours} hours Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 1L ->
 		{
 			//check if there are minutes left
 			if (timeToNextPrayer.minutes > 1)
 			{
 				"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minutes Left"
-			}else if (timeToNextPrayer.minutes == 1L)
+			} else if (timeToNextPrayer.minutes == 1L)
 			{
 				//check if there are seconds left
 				if (timeToNextPrayer.seconds > 1)
 				{
 					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
-				}
-				else if (timeToNextPrayer.seconds == 1L)
+				} else if (timeToNextPrayer.seconds == 1L)
 				{
 					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
-				}else{
+				} else
+				{
 					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute Left"
 				}
-			}
-			else
+			} else
 			{
 				"${timeToNextPrayer.hours} hour Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes > 1 ->
 		{
 			//check if there are seconds left
 			if (timeToNextPrayer.seconds > 1)
 			{
 				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} seconds Left"
-			}
-			else if (timeToNextPrayer.seconds == 1L)
+			} else if (timeToNextPrayer.seconds == 1L)
 			{
 				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} second Left"
-			}
-			else
+			} else
 			{
 				"${timeToNextPrayer.minutes} minutes Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 1L ->
 		{
 			//check if there are seconds left
 			if (timeToNextPrayer.seconds > 1)
 			{
 				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
-			}
-			else if (timeToNextPrayer.seconds == 1L)
+			} else if (timeToNextPrayer.seconds == 1L)
 			{
 				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
-			}
-			else
+			} else
 			{
 				"${timeToNextPrayer.minutes} minute Left"
 			}
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds > 1 ->
 		{
 			"${timeToNextPrayer.seconds} seconds Left"
 		}
+
 		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds == 1L ->
 		{
 			"${timeToNextPrayer.seconds} second Left"
 		}
+
 		else ->
 		{
 			"Prayer Time"

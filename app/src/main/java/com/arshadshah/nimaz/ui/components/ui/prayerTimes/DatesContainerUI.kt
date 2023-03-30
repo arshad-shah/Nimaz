@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 fun DatesContainerUI(GregDate : String , islamDate : String , onNavigateToTracker : () -> Unit)
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
+				.padding(vertical = 8.dp , horizontal = 8.dp)
 				.fillMaxWidth()
 				.clickable {
 					onNavigateToTracker()
@@ -30,7 +32,7 @@ fun DatesContainerUI(GregDate : String , islamDate : String , onNavigateToTracke
 					Modifier.padding(vertical = 16.dp , horizontal = 8.dp) ,
 					style = MaterialTheme.typography.titleLarge
 				)
-			Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,)
+			Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
 			Text(
 					text = islamDate ,
 					Modifier.padding(16.dp) ,

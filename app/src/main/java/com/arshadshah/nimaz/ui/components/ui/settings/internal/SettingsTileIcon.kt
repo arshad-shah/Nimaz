@@ -23,11 +23,14 @@ internal fun SettingsTileIcon(
 	if (icon == null)
 	{
 		Box(
-				modifier = modifier.height(64.dp).width(16.dp) ,
+				modifier = modifier
+					.height(64.dp)
+					.width(16.dp) ,
 				contentAlignment = Alignment.Center ,
 		   ) {
 		}
-	}else{
+	} else
+	{
 		Box(
 				modifier = modifier.size(64.dp) ,
 				contentAlignment = Alignment.Center ,

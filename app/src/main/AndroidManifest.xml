@@ -9,11 +9,14 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <queries>
         <intent>
@@ -34,6 +37,10 @@
         android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+
+        <meta-data
+            android:name="firebase_performance_logcat_enabled"
+            android:value="true" />
 
         <service
             android:name=".widgets.WidgetService"
@@ -74,13 +81,12 @@
         <receiver
             android:name=".utils.recievers.ResetAdhansReciever"
             android:enabled="true"
-            android:exported="true"
-            android:permission="com.android.alarm.permission.SET_ALARM" />
+            android:exported="true" />
         <receiver
             android:name=".utils.recievers.AdhanReciever"
             android:enabled="true"
             android:exported="true"
-            android:permission="com.android.alarm.permission.SET_ALARM" />
+            android:permission="android.permission.POST_NOTIFICATIONS" />
 
         <activity
             android:name=".activities.Introduction"
@@ -88,9 +94,6 @@
             android:label="@string/title_activity_introduction"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Nimaz">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
         <activity
             android:name=".activities.RoutingActivity"

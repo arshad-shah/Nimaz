@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.theme.amiri
@@ -49,7 +50,7 @@ fun Page(
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 	val arabicFontSize = remember {
@@ -61,31 +62,34 @@ fun Page(
 
 	val state = rememberLazyListState()
 
-	Log.d("Nimaz: ListState" , remember { derivedStateOf { state.firstVisibleItemIndex } }.toString())
+	Log.d(
+			"Nimaz: ListState" ,
+			remember { derivedStateOf { state.firstVisibleItemIndex } }.toString()
+		 )
 
 	LazyColumn(
-			state = state,
+			state = state ,
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(paddingValues)
-				.padding(4.dp),
-			content ={
-		item{
-			Verses {
-				AyaList.forEach { aya ->
-					Verse(
+				.padding(4.dp) ,
+			content = {
+				item {
+					Verses {
+						AyaList.forEach { aya ->
+							Verse(
 
-							isNotBismillah = aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾"  && aya.ayaNumber != 0,
-							//split the aya into words
-							word = aya.ayaArabic ,
-							loading = loading ,
-							arabicFontSize = arabicFontSize.value ,
-							fontStyle = arabicFont.value
-						 )
+									isNotBismillah = aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" && aya.ayaNumber != 0 ,
+									//split the aya into words
+									word = aya.ayaArabic ,
+									loading = loading ,
+									arabicFontSize = arabicFontSize.value ,
+									fontStyle = arabicFont.value
+								 )
+						}
+					}
 				}
-			}
-		}
-	})
+			})
 }
 
 @Composable
@@ -180,14 +184,16 @@ fun Verse(
 							color = MaterialTheme.colorScheme.onSurface ,
 							textAlign = if (isNotBismillah) TextAlign.Justify else TextAlign.Center ,
 									 ) ,
-						 )
+				)
 		}
 	}
 }
 
 @Composable
-fun Verses(modifier : Modifier = Modifier ,
-		   content : @Composable () -> Unit)
+fun Verses(
+	modifier : Modifier = Modifier ,
+	content : @Composable () -> Unit ,
+		  )
 {
 	Layout(
 			modifier = modifier ,
@@ -237,10 +243,10 @@ fun PagePreview()
 	val context = LocalContext.current
 	LocalDataStore.init(context)
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
-	viewModel.getAllAyaForJuz(1, "English")
+	viewModel.getAllAyaForJuz(1 , "English")
 
 	val listOfAya = remember {
 		viewModel.ayaListState
@@ -252,7 +258,7 @@ fun PagePreview()
 
 	Page(
 			AyaList = listOfAya.value ,
-		 paddingValues =  PaddingValues(16.dp) ,
+			paddingValues = PaddingValues(16.dp) ,
 			loading = loading.value ,
 		)
 }
@@ -269,5 +275,5 @@ fun VersePreview()
 			//something long to test the text wrapping
 			word = "الرَّحْمَٰنِ الرَّحِيمِ ۚ إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ ۖ فَصَلِّ لِرَبِّكَ وَانْحَرْ ۚ إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمُ ۚ إِنَّهُ لَا يَغْنِي مِنْ اللَّهِ شَيْئًا ۚ إِنَّهُ هُوَ الْعَلِيُّ الْعَظِيمْ" ,
 			fontStyle = "Default" ,
-		   )
+		 )
 }

@@ -1,10 +1,16 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -16,10 +22,11 @@ import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.ui.trackers.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlin.reflect.KFunction1
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class , ExperimentalMaterialApi::class)
 @Composable
 fun MyQuranScreen(
 	bookmarks : State<List<Aya>> ,
@@ -50,37 +57,64 @@ fun MyQuranScreen(
 	}
 
 	LazyColumn(
-			modifier = Modifier.testTag("MyQuranScreen"),
+			modifier = Modifier
+				.testTag("MyQuranScreen")
+				.fillMaxSize() ,
 			userScrollEnabled = true ,
 			  ) {
 		item {
 			FeaturesDropDown(
 					label = "Bookmarks" ,
 					items = bookmarks.value ,
-					dropDownItem = {
-						FeatureDropdownItem(
-								item = it ,
-								onClick = { aya ->
-									onNavigateToAyatScreen(
-											aya.suraNumber.toString() ,
-											true ,
-											translation ,
-											aya.ayaNumberInSurah
-														  )
-								} ,
-								itemContent = { aya ->
-									//the text
-									Text(
-											modifier = Modifier
-												.padding(8.dp) ,
-											text = "Chapter " + aya.suraNumber.toString() + ":" + " Verse " + aya.ayaNumber.toString() ,
-											textAlign = TextAlign.Start ,
-											maxLines = 2 ,
-											overflow = TextOverflow.Ellipsis ,
-											style = MaterialTheme.typography.bodyLarge
-										)
+					dropDownItem = { bookmark ->
+						val currentItem = rememberUpdatedState(newValue = bookmark)
+						val dismissState = rememberDismissState(
+								confirmStateChange = {
+									if (it == DismissValue.DismissedToStart)
+									{
+										handleEvents(
+												QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+														currentItem.value.ayaNumber ,
+														currentItem.value.suraNumber ,
+														currentItem.value.ayaNumberInSurah
+																							 )
+													)
+									}
+									false
 								}
-										   )
+															   )
+
+						SwipeToDismiss(
+								directions = setOf(DismissDirection.EndToStart) ,
+								state = dismissState ,
+								background = {
+									SwipeBackground(dismissState = dismissState)
+								} ,
+								dismissContent = {
+									FeatureDropdownItem(
+											item = bookmark ,
+											onClick = { aya ->
+												onNavigateToAyatScreen(
+														aya.suraNumber.toString() ,
+														true ,
+														translation ,
+														aya.ayaNumberInSurah
+																	  )
+											} ,
+											itemContent = { aya ->
+												//the text
+												Text(
+														modifier = Modifier
+															.padding(8.dp) ,
+														text = "Chapter " + aya.suraNumber.toString() + ":" + " Verse " + aya.ayaNumber.toString() ,
+														textAlign = TextAlign.Start ,
+														maxLines = 2 ,
+														overflow = TextOverflow.Ellipsis ,
+														style = MaterialTheme.typography.bodyLarge
+													)
+											}
+													   )
+								})
 					}
 							)
 		}
@@ -88,30 +122,55 @@ fun MyQuranScreen(
 			FeaturesDropDown(
 					label = "Favorites" ,
 					items = favorites.value ,
-					dropDownItem = {
-						FeatureDropdownItem(
-								item = it ,
-								onClick = { aya ->
-									onNavigateToAyatScreen(
-											aya.suraNumber.toString() ,
-											true ,
-											translation ,
-											aya.ayaNumberInSurah
-														  )
+					dropDownItem = { favourite ->
+						val currentItem = rememberUpdatedState(newValue = favourite)
+						val dismissState = rememberDismissState(
+								confirmStateChange = {
+									if (it == DismissValue.DismissedToStart)
+									{
+										handleEvents(
+												QuranViewModel.AyaEvent.deleteFavoriteFromAya(
+														currentItem.value.ayaNumber ,
+														currentItem.value.suraNumber ,
+														currentItem.value.ayaNumberInSurah
+																							 )
+													)
+									}
+									false
+								}
+															   )
+
+						SwipeToDismiss(
+								directions = setOf(DismissDirection.EndToStart) ,
+								state = dismissState ,
+								background = {
+									SwipeBackground(dismissState = dismissState)
 								} ,
-								itemContent = { aya ->
-									//the text
-									Text(
-											modifier = Modifier
-												.padding(8.dp) ,
-											text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-											textAlign = TextAlign.Start ,
-											maxLines = 2 ,
-											overflow = TextOverflow.Ellipsis ,
-											style = MaterialTheme.typography.bodyLarge
-										)
-								} ,
-										   )
+								dismissContent = {
+									FeatureDropdownItem(
+											item = favourite ,
+											onClick = { aya ->
+												onNavigateToAyatScreen(
+														aya.suraNumber.toString() ,
+														true ,
+														translation ,
+														aya.ayaNumberInSurah
+																	  )
+											} ,
+											itemContent = { aya ->
+												//the text
+												Text(
+														modifier = Modifier
+															.padding(8.dp) ,
+														text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
+														textAlign = TextAlign.Start ,
+														maxLines = 2 ,
+														overflow = TextOverflow.Ellipsis ,
+														style = MaterialTheme.typography.bodyLarge
+													)
+											} ,
+													   )
+								})
 					}
 							)
 		}
@@ -119,30 +178,55 @@ fun MyQuranScreen(
 			FeaturesDropDown(
 					label = "Notes" ,
 					items = notes.value ,
-					dropDownItem = {
-						FeatureDropdownItem(
-								item = it ,
-								onClick = { aya ->
-									onNavigateToAyatScreen(
-											aya.suraNumber.toString() ,
-											true ,
-											translation ,
-											aya.ayaNumberInSurah
-														  )
+					dropDownItem = { note ->
+						val currentItem = rememberUpdatedState(newValue = note)
+						val dismissState = rememberDismissState(
+								confirmStateChange = {
+									if (it == DismissValue.DismissedToStart)
+									{
+										handleEvents(
+												QuranViewModel.AyaEvent.deleteNoteFromAya(
+														currentItem.value.ayaNumber ,
+														currentItem.value.suraNumber ,
+														currentItem.value.ayaNumberInSurah
+																						 )
+													)
+									}
+									false
+								}
+															   )
+
+						SwipeToDismiss(
+								directions = setOf(DismissDirection.EndToStart) ,
+								state = dismissState ,
+								background = {
+									SwipeBackground(dismissState = dismissState)
 								} ,
-								itemContent = { aya ->
-									//the text
-									Text(
-											modifier = Modifier
-												.padding(8.dp) ,
-											text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-											textAlign = TextAlign.Start ,
-											maxLines = 2 ,
-											overflow = TextOverflow.Ellipsis ,
-											style = MaterialTheme.typography.bodyLarge
-										)
-								} ,
-										   )
+								dismissContent = {
+									FeatureDropdownItem(
+											item = note ,
+											onClick = { aya ->
+												onNavigateToAyatScreen(
+														aya.suraNumber.toString() ,
+														true ,
+														translation ,
+														aya.ayaNumberInSurah
+																	  )
+											} ,
+											itemContent = { aya ->
+												//the text
+												Text(
+														modifier = Modifier
+															.padding(8.dp) ,
+														text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
+														textAlign = TextAlign.Start ,
+														maxLines = 2 ,
+														overflow = TextOverflow.Ellipsis ,
+														style = MaterialTheme.typography.bodyLarge
+													)
+											} ,
+													   )
+								})
 					}
 							)
 		}

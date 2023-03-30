@@ -29,7 +29,7 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
@@ -47,8 +47,8 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	}
 
 	//create a list with numbers from 1 to 114
-	val surahList = (1..114).toList()
-	val juzList = (1..30).toList()
+	val surahList = (1 .. 114).toList()
+	val juzList = (1 .. 30).toList()
 	val (selectedSurah , setSelectedSurah) = remember { mutableStateOf(number) }
 
 	val label = when (isSurah)
@@ -72,9 +72,10 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	}
 	//size of the main button that opens the dropdown
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.width(150.dp)
-				){
+				) {
 		//an elevation card that shows the text and icon
 		ElevatedCard(
 				modifier = Modifier
@@ -85,12 +86,12 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 				shape = MaterialTheme.shapes.medium ,
 				content = {
 					Row(
-							modifier = Modifier.fillMaxWidth(),
+							modifier = Modifier.fillMaxWidth() ,
 							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.SpaceBetween
 					   ) {
 						Row(
-								modifier = Modifier.padding(horizontal = 4.dp),
+								modifier = Modifier.padding(horizontal = 4.dp) ,
 								verticalAlignment = Alignment.CenterVertically ,
 								horizontalArrangement = Arrangement.Start
 						   ) {
@@ -98,7 +99,7 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 							Text(
 									modifier = Modifier
 										.padding(8.dp) ,
-									text = label,
+									text = label ,
 									textAlign = TextAlign.Start ,
 									maxLines = 2 ,
 									overflow = TextOverflow.Ellipsis ,
@@ -110,8 +111,8 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 								 )
 							{
 								Text(
-										text = selectedSurah.toString(),
-										style = MaterialTheme.typography.bodyMedium,
+										text = selectedSurah.toString() ,
+										style = MaterialTheme.typography.bodyMedium ,
 										textAlign = TextAlign.Center ,
 									)
 							}
@@ -135,10 +136,10 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 				setSelectedSurah = setSelectedSurah ,
 				expanded = expanded ,
 				list = list ,
-				translation = translation,
+				translation = translation ,
 				label = label
 						 )
-		}
+	}
 }
 
 //drop down menu
@@ -149,56 +150,58 @@ fun DropdownMenuSurah(
 	translation : String ,
 	label : String ,
 	list : List<Int> ,
-	setSelectedSurah : (Int) -> Unit
-					 ){
+	setSelectedSurah : (Int) -> Unit ,
+					 )
+{
 
-		val scope = rememberCoroutineScope()
-		val onSelected = { surah : Int ->
-			scope.launch {
-				setSelectedSurah(surah)
-				getAllAyats(surah , translation)
+	val scope = rememberCoroutineScope()
+	val onSelected = { surah : Int ->
+		scope.launch {
+			setSelectedSurah(surah)
+			getAllAyats(surah , translation)
+			expanded.value = false
+		}
+	}
+	DropdownMenu(
+			modifier = Modifier
+				.width(150.dp)
+				.height(300.dp) ,
+			expanded = expanded.value ,
+			onDismissRequest = {
 				expanded.value = false
-			}
+			}) {
+		//the list of numbers in a dropdown menu
+		list.forEach { surah ->
+			DropdownMenuItem(
+					modifier = Modifier
+						.fillMaxWidth()
+						.height(40.dp) ,
+					onClick = {
+						onSelected(surah)
+					} ,
+					text = {
+						Text(
+								text = "$label $surah" ,
+								style = MaterialTheme.typography.bodyLarge ,
+								textAlign = TextAlign.Center ,
+							)
+					} ,
+							)
 		}
-		DropdownMenu(
-				modifier = Modifier
-					.width(150.dp)
-					.height(300.dp),
-				expanded = expanded.value ,
-					 onDismissRequest = {
-						 expanded.value = false
-					 }) {
-			//the list of numbers in a dropdown menu
-			list.forEach { surah ->
-				DropdownMenuItem(
-						modifier = Modifier
-							.fillMaxWidth()
-							.height(40.dp),
-						onClick = {
-							onSelected(surah)
-						} ,
-						text = {
-							Text(
-									text = "$label $surah" ,
-									style = MaterialTheme.typography.bodyLarge,
-									textAlign = TextAlign.Center ,
-								)
-						} ,
-						)
-			}
-		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
-fun DropdownMenuSurahPreview() {
+fun DropdownMenuSurahPreview()
+{
 	NimazTheme {
 		DropdownMenuSurah(
 				expanded = remember { mutableStateOf(false) } ,
-				list = (1..114).toList() ,
+				list = (1 .. 114).toList() ,
 				translation = "english" ,
 				label = "Surah" ,
-				getAllAyats = { _, _ -> } ,
+				getAllAyats = { _ , _ -> } ,
 				setSelectedSurah = { }
 						 )
 	}
@@ -206,7 +209,8 @@ fun DropdownMenuSurahPreview() {
 
 @Preview
 @Composable
-fun TopBarSurahMenuPreviewDark() {
+fun TopBarSurahMenuPreviewDark()
+{
 	NimazTheme(darkTheme = true) {
 		TopBarMenu(1 , isSurah = true)
 	}
@@ -214,7 +218,8 @@ fun TopBarSurahMenuPreviewDark() {
 
 @Preview
 @Composable
-fun TopBarSurahMenuPreview() {
+fun TopBarSurahMenuPreview()
+{
 	NimazTheme {
 		TopBarMenu(1 , isSurah = true)
 	}

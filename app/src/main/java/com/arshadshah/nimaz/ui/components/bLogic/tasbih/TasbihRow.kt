@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.ui.components.ui.trackers.TasbihGoalDialog
@@ -33,7 +34,7 @@ fun TasbihRow(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 							 )
@@ -63,9 +64,10 @@ fun TasbihRow(
 		mutableStateOf(false)
 	}
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(8.dp)
+				.padding(horizontal = 8.dp , vertical = 4.dp)
 				.clickable(
 						//disable it if onNavigateToTasbihScreen has no implementation
 						enabled = onNavigateToTasbihScreen != null ,
@@ -139,16 +141,18 @@ fun TasbihRow(
 	TasbihGoalDialog(
 			state = goal ,
 			onConfirm = {
-				viewModel.handleEvent(TasbihViewModel.TasbihEvent.SetTasbih(
-						Tasbih(
-								arabicName = arabicName ,
-								englishName = englishName ,
-								translationName = translationName ,
-								goal = it.toInt() ,
-								count = 0 ,
-								date = LocalDate.now().toString() ,
-							  )
-																		   ))
+				viewModel.handleEvent(
+						TasbihViewModel.TasbihEvent.SetTasbih(
+								Tasbih(
+										arabicName = arabicName ,
+										englishName = englishName ,
+										translationName = translationName ,
+										goal = it.toInt() ,
+										count = 0 ,
+										date = LocalDate.now().toString() ,
+									  )
+															 )
+									 )
 				navigateToTasbihScreen.value = true
 			} ,
 			isOpen = showTasbihDialog ,

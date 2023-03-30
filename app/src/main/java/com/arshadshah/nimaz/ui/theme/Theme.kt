@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import com.arshadshah.nimaz.ui.theme.CustomThemes.DarkColorsDefault
 import com.arshadshah.nimaz.ui.theme.CustomThemes.LightColorsDefault
 
@@ -40,12 +40,14 @@ fun NimazTheme(
 	{
 		//if the name of the theme is not default then use the custom theme
 		ThemeName != "Default" && ! dynamicColor ->
-			CustomThemes.getTheme(ThemeName, darkTheme)
+			CustomThemes.getTheme(ThemeName , darkTheme)
+
 		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
 		{
 			val context = LocalContext.current
 			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 		}
+
 		else -> if (darkTheme) DarkColorsDefault else LightColorsDefault
 	}
 	val configuration = LocalConfiguration.current
@@ -55,12 +57,13 @@ fun NimazTheme(
 	val typography =
 		if (configuration.screenHeightDp > 700 || configuration.screenWidthDp < 360) TypographyMain else TypographySmall
 	val view = LocalView.current
+	val window = (view.context as Activity).window
 	if (! view.isInEditMode)
 	{
 		SideEffect {
 			(view.context as Activity).window.statusBarColor = colorScheme.surface.toArgb()
 			// Set the status bar color to be light or dark, depending on the theme
-			ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars =
+			WindowCompat.getInsetsController(window , view).isAppearanceLightStatusBars =
 				! darkTheme
 		}
 	}

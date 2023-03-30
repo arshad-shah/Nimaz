@@ -26,15 +26,15 @@ import com.patrykandpatrick.vico.core.marker.Marker
 
 
 @Composable
-internal fun rememberMarker(): Marker
+internal fun rememberMarker() : Marker
 {
 	val labelBackgroundColor = MaterialTheme.colorScheme.surface
 	val labelBackground = remember(labelBackgroundColor) {
-		ShapeComponent(labelBackgroundShape, labelBackgroundColor.toArgb()).setShadow(
-				radius = LABEL_BACKGROUND_SHADOW_RADIUS,
-				dy = LABEL_BACKGROUND_SHADOW_DY,
-				applyElevationOverlay = true,
-																					 )
+		ShapeComponent(labelBackgroundShape , labelBackgroundColor.toArgb()).setShadow(
+				radius = LABEL_BACKGROUND_SHADOW_RADIUS ,
+				dy = LABEL_BACKGROUND_SHADOW_DY ,
+				applyElevationOverlay = true ,
+																					  )
 	}
 	val label = textComponent(
 			background = labelBackground ,
@@ -42,15 +42,16 @@ internal fun rememberMarker(): Marker
 			padding = labelPadding ,
 			typeface = Typeface.MONOSPACE ,
 							 )
-	val indicatorInnerComponent = shapeComponent(Shapes.pillShape , MaterialTheme.colorScheme.surface)
+	val indicatorInnerComponent =
+		shapeComponent(Shapes.pillShape , MaterialTheme.colorScheme.surface)
 	val indicatorCenterComponent = shapeComponent(Shapes.pillShape , Color.White)
 	val indicatorOuterComponent = shapeComponent(Shapes.pillShape , Color.White)
 	val indicator = overlayingComponent(
 			outer = indicatorOuterComponent ,
 			inner = overlayingComponent(
-					outer = indicatorCenterComponent,
-					inner = indicatorInnerComponent,
-					innerPaddingAll = indicatorInnerAndCenterComponentPaddingValue,
+					outer = indicatorCenterComponent ,
+					inner = indicatorInnerComponent ,
+					innerPaddingAll = indicatorInnerAndCenterComponentPaddingValue ,
 									   ) ,
 			innerPaddingAll = indicatorCenterAndOuterComponentPaddingValue ,
 									   )
@@ -59,24 +60,35 @@ internal fun rememberMarker(): Marker
 			guidelineThickness ,
 			guidelineShape ,
 								 )
-	return remember(label, indicator, guideline) {
-		object : MarkerComponent(label , indicator , guideline) {
-			init {
+	return remember(label , indicator , guideline) {
+		object : MarkerComponent(label , indicator , guideline)
+		{
+			init
+			{
 				indicatorSizeDp = INDICATOR_SIZE_DP
 				onApplyEntryColor = { entryColor ->
-					indicatorOuterComponent.color = entryColor.copyColor(INDICATOR_OUTER_COMPONENT_ALPHA)
+					indicatorOuterComponent.color =
+						entryColor.copyColor(INDICATOR_OUTER_COMPONENT_ALPHA)
 					with(indicatorCenterComponent) {
 						color = entryColor
-						setShadow(radius = INDICATOR_CENTER_COMPONENT_SHADOW_RADIUS, color = entryColor)
+						setShadow(
+								radius = INDICATOR_CENTER_COMPONENT_SHADOW_RADIUS ,
+								color = entryColor
+								 )
 					}
 				}
 			}
 
-			override fun getInsets(context: MeasureContext , outInsets: Insets , segmentProperties: SegmentProperties) =
+			override fun getInsets(
+				context : MeasureContext ,
+				outInsets : Insets ,
+				segmentProperties : SegmentProperties ,
+								  ) =
 				with(context) {
-					outInsets.top = label.getHeight(context) + labelBackgroundShape.tickSizeDp.pixels +
-							LABEL_BACKGROUND_SHADOW_RADIUS.pixels * SHADOW_RADIUS_MULTIPLIER -
-							LABEL_BACKGROUND_SHADOW_DY.pixels
+					outInsets.top =
+						label.getHeight(context) + labelBackgroundShape.tickSizeDp.pixels +
+								LABEL_BACKGROUND_SHADOW_RADIUS.pixels * SHADOW_RADIUS_MULTIPLIER -
+								LABEL_BACKGROUND_SHADOW_DY.pixels
 				}
 		}
 	}
@@ -96,8 +108,9 @@ private const val SHADOW_RADIUS_MULTIPLIER = 1.3f
 private val labelBackgroundShape = MarkerCorneredShape(Corner.FullyRounded)
 private val labelHorizontalPaddingValue = 8.dp
 private val labelVerticalPaddingValue = 4.dp
-private val labelPadding = dimensionsOf(labelHorizontalPaddingValue, labelVerticalPaddingValue)
+private val labelPadding = dimensionsOf(labelHorizontalPaddingValue , labelVerticalPaddingValue)
 private val indicatorInnerAndCenterComponentPaddingValue = 5.dp
 private val indicatorCenterAndOuterComponentPaddingValue = 10.dp
 private val guidelineThickness = 2.dp
-private val guidelineShape = DashedShape(Shapes.pillShape , GUIDELINE_DASH_LENGTH_DP , GUIDELINE_GAP_LENGTH_DP)
+private val guidelineShape =
+	DashedShape(Shapes.pillShape , GUIDELINE_DASH_LENGTH_DP , GUIDELINE_GAP_LENGTH_DP)

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
 
@@ -25,7 +26,7 @@ fun Counter(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -123,11 +124,12 @@ fun Counter(
 				onDismissRequest = {
 					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
 				} ,
-				title = { Text(text = "Reset Counter") } ,
+				title = {
+					Text(text = "Reset Counter")
+				} ,
 				text = {
 					Text(
 							text = "Are you sure you want to reset the counter?" ,
-							style = MaterialTheme.typography.titleLarge
 						)
 				} ,
 				confirmButton = {
@@ -135,16 +137,24 @@ fun Counter(
 						count.value = 0
 						lap.value = 1
 						lapCountCounter.value = 0
-						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+						viewModel.handleEvent(
+								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+										false
+																				  )
+											 )
 					}) {
-						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Reset" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = {
-						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+						viewModel.handleEvent(
+								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+										false
+																				  )
+											 )
 					}) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )
@@ -158,6 +168,7 @@ fun Counter(
 				text = {
 					Spacer(modifier = Modifier.height(16.dp))
 					OutlinedTextField(
+							shape = MaterialTheme.shapes.extraLarge ,
 							textStyle = MaterialTheme.typography.titleLarge ,
 							value = objective.value ,
 							onValueChange = { objective.value = it } ,
@@ -169,7 +180,6 @@ fun Counter(
 							label = {
 								Text(
 										text = "Objective" ,
-										style = MaterialTheme.typography.titleLarge
 									)
 							} ,
 							modifier = Modifier
@@ -183,7 +193,8 @@ fun Counter(
 											if (objective.value != "" || isInt != 0)
 											{
 												showObjectiveDialog.value = false
-											}else{
+											} else
+											{
 												Toasty
 													.error(
 															context ,
@@ -213,7 +224,8 @@ fun Counter(
 							if (objective.value != "" || isInt != 0)
 							{
 								showObjectiveDialog.value = false
-							}else{
+							} else
+							{
 								Toasty
 									.error(
 											context ,
@@ -233,12 +245,12 @@ fun Counter(
 								.show()
 						}
 					}) {
-						Text(text = "Set" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Set" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = { showObjectiveDialog.value = false }) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )

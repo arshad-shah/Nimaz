@@ -7,6 +7,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,6 +24,7 @@ import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferen
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 
@@ -31,21 +33,44 @@ fun CalculationMethodUI()
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = "SettingViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
+			viewModelStoreOwner = context
 									)
-	val autoParams = remember{
+	val fajrTime = remember {
+		viewModel.fajrTime
+	}.collectAsState()
+
+	val sunriseTime = remember {
+		viewModel.sunriseTime
+	}.collectAsState()
+
+	val dhuhrTime = remember {
+		viewModel.dhuhrTime
+	}.collectAsState()
+
+	val asrTime = remember {
+		viewModel.asrTime
+	}.collectAsState()
+
+	val maghribTime = remember {
+		viewModel.maghribTime
+	}.collectAsState()
+
+	val ishaTime = remember {
+		viewModel.ishaTime
+	}.collectAsState()
+	val autoParams = remember {
 		settingViewModel.autoParams
 	}.collectAsState()
 	val state =
 		rememberPreferenceBooleanSettingState(
-				AUTO_PARAMETERS,
+				AUTO_PARAMETERS ,
 				false
 											 )
 	state.value = autoParams.value
@@ -56,14 +81,19 @@ fun CalculationMethodUI()
 				AppConstants.CALCULATION_METHOD ,
 				"MWL"
 											)
-	val latitude = remember{
+	val latitude = remember {
 		settingViewModel.latitude
 	}.collectAsState()
-	val longitude = remember{
+	val longitude = remember {
 		settingViewModel.longitude
 	}.collectAsState()
 
+	val sharedPreferences = remember {
+		settingViewModel.sharedPreferences
+	}
+
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -74,20 +104,24 @@ fun CalculationMethodUI()
 					if (state.value)
 					{
 						Text(text = "Auto Calculation")
-					}
-					else
+					} else
 					{
 						Text(text = "Manual Calculation")
 					}
-				},
+				} ,
+				subtitle = {
+					Text(text = "Auto angles are Experimental")
+				} ,
 				onCheckedChange = {
-					if (it){
+					if (it)
+					{
 						settingViewModel.handleEvent(
 								SettingsViewModel.SettingsEvent.AutoParameters(
 										true
 																			  )
 													)
-					}else{
+					} else
+					{
 						settingViewModel.handleEvent(
 								SettingsViewModel.SettingsEvent.AutoParameters(
 										false
@@ -104,20 +138,28 @@ fun CalculationMethodUI()
 					//set fajr angle
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.FajrAngle(
-									AutoAnglesCalc().calculateFajrAngle(context, latitude.value, longitude.value).toString()
+									AutoAnglesCalc().calculateFajrAngle(
+											context ,
+											latitude.value ,
+											longitude.value
+																	   ).toString()
 																	 )
 												)
 					//set ishaa angle
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.IshaAngle(
-									AutoAnglesCalc().calculateIshaaAngle(context, latitude.value, longitude.value).toString()
-																	  )
+									AutoAnglesCalc().calculateIshaaAngle(
+											context ,
+											latitude.value ,
+											longitude.value
+																		).toString()
+																	 )
 												)
 					//set high latitude method
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.HighLatitude(
 									"TWILIGHT_ANGLE"
-																			  )
+																		)
 												)
 					viewModel.handleEvent(
 							context ,
@@ -131,15 +173,20 @@ fun CalculationMethodUI()
 									context
 																			   )
 										 )
+					PrivateSharedPreferences(context).saveDataBoolean(
+							AppConstants.ALARM_LOCK ,
+							false
+																	 )
 				}
 					  )
 	}
 	AnimatedVisibility(
-			visible = !state.value,
+			visible = ! state.value ,
 			enter = expandVertically() ,
 			exit = shrinkVertically()
 					  ) {
 		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth()
@@ -179,6 +226,10 @@ fun CalculationMethodUI()
 										context
 																				   )
 											 )
+						PrivateSharedPreferences(context).saveDataBoolean(
+								AppConstants.ALARM_LOCK ,
+								false
+																		 )
 					} ,
 					height = 500.dp
 						)

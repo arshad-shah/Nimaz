@@ -3,9 +3,7 @@ package com.arshadshah.nimaz.utils.recievers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.NotificationHelper
 import es.dmoral.toasty.Toasty
@@ -13,7 +11,6 @@ import es.dmoral.toasty.Toasty
 class AdhanReciever : BroadcastReceiver()
 {
 
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	override fun onReceive(context : Context , intent : Intent)
 	{
 		// When the reciever is called, it will send a notification to the user
@@ -26,11 +23,13 @@ class AdhanReciever : BroadcastReceiver()
 
 		val current_time = System.currentTimeMillis()
 		val diff = current_time - Time_of_alarm
-		val graceP = 60000 * 2
+		//two minutes grace period
+		val graceP = 2 * 60 * 1000
 
 		Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Alarm for $title is being executed!")
 		// check if it is time to notify
-		if (diff in 1 until graceP)
+		//diff in 1 until graceP
+		if (diff in 1 until graceP || title == "Test Adhan")
 		{
 			Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Notification for $title is being executed!")
 			when (title)
@@ -57,6 +56,7 @@ class AdhanReciever : BroadcastReceiver()
 					Notify_Id ,
 					Time_of_alarm
 												   )
+			Toasty.info(context , "Time to pray $title").show()
 
 			Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Alarm for $title is Successfully executed!")
 		} // end of if

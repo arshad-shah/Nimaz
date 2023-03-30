@@ -41,6 +41,7 @@ fun <T> FeaturesDropDown(
 	}
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				) {
@@ -88,7 +89,7 @@ fun <T> FeaturesDropDown(
 								{
 									Text(
 											text = items.size.toString() ,
-											style = MaterialTheme.typography.bodyMedium,
+											style = MaterialTheme.typography.bodyMedium ,
 											textAlign = TextAlign.Center ,
 										)
 								}
@@ -157,7 +158,7 @@ fun <T> FeatureDropdownItem(
 				.clickable {
 					onClick(item)
 				} ,
-			shape = MaterialTheme.shapes.medium ,
+			shape = MaterialTheme.shapes.extraLarge ,
 			content = {
 				Row(
 						modifier = Modifier

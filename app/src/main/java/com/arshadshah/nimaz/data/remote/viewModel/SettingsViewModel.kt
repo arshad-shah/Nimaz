@@ -1,15 +1,22 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
+import android.app.Activity
 import android.content.Context
+import android.content.IntentSender
 import android.location.Address
 import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
+import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,8 +36,12 @@ class SettingsViewModel(context : Context) : ViewModel()
 	val theme = _theme.asStateFlow()
 
 	//dark mode state
-	private var _isDarkMode = MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE , false))
+	private var _isDarkMode =
+		MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE , false))
 	val isDarkMode = _isDarkMode.asStateFlow()
+
+	private var _hasUpdate = MutableStateFlow(false)
+	val hasUpdate = _hasUpdate.asStateFlow()
 
 
 	//state for switch of location toggle between manual and automatic
@@ -93,8 +104,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 			sharedPreferences.getDataBoolean(
 					AppConstants.AUTO_PARAMETERS ,
 					false
-									 )
-												)
+											)
+											  )
 	val autoParams = _autoParams.asStateFlow()
 
 	//fajr angle state
@@ -147,6 +158,9 @@ class SettingsViewModel(context : Context) : ViewModel()
 		MutableStateFlow(sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0"))
 	val ishaOffset = _ishaOffset.asStateFlow()
 
+	private var _isUpdateAvailable = MutableStateFlow(false)
+	val isUpdateAvailable = _isUpdateAvailable.asStateFlow()
+
 	//events
 	sealed class SettingsEvent
 	{
@@ -182,12 +196,15 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 		//theme
 		class Theme(val theme : String) : SettingsEvent()
+
 		//dark mode
 		class DarkMode(val darkMode : Boolean) : SettingsEvent()
 
 		//update settings based on calculation method
 		class UpdateSettings(val method : String) : SettingsEvent()
 		class AutoParameters(val checked : Boolean) : SettingsEvent()
+
+		class CheckUpdate(val context : Context , val doUpdate : Boolean) : SettingsEvent()
 	}
 
 	//events for the settings screen
@@ -373,6 +390,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.saveData(AppConstants.THEME , event.theme)
 				Log.d("Nimaz: SettingsViewModel" , "Theme : ${event.theme}")
 			}
+
 			is SettingsEvent.DarkMode ->
 			{
 				_isDarkMode.value = event.darkMode
@@ -443,11 +461,63 @@ class SettingsViewModel(context : Context) : ViewModel()
 				Log.d("Nimaz: SettingsViewModel" , "Settings updated")
 
 			}
+
 			is SettingsEvent.AutoParameters ->
 			{
 				sharedPreferences.saveDataBoolean(AppConstants.AUTO_PARAMETERS , event.checked)
 				_autoParams.value = event.checked
 				Log.d("Nimaz: SettingsViewModel" , "Auto parameters : ${event.checked}")
+			}
+
+			is SettingsEvent.CheckUpdate ->
+			{
+				Log.d("Nimaz: SettingsViewModel" , "Checking for update")
+				val appUpdateManager = AppUpdateManagerFactory.create(event.context)
+				val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+				appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+					if (event.doUpdate)
+					{
+						Log.d(
+								"Nimaz: SettingsViewModel" , "Update available : ${
+							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE
+																																		  )
+						}"
+							 )
+						if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE
+																																		  )
+						)
+						{
+							try
+							{
+								Log.d("Nimaz: SettingsViewModel" , "Starting update")
+								appUpdateManager.startUpdateFlowForResult(
+										appUpdateInfo ,
+										AppUpdateType.IMMEDIATE ,
+										event.context as Activity ,
+										APP_UPDATE_REQUEST_CODE
+																		 )
+							} catch (e : IntentSender.SendIntentException)
+							{
+								e.printStackTrace()
+							}
+						}
+					} else
+					{
+						Log.d(
+								"Nimaz: SettingsViewModel" , "Update available : ${
+							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE
+																																		  )
+						}"
+							 )
+						_isUpdateAvailable.value =
+							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+									AppUpdateType.IMMEDIATE
+																																		  )
+					}
+				}
 			}
 		}
 	}
@@ -458,32 +528,42 @@ class SettingsViewModel(context : Context) : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				if (checked)
+				if (NetworkChecker().networkCheck(context))
 				{
-					_isLoading.value = true
-					if(!AutoLocationUtils.isInitialized()){
-						AutoLocationUtils.init(context)
+					if (checked)
+					{
+						_isLoading.value = true
+						if (! AutoLocationUtils.isInitialized())
+						{
+							AutoLocationUtils.init(context)
+							AutoLocationUtils.startLocationUpdates()
+						}
+						AutoLocationUtils.setLocationDataCallback { location ->
+							sharedPreferences.saveData(
+									AppConstants.LATITUDE ,
+									location.latitude.toString()
+													  )
+							sharedPreferences.saveData(
+									AppConstants.LONGITUDE ,
+									location.longitude.toString()
+													  )
+							reverseGeocode(location.latitude , location.longitude)
+						}
+						_isLoading.value = false
+					} else
+					{
+						_isLoading.value = true
+						AutoLocationUtils.stopLocationUpdates()
+						forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
+						_isLoading.value = false
 					}
-					AutoLocationUtils.startLocationUpdates()
-					AutoLocationUtils.setLocationDataCallback {
-						location ->
-						sharedPreferences.saveData(
-								AppConstants.LATITUDE ,
-								location.latitude.toString()
-												  )
-						sharedPreferences.saveData(
-								AppConstants.LONGITUDE ,
-								location.longitude.toString()
-												  )
-						reverseGeocode(location.latitude , location.longitude)
-					}
-					_isLoading.value = false
 				} else
 				{
-					_isLoading.value = true
-					AutoLocationUtils.stopLocationUpdates()
-					forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT , ""))
-					_isLoading.value = false
+					_locationName.value = "No Network"
+					_latitude.value =
+						sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
+					_longitude.value =
+						sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				}
 			} catch (e : Exception)
 			{
@@ -500,6 +580,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 	fun reverseGeocode(latitude : Double , longitude : Double)
 	{
 		Log.d("Nimaz: reverseGeocode" , "reverseGeocode")
+		_locationName.value = "Loading..."
 		try
 		{
 			val gcd = geocoder.getFromLocation(latitude , longitude , 1)
@@ -574,8 +655,6 @@ class SettingsViewModel(context : Context) : ViewModel()
 					_locationName.value = address.countryName
 					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.countryName)
 				}
-				_locationName.value = address.locality
-				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
 				_latitude.value = address.latitude
 				_longitude.value = address.longitude
 				sharedPreferences.saveDataDouble(AppConstants.LATITUDE , address.latitude)

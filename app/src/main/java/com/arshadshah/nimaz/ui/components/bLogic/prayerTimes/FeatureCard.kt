@@ -140,6 +140,7 @@ fun LinkButton(
 			  )
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -149,12 +150,13 @@ fun LinkButton(
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(8.dp) ,
+					.padding(10.dp) ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			Image(
 					modifier = Modifier
+						.padding(start = 8.dp)
 						.size(48.dp) ,
 					painter = painter ,
 					contentDescription = content
@@ -168,8 +170,7 @@ fun LinkButton(
 			//an icon of arrow to indicate that it is a link
 			Icon(
 					modifier = Modifier
-						.size(24.dp)
-						.padding(start = 8.dp) ,
+						.size(24.dp) ,
 					painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 					contentDescription = "Link" ,
 				)
@@ -182,7 +183,7 @@ fun LinkButton(
 fun LinkButtonPreview()
 {
 	LinkButton(
-			painter = painterResource(id = R.drawable.tasbih) ,
+			painter = painterResource(id = R.drawable.calendar_icon) ,
 			content = "Tasbih" ,
 			onClick = {} ,
 			title = "Github"

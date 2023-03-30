@@ -17,10 +17,13 @@ import com.patrykandpatrick.vico.core.component.shape.Shapes
 import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
 
 @Composable
-internal fun rememberChartStyle(columnChartColors: List<Color> , lineChartColors: List<Color>): ChartStyle
+internal fun rememberChartStyle(
+	columnChartColors : List<Color> ,
+	lineChartColors : List<Color> ,
+							   ) : ChartStyle
 {
 	val isSystemInDarkTheme = isSystemInDarkTheme()
-	return remember(columnChartColors, lineChartColors, isSystemInDarkTheme) {
+	return remember(columnChartColors , lineChartColors , isSystemInDarkTheme) {
 		val defaultColors = if (isSystemInDarkTheme) DefaultColors.Dark else DefaultColors.Light
 		ChartStyle(
 				ChartStyle.Axis(
@@ -35,22 +38,22 @@ internal fun rememberChartStyle(columnChartColors: List<Color> , lineChartColors
 									DefaultDimens.COLUMN_WIDTH ,
 									Shapes.roundedCornerShape(DefaultDimens.COLUMN_ROUNDNESS_PERCENT) ,
 										 )
-						},
+						} ,
 									  ) ,
 				ChartStyle.LineChart(
 						lineChartColors.map { lineChartColor ->
 							LineChart.LineSpec(
-									lineColor = lineChartColor.toArgb(),
+									lineColor = lineChartColor.toArgb() ,
 									lineBackgroundShader = DynamicShaders.fromBrush(
 											Brush.verticalGradient(
 													listOf(
 															lineChartColor.copy(DefaultAlpha.LINE_BACKGROUND_SHADER_START) ,
 															lineChartColor.copy(DefaultAlpha.LINE_BACKGROUND_SHADER_END) ,
-														  ),
-																  ),
-																				   ),
+														  ) ,
+																  ) ,
+																				   ) ,
 											  )
-						},
+						} ,
 									) ,
 				ChartStyle.Marker() ,
 				Color(defaultColors.elevationOverlayColor) ,
@@ -59,5 +62,5 @@ internal fun rememberChartStyle(columnChartColors: List<Color> , lineChartColors
 }
 
 @Composable
-internal fun rememberChartStyle(chartColors: List<Color>) =
-	rememberChartStyle(columnChartColors = chartColors, lineChartColors = chartColors)
+internal fun rememberChartStyle(chartColors : List<Color>) =
+	rememberChartStyle(columnChartColors = chartColors , lineChartColors = chartColors)

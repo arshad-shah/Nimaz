@@ -25,12 +25,10 @@ object AutoLocationUtils
 		return fusedLocationProviderClient != null
 	}
 
-	private const val ONE_MINUTE = 60 * 1000
+	private const val THIRTY_MINUTES = 30 * 60 * 1000
 
-	val locationRequest : LocationRequest = LocationRequest.Builder(
-			Priority.PRIORITY_HIGH_ACCURACY ,
-			ONE_MINUTE.toLong()
-																   ).build()
+	val locationRequest : LocationRequest =
+		LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY , THIRTY_MINUTES.toLong()).build()
 
 	//a single instance of location callback
 	private val locationCallback = object : LocationCallback()
@@ -66,7 +64,7 @@ object AutoLocationUtils
 				locationRequest ,
 				locationCallback ,
 				Looper.getMainLooper()
-														  )
+														   )
 		Log.w("Nimaz: Location" , "Location Updates Started")
 	}
 
@@ -74,7 +72,7 @@ object AutoLocationUtils
 	{
 		fusedLocationProviderClient?.removeLocationUpdates(
 				locationCallback
-														 )?.addOnCompleteListener {
+														  )?.addOnCompleteListener {
 			Log.w("Nimaz: Location" , "Location Updates Stopped")
 		}
 		//set client to null

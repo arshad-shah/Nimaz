@@ -51,12 +51,12 @@ fun LocationSettings(isIntro : Boolean = false)
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "SettingsViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val viewModelPrayerTimes = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 										)
@@ -83,12 +83,12 @@ fun LocationSettings(isIntro : Boolean = false)
 		viewModel.isError
 	}.collectAsState()
 
-	LaunchedEffect(locationNameState.value, latitudeState.value, longitudeState.value) {
+	LaunchedEffect(locationNameState.value , latitudeState.value , longitudeState.value) {
 		viewModelPrayerTimes.handleEvent(
 				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
-							 )
+										)
 	}
 
 	if (isError.value.isNotBlank())
@@ -136,34 +136,43 @@ fun LocationSettings(isIntro : Boolean = false)
 				key3 = longitudeState.value
 					  ) {
 
-			if(autoParams.value){
+			if (autoParams.value)
+			{
 				//set method to other
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.CalculationMethod(
 								"OTHER"
 																		 )
-											)
+									 )
 				//set fajr angle
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.FajrAngle(
-								AutoAnglesCalc().calculateFajrAngle(context , latitude.value , longitude.value).toString()
+								AutoAnglesCalc().calculateFajrAngle(
+										context ,
+										latitude.value ,
+										longitude.value
+																   ).toString()
 																 )
-											)
+									 )
 				//set ishaa angle
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.IshaAngle(
-								AutoAnglesCalc().calculateIshaaAngle(context , latitude.value , longitude.value).toString()
+								AutoAnglesCalc().calculateIshaaAngle(
+										context ,
+										latitude.value ,
+										longitude.value
+																	).toString()
 																 )
-											)
+									 )
 				//set high latitude method
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.HighLatitude(
 								"TWILIGHT_ANGLE"
 																	)
-											)
+									 )
 				viewModel.handleEvent(
 						SettingsViewModel.SettingsEvent.LoadSettings
-											)
+									 )
 			}
 
 
@@ -195,6 +204,7 @@ fun LocationSettings(isIntro : Boolean = false)
 					exit = shrinkVertically()
 							  ) {
 				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
@@ -228,6 +238,7 @@ fun LocationSettings(isIntro : Boolean = false)
 								  ) {
 					Column {
 						ElevatedCard(
+								shape = MaterialTheme.shapes.extraLarge ,
 								modifier = Modifier
 									.padding(8.dp)
 									.fillMaxWidth()
@@ -268,12 +279,12 @@ fun LocationToggleSwitch(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "SettingsViewModel" ,
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 	val viewModelPrayerTimes = viewModel(
-			key = "PrayerTimesViewModel" ,
+			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 										)
@@ -304,19 +315,20 @@ fun LocationToggleSwitch(
 						val isLocationAutoInPref = PrivateSharedPreferences(context).getDataBoolean(
 								AppConstants.LOCATION_TYPE ,
 								false
-																							)
-						if(isLocationAutoInPref)
+																								   )
+						if (isLocationAutoInPref)
 						{
 							viewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.LocationToggle(
 											context ,
 											true
 																				  )
-													 )
+												 )
 							viewModelPrayerTimes.handleEvent(
-									context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-									PrayerTimesParamMapper.getParams(context)
-																									  )
+									context ,
+									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+											PrayerTimesParamMapper.getParams(context)
+																							)
 															)
 							viewModelPrayerTimes.handleEvent(
 									context ,
@@ -325,13 +337,14 @@ fun LocationToggleSwitch(
 																					   )
 															)
 							isChecked.value = true
-						}else{
+						} else
+						{
 							viewModel.handleEvent(
 									SettingsViewModel.SettingsEvent.LocationToggle(
 											context ,
 											false
 																				  )
-													 )
+												 )
 							isChecked.value = false
 						}
 					}
@@ -351,6 +364,7 @@ fun LocationToggleSwitch(
 	}
 
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.padding(8.dp)
 				.fillMaxWidth()
@@ -445,6 +459,10 @@ fun LocationToggleSwitch(
 											context
 																					   )
 															)
+							PrivateSharedPreferences(context).saveDataBoolean(
+									AppConstants.ALARM_LOCK ,
+									false
+																			 )
 						} else
 						{
 							locationPermissionState.launchMultiplePermissionRequest()
@@ -468,6 +486,10 @@ fun LocationToggleSwitch(
 										context
 																				   )
 														)
+						PrivateSharedPreferences(context).saveDataBoolean(
+								AppConstants.ALARM_LOCK ,
+								false
+																		 )
 						isChecked.value = false
 						if (isIntro)
 						{
@@ -504,6 +526,7 @@ fun LocationToggleSwitch(
 		if (locationNameState.value.isBlank())
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()
@@ -518,6 +541,7 @@ fun LocationToggleSwitch(
 		} else
 		{
 			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
 					modifier = Modifier
 						.padding(8.dp)
 						.fillMaxWidth()

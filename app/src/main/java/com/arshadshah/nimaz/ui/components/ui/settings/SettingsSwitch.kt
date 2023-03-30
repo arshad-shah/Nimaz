@@ -41,16 +41,18 @@ fun SettingsSwitch(
 		onCheckedChange(storageValue)
 	}
 
-	val iconForSwitch: (@Composable () -> Unit)? = if (state.value) {
+	val iconForSwitch : (@Composable () -> Unit)? = if (state.value)
+	{
 		{
-				Icon(
-						painter = painterResource(id = R.drawable.check_icon) ,
-						contentDescription = null ,
-						modifier = Modifier
-							.size(SwitchDefaults.IconSize)
-					)
+			Icon(
+					painter = painterResource(id = R.drawable.check_icon) ,
+					contentDescription = null ,
+					modifier = Modifier
+						.size(SwitchDefaults.IconSize)
+				)
 		}
-	} else {
+	} else
+	{
 		null
 	}
 
@@ -72,7 +74,7 @@ fun SettingsSwitch(
 			SettingsTileAction {
 				Switch(
 						checked = storageValue ,
-						onCheckedChange = update,
+						onCheckedChange = update ,
 						thumbContent = iconForSwitch ,
 					  )
 			}

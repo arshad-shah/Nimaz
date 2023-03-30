@@ -151,9 +151,11 @@ fun NotificationScreenUI()
 				{
 					Row(
 							verticalAlignment = Alignment.CenterVertically
-					   ){
+					   ) {
 						Icon(
-								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								modifier = Modifier
+									.size(18.dp)
+									.padding(end = 4.dp) ,
 								painter = painterResource(id = R.drawable.checkbox_icon) ,
 								contentDescription = "Notifications Allowed"
 							)
@@ -163,10 +165,12 @@ fun NotificationScreenUI()
 				{
 					//if the permission is not granted, show a notification icon and text saying "Not Allowed"
 					Row(
-							verticalAlignment = Alignment.CenterVertically,
+							verticalAlignment = Alignment.CenterVertically ,
 					   ) {
 						Icon(
-								modifier = Modifier.size(18.dp).padding(end = 4.dp) ,
+								modifier = Modifier
+									.size(18.dp)
+									.padding(end = 4.dp) ,
 								painter = painterResource(id = R.drawable.cross_circle_icon) ,
 								contentDescription = "Notifications Not Allowed"
 							)

@@ -4,7 +4,6 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -29,6 +28,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
@@ -58,7 +59,7 @@ fun AyaListUI(
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 	val spaceFilesRepository = SpacesFileRepository(context)
@@ -110,7 +111,7 @@ fun AyaListUI(
 	{
 		//dumy list of 10 AYa
 		val dummyList = ArrayList<Aya>()
-		for (i in 0..9)
+		for (i in 0 .. 9)
 		{
 			dummyList.add(
 					Aya(
@@ -133,9 +134,9 @@ fun AyaListUI(
 						 )
 		}
 		LazyColumn(
-				contentPadding = paddingValues,
-				state = rememberLazyListState(),
-				userScrollEnabled = false,
+				contentPadding = paddingValues ,
+				state = rememberLazyListState() ,
+				userScrollEnabled = false ,
 				  ) {
 			items(10) { index ->
 				AyaListItemUI(
@@ -190,10 +191,13 @@ fun AyaListUI(
 			}
 		}
 
+		val scope = rememberCoroutineScope()
+
 		LazyColumn(
 				modifier = Modifier.testTag(TEST_TAG_AYA) ,
 				userScrollEnabled = true ,
-				contentPadding = paddingValues , state = listState
+				contentPadding = paddingValues ,
+				state = listState
 				  ) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
@@ -225,7 +229,7 @@ fun AyaListItemUI(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "QuranViewModel" ,
+			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 
@@ -400,17 +404,27 @@ fun AyaListItemUI(
 
 	val cardBackgroundColor = if (aya.ayaNumber == 0)
 	{
-		MaterialTheme.colorScheme.outline
-	}else{
+		MaterialTheme.colorScheme.secondaryContainer
+	} else
+	{
 		MaterialTheme.colorScheme.surface
 	}
+	val cardTextColor = if (aya.ayaNumber == 0)
+	{
+		MaterialTheme.colorScheme.onSecondaryContainer
+	} else
+	{
+		MaterialTheme.colorScheme.onSurface
+	}
 	ElevatedCard(
+			colors = CardDefaults.elevatedCardColors(
+					containerColor = cardBackgroundColor ,
+													) ,
 			modifier = Modifier
 				.padding(4.dp)
 				.fillMaxHeight()
-				.fillMaxWidth()
-				.border(2.dp , cardBackgroundColor , RoundedCornerShape(8.dp)) ,
-			shape = RoundedCornerShape(8.dp)
+				.fillMaxWidth() ,
+			shape = MaterialTheme.shapes.extraLarge ,
 				) {
 		Row(
 				modifier = Modifier
@@ -485,7 +499,7 @@ fun AyaListItemUI(
 									.fillMaxWidth()
 									.padding(horizontal = 4.dp)
 									.placeholder(
-											visible =loading ,
+											visible = loading ,
 											color = MaterialTheme.colorScheme.outline ,
 											shape = RoundedCornerShape(4.dp) ,
 											highlight = PlaceholderHighlight.shimmer(
@@ -552,7 +566,7 @@ fun AyaListItemUI(
 												highlight = PlaceholderHighlight.shimmer(
 														highlightColor = Color.White ,
 																						)
-													),
+													) ,
 									painter = painterResource(id = R.drawable.more_menu_icon) ,
 									contentDescription = "More Menu" ,
 								)

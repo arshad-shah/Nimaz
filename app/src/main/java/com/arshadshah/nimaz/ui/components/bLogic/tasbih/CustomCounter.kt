@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
@@ -27,7 +28,7 @@ fun CustomCounter(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -53,7 +54,7 @@ fun CustomCounter(
 		viewModel.handleEvent(
 				TasbihViewModel.TasbihEvent.UpdateTasbih(
 						Tasbih(
-								id = tasbih.value?.id !! ,
+								id = tasbih.value.id ,
 								date = tasbih.value.date ,
 								arabicName = tasbih.value.arabicName ,
 								englishName = tasbih.value.englishName ,
@@ -74,20 +75,20 @@ fun CustomCounter(
 	//lap counter
 	val lap = remember {
 		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih.value?.id !!}" , 0)
+				context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih.value.id}" , 0)
 					  )
 	}
 	val lapCountCounter = remember {
 		mutableStateOf(
 				context.getSharedPreferences("tasbih" , 0)
-					.getInt("lapCountCounter-${tasbih.value?.id !!}" , 0)
+					.getInt("lapCountCounter-${tasbih.value.id}" , 0)
 					  )
 	}
 
 	//when we firrst launch the composable, we want to set the count to the tasbih count
 	LaunchedEffect(key1 = tasbih.value.id) {
 		count.value =
-			context.getSharedPreferences("tasbih" , 0).getInt("count-${tasbih.value?.id !!}" , 0)
+			context.getSharedPreferences("tasbih" , 0).getInt("count-${tasbih.value.id}" , 0)
 		objective.value = context.getSharedPreferences("tasbih" , 0)
 			.getString("objective-${tasbih.value.id}" , tasbih.value.goal.toString()) !!
 		lap.value = context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih.value.id}" , 0)
@@ -100,7 +101,7 @@ fun CustomCounter(
 	{
 		//save the count
 		context.getSharedPreferences("tasbih" , 0).edit()
-			.putInt("count-${tasbih.value?.id !!}" , count.value).apply()
+			.putInt("count-${tasbih.value.id}" , count.value).apply()
 		//save the objective
 		context.getSharedPreferences("tasbih" , 0).edit()
 			.putString("objective-${tasbih.value.id}" , objective.value)
@@ -141,7 +142,7 @@ fun CustomCounter(
 		Text(
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally) ,
-				text = tasbih.value?.goal.toString() ,
+				text = tasbih.value.goal.toString() ,
 				style = MaterialTheme.typography.bodyMedium ,
 				color = MaterialTheme.colorScheme.onSurface
 			)
@@ -155,7 +156,8 @@ fun CustomCounter(
 						  )
 	}
 
-	if (resetTasbih.value) {
+	if (resetTasbih.value)
+	{
 		AlertDialog(
 				onDismissRequest = {
 					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
@@ -163,7 +165,7 @@ fun CustomCounter(
 				title = { Text(text = "Reset Counter") } ,
 				text = {
 					Text(
-							text = "Are you sure you want to reset the counter?" ,
+							text = "Are you sure you want to reset the counter? This action cannot be undone." ,
 							style = MaterialTheme.typography.titleLarge
 						)
 				} ,
@@ -172,16 +174,24 @@ fun CustomCounter(
 						count.value = 0
 						lap.value = 1
 						lapCountCounter.value = 0
-						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+						viewModel.handleEvent(
+								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+										false
+																				  )
+											 )
 					}) {
-						Text(text = "Reset" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Reset" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
 					TextButton(onClick = {
-						viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+						viewModel.handleEvent(
+								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+										false
+																				  )
+											 )
 					}) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleLarge)
+						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )
@@ -195,6 +205,7 @@ fun CustomCounter(
 				text = {
 					Spacer(modifier = Modifier.height(16.dp))
 					OutlinedTextField(
+							shape = MaterialTheme.shapes.extraLarge ,
 							textStyle = MaterialTheme.typography.titleLarge ,
 							value = objective.value ,
 							onValueChange = { objective.value = it } ,

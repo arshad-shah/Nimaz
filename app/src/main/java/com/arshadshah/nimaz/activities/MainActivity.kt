@@ -3,10 +3,6 @@ package com.arshadshah.nimaz.activities
 import android.app.ActivityManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Context
-import android.media.AudioAttributes
-import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -16,7 +12,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,24 +34,27 @@ import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.NAMES_OF_ALLAH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
+import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
+import com.arshadshah.nimaz.data.remote.viewModel.*
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
 import com.arshadshah.nimaz.widgets.Nimaz
@@ -75,6 +75,17 @@ class MainActivity : ComponentActivity()
 	{
 		super.onResume()
 		Log.d(MAIN_ACTIVITY_TAG , "onResume:  called")
+
+		if (PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE , true))
+		{
+			if (! AutoLocationUtils.isInitialized())
+			{
+				AutoLocationUtils.init(this)
+				Log.d(MAIN_ACTIVITY_TAG , "onResume:  location is initialized")
+			}
+			AutoLocationUtils.startLocationUpdates()
+		}
+
 		val appUpdateManager = AppUpdateManagerFactory.create(this)
 		appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
 			if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
@@ -90,34 +101,40 @@ class MainActivity : ComponentActivity()
 		}
 	}
 
-	private val mediaPlayer = MediaPlayer()
-
 	override fun onDestroy()
 	{
 		super.onDestroy()
-		mediaPlayer.release()
-		AutoLocationUtils.stopLocationUpdates()
+		if (PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE , true))
+		{
+			AutoLocationUtils.stopLocationUpdates()
+			Log.d(MAIN_ACTIVITY_TAG , "onDestroy:  location is stopped")
+		}
 	}
 
 	override fun onPause()
 	{
 		super.onPause()
-		mediaPlayer.release()
-		AutoLocationUtils.stopLocationUpdates()
+		if (PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE , true))
+		{
+			AutoLocationUtils.stopLocationUpdates()
+			Log.d(MAIN_ACTIVITY_TAG , "onPause:  location is stopped")
+		}
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class)
+	@OptIn(
+			ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class ,
+			ExperimentalMaterialApi::class
+		  )
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
 	{
 		this.actionBar?.hide()
 
-		LocalDataStore.init(this@MainActivity)
-		Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
-
-		prepareMediaPlayer(this@MainActivity)
-
-		Log.d(MAIN_ACTIVITY_TAG , "onCreate:  media player prepared")
+		if (! LocalDataStore.isInitialized())
+		{
+			LocalDataStore.init(this)
+			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
+		}
 
 		val appWidgetManager = AppWidgetManager.getInstance(this)
 		val appWidgetIds : IntArray = appWidgetManager.getAppWidgetIds(
@@ -132,37 +149,12 @@ class MainActivity : ComponentActivity()
 		}
 		Log.d(MAIN_ACTIVITY_TAG , "onCreate:  app widget updated")
 
-		val appUpdateManager = AppUpdateManagerFactory.create(this)
-
-		// Returns an intent object that you use to check for an update.
-		val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-
-		// Checks that the platform will allow the specified type of update.
-		appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-			if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-				&& appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-			)
-			{
-				Log.d(
-						MAIN_ACTIVITY_TAG ,
-						"onCreate:  update is available and immediate is allowed"
-					 )
-				// Request the update.
-				appUpdateManager.startUpdateFlowForResult(
-						appUpdateInfo ,
-						AppUpdateType.IMMEDIATE ,
-						this ,
-						APP_UPDATE_REQUEST_CODE
-														 )
-
-			}
-		}
 		super.onCreate(savedInstanceState)
 
 		//this is used to show the full activity on the screen
 		setContent {
 			val viewModelSettings = viewModel(
-					key = "SettingsViewModel" ,
+					key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 					initializer = { SettingsViewModel(this@MainActivity) } ,
 					viewModelStoreOwner = this as ComponentActivity
 											 )
@@ -190,34 +182,56 @@ class MainActivity : ComponentActivity()
 					dynamicTheme.value = true
 					darkTheme.value = isDarkTheme.value
 				}
+
 				"SYSTEM" ->
 				{
-					darkTheme.value = isSystemInDarkTheme()
-					themeName.value = "Default"
+					//if is dark theme is true then it will be dark theme
+					if (isDarkTheme.value)
+					{
+						dynamicTheme.value = false
+						darkTheme.value = isDarkTheme.value
+						themeName.value = "Default"
+					} else
+					{
+						dynamicTheme.value = false
+						darkTheme.value = isSystemInDarkTheme()
+						themeName.value = "Default"
+					}
 				}
+
 				"DEFAULT" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Default"
 				}
+
 				"Raisin_Black" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Raisin_Black"
 				}
+
 				"Dark_Red" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Red"
 				}
+
 				"Dark_Liver" ->
 				{
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Liver"
+				}
+
+				"Rustic_brown" ->
+				{
+					dynamicTheme.value = false
+					darkTheme.value = isDarkTheme.value
+					themeName.value = "Rustic_brown"
 				}
 			}
 
@@ -226,9 +240,6 @@ class MainActivity : ComponentActivity()
 					dynamicColor = dynamicTheme.value ,
 					ThemeName = themeName.value
 					  ) {
-				val isPlaying = remember { mutableStateOf(false) }
-				val isPaused = remember { mutableStateOf(false) }
-				val isStopped = remember { mutableStateOf(true) }
 				val navController = rememberAnimatedNavController()
 				val route =
 					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
@@ -270,11 +281,46 @@ class MainActivity : ComponentActivity()
 					 )
 
 				val viewModelTasbih = viewModel(
-						key = "TasbihViewModel" ,
+						key = TASBIH_VIEWMODEL_KEY ,
 						initializer = { TasbihViewModel(this@MainActivity) } ,
 						viewModelStoreOwner = LocalContext.current as ComponentActivity
-										 )
-
+											   )
+				val viewModelNames = viewModel(
+						key = NAMES_OF_ALLAH_VIEWMODEL_KEY ,
+						initializer = { NamesOfAllahViewModel() } ,
+						viewModelStoreOwner = LocalContext.current as ComponentActivity
+											  )
+				val isPlaying = remember {
+					viewModelNames.isPlaying
+				}.collectAsState()
+				val isPaused = remember {
+					viewModelNames.isPaused
+				}.collectAsState()
+				val isStopped = remember {
+					viewModelNames.isStopped
+				}.collectAsState()
+				val isPlayingState = remember {
+					mutableStateOf(false)
+				}
+				val isPausedState = remember {
+					mutableStateOf(false)
+				}
+				val isStoppedState = remember {
+					mutableStateOf(false)
+				}
+				LaunchedEffect(
+						key1 = isPlaying.value ,
+						key2 = isPaused.value ,
+						key3 = isStopped.value
+							  ) {
+					Log.d(
+							MAIN_ACTIVITY_TAG ,
+							"onCreate: isPlaying: ${isPlaying.value} isPaused: ${isPaused.value} isStopped: ${isStopped.value}"
+						 )
+					isPlayingState.value = isPlaying.value
+					isPausedState.value = isPaused.value
+					isStoppedState.value = isStopped.value
+				}
 				Scaffold(
 						modifier = Modifier.testTag("mainActivity") ,
 						snackbarHost = { SnackbarHost(snackbarHostState) } ,
@@ -282,25 +328,32 @@ class MainActivity : ComponentActivity()
 							AnimatedVisibility(
 									visible = checkRoute(route.value.toString()) ,
 									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
-									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION) ,
+									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
 									content = {
-
 										TopAppBar(
 												title = {
 													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
 													{
-														val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
-														val number = navController.currentBackStackEntry?.arguments?.getString("number")
-														if (isSurah)
-														{
-															TopBarMenu(number = number!!.toInt() , isSurah = true)
-														} else
-														{
-															TopBarMenu(number = number!!.toInt() , isSurah = false)
-														}
-													}else{
+														val isSurah =
+															navController.currentBackStackEntry?.arguments?.getString(
+																	"isSurah"
+																													 )
+																.toBoolean()
+														val number =
+															navController.currentBackStackEntry?.arguments?.getString(
+																	"number"
+																													 )
+														TopBarMenu(
+																number = number !!.toInt() ,
+																isSurah = isSurah
+																  )
+													} else
+													{
 														Text(
-																text = processPageTitle(route.value.toString(), navController) ,
+																text = processPageTitle(
+																		route.value.toString() ,
+																		navController
+																					   ) ,
 																style = MaterialTheme.typography.titleLarge
 															)
 													}
@@ -318,7 +371,7 @@ class MainActivity : ComponentActivity()
 														navController.navigateUp()
 													}) {
 														Icon(
-																modifier = Modifier.size(24.dp) ,
+																modifier = Modifier.size(20.dp) ,
 																painter = painterResource(id = R.drawable.angle_left_icon) ,
 																contentDescription = "Back"
 															)
@@ -328,9 +381,8 @@ class MainActivity : ComponentActivity()
 													//only show the menu button if the title is Quran
 													when (route.value)
 													{
-														QURAN_SCREEN_ROUTE ,
 														QURAN_AYA_SCREEN_ROUTE ,
-														MY_QURAN_SCREEN_ROUTE,
+														MY_QURAN_SCREEN_ROUTE ,
 														->
 														{
 															//open the menu
@@ -349,15 +401,12 @@ class MainActivity : ComponentActivity()
 
 														NAMESOFALLAH_SCREEN_ROUTE ->
 														{
-															if (! isStopped.value)
+															if (! isStoppedState.value)
 															{
 																IconButton(onClick = {
-																	mediaPlayer.stop()
-																	mediaPlayer.reset()
-																	prepareMediaPlayer(this@MainActivity)
-																	isPlaying.value = false
-																	isPaused.value = false
-																	isStopped.value = true
+																	viewModelNames.handleAudioEvent(
+																			NamesOfAllahViewModel.AudioEvent.Stop
+																								   )
 																}
 																		  ) {
 																	Icon(
@@ -372,23 +421,22 @@ class MainActivity : ComponentActivity()
 																}
 															}
 															IconButton(onClick = {
-																if (isPlaying.value.not())
+																if (isPlayingState.value.not())
 																{
-																	//start the audio
-																	mediaPlayer.start()
-																	isPlaying.value = true
-																	isPaused.value = false
-																	isStopped.value = false
+																	viewModelNames.handleAudioEvent(
+																			NamesOfAllahViewModel.AudioEvent.Play(
+																					this@MainActivity
+																												 )
+																								   )
 																} else
 																{
-																	mediaPlayer.pause()
-																	isPlaying.value = false
-																	isPaused.value = true
-																	isStopped.value = false
+																	viewModelNames.handleAudioEvent(
+																			NamesOfAllahViewModel.AudioEvent.Pause
+																								   )
 																}
 															}
 																	  ) {
-																if (isPlaying.value)
+																if (isPlayingState.value)
 																{
 																	Icon(
 																			modifier = Modifier.size(
@@ -417,17 +465,21 @@ class MainActivity : ComponentActivity()
 
 														TASBIH_SCREEN_ROUTE ->
 														{
-															//icon button to chenge the position of the button for right or left
+															//icon button to change the position of the button for right or left
 															IconButton(onClick = {
 																rOrl.value = ! rOrl.value
-																viewModelTasbih.handleEvent(TasbihViewModel.TasbihEvent.UpdateOrientationButtonState(rOrl.value))
+																viewModelTasbih.handleEvent(
+																		TasbihViewModel.TasbihEvent.UpdateOrientationButtonState(
+																				rOrl.value
+																																)
+																						   )
 															}) {
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
 																		painter = if (rOrl.value)
 																			painterResource(
-																				id = R.drawable.corner_right_down_icon
-																													  )
+																					id = R.drawable.corner_right_down_icon
+																						   )
 																		else painterResource(id = R.drawable.corner_left_down_icon) ,
 																		contentDescription = "Change the position of the button"
 																	)
@@ -436,7 +488,11 @@ class MainActivity : ComponentActivity()
 															IconButton(onClick = {
 																vibrationAllowed.value =
 																	! vibrationAllowed.value
-																viewModelTasbih.handleEvent(TasbihViewModel.TasbihEvent.UpdateVibrationButtonState(vibrationAllowed.value))
+																viewModelTasbih.handleEvent(
+																		TasbihViewModel.TasbihEvent.UpdateVibrationButtonState(
+																				vibrationAllowed.value
+																															  )
+																						   )
 															}) {
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
@@ -452,7 +508,11 @@ class MainActivity : ComponentActivity()
 
 															//a reset button to reset the count
 															IconButton(onClick = {
-																viewModelTasbih.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(true))
+																viewModelTasbih.handleEvent(
+																		TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+																				true
+																														  )
+																						   )
 															}) {
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
@@ -471,7 +531,7 @@ class MainActivity : ComponentActivity()
 							AnimatedVisibility(
 									visible = ! checkRoute(route.value.toString()) ,
 									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
-									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION) ,
+									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
 									content = {
 										BottomNavigationBar(navController = navController)
 									})
@@ -489,9 +549,11 @@ class MainActivity : ComponentActivity()
 		{
 			SETTINGS_SCREEN_ROUTE -> "Settings"
 			ABOUT_SCREEN_ROUTE -> "About"
-			PRAYER_TIMES_SETTINGS_SCREEN_ROUTE -> "Prayer Times Customization"
+			PRAYER_TIMES_SETTINGS_SCREEN_ROUTE -> "Prayer Times Settings"
 			QURAN_SCREEN_ROUTE -> "Quran"
-			QURAN_AYA_SCREEN_ROUTE -> {
+
+			QURAN_AYA_SCREEN_ROUTE ->
+			{
 				//check if the url of the route is for surah or juz using the nav controller
 				val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah")
 				val number = navController.currentBackStackEntry?.arguments?.getString("number")
@@ -503,22 +565,30 @@ class MainActivity : ComponentActivity()
 					"Juz $number"
 				}
 			}
+
 			SHAHADAH_SCREEN_ROUTE -> "Shahadah"
 			CHAPTERS_SCREEN_ROUTE -> "Categories of Dua"
-			CHAPTER_SCREEN_ROUTE -> {
+
+			CHAPTER_SCREEN_ROUTE ->
+			{
 				//check if the url of the route is for surah or juz using the nav controller
-				val chapterId = navController.currentBackStackEntry?.arguments?.getString("chapterId")
+				val chapterId =
+					navController.currentBackStackEntry?.arguments?.getString("chapterId")
 				"Chapter $chapterId"
 			}
+
 			TASBIH_SCREEN_ROUTE -> "Tasbih"
 			NAMESOFALLAH_SCREEN_ROUTE -> "Allah"
 			PRAYER_TRACKER_SCREEN_ROUTE -> "Trackers"
 			CALENDER_SCREEN_ROUTE -> "Calender"
 			QIBLA_SCREEN_ROUTE -> "Qibla"
 			AppConstants.TASBIH_LIST_SCREEN -> "Tasbih List"
-			AppConstants.MY_QURAN_SCREEN_ROUTE -> {
+
+			MY_QURAN_SCREEN_ROUTE ->
+			{
 				//check if the url of the route is for surah or juz using the nav controller
-				val isSurah = navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
+				val isSurah =
+					navController.currentBackStackEntry?.arguments?.getString("isSurah").toBoolean()
 				val number = navController.currentBackStackEntry?.arguments?.getString("number")
 				if (isSurah)
 				{
@@ -528,23 +598,31 @@ class MainActivity : ComponentActivity()
 					"Juz $number"
 				}
 			}
-			WEB_VIEW_SCREEN_ROUTE -> {
+
+			WEB_VIEW_SCREEN_ROUTE ->
+			{
 				//check if the url of the route is privacy_policy using the nav controller
 				val url = navController.currentBackStackEntry?.arguments?.getString("url")
 				if (url == "privacy_policy")
 				{
 					"Privacy Policy"
+				} else if (
+					url == "help"
+				)
+				{
+					"Help"
 				} else
 				{
 					"Terms and Conditions"
 				}
 			}
+
 			else -> ""
 		}
 	}
 
 	//a fuinction to check a givenm route and return a boolean
-	private fun checkRoute(route : String ) : Boolean
+	private fun checkRoute(route : String) : Boolean
 	{
 		val routeToCheck = listOf(
 				SETTINGS_SCREEN_ROUTE ,
@@ -561,27 +639,11 @@ class MainActivity : ComponentActivity()
 				CALENDER_SCREEN_ROUTE ,
 				QIBLA_SCREEN_ROUTE ,
 				AppConstants.TASBIH_LIST_SCREEN ,
-				AppConstants.MY_QURAN_SCREEN_ROUTE,
+				MY_QURAN_SCREEN_ROUTE ,
 				WEB_VIEW_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
-	}
-
-	private fun prepareMediaPlayer(context : Context)
-	{
-		val myUri : Uri =
-			Uri.parse("android.resource://" + context.packageName + "/" + R.raw.asmaulhusna)
-		mediaPlayer.apply {
-			setAudioAttributes(
-					AudioAttributes.Builder()
-						.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-						.setUsage(AudioAttributes.USAGE_MEDIA)
-						.build()
-							  )
-			setDataSource(context , myUri)
-			prepare()
-		}
 	}
 
 	private fun isMyServiceRunning(serviceClass : Class<*>) : Boolean
@@ -613,4 +675,16 @@ class CustomAnimation
 				shrinkTowards = Alignment.Top ,
 				animationSpec = tween(durationMillis = duration)
 						)
+
+	fun expandHorizontally(duration : Int) : EnterTransition =
+		expandHorizontally(
+				expandFrom = Alignment.CenterHorizontally ,
+				animationSpec = tween(durationMillis = duration)
+						  )
+
+	fun shrinkHorizontally(duration : Int) : ExitTransition =
+		shrinkHorizontally(
+				shrinkTowards = Alignment.CenterHorizontally ,
+				animationSpec = tween(durationMillis = duration)
+						  )
 }

@@ -1,30 +1,28 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
 import androidx.activity.ComponentActivity
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.Tasbih
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 
 @Composable
 fun DeleteDialog(
 	tasbih : Tasbih ,
-	showDialog : MutableState<Boolean>
-				  )
+	showDialog : MutableState<Boolean> ,
+				)
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = "TasbihViewModel" ,
+			key = TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
-	if(showDialog.value)
+	if (showDialog.value)
 	{
 		AlertDialog(
 				onDismissRequest = { showDialog.value = false } ,
@@ -41,7 +39,7 @@ fun DeleteDialog(
 								showDialog.value = false
 							} ,
 						  ) {
-						Text(text = "Submit")
+						Text(text = "Submit" , style = MaterialTheme.typography.titleMedium)
 					}
 				} ,
 				dismissButton = {
@@ -49,7 +47,7 @@ fun DeleteDialog(
 							onClick = {
 								showDialog.value = false
 							} ,
-						  ) {
+							  ) {
 						Text(text = "Cancel")
 					}
 				} ,

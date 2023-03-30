@@ -1,15 +1,18 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.ui.settings.internal.SettingsTileAction
 import com.arshadshah.nimaz.ui.components.ui.settings.internal.SettingsTileIcon
 import com.arshadshah.nimaz.ui.components.ui.settings.internal.SettingsTileTexts
@@ -41,12 +44,6 @@ fun SettingsMenuLink(
 			}
 			if (action != null)
 			{
-				Divider(
-						modifier = Modifier
-							.padding(vertical = 4.dp)
-							.height(56.dp)
-							.width(1.dp) ,
-					   )
 				SettingsTileAction {
 					action.invoke()
 				}
@@ -95,9 +92,11 @@ internal fun SettingsMenuLinkActionPreview()
 				title = { Text(text = "Hello") } ,
 				subtitle = { Text(text = "This is a longer text") } ,
 				action = {
-					Checkbox(checked = rememberCheckBoxState , onCheckedChange = { newState ->
-						rememberCheckBoxState = newState
-					})
+					Button(
+							onClick = { rememberCheckBoxState = ! rememberCheckBoxState } ,
+						  ) {
+						Text(text = "Action")
+					}
 				} ,
 						) {
 

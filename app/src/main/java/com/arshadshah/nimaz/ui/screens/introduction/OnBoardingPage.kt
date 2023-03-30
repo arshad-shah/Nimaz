@@ -59,6 +59,7 @@ sealed class OnBoardingPage(
 				LocationSettings(isIntro = true)
 			}
 								 )
+
 	object Seventh : OnBoardingPage(
 			image = R.drawable.time_calculation ,
 			title = "Calculation Method" ,
@@ -77,7 +78,7 @@ sealed class OnBoardingPage(
 			extra = {
 				BatteryExemptionUI()
 			}
-								   )
+								  )
 
 	object Ninth : OnBoardingPage(
 			image = R.drawable.check_mark ,
@@ -85,5 +86,5 @@ sealed class OnBoardingPage(
 			description = "You are all set to use Nimaz. You can always change these settings later. I hope Nimaz helps you in your daily life and Kindly keep me and my family in your prayers." ,
 			extra = {
 			}
-								  )
+								 )
 }

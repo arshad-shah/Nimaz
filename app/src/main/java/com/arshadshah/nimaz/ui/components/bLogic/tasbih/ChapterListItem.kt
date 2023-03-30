@@ -23,6 +23,7 @@ import com.google.accompanist.placeholder.shimmer
 fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , loading : Boolean)
 {
 	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(8.dp)

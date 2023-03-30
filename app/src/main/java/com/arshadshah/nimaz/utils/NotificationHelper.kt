@@ -12,9 +12,7 @@ import android.content.Intent
 import android.graphics.Color.GREEN
 import android.media.AudioAttributes
 import android.net.Uri
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.arshadshah.nimaz.R
@@ -132,7 +130,6 @@ class NotificationHelper
 	 * @param notification_id The id of the Notification ( Unique Integer)
 	 */
 	@SuppressLint("MissingPermission")
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	fun createNotification(
 		context : Context ,
 		channel_id : String ,
@@ -164,7 +161,7 @@ class NotificationHelper
 
 		val builder =
 			NotificationCompat.Builder(context , channel_id).apply {
-				setSmallIcon(R.mipmap.ic_launcher)
+				setSmallIcon(R.mipmap.ic_launcher_round)
 				setContentTitle("$title at $timeFormated")
 				when (title)
 				{

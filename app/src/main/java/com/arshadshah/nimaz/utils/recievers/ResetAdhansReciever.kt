@@ -22,6 +22,6 @@ class ResetAdhansReciever : BroadcastReceiver()
 		//create alarms
 		CreateAlarms().scheduleAlarms(context , fajr , sunrise , zuhar , asar , maghrib , ishaa)
 
-		Log.d(AppConstants.RESET_ADHANS_RECEIVER_TAG , "Alarms for Adhan Reset!")
+		Log.i(AppConstants.RESET_ADHANS_RECEIVER_TAG , "Alarms for Adhan Reset!")
 	}
 }

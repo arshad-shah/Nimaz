@@ -25,6 +25,8 @@ fun NoteInput(
 	//open dialog
 	AlertDialog(
 			onDismissRequest = {
+				//close dialog
+				showNoteDialog.value = false
 			} ,
 			title = {
 				Row(
@@ -43,8 +45,7 @@ fun NoteInput(
 							}) {
 						Icon(
 								modifier = Modifier
-									.size(48.dp)
-									.padding(4.dp) ,
+									.size(24.dp) ,
 								painter = painterResource(id = R.drawable.delete_icon) ,
 								contentDescription = "Remove Note"
 							)
@@ -53,25 +54,37 @@ fun NoteInput(
 			} ,
 			text = {
 				OutlinedTextField(
+						textStyle = MaterialTheme.typography.bodyLarge ,
+						singleLine = false ,
+						shape = MaterialTheme.shapes.extraLarge ,
 						value = noteContent.value ,
 						onValueChange = { noteContent.value = it } ,
 						label = { Text(text = "Note") } ,
 						modifier = Modifier
-							.fillMaxWidth()
-							.height(200.dp) ,
+							.fillMaxWidth() ,
+						leadingIcon = {
+							Icon(
+									modifier = Modifier
+										.size(20.dp) ,
+									painter = painterResource(id = R.drawable.note_icon) ,
+									contentDescription = "Note"
+								)
+						} ,
 						trailingIcon = {
-							//an icon to clear the text field
-							IconButton(onClick = {
-								//clear text field
-								noteContent.value = ""
-							}) {
-								Icon(
-										modifier = Modifier
-											.size(24.dp)
-											.padding(4.dp) ,
-										painter = painterResource(id = R.drawable.cross_icon) ,
-										contentDescription = "Clear Text"
-									)
+							if (noteContent.value.isNotEmpty())
+							{
+								//an icon to clear the text field
+								IconButton(onClick = {
+									//clear text field
+									noteContent.value = ""
+								}) {
+									Icon(
+											modifier = Modifier
+												.size(20.dp) ,
+											painter = painterResource(id = R.drawable.cross_icon) ,
+											contentDescription = "Clear Text"
+										)
+								}
 							}
 						}
 								 )
@@ -91,13 +104,13 @@ fun NoteInput(
 					{
 						onClick()
 					}
-				}) { Text(text = "Save") }
+				}) { Text(text = "Save" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			dismissButton = {
 				TextButton(onClick = {
 					//close dialog
 					showNoteDialog.value = false
-				}) { Text(text = "Cancel") }
+				}) { Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium) }
 			} ,
 			   )
 

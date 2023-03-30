@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
@@ -27,6 +28,7 @@ fun DateSelector(
 				)
 {
 	val viewModel = viewModel(
+			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -38,7 +40,9 @@ fun DateSelector(
 	val newDay = remember { mutableStateOf(date.value.dayOfMonth) }
 	val newMonth = remember { mutableStateOf(date.value.monthValue) }
 	val newYear = remember { mutableStateOf(date.value.year) }
-	ElevatedCard {
+	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
+				) {
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -69,6 +73,7 @@ fun DateSelector(
 						.clickable {
 							date.value = LocalDate.now()
 							handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
+							handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value.toString()))
 							newDay.value = date.value.dayOfMonth
 							newMonth.value = date.value.monthValue
 							newYear.value = date.value.year
