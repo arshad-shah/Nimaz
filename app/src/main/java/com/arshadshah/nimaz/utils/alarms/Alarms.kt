@@ -4,7 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -24,7 +24,7 @@ class Alarms
 	fun setAlarm(context : Context , pendingIntent : PendingIntent)
 	{
 		// get alarm manager
-		val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
+		val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
 
 		val calendar = GregorianCalendar.getInstance().apply {
 			if (get(Calendar.HOUR_OF_DAY) >= 1)
@@ -68,7 +68,7 @@ class Alarms
 	fun setExactAlarm(context : Context , timeToNotify : Long , pendingIntent : PendingIntent)
 	{
 		// get alarm manager
-		val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
+		val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
 		alarmManager.setAlarmClock(
 				AlarmManager.AlarmClockInfo(timeToNotify , pendingIntent) ,
 				pendingIntent
@@ -92,7 +92,7 @@ class Alarms
 	 * */
 	fun cancelAlarm(context : Context , pendingIntent : PendingIntent)
 	{
-		val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
+		val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
 		alarmManager.cancel(pendingIntent)
 		Log.i("Alarms for Adhan" , "ALL alarms are cancelled")
 	}

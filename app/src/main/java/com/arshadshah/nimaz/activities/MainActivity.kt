@@ -12,7 +12,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -120,7 +121,9 @@ class MainActivity : ComponentActivity()
 		}
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class)
+	@OptIn(ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class ,
+		   ExperimentalMaterialApi::class
+		  )
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
 	{

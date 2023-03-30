@@ -1,10 +1,16 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -20,7 +26,7 @@ import com.arshadshah.nimaz.ui.components.ui.trackers.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlin.reflect.KFunction1
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class , ExperimentalMaterialApi::class)
 @Composable
 fun MyQuranScreen(
 	bookmarks : State<List<Aya>> ,
@@ -63,7 +69,7 @@ fun MyQuranScreen(
 					dropDownItem = { bookmark ->
 						val currentItem = rememberUpdatedState(newValue = bookmark)
 						val dismissState = rememberDismissState(
-								confirmValueChange = {
+								confirmStateChange = {
 									if (it == DismissValue.DismissedToStart)
 									{
 										handleEvents(
@@ -119,7 +125,7 @@ fun MyQuranScreen(
 					dropDownItem = { favourite ->
 						val currentItem = rememberUpdatedState(newValue = favourite)
 						val dismissState = rememberDismissState(
-								confirmValueChange = {
+								confirmStateChange = {
 									if (it == DismissValue.DismissedToStart)
 									{
 										handleEvents(
@@ -175,7 +181,7 @@ fun MyQuranScreen(
 					dropDownItem = { note ->
 						val currentItem = rememberUpdatedState(newValue = note)
 						val dismissState = rememberDismissState(
-								confirmValueChange = {
+								confirmStateChange = {
 									if (it == DismissValue.DismissedToStart)
 									{
 										handleEvents(

@@ -11,6 +11,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -35,6 +36,7 @@ fun BottomNavigationBar(navController : NavController)
 		val navBackStackEntry by navController.currentBackStackEntryAsState()
 		val currentRoute = navBackStackEntry?.destination?.route
 		bottomNavItems.forEach { bottomNavItem ->
+			val selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == bottomNavItem.screen_route } == true
 			NavigationBarItem(
 					modifier = Modifier
 						.semantics {
@@ -48,11 +50,15 @@ fun BottomNavigationBar(navController : NavController)
 							indicatorColor = MaterialTheme.colorScheme.secondaryContainer
 															 ) ,
 					icon = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = bottomNavItem.icon) ,
-								contentDescription = bottomNavItem.iconDescription
-							)
+								Icon(
+										painter = painterResource(id = if(selected) bottomNavItem.icon else bottomNavItem.icon_empty) ,
+										contentDescription = bottomNavItem.iconDescription,
+										modifier = Modifier
+											.semantics {
+												contentDescription = bottomNavItem.iconDescription
+											}
+											.size(24.dp)
+									)
 					} ,
 					label = {
 						Text(

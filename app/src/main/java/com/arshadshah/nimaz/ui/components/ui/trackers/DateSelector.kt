@@ -73,6 +73,7 @@ fun DateSelector(
 						.clickable {
 							date.value = LocalDate.now()
 							handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
+							handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value.toString()))
 							newDay.value = date.value.dayOfMonth
 							newMonth.value = date.value.monthValue
 							newYear.value = date.value.year
