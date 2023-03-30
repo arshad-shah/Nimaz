@@ -25,7 +25,7 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
 			initializer = { DuaViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
-									)
+							 )
 
 
 	val chapterState = remember { viewModel.chapterState }.collectAsState()

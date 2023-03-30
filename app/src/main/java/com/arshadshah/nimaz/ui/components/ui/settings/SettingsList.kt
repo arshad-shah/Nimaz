@@ -73,6 +73,10 @@ fun SettingsList(
 			onChange(valueState.value)
 		}
 	}
+
+	//state of the scrollable column
+	val stateScroll = rememberScrollState()
+
 	AlertDialog(
 			icon = icon ,
 			modifier = Modifier.height(height) ,
@@ -86,7 +90,7 @@ fun SettingsList(
 					Row(modifier.height(300.dp)) {
 						Column(
 								modifier = Modifier
-									.verticalScroll(rememberScrollState())
+									.verticalScroll(stateScroll)
 									.fillMaxWidth()
 									.fillMaxHeight()
 							  ) {
@@ -142,7 +146,7 @@ fun SettingsList(
 						onClick = { showDialog = false } ,
 						content = {
 							Text(
-									text = "Confirm" ,
+									text = "Done" ,
 									style = MaterialTheme.typography.titleMedium
 								)
 						}

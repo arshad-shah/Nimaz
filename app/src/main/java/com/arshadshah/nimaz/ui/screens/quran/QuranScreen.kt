@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
@@ -58,75 +58,70 @@ fun QuranScreen(
 				selectedTabIndex = pagerState.currentPage ,
 				modifier = Modifier
 					.padding(vertical = 4.dp , horizontal = 4.dp)
-					.clip(RoundedCornerShape(50))
-					.padding(1.dp) ,
-				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f) ,
+					.clip(MaterialTheme.shapes.extraLarge) ,
+				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) ,
 				indicator = { tabPositions : List<TabPosition> ->
-					val transition = updateTransition(pagerState.currentPage , label = "quranTabTransition")
+					val transition = updateTransition(pagerState.currentPage , label = "")
 					val indicatorStart by transition.animateDp(
 							transitionSpec = {
-								// Handle directionality here, if we are moving to the right, we
-								// want the right side of the indicator to move faster, if we are
-								// moving to the left, we want the left side to move faster.
-								//it should expand from left to right and return to normal once it reaches the en
-								if (initialState < targetState) {
-									spring(dampingRatio = 1f, stiffness = 1000f)
-								} else {
-									spring(dampingRatio = 1f, stiffness = 50f)
+								if (initialState < targetState)
+								{
+									spring(dampingRatio = 1f , stiffness = 50f)
+								} else
+								{
+									spring(dampingRatio = 1f , stiffness = 1000f)
 								}
-							} , label = "quranTabTransitionStart"
+							} , label = ""
 															  ) {
 						tabPositions[it].left
 					}
 
 					val indicatorEnd by transition.animateDp(
 							transitionSpec = {
-								// Handle directionality here, if we are moving to the right, we
-								// want the right side of the indicator to move faster, if we are
-								// moving to the left, we want the left side to move faster.
-								if (initialState < targetState) {
-									spring(dampingRatio = 1f, stiffness = 1000f)
-								} else {
-									spring(dampingRatio = 1f, stiffness = 50f)
+								if (initialState < targetState)
+								{
+									spring(dampingRatio = 1f , stiffness = 1000f)
+								} else
+								{
+									spring(dampingRatio = 1f , stiffness = 50f)
 								}
-							} , label = "quranTabTransitionEnd"
+							} , label = ""
 															) {
 						tabPositions[it].right
 					}
+
 					Box(
-							modifier = Modifier
-								// Fill up the entire TabRow, and place the indicator at the start
-								.fillMaxSize()
-								.wrapContentSize(align = Alignment.BottomStart)
-								// Apply an offset from the start to correctly position the indicator around the tab
+							Modifier
 								.offset(x = indicatorStart)
-								// Make the width of the indicator follow the animated width as we move between tabs
+								.wrapContentSize(align = Alignment.BottomStart)
 								.width(indicatorEnd - indicatorStart)
-					   ) {}
+								.padding(2.dp)
+								.fillMaxSize()
+								.background(
+										color = MaterialTheme.colorScheme.secondaryContainer ,
+										MaterialTheme.shapes.extraLarge
+										   )
+								.zIndex(1f)
+					   )
 				} ,
 				divider = { }
 			  ) {
 			titles.forEachIndexed { index , title ->
 				val selected = pagerState.currentPage == index
 				Tab(
-						modifier =
-						if (selected) Modifier
-							.clip(RoundedCornerShape(50))
-							.background(MaterialTheme.colorScheme.secondaryContainer)
-							.testTag(
-									AppConstants.TEST_TAG_QURAN_TAB.replace(
-											"{number}" ,
-											index.toString()
-																		   )
-									)
-						else Modifier
-							.clip(RoundedCornerShape(50))
+						modifier = Modifier
+							.zIndex(2f)
+							.clip(MaterialTheme.shapes.extraLarge)
 							.testTag(
 									AppConstants.TEST_TAG_QURAN_TAB.replace(
 											"{number}" ,
 											index.toString()
 																		   )
 									) ,
+						selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer ,
+						unselectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+								alpha = 0.4f
+																									) ,
 						selected = pagerState.currentPage == index ,
 						onClick = {
 							scope.launch {

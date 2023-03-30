@@ -309,7 +309,7 @@ fun DownloadQuranDialog(
 					handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
 					showDialog4(false)
 				} , modifier = Modifier.padding(4.dp)) {
-					Text(text = "Cancel Download" , style = MaterialTheme.typography.titleMedium)
+					Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
 				}
 			}
 			   )

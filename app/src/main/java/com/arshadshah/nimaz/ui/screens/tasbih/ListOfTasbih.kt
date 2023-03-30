@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -51,7 +51,7 @@ fun ListOfTasbih(
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = AppConstants.TASBIH_VIEWMODEL_KEY,
+			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
 			initializer = { TasbihViewModel(context) } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
@@ -89,7 +89,6 @@ fun ListOfTasbih(
 	val titles = listOf("Tasbih List" , "My Tasbih")
 	val pagerState = rememberPagerState()
 	val scope = rememberCoroutineScope()
-	val transition = updateTransition(pagerState.currentPage , label = "tasbihTabTransition")
 	Column(
 			modifier = Modifier
 				.padding(paddingValues)
@@ -100,15 +99,12 @@ fun ListOfTasbih(
 				selectedTabIndex = pagerState.currentPage ,
 				modifier = Modifier
 					.padding(vertical = 4.dp , horizontal = 4.dp)
-					.clip(RoundedCornerShape(50))
-					.padding(1.dp) ,
+					.clip(MaterialTheme.shapes.extraLarge) ,
 				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f) ,
 				indicator = { tabPositions : List<TabPosition> ->
+					val transition = updateTransition(pagerState.currentPage , label = "")
 					val indicatorStart by transition.animateDp(
 							transitionSpec = {
-								// Handle directionality here, if we are moving to the right, we
-								// want the right side of the indicator to move faster, if we are
-								// moving to the left, we want the left side to move faster.
 								if (initialState < targetState)
 								{
 									spring(dampingRatio = 1f , stiffness = 50f)
@@ -116,16 +112,13 @@ fun ListOfTasbih(
 								{
 									spring(dampingRatio = 1f , stiffness = 1000f)
 								}
-							} , label = "tasbihTabTransitionStart"
+							} , label = ""
 															  ) {
 						tabPositions[it].left
 					}
 
 					val indicatorEnd by transition.animateDp(
 							transitionSpec = {
-								// Handle directionality here, if we are moving to the right, we
-								// want the right side of the indicator to move faster, if we are
-								// moving to the left, we want the left side to move faster.
 								if (initialState < targetState)
 								{
 									spring(dampingRatio = 1f , stiffness = 1000f)
@@ -133,34 +126,33 @@ fun ListOfTasbih(
 								{
 									spring(dampingRatio = 1f , stiffness = 50f)
 								}
-							} , label = "tasbihTabTransitionEnd"
+							} , label = ""
 															) {
 						tabPositions[it].right
 					}
+
 					Box(
-							modifier = Modifier
-								// Apply an offset from the start to correctly position the indicator around the tab
+							Modifier
 								.offset(x = indicatorStart)
-								// Make the width of the indicator follow the animated width as we move between tabs
+								.wrapContentSize(align = Alignment.BottomStart)
 								.width(indicatorEnd - indicatorStart)
-					   ) {}
+								.padding(2.dp)
+								.fillMaxSize()
+								.background(
+										color = MaterialTheme.colorScheme.secondaryContainer ,
+										MaterialTheme.shapes.extraLarge
+										   )
+								.zIndex(1f)
+					   )
 				} ,
 				divider = { }
 			  ) {
 			titles.forEachIndexed { index , title ->
 				val selectedTabIndx = pagerState.currentPage == index
 				Tab(
-						modifier = if (selectedTabIndx) Modifier
-							.clip(RoundedCornerShape(50))
-							.background(MaterialTheme.colorScheme.secondaryContainer)
-							.testTag(
-									AppConstants.TEST_TAG_QURAN_TAB.replace(
-											"{number}" ,
-											index.toString()
-																		   )
-									)
-						else Modifier
-							.clip(RoundedCornerShape(50))
+						modifier = Modifier
+							.zIndex(2f)
+							.clip(MaterialTheme.shapes.extraLarge)
 							.testTag(
 									AppConstants.TEST_TAG_QURAN_TAB.replace(
 											"{number}" ,
@@ -176,7 +168,7 @@ fun ListOfTasbih(
 						text = {
 							Text(
 									text = title ,
-									maxLines = 2 ,
+									maxLines = 1 ,
 									overflow = TextOverflow.Ellipsis ,
 									style = MaterialTheme.typography.titleMedium ,
 									color = if (selectedTabIndx) MaterialTheme.colorScheme.onSecondaryContainer

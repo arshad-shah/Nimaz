@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -11,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +30,6 @@ fun Editbutton(
 			verticalAlignment = Alignment.CenterVertically
 	   ) {
 		ElevatedButton(
-				modifier = Modifier.shadow(3.dp , RoundedCornerShape(50)) ,
 				onClick = {
 					//if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
 					if (count.value > 0)

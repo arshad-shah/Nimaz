@@ -40,6 +40,9 @@ class SettingsViewModel(context : Context) : ViewModel()
 		MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE , false))
 	val isDarkMode = _isDarkMode.asStateFlow()
 
+	private var _hasUpdate = MutableStateFlow(false)
+	val hasUpdate = _hasUpdate.asStateFlow()
+
 
 	//state for switch of location toggle between manual and automatic
 	private var _isLocationAuto =
