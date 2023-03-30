@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.ui.navigation
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BottomNavigationBar(navController : NavController)
 {
@@ -50,15 +53,17 @@ fun BottomNavigationBar(navController : NavController)
 							indicatorColor = MaterialTheme.colorScheme.secondaryContainer
 															 ) ,
 					icon = {
-								Icon(
-										painter = painterResource(id = if(selected) bottomNavItem.icon else bottomNavItem.icon_empty) ,
-										contentDescription = bottomNavItem.iconDescription,
-										modifier = Modifier
-											.semantics {
-												contentDescription = bottomNavItem.iconDescription
-											}
-											.size(24.dp)
-									)
+						Crossfade(
+								targetState = selected ,
+								animationSpec = tween(durationMillis = 100)
+									   ) { targetState ->
+							Icon(
+									painter = painterResource(id = if(targetState) bottomNavItem.icon else bottomNavItem.icon_empty) ,
+									contentDescription = bottomNavItem.iconDescription,
+									modifier = Modifier
+										.size(24.dp)
+								)
+						}
 					} ,
 					label = {
 						Text(

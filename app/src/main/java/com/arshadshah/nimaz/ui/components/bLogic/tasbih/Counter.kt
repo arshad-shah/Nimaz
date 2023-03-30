@@ -124,11 +124,12 @@ fun Counter(
 				onDismissRequest = {
 					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
 				} ,
-				title = { Text(text = "Reset Counter") } ,
+				title = {
+					Text(text = "Reset Counter")
+						} ,
 				text = {
 					Text(
 							text = "Are you sure you want to reset the counter?" ,
-							style = MaterialTheme.typography.titleLarge
 						)
 				} ,
 				confirmButton = {
@@ -179,7 +180,6 @@ fun Counter(
 							label = {
 								Text(
 										text = "Objective" ,
-										style = MaterialTheme.typography.titleLarge
 									)
 							} ,
 							modifier = Modifier
