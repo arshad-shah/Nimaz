@@ -28,7 +28,7 @@ class RoutingActivity : ComponentActivity()
 		//get the first time flag
 		val firstTime = sharedPref.getDataBoolean(AppConstants.IS_FIRST_INSTALL , true)
 
-		if (!firstTime)
+		if (firstTime)
 		{
 			Log.d(
 					AppConstants.SPLASH_SCREEN_TAG ,
