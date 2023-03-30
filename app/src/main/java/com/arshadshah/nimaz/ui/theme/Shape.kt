@@ -7,7 +7,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun nimazCardShapes() = Shapes(
-		small = RoundedCornerShape(6.dp) ,
-		medium = RoundedCornerShape(8.dp) ,
-		large = RoundedCornerShape(10.dp)
+		extraSmall = RoundedCornerShape(8.dp) ,
+		small = RoundedCornerShape(10.dp) ,
+		medium = RoundedCornerShape(16.dp) ,
+		large = RoundedCornerShape(24.dp) ,
+		extraLarge = RoundedCornerShape(32.dp)
 							  )

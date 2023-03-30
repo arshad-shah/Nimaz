@@ -390,7 +390,7 @@ fun CalenderDay(
 				.padding(2.dp)
 				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
 				.border(
-						width = if (isSelectedDay) 2.dp else 0.dp ,
+						width = if (isSelectedDay || today) 2.dp else 0.dp ,
 						color = when (importantDay.first)
 						{
 							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary

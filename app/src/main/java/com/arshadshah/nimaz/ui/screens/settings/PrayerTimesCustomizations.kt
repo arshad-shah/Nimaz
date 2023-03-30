@@ -5,13 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -201,7 +199,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
-								.shadow(8.dp , RoundedCornerShape(8.dp))
 								.padding(8.dp) ,
 								) {
 						Text(
@@ -335,7 +332,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					ElevatedCard(
 							shape = MaterialTheme.shapes.extraLarge ,
 							modifier = Modifier
-								.shadow(8.dp , RoundedCornerShape(8.dp))
 								.padding(8.dp) ,
 								) {
 						Text(
@@ -484,7 +480,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 							ElevatedCard(
 									shape = MaterialTheme.shapes.extraLarge ,
 									modifier = Modifier
-										.shadow(8.dp , RoundedCornerShape(8.dp))
 										.padding(8.dp) ,
 										) {
 								Text(

@@ -150,12 +150,13 @@ fun LinkButton(
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(8.dp) ,
+					.padding(10.dp) ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			Image(
 					modifier = Modifier
+						.padding(start = 8.dp)
 						.size(48.dp) ,
 					painter = painter ,
 					contentDescription = content
@@ -182,7 +183,7 @@ fun LinkButton(
 fun LinkButtonPreview()
 {
 	LinkButton(
-			painter = painterResource(id = R.drawable.tasbih) ,
+			painter = painterResource(id = R.drawable.calendar_icon) ,
 			content = "Tasbih" ,
 			onClick = {} ,
 			title = "Github"

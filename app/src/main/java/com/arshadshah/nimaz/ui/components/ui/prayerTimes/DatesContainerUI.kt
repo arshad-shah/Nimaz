@@ -20,6 +20,7 @@ fun DatesContainerUI(GregDate : String , islamDate : String , onNavigateToTracke
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
+				.padding(vertical = 8.dp , horizontal = 8.dp)
 				.fillMaxWidth()
 				.clickable {
 					onNavigateToTracker()

@@ -28,7 +28,7 @@ fun DateSelector(
 				)
 {
 	val viewModel = viewModel(
-			key = AppConstants.TRACKING_VIEWMODEL_KEY,
+			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )

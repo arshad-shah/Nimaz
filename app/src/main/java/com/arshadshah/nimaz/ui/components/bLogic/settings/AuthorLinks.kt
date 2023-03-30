@@ -22,49 +22,65 @@ fun AuthorLinks()
 
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier.padding(8.dp)
+			modifier = Modifier
+				.padding(8.dp)
+				.height(64.dp) ,
 				) {
 		Row(
-				modifier = Modifier.fillMaxWidth() ,
+				modifier = Modifier
+					.fillMaxWidth()
+					.fillMaxHeight() ,
 				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically
+				verticalAlignment = Alignment.CenterVertically ,
 		   ) {
 			//website link
-			LinkButton(
-					icon = {
+			FilledIconButton(
+					colors = IconButtonDefaults.filledIconButtonColors(
+							containerColor = MaterialTheme.colorScheme.primary ,
+							contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	  ) ,
+					onClick = {
+						val intent =
+							Intent(Intent.ACTION_VIEW , Uri.parse("https://arshadshah.com"))
+						context.startActivity(intent)
+					} ,
+					content = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = R.drawable.external_link_icon) ,
 								contentDescription = "Portfolio Website Link" ,
 							)
-					} ,
-					onClick = {
-						val intent =
-							Intent(Intent.ACTION_VIEW , Uri.parse("https://arshadshah.com"))
-						context.startActivity(intent)
 					}
-					  )
+							)
 
 			//linkdIn link
-			LinkButton(
-					icon = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.linkedin_icon) ,
-								contentDescription = "LinkedIn Link" ,
-							)
-					} ,
+			FilledIconButton(
+					colors = IconButtonDefaults.filledIconButtonColors(
+							containerColor = MaterialTheme.colorScheme.primary ,
+							contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	  ) ,
 					onClick = {
 						val intent = Intent(
 								Intent.ACTION_VIEW ,
 								Uri.parse("https://www.linkedin.com/in/arshadshah")
 										   )
 						context.startActivity(intent)
+					} ,
+					content = {
+						Icon(
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.linkedin_icon) ,
+								contentDescription = "LinkedIn Link" ,
+							)
 					}
-					  )
+							)
 			//email link
-			LinkButton(
-					icon = {
+			FilledIconButton(
+					colors = IconButtonDefaults.filledIconButtonColors(
+							containerColor = MaterialTheme.colorScheme.primary ,
+							contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	  ) ,
+					content = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = R.drawable.mail_icon) ,
@@ -76,9 +92,13 @@ fun AuthorLinks()
 							Intent(Intent.ACTION_SENDTO , Uri.parse("mailto: info@arshadshah.com"))
 						context.startActivity(intent)
 					}
-					  )
-			LinkButton(
-					icon = {
+							)
+			FilledIconButton(
+					colors = IconButtonDefaults.filledIconButtonColors(
+							containerColor = MaterialTheme.colorScheme.primary ,
+							contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	  ) ,
+					content = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = R.drawable.github_icon) ,
@@ -93,27 +113,9 @@ fun AuthorLinks()
 											  )
 						context.startActivity(urlIntent)
 					}
-					  )
+							)
 
 		}
-	}
-}
-
-@Composable
-fun LinkButton(
-	icon : @Composable () -> Unit ,
-	onClick : () -> Unit ,
-			  )
-{
-	IconButton(
-			modifier = Modifier
-				.padding(4.dp)
-				.size(48.dp) ,
-			onClick = onClick ,
-			colors = IconButtonDefaults.filledIconButtonColors()
-			  )
-	{
-		icon()
 	}
 }
 

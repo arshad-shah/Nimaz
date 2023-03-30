@@ -32,7 +32,7 @@ fun ToggleableItemRow(
 {
 
 	Crossfade(
-			targetState = checked,
+			targetState = checked ,
 			animationSpec = tween(durationMillis = 300)
 			 ) { targetState ->
 
@@ -97,9 +97,9 @@ fun ToggleableItemColumn(
 						)
 {
 	Crossfade(
-			targetState = checked,
+			targetState = checked ,
 			animationSpec = tween(durationMillis = 300)
-				   ) { targetState ->
+			 ) { targetState ->
 		Row(
 				modifier = modifier
 					.fillMaxWidth()
