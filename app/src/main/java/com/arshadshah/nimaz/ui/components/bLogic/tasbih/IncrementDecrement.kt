@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.ui.components.bLogic.tasbih
 
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -14,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun IncrementDecrement(
 	count : MutableState<Int> ,
@@ -32,53 +35,67 @@ fun IncrementDecrement(
 		viewModel.orientationButtonState
 	}.collectAsState()
 
-	//if rorl is 0 then switch the place of the increment and decrement buttons to right side and if its 1 then switch the place of the increment and decrement buttons to left side
-	if (rOrl.value)
-	{
-		Row(
-				modifier = Modifier.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
+	AnimatedContent(
+			transitionSpec = {
+				ContentTransform(
+						fadeIn() +
+								slideInHorizontally(
+										animationSpec = tween(500)
+												   ) ,
+						fadeOut() + slideOutHorizontally(
+								animationSpec = tween(500)
+														)
+								)
+			} ,
+			targetState = rOrl.value
+				   ) { rorl ->
+		if (rorl)
+		{
+			Row(
+					modifier = Modifier.fillMaxWidth() ,
+					horizontalArrangement = Arrangement.SpaceEvenly ,
+					verticalAlignment = Alignment.CenterVertically
+			   ) {
 
-			Decrementbutton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-						   )
+				Decrementbutton(
+						count = count ,
+						lap = lap ,
+						lapCountCounter = lapCountCounter ,
+						objective = objective ,
+							   )
 
-			Spacer(modifier = Modifier.width(16.dp))
-			IncrementButton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-					context = context
-						   )
-		}
-	} else
-	{
-		Row(
-				modifier = Modifier.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
-			IncrementButton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-					context = context
-						   )
-			Spacer(modifier = Modifier.width(16.dp))
-			Decrementbutton(
-					count = count ,
-					lap = lap ,
-					lapCountCounter = lapCountCounter ,
-					objective = objective ,
-						   )
+				Spacer(modifier = Modifier.width(16.dp))
+				IncrementButton(
+						count = count ,
+						lap = lap ,
+						lapCountCounter = lapCountCounter ,
+						objective = objective ,
+						context = context
+							   )
+			}
+		} else
+		{
+			Row(
+					modifier = Modifier.fillMaxWidth() ,
+					horizontalArrangement = Arrangement.SpaceEvenly ,
+					verticalAlignment = Alignment.CenterVertically
+			   ) {
+				IncrementButton(
+						count = count ,
+						lap = lap ,
+						lapCountCounter = lapCountCounter ,
+						objective = objective ,
+						context = context
+							   )
+				Spacer(modifier = Modifier.width(16.dp))
+				Decrementbutton(
+						count = count ,
+						lap = lap ,
+						lapCountCounter = lapCountCounter ,
+						objective = objective ,
+							   )
 
+			}
 		}
 	}
 }

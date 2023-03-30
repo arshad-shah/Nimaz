@@ -38,6 +38,10 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
 
+        <meta-data
+            android:name="firebase_performance_logcat_enabled"
+            android:value="true" />
+
         <service
             android:name=".widgets.WidgetService"
             android:enabled="true"
@@ -77,8 +81,7 @@
         <receiver
             android:name=".utils.recievers.ResetAdhansReciever"
             android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.POST_NOTIFICATIONS" />
+            android:exported="true" />
         <receiver
             android:name=".utils.recievers.AdhanReciever"
             android:enabled="true"

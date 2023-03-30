@@ -382,7 +382,7 @@ fun CalenderDay(
 	//check if today is an important day and if so, display the description of the day and highlight the day
 	val importantDay = isImportantDay(hijriDayOfMonth , hijriMonth)
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
+			shape = MaterialTheme.shapes.large ,
 			elevation = CardDefaults.elevatedCardElevation(
 					defaultElevation = if (dayState.isFromCurrentMonth) 2.dp else 0.dp ,
 														  ) ,
@@ -390,7 +390,7 @@ fun CalenderDay(
 				.padding(2.dp)
 				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
 				.border(
-						width = 2.dp ,
+						width = if (isSelectedDay || today) 2.dp else 0.dp ,
 						color = when (importantDay.first)
 						{
 							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary
@@ -400,7 +400,7 @@ fun CalenderDay(
 							else if (today) MaterialTheme.colorScheme.secondary
 							else MaterialTheme.colorScheme.primary
 						} ,
-						shape = MaterialTheme.shapes.extraLarge
+						shape = MaterialTheme.shapes.large
 					   ) ,
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)

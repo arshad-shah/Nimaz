@@ -58,29 +58,6 @@ fun PrayerTimesScreen(
 		viewModel.isLoading
 	}.collectAsState()
 
-	val fajrTime = remember {
-		viewModel.fajrTime
-	}.collectAsState()
-
-	val sunriseTime = remember {
-		viewModel.sunriseTime
-	}.collectAsState()
-
-	val dhuhrTime = remember {
-		viewModel.dhuhrTime
-	}.collectAsState()
-
-	val asrTime = remember {
-		viewModel.asrTime
-	}.collectAsState()
-
-	val maghribTime = remember {
-		viewModel.maghribTime
-	}.collectAsState()
-
-	val ishaTime = remember {
-		viewModel.ishaTime
-	}.collectAsState()
 	LaunchedEffect(locationState.value , latitude.value , longitude.value) {
 		//update the prayer times
 		viewModel.handleEvent(
@@ -102,7 +79,7 @@ fun PrayerTimesScreen(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(paddingValues)
-				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES),
+				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 			  ) {
@@ -125,7 +102,8 @@ fun PrayerTimesScreen(
 @Composable
 fun getBackgroundImage(currentPrayerName : String) : Painter
 {
-	return when (currentPrayerName) {
+	return when (currentPrayerName)
+	{
 		"fajr" -> painterResource(id = R.drawable.fajr_back)
 		"sunrise" -> painterResource(id = R.drawable.sunrise_back)
 		"dhuhr" -> painterResource(id = R.drawable.dhuhr_back)

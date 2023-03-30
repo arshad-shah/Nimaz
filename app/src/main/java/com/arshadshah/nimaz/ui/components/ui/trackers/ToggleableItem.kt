@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
 import android.util.Log
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,56 +31,63 @@ fun ToggleableItemRow(
 					 )
 {
 
-	Column(
-			modifier = modifier
-				.clickable {
-					onCheckedChange(! checked)
-				} ,
-			verticalArrangement = Arrangement.Center ,
-			horizontalAlignment = Alignment.CenterHorizontally
-		  ) {
-		//a icon button to toggle the state of the toggleable item
-		OutlinedIconToggleButton(
-				colors = IconButtonDefaults.outlinedIconToggleButtonColors(
-						containerColor = MaterialTheme.colorScheme.surface ,
-						contentColor = MaterialTheme.colorScheme.onSurface ,
-						checkedContainerColor = MaterialTheme.colorScheme.primary ,
-						checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
-																		  ) ,
-				checked = checked ,
-				onCheckedChange = {
-					Log.d("ToggleableItem" , "onCheckedChange: $it")
-					onCheckedChange(it)
-				} ,
-								) {
-			if (! checked)
-			{
-				Icon(
-						painter = painterResource(id = R.drawable.cross_icon) ,
-						contentDescription = "Close" ,
-						modifier = Modifier.padding(10.dp)
-					)
-			} else
-			{
-				Icon(
-						painter = painterResource(id = R.drawable.check_icon) ,
-						contentDescription = "Check" ,
-						modifier = Modifier.padding(8.dp)
-					)
+	Crossfade(
+			targetState = checked ,
+			animationSpec = tween(durationMillis = 300)
+			 ) { targetState ->
+
+		Column(
+				modifier = modifier
+					.clickable {
+						onCheckedChange(! targetState)
+					} ,
+				verticalArrangement = Arrangement.Center ,
+				horizontalAlignment = Alignment.CenterHorizontally
+			  ) {
+			//a icon button to toggle the state of the toggleable item
+			OutlinedIconToggleButton(
+					colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+							containerColor = MaterialTheme.colorScheme.surface ,
+							contentColor = MaterialTheme.colorScheme.onSurface ,
+							checkedContainerColor = MaterialTheme.colorScheme.primary ,
+							checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
+																			  ) ,
+					checked = targetState ,
+					onCheckedChange = {
+						Log.d("ToggleableItem" , "onCheckedChange: $it")
+						onCheckedChange(it)
+					} ,
+									) {
+				if (! targetState)
+				{
+					Icon(
+							painter = painterResource(id = R.drawable.cross_icon) ,
+							contentDescription = "Close" ,
+							modifier = Modifier.padding(10.dp)
+						)
+				} else
+				{
+					Icon(
+							painter = painterResource(id = R.drawable.check_icon) ,
+							contentDescription = "Check" ,
+							modifier = Modifier.padding(8.dp)
+						)
+				}
 			}
+
+
+			Text(
+					text = text ,
+					modifier = Modifier.padding(8.dp) ,
+					style = MaterialTheme.typography.bodySmall ,
+				)
 		}
-
-
-		Text(
-				text = text ,
-				modifier = Modifier.padding(8.dp) ,
-				style = MaterialTheme.typography.bodySmall ,
-			)
 	}
 }
 
 //toggelable item variant columned
 //overloaded function
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ToggleableItemColumn(
 	text : String ,
@@ -87,55 +96,60 @@ fun ToggleableItemColumn(
 	modifier : Modifier ,
 						)
 {
-	Row(
-			modifier = modifier
-				.fillMaxWidth()
-				.clickable {
-					onCheckedChange(! checked)
-				} ,
-			verticalAlignment = Alignment.CenterVertically ,
-			horizontalArrangement = Arrangement.Start
-	   ) {
-		//a icon button to toggle the state of the toggleable item
-		OutlinedIconToggleButton(
-				colors = IconButtonDefaults.outlinedIconToggleButtonColors(
-						containerColor = MaterialTheme.colorScheme.surface ,
-						contentColor = MaterialTheme.colorScheme.onSurface ,
-						checkedContainerColor = MaterialTheme.colorScheme.primary ,
-						checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
-																		  ) ,
-				checked = checked ,
-				onCheckedChange = {
-					Log.d("ToggleableItem" , "onCheckedChange: $it")
-					onCheckedChange(it)
-				} ,
-								) {
-			if (! checked)
-			{
-				Icon(
-						painter = painterResource(id = R.drawable.cross_icon) ,
-						contentDescription = "Close" ,
-						modifier = Modifier.padding(10.dp)
-					)
-			} else
-			{
-				Icon(
-						painter = painterResource(id = R.drawable.check_icon) ,
-						contentDescription = "Check" ,
-						modifier = Modifier.padding(8.dp)
-					)
+	Crossfade(
+			targetState = checked ,
+			animationSpec = tween(durationMillis = 300)
+			 ) { targetState ->
+		Row(
+				modifier = modifier
+					.fillMaxWidth()
+					.clickable {
+						onCheckedChange(! targetState)
+					} ,
+				verticalAlignment = Alignment.CenterVertically ,
+				horizontalArrangement = Arrangement.Start
+		   ) {
+			//a icon button to toggle the state of the toggleable item
+			OutlinedIconToggleButton(
+					colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+							containerColor = MaterialTheme.colorScheme.surface ,
+							contentColor = MaterialTheme.colorScheme.onSurface ,
+							checkedContainerColor = MaterialTheme.colorScheme.primary ,
+							checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
+																			  ) ,
+					checked = targetState ,
+					onCheckedChange = {
+						Log.d("ToggleableItem" , "onCheckedChange: $it")
+						onCheckedChange(it)
+					} ,
+									) {
+				if (! targetState)
+				{
+					Icon(
+							painter = painterResource(id = R.drawable.cross_icon) ,
+							contentDescription = "Close" ,
+							modifier = Modifier.padding(10.dp)
+						)
+				} else
+				{
+					Icon(
+							painter = painterResource(id = R.drawable.check_icon) ,
+							contentDescription = "Check" ,
+							modifier = Modifier.padding(8.dp)
+						)
+				}
 			}
+			Text(
+					modifier = Modifier.padding(
+							top = 8.dp ,
+							start = 8.dp ,
+							end = 8.dp ,
+							bottom = 8.dp
+											   ) ,
+					text = text ,
+					style = MaterialTheme.typography.bodyLarge
+				)
 		}
-		Text(
-				modifier = Modifier.padding(
-						top = 8.dp ,
-						start = 8.dp ,
-						end = 8.dp ,
-						bottom = 8.dp
-										   ) ,
-				text = text ,
-				style = MaterialTheme.typography.bodyLarge
-			)
 	}
 }
 

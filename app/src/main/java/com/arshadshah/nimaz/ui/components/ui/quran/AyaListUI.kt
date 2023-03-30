@@ -191,10 +191,13 @@ fun AyaListUI(
 			}
 		}
 
+		val scope = rememberCoroutineScope()
+
 		LazyColumn(
 				modifier = Modifier.testTag(TEST_TAG_AYA) ,
 				userScrollEnabled = true ,
-				contentPadding = paddingValues , state = listState
+				contentPadding = paddingValues ,
+				state = listState
 				  ) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
@@ -226,7 +229,7 @@ fun AyaListItemUI(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.QURAN_VIEWMODEL_KEY ,
+			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 

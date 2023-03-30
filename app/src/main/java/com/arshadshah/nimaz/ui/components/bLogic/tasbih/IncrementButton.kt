@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -14,7 +14,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -45,8 +44,10 @@ fun IncrementButton(
 	val vibrator = viewModel.vibrator
 
 	ElevatedButton(
-			contentPadding = PaddingValues(38.dp) ,
-			modifier = Modifier.shadow(5.dp , RoundedCornerShape(50)) ,
+			elevation = ButtonDefaults.elevatedButtonElevation(
+					defaultElevation = 4.dp
+															  ) ,
+			contentPadding = PaddingValues(48.dp) ,
 			onClick = {
 				if (vibrationAllowed.value)
 				{

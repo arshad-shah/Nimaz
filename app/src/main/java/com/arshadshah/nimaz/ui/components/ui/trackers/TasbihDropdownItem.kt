@@ -1,15 +1,20 @@
 package com.arshadshah.nimaz.ui.components.ui.trackers
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -35,7 +40,7 @@ fun TasbihDropdownItem(
 {
 	val currentItem = rememberUpdatedState(newValue = item)
 	val dismissState = rememberDismissState(
-			confirmValueChange = {
+			confirmStateChange = {
 				if (it == DismissValue.DismissedToEnd)
 				{
 					onEdit(currentItem.value)
@@ -138,7 +143,7 @@ fun TasbihDropdownItem(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class , ExperimentalMaterialApi::class)
 fun SwipeBackground(dismissState : DismissState)
 {
 	val direction = dismissState.dismissDirection ?: return

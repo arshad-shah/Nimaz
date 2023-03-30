@@ -102,16 +102,16 @@ class NamesOfAllahViewModel : ViewModel()
 	fun stopAudio()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-				//stop the audio
-				mediaPlayer.stop()
-				//reset the audio
-				mediaPlayer.reset()
-				//set the playing state to false
-				_isPlaying.value = false
-				//set the paused state to false
-				_isPaused.value = false
-				//set the stopped state to true
-				_isStopped.value = true
+			//stop the audio
+			mediaPlayer.stop()
+			//reset the audio
+			mediaPlayer.reset()
+			//set the playing state to false
+			_isPlaying.value = false
+			//set the paused state to false
+			_isPaused.value = false
+			//set the stopped state to true
+			_isStopped.value = true
 		}
 	}
 
