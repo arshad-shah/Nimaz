@@ -197,7 +197,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				}
 
 				//emoji for moon phase
-				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge)
+				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge, modifier = Modifier.testTag("moon_phase"))
 			}
 			Row(
 					modifier = Modifier

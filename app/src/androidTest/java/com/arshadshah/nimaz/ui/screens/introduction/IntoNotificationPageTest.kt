@@ -30,7 +30,7 @@ class IntoNotificationPageTest
 	fun verifyNotificationPageStructure()
 	{
 		composeTestRule.onNodeWithText("Adhan Notifications").assertIsDisplayed()
-		composeTestRule.onNodeWithText("Enable Adhan Notifications for Nimaz to get Prayer alerts in the form of Adhan.").assertIsDisplayed()
+		composeTestRule.onNodeWithText("Enable Adhan Notifications for Nimaz to get Prayer reminders in the form of Adhan.").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Enable Notifications").assertIsDisplayed()
 		composeTestRule.onNodeWithTag("notification_switch_on_intro_screen").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Next").assertIsDisplayed()
