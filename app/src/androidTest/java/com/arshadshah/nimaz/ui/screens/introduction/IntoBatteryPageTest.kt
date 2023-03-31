@@ -33,8 +33,7 @@ class IntoBatteryPageTest
 	fun verifyBatteryExemptionPageStructure()
 	{
 		composeTestRule.onNodeWithText("Battery Exemption").assertIsDisplayed()
-		composeTestRule.onNodeWithText("Nimaz needs to be exempted from battery optimization to show adhan notifications Correctly.").assertIsDisplayed()
-		composeTestRule.onNodeWithText("Enable Battery Exemption").assertIsDisplayed()
+		composeTestRule.onNodeWithText("Battery optimization can cause issues with Adhan Notifications. Please exempt Nimaz from battery optimization.").assertIsDisplayed()
 		composeTestRule.onNodeWithTag("BatteryExemptionSwitch").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Next").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Back").assertIsDisplayed()
