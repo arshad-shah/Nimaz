@@ -274,6 +274,7 @@
                 <map>
                   <entry key="Duration" value="90" />
                   <entry key="Pixel_6_Pro_API_33" value="120" />
+                  <entry key="S20_Fe_API_33" value="120" />
                   <entry key="Tests" value="360" />
                 </map>
               </option>
@@ -371,6 +372,19 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="895087732">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="S20_Fe_API_33" value="120" />
+                  <entry key="Tests" value="360" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
         <entry key="1021648077">
           <value>
             <AndroidTestResultsTableState>
@@ -443,6 +457,19 @@
                 <map>
                   <entry key="Duration" value="90" />
                   <entry key="Pixel_6_Pro_API_33" value="120" />
+                  <entry key="S20_Fe_API_33" value="120" />
+                  <entry key="Tests" value="360" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="1226692847">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
                   <entry key="S20_Fe_API_33" value="120" />
                   <entry key="Tests" value="360" />
                 </map>

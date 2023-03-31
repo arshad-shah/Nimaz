@@ -38,7 +38,7 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 	val visibleItemIndex = remember { mutableStateOf(sharedPref.getInt("visibleItemIndex" , - 1)) }
 
 	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-	LaunchedEffect(listState.firstVisibleItemIndex)
+	LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })
 	{
 		sharedPref.edit().putInt("visibleItemIndex" , listState.firstVisibleItemIndex).apply()
 	}

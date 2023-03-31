@@ -31,10 +31,8 @@ class IntoLocationPageTest
 	fun verifyLocationPageStructure()
 	{
 		composeTestRule.onNodeWithText("Location").assertIsDisplayed()
-		composeTestRule.onNodeWithText("Nimaz needs your location to get accurate prayer times. You can also use manual location.").assertIsDisplayed()
-		composeTestRule.onNodeWithText("Enable Auto Location").assertIsDisplayed()
+		composeTestRule.onNodeWithText("Nimaz needs your location to get accurate prayer times and calculate Qibla direction. You can also use manual location.").assertIsDisplayed()
 		composeTestRule.onNodeWithTag("LocationSwitch").assertIsDisplayed()
-		composeTestRule.onNodeWithText("Edit Location").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Next").assertIsDisplayed()
 		composeTestRule.onNodeWithText("Back").assertIsDisplayed()
 	}
