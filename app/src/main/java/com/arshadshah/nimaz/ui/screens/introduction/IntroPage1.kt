@@ -67,6 +67,7 @@ fun IntroPage1()
 		Row(
 				Modifier
 					.padding(vertical = 8.dp)
+					.testTag("introPagerIndicator")
 					.height(30.dp)
 					.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.Center ,
