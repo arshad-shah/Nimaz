@@ -9,8 +9,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,7 +22,6 @@ import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 
 
@@ -49,12 +47,26 @@ fun IntroPage1()
 	val sharedPref = PrivateSharedPreferences(context)
 	val scope = rememberCoroutineScope()
 
+
+	val areSettingsComplete = remember {
+		mutableStateOf(false)
+	}
+
+	LaunchedEffect(key1 = pagerState.currentPage) {
+		val isLocationSet =
+			sharedPref.getData(AppConstants.LOCATION_INPUT , "").isNotBlank()
+		val isNotificationSet =
+			sharedPref.getDataBoolean(AppConstants.NOTIFICATION_ALLOWED , false)
+		areSettingsComplete.value = pagerState.currentPage == pages.size - 1 && isLocationSet && isNotificationSet
+	}
+
 	Column(
 			modifier = Modifier
 				.padding(bottom = 20.dp)
 				.fillMaxSize()
 		  ) {
 		HorizontalPager(
+				userScrollEnabled = false ,
 				modifier = Modifier
 					.weight(10f)
 					.testTag("introPager") ,
@@ -106,64 +118,35 @@ fun IntroPage1()
 			{
 				BackButton(
 						modifier = Modifier ,
-						pagerState = pagerState
+						pagerState = pagerState,
 						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage - 1)
 					}
 				}
 				FinishButton(
-						modifier = Modifier , pagerState = pagerState
+						modifier = Modifier ,
+						pagerState = pagerState,
+						areSettingsComplete = areSettingsComplete.value,
 							) {
-					//check if the settings were completed or not
-					val isLocationSet =
-						sharedPref.getData(AppConstants.LOCATION_INPUT , "").isNotBlank()
-					val isNotificationSet =
-						sharedPref.getDataBoolean(AppConstants.NOTIFICATION_ALLOWED , false)
-					if (isLocationSet && isNotificationSet)
-					{
-						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
-						context.startActivity(Intent(context , MainActivity::class.java))
-						//remove the activity from the back stack
-						(context as Introduction).finish()
-					} else if (! isLocationSet)
-					{
-						Toasty.error(
-								context ,
-								"Please set your location in settings" ,
-								Toasty.LENGTH_SHORT
-									)
-							.show()
-						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
-						context.startActivity(Intent(context , MainActivity::class.java))
-						//remove the activity from the back stack
-						(context as Introduction).finish()
-					} else if (! isNotificationSet)
-					{
-						Toasty.error(
-								context ,
-								"Please allow notifications in settings" ,
-								Toasty.LENGTH_SHORT
-									)
-							.show()
-						sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
-						context.startActivity(Intent(context , MainActivity::class.java))
-						//remove the activity from the back stack
-						(context as Introduction).finish()
-					}
+					sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
+					context.startActivity(Intent(context , MainActivity::class.java))
+					//remove the activity from the back stack
+					(context as Introduction).finish()
 				}
 			} else
 			{
 				BackButton(
 						modifier = Modifier.padding(horizontal = 20.dp) ,
-						pagerState = pagerState
-						  ) {
+						pagerState = pagerState ,
+						  )
+				{
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage - 1)
 					}
 				}
 				NextButton(
-						pagerState = pagerState
+						pagerState = pagerState,
 						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage + 1)

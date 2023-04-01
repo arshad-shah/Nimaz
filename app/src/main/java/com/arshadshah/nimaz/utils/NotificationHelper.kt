@@ -16,7 +16,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.activities.MainActivity
+import com.arshadshah.nimaz.activities.RoutingActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.NOTIFICATION_PENDING_INTENT_REQUEST_CODE
 import java.text.DateFormat
@@ -140,7 +140,7 @@ class NotificationHelper
 	{
 		// Create an explicit intent for an Activity in your app
 		val notificationIntent =
-			Intent(context , MainActivity::class.java).apply {
+			Intent(context , RoutingActivity::class.java).apply {
 				flags =
 					Intent.FLAG_ACTIVITY_NEW_TASK or
 							Intent
@@ -188,5 +188,44 @@ class NotificationHelper
 			notify(notification_id , builder.build())
 		}
 		Log.d(AppConstants.NOTIFICATION_TAG , "Notification $title Successfully Displayed")
+	}
+
+	@SuppressLint("MissingPermission")
+	fun createNotificationForMissedPrayer(
+		context : Context ,
+		channel_id : String ,
+		notification_id : Int ,
+		title : String ,
+		message : String ,
+						  )
+	{
+		// Create an explicit intent for an Activity in your app
+		val notificationIntent =
+			Intent(context , RoutingActivity::class.java).apply {
+				flags =
+					Intent.FLAG_ACTIVITY_NEW_TASK or
+							Intent
+								.FLAG_ACTIVITY_CLEAR_TASK
+			}
+		val notificationPendingIntent : PendingIntent =
+			PendingIntent.getActivity(
+					context ,
+					NOTIFICATION_PENDING_INTENT_REQUEST_CODE ,
+					notificationIntent ,
+					FLAG_IMMUTABLE
+									 )
+		val builder =
+			NotificationCompat.Builder(context , channel_id).apply {
+				setSmallIcon(R.mipmap.ic_launcher_round)
+				setContentTitle(title)
+				setContentText(message)
+				priority = NotificationCompat.PRIORITY_HIGH
+				setContentIntent(notificationPendingIntent)
+				setAutoCancel(true)
+			}
+		with(NotificationManagerCompat.from(context)) {
+			notify(notification_id , builder.build())
+		}
+		Log.d(AppConstants.NOTIFICATION_TAG , "Notification $message Successfully Displayed")
 	}
 }

@@ -38,9 +38,9 @@ object PrayerTimesRepository
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
 		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)
 		val fajrAngle : String =
-			sharedPreferences.getData(AppConstants.FAJR_ANGLE , "(timezoneOffsetHours.toLong())8")
+			sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 		val ishaAngle : String =
-			sharedPreferences.getData(AppConstants.ISHA_ANGLE , "(timezoneOffsetHours.toLong())7")
+			sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
 		val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
 		val calculationMethod : String =
 			sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
