@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
+	const val UPDATE_WIDGET_ACTION : String = "com.arshadshah.nimaz.UPDATE_WIDGET"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
@@ -94,6 +95,7 @@ object AppConstants
 	const val MAGHRIB_CHANNEL_ID = "maghrib_channel_id"
 	const val ISHA_CHANNEL_ID = "isha_channel_id"
 	const val TEST_CHANNEL_ID = "test_channel_id"
+	const val CHANNEL_MISSED_PRAYER_ID = "missed_prayer_channel_id"
 
 	const val FAJR_NOTIFY_ID = 2000
 	const val SUNRISE_NOTIFY_ID = 2001
@@ -102,6 +104,7 @@ object AppConstants
 	const val MAGHRIB_NOTIFY_ID = 2004
 	const val ISHA_NOTIFY_ID = 2005
 	const val TEST_NOTIFY_ID = 2006
+	const val MISSED_PRAYER_NOTIFY_ID = 2007
 
 	const val FAJR_PI_REQUEST_CODE = 1000
 	const val SUNRISE_PI_REQUEST_CODE = 1001
@@ -110,6 +113,7 @@ object AppConstants
 	const val MAGHRIB_PI_REQUEST_CODE = 1004
 	const val ISHA_PI_REQUEST_CODE = 1005
 	const val TEST_PI_REQUEST_CODE = 1006
+	const val MISSED_PRAYER_PI_REQUEST_CODE = 1007
 
 	//channels titles
 	const val CHANNEL_FAJR = "Fajr"
@@ -119,6 +123,7 @@ object AppConstants
 	const val CHANNEL_MAGHRIB = "Maghrib"
 	const val CHANNEL_ISHAA = "Ishaa"
 	const val CHANNEL_TEST = "Test"
+	const val CHANNEL_MISSED_PRAYER = "Missed Prayer"
 
 	//channel descriptions
 	const val CHANNEL_DESC = "Prayer Adhan Notification"
@@ -129,6 +134,7 @@ object AppConstants
 	const val CHANNEL_DESC_MAGHRIB = "Maghrib $CHANNEL_DESC"
 	const val CHANNEL_DESC_ISHAA = "Ishaa $CHANNEL_DESC"
 	const val CHANNEL_DESC_TEST = "Test $CHANNEL_DESC"
+	const val CHANNEL_DESC_MISSED_PRAYER = "Missed Prayer Notification"
 
 
 	//pending intent request codes
@@ -145,6 +151,8 @@ object AppConstants
 
 	//notification permission request code
 	const val NOTIFICATION_PERMISSION_REQUEST_CODE = 11
+
+	const val PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE = 12
 
 
 	// bottom nav item titles
@@ -260,6 +268,9 @@ object AppConstants
 
 	//AdhanReciever
 	const val ADHAN_RECEIVER_TAG = "$TAG: AdhanReciever"
+
+	//MissedPrayerReciever
+	const val MISSED_PRAYER_RECEIVER_TAG = "$TAG: MissedPrayerReciever"
 
 	//NimazServicesImpl
 	const val NIMAZ_SERVICES_IMPL_TAG = "$TAG: NimazServicesImpl"

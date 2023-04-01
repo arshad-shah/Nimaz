@@ -87,6 +87,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 fun FinishButton(
 	modifier : Modifier ,
 	pagerState : PagerState ,
+	areSettingsComplete : Boolean ,
 	onClick : () -> Unit ,
 				)
 {
@@ -102,7 +103,7 @@ fun FinishButton(
 			Button(
 					onClick = onClick ,
 				  ) {
-				Text(text = "Let's Get Started")
+				Text(text = if (areSettingsComplete) "Finish" else "Finish (Incomplete)" , style = MaterialTheme.typography.labelLarge)
 			}
 		}
 	}

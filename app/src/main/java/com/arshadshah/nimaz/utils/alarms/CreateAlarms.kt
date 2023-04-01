@@ -253,7 +253,31 @@ class CreateAlarms
 				context , RESET_PENDING_INTENT_REQUEST_CODE , resetIntent ,
 				PendingIntent.FLAG_IMMUTABLE
 														   )
-		Alarms().setAlarm(context , resetPendingIntent)
+		val calendar = GregorianCalendar.getInstance().apply {
+			if (get(Calendar.HOUR_OF_DAY) >= 1)
+			{
+				add(Calendar.DAY_OF_MONTH , 1)
+			}
+			set(Calendar.HOUR_OF_DAY , 1)
+			set(Calendar.MINUTE , 0)
+			set(Calendar.SECOND , 0)
+			set(Calendar.MILLISECOND , 0)
+		}
+		Alarms().setAlarm(context , resetPendingIntent , calendar.timeInMillis, message = "Reset alarm")
+//
+//		//recreate all alarms
+//		val prayerCompletedIntent = Intent(context , MissedPrayerReciever::class.java)
+//		val prayerCompletedPendingIntent = PendingIntent.getBroadcast(
+//				context , AppConstants.PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE , prayerCompletedIntent ,
+//				PendingIntent.FLAG_IMMUTABLE
+//														   )
+//		val calendarPrayerCompleted = System.currentTimeMillis() + 10000
+//		Alarms().setAlarm(
+//				context ,
+//				prayerCompletedPendingIntent ,
+//				calendarPrayerCompleted ,
+//				message = "Prayer completed alarm"
+//						 )
 	}
 
 	fun createAllNotificationChannels(context : Context)
@@ -324,6 +348,16 @@ class CreateAlarms
 				ISHA_CHANNEL_ID ,
 				ishaaAdhan
 													)
+//
+//		//sunrise
+//		notificationHelper.notificationChannelSilent(
+//				context ,
+//				NotificationManager.IMPORTANCE_DEFAULT ,
+//				false ,
+//				CHANNEL_MISSED_PRAYER ,
+//				CHANNEL_DESC_MISSED_PRAYER ,
+//				CHANNEL_MISSED_PRAYER_ID
+//													)
 
 	}
 }
