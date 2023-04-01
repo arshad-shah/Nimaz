@@ -9,7 +9,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 class Alarms
 {
@@ -21,40 +20,31 @@ class Alarms
 	 * @param pendingIntent The pending Intent for the alarm
 	 * @return Alarm
 	 * */
-	fun setAlarm(context : Context , pendingIntent : PendingIntent)
+	fun setAlarm(
+		context : Context ,
+		pendingIntent : PendingIntent ,
+		timeToNotify : Long ,
+		message : String
+				)
 	{
 		// get alarm manager
 		val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
 
-		val calendar = GregorianCalendar.getInstance().apply {
-			if (get(Calendar.HOUR_OF_DAY) >= 1)
-			{
-				add(Calendar.DAY_OF_MONTH , 1)
-			}
-			set(Calendar.HOUR_OF_DAY , 1)
-			set(Calendar.MINUTE , 0)
-			set(Calendar.SECOND , 0)
-			set(Calendar.MILLISECOND , 0)
-		}
-
 		alarmManager.setRepeating(
 				AlarmManager.RTC_WAKEUP ,
-				calendar.timeInMillis ,
+				timeToNotify ,
 				AlarmManager.INTERVAL_DAY ,
 				pendingIntent
 								 )
 
-		//recieverEnabled(context)
-		//format time by converting to LocalDateTime get the date and time
-
 		val time = LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(calendar.timeInMillis) ,
+				Instant.ofEpochMilli(timeToNotify) ,
 				ZoneId.systemDefault()
 										  )
 			.format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a"))
 
 		//logs
-		Log.i("Nimaz: Alarms for Adhan" , "Reset alarm for $time is successfully created")
+		Log.i("Nimaz: Alarms for Adhan" , "Alarm for $message at $time is successfully created")
 	} // end of alarm set
 
 

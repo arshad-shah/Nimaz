@@ -19,28 +19,31 @@
         android:visibility="visible">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/fajr"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/Fajr_time"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/fajr_time"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
-            tools:text="3:46 am" />
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
+            tools:text="3:46 AM" />
     </LinearLayout>
 
     <LinearLayout
@@ -54,34 +57,37 @@
         android:visibility="visible">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/zuhar"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/Zuhar_time"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Zuhar_time"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             tools:text="3:46 am" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/asarwidgethighlight"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
@@ -89,27 +95,30 @@
         android:visibility="visible">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/asar"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/Asar_time"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Asar_time"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             tools:text="3:46 am" />
     </LinearLayout>
 
@@ -124,27 +133,30 @@
         android:visibility="visible">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/maghrib"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/Maghrib_time"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Maghrib_time"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             tools:text="3:46 am" />
 
     </LinearLayout>
@@ -160,27 +172,30 @@
         android:visibility="visible">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/ishaa"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/Ishaa_time"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito"
             android:text="@string/Ishaa_time"
-            android:textColor="#C5E1A5"
-            android:textSize="14sp"
+            android:textAlignment="center"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="12sp"
             tools:text="10:46 am" />
     </LinearLayout>
 

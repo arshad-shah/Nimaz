@@ -95,6 +95,12 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 				PrayerTimesParamMapper.getParams(context)
 																				  )
 							 )
+		viewModel.handleEvent(
+				context ,
+				PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+						context
+																   )
+							 )
 	}
 
 	LaunchedEffect(key1 = Unit) {

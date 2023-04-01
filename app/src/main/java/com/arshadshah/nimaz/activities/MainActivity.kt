@@ -1,8 +1,5 @@
 package com.arshadshah.nimaz.activities
 
-import android.app.ActivityManager
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +10,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -53,13 +49,11 @@ import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.location.AutoLocationUtils
 import com.arshadshah.nimaz.utils.location.NetworkChecker
-import com.arshadshah.nimaz.widgets.Nimaz
-import com.arshadshah.nimaz.widgets.WidgetService
-import com.arshadshah.nimaz.widgets.updateAppWidget
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -122,8 +116,7 @@ class MainActivity : ComponentActivity()
 	}
 
 	@OptIn(
-			ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class ,
-			ExperimentalMaterialApi::class
+			ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class
 		  )
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
@@ -136,18 +129,11 @@ class MainActivity : ComponentActivity()
 			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
 		}
 
-		val appWidgetManager = AppWidgetManager.getInstance(this)
-		val appWidgetIds : IntArray = appWidgetManager.getAppWidgetIds(
-				ComponentName(
-						this ,
-						Nimaz::class.java
-							 )
-																	  )
-		for (appWidgetId in appWidgetIds)
+		if(!FirebaseLogger.isInitialized())
 		{
-			updateAppWidget(this , appWidgetManager , appWidgetId)
+			FirebaseLogger.init()
+			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and firebase logger initialized")
 		}
-		Log.d(MAIN_ACTIVITY_TAG , "onCreate:  app widget updated")
 
 		super.onCreate(savedInstanceState)
 
@@ -271,14 +257,6 @@ class MainActivity : ComponentActivity()
 						}
 					}
 				}
-
-
-//				this.startService(Intent(this , WidgetService::class.java))
-
-				Log.d(
-						MAIN_ACTIVITY_TAG ,
-						"Is service running: " + isMyServiceRunning(WidgetService::class.java).toString()
-					 )
 
 				val viewModelTasbih = viewModel(
 						key = TASBIH_VIEWMODEL_KEY ,
@@ -645,20 +623,6 @@ class MainActivity : ComponentActivity()
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
 	}
-
-	private fun isMyServiceRunning(serviceClass : Class<*>) : Boolean
-	{
-		val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-		for (service in manager.getRunningServices(Int.MAX_VALUE))
-		{
-			if (serviceClass.name == service.service.className)
-			{
-				return true
-			}
-		}
-		return false
-	}
-
 }
 
 class CustomAnimation
