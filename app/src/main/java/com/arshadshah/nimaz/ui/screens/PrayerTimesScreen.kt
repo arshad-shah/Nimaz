@@ -65,6 +65,12 @@ fun PrayerTimesScreen(
 				PrayerTimesParamMapper.getParams(context)
 																				  )
 							 )
+		viewModel.handleEvent(
+				context ,
+				PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+						context
+																   )
+							 )
 	}
 	val currentPrayerName = remember {
 		viewModel.currentPrayerName

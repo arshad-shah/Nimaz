@@ -42,29 +42,6 @@ fun CalculationMethodUI()
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context
 									)
-	val fajrTime = remember {
-		viewModel.fajrTime
-	}.collectAsState()
-
-	val sunriseTime = remember {
-		viewModel.sunriseTime
-	}.collectAsState()
-
-	val dhuhrTime = remember {
-		viewModel.dhuhrTime
-	}.collectAsState()
-
-	val asrTime = remember {
-		viewModel.asrTime
-	}.collectAsState()
-
-	val maghribTime = remember {
-		viewModel.maghribTime
-	}.collectAsState()
-
-	val ishaTime = remember {
-		viewModel.ishaTime
-	}.collectAsState()
 	val autoParams = remember {
 		settingViewModel.autoParams
 	}.collectAsState()
@@ -87,11 +64,6 @@ fun CalculationMethodUI()
 	val longitude = remember {
 		settingViewModel.longitude
 	}.collectAsState()
-
-	val sharedPreferences = remember {
-		settingViewModel.sharedPreferences
-	}
-
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier

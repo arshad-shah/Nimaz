@@ -37,16 +37,15 @@
         android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+        <receiver
+            android:name=".utils.recievers.MissedPrayerReciever"
+            android:enabled="true"
+            android:exported="false" />
 
         <meta-data
             android:name="firebase_performance_logcat_enabled"
             android:value="true" />
 
-        <service
-            android:name=".widgets.WidgetService"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="TODO" />
         <service
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
             android:enabled="true" />
@@ -93,8 +92,7 @@
             android:exported="false"
             android:label="@string/title_activity_introduction"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz">
-        </activity>
+            android:theme="@style/Theme.Nimaz"></activity>
         <activity
             android:name=".activities.RoutingActivity"
             android:exported="true"
