@@ -1,13 +1,12 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
+import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -16,12 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.ui.compass.CustomText
@@ -72,6 +73,11 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 		viewModel.randomAyaSurahState
 	}.collectAsState()
 
+	val translationSelected = PrivateSharedPreferences(context).getData(
+			AppConstants.TRANSLATION_LANGUAGE ,
+			"English"
+																	   )
+
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
@@ -93,7 +99,7 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(4.dp) ,
+					.padding(8.dp) ,
 				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
@@ -101,18 +107,18 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 					shape = MaterialTheme.shapes.extraLarge ,
 						) {
 				Row(
-						modifier = Modifier.padding(4.dp) ,
+						modifier = Modifier.padding(8.dp) ,
 				   ) {
-					CustomText(
-							modifier = Modifier ,
-							heading = "Verse" ,
-							text = stateOfRandomAyat.value.ayaNumber.toString()
-							  )
-					Spacer(modifier = Modifier.width(4.dp))
 					CustomText(
 							modifier = Modifier ,
 							heading = "Chapter" ,
 							text = stateOfRandomAyat.value.suraNumber.toString()
+							  )
+					Spacer(modifier = Modifier.width(4.dp))
+					CustomText(
+							modifier = Modifier ,
+							heading = "Verse" ,
+							text = stateOfRandomAyat.value.ayaNumber.toString()
 							  )
 				}
 			}
@@ -125,11 +131,36 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 					modifier = Modifier
 						.padding(4.dp)
 				)
+			Spacer(modifier = Modifier.width(4.dp))
+			IconButton(onClick = {
+				//share the aya
+				val shareIntent = Intent(Intent.ACTION_SEND)
+				shareIntent.type = "text/plain"
+				//create the share message
+				//with the aya text, aya translation
+				//the sura number followed by the aya number
+				shareIntent.putExtra(
+						Intent.EXTRA_TEXT ,
+						"Aya of the Day - Chapter ${stateOfRandomAyat.value.suraNumber}: Verse ${stateOfRandomAyat.value.ayaNumberInSurah}\n\n" +
+						"${stateOfRandomAyat.value.ayaArabic} \n\n" +
+								"${if(translationSelected == "Urdu") stateOfRandomAyat.value.ayaTranslationUrdu else stateOfRandomAyat.value.ayaTranslationEnglish} " +
+								"\n\n${stateOfRandomAyat.value.suraNumber}:${stateOfRandomAyat.value.ayaNumberInSurah}" +
+								"\n\nDownload the app to read more: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
+									)
+				shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Aya of the Day")
+
+				//start the share intent
+				context.startActivity(Intent.createChooser(shareIntent , "Share Ramadan Times"))
+			} , modifier = Modifier.size(24.dp)) {
+				Icon(painter = painterResource(id = R.drawable.share_icon) ,
+					 contentDescription = "Share Ramadan Times" ,
+					)
+			}
 		}
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(4.dp)
+					.padding(8.dp)
 		   ) {
 
 			Column(
@@ -153,11 +184,7 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 					}
 				}
 				Spacer(modifier = Modifier.height(4.dp))
-				if (PrivateSharedPreferences(context).getData(
-							AppConstants.TRANSLATION_LANGUAGE ,
-							"English"
-															 ) == "Urdu"
-				)
+				if (translationSelected == "Urdu")
 				{
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
@@ -172,11 +199,7 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 							)
 					}
 				}
-				if (PrivateSharedPreferences(context).getData(
-							AppConstants.TRANSLATION_LANGUAGE ,
-							"English"
-															 ) == "English"
-				)
+				if (translationSelected == "English")
 				{
 					stateOfRandomAyat.value.ayaTranslationEnglish.let {
 						Text(

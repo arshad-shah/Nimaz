@@ -57,14 +57,6 @@ fun RamadanTimesCard()
 	val todayHijri = HijrahDate.from(today)
 	val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 1)
 	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 29)
-	//get date of ramadan start in gregorian
-	val ramadanStartGregorian = LocalDate.from(ramadanStart)
-	val ramadanEndGregorian = LocalDate.from(ramadanEnd)
-	//format the date to show day and month and year
-	//wednesday, 1st of september 2021
-	val formatter = java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
-	val ramadanStartFormatted = ramadanStartGregorian.format(formatter)
-	val ramadanEndFormatted = ramadanEndGregorian.format(formatter)
 
 	val isAfterRamadanStart = todayHijri.isAfter(ramadanStart)
 	if (isAfterRamadanStart)
@@ -122,7 +114,7 @@ fun RamadanTimesCard()
 								"Ramadan Fasting Times for ${location.value} \n${DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy").format(today)} \n" +
 										"Imsak (Fajr): ${DateTimeFormatter.ofPattern("hh:mm a").format(fajrPrayerTime.value)} \n" +
 										"Iftar (Maghrib): ${DateTimeFormatter.ofPattern("hh:mm a").format(maghribPrayerTime.value)} \n" +
-										"Times are Provided by Nimaz"
+										"Times are Provided by Nimaz : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
 											)
 						shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Ramadan Times")
 						shareIntent.putExtra(Intent.EXTRA_TITLE , "Ramadan Times")
@@ -136,9 +128,18 @@ fun RamadanTimesCard()
 					}
 				}
 
+				val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
+				//if the device time format is 24 hour then use the 24 hour format
+				val formatter = if (deviceTimeFormat)
+				{
+					DateTimeFormatter.ofPattern("HH:mm")
+				} else
+				{
+					DateTimeFormatter.ofPattern("hh:mm a")
+				}
+
 				Row(
 						modifier = Modifier
-							.padding(8.dp)
 							.fillMaxWidth() ,
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween
@@ -148,8 +149,8 @@ fun RamadanTimesCard()
 							verticalArrangement = Arrangement.Center ,
 							horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
-						TimeComponent(title = "Imsak (Fajr)" , fajrPrayerTime = DateTimeFormatter.ofPattern("hh:mm a").format(fajrPrayerTime.value))
-						TimeComponent(title = "Iftar (Maghrib)" , fajrPrayerTime = DateTimeFormatter.ofPattern("hh:mm a").format(maghribPrayerTime.value))
+						TimeComponent(title = "Imsak (Fajr)" , fajrPrayerTime = formatter.format(fajrPrayerTime.value))
+						TimeComponent(title = "Iftar (Maghrib)" , fajrPrayerTime = formatter.format(maghribPrayerTime.value))
 					}
 				}
 			}

@@ -132,6 +132,17 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 
 	val difference = timeToNextPrayerLong?.minus(currentTime)
 
+	val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
+	//if the device time format is 24 hour then use the 24 hour format
+	val formatter = if (deviceTimeFormat)
+	{
+		DateTimeFormatter.ofPattern("HH:mm")
+	} else
+	{
+		DateTimeFormatter.ofPattern("hh:mm a")
+	}
+
+
 	viewModel.handleEvent(
 			context ,
 			PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
@@ -274,7 +285,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 							style = MaterialTheme.typography.titleLarge
 						)
 					Text(
-							text = nextPrayerTime.value.format(DateTimeFormatter.ofPattern("hh:mm a")) ,
+							text = nextPrayerTime.value.format(formatter) ,
 							style = MaterialTheme.typography.titleLarge
 						)
 					Text(
