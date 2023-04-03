@@ -1039,6 +1039,22 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
+	//get surah by id
+	fun getSurahById(id : Int)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				val surah = dataStore.getSurahById(id)
+				_randomAyaSurahState.value = surah
+			} catch (e : Exception)
+			{
+				Log.d("getSurahById" , e.message ?: "Unknown error")
+			}
+		}
+	}
+
 	//get random aya from database
 	fun getRandomAya()
 	{
