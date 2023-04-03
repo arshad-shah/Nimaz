@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,13 +26,15 @@ fun TasbihGoalDialog(
 					)
 {
 	val context = LocalContext.current
-	if (isOpen.value)
-	{
-		//an alert dialog with text field to enter the tasbih goal
-		AlertDialog(
-				onDismissRequest = { isOpen.value = false } ,
-				title = { Text(text = "Set Daily Goal") } ,
-				text = {
+	if (!isOpen.value) return
+
+		AlertDialogNimaz(
+				bottomDivider = false ,
+				topDivider = false ,
+				contentHeight = 100.dp,
+				contentDescription = "Goal for tasbih" ,
+				title = "Set Daily Goal" ,
+				contentToShow = {
 					Column(
 							modifier = Modifier.padding(8.dp) ,
 							verticalArrangement = Arrangement.spacedBy(8.dp) ,
@@ -82,9 +85,10 @@ fun TasbihGoalDialog(
 										 )
 					}
 				} ,
-				confirmButton = {
-					Button(
-							onClick = {
+				onDismissRequest = {
+					isOpen.value = false
+				} ,
+				onConfirm = {
 								val isInt = state.value.toIntOrNull()
 								if (isInt != null && state.value != "")
 								{
@@ -112,32 +116,9 @@ fun TasbihGoalDialog(
 											  )
 										.show()
 								}
-							} ,
-							content = {
-								Text(
-										text = "Confirm" ,
-										style = MaterialTheme.typography.titleMedium
-									)
-							} ,
-						  )
+
 				} ,
-				dismissButton = {
-					TextButton(
-							onClick = {
-								isOpen.value = false
-							} ,
-							content = {
-								Text(
-										text = "Cancel" ,
-										style = MaterialTheme.typography.titleMedium
-									)
-							} ,
-							  )
-				} ,
-				   )
-	} else
-	{
-		//do nothing
-		return
-	}
+				onDismiss = {
+					isOpen.value = false
+				})
 }

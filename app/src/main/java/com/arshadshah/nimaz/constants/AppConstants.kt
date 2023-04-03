@@ -118,7 +118,7 @@ object AppConstants
 	//channels titles
 	const val CHANNEL_FAJR = "Fajr"
 	const val CHANNEL_SUNRISE = "Sunrise"
-	const val CHANNEL_ZUHAR = "Zuhar"
+	const val CHANNEL_ZUHAR = "Dhuhr"
 	const val CHANNEL_ASAR = "Asar"
 	const val CHANNEL_MAGHRIB = "Maghrib"
 	const val CHANNEL_ISHAA = "Ishaa"
