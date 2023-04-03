@@ -17,6 +17,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,13 +56,15 @@ fun ManualLocationInput(
 					)
 
 	if (! showDialog.value) return
-	//text input field
-	//open dialog
-	AlertDialog(
-			onDismissRequest = {
-			} ,
-			title = { Text(text = "Edit Location") } ,
-			text = {
+
+	AlertDialogNimaz(
+			bottomDivider = false ,
+			topDivider = false ,
+			contentHeight = 100.dp,
+			confirmButtonText = "Submit",
+			contentDescription = "Edit Location" ,
+			title = "Edit Location" ,
+			contentToShow = {
 				OutlinedTextField(
 						shape = MaterialTheme.shapes.extraLarge ,
 						value = name.value ,
@@ -72,30 +75,27 @@ fun ManualLocationInput(
 						modifier = Modifier.fillMaxWidth()
 								 )
 			} ,
-			confirmButton = {
-				Button(onClick = {
-					handleSettingEvents(
-							SettingsViewModel.SettingsEvent.LocationInput(
-									context ,
-									name.value
-																		 )
-									   )
-					viewModelPrayerTimes.handleEvent(
-							context ,
-							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-									context
-																			   )
-													)
-
-					showDialog.value = false
-				}) { Text(text = "Confirm" , style = MaterialTheme.typography.titleMedium) }
+			onDismissRequest = {
+				showDialog.value = false
 			} ,
-			dismissButton = {
-				TextButton(onClick = {
-					showDialog.value = false
+			onConfirm = {
+				handleSettingEvents(
+						SettingsViewModel.SettingsEvent.LocationInput(
+								context ,
+								name.value
+																 )
+								   )
+				viewModelPrayerTimes.handleEvent(
+						context ,
+						PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+								context
+																		   )
+												)
 
-				}) { Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium) }
+				showDialog.value = false
+
 			} ,
-			   )
-
+			onDismiss = {
+				showDialog.value = false
+			})
 }
