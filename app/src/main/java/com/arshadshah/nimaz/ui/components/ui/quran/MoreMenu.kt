@@ -2,21 +2,26 @@ package com.arshadshah.nimaz.ui.components.ui.quran
 
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
+import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.ProgressBarCustom
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
@@ -274,19 +279,11 @@ fun DownloadQuranDialog(
 			}
 		}
 	}
-	//a progress bar to show the progress of the download in an alert dialog
-	AlertDialog(
-			icon = {
-				Icon(
-						painter = painterResource(id = R.drawable.download_icon) ,
-						modifier = Modifier.size(32.dp) ,
-						contentDescription = "Download Quran" ,
-						tint = MaterialTheme.colorScheme.primary
-					)
-			} ,
-			onDismissRequest = { showDialog4(false) } ,
-			title = { Text(text = "Downloading Quran") } ,
-			text = {
+	AlertDialogNimaz(
+			contentHeight = 200.dp,
+			contentDescription = "Download Quran" ,
+			title = "Downloading Quran" ,
+			contentToShow = {
 				Column(
 						modifier = Modifier
 							.fillMaxWidth()
@@ -302,17 +299,19 @@ fun DownloadQuranDialog(
 									 )
 				}
 			} ,
-			confirmButton = {
-			} ,
-			dismissButton = {
-				Button(onClick = {
+			onDismissRequest = {
 					handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
-					showDialog4(false)
-				} , modifier = Modifier.padding(4.dp)) {
-					Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
-				}
-			}
-			   )
+				showDialog4(false)
+							   } ,
+			showDismissButton = false ,
+			confirmButtonText = "Cancel",
+			onConfirm = {
+				handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
+				showDialog4(false)
+			} ,
+			onDismiss = {
+
+			})
 }
 
 @Preview

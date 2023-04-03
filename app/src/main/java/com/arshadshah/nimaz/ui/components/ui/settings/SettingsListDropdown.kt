@@ -1,10 +1,7 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material3.*
@@ -40,7 +37,12 @@ fun SettingsListDropdown(
 				modifier = modifier.fillMaxWidth() ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
-			SettingsTileIcon(icon = icon)
+			if (icon != null)
+			{
+				SettingsTileIcon(icon = icon)
+			}else{
+				Spacer(modifier = Modifier.size(24.dp))
+			}
 			SettingsTileTexts(
 					title = title ,
 					subtitle = subtitle

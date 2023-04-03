@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,8 +40,11 @@ fun Dashboard(
 	onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit ,
 			 )
 {
+	val stateScroll = rememberLazyListState()
 	LazyColumn(
-			modifier = Modifier.testTag(TEST_TAG_HOME) ,
+			state = stateScroll ,
+			modifier = Modifier
+				.testTag(TEST_TAG_HOME),
 			contentPadding = paddingValues
 			  ) {
 		item {

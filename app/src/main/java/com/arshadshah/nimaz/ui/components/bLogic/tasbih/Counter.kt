@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.viewModel.TasbihViewModel
+import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import es.dmoral.toasty.Toasty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,53 +121,42 @@ fun Counter(
 
 	if (resetTasbih.value)
 	{
-		AlertDialog(
+		AlertDialogNimaz(
+				bottomDivider = false,
+				topDivider = false,
+				contentHeight = 100.dp,
+				contentDescription = "Reset Counter" ,
+				title = "Reset Counter" ,
+				contentToShow = {
+					Text(text = "Are you sure you want to reset the counter?", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
+				} ,
 				onDismissRequest = {
 					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
 				} ,
-				title = {
-					Text(text = "Reset Counter")
+				onConfirm = {
+					count.value = 0
+					lap.value = 1
+					lapCountCounter.value = 0
+					viewModel.handleEvent(
+							TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+									false
+																			  )
+										 )
 				} ,
-				text = {
-					Text(
-							text = "Are you sure you want to reset the counter?" ,
-						)
-				} ,
-				confirmButton = {
-					Button(onClick = {
-						count.value = 0
-						lap.value = 1
-						lapCountCounter.value = 0
-						viewModel.handleEvent(
-								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
-										false
-																				  )
-											 )
-					}) {
-						Text(text = "Reset" , style = MaterialTheme.typography.titleMedium)
-					}
-				} ,
-				dismissButton = {
-					TextButton(onClick = {
-						viewModel.handleEvent(
-								TasbihViewModel.TasbihEvent.UpdateResetButtonState(
-										false
-																				  )
-											 )
-					}) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
-					}
-				}
-				   )
+				onDismiss = {
+					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+				})
 	}
 
 	if (showObjectiveDialog.value)
 	{
-		AlertDialog(
-				onDismissRequest = { showObjectiveDialog.value = false } ,
-				title = { Text(text = "Set Tasbih Objective") } ,
-				text = {
-					Spacer(modifier = Modifier.height(16.dp))
+		AlertDialogNimaz(
+				bottomDivider = false,
+				topDivider = false,
+				contentHeight = 100.dp,
+				contentDescription = "Set Tasbih Objective" ,
+				title = "Set Tasbih Objective" ,
+				contentToShow = {
 					OutlinedTextField(
 							shape = MaterialTheme.shapes.extraLarge ,
 							textStyle = MaterialTheme.typography.titleLarge ,
@@ -216,24 +206,16 @@ fun Counter(
 									})
 									 )
 				} ,
-				confirmButton = {
-					Button(onClick = {
-						val isInt = objective.value.toIntOrNull()
-						if (isInt != null)
+				onDismissRequest = {
+					showObjectiveDialog.value = false
+				} ,
+				onConfirm = {
+					val isInt = objective.value.toIntOrNull()
+					if (isInt != null)
+					{
+						if (objective.value != "" || isInt != 0)
 						{
-							if (objective.value != "" || isInt != 0)
-							{
-								showObjectiveDialog.value = false
-							} else
-							{
-								Toasty
-									.error(
-											context ,
-											"Objective must be greater than 0" ,
-											Toasty.LENGTH_SHORT
-										  )
-									.show()
-							}
+							showObjectiveDialog.value = false
 						} else
 						{
 							Toasty
@@ -244,15 +226,19 @@ fun Counter(
 									  )
 								.show()
 						}
-					}) {
-						Text(text = "Set" , style = MaterialTheme.typography.titleMedium)
+					} else
+					{
+						Toasty
+							.error(
+									context ,
+									"Objective must be greater than 0" ,
+									Toasty.LENGTH_SHORT
+								  )
+							.show()
 					}
 				} ,
-				dismissButton = {
-					TextButton(onClick = { showObjectiveDialog.value = false }) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
-					}
-				}
-				   )
+				onDismiss = {
+					showObjectiveDialog.value = false
+				})
 	}
 }
