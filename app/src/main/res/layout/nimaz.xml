@@ -12,7 +12,7 @@
     <LinearLayout
         android:id="@+id/fajrwidgethighlight"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
         android:orientation="vertical"
@@ -28,7 +28,7 @@
             android:text="@string/fajr"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -42,14 +42,14 @@
             android:text="@string/fajr_time"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             tools:text="3:46 AM" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/zuharwidgethighlight"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginStart="1dp"
         android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
@@ -66,7 +66,7 @@
             android:text="@string/zuhar"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -80,14 +80,14 @@
             android:text="@string/Zuhar_time"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
-            tools:text="3:46 am" />
+            android:textSize="14sp"
+            tools:text="3:46 AM" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/asarwidgethighlight"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginStart="1dp"
         android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
@@ -104,7 +104,7 @@
             android:text="@string/asar"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -118,14 +118,14 @@
             android:text="@string/Asar_time"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
-            tools:text="3:46 am" />
+            android:textSize="14sp"
+            tools:text="3:46 AM" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/maghribwidgethighlight"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginStart="1dp"
         android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
@@ -142,7 +142,7 @@
             android:text="@string/maghrib"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -156,15 +156,15 @@
             android:text="@string/Maghrib_time"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
-            tools:text="3:46 am" />
+            android:textSize="14sp"
+            tools:text="3:46 AM" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ishaawidgethighlight"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginStart="1dp"
         android:layout_weight="0.2"
         android:background="@drawable/app_widget_inner_view_background"
@@ -181,7 +181,7 @@
             android:text="@string/ishaa"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
@@ -195,8 +195,8 @@
             android:text="@string/Ishaa_time"
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
-            android:textSize="12sp"
-            tools:text="10:46 am" />
+            android:textSize="14sp"
+            tools:text="10:46 AM" />
     </LinearLayout>
 
 </LinearLayout>

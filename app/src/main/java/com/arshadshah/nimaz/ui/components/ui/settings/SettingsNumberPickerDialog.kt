@@ -1,16 +1,19 @@
 package com.arshadshah.nimaz.ui.components.ui.settings
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
+import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberStringSettingState
@@ -23,8 +26,10 @@ import kotlinx.coroutines.launch
 fun SettingsNumberPickerDialog(
 	modifier : Modifier = Modifier ,
 	state : SettingValueState<Int> = rememberIntSettingState() ,
-	title : @Composable () -> Unit ,
-	description : @Composable() (() -> Unit)? = null ,
+	title : String ,
+	description : String? = null ,
+	iconDescription : String? = null ,
+	iconPainter : Painter? = null ,
 	items : List<Int> ,
 	icon : @Composable() (() -> Unit)? = null ,
 	useSelectedValueAsSubtitle : Boolean = true ,
@@ -32,6 +37,7 @@ fun SettingsNumberPickerDialog(
 	action : @Composable() (() -> Unit)? = null ,
 	valueState : SettingValueState<String> = rememberStringSettingState() ,
 	onChange : (Int) -> Unit = { } ,
+	height : Dp ,
 							  )
 {
 
@@ -55,9 +61,14 @@ fun SettingsNumberPickerDialog(
 	} else subtitle
 
 	SettingsMenuLink(
-			modifier = modifier ,
+			modifier = if (icon != null) modifier else  modifier.padding(8.dp)  ,
 			icon = icon ,
-			title = title ,
+			title = {
+				Text(
+						text = title ,
+						style = MaterialTheme.typography.titleLarge
+					)
+			} ,
 			subtitle = safeSubtitle ,
 			action = action ,
 			onClick = { showDialog = true } ,
@@ -75,67 +86,38 @@ fun SettingsNumberPickerDialog(
 			onChange(selectedIndex)
 		}
 	}
-
-	AlertDialog(
+	AlertDialogNimaz(
+			contentDescription = title ,
+			description = description ,
+			contentHeight = height ,
 			title = title ,
-			text = {
-				Column {
-					Row(modifier.padding(bottom = 8.dp)) {
-						description?.invoke()
-					}
-					Divider(color = MaterialTheme.colorScheme.outline)
-					Row(
-							modifier.fillMaxWidth() ,
-							verticalAlignment = Alignment.CenterVertically ,
-							horizontalArrangement = Arrangement.Center
-					   ) {
-						NumberPicker(
-								modifier = modifier ,
-								value = if (items.size == 51) valueState.value.toDouble()
-									.toInt() else valueState.value.toInt() ,
-								onValueChange = onSelected ,
-								range = items ,
-								dividersColor = MaterialTheme.colorScheme.outline ,
-								textStyle = MaterialTheme.typography.titleLarge ,
-								label = {
-									if (items.size == 51)
-										if (it < 2 && it > - 1) "$it Degree " else if (it != - 1) "$it Degrees" else "$it Degree"
-									else
-										if (it < 2 && it > - 1) "$it Minute " else if (it != - 1) "$it Minutes" else "$it Minute"
-								} ,
-									)
-					}
-					Divider(color = MaterialTheme.colorScheme.outline)
-				}
-			} ,
-			onDismissRequest = { showDialog = false } ,
-			properties = DialogProperties(
-					dismissOnBackPress = true ,
-					dismissOnClickOutside = true ,
-										 ) ,
-			confirmButton = {
-				Button(
-						onClick = { showDialog = false } ,
-						content = {
-							Text(
-									text = "Done" ,
-									style = MaterialTheme.typography.titleMedium
+			contentToShow = {
+					NumberPicker(
+							modifier = modifier ,
+							value = if (items.size == 51) valueState.value.toDouble()
+								.toInt() else valueState.value.toInt() ,
+							onValueChange = onSelected ,
+							range = items ,
+							dividersColor = MaterialTheme.colorScheme.outline ,
+							textStyle = MaterialTheme.typography.titleLarge ,
+							label = {
+								if (items.size == 51)
+									if (it < 2 && it > - 1) "$it Degree " else if (it != - 1) "$it Degrees" else "$it Degree"
+								else
+									if (it < 2 && it > - 1) "$it Minute " else if (it != - 1) "$it Minutes" else "$it Minute"
+							} ,
 								)
-						}
-					  )
 			} ,
-			dismissButton = {
-				TextButton(
-						onClick = { showDialog = false } ,
-						content = {
-							Text(
-									text = "Cancel" ,
-									style = MaterialTheme.typography.titleMedium
-								)
-						}
-						  )
+			onDismissRequest = {
+				showDialog = false
+			} ,
+			onConfirm = {
+				showDialog = false
+			} ,
+			onDismiss = {
+					showDialog = false
 			}
-			   )
+					)
 }
 
 
@@ -150,12 +132,13 @@ fun SettingsNumberPickerDialogPreview()
 													  )
 	NimazTheme {
 		SettingsNumberPickerDialog(
-				title = { Text(text = "Title") } ,
-				description = { Text(text = "Description") } ,
+				title = "Title" ,
+				description = "Description" ,
 				items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+				icon = { Icon(imageVector = Icons.Filled.Clear , contentDescription = "Clear") } ,
 				subtitle = { Text(text = "Subtitle") } ,
 				valueState = storage ,
+				height = 100.dp ,
 								  )
 	}
 }
@@ -170,11 +153,12 @@ fun SettingsNumberPickerDialogNoIconPreview()
 													  )
 	NimazTheme {
 		SettingsNumberPickerDialog(
-				title = { Text(text = "Title") } ,
-				description = { Text(text = "Description") } ,
+				title = "Title" ,
+				description = "Description" ,
 				items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
 				subtitle = { Text(text = "Subtitle") } ,
 				valueState = storage ,
+				height = 100.dp ,
 								  )
 	}
 }

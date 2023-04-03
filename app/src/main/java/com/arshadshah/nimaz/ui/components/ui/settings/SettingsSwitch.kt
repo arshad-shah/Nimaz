@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.ui.settings
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.getValue
@@ -69,7 +71,12 @@ fun SettingsSwitch(
 							   ) ,
 				verticalAlignment = Alignment.CenterVertically ,
 		   ) {
-			SettingsTileIcon(icon = icon)
+			if (icon != null)
+			{
+				SettingsTileIcon(icon = icon)
+			}else{
+				Spacer(modifier = Modifier.size(24.dp))
+			}
 			SettingsTileTexts(title = title , subtitle = subtitle)
 			SettingsTileAction {
 				Switch(

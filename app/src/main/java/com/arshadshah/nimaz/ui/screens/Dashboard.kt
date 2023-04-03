@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,10 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_EVENTS_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DashboardPrayertimesCard
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlAdhaCard
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlFitrCard
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.RamadanCard
+import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.*
 import com.arshadshah.nimaz.ui.components.ui.dashboard.DashboardTasbihTracker
 import com.arshadshah.nimaz.ui.components.ui.quran.DashboardQuranTracker
 import com.arshadshah.nimaz.ui.components.ui.quran.DashboardRandomAyatCard
@@ -39,14 +37,20 @@ fun Dashboard(
 	onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit ,
 			 )
 {
+	val stateScroll = rememberLazyListState()
 	LazyColumn(
-			modifier = Modifier.testTag(TEST_TAG_HOME) ,
+			state = stateScroll ,
+			modifier = Modifier
+				.testTag(TEST_TAG_HOME),
 			contentPadding = paddingValues
 			  ) {
 		item {
 			DashboardPrayertimesCard(
 					onNavigateToPrayerTimes = onNavigateToPrayerTimes
 									)
+		}
+		item {
+			RamadanTimesCard()
 		}
 		item {
 			ElevatedCard(

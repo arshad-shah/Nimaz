@@ -37,6 +37,7 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
+import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -135,13 +136,13 @@ fun SettingsScreen(
 					.testTag(TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON)
 					) {
 			SettingsMenuLink(
-					title = { Text(text = "Prayer Times Adjustments") } ,
+					title = { Text(text = "Prayer Times") } ,
 					onClick = onNavigateToPrayerTimeCustomizationScreen ,
 					icon = {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = R.drawable.settings_sliders_icon) ,
-								contentDescription = "Clock"
+								contentDescription = "Prayer Times settings"
 							)
 					} ,
 							)
@@ -193,18 +194,13 @@ fun SettingsScreen(
 					//switch for theme mode dark/light when its not dynamic
 					SettingsSwitch(
 							state = stateDarkMode ,
-							title = { Text(text = "Theme Mode") } ,
+							title = { Text(text = if (stateDarkMode.value) "Dark Mode" else "Light Mode") } ,
 							onCheckedChange = {
 								viewModelSettings.handleEvent(
 										SettingsViewModel.SettingsEvent.DarkMode(
 												it
 																				)
 															 )
-							} ,
-							subtitle = {
-								Text(
-										text = if (stateDarkMode.value) "Dark" else "Light"
-									)
 							} ,
 							icon = {
 								if (stateDarkMode.value)
@@ -237,7 +233,7 @@ fun SettingsScreen(
 						onChange = {
 							viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
 						} ,
-						height = 400.dp ,
+						height = 250.dp ,
 						icon = {
 							Icon(
 									modifier = Modifier.size(24.dp) ,
@@ -245,11 +241,11 @@ fun SettingsScreen(
 									contentDescription = "Theme"
 								)
 						} ,
+						iconPainter = painterResource(id = R.drawable.theme_icon),
+						iconDescription = "Theme" ,
 						useSelectedValueAsSubtitle = false ,
 						valueState = stateOfTheme ,
-						title = {
-							Text(
-									text =
+						title =
 									when (stateOfTheme.value)
 									{
 										"DEFAULT" -> "App Default"
@@ -260,9 +256,7 @@ fun SettingsScreen(
 										"SYSTEM" -> "System Default"
 										"DYNAMIC" -> "Dynamic"
 										else -> "App Default"
-									}
-								)
-						} ,
+									} ,
 						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
 							)
 			}
@@ -363,6 +357,15 @@ fun SettingsScreen(
 								)
 						} ,
 								)
+			}
+
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						) {
+				NotificationScreenUI()
 			}
 
 			ElevatedCard(

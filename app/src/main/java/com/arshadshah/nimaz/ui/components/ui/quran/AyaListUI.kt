@@ -4,6 +4,8 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,6 +21,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -28,10 +31,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
 import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.quran.AyatFeatures
@@ -45,6 +48,7 @@ import com.google.accompanist.placeholder.shimmer
 import java.io.File
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AyaListUI(
 	ayaList : ArrayList<Aya> ,
@@ -83,6 +87,8 @@ fun AyaListUI(
 	val mediaPlayer = remember {
 		MediaPlayer()
 	}
+
+	val state = rememberLazyListState()
 
 	//when we close or move to another screen, we want to clean the state o'f the AyaListItemUI so that we don't have any bugs such as dangling data
 	val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -135,7 +141,7 @@ fun AyaListUI(
 		}
 		LazyColumn(
 				contentPadding = paddingValues ,
-				state = rememberLazyListState() ,
+				state = state ,
 				userScrollEnabled = false ,
 				  ) {
 			items(10) { index ->
@@ -155,7 +161,6 @@ fun AyaListUI(
 	{
 		//if a new item is viewed, then scroll to that item
 		val sharedPref = LocalContext.current.getSharedPreferences("quran" , 0)
-		val listState = rememberLazyListState()
 		val visibleItemIndex =
 			remember {
 				mutableStateOf(
@@ -167,10 +172,10 @@ fun AyaListUI(
 			}
 
 		//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-		LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })
+		LaunchedEffect(remember { derivedStateOf { state.firstVisibleItemIndex } })
 		{
 			sharedPref.edit()
-				.putInt("visibleItemIndex-${type}-${number}" , listState.firstVisibleItemIndex)
+				.putInt("visibleItemIndex-${type}-${number}" , state.firstVisibleItemIndex)
 				.apply()
 		}
 
@@ -179,25 +184,22 @@ fun AyaListUI(
 		{
 			if (scrollToAya != null)
 			{
-				listState.animateScrollToItem(scrollToAya)
+				state.animateScrollToItem(scrollToAya)
 			} else
 			{
 				if (visibleItemIndex.value != - 1)
 				{
-					listState.animateScrollToItem(visibleItemIndex.value)
+					state.animateScrollToItem(visibleItemIndex.value)
 					//set the value back to -1 so that we don't scroll to the same item again
 					visibleItemIndex.value = - 1
 				}
 			}
 		}
-
-		val scope = rememberCoroutineScope()
-
 		LazyColumn(
 				modifier = Modifier.testTag(TEST_TAG_AYA) ,
 				userScrollEnabled = true ,
 				contentPadding = paddingValues ,
-				state = listState
+				state = state
 				  ) {
 			items(ayaList.size) { index ->
 				AyaListItemUI(
@@ -213,6 +215,31 @@ fun AyaListUI(
 			}
 		}
 	}
+}
+//surah header component
+@Composable
+fun SurahHeader(
+	surah : Surah ,
+	loading : Boolean ,
+			 )
+{
+	Row(
+			modifier = Modifier
+				.fillMaxWidth()
+				.background(Color.White)
+				.padding(10.dp)
+				.placeholder(visible = loading, color = MaterialTheme.colorScheme.outline),
+			horizontalArrangement = Arrangement.SpaceBetween ,
+			verticalAlignment = Alignment.CenterVertically
+		  ) {
+		Text(
+				text = surah.name,
+				fontSize = 20.sp ,
+				fontWeight = FontWeight.Bold ,
+				color = Color.Black
+			)
+	}
+	Spacer(modifier = Modifier.height(10.dp))
 }
 
 @Composable

@@ -164,15 +164,9 @@ fun CalculationMethodUI()
 					.fillMaxWidth()
 					) {
 			SettingsList(
-					title = {
-						Text(text = "Calculation Method")
-					} ,
-					subtitle = {
-						Text(text = calculationMethodState.value)
-					} ,
-					description = {
-						Text(text = "The method used to calculate the prayer times.")
-					} ,
+					title = "Calculation Method" ,
+					subtitle = calculationMethodState.value ,
+					description = "The method used to calculate the prayer times." ,
 					items = mapOfMethods ,
 					valueState = calculationMethodState ,
 					onChange = { method : String ->
@@ -203,7 +197,7 @@ fun CalculationMethodUI()
 								false
 																		 )
 					} ,
-					height = 500.dp
+					height = 300.dp
 						)
 		}
 	}
