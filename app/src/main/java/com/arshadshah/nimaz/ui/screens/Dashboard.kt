@@ -18,10 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_EVENTS_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DashboardPrayertimesCard
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlAdhaCard
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.EidUlFitrCard
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.RamadanCard
+import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.*
 import com.arshadshah.nimaz.ui.components.ui.dashboard.DashboardTasbihTracker
 import com.arshadshah.nimaz.ui.components.ui.quran.DashboardQuranTracker
 import com.arshadshah.nimaz.ui.components.ui.quran.DashboardRandomAyatCard
@@ -51,6 +48,9 @@ fun Dashboard(
 			DashboardPrayertimesCard(
 					onNavigateToPrayerTimes = onNavigateToPrayerTimes
 									)
+		}
+		item {
+			RamadanTimesCard()
 		}
 		item {
 			ElevatedCard(
