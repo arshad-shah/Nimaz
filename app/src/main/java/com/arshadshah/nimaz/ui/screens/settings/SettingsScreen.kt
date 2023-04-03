@@ -37,6 +37,7 @@ import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
+import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
 import com.arshadshah.nimaz.ui.components.ui.settings.*
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -392,6 +393,15 @@ fun SettingsScreen(
 								)
 						} ,
 								)
+			}
+
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						) {
+				NotificationScreenUI()
 			}
 
 			ElevatedCard(

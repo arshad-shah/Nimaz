@@ -1,8 +1,11 @@
 package com.arshadshah.nimaz.ui.components.ui.intro
 
 import android.Manifest
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,8 +23,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsSwitch
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -38,6 +43,18 @@ fun NotificationScreenUI()
 	val context = LocalContext.current
 	//get shared preference
 	val sharedpref = PrivateSharedPreferences(context)
+
+	val viewModel = viewModel(
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+	val notificationAllowed = remember {
+		viewModel.areNotificationsAllowed
+	}.collectAsState()
+
+	//battery optimization exemption
+	val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
 	//notification permission state
 	val notificationPermissionState =
@@ -62,12 +79,33 @@ fun NotificationScreenUI()
 	}
 
 	val lifecycle = LocalLifecycleOwner.current.lifecycle
-	lifecycle.addObserver(LifecycleEventObserver { _ , event ->
-		if (event == Lifecycle.Event.ON_RESUME)
-		{
-			isChecked.value = notificationPermissionState.status.isGranted
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _ , event ->
+			when (event)
+			{
+				Lifecycle.Event.ON_RESUME ->
+				{
+					viewModel.handleEvent(
+							SettingsViewModel.SettingsEvent.NotificationsAllowed(
+									notificationManager.areNotificationsEnabled()
+																		 )
+										 )
+					state.value = notificationManager.areNotificationsEnabled()
+					isChecked.value = notificationManager.areNotificationsEnabled()
+				}
+
+				else ->
+				{
+
+				}
+			}
 		}
-	})
+
+		lifecycle.addObserver(observer)
+		onDispose {
+			lifecycle.removeObserver(observer)
+		}
+	}
 	//a laucnhed affect to check if the user has granted the notification permission
 	LaunchedEffect(notificationPermissionState.status.isGranted) {
 		if (notificationPermissionState.status.isGranted)
@@ -143,11 +181,11 @@ fun NotificationScreenUI()
 				}
 			} ,
 			title = {
-				Text(text = "Enable Notifications")
+				Text(text = "Notifications")
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
-				if (isChecked.value)
+				if (notificationAllowed.value)
 				{
 					Row(
 							verticalAlignment = Alignment.CenterVertically

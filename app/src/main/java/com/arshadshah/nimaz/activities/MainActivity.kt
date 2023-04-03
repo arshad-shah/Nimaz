@@ -135,6 +135,8 @@ class MainActivity : ComponentActivity()
 			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and firebase logger initialized")
 		}
 
+
+
 		super.onCreate(savedInstanceState)
 
 		//this is used to show the full activity on the screen

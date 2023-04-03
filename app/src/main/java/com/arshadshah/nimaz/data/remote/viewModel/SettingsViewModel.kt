@@ -81,6 +81,15 @@ class SettingsViewModel(context : Context) : ViewModel()
 												   )
 	val isBatteryExempt = _isBatteryExempt.asStateFlow()
 
+	//_areNotificationsAllowed
+	private var _areNotificationsAllowed = MutableStateFlow(
+			sharedPreferences.getDataBoolean(
+					AppConstants.NOTIFICATION_ALLOWED ,
+					false
+											)
+												   )
+	val areNotificationsAllowed = _areNotificationsAllowed.asStateFlow()
+
 	//prayer times adjustments state
 	//calculation method state
 	private var _calculationMethod =
@@ -173,6 +182,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 		class Longitude(val context : Context , val longitude : Double) : SettingsEvent()
 		class LoadLocation(val context : Context) : SettingsEvent()
 		class BatteryExempt(val exempt : Boolean) : SettingsEvent()
+		class NotificationsAllowed(val allowed : Boolean) : SettingsEvent()
 
 		//prayer times adjustments
 		//calculation method
@@ -255,6 +265,12 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_isBatteryExempt.value = event.exempt
 				sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , event.exempt)
 				Log.d("Nimaz: SettingsViewModel" , "Battery exempt : ${event.exempt}")
+			}
+			is SettingsEvent.NotificationsAllowed ->
+			{
+				_areNotificationsAllowed.value = event.allowed
+				sharedPreferences.saveDataBoolean(AppConstants.NOTIFICATION_ALLOWED , event.allowed)
+				Log.d("Nimaz: SettingsViewModel" , "Notifications allowed : ${event.allowed}")
 			}
 
 			is SettingsEvent.CalculationMethod ->
