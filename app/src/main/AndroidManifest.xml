@@ -92,7 +92,7 @@
             android:exported="false"
             android:label="@string/title_activity_introduction"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz"></activity>
+            android:theme="@style/Theme.Nimaz" />
         <activity
             android:name=".activities.RoutingActivity"
             android:exported="true"
