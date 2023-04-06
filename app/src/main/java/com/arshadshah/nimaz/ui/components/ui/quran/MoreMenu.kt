@@ -25,7 +25,6 @@ import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.ProgressBarCustom
 import com.arshadshah.nimaz.ui.components.bLogic.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.rememberIntSettingState
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -87,16 +86,11 @@ fun MoreMenu(
 			defaultValue = "Default" ,
 															 )
 
-	val isFullQuranDownloaded = rememberPreferenceBooleanSettingState(
-			key = AppConstants.FULL_QURAN_DOWNLOADED ,
-			defaultValue = false ,
-																	 )
-
 	//log the initial state of the font size
 	Log.d("MoreMenu" , "arabicFontSizeState.value = ${arabicFontSizeState.value}")
 	Log.d("MoreMenu" , "translationFontSizeState.value = ${translationFontSizeState.value}")
 	Log.d("MoreMenu" , "fontStyleState.value = ${fontStyleState.value}")
-	Log.d("MoreMenu" , "isDownloadButtonEnabled.value = ${isFullQuranDownloaded.value}")
+	Log.d("MoreMenu" , "isDownloadButtonEnabled.value = ${isDownloadButtonEnabled.value}")
 
 	DropdownMenu(
 			expanded = menuOpen ,
@@ -246,11 +240,7 @@ fun MoreMenuMain(
 
 	viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
 
-	val isFullQuranDownloaded = rememberPreferenceBooleanSettingState(
-			key = AppConstants.FULL_QURAN_DOWNLOADED ,
-			defaultValue = false ,
-																	 )
-	Log.d("MoreMenu" , "isDownloadButtonEnabled.value = ${isFullQuranDownloaded.value}")
+	Log.d("MoreMenu" , "isDownloadButtonEnabled.value = ${isDownloadButtonEnabled.value}")
 
 	DropdownMenu(
 			expanded = menuOpen ,

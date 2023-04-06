@@ -262,11 +262,17 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				//reset quran data
 				_arabic_Font.value = "Default"
+				sharedPreferences.saveData(AppConstants.FONT_STYLE , "Default")
 				_translation.value = "English"
+				sharedPreferences.saveData(AppConstants.TRANSLATION_LANGUAGE , "English")
 				_arabic_Font_size.value = 26.0f
+				sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE , 26.0f)
 				_translation_Font_size.value = 16.0f
+				sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE , 16.0f)
 				_display_Mode.value = "List"
+				sharedPreferences.saveData(AppConstants.PAGE_TYPE , "List")
 				_downloadButtonState.value = true
+				sharedPreferences.saveDataBoolean(FULL_QURAN_DOWNLOADED , false)
 				deleteAllAyat()
 			}
 		}
