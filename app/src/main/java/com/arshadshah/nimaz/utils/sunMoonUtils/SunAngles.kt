@@ -117,7 +117,7 @@ object SunAngles
 	 */
 	fun getPosition(date : Date , lat : Double , lng : Double) : Map<String , Double>
 	{
-		val map : MutableMap<String, Double> = Maps.newConcurrentMap()
+		val map : MutableMap<String , Double> = Maps.newConcurrentMap()
 		val lw = rad * - lng
 		val phi = rad * lat
 		val d = toDays(date)
@@ -153,6 +153,7 @@ object SunAngles
 			Lists.newArrayList(- 18.0 , "nightEnd" , "night") ,
 			Lists.newArrayList(6.0 , "goldenHourEnd" , "goldenHour")
 												   )
+
 	/**
 	 * calculations for sun times
 	 */
@@ -325,21 +326,21 @@ object SunAngles
 		// distance from Earth to Sun in km
 		val sdist = 149598000.0
 		val phi : Double = acos(
-				sin(s["dec"]!!) * sin(m["dec"]!!) + cos(s["dec"]!!) * cos(m["dec"]!!) * cos(
+				sin(s["dec"] !!) * sin(m["dec"] !!) + cos(s["dec"] !!) * cos(m["dec"] !!) * cos(
 						s["ra"] !! - m["ra"] !!
-																				   )
+																							   )
 							   )
 		val inc : Double = atan2(sdist * sin(phi) , m["dist"]?.minus(sdist * cos(phi)) ?: 0.0)
 		val angle : Double = atan2(
-				cos(s["dec"]!!) * sin(s["ra"] !! - m["ra"] !!) , sin(s["dec"]!!) * cos(
-				m["dec"]!!
-																				  ) - cos(
-				s["dec"]!!
-																						 ) * sin(
-				m["dec"]!!
-																								) * cos(
+				cos(s["dec"] !!) * sin(s["ra"] !! - m["ra"] !!) , sin(s["dec"] !!) * cos(
+				m["dec"] !!
+																						) - cos(
+				s["dec"] !!
+																							   ) * sin(
+				m["dec"] !!
+																									  ) * cos(
 				s["ra"] !! - m["ra"] !!
-																									   )
+																											 )
 								  )
 		result["fraction"] = (1 + cos(inc)) / 2
 		result["phase"] = 0.5 + 0.5 * inc * (if (angle < 0) - 1 else 1) / PI
@@ -389,12 +390,12 @@ object SunAngles
 		{
 			calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
 		}
-		calendar.setTime(date)
+		calendar.time = date
 		calendar.set(Calendar.HOUR_OF_DAY , 0)
 		calendar.set(Calendar.MINUTE , 0)
 		calendar.set(Calendar.SECOND , 0)
 		calendar.set(Calendar.MILLISECOND , 0)
-		val t : Date = calendar.getTime()
+		val t : Date = calendar.time
 		val hc = 0.133 * rad
 		var h0 = getMoonPosition(t , lat , lng)["altitude"] !! - hc
 		var h1 : Double

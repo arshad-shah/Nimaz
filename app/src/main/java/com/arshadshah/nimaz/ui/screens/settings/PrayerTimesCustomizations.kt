@@ -220,10 +220,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						) {
 				SettingsList(
 						valueState = madhabState ,
-						title = "Madhab",
+						title = "Madhab" ,
 						description = "The madhab used to calculate the asr prayer times." ,
 						items = mapOfMadhabs ,
-						subtitle = madhabState.value,
+						subtitle = madhabState.value ,
 						height = 150.dp
 							) { madhab : String ->
 					settingViewModel.handleEvent(
@@ -257,10 +257,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						) {
 				SettingsList(
 						valueState = highLatitudeRuleState ,
-						title = "High Latitude Rule",
+						title = "High Latitude Rule" ,
 						description = "The high latitude rule used to calculate the prayer times." ,
 						items = mapOfHighLatitudeRules ,
-						subtitle = highLatitudeRuleState.value,
+						subtitle = highLatitudeRuleState.value ,
 						height = 150.dp
 							) { highLatRule : String ->
 					settingViewModel.handleEvent(
@@ -347,9 +347,13 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						description = "The angle of the sun at which the Fajr prayer begins" ,
 						items = (0 .. 50).map { (it - 25) } ,
 						valueState = fajrAngleState ,
-						height = 150.dp,
+						height = 150.dp ,
 						onChange = { angle : Int ->
-							settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.FajrAngle(angle.toString()))
+							settingViewModel.handleEvent(
+									SettingsViewModel.SettingsEvent.FajrAngle(
+											angle.toString()
+																			 )
+														)
 							viewModel.handleEvent(
 									context ,
 									PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
@@ -380,7 +384,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					SettingsNumberPickerDialog(
 							title = "Isha Angle" ,
 							description = "The angle of the sun at which the Isha prayer begins" ,
-							items = (0 .. 50).map { (it - 25) }  ,
+							items = (0 .. 50).map { (it - 25) } ,
 							subtitle = {
 								Text(text = ishaAngleState.value)
 							} ,

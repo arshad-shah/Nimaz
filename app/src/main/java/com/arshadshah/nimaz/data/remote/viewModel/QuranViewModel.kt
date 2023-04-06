@@ -114,12 +114,12 @@ class QuranViewModel(context : Context) : ViewModel()
 
 	private val _surahState = MutableStateFlow(
 			Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0)
-												)
+											  )
 	val surahState = _surahState.asStateFlow()
 
 	private val _surahStateForScroll = MutableStateFlow(
 			Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0)
-											  )
+													   )
 	val surahStateForScroll = _surahStateForScroll.asStateFlow()
 
 	//download button state
@@ -165,6 +165,7 @@ class QuranViewModel(context : Context) : ViewModel()
 
 		//initialize quran using settings
 		object Initialize_Quran : QuranMenuEvents()
+
 		//scroll to aya
 		data class Scroll_To_Aya(val aya : Aya?) : QuranMenuEvents()
 
@@ -251,10 +252,12 @@ class QuranViewModel(context : Context) : ViewModel()
 			{
 				cancelDownload()
 			}
+
 			is QuranMenuEvents.Scroll_To_Aya ->
 			{
 				_scrollToAya.value = event.aya
 			}
+
 			is QuranMenuEvents.Reset_Quran_Data ->
 			{
 				//reset quran data
@@ -1104,6 +1107,7 @@ class QuranViewModel(context : Context) : ViewModel()
 			}
 		}
 	}
+
 	fun getSurahByIdForScroll(id : Int)
 	{
 		viewModelScope.launch(Dispatchers.IO) {

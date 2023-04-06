@@ -58,7 +58,8 @@ fun AyatFeatures(
 			horizontalArrangement = Arrangement.SpaceEvenly ,
 			verticalAlignment = Alignment.CenterVertically ,
 	   ) {
-		if(aya.sajda){
+		if (aya.sajda)
+		{
 			//a button that opens a popup menu
 			IconButton(
 					onClick = {
@@ -83,7 +84,8 @@ fun AyatFeatures(
 					)
 			}
 		}
-		if (sajdahPopUpOpen.value){
+		if (sajdahPopUpOpen.value)
+		{
 			Popup(
 					onDismissRequest = {
 						sajdahPopUpOpen.value = false
@@ -97,7 +99,11 @@ fun AyatFeatures(
 								defaultElevation = 8.dp ,
 																	  )
 							) {
-					Text(text = "${aya.sajdaType} sujood", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.bodySmall)
+					Text(
+							text = "${aya.sajdaType} sujood" ,
+							modifier = Modifier.padding(8.dp) ,
+							style = MaterialTheme.typography.bodySmall
+						)
 				}
 			}
 		}
@@ -106,7 +112,8 @@ fun AyatFeatures(
 			IconButton(
 					onClick = {
 						titleOfDialog.value = "Remove from Bookmarks"
-						messageOfDialog.value = "Are you sure you want to remove this verse from your bookmarks?"
+						messageOfDialog.value =
+							"Are you sure you want to remove this verse from your bookmarks?"
 						openDialog.value = true
 					} ,
 					enabled = ! isLoading ,
@@ -135,7 +142,8 @@ fun AyatFeatures(
 			IconButton(
 					onClick = {
 						titleOfDialog.value = "Remove from Favourites"
-						messageOfDialog.value = "Are you sure you want to remove this verse from your favourites?"
+						messageOfDialog.value =
+							"Are you sure you want to remove this verse from your favourites?"
 						openDialog.value = true
 					} ,
 					enabled = ! isLoading ,
@@ -220,44 +228,61 @@ fun AyatFeatures(
 				 )
 	}
 
-	if (openDialog.value){
+	if (openDialog.value)
+	{
 		AlertDialogNimaz(
-				topDivider = false,
-				bottomDivider = false,
+				topDivider = false ,
+				bottomDivider = false ,
 				contentDescription = "Ayat features dialog" ,
-				title = titleOfDialog.value,
+				title = titleOfDialog.value ,
 				contentToShow = {
-					Text(text = messageOfDialog.value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp))
+					Text(
+							text = messageOfDialog.value ,
+							style = MaterialTheme.typography.bodyMedium ,
+							modifier = Modifier.padding(8.dp)
+						)
 				} ,
 				onDismissRequest = {
 					openDialog.value = false
 				} ,
-				contentHeight = 100.dp,
-				confirmButtonText = "Yes",
-				dismissButtonText = "No, Cancel",
+				contentHeight = 100.dp ,
+				confirmButtonText = "Yes" ,
+				dismissButtonText = "No, Cancel" ,
 				onConfirm = {
-								if (titleOfDialog.value == "Remove from Bookmarks")
-								{
-									handleEvents(QuranViewModel.AyaEvent.deleteBookmarkFromAya(aya.ayaNumber, aya.suraNumber, aya.ayaNumberInSurah))
-									aya.bookmark = false
-									isBookMarkedVerse.value = false
-								}
-								else if (titleOfDialog.value == "Remove from Favourites")
-								{
-									handleEvents(QuranViewModel.AyaEvent.deleteFavoriteFromAya(aya.ayaNumber, aya.suraNumber, aya.ayaNumberInSurah))
-									aya.favorite = false
-									isFavouredVerse.value = false
-								}
-								openDialog.value = false
-							} ,
+					if (titleOfDialog.value == "Remove from Bookmarks")
+					{
+						handleEvents(
+								QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+										aya.ayaNumber ,
+										aya.suraNumber ,
+										aya.ayaNumberInSurah
+																			 )
+									)
+						aya.bookmark = false
+						isBookMarkedVerse.value = false
+					} else if (titleOfDialog.value == "Remove from Favourites")
+					{
+						handleEvents(
+								QuranViewModel.AyaEvent.deleteFavoriteFromAya(
+										aya.ayaNumber ,
+										aya.suraNumber ,
+										aya.ayaNumberInSurah
+																			 )
+									)
+						aya.favorite = false
+						isFavouredVerse.value = false
+					}
+					openDialog.value = false
+				} ,
 				onDismiss = {
 					openDialog.value = false
 				})
 	}
 }
 
-@Preview(device = "id:S20 Fe" , showSystemUi = false , showBackground = true ,
-		 backgroundColor = 0xFFFFFFFF
+@Preview(
+		device = "id:S20 Fe" , showSystemUi = false , showBackground = true ,
+		backgroundColor = 0xFFFFFFFF
 		)
 @Composable
 fun AyatFeaturesPreview()

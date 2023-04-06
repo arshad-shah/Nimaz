@@ -38,8 +38,10 @@ class AutoAnglesCalc
 	fun calculateIshaaAngle(context : Context , latitude : Double , longitude : Double) : Int
 	{
 		val timesFromNew = SunAngles.getTimes(Date() , latitude , longitude)
-		val sunPositionAtIsaaNew = SunAngles.getPosition(timesFromNew["nauticalDusk"]!! , latitude , longitude)
-		val altitudeInDegreesIsaaNew = Math.toDegrees(sunPositionAtIsaaNew["altitude"]!!).roundToInt()
+		val sunPositionAtIsaaNew =
+			SunAngles.getPosition(timesFromNew["nauticalDusk"] !! , latitude , longitude)
+		val altitudeInDegreesIsaaNew =
+			Math.toDegrees(sunPositionAtIsaaNew["altitude"] !!).roundToInt()
 		return (altitudeInDegreesIsaaNew - 3) * - 1
 	}
 

@@ -23,10 +23,13 @@ class ResetAdhansReciever : BroadcastReceiver()
 		//create alarms
 		CreateAlarms().scheduleAlarms(context , fajr , sunrise , zuhar , asar , maghrib , ishaa)
 
-		if(! FirebaseLogger.isInitialized())
+		if (! FirebaseLogger.isInitialized())
 		{
 			FirebaseLogger.init()
-			Log.d(AppConstants.RESET_ADHANS_RECEIVER_TAG , "onReceived:  called and firebase logger initialized")
+			Log.d(
+					AppConstants.RESET_ADHANS_RECEIVER_TAG ,
+					"onReceived:  called and firebase logger initialized"
+				 )
 		}
 
 		val mapForLogging = mapOf(

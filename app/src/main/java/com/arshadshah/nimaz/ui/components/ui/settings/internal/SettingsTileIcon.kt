@@ -15,15 +15,15 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 @Composable
 internal fun SettingsTileIcon(
 	modifier : Modifier = Modifier ,
-	icon : @Composable (() -> Unit),
+	icon : @Composable (() -> Unit) ,
 							 )
 {
-		Box(
-				modifier = modifier.size(64.dp) ,
-				contentAlignment = Alignment.Center ,
-		   ) {
-			icon()
-		}
+	Box(
+			modifier = modifier.size(64.dp) ,
+			contentAlignment = Alignment.Center ,
+	   ) {
+		icon()
+	}
 }
 
 @Preview

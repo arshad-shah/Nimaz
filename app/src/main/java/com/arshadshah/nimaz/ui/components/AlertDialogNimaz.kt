@@ -51,7 +51,7 @@ fun AlertDialogNimaz(
 		ElevatedCard(
 				modifier = modifier
 					.fillMaxWidth()
-					.wrapContentHeight(),
+					.wrapContentHeight() ,
 				shape = MaterialTheme.shapes.extraLarge ,
 					) {
 			Column(
@@ -67,7 +67,8 @@ fun AlertDialogNimaz(
 						verticalArrangement = Arrangement.Center ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
-					if (icon != null){
+					if (icon != null)
+					{
 						Icon(
 								painter = icon ,
 								contentDescription = contentDescription ,
@@ -76,12 +77,13 @@ fun AlertDialogNimaz(
 									.size(32.dp)
 							)
 					}
-					if(action != null) {
+					if (action != null)
+					{
 						Row(
 								modifier
 									.padding(bottom = 4.dp)
-									.fillMaxWidth(),
-								horizontalArrangement = Arrangement.SpaceBetween,
+									.fillMaxWidth() ,
+								horizontalArrangement = Arrangement.SpaceBetween ,
 								verticalAlignment = Alignment.CenterVertically
 						   ) {
 							Text(
@@ -93,7 +95,8 @@ fun AlertDialogNimaz(
 								)
 							action()
 						}
-					}else{
+					} else
+					{
 						Text(
 								text = title ,
 								style = MaterialTheme.typography.titleLarge ,
@@ -104,11 +107,13 @@ fun AlertDialogNimaz(
 				}
 
 				Column {
-					if (description != null){
+					if (description != null)
+					{
 						Row(
 								modifier
 									.padding(bottom = 4.dp)
-									.fillMaxWidth()) {
+									.fillMaxWidth()
+						   ) {
 							Text(
 									text = description ,
 									style = MaterialTheme.typography.bodyMedium ,
@@ -121,28 +126,29 @@ fun AlertDialogNimaz(
 							modifier
 								.height(contentHeight)
 								.fillMaxWidth() ,
-							verticalAlignment = Alignment.CenterVertically,
+							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.Center
 					   ) {
-							Column(
-									Modifier
-										.verticalScroll(state = stateScroll),
-									verticalArrangement = Arrangement.Center,
-									horizontalAlignment = Alignment.CenterHorizontally
-								  ) {
-								contentToShow()
-							}
+						Column(
+								Modifier
+									.verticalScroll(state = stateScroll) ,
+								verticalArrangement = Arrangement.Center ,
+								horizontalAlignment = Alignment.CenterHorizontally
+							  ) {
+							contentToShow()
 						}
 					}
-				if(bottomDivider) Divider(color = MaterialTheme.colorScheme.outline)
+				}
+				if (bottomDivider) Divider(color = MaterialTheme.colorScheme.outline)
 				Row(
 						modifier = Modifier
 							.fillMaxWidth()
 							.wrapContentHeight()
-							.padding(top = 8.dp , end = 8.dp, bottom = 8.dp) ,
+							.padding(top = 8.dp , end = 8.dp , bottom = 8.dp) ,
 						horizontalArrangement = Arrangement.End
 				   ) {
-					if (showDismissButton){
+					if (showDismissButton)
+					{
 						TextButton(
 								modifier = Modifier.padding(horizontal = 16.dp) ,
 								onClick = { onDismiss() } ,
@@ -154,7 +160,8 @@ fun AlertDialogNimaz(
 								}
 								  )
 					}
-					if (showConfirmButton){
+					if (showConfirmButton)
+					{
 						Button(
 								modifier = Modifier.padding(end = 8.dp) ,
 								onClick = { onConfirm() } ,
@@ -167,32 +174,34 @@ fun AlertDialogNimaz(
 							  )
 					}
 				}
-				}
 			}
 		}
 	}
+}
 
 
 //alert dilog nimaz preview
 @Preview
 @Composable
-fun AlertDialogNimazPreview(){
-		AlertDialogNimaz(
-				title = "Hello" ,
-				icon = painterResource(id = R.drawable.mail_icon) ,
-				contentDescription = "Add" ,
-				contentToShow = { Text(text = "This is a content") } ,
-				onDismissRequest = { } ,
-				onConfirm = { } ,
-				onDismiss = { } ,
-				description = "This is a description"
-						)
+fun AlertDialogNimazPreview()
+{
+	AlertDialogNimaz(
+			title = "Hello" ,
+			icon = painterResource(id = R.drawable.mail_icon) ,
+			contentDescription = "Add" ,
+			contentToShow = { Text(text = "This is a content") } ,
+			onDismissRequest = { } ,
+			onConfirm = { } ,
+			onDismiss = { } ,
+			description = "This is a description"
+					)
 }
 
 //preview of the alert dialog nimaz with action
 @Preview
 @Composable
-fun AlertDialogNimazPreviewWithAction(){
+fun AlertDialogNimazPreviewWithAction()
+{
 	AlertDialogNimaz(
 			title = "Hello" ,
 			contentDescription = "Add" ,
@@ -212,35 +221,36 @@ fun AlertDialogNimazPreviewWithAction(){
 									tint = MaterialTheme.colorScheme.primary
 								)
 						}
-					  )
+						  )
 			}
-				)
+					)
 }
 
 //with a oulinedTextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun AlertDialogNimazPreviewWithOutlinedTextField(){
+fun AlertDialogNimazPreviewWithOutlinedTextField()
+{
 	val textToShow = remember { mutableStateOf("") }
 	AlertDialogNimaz(
 			title = "Hello" ,
 			contentDescription = "Add" ,
-			topDivider = true,
-			bottomDivider = true,
+			topDivider = true ,
+			bottomDivider = true ,
 			contentToShow = {
-					OutlinedTextField(
-							label = { Text(text = "Enter your name") },
-							singleLine = true ,
-							shape = MaterialTheme.shapes.extraLarge ,
-							value = textToShow.value,
-							onValueChange = {
-								textToShow.value = it
-							} ,
-							modifier = Modifier
-								.fillMaxWidth()
-								.fillMaxHeight()
-						)
+				OutlinedTextField(
+						label = { Text(text = "Enter your name") } ,
+						singleLine = true ,
+						shape = MaterialTheme.shapes.extraLarge ,
+						value = textToShow.value ,
+						onValueChange = {
+							textToShow.value = it
+						} ,
+						modifier = Modifier
+							.fillMaxWidth()
+							.fillMaxHeight()
+								 )
 			} ,
 			contentHeight = 100.dp ,
 			onDismissRequest = { } ,
@@ -257,7 +267,7 @@ fun AlertDialogNimazPreviewWithOutlinedTextField(){
 									tint = MaterialTheme.colorScheme.primary
 								)
 						}
-					  )
+						  )
 			}
-				)
+					)
 }

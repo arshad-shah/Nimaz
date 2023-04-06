@@ -219,7 +219,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 
 				MoonPhaseImage(
 						image = phaseOfMoon.phaseSvg
-					)
+							  )
 			}
 			Row(
 					modifier = Modifier
@@ -412,11 +412,11 @@ fun MoonPhaseImage(image : Int)
 				.size(40.dp)
 				.border(
 						width = 1.dp ,
-						color = MaterialTheme.colorScheme.outline,
+						color = MaterialTheme.colorScheme.outline ,
 						shape = CircleShape
 					   )
 				.clip(shape = CircleShape)
-		) {
+	   ) {
 		Image(
 				painter = painterResource(id = image) ,
 				contentDescription = "Moon Phase Image" ,
@@ -424,7 +424,7 @@ fun MoonPhaseImage(image : Int)
 					.size(40.dp)
 					.background(color = Color.White.copy(alpha = 0.8f))
 					.clip(shape = CircleShape)
-			)
+			 )
 	}
 }
 
@@ -443,15 +443,16 @@ fun MoonPhaseImagePreview()
 			MoonPhase.WANING_GIBBOUS ,
 			MoonPhase.LAST_QUARTER ,
 			MoonPhase.WANING_CRESCENT
-		)
+					   )
 	val currentPhase = remember { mutableStateOf(phases[0]) }
 	val percentage = (fraction.value * 100).toInt()
-	val imageToShow = when(currentPhase.value)
+	val imageToShow = when (currentPhase.value)
 	{
 		MoonPhase.NEW_MOON ->
 		{
 			R.drawable.new_moon
 		}
+
 		MoonPhase.WAXING_CRESCENT ->
 		{
 			//get the image to show
@@ -484,6 +485,7 @@ fun MoonPhaseImagePreview()
 				else -> R.drawable.waxing_gib_71
 			}
 		}
+
 		MoonPhase.FULL_MOON ->
 		{
 			R.drawable.full_moon
@@ -537,22 +539,24 @@ fun MoonPhaseImagePreview()
 					  )
 	}
 	//get a list of moon phases
-	val moonPhases = dates.value.map { SunMoonCalc(
-			latitude = 53.7,
-			longitude = -7.35
-										 ).getMoonPhase(it) }
+	val moonPhases = dates.value.map {
+		SunMoonCalc(
+				latitude = 53.7 ,
+				longitude = - 7.35
+				   ).getMoonPhase(it)
+	}
 	//a slider to change date so that the moon phase changes
 	//and we can see the different moon phases
 	Column(
-			modifier = Modifier.fillMaxSize(),
-			horizontalAlignment = Alignment.CenterHorizontally,
+			modifier = Modifier.fillMaxSize() ,
+			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
 		  ) {
 
 		//loop through the list of moon phases and get the fraction and phase
 		//print the date
 		LaunchedEffect(key1 = Unit) {
-			moonPhases.forEachIndexed { index, moonPhase ->
+			moonPhases.forEachIndexed { index , moonPhase ->
 				fraction.value = moonPhase.fraction
 				currentPhase.value = moonPhase.phaseName
 				dateOfCurrentPhase.value = dates.value[index]

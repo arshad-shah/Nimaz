@@ -77,7 +77,7 @@ fun Page(
 				item {
 					Verses {
 						AyaList.forEach { aya ->
-							if(
+							if (
 								aya.ayaNumberInQuran == 0 ||
 								aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ||
 								aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
@@ -114,7 +114,7 @@ fun Verse(
 	fontStyle : String ,
 		 )
 {
-	val cardBackgroundColor = if (!isNotBismillah)
+	val cardBackgroundColor = if (! isNotBismillah)
 	{
 		MaterialTheme.colorScheme.secondaryContainer
 	} else
@@ -137,7 +137,7 @@ fun Verse(
 																			)
 										)
 							.background(
-									color = cardBackgroundColor,
+									color = cardBackgroundColor ,
 									shape = MaterialTheme.shapes.extraLarge
 									   )
 							.clickable {
@@ -183,6 +183,7 @@ fun Verse(
 								{
 									amiri
 								}
+
 								"IndoPak" ->
 								{
 									almajeed

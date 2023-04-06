@@ -56,6 +56,7 @@ fun FontSizeDialog(
 				arabicFontSizeState.value = 24f
 				translationFontSizeState.value = 16f
 			}
+
 			"IndoPak" ->
 			{
 				arabicFontSizeState.value = 32f
@@ -72,7 +73,7 @@ fun FontSizeDialog(
 	AlertDialogNimaz(
 			topDivider = false ,
 			bottomDivider = false ,
-			contentHeight = 250.dp,
+			contentHeight = 250.dp ,
 			dismissButtonText = "Close" ,
 			contentDescription = "Font Settings" ,
 			title = "Font Settings" ,
@@ -85,145 +86,151 @@ fun FontSizeDialog(
 						verticalArrangement = Arrangement.SpaceBetween ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.wrapContentHeight() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
-				   ) {
-					Text(text = "Arabic Font" , style = MaterialTheme.typography.bodyMedium)
-					Spacer(modifier = Modifier.width(8.dp))
-					//round this value to make it clean and easy to read
-					Text(text = arabicFontSizeState.value.roundToInt().toString())
-				}
-				Slider(
-						value = arabicFontSizeState.value ,
-						onValueChange = {
-							arabicFontSizeState.value = it
-							handleQuranEvents(
-									QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(
-											it
-																						  )
-											 )
-						} ,
-						valueRange = if (fontStyleState.value == "IndoPak") 32f..60f else 24f..46f ,
-						modifier = Modifier.width(300.dp)
-					  )
-
-
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.wrapContentHeight() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
-				   ) {
-					Text(text = "Translation Font" , style = MaterialTheme.typography.bodyMedium)
-					//a text to show the font value of the translation
-					//round this value to make it clean and easy to read
-					Text(text = translationFontSizeState.value.roundToInt().toString())
-				}
-
-				Slider(
-						value = translationFontSizeState.value ,
-						onValueChange = {
-							translationFontSizeState.value = it
-							handleQuranEvents(
-									QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
-											it
-																							   )
-											 )
-						} ,
-						valueRange = 16f .. 40f ,
-						modifier = Modifier.width(300.dp)
-					  )
-
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.wrapContentHeight() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
-				   ) {
-					Text(text = "Font Style (Arabic)" , style = MaterialTheme.typography.bodyMedium)
-					ElevatedCard(
-							shape = MaterialTheme.shapes.extraLarge ,
-							elevation = CardDefaults.elevatedCardElevation(
-									defaultElevation = 4.dp
-																		  ) ,
+					Row(
 							modifier = Modifier
-								.width(120.dp)
-								) {
-						//an elevation card that shows the text and icon
+								.fillMaxWidth()
+								.wrapContentHeight() ,
+							verticalAlignment = Alignment.CenterVertically ,
+							horizontalArrangement = Arrangement.SpaceBetween
+					   ) {
+						Text(text = "Arabic Font" , style = MaterialTheme.typography.bodyMedium)
+						Spacer(modifier = Modifier.width(8.dp))
+						//round this value to make it clean and easy to read
+						Text(text = arabicFontSizeState.value.roundToInt().toString())
+					}
+					Slider(
+							value = arabicFontSizeState.value ,
+							onValueChange = {
+								arabicFontSizeState.value = it
+								handleQuranEvents(
+										QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(
+												it
+																							  )
+												 )
+							} ,
+							valueRange = if (fontStyleState.value == "IndoPak") 32f .. 60f else 24f .. 46f ,
+							modifier = Modifier.width(300.dp)
+						  )
+
+
+					Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.wrapContentHeight() ,
+							verticalAlignment = Alignment.CenterVertically ,
+							horizontalArrangement = Arrangement.SpaceBetween
+					   ) {
+						Text(
+								text = "Translation Font" ,
+								style = MaterialTheme.typography.bodyMedium
+							)
+						//a text to show the font value of the translation
+						//round this value to make it clean and easy to read
+						Text(text = translationFontSizeState.value.roundToInt().toString())
+					}
+
+					Slider(
+							value = translationFontSizeState.value ,
+							onValueChange = {
+								translationFontSizeState.value = it
+								handleQuranEvents(
+										QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
+												it
+																								   )
+												 )
+							} ,
+							valueRange = 16f .. 40f ,
+							modifier = Modifier.width(300.dp)
+						  )
+
+					Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.wrapContentHeight() ,
+							verticalAlignment = Alignment.CenterVertically ,
+							horizontalArrangement = Arrangement.SpaceBetween
+					   ) {
+						Text(
+								text = "Font Style (Arabic)" ,
+								style = MaterialTheme.typography.bodyMedium
+							)
 						ElevatedCard(
+								shape = MaterialTheme.shapes.extraLarge ,
+								elevation = CardDefaults.elevatedCardElevation(
+										defaultElevation = 4.dp
+																			  ) ,
 								modifier = Modifier
-									.fillMaxWidth()
-									.clickable {
-										fontMenuExpanded.value = ! fontMenuExpanded.value
-									} ,
-								content = {
-									Row(
-											modifier = Modifier
-												.fillMaxWidth()
-												.padding(8.dp) ,
-											verticalAlignment = Alignment.CenterVertically ,
-											horizontalArrangement = Arrangement.SpaceBetween
-									   ) {
-										//find the font style from the list of font styles
-										//and then show it in the text
-										Text(
-												text = items3[items3.indexOf(fontStyleState.value)] ,
-												modifier = Modifier.padding(start = 8.dp) ,
-												style = MaterialTheme.typography.bodyMedium ,
-											)
-										Icon(
+									.width(120.dp)
+									) {
+							//an elevation card that shows the text and icon
+							ElevatedCard(
+									modifier = Modifier
+										.fillMaxWidth()
+										.clickable {
+											fontMenuExpanded.value = ! fontMenuExpanded.value
+										} ,
+									content = {
+										Row(
 												modifier = Modifier
-													.padding(start = 8.dp)
-													.size(18.dp) ,
-												painter = icon ,
-												contentDescription = null
-											)
-									}
-									DropdownMenu(
-											modifier = Modifier
-												.wrapContentWidth()
-												.wrapContentHeight() ,
-											expanded = fontMenuExpanded.value ,
-											onDismissRequest = {
-												fontMenuExpanded.value = false
-											} ,
-											content = {
-												items3.forEach { item ->
-													DropdownMenuItem(
-															onClick = {
-																fontStyleState.value = item
-																setFontBasedOnFontStyle(
-																		fontStyleState.value
-																					   )
-																fontMenuExpanded.value =
-																	false
-																handleQuranEvents(
-																		QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
-																				fontStyleState.value
-																														 )
-																				 )
-															} ,
-															text = {
-																Text(
-																		text = item ,
-																		style = MaterialTheme.typography.bodyMedium
-																	)
-															}
-																	)
-												}
-											}
+													.fillMaxWidth()
+													.padding(8.dp) ,
+												verticalAlignment = Alignment.CenterVertically ,
+												horizontalArrangement = Arrangement.SpaceBetween
+										   ) {
+											//find the font style from the list of font styles
+											//and then show it in the text
+											Text(
+													text = items3[items3.indexOf(fontStyleState.value)] ,
+													modifier = Modifier.padding(start = 8.dp) ,
+													style = MaterialTheme.typography.bodyMedium ,
 												)
-								}
-									)
+											Icon(
+													modifier = Modifier
+														.padding(start = 8.dp)
+														.size(18.dp) ,
+													painter = icon ,
+													contentDescription = null
+												)
+										}
+										DropdownMenu(
+												modifier = Modifier
+													.wrapContentWidth()
+													.wrapContentHeight() ,
+												expanded = fontMenuExpanded.value ,
+												onDismissRequest = {
+													fontMenuExpanded.value = false
+												} ,
+												content = {
+													items3.forEach { item ->
+														DropdownMenuItem(
+																onClick = {
+																	fontStyleState.value = item
+																	setFontBasedOnFontStyle(
+																			fontStyleState.value
+																						   )
+																	fontMenuExpanded.value =
+																		false
+																	handleQuranEvents(
+																			QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
+																					fontStyleState.value
+																															 )
+																					 )
+																} ,
+																text = {
+																	Text(
+																			text = item ,
+																			style = MaterialTheme.typography.bodyMedium
+																		)
+																}
+																		)
+													}
+												}
+													)
+									}
+										)
+						}
 					}
 				}
-			}
 			} ,
 			onDismissRequest = {
 				showDialog3(false)
@@ -232,6 +239,6 @@ fun FontSizeDialog(
 				showDialog3(false)
 			} ,
 			onDismiss = {
-					showDialog3(false)
+				showDialog3(false)
 			})
 }

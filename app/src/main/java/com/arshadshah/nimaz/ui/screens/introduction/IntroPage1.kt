@@ -57,7 +57,8 @@ fun IntroPage1()
 			sharedPref.getData(AppConstants.LOCATION_INPUT , "").isNotBlank()
 		val isNotificationSet =
 			sharedPref.getDataBoolean(AppConstants.NOTIFICATION_ALLOWED , false)
-		areSettingsComplete.value = pagerState.currentPage == pages.size - 1 && isLocationSet && isNotificationSet
+		areSettingsComplete.value =
+			pagerState.currentPage == pages.size - 1 && isLocationSet && isNotificationSet
 	}
 
 	Column(
@@ -118,7 +119,7 @@ fun IntroPage1()
 			{
 				BackButton(
 						modifier = Modifier ,
-						pagerState = pagerState,
+						pagerState = pagerState ,
 						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage - 1)
@@ -126,8 +127,8 @@ fun IntroPage1()
 				}
 				FinishButton(
 						modifier = Modifier ,
-						pagerState = pagerState,
-						areSettingsComplete = areSettingsComplete.value,
+						pagerState = pagerState ,
+						areSettingsComplete = areSettingsComplete.value ,
 							) {
 					sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
 					context.startActivity(Intent(context , MainActivity::class.java))
@@ -146,7 +147,7 @@ fun IntroPage1()
 					}
 				}
 				NextButton(
-						pagerState = pagerState,
+						pagerState = pagerState ,
 						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage + 1)

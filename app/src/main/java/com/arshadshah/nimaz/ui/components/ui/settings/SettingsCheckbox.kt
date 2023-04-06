@@ -56,7 +56,8 @@ fun SettingsCheckbox(
 			if (icon != null)
 			{
 				SettingsTileIcon(icon = icon)
-			}else{
+			} else
+			{
 				Spacer(modifier = Modifier.size(24.dp))
 			}
 			SettingsTileTexts(title = title , subtitle = subtitle)
