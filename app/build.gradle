@@ -16,8 +16,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 109
-        versionName '1.5.37'
+        versionCode 110
+        versionName '1.5.38'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -85,6 +85,7 @@ dependencies {
     implementation "androidx.compose.material:material"
     implementation "androidx.compose.material3:material3"
     implementation "androidx.navigation:navigation-compose"
+    implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.9.4'
 
     debugImplementation "androidx.compose.ui:ui-tooling"
     debugImplementation "androidx.compose.ui:ui-test-manifest"

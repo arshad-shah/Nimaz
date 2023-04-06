@@ -48,7 +48,7 @@ fun SettingsList(
 
 	var showDialog by remember { mutableStateOf(false) }
 
-	val safeSubtitle  = if (state.value >= 0 && useSelectedValueAsSubtitle)
+	val safeSubtitle = if (state.value >= 0 && useSelectedValueAsSubtitle)
 	{
 		val key = valueState.value
 		//find the value of the key in the map
@@ -57,13 +57,14 @@ fun SettingsList(
 	} else subtitle
 
 	SettingsMenuLink(
-			modifier = if (icon != null) modifier else  modifier.padding(8.dp) ,
-			icon = icon,
+			modifier = if (icon != null) modifier else modifier.padding(8.dp) ,
+			icon = icon ,
 			title = {
 				Text(text = title)
 			} ,
 			subtitle = {
-				if (safeSubtitle != null){
+				if (safeSubtitle != null)
+				{
 					Text(text = safeSubtitle)
 				}
 			} ,

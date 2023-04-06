@@ -197,7 +197,7 @@ class NotificationHelper
 		notification_id : Int ,
 		title : String ,
 		message : String ,
-						  )
+										 )
 	{
 		// Create an explicit intent for an Activity in your app
 		val notificationIntent =

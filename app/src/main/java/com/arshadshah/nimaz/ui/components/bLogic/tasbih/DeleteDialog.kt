@@ -30,28 +30,33 @@ fun DeleteDialog(
 	if (showDialog.value)
 	{
 		AlertDialogNimaz(
-			bottomDivider = false,
-			topDivider = false,
-			contentHeight = 100.dp,
-			confirmButtonText = "Confirm",
-			contentDescription = "Delete Tasbih" ,
-			title = "Delete Tasbih" ,
-			contentToShow = {
-				Text(text = "Are you sure you want to delete this tasbih?" , style = MaterialTheme.typography.bodyMedium , modifier = Modifier.padding(16.dp))
-			} ,
-			onDismissRequest = {
-				showDialog.value = false
-			} ,
-			onConfirm = {
-				viewModel.handleEvent(
-						TasbihViewModel.TasbihEvent.DeleteTasbih(
-								tasbih
-																)
-									 )
-				showDialog.value = false
-			} ,
-			onDismiss = {
-				showDialog.value = false
-			})
+				bottomDivider = false ,
+				topDivider = false ,
+				contentHeight = 100.dp ,
+				confirmButtonText = "Yes" ,
+				dismissButtonText = "No, Cancel" ,
+				contentDescription = "Delete Tasbih" ,
+				title = "Delete Tasbih" ,
+				contentToShow = {
+					Text(
+							text = "Are you sure you want to delete this tasbih?" ,
+							style = MaterialTheme.typography.bodyMedium ,
+							modifier = Modifier.padding(16.dp)
+						)
+				} ,
+				onDismissRequest = {
+					showDialog.value = false
+				} ,
+				onConfirm = {
+					viewModel.handleEvent(
+							TasbihViewModel.TasbihEvent.DeleteTasbih(
+									tasbih
+																	)
+										 )
+					showDialog.value = false
+				} ,
+				onDismiss = {
+					showDialog.value = false
+				})
 	}
 }

@@ -8,38 +8,39 @@ import com.google.firebase.ktx.Firebase
 
 object FirebaseLogger
 {
-	private lateinit var firebaseAnalytics: FirebaseAnalytics
+
+	private lateinit var firebaseAnalytics : FirebaseAnalytics
 
 	fun init()
 	{
-		if (!::firebaseAnalytics.isInitialized)
+		if (! ::firebaseAnalytics.isInitialized)
 		{
 			this.firebaseAnalytics = Firebase.analytics
 			Log.d("Nimaz: FirebaseLogger" , "Firebase Analytics Initialized")
 		}
 	}
 
-	fun logEvent(eventName: String, params: Map<String, Any>?)
+	fun logEvent(eventName : String , params : Map<String , Any>?)
 	{
 		val bundle = Bundle()
-		params?.forEach { (key, value) ->
+		params?.forEach { (key , value) ->
 			when (value)
 			{
-				is String -> bundle.putString(key, value)
-				is Int    -> bundle.putInt(key, value)
-				is Long   -> bundle.putLong(key, value)
-				is Float  -> bundle.putFloat(key, value)
-				is Double -> bundle.putDouble(key, value)
-				is Boolean-> bundle.putBoolean(key, value)
+				is String -> bundle.putString(key , value)
+				is Int -> bundle.putInt(key , value)
+				is Long -> bundle.putLong(key , value)
+				is Float -> bundle.putFloat(key , value)
+				is Double -> bundle.putDouble(key , value)
+				is Boolean -> bundle.putBoolean(key , value)
 			}
 		}
-		firebaseAnalytics.logEvent(eventName, bundle)
+		firebaseAnalytics.logEvent(eventName , bundle)
 		Log.d("Nimaz: FirebaseLogger" , "Logged Event: $eventName")
 	}
 
-	fun logEvent(eventName: String)
+	fun logEvent(eventName : String)
 	{
-		firebaseAnalytics.logEvent(eventName, null)
+		firebaseAnalytics.logEvent(eventName , null)
 		Log.d("Nimaz: FirebaseLogger" , "Logged Event: $eventName")
 	}
 

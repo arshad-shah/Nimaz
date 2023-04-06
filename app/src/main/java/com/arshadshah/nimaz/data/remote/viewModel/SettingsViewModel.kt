@@ -87,7 +87,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 					AppConstants.NOTIFICATION_ALLOWED ,
 					false
 											)
-												   )
+														   )
 	val areNotificationsAllowed = _areNotificationsAllowed.asStateFlow()
 
 	//prayer times adjustments state
@@ -266,6 +266,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION , event.exempt)
 				Log.d("Nimaz: SettingsViewModel" , "Battery exempt : ${event.exempt}")
 			}
+
 			is SettingsEvent.NotificationsAllowed ->
 			{
 				_areNotificationsAllowed.value = event.allowed

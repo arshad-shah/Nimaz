@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 
 class ResetAdhansReciever : BroadcastReceiver()
@@ -22,6 +23,30 @@ class ResetAdhansReciever : BroadcastReceiver()
 		//create alarms
 		CreateAlarms().scheduleAlarms(context , fajr , sunrise , zuhar , asar , maghrib , ishaa)
 
+		if (! FirebaseLogger.isInitialized())
+		{
+			FirebaseLogger.init()
+			Log.d(
+					AppConstants.RESET_ADHANS_RECEIVER_TAG ,
+					"onReceived:  called and firebase logger initialized"
+				 )
+		}
+
+		val mapForLogging = mapOf(
+				"ResetAdhansReciever" to "Resetting Alarms"
+								 )
+		FirebaseLogger.logEvent(
+				"Reset Adhans Receiver" ,
+				mapForLogging
+							   )
+
 		Log.i(AppConstants.RESET_ADHANS_RECEIVER_TAG , "Alarms for Adhan Reset!")
+
+		FirebaseLogger.logEvent(
+				"Reset Adhans Receiver" ,
+				mapOf(
+						"ResetAdhansReciever" to "Alarms for Adhan Reset!"
+					 )
+							   )
 	}
 }

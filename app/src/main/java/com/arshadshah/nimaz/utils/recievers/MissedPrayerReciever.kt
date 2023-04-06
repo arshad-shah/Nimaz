@@ -24,13 +24,19 @@ class MissedPrayerReciever : BroadcastReceiver()
 		if (! LocalDataStore.isInitialized())
 		{
 			LocalDataStore.init(context)
-			Log.d(AppConstants.MISSED_PRAYER_RECEIVER_TAG , "onReceived:  called and local data store initialized")
+			Log.d(
+					AppConstants.MISSED_PRAYER_RECEIVER_TAG ,
+					"onReceived:  called and local data store initialized"
+				 )
 		}
 
-		if(!FirebaseLogger.isInitialized())
+		if (! FirebaseLogger.isInitialized())
 		{
 			FirebaseLogger.init()
-			Log.d(AppConstants.MISSED_PRAYER_RECEIVER_TAG , "onReceived:  called and firebase logger initialized")
+			Log.d(
+					AppConstants.MISSED_PRAYER_RECEIVER_TAG ,
+					"onReceived:  called and firebase logger initialized"
+				 )
 		}
 
 
@@ -42,20 +48,21 @@ class MissedPrayerReciever : BroadcastReceiver()
 			try
 			{
 				var amountMissed = 0
-				val tracker = LocalDataStore.getDataStore().getTrackerForDate(LocalDate.now().toString())
-				if (!tracker.fajr)
+				val tracker =
+					LocalDataStore.getDataStore().getTrackerForDate(LocalDate.now().toString())
+				if (! tracker.fajr)
 				{
 					amountMissed += 1
-				}else if (!tracker.dhuhr)
+				} else if (! tracker.dhuhr)
 				{
 					amountMissed += 1
-				}else if (!tracker.asr)
+				} else if (! tracker.asr)
 				{
 					amountMissed += 1
-				}else if (!tracker.maghrib)
+				} else if (! tracker.maghrib)
 				{
 					amountMissed += 1
-				}else if (!tracker.isha)
+				} else if (! tracker.isha)
 				{
 					amountMissed += 1
 				}
@@ -63,14 +70,24 @@ class MissedPrayerReciever : BroadcastReceiver()
 				else "Well Done!"
 
 				//message
-				val message = if (amountMissed > 0) "You missed $amountMissed prayers today. Please try to pray them before the next day."
-				else "You completed all your prayers today. Keep it up!"
+				val message =
+					if (amountMissed > 0) "You missed $amountMissed prayers today. Please try to pray them before the next day."
+					else "You completed all your prayers today. Keep it up!"
 
-				NotificationHelper().createNotificationForMissedPrayer(context,AppConstants.CHANNEL_MISSED_PRAYER_ID, AppConstants.MISSED_PRAYER_NOTIFY_ID,title, message)
+				NotificationHelper().createNotificationForMissedPrayer(
+						context ,
+						AppConstants.CHANNEL_MISSED_PRAYER_ID ,
+						AppConstants.MISSED_PRAYER_NOTIFY_ID ,
+						title ,
+						message
+																	  )
 
-			}catch (e : Exception)
+			} catch (e : Exception)
 			{
-				Log.e(AppConstants.MISSED_PRAYER_RECEIVER_TAG , "Error in BootReciever: ${e.message}")
+				Log.e(
+						AppConstants.MISSED_PRAYER_RECEIVER_TAG ,
+						"Error in BootReciever: ${e.message}"
+					 )
 				val mapForLoggingError = mapOf(
 						"MissedPrayerReciever" to "Error in BootReciever: ${e.message}"
 											  )

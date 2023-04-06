@@ -26,43 +26,33 @@ fun TasbihGoalDialog(
 					)
 {
 	val context = LocalContext.current
-	if (!isOpen.value) return
+	if (! isOpen.value) return
 
-		AlertDialogNimaz(
-				bottomDivider = false ,
-				topDivider = false ,
-				contentHeight = 100.dp,
-				contentDescription = "Goal for tasbih" ,
-				title = "Set Daily Goal" ,
-				contentToShow = {
-					Column(
-							modifier = Modifier.padding(8.dp) ,
-							verticalArrangement = Arrangement.spacedBy(8.dp) ,
-							horizontalAlignment = Alignment.CenterHorizontally ,
-						  ) {
-						OutlinedTextField(
-								shape = MaterialTheme.shapes.extraLarge ,
-								value = state.value ,
-								maxLines = 1 ,
-								keyboardActions = KeyboardActions(
-										onDone = {
-											val isInt = state.value.toIntOrNull()
-											if (isInt != null && state.value != "")
+	AlertDialogNimaz(
+			bottomDivider = false ,
+			topDivider = false ,
+			contentHeight = 100.dp ,
+			contentDescription = "Goal for tasbih" ,
+			title = "Set Daily Goal" ,
+			contentToShow = {
+				Column(
+						modifier = Modifier.padding(8.dp) ,
+						verticalArrangement = Arrangement.spacedBy(8.dp) ,
+						horizontalAlignment = Alignment.CenterHorizontally ,
+					  ) {
+					OutlinedTextField(
+							shape = MaterialTheme.shapes.extraLarge ,
+							value = state.value ,
+							maxLines = 1 ,
+							keyboardActions = KeyboardActions(
+									onDone = {
+										val isInt = state.value.toIntOrNull()
+										if (isInt != null && state.value != "")
+										{
+											if (state.value.toInt() > 0)
 											{
-												if (state.value.toInt() > 0)
-												{
-													onConfirm(state.value)
-													isOpen.value = false
-												} else
-												{
-													Toasty
-														.error(
-																context ,
-																"Goal must be greater than 0" ,
-																Toasty.LENGTH_SHORT
-															  )
-														.show()
-												}
+												onConfirm(state.value)
+												isOpen.value = false
 											} else
 											{
 												Toasty
@@ -73,52 +63,62 @@ fun TasbihGoalDialog(
 														  )
 													.show()
 											}
-										}) ,
-								onValueChange = {
-									state.value = it
-								} ,
-								label = { Text(text = "Daily Goal") } ,
-								keyboardOptions = KeyboardOptions(
-										keyboardType = KeyboardType.Number ,
-										imeAction = ImeAction.Done ,
-																 ) ,
-										 )
+										} else
+										{
+											Toasty
+												.error(
+														context ,
+														"Goal must be greater than 0" ,
+														Toasty.LENGTH_SHORT
+													  )
+												.show()
+										}
+									}) ,
+							onValueChange = {
+								state.value = it
+							} ,
+							label = { Text(text = "Daily Goal") } ,
+							keyboardOptions = KeyboardOptions(
+									keyboardType = KeyboardType.Number ,
+									imeAction = ImeAction.Done ,
+															 ) ,
+									 )
+				}
+			} ,
+			onDismissRequest = {
+				isOpen.value = false
+			} ,
+			onConfirm = {
+				val isInt = state.value.toIntOrNull()
+				if (isInt != null && state.value != "")
+				{
+					if (state.value.toInt() > 0)
+					{
+						onConfirm(state.value)
+						isOpen.value = false
+					} else
+					{
+						Toasty
+							.error(
+									context ,
+									"Goal must be greater than 0" ,
+									Toasty.LENGTH_SHORT
+								  )
+							.show()
 					}
-				} ,
-				onDismissRequest = {
-					isOpen.value = false
-				} ,
-				onConfirm = {
-								val isInt = state.value.toIntOrNull()
-								if (isInt != null && state.value != "")
-								{
-									if (state.value.toInt() > 0)
-									{
-										onConfirm(state.value)
-										isOpen.value = false
-									} else
-									{
-										Toasty
-											.error(
-													context ,
-													"Goal must be greater than 0" ,
-													Toasty.LENGTH_SHORT
-												  )
-											.show()
-									}
-								} else
-								{
-									Toasty
-										.error(
-												context ,
-												"Goal must be greater than 0" ,
-												Toasty.LENGTH_SHORT
-											  )
-										.show()
-								}
+				} else
+				{
+					Toasty
+						.error(
+								context ,
+								"Goal must be greater than 0" ,
+								Toasty.LENGTH_SHORT
+							  )
+						.show()
+				}
 
-				} ,
-				onDismiss = {
-					isOpen.value = false
-				})
+			} ,
+			onDismiss = {
+				isOpen.value = false
+			})
 }
