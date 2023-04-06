@@ -11,5 +11,5 @@ data class MoonPhaseInfo(
 	val phase : Double ,
 	val angle : Double ,
 	val phaseName : MoonPhase ,
-	val phaseSvg : String ,
+	val phaseSvg : Int ,
 						)

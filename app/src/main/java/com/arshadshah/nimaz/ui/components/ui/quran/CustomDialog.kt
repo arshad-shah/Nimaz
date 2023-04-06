@@ -41,11 +41,14 @@ fun CustomDialog(
 	}
 
 	AlertDialogNimaz(
-			topDivider = false,
-			bottomDivider = false,
+			topDivider = false ,
+			bottomDivider = false ,
 			dismissButtonText = "Close" ,
 			contentHeight = 100.dp ,
-			properties = DialogProperties(dismissOnBackPress = true , dismissOnClickOutside = true) ,
+			properties = DialogProperties(
+					dismissOnBackPress = true ,
+					dismissOnClickOutside = true
+										 ) ,
 			contentDescription = title ,
 			title = title ,
 			contentToShow = {
@@ -83,9 +86,9 @@ fun CustomDialog(
 				setShowDialog(false)
 			} ,
 			onConfirm = {
-					setShowDialog(false)
-						} ,
+				setShowDialog(false)
+			} ,
 			onDismiss = {
-					setShowDialog(false)
+				setShowDialog(false)
 			})
 }

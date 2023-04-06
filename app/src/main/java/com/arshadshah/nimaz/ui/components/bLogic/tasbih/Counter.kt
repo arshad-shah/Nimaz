@@ -122,13 +122,19 @@ fun Counter(
 	if (resetTasbih.value)
 	{
 		AlertDialogNimaz(
-				bottomDivider = false,
-				topDivider = false,
-				contentHeight = 100.dp,
+				bottomDivider = false ,
+				topDivider = false ,
+				contentHeight = 100.dp ,
 				contentDescription = "Reset Counter" ,
 				title = "Reset Counter" ,
+				confirmButtonText = "Yes" ,
+				dismissButtonText = "No, Cancel" ,
 				contentToShow = {
-					Text(text = "Are you sure you want to reset the counter?", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
+					Text(
+							text = "Are you sure you want to reset the counter?" ,
+							style = MaterialTheme.typography.bodyMedium ,
+							modifier = Modifier.padding(8.dp)
+						)
 				} ,
 				onDismissRequest = {
 					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
@@ -151,9 +157,9 @@ fun Counter(
 	if (showObjectiveDialog.value)
 	{
 		AlertDialogNimaz(
-				bottomDivider = false,
-				topDivider = false,
-				contentHeight = 100.dp,
+				bottomDivider = false ,
+				topDivider = false ,
+				contentHeight = 100.dp ,
 				contentDescription = "Set Tasbih Objective" ,
 				title = "Set Tasbih Objective" ,
 				contentToShow = {

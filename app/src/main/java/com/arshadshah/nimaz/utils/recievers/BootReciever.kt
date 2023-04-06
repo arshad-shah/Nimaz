@@ -25,10 +25,13 @@ class BootReciever : BroadcastReceiver()
 			Log.i(AppConstants.BOOT_RECEIVER_TAG , "Boot Completed or Locked Boot Completed!")
 			Log.i(AppConstants.BOOT_RECEIVER_TAG , "Resetting Alarms after BootUp!")
 
-			if(! FirebaseLogger.isInitialized())
+			if (! FirebaseLogger.isInitialized())
 			{
 				FirebaseLogger.init()
-				Log.d(AppConstants.BOOT_RECEIVER_TAG , "onReceived:  called and firebase logger initialized")
+				Log.d(
+						AppConstants.BOOT_RECEIVER_TAG ,
+						"onReceived:  called and firebase logger initialized"
+					 )
 			}
 
 			val mapForLogging = mapOf(
@@ -42,7 +45,8 @@ class BootReciever : BroadcastReceiver()
 				{
 					val repository = PrayerTimesRepository.getPrayerTimes(context)
 					sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
-					val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+					val alarmLock =
+						sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
 					if (! alarmLock)
 					{
 						CreateAlarms().exact(
@@ -56,12 +60,12 @@ class BootReciever : BroadcastReceiver()
 											)
 						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 					}
-				}catch (e : Exception)
+				} catch (e : Exception)
 				{
 					Log.e(AppConstants.BOOT_RECEIVER_TAG , "Error in BootReciever: ${e.message}")
 					val mapForLoggingError = mapOf(
 							"BootReciever" to "Error in BootReciever: ${e.message}"
-											 )
+												  )
 					FirebaseLogger.logEvent("Boot Receiver" , mapForLoggingError)
 				}
 			}

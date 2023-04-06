@@ -734,7 +734,7 @@ fun NavigationGraph(
 					} ,
 					onNavigateToTasbihListScreen = {
 						navController.navigate(TASBIH_LIST_SCREEN)
-					}
+					} ,
 					 )
 
 		}

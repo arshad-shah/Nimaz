@@ -99,7 +99,7 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(8.dp) ,
+					.padding(vertical = 8.dp , horizontal = 16.dp) ,
 				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
@@ -132,28 +132,35 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 						.padding(4.dp)
 				)
 			Spacer(modifier = Modifier.width(4.dp))
-			IconButton(onClick = {
-				//share the aya
-				val shareIntent = Intent(Intent.ACTION_SEND)
-				shareIntent.type = "text/plain"
-				//create the share message
-				//with the aya text, aya translation
-				//the sura number followed by the aya number
-				shareIntent.putExtra(
-						Intent.EXTRA_TEXT ,
-						"Aya of the Day - Chapter ${stateOfRandomAyat.value.suraNumber}: Verse ${stateOfRandomAyat.value.ayaNumberInSurah}\n\n" +
-						"${stateOfRandomAyat.value.ayaArabic} \n\n" +
-								"${if(translationSelected == "Urdu") stateOfRandomAyat.value.ayaTranslationUrdu else stateOfRandomAyat.value.ayaTranslationEnglish} " +
-								"\n\n${stateOfRandomAyat.value.suraNumber}:${stateOfRandomAyat.value.ayaNumberInSurah}" +
-								"\n\nDownload the app to read more: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
-									)
-				shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Aya of the Day")
+			IconButton(
+					onClick = {
+						//share the aya
+						val shareIntent = Intent(Intent.ACTION_SEND)
+						shareIntent.type = "text/plain"
+						//create the share message
+						//with the aya text, aya translation
+						//the sura number followed by the aya number
+						shareIntent.putExtra(
+								Intent.EXTRA_TEXT ,
+								"Aya of the Day - Chapter ${stateOfRandomAyat.value.suraNumber}: Verse ${stateOfRandomAyat.value.ayaNumberInSurah}\n\n" +
+										"${stateOfRandomAyat.value.ayaArabic} \n\n" +
+										"${if (translationSelected == "Urdu") stateOfRandomAyat.value.ayaTranslationUrdu else stateOfRandomAyat.value.ayaTranslationEnglish} " +
+										"\n\n${stateOfRandomAyat.value.suraNumber}:${stateOfRandomAyat.value.ayaNumberInSurah}" +
+										"\n\nDownload the app to read more: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
+											)
+						shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Aya of the Day")
 
-				//start the share intent
-				context.startActivity(Intent.createChooser(shareIntent , "Share Ramadan Times"))
-			} , modifier = Modifier.size(24.dp)) {
-				Icon(painter = painterResource(id = R.drawable.share_icon) ,
-					 contentDescription = "Share Ramadan Times" ,
+						//start the share intent
+						context.startActivity(
+								Intent.createChooser(
+										shareIntent ,
+										"Share Ramadan Times"
+													)
+											 )
+					} , modifier = Modifier.size(24.dp)) {
+				Icon(
+						painter = painterResource(id = R.drawable.share_icon) ,
+						contentDescription = "Share Ramadan Times" ,
 					)
 			}
 		}

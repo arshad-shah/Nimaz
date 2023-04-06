@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
+import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
+import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.ui.trackers.Placeholder
@@ -56,6 +58,19 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 		Placeholder(nameOfDropdown = "Quran Bookmarks")
 		return
 	}
+
+	val titleOfDialog = remember {
+		mutableStateOf("")
+	}
+	val openDialog = remember {
+		mutableStateOf(false)
+	}
+	val messageOfDialog = remember {
+		mutableStateOf("")
+	}
+	val itemToDelete = remember {
+		mutableStateOf<Aya?>(null)
+	}
 	FeaturesDropDown(
 			label = "Quran Bookmarks" ,
 			items = bookmarks.value ,
@@ -65,13 +80,11 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 						confirmStateChange = {
 							if (it == DismissValue.DismissedToStart)
 							{
-								viewModel.handleAyaEvent(
-										QuranViewModel.AyaEvent.deleteBookmarkFromAya(
-												currentItem.value.ayaNumber ,
-												currentItem.value.suraNumber ,
-												currentItem.value.ayaNumberInSurah
-																					 )
-														)
+								titleOfDialog.value = "Delete Bookmark"
+								messageOfDialog.value =
+									"Are you sure you want to delete this bookmark?"
+								itemToDelete.value = currentItem.value
+								openDialog.value = true
 							}
 							false
 						}
@@ -110,4 +123,39 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 						})
 			}
 					)
+
+	if (openDialog.value)
+	{
+		AlertDialogNimaz(
+				topDivider = false ,
+				bottomDivider = false ,
+				contentDescription = "Ayat features dialog" ,
+				title = titleOfDialog.value ,
+				contentToShow = {
+					Text(
+							text = messageOfDialog.value ,
+							style = MaterialTheme.typography.bodyMedium ,
+							modifier = Modifier.padding(8.dp)
+						)
+				} ,
+				onDismissRequest = {
+					viewModel.handleAyaEvent(
+							QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+									itemToDelete.value !!.ayaNumber ,
+									itemToDelete.value !!.suraNumber ,
+									itemToDelete.value !!.ayaNumberInSurah
+																		 )
+											)
+					openDialog.value = false
+				} ,
+				contentHeight = 100.dp ,
+				confirmButtonText = "Yes" ,
+				dismissButtonText = "No, Cancel" ,
+				onConfirm = {
+					openDialog.value = false
+				} ,
+				onDismiss = {
+					openDialog.value = false
+				})
+	}
 }

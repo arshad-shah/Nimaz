@@ -103,7 +103,10 @@ fun FinishButton(
 			Button(
 					onClick = onClick ,
 				  ) {
-				Text(text = if (areSettingsComplete) "Finish" else "Finish (Incomplete)" , style = MaterialTheme.typography.labelLarge)
+				Text(
+						text = if (areSettingsComplete) "Finish" else "Finish (Incomplete)" ,
+						style = MaterialTheme.typography.labelLarge
+					)
 			}
 		}
 	}
