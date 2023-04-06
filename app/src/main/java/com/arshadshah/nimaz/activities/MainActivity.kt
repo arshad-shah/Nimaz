@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity()
 			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
 		}
 
-		if(!FirebaseLogger.isInitialized())
+		if (! FirebaseLogger.isInitialized())
 		{
 			FirebaseLogger.init()
 			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and firebase logger initialized")
@@ -380,6 +380,7 @@ class MainActivity : ComponentActivity()
 																	setMenuOpen = setMenuOpen ,
 																	)
 														}
+
 														QURAN_SCREEN_ROUTE ->
 														{
 															IconButton(onClick = {
@@ -394,7 +395,7 @@ class MainActivity : ComponentActivity()
 															MoreMenuMain(
 																	menuOpen = menuOpen2 ,
 																	setMenuOpen = setMenuOpen2 ,
-																	)
+																		)
 														}
 
 														NAMESOFALLAH_SCREEN_ROUTE ->

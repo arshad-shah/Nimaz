@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 class RoutingActivity : ComponentActivity()
 {
+
 	override fun onCreate(savedInstanceState : Bundle?)
 	{
 
@@ -26,13 +27,19 @@ class RoutingActivity : ComponentActivity()
 		if (! LocalDataStore.isInitialized())
 		{
 			LocalDataStore.init(this)
-			Log.d("Nimaz: Introduction Activity" , "onCreate:  called and local data store initialized")
+			Log.d(
+					"Nimaz: Introduction Activity" ,
+					"onCreate:  called and local data store initialized"
+				 )
 		}
 
-		if(!FirebaseLogger.isInitialized())
+		if (! FirebaseLogger.isInitialized())
 		{
 			FirebaseLogger.init()
-			Log.d("Nimaz: Introduction Activity", "onCreate:  called and firebase logger initialized")
+			Log.d(
+					"Nimaz: Introduction Activity" ,
+					"onCreate:  called and firebase logger initialized"
+				 )
 		}
 
 		//get the first time flag

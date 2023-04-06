@@ -19,7 +19,9 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.delay
 
 //Banner Variant
-sealed class BannerVariant {
+sealed class BannerVariant
+{
+
 	object Success : BannerVariant()
 	object Error : BannerVariant()
 	object Info : BannerVariant()
@@ -39,40 +41,43 @@ fun BannerSmall(
 		mutableStateOf(true)
 	} ,
 	dismissable : Boolean = false ,
-		  )
+			   )
 {
 	val sharedPref = PrivateSharedPreferences(LocalContext.current)
 	val colors = mapOf(
-			BannerVariant.Success to Color(0xFF388E3C),
+			BannerVariant.Success to Color(0xFF388E3C) ,
 			BannerVariant.Error to Color(0xFFD50000) ,
 			BannerVariant.Info to Color(0xFF3F51B5) ,
 			BannerVariant.Warning to Color(0xFFFFA900) ,
-						  )
+					  )
 	val textColor = Color(0xFFFFFFFF)
 
 	isOpen.value = sharedPref.getDataBoolean("$title-bannerIsOpen" , true)
 	LaunchedEffect(Unit) {
-		if(!dismissable){
-			if(showFor > 0){
+		if (! dismissable)
+		{
+			if (showFor > 0)
+			{
 				delay(showFor.toLong())
 				isOpen.value = false
 				sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
 			}
 		}
 	}
-	if(isOpen.value){
+	if (isOpen.value)
+	{
 		//if its a success banner we use the success color and a check icon
 		//if its an error banner we use the error color and a cross icon
 		//if its an info banner we use the info color and an info icon
 		//if its a warning banner we use the warning color and a warning icon
 		ElevatedCard(
-				shape= MaterialTheme.shapes.extraLarge ,
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = modifier
 					.padding(paddingValues ?: PaddingValues(8.dp))
 					.clickable(
-							interactionSource = remember { MutableInteractionSource() },
+							interactionSource = remember { MutableInteractionSource() } ,
 							enabled = true ,
-							indication = if(onClick != {}) rememberRipple() else null ,
+							indication = if (onClick != {}) rememberRipple() else null ,
 							role = Role.Button ,
 							onClickLabel = "$title Banner" ,
 							onClick = {
@@ -80,7 +85,7 @@ fun BannerSmall(
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
 							} ,
-							  ),
+							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
 				colors = CardDefaults.elevatedCardColors(
 						containerColor = colors[variant] ?: Color(0xFFE0E0E0) ,
@@ -89,13 +94,13 @@ fun BannerSmall(
 			Row(
 					modifier = Modifier
 						.fillMaxWidth()
-						.padding(8.dp)
-					,
+						.padding(8.dp) ,
 					verticalAlignment = Alignment.CenterVertically ,
 			   ) {
 				//show the appropriate icon based on the banner variant
 				Icon(
-						painter = when (variant) {
+						painter = when (variant)
+						{
 							is BannerVariant.Success -> painterResource(id = R.drawable.checkbox_icon)
 							is BannerVariant.Error -> painterResource(id = R.drawable.cross_circle_icon)
 							is BannerVariant.Info -> painterResource(id = R.drawable.info_icon)
@@ -104,7 +109,7 @@ fun BannerSmall(
 						contentDescription = null ,
 						modifier = Modifier
 							.size(24.dp)
-							.weight(0.1f),
+							.weight(0.1f) ,
 						tint = textColor ,
 					)
 				Column(
@@ -127,14 +132,15 @@ fun BannerSmall(
 							color = textColor ,
 						)
 				}
-				if(dismissable){
+				if (dismissable)
+				{
 					IconButton(
 							onClick = {
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
 							} ,
 							modifier = Modifier
-								.size(32.dp),
+								.size(32.dp) ,
 							  ) {
 						Icon(
 								painter = painterResource(id = R.drawable.cross_icon) ,
@@ -142,7 +148,7 @@ fun BannerSmall(
 								tint = textColor ,
 								modifier = Modifier
 									.size(32.dp)
-									.padding(end = 8.dp , start = 8.dp),
+									.padding(end = 8.dp , start = 8.dp) ,
 							)
 					}
 				}
@@ -160,12 +166,12 @@ fun BannerLarge(
 	onClick : () -> Unit = {} ,
 	showFor : Int = 3000 ,
 	isOpen : MutableState<Boolean> ,
-	onDismiss : () -> Unit
-		  )
+	onDismiss : () -> Unit ,
+			   )
 {
 	val sharedPref = PrivateSharedPreferences(LocalContext.current)
 	val colors = mapOf(
-			BannerVariant.Success to Color(0xFF388E3C),
+			BannerVariant.Success to Color(0xFF388E3C) ,
 			BannerVariant.Error to Color(0xFFD50000) ,
 			BannerVariant.Info to Color(0xFF3F51B5) ,
 			BannerVariant.Warning to Color(0xFFFFA900) ,
@@ -175,25 +181,27 @@ fun BannerLarge(
 	isOpen.value = sharedPref.getDataBoolean("$title-bannerOpen" , true)
 
 	LaunchedEffect(Unit) {
-		if(showFor > 0){
+		if (showFor > 0)
+		{
 			delay(showFor.toLong())
 			isOpen.value = false
 			sharedPref.saveDataBoolean("$title-bannerOpen" , false)
 		}
 	}
-	if(isOpen.value){
+	if (isOpen.value)
+	{
 		//if its a success banner we use the success color and a check icon
 		//if its an error banner we use the error color and a cross icon
 		//if its an info banner we use the info color and an info icon
 		//if its a warning banner we use the warning color and a warning icon
 		ElevatedCard(
-				shape= MaterialTheme.shapes.extraLarge,
+				shape = MaterialTheme.shapes.extraLarge ,
 				modifier = modifier
-					.padding(top = 8.dp , bottom = 0.dp, start = 8.dp, end = 8.dp)
+					.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 					.clickable(
-							interactionSource = remember { MutableInteractionSource() },
+							interactionSource = remember { MutableInteractionSource() } ,
 							enabled = true ,
-							indication = if(onClick != {}) rememberRipple() else null ,
+							indication = if (onClick != {}) rememberRipple() else null ,
 							role = Role.Button ,
 							onClickLabel = "$title Banner" ,
 							onClick = {
@@ -201,11 +209,11 @@ fun BannerLarge(
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
 							} ,
-							  ),
+							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
 				colors = CardDefaults.elevatedCardColors(
 						containerColor = colors[variant] ?: Color(0xFFE0E0E0) ,
-														),
+														) ,
 					) {
 			Column(
 					modifier = Modifier.fillMaxWidth() ,
@@ -213,17 +221,25 @@ fun BannerLarge(
 					horizontalAlignment = Alignment.CenterHorizontally ,
 				  ) {
 				Row(
-						modifier = Modifier.fillMaxWidth().padding(8.dp) ,
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(8.dp) ,
 						verticalAlignment = Alignment.CenterVertically ,
 						horizontalArrangement = Arrangement.SpaceBetween ,
 				   ) {
 					Row(
-							modifier = Modifier.padding(top = 8.dp , bottom = 0.dp, start = 0.dp, end = 8.dp),
+							modifier = Modifier.padding(
+									top = 8.dp ,
+									bottom = 0.dp ,
+									start = 0.dp ,
+									end = 8.dp
+													   ) ,
 							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.Start ,
 					   ) {
 						Icon(
-								painter = when (variant) {
+								painter = when (variant)
+								{
 									is BannerVariant.Success -> painterResource(id = R.drawable.checkbox_icon)
 									is BannerVariant.Error -> painterResource(id = R.drawable.cross_circle_icon)
 									is BannerVariant.Info -> painterResource(id = R.drawable.info_icon)
@@ -231,7 +247,7 @@ fun BannerLarge(
 								} ,
 								contentDescription = null ,
 								modifier = Modifier
-									.size(24.dp),
+									.size(24.dp) ,
 								tint = textColor ,
 							)
 						//title
@@ -250,7 +266,7 @@ fun BannerLarge(
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
 							} ,
 							modifier = Modifier
-								.size(32.dp),
+								.size(32.dp) ,
 							  ) {
 						Icon(
 								painter = painterResource(id = R.drawable.cross_icon) ,
@@ -258,7 +274,7 @@ fun BannerLarge(
 								tint = textColor ,
 								modifier = Modifier
 									.size(32.dp)
-									.padding(end = 8.dp , start = 8.dp),
+									.padding(end = 8.dp , start = 8.dp) ,
 							)
 					}
 				}
@@ -267,7 +283,9 @@ fun BannerLarge(
 						text = message ?: "" ,
 						style = MaterialTheme.typography.bodyMedium ,
 						color = textColor ,
-						modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(horizontal = 16.dp , vertical = 8.dp)
 					)
 			}
 		}
@@ -275,16 +293,17 @@ fun BannerLarge(
 }
 
 
-@Preview(showBackground = true ,
+@Preview(
+		showBackground = true ,
 		)
 @Composable
 fun BannerPreviewWarning()
 {
 	BannerSmall(
-				variant = BannerVariant.Warning ,
-				title = "Warning" ,
-				message = "This is a warning banner" ,
-			  )
+			variant = BannerVariant.Warning ,
+			title = "Warning" ,
+			message = "This is a warning banner" ,
+			   )
 }
 
 @Preview(showBackground = true)
@@ -292,10 +311,10 @@ fun BannerPreviewWarning()
 fun BannerPreviewError()
 {
 	BannerSmall(
-				variant = BannerVariant.Error ,
-				title = "Error" ,
-				message = "This is an error banner" ,
-			  )
+			variant = BannerVariant.Error ,
+			title = "Error" ,
+			message = "This is an error banner" ,
+			   )
 }
 
 @Preview(showBackground = true)
@@ -303,10 +322,10 @@ fun BannerPreviewError()
 fun BannerPreviewSuccess()
 {
 	BannerSmall(
-				variant = BannerVariant.Success ,
-				title = "Success" ,
-				message = "This is a success banner" ,
-			  )
+			variant = BannerVariant.Success ,
+			title = "Success" ,
+			message = "This is a success banner" ,
+			   )
 }
 
 @Preview(showBackground = true)
@@ -314,10 +333,10 @@ fun BannerPreviewSuccess()
 fun BannerPreviewInfo()
 {
 	BannerSmall(
-				variant = BannerVariant.Info ,
-				title = "Info" ,
-				message = "This is an info banner" ,
-			  )
+			variant = BannerVariant.Info ,
+			title = "Info" ,
+			message = "This is an info banner" ,
+			   )
 }
 
 @Preview(showBackground = true)
@@ -344,9 +363,9 @@ fun BannerPreviewDismissable()
 			variant = BannerVariant.Info ,
 			title = "Info" ,
 			message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long" ,
-			isOpen = isOpen,
+			isOpen = isOpen ,
 			onDismiss = {
 				isOpen.value = false
 			} ,
-		  )
+			   )
 }

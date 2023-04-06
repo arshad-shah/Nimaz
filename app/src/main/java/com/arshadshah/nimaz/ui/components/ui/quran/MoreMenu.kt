@@ -44,7 +44,7 @@ fun MoreMenu(
 
 	val items1 : List<String> = listOf("List" , "Page (Experimental)")
 	val items2 : List<String> = listOf("English" , "Urdu")
-	val items3 : List<String> = listOf("Default" , "Quranme" , "Hidayat" , "Amiri", "IndoPak")
+	val items3 : List<String> = listOf("Default" , "Quranme" , "Hidayat" , "Amiri" , "IndoPak")
 	val (showDialog1 , setShowDialog1) = remember { mutableStateOf(false) }
 	val (showDialog2 , setShowDialog2) = remember { mutableStateOf(false) }
 
@@ -207,7 +207,7 @@ fun MoreMenu(
 			viewModel.downloadProgress
 		}.collectAsState()
 		DownloadQuranDialog(setShowDialog4 , downloadState , viewModel::handleQuranMenuEvents)
-	}  else if (showDialog3)
+	} else if (showDialog3)
 	{
 		FontSizeDialog(
 				setShowDialog3 ,
@@ -217,8 +217,7 @@ fun MoreMenu(
 				items3 ,
 				viewModel::handleQuranMenuEvents
 					  )
-	}
-	else
+	} else
 	{
 		return
 	}
@@ -228,7 +227,7 @@ fun MoreMenu(
 fun MoreMenuMain(
 	menuOpen : Boolean = false ,
 	setMenuOpen : (Boolean) -> Unit ,
-			)
+				)
 {
 
 	val context = LocalContext.current
@@ -301,11 +300,10 @@ fun MoreMenuMain(
 			viewModel.downloadProgress
 		}.collectAsState()
 		DownloadQuranDialog(setShowDialog4 , downloadState , viewModel::handleQuranMenuEvents)
-	}else if (showDialog6)
+	} else if (showDialog6)
 	{
-		ResetQuranDataDialog(setShowDialog6, viewModel::handleQuranMenuEvents)
-	}
-	else
+		ResetQuranDataDialog(setShowDialog6 , viewModel::handleQuranMenuEvents)
+	} else
 	{
 		return
 	}
@@ -325,30 +323,32 @@ fun ResetQuranDataDialog(
 			contentToShow = {
 				Text(
 						text = "Are you sure you want to reset the Quran Data?" ,
-						style = MaterialTheme.typography.bodyMedium,
+						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier.padding(8.dp)
 					)
 				Text(
 						text = "This will delete all the Verses, and get fresh data from the server." ,
-						style = MaterialTheme.typography.bodySmall,
+						style = MaterialTheme.typography.bodySmall ,
 						modifier = Modifier.padding(8.dp)
 					)
-				Text(text = "Bookmarks, Notes, Favorites, and Settings for Quran will be deleted." ,
-					 style = MaterialTheme.typography.bodySmall,
-					 modifier = Modifier.padding(8.dp))
+				Text(
+						text = "Bookmarks, Notes, Favorites, and Settings for Quran will be deleted." ,
+						style = MaterialTheme.typography.bodySmall ,
+						modifier = Modifier.padding(8.dp)
+					)
 			} ,
 			onDismissRequest = {
 				showDialog6(false)
-			},
+			} ,
 			onConfirm = {
 				handleEvents(QuranViewModel.QuranMenuEvents.Reset_Quran_Data)
 				showDialog6(false)
-			},
+			} ,
 			onDismiss = {
 				showDialog6(false)
-			},
-			confirmButtonText = "Yes",
-			dismissButtonText = "No, Cancel",
+			} ,
+			confirmButtonText = "Yes" ,
+			dismissButtonText = "No, Cancel" ,
 					)
 }
 
@@ -408,7 +408,7 @@ fun DownloadQuranDialog(
 		}
 	}
 	AlertDialogNimaz(
-			contentHeight = 200.dp,
+			contentHeight = 200.dp ,
 			contentDescription = "Download Quran" ,
 			title = "Downloading Quran" ,
 			contentToShow = {
@@ -428,11 +428,11 @@ fun DownloadQuranDialog(
 				}
 			} ,
 			onDismissRequest = {
-					handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
+				handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
 				showDialog4(false)
-							   } ,
+			} ,
 			showDismissButton = false ,
-			confirmButtonText = "Cancel",
+			confirmButtonText = "Cancel" ,
 			onConfirm = {
 				handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
 				showDialog4(false)

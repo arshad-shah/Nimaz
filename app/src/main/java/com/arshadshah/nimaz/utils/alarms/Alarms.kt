@@ -24,7 +24,7 @@ class Alarms
 		context : Context ,
 		pendingIntent : PendingIntent ,
 		timeToNotify : Long ,
-		message : String
+		message : String ,
 				)
 	{
 		// get alarm manager

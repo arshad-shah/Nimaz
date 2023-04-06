@@ -222,14 +222,14 @@ fun AyaListUI(
 				state = state
 				  ) {
 			items(ayaList.size) { index ->
-				if(
+				if (
 					ayaList[index].ayaNumberInQuran == 0 ||
 					ayaList[index].ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ||
 					ayaList[index].ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
 					ayaList[index].suraNumber == 9 && ayaList[index].ayaNumberInSurah == 1
 				)
 				{
-					viewModel.getSurahById(ayaList[index+1].suraNumber)
+					viewModel.getSurahById(ayaList[index + 1].suraNumber)
 					SurahHeader(
 							surah = surah.value ,
 							loading = loading ,
@@ -249,12 +249,13 @@ fun AyaListUI(
 		}
 	}
 }
+
 //surah header component
 @Composable
 fun SurahHeader(
 	surah : Surah ,
 	loading : Boolean ,
-			 )
+			   )
 {
 	OutlinedCard(
 			colors = CardDefaults.elevatedCardColors(
@@ -360,6 +361,7 @@ fun SurahHeader(
 		}
 	}
 }
+
 @Preview
 @Composable
 fun SurahHeaderPreview()
@@ -386,7 +388,7 @@ fun SurahHeaderPreview()
 					1 ,
 						 ) ,
 			loading = false ,
-				 )
+			   )
 }
 
 @Composable
@@ -637,6 +639,7 @@ fun AyaListItemUI(
 									{
 										amiri
 									}
+
 									"IndoPak" ->
 									{
 										almajeed

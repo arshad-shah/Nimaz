@@ -37,16 +37,18 @@ fun NoteInput(
 						} ,
 						modifier = Modifier
 							.padding(8.dp)
-							.size(24.dp)
-						,
-						 ){
-						Icon(
-								painter = painterResource(id = R.drawable.delete_icon) ,
-								contentDescription = "delete note" ,
-							)
+							.size(24.dp) ,
+						  ) {
+					Icon(
+							painter = painterResource(id = R.drawable.delete_icon) ,
+							contentDescription = "delete note" ,
+						)
 				}
 			} ,
-			properties = DialogProperties(dismissOnBackPress = true , dismissOnClickOutside = true) ,
+			properties = DialogProperties(
+					dismissOnBackPress = true ,
+					dismissOnClickOutside = true
+										 ) ,
 			contentToShow = {
 				OutlinedTextField(
 						textStyle = MaterialTheme.typography.bodyLarge ,
@@ -58,7 +60,7 @@ fun NoteInput(
 						modifier = Modifier
 							.padding(vertical = 8.dp)
 							.fillMaxWidth()
-							.height(300.dp),
+							.height(300.dp) ,
 								 )
 			} ,
 			onDismissRequest = {

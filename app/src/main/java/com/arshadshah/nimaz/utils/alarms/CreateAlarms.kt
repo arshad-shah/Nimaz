@@ -263,7 +263,12 @@ class CreateAlarms
 			set(Calendar.SECOND , 0)
 			set(Calendar.MILLISECOND , 0)
 		}
-		Alarms().setAlarm(context , resetPendingIntent , calendar.timeInMillis, message = "Reset alarm")
+		Alarms().setAlarm(
+				context ,
+				resetPendingIntent ,
+				calendar.timeInMillis ,
+				message = "Reset alarm"
+						 )
 //
 //		//recreate all alarms
 //		val prayerCompletedIntent = Intent(context , MissedPrayerReciever::class.java)

@@ -135,12 +135,13 @@ class SunMoonCalc @JvmOverloads constructor(
 			(0.5 + 0.5 * moonCalculations.inc * (if (moonCalculations.angle < 0) - 1 else 1) / Math.PI)
 
 		val percentage = (fraction * 100).toInt()
-		val imageToShow = when(phaseName)
+		val imageToShow = when (phaseName)
 		{
 			MoonPhase.NEW_MOON ->
 			{
 				R.drawable.new_moon
 			}
+
 			MoonPhase.WAXING_CRESCENT ->
 			{
 				//get the image to show
@@ -173,6 +174,7 @@ class SunMoonCalc @JvmOverloads constructor(
 					else -> R.drawable.waxing_gib_71
 				}
 			}
+
 			MoonPhase.FULL_MOON ->
 			{
 				R.drawable.full_moon

@@ -54,7 +54,8 @@ fun NotificationScreenUI()
 	}.collectAsState()
 
 	//battery optimization exemption
-	val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+	val notificationManager =
+		context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
 	//notification permission state
 	val notificationPermissionState =
@@ -88,7 +89,7 @@ fun NotificationScreenUI()
 					viewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.NotificationsAllowed(
 									notificationManager.areNotificationsEnabled()
-																		 )
+																				)
 										 )
 					state.value = notificationManager.areNotificationsEnabled()
 					isChecked.value = notificationManager.areNotificationsEnabled()

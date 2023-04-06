@@ -241,22 +241,22 @@ fun SettingsScreen(
 									contentDescription = "Theme"
 								)
 						} ,
-						iconPainter = painterResource(id = R.drawable.theme_icon),
+						iconPainter = painterResource(id = R.drawable.theme_icon) ,
 						iconDescription = "Theme" ,
 						useSelectedValueAsSubtitle = false ,
 						valueState = stateOfTheme ,
 						title =
-									when (stateOfTheme.value)
-									{
-										"DEFAULT" -> "App Default"
-										"Raisin_Black" -> "Raisin Black"
-										"Dark_Red" -> "Burgundy"
-										"Dark_Liver" -> "Dark Liver"
-										"Rustic_brown" -> "Rustic Brown"
-										"SYSTEM" -> "System Default"
-										"DYNAMIC" -> "Dynamic"
-										else -> "App Default"
-									} ,
+						when (stateOfTheme.value)
+						{
+							"DEFAULT" -> "App Default"
+							"Raisin_Black" -> "Raisin Black"
+							"Dark_Red" -> "Burgundy"
+							"Dark_Liver" -> "Dark Liver"
+							"Rustic_brown" -> "Rustic Brown"
+							"SYSTEM" -> "System Default"
+							"DYNAMIC" -> "Dynamic"
+							else -> "App Default"
+						} ,
 						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
 							)
 			}

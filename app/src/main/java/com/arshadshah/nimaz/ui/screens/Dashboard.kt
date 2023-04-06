@@ -59,7 +59,7 @@ fun Dashboard(
 	LazyColumn(
 			state = stateScroll ,
 			modifier = Modifier
-				.testTag(TEST_TAG_HOME),
+				.testTag(TEST_TAG_HOME) ,
 			contentPadding = paddingValues
 			  ) {
 		item {
@@ -71,7 +71,8 @@ fun Dashboard(
 			RamadanTimesCard()
 		}
 		item {
-			if (updateAvailabile.value) {
+			if (updateAvailabile.value)
+			{
 				val isOpen = remember { mutableStateOf(true) }
 				BannerSmall(
 						title = "Update Available" ,
@@ -79,11 +80,16 @@ fun Dashboard(
 						isOpen = isOpen ,
 						onClick = {
 							viewModelSettings.handleEvent(
-									SettingsViewModel.SettingsEvent.CheckUpdate(context, true)
+									SettingsViewModel.SettingsEvent.CheckUpdate(context , true)
 														 )
-						},
-						dismissable = true,
-						paddingValues = PaddingValues(top = 8.dp , bottom = 0.dp, start = 8.dp, end = 8.dp)
+						} ,
+						dismissable = true ,
+						paddingValues = PaddingValues(
+								top = 8.dp ,
+								bottom = 0.dp ,
+								start = 8.dp ,
+								end = 8.dp
+													 )
 						   )
 			}
 		}

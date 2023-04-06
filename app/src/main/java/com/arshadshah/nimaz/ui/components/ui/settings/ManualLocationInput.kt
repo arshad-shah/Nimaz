@@ -61,8 +61,8 @@ fun ManualLocationInput(
 	AlertDialogNimaz(
 			bottomDivider = false ,
 			topDivider = false ,
-			contentHeight = 100.dp,
-			confirmButtonText = "Submit",
+			contentHeight = 100.dp ,
+			confirmButtonText = "Submit" ,
 			contentDescription = "Edit Location" ,
 			title = "Edit Location" ,
 			contentToShow = {
@@ -73,7 +73,9 @@ fun ManualLocationInput(
 						label = { Text(text = "Location") } ,
 						singleLine = true ,
 						maxLines = 1 ,
-						modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(horizontal = 16.dp)
 								 )
 			} ,
 			onDismissRequest = {
@@ -84,7 +86,7 @@ fun ManualLocationInput(
 						SettingsViewModel.SettingsEvent.LocationInput(
 								context ,
 								name.value
-																 )
+																	 )
 								   )
 				viewModelPrayerTimes.handleEvent(
 						context ,
