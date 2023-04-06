@@ -44,13 +44,14 @@ fun MoreMenu(
 
 	val items1 : List<String> = listOf("List" , "Page (Experimental)")
 	val items2 : List<String> = listOf("English" , "Urdu")
-	val items3 : List<String> = listOf("Default" , "Quranme" , "Hidayat" , "Amiri")
+	val items3 : List<String> = listOf("Default" , "Quranme" , "Hidayat" , "Amiri", "IndoPak")
 	val (showDialog1 , setShowDialog1) = remember { mutableStateOf(false) }
 	val (showDialog2 , setShowDialog2) = remember { mutableStateOf(false) }
 
 	//a dialog with two sliders to control the font size of quran
 	val (showDialog3 , setShowDialog3) = remember { mutableStateOf(false) }
 	val (showDialog4 , setShowDialog4) = remember { mutableStateOf(false) }
+	val (showDialog5 , setShowDialog5) = remember { mutableStateOf(false) }
 
 	val viewModel = viewModel(
 			key = QURAN_VIEWMODEL_KEY ,
@@ -72,7 +73,6 @@ fun MoreMenu(
 				"English" ,
 											)
 
-
 	val arabicFontSizeState = rememberPreferenceFloatSettingState(
 			key = AppConstants.ARABIC_FONT_SIZE ,
 			defaultValue = 26f
@@ -81,7 +81,6 @@ fun MoreMenu(
 			key = AppConstants.TRANSLATION_FONT_SIZE ,
 			defaultValue = 16f
 																	  )
-
 	//font style
 	val fontStyleState = rememberPreferenceStringSettingState(
 			key = AppConstants.FONT_STYLE ,
@@ -202,7 +201,13 @@ fun MoreMenu(
 												   )
 				}
 					)
-	} else if (showDialog3)
+	} else if (showDialog4)
+	{
+		val downloadState = remember {
+			viewModel.downloadProgress
+		}.collectAsState()
+		DownloadQuranDialog(setShowDialog4 , downloadState , viewModel::handleQuranMenuEvents)
+	}  else if (showDialog3)
 	{
 		FontSizeDialog(
 				setShowDialog3 ,
@@ -212,16 +217,139 @@ fun MoreMenu(
 				items3 ,
 				viewModel::handleQuranMenuEvents
 					  )
-	} else if (showDialog4)
+	}
+	else
+	{
+		return
+	}
+}
+
+@Composable
+fun MoreMenuMain(
+	menuOpen : Boolean = false ,
+	setMenuOpen : (Boolean) -> Unit ,
+			)
+{
+
+	val context = LocalContext.current
+	val (showDialog4 , setShowDialog4) = remember { mutableStateOf(false) }
+	val (showDialog6 , setShowDialog6) = remember { mutableStateOf(false) }
+
+	val viewModel = viewModel(
+			key = QURAN_VIEWMODEL_KEY ,
+			initializer = { QuranViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+	//downloadButtonState
+	val isDownloadButtonEnabled = remember {
+		viewModel.downloadButtonState
+	}.collectAsState()
+
+	viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
+
+	val isFullQuranDownloaded = rememberPreferenceBooleanSettingState(
+			key = AppConstants.FULL_QURAN_DOWNLOADED ,
+			defaultValue = false ,
+																	 )
+	Log.d("MoreMenu" , "isDownloadButtonEnabled.value = ${isFullQuranDownloaded.value}")
+
+	DropdownMenu(
+			expanded = menuOpen ,
+			onDismissRequest = { setMenuOpen(false) } ,
+			content = {
+				//Reset_Quran_Data
+				DropdownMenuItem(onClick = {
+					setShowDialog6(true)
+					setMenuOpen(false)
+				} , text = { Text(text = "Reset Quran") })
+
+				//download quran
+				DropdownMenuItem(
+						onClick = {
+							//if isDownloadButtonEnabled.value then gray out the download button
+							//else download the quran
+							if (! isDownloadButtonEnabled.value)
+							{
+								Toasty.info(
+										context ,
+										"Quran is already downloaded" ,
+										Toasty.LENGTH_SHORT ,
+										true
+										   ).show()
+								return@DropdownMenuItem
+							} else
+							{
+								//if the quran is not downloaded then download it
+								viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Download_Quran)
+								setShowDialog4(true)
+								setMenuOpen(false)
+							}
+						} ,
+						text = {
+							Text(
+									text = "Download Quran" ,
+									color = if (! isDownloadButtonEnabled.value) Color.Gray else MaterialTheme.colorScheme.onBackground ,
+								)
+						})
+			}
+				)
+
+
+	if (showDialog4)
 	{
 		val downloadState = remember {
 			viewModel.downloadProgress
 		}.collectAsState()
 		DownloadQuranDialog(setShowDialog4 , downloadState , viewModel::handleQuranMenuEvents)
-	} else
+	}else if (showDialog6)
+	{
+		ResetQuranDataDialog(setShowDialog6, viewModel::handleQuranMenuEvents)
+	}
+	else
 	{
 		return
 	}
+}
+
+@Composable
+fun ResetQuranDataDialog(
+	showDialog6 : (Boolean) -> Unit ,
+	handleEvents : (QuranViewModel.QuranMenuEvents) -> Unit ,
+						)
+{
+	//viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Reset_Quran_Data)
+	AlertDialogNimaz(
+			contentDescription = "Reset Quran Data" ,
+			contentHeight = 150.dp ,
+			title = "Reset Quran Data" ,
+			contentToShow = {
+				Text(
+						text = "Are you sure you want to reset the Quran Data?" ,
+						style = MaterialTheme.typography.bodyMedium,
+						modifier = Modifier.padding(8.dp)
+					)
+				Text(
+						text = "This will delete all the Verses, and get fresh data from the server." ,
+						style = MaterialTheme.typography.bodySmall,
+						modifier = Modifier.padding(8.dp)
+					)
+				Text(text = "Bookmarks, Notes, Favorites, and Settings for Quran will be deleted." ,
+					 style = MaterialTheme.typography.bodySmall,
+					 modifier = Modifier.padding(8.dp))
+			} ,
+			onDismissRequest = {
+				showDialog6(false)
+			},
+			onConfirm = {
+				handleEvents(QuranViewModel.QuranMenuEvents.Reset_Quran_Data)
+				showDialog6(false)
+			},
+			onDismiss = {
+				showDialog6(false)
+			},
+			confirmButtonText = "Yes",
+			dismissButtonText = "No, Cancel",
+					)
 }
 
 @Composable

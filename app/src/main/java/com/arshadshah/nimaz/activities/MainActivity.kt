@@ -45,6 +45,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.remote.viewModel.*
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
@@ -235,6 +236,7 @@ class MainActivity : ComponentActivity()
 					route.value = destination.route
 				}
 				val (menuOpen , setMenuOpen) = remember { mutableStateOf(false) }
+				val (menuOpen2 , setMenuOpen2) = remember { mutableStateOf(false) }
 				val CustomAnimation = remember { CustomAnimation() }
 
 				val vibrationAllowed = remember { mutableStateOf(true) }
@@ -376,6 +378,22 @@ class MainActivity : ComponentActivity()
 															MoreMenu(
 																	menuOpen = menuOpen ,
 																	setMenuOpen = setMenuOpen ,
+																	)
+														}
+														QURAN_SCREEN_ROUTE ->
+														{
+															IconButton(onClick = {
+																setMenuOpen2(true)
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.settings_sliders_icon) ,
+																		contentDescription = "Menu"
+																	)
+															}
+															MoreMenuMain(
+																	menuOpen = menuOpen2 ,
+																	setMenuOpen = setMenuOpen2 ,
 																	)
 														}
 

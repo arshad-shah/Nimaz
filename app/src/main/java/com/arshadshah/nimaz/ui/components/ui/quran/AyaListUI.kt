@@ -41,7 +41,6 @@ import com.arshadshah.nimaz.ui.components.bLogic.quran.AyatFeatures
 import com.arshadshah.nimaz.ui.components.bLogic.quran.AyatFeaturesPopUpMenu
 import com.arshadshah.nimaz.ui.components.bLogic.quran.PlayerForAyat
 import com.arshadshah.nimaz.ui.theme.*
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -67,6 +66,9 @@ fun AyaListUI(
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
 	val spaceFilesRepository = SpacesFileRepository(context)
+	val surah = remember {
+		viewModel.surahState
+	}.collectAsState()
 	val arabicFontSize = remember {
 		viewModel.arabic_Font_size
 	}.collectAsState()
@@ -80,6 +82,10 @@ fun AyaListUI(
 
 	val translation = remember {
 		viewModel.translation
+	}.collectAsState()
+
+	val scrollToVerse = remember {
+		viewModel.scrollToAya
 	}.collectAsState()
 
 
@@ -195,6 +201,20 @@ fun AyaListUI(
 				}
 			}
 		}
+		LaunchedEffect(scrollToVerse.value)
+		{
+			if (scrollToVerse.value != null)
+			{
+				val index = ayaList.indexOfFirst {
+					it.ayaNumberInQuran == scrollToVerse.value?.ayaNumberInQuran &&
+							it.suraNumber == scrollToVerse.value?.suraNumber &&
+							it.juzNumber == scrollToVerse.value?.juzNumber
+				}
+				state.animateScrollToItem(index)
+				viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Scroll_To_Aya(null))
+			}
+		}
+
 		LazyColumn(
 				modifier = Modifier.testTag(TEST_TAG_AYA) ,
 				userScrollEnabled = true ,
@@ -202,6 +222,19 @@ fun AyaListUI(
 				state = state
 				  ) {
 			items(ayaList.size) { index ->
+				if(
+					ayaList[index].ayaNumberInQuran == 0 ||
+					ayaList[index].ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ||
+					ayaList[index].ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
+					ayaList[index].suraNumber == 9 && ayaList[index].ayaNumberInSurah == 1
+				)
+				{
+					viewModel.getSurahById(ayaList[index+1].suraNumber)
+					SurahHeader(
+							surah = surah.value ,
+							loading = loading ,
+							   )
+				}
 				AyaListItemUI(
 						aya = ayaList[index] ,
 						spacesFileRepository = spaceFilesRepository ,
@@ -223,23 +256,137 @@ fun SurahHeader(
 	loading : Boolean ,
 			 )
 {
-	Row(
+	OutlinedCard(
+			colors = CardDefaults.elevatedCardColors(
+					containerColor = MaterialTheme.colorScheme.surface ,
+					contentColor = MaterialTheme.colorScheme.onSurface ,
+													) ,
 			modifier = Modifier
-				.fillMaxWidth()
-				.background(Color.White)
-				.padding(10.dp)
-				.placeholder(visible = loading, color = MaterialTheme.colorScheme.outline),
-			horizontalArrangement = Arrangement.SpaceBetween ,
-			verticalAlignment = Alignment.CenterVertically
-		  ) {
-		Text(
-				text = surah.name,
-				fontSize = 20.sp ,
-				fontWeight = FontWeight.Bold ,
-				color = Color.Black
-			)
+				.padding(4.dp)
+				.fillMaxWidth() ,
+			shape = MaterialTheme.shapes.extraLarge ,
+				) {
+		Row(
+				modifier = Modifier
+					.padding(top = 8.dp)
+					.fillMaxWidth()
+					.background(MaterialTheme.colorScheme.surface) ,
+				horizontalArrangement = Arrangement.SpaceAround ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
+			Text(
+					text = surah.revelationType ,
+					style = MaterialTheme.typography.titleSmall ,
+					textAlign = TextAlign.Center ,
+					modifier = Modifier
+						.padding(4.dp)
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
+				)
+			Column(
+					modifier = Modifier.padding(4.dp) ,
+					verticalArrangement = Arrangement.Center ,
+					horizontalAlignment = Alignment.CenterHorizontally
+				  ) {
+				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+					Text(
+							text = surah.name ,
+							style = MaterialTheme.typography.headlineLarge ,
+							fontFamily = utmaniQuranFont ,
+							fontWeight = FontWeight.Bold ,
+							textAlign = TextAlign.Center ,
+							modifier = Modifier
+								.placeholder(
+										visible = loading ,
+										color = MaterialTheme.colorScheme.outline ,
+										shape = RoundedCornerShape(4.dp) ,
+										highlight = PlaceholderHighlight.shimmer(
+												highlightColor = Color.White ,
+																				)
+											)
+						)
+				}
+
+				Text(
+						text = surah.englishName ,
+						style = MaterialTheme.typography.titleLarge ,
+						textAlign = TextAlign.Center ,
+						modifier = Modifier
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
+					)
+				Text(
+						text = surah.englishNameTranslation ,
+						style = MaterialTheme.typography.titleMedium ,
+						textAlign = TextAlign.Center ,
+						modifier = Modifier
+							.placeholder(
+									visible = loading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
+					)
+			}
+
+			Text(
+					text = "${surah.numberOfAyahs} Verses" ,
+					style = MaterialTheme.typography.titleSmall ,
+					textAlign = TextAlign.Center ,
+					modifier = Modifier
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									)
+				)
+		}
 	}
-	Spacer(modifier = Modifier.height(10.dp))
+}
+@Preview
+@Composable
+fun SurahHeaderPreview()
+{
+	//al number: Int,
+	//    val numberOfAyahs: Int,
+	//    val startAya: Int,
+	//    val name: String,
+	//    val englishName: String,
+	//    val englishNameTranslation: String,
+	//    val revelationType: String,
+	//    val revelationOrder: Int,
+	//    val rukus:
+	SurahHeader(
+			surah = Surah(
+					1 ,
+					7 ,
+					1 ,
+					"الفاتحة" ,
+					"Al-Faatiha" ,
+					"The Opening" ,
+					"Meccan" ,
+					5 ,
+					1 ,
+						 ) ,
+			loading = false ,
+				 )
 }
 
 @Composable
@@ -449,7 +596,6 @@ fun AyaListItemUI(
 													) ,
 			modifier = Modifier
 				.padding(4.dp)
-				.fillMaxHeight()
 				.fillMaxWidth() ,
 			shape = MaterialTheme.shapes.extraLarge ,
 				) {
@@ -490,6 +636,10 @@ fun AyaListItemUI(
 									"Amiri" ->
 									{
 										amiri
+									}
+									"IndoPak" ->
+									{
+										almajeed
 									}
 
 									else ->
@@ -572,7 +722,6 @@ fun AyaListItemUI(
 							noteContent = noteContent ,
 							isLoading = loading ,
 								)
-
 					//more menu button that opens a popup menu
 					if (aya.ayaNumberInQuran != 0)
 					{
@@ -585,7 +734,8 @@ fun AyaListItemUI(
 								  ) {
 							Icon(
 									modifier = Modifier
-										.size(24.dp)
+										.size(36.dp)
+										.padding(end = 8.dp)
 										.placeholder(
 												visible = loading ,
 												color = MaterialTheme.colorScheme.outline ,
@@ -595,7 +745,8 @@ fun AyaListItemUI(
 																						)
 													) ,
 									painter = painterResource(id = R.drawable.more_menu_icon) ,
-									contentDescription = "More Menu" ,
+									tint = MaterialTheme.colorScheme.primary ,
+									contentDescription = "More Menu for Ayat ${aya.ayaNumberInSurah}" ,
 								)
 						}
 					}
@@ -633,42 +784,42 @@ fun AyaListItemUI(
 	}
 }
 
-//preview AyaListItemUI
-@Preview(showBackground = true)
-@Composable
-fun AyaListItemUIPreview()
-{
-	NimazTheme {
-		LocalDataStore.init(LocalContext.current)
-		//create a dummy aya
-		val aya = Aya(
-				ayaNumber = 0 ,
-				ayaNumberInQuran = 1 ,
-				ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-				ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-				ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
-				audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
-				ayaNumberInSurah = 1 ,
-				bookmark = true ,
-				favorite = true ,
-				note = "dsfhsdhsgdfhstghs" ,
-				juzNumber = 1 ,
-				suraNumber = 1 ,
-				ruku = 1 ,
-				sajda = false ,
-				sajdaType = "" ,
-					 )
-
-		AyaListItemUI(
-				aya = aya ,
-				spacesFileRepository = SpacesFileRepository(LocalContext.current) ,
-				mediaPlayer = MediaPlayer() ,
-				arabic_Font_size = remember { mutableStateOf(0.0f) } ,
-				translation_Font_size = remember { mutableStateOf(0.0f) } ,
-				arabic_Font = remember { mutableStateOf("Amiri") } ,
-				translation = remember { mutableStateOf("English") } ,
-				loading = true ,
-					 )
-	}
-
-}
+////preview AyaListItemUI
+//@Preview(showBackground = true)
+//@Composable
+//fun AyaListItemUIPreview()
+//{
+//	NimazTheme {
+//		LocalDataStore.init(LocalContext.current)
+//		//create a dummy aya
+//		val aya = Aya(
+//				ayaNumber = 0 ,
+//				ayaNumberInQuran = 1 ,
+//				ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
+//				ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+//				ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
+//				audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
+//				ayaNumberInSurah = 1 ,
+//				bookmark = true ,
+//				favorite = true ,
+//				note = "dsfhsdhsgdfhstghs" ,
+//				juzNumber = 1 ,
+//				suraNumber = 1 ,
+//				ruku = 1 ,
+//				sajda = true ,
+//				sajdaType = "Recommended" ,
+//					 )
+//
+//		AyaListItemUI(
+//				aya = aya ,
+//				spacesFileRepository = SpacesFileRepository(LocalContext.current) ,
+//				mediaPlayer = MediaPlayer() ,
+//				arabic_Font_size = remember { mutableStateOf(0.0f) } ,
+//				translation_Font_size = remember { mutableStateOf(0.0f) } ,
+//				arabic_Font = remember { mutableStateOf("Amiri") } ,
+//				translation = remember { mutableStateOf("English") } ,
+//				loading = false ,
+//					 )
+//	}
+//
+//}

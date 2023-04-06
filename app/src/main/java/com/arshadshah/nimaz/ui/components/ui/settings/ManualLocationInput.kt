@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.ui.settings
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -72,7 +73,7 @@ fun ManualLocationInput(
 						label = { Text(text = "Location") } ,
 						singleLine = true ,
 						maxLines = 1 ,
-						modifier = Modifier.fillMaxWidth()
+						modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
 								 )
 			} ,
 			onDismissRequest = {

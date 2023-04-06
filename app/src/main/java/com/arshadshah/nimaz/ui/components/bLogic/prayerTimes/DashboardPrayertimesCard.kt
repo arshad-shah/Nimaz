@@ -2,22 +2,24 @@ package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
@@ -30,7 +32,9 @@ import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.sunMoonUtils.MoonPhase
 import com.arshadshah.nimaz.utils.sunMoonUtils.SunMoonCalc
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
@@ -213,8 +217,9 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						)
 				}
 
-				//emoji for moon phase
-				Text(text = phaseOfMoon.phaseSvg , style = MaterialTheme.typography.headlineLarge, modifier = Modifier.testTag("moon_phase"))
+				MoonPhaseImage(
+						image = phaseOfMoon.phaseSvg
+					)
 			}
 			Row(
 					modifier = Modifier
@@ -393,3 +398,173 @@ fun getTimerText(timeToNextPrayer : CountDownTime) : String
 		}
 	}
 }
+
+@Composable
+fun MoonPhaseImage(image : Int)
+{
+	//a composable to show the moon phase image
+	//it takes the image as an argument
+	//and shows it in a circular shape
+	//with a white background
+	//and a black border
+	Box(
+			modifier = Modifier
+				.size(40.dp)
+				.border(
+						width = 1.dp ,
+						color = MaterialTheme.colorScheme.outline,
+						shape = CircleShape
+					   )
+				.clip(shape = CircleShape)
+		) {
+		Image(
+				painter = painterResource(id = image) ,
+				contentDescription = "Moon Phase Image" ,
+				modifier = Modifier
+					.size(40.dp)
+					.background(color = Color.White.copy(alpha = 0.8f))
+					.clip(shape = CircleShape)
+			)
+	}
+}
+
+@Preview
+@Composable
+fun MoonPhaseImagePreview()
+{
+	val fraction = remember { mutableStateOf(0.0) }
+	//list of phases
+	val phases = listOf(
+			MoonPhase.NEW_MOON ,
+			MoonPhase.WAXING_CRESCENT ,
+			MoonPhase.FIRST_QUARTER ,
+			MoonPhase.WAXING_GIBBOUS ,
+			MoonPhase.FULL_MOON ,
+			MoonPhase.WANING_GIBBOUS ,
+			MoonPhase.LAST_QUARTER ,
+			MoonPhase.WANING_CRESCENT
+		)
+	val currentPhase = remember { mutableStateOf(phases[0]) }
+	val percentage = (fraction.value * 100).toInt()
+	val imageToShow = when(currentPhase.value)
+	{
+		MoonPhase.NEW_MOON ->
+		{
+			R.drawable.new_moon
+		}
+		MoonPhase.WAXING_CRESCENT ->
+		{
+			//get the image to show
+			when (percentage)
+			{
+				in 0 .. 10 -> R.drawable.waxing_cresent_7
+				in 10 .. 20 -> R.drawable.waxing_cresent_14
+				in 20 .. 30 -> R.drawable.waxing_cresent_21
+				in 30 .. 40 -> R.drawable.waxing_cresent_29
+				in 40 .. 50 -> R.drawable.waxing_cresent_36
+				else -> R.drawable.waxing_cresent_36
+			}
+		}
+
+		MoonPhase.FIRST_QUARTER ->
+		{
+			R.drawable.first_quarter_moon
+		}
+
+		MoonPhase.WAXING_GIBBOUS ->
+		{
+			//get the image to show
+			when (percentage)
+			{
+				in 50 .. 60 -> R.drawable.waxing_gib_57
+				in 60 .. 70 -> R.drawable.waxing_gib_64
+				in 70 .. 80 -> R.drawable.waxing_gib_71
+				in 80 .. 90 -> R.drawable.waxing_gib_78
+				in 90 .. 100 -> R.drawable.waxing_gib_86
+				else -> R.drawable.waxing_gib_71
+			}
+		}
+		MoonPhase.FULL_MOON ->
+		{
+			R.drawable.full_moon
+		}
+
+		MoonPhase.WANING_GIBBOUS ->
+		{
+			val percentageProcessed = 100 - percentage
+			//get the image to show
+			when (percentageProcessed)
+			{
+				in 0 .. 10 -> R.drawable.wanning_gib_7
+				in 10 .. 20 -> R.drawable.wanning_gib_14
+				in 20 .. 30 -> R.drawable.wanning_gib_21
+				in 30 .. 40 -> R.drawable.wanning_gib_29
+				in 40 .. 50 -> R.drawable.wanning_gib_36
+				in 50 .. 60 -> R.drawable.wanning_gib_43
+				else -> R.drawable.wanning_gib_36
+			}
+		}
+
+		MoonPhase.LAST_QUARTER ->
+		{
+			R.drawable.last_quarter_moon
+		}
+
+		MoonPhase.WANING_CRESCENT ->
+		{
+			val percentageProcessed = 100 - percentage
+			//get the image to show
+			when (percentageProcessed)
+			{
+				in 50 .. 60 -> R.drawable.wanning_cres_57
+				in 60 .. 70 -> R.drawable.wanning_cres_64
+				in 70 .. 80 -> R.drawable.wanning_cres_71
+				in 80 .. 90 -> R.drawable.wanning_cres_78
+				in 90 .. 100 -> R.drawable.wanning_cres_86
+				else -> R.drawable.wanning_cres_93
+			}
+		}
+	}
+	val dateOfCurrentPhase = remember { mutableStateOf(LocalDateTime.now()) }
+	//one hundred days  to chewck the moon phase over
+	val hundredDays = 30
+	//get one hundred dates
+	val dates = remember {
+		mutableStateOf(
+				(0 .. hundredDays).map {
+					LocalDateTime.now().plusDays(it.toLong())
+				}
+					  )
+	}
+	//get a list of moon phases
+	val moonPhases = dates.value.map { SunMoonCalc(
+			latitude = 53.7,
+			longitude = -7.35
+										 ).getMoonPhase(it) }
+	//a slider to change date so that the moon phase changes
+	//and we can see the different moon phases
+	Column(
+			modifier = Modifier.fillMaxSize(),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center
+		  ) {
+
+		//loop through the list of moon phases and get the fraction and phase
+		//print the date
+		LaunchedEffect(key1 = Unit) {
+			moonPhases.forEachIndexed { index, moonPhase ->
+				fraction.value = moonPhase.fraction
+				currentPhase.value = moonPhase.phaseName
+				dateOfCurrentPhase.value = dates.value[index]
+				delay(1000)
+			}
+		}
+		Text(text = "Date: ${dateOfCurrentPhase.value}")
+		Text(text = "Fraction: ${fraction.value}")
+		Text(text = "Percentage: ${percentage}")
+		Text(text = "Phase: ${currentPhase.value}")
+		Spacer(modifier = Modifier.height(10.dp))
+		MoonPhaseImage(image = imageToShow)
+	}
+}
+

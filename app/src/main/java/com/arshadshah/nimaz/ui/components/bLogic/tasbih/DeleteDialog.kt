@@ -33,7 +33,8 @@ fun DeleteDialog(
 			bottomDivider = false,
 			topDivider = false,
 			contentHeight = 100.dp,
-			confirmButtonText = "Confirm",
+			confirmButtonText = "Yes" ,
+			dismissButtonText = "No, Cancel" ,
 			contentDescription = "Delete Tasbih" ,
 			title = "Delete Tasbih" ,
 			contentToShow = {
