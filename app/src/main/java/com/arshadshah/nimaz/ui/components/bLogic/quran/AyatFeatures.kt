@@ -1,13 +1,11 @@
 package com.arshadshah.nimaz.ui.components.bLogic.quran
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -18,10 +16,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
+import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.ui.quran.NoteInput
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -41,79 +42,156 @@ fun AyatFeatures(
 	isLoading : Boolean ,
 				)
 {
+	val sajdahPopUpOpen = remember {
+		mutableStateOf(false)
+	}
+	val titleOfDialog = remember {
+		mutableStateOf("")
+	}
+	val openDialog = remember {
+		mutableStateOf(false)
+	}
+	val messageOfDialog = remember {
+		mutableStateOf("")
+	}
 	Row(
-			horizontalArrangement = Arrangement.SpaceBetween ,
+			horizontalArrangement = Arrangement.SpaceEvenly ,
 			verticalAlignment = Alignment.CenterVertically ,
 	   ) {
+		if(aya.sajda){
+			//a button that opens a popup menu
+			IconButton(
+					onClick = {
+						sajdahPopUpOpen.value = ! sajdahPopUpOpen.value
+					} ,
+					enabled = ! isLoading ,
+					  ) {
+				Icon(
+						modifier = Modifier
+							.size(48.dp)
+							.placeholder(
+									visible = isLoading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										) ,
+						painter = painterResource(id = R.drawable.sajad_icon) ,
+						contentDescription = "Sajda at this Ayat" ,
+						tint = MaterialTheme.colorScheme.tertiary
+					)
+			}
+		}
+		if (sajdahPopUpOpen.value){
+			Popup(
+					onDismissRequest = {
+						sajdahPopUpOpen.value = false
+					} ,
+					alignment = Alignment.BottomCenter ,
+					offset = IntOffset(0 , - 100) ,
+				 ) {
+				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
+						elevation = CardDefaults.elevatedCardElevation(
+								defaultElevation = 8.dp ,
+																	  )
+							) {
+					Text(text = "${aya.sajdaType} sujood", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.bodySmall)
+				}
+			}
+		}
 		if (isBookMarkedVerse.value)
 		{
-			Icon(
-					painter = painterResource(id = R.drawable.bookmark_icon) ,
-					contentDescription = "Bookmark" ,
-					tint = MaterialTheme.colorScheme.primary ,
-					modifier = Modifier
-						.size(24.dp)
-						.padding(4.dp)
-						.placeholder(
-								visible = isLoading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
-				)
+			IconButton(
+					onClick = {
+						titleOfDialog.value = "Remove from Bookmarks"
+						messageOfDialog.value = "Are you sure you want to remove this verse from your bookmarks?"
+						openDialog.value = true
+					} ,
+					enabled = ! isLoading ,
+					  ) {
+				Icon(
+						painter = painterResource(id = R.drawable.bookmark_icon) ,
+						contentDescription = "Bookmark" ,
+						tint = MaterialTheme.colorScheme.primary ,
+						modifier = Modifier
+							.size(24.dp)
+							.padding(4.dp)
+							.placeholder(
+									visible = isLoading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
+					)
+			}
 		}
 
 		if (isFavouredVerse.value)
 		{
-			Icon(
-					painter = painterResource(id = R.drawable.favorite_icon) ,
-					contentDescription = "Favourite" ,
-					tint = MaterialTheme.colorScheme.primary ,
-					modifier = Modifier
-						.size(24.dp)
-						.padding(4.dp)
-						.placeholder(
-								visible = isLoading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
-				)
+			IconButton(
+					onClick = {
+						titleOfDialog.value = "Remove from Favourites"
+						messageOfDialog.value = "Are you sure you want to remove this verse from your favourites?"
+						openDialog.value = true
+					} ,
+					enabled = ! isLoading ,
+					  ) {
+				Icon(
+						painter = painterResource(id = R.drawable.favorite_icon) ,
+						contentDescription = "Favourite" ,
+						tint = MaterialTheme.colorScheme.primary ,
+						modifier = Modifier
+							.size(24.dp)
+							.padding(4.dp)
+							.placeholder(
+									visible = isLoading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										)
+					)
+			}
 		}
 
 		if (hasNote.value)
 		{
-			Icon(
-					painter = painterResource(id = R.drawable.note_icon) ,
-					contentDescription = "Note" ,
-					tint = MaterialTheme.colorScheme.primary ,
-					modifier = Modifier
-						.size(24.dp)
-						.padding(4.dp)
-						.placeholder(
-								visible = isLoading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
+			IconButton(
+					onClick = {
+						handleEvents(
+								QuranViewModel.AyaEvent.getNoteForAya(
+										aya.ayaNumber ,
+										aya.suraNumber ,
+										aya.ayaNumberInSurah
+																	 )
 									)
-						.clickable {
-							handleEvents(
-									QuranViewModel.AyaEvent.getNoteForAya(
-											aya.ayaNumber ,
-											aya.suraNumber ,
-											aya.ayaNumberInSurah
-																		 )
+						showNoteDialog.value = true
+						noteContent.value = aya.note
+					} ,
+					enabled = ! isLoading ,
+					  ) {
+				Icon(
+						painter = painterResource(id = R.drawable.note_icon) ,
+						contentDescription = "Note" ,
+						tint = MaterialTheme.colorScheme.primary ,
+						modifier = Modifier
+							.size(24.dp)
+							.padding(4.dp)
+							.placeholder(
+									visible = isLoading ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
 										)
-							showNoteDialog.value = true
-							noteContent.value = aya.note
-						}
-				)
+					)
+			}
 		}
 	}
 
@@ -142,9 +220,45 @@ fun AyatFeatures(
 				 )
 	}
 
+	if (openDialog.value){
+		AlertDialogNimaz(
+				topDivider = false,
+				bottomDivider = false,
+				contentDescription = "Ayat features dialog" ,
+				title = titleOfDialog.value,
+				contentToShow = {
+					Text(text = messageOfDialog.value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp))
+				} ,
+				onDismissRequest = {
+					openDialog.value = false
+				} ,
+				contentHeight = 100.dp,
+				confirmButtonText = "Yes",
+				dismissButtonText = "No, Cancel",
+				onConfirm = {
+								if (titleOfDialog.value == "Remove from Bookmarks")
+								{
+									handleEvents(QuranViewModel.AyaEvent.deleteBookmarkFromAya(aya.ayaNumber, aya.suraNumber, aya.ayaNumberInSurah))
+									aya.bookmark = false
+									isBookMarkedVerse.value = false
+								}
+								else if (titleOfDialog.value == "Remove from Favourites")
+								{
+									handleEvents(QuranViewModel.AyaEvent.deleteFavoriteFromAya(aya.ayaNumber, aya.suraNumber, aya.ayaNumberInSurah))
+									aya.favorite = false
+									isFavouredVerse.value = false
+								}
+								openDialog.value = false
+							} ,
+				onDismiss = {
+					openDialog.value = false
+				})
+	}
 }
 
-@Preview
+@Preview(device = "id:S20 Fe" , showSystemUi = false , showBackground = true ,
+		 backgroundColor = 0xFFFFFFFF
+		)
 @Composable
 fun AyatFeaturesPreview()
 {
@@ -166,8 +280,8 @@ fun AyatFeaturesPreview()
 			juzNumber = 1 ,
 			suraNumber = 1 ,
 			ruku = 1 ,
-			sajda = false ,
-			sajdaType = "" ,
+			sajda = true ,
+			sajdaType = "Recommended" ,
 				 )
 
 	AyatFeatures(

@@ -99,7 +99,7 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(8.dp) ,
+					.padding(vertical = 8.dp, horizontal = 16.dp) ,
 				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
@@ -132,7 +132,8 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 						.padding(4.dp)
 				)
 			Spacer(modifier = Modifier.width(4.dp))
-			IconButton(onClick = {
+			IconButton(
+					onClick = {
 				//share the aya
 				val shareIntent = Intent(Intent.ACTION_SEND)
 				shareIntent.type = "text/plain"

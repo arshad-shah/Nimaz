@@ -145,6 +145,9 @@ class DataStore(db : AppDatabase)
 	//get allAyas
 	suspend fun getAllAyat() = ayaDao.getAllAyas().map { it.toAya() }
 
+	//deleteAllAyas
+	suspend fun deleteAllAyat() = ayaDao.deleteAllAyas()
+
 	//count the number of ayas
 	suspend fun countSurahAyat(
 		surahNumber : Int ,

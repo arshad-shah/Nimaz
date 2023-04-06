@@ -380,7 +380,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					SettingsNumberPickerDialog(
 							title = "Isha Angle" ,
 							description = "The angle of the sun at which the Isha prayer begins" ,
-							items = (0 .. 50).map { (it - 25) } ,
+							items = (0 .. 50).map { (it - 25) }  ,
 							subtitle = {
 								Text(text = ishaAngleState.value)
 							} ,

@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.components.ui.quran
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,10 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.theme.amiri
-import com.arshadshah.nimaz.ui.theme.hidayat
-import com.arshadshah.nimaz.ui.theme.quranFont
-import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -67,6 +63,10 @@ fun Page(
 			remember { derivedStateOf { state.firstVisibleItemIndex } }.toString()
 		 )
 
+	val surah = remember {
+		viewModel.surahState
+	}.collectAsState()
+
 	LazyColumn(
 			state = state ,
 			modifier = Modifier
@@ -77,6 +77,19 @@ fun Page(
 				item {
 					Verses {
 						AyaList.forEach { aya ->
+							if(
+								aya.ayaNumberInQuran == 0 ||
+								aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ||
+								aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
+								aya.suraNumber == 9 && aya.ayaNumberInSurah == 1
+							)
+							{
+								viewModel.getSurahById(aya.suraNumber)
+								SurahHeader(
+										surah = surah.value ,
+										loading = loading ,
+										   )
+							}
 							Verse(
 
 									isNotBismillah = aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" && aya.ayaNumber != 0 ,
@@ -101,6 +114,13 @@ fun Verse(
 	fontStyle : String ,
 		 )
 {
+	val cardBackgroundColor = if (!isNotBismillah)
+	{
+		MaterialTheme.colorScheme.secondaryContainer
+	} else
+	{
+		MaterialTheme.colorScheme.surface
+	}
 	val isSelected = remember { mutableStateOf(false) }
 	SelectionContainer {
 		CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -117,10 +137,8 @@ fun Verse(
 																			)
 										)
 							.background(
-									color = if (isSelected.value) MaterialTheme.colorScheme.primary.copy(
-											alpha = 0.5f
-																										) else Color.Transparent ,
-									shape = RoundedCornerShape(8.dp)
+									color = cardBackgroundColor,
+									shape = MaterialTheme.shapes.extraLarge
 									   )
 							.clickable {
 								isSelected.value = ! isSelected.value
@@ -129,11 +147,6 @@ fun Verse(
 					{
 						Modifier
 							.fillMaxWidth()
-							.border(
-									2.dp ,
-									MaterialTheme.colorScheme.outline ,
-									RoundedCornerShape(8.dp)
-								   )
 							.placeholder(
 									visible = loading ,
 									color = MaterialTheme.colorScheme.outline ,
@@ -143,10 +156,8 @@ fun Verse(
 																			)
 										)
 							.background(
-									color = if (isSelected.value) MaterialTheme.colorScheme.primary.copy(
-											alpha = 0.5f
-																										) else Color.Transparent ,
-									shape = RoundedCornerShape(8.dp)
+									color = cardBackgroundColor ,
+									shape = MaterialTheme.shapes.extraLarge
 									   )
 					} ,
 					text = AnnotatedString(word) ,
@@ -171,6 +182,10 @@ fun Verse(
 								"Amiri" ->
 								{
 									amiri
+								}
+								"IndoPak" ->
+								{
+									almajeed
 								}
 
 								else ->

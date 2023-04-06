@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.utils.sunMoonUtils
 
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.utils.sunMoonUtils.MathUtils.altitude
 import com.arshadshah.nimaz.utils.sunMoonUtils.MathUtils.astroRefraction
 import com.arshadshah.nimaz.utils.sunMoonUtils.MathUtils.azimuth
@@ -133,12 +134,93 @@ class SunMoonCalc @JvmOverloads constructor(
 		val phaseValue =
 			(0.5 + 0.5 * moonCalculations.inc * (if (moonCalculations.angle < 0) - 1 else 1) / Math.PI)
 
+		val percentage = (fraction * 100).toInt()
+		val imageToShow = when(phaseName)
+		{
+			MoonPhase.NEW_MOON ->
+			{
+				R.drawable.new_moon
+			}
+			MoonPhase.WAXING_CRESCENT ->
+			{
+				//get the image to show
+				when (percentage)
+				{
+					in 0 .. 10 -> R.drawable.waxing_cresent_7
+					in 10 .. 20 -> R.drawable.waxing_cresent_14
+					in 20 .. 30 -> R.drawable.waxing_cresent_21
+					in 30 .. 40 -> R.drawable.waxing_cresent_29
+					in 40 .. 50 -> R.drawable.waxing_cresent_36
+					else -> R.drawable.waxing_cresent_36
+				}
+			}
+
+			MoonPhase.FIRST_QUARTER ->
+			{
+				R.drawable.first_quarter_moon
+			}
+
+			MoonPhase.WAXING_GIBBOUS ->
+			{
+				//get the image to show
+				when (percentage)
+				{
+					in 50 .. 60 -> R.drawable.waxing_gib_57
+					in 60 .. 70 -> R.drawable.waxing_gib_64
+					in 70 .. 80 -> R.drawable.waxing_gib_71
+					in 80 .. 90 -> R.drawable.waxing_gib_78
+					in 90 .. 100 -> R.drawable.waxing_gib_86
+					else -> R.drawable.waxing_gib_71
+				}
+			}
+			MoonPhase.FULL_MOON ->
+			{
+				R.drawable.full_moon
+			}
+
+			MoonPhase.WANING_GIBBOUS ->
+			{
+				val percentageProcessed = 100 - percentage
+				//get the image to show
+				when (percentageProcessed)
+				{
+					in 0 .. 10 -> R.drawable.wanning_gib_7
+					in 10 .. 20 -> R.drawable.wanning_gib_14
+					in 20 .. 30 -> R.drawable.wanning_gib_21
+					in 30 .. 40 -> R.drawable.wanning_gib_29
+					in 40 .. 50 -> R.drawable.wanning_gib_36
+					in 50 .. 60 -> R.drawable.wanning_gib_43
+					else -> R.drawable.wanning_gib_36
+				}
+			}
+
+			MoonPhase.LAST_QUARTER ->
+			{
+				R.drawable.last_quarter_moon
+			}
+
+			MoonPhase.WANING_CRESCENT ->
+			{
+				val percentageProcessed = 100 - percentage
+				//get the image to show
+				when (percentageProcessed)
+				{
+					in 50 .. 60 -> R.drawable.wanning_cres_57
+					in 60 .. 70 -> R.drawable.wanning_cres_64
+					in 70 .. 80 -> R.drawable.wanning_cres_71
+					in 80 .. 90 -> R.drawable.wanning_cres_78
+					in 90 .. 100 -> R.drawable.wanning_cres_86
+					else -> R.drawable.wanning_cres_93
+				}
+			}
+		}
+
 		return MoonPhaseInfo(
 				fraction ,
 				phaseValue ,
 				moonCalculations.angle ,
 				phaseName ,
-				phaseEmoji
+				imageToShow
 							)
 	}
 
@@ -162,6 +244,8 @@ class SunMoonCalc @JvmOverloads constructor(
 
 	private fun getMoonPhasePosition(current : MoonCalculations , next : MoonCalculations) : Int
 	{
+		// 0 - 27
+		//where 0 is new moon and 27 is waninng crescent
 		var index = 0
 
 		val phase1 = (0.5 + 0.5 * current.inc * (if (current.angle < 0) - 1 else 1) / Math.PI)
@@ -172,7 +256,7 @@ class SunMoonCalc @JvmOverloads constructor(
 			for (i in percentages.indices)
 			{
 				val percentage = percentages[i]
-				if (percentage >= phase1 && percentage <= phase2)
+				if (percentage in phase1 .. phase2)
 				{
 					index = 2 * i
 					break
@@ -184,7 +268,7 @@ class SunMoonCalc @JvmOverloads constructor(
 			}
 		}
 
-		return index % 8
+		return index % 27
 	}
 
 	private fun getPhaseNameByPhasePosition(value : Int) : MoonPhase
@@ -193,6 +277,13 @@ class SunMoonCalc @JvmOverloads constructor(
 		{
 			0 -> MoonPhase.NEW_MOON
 			1 -> MoonPhase.WAXING_CRESCENT
+			//in 0 .. 7 -> R.drawable.waxing_cresent_7
+			//				in 7 .. 14 -> R.drawable.waxing_cresent_14
+			//				in 14 .. 21 -> R.drawable.waxing_cresent_21
+			//				in 21 .. 29 -> R.drawable.waxing_cresent_29
+			//				in 28 .. 36 -> R.drawable.waxing_cresent_36
+			//				in 35 .. 43 -> R.drawable.waxing_cresent_43
+
 			2 -> MoonPhase.FIRST_QUARTER
 			3 -> MoonPhase.WAXING_GIBBOUS
 			4 -> MoonPhase.FULL_MOON
@@ -218,6 +309,8 @@ class SunMoonCalc @JvmOverloads constructor(
 			else -> throw IllegalStateException("Moon phase position should be between 0-7")
 		}
 	}
+
+	//get the phase of the moon by fraction of the illuminated limb
 
 	/**
 	 *

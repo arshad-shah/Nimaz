@@ -66,7 +66,7 @@ fun FeatureThatRequiresLocationPermission(
 					Button(onClick = {
 						showDialog.value = false
 					}) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
+						Text(text = "Close" , style = MaterialTheme.typography.titleMedium)
 					}
 				}
 				   )

@@ -56,6 +56,11 @@ fun FontSizeDialog(
 				arabicFontSizeState.value = 24f
 				translationFontSizeState.value = 16f
 			}
+			"IndoPak" ->
+			{
+				arabicFontSizeState.value = 32f
+				translationFontSizeState.value = 16f
+			}
 		}
 	}
 
@@ -102,7 +107,7 @@ fun FontSizeDialog(
 																						  )
 											 )
 						} ,
-						valueRange = 24f .. 40f ,
+						valueRange = if (fontStyleState.value == "IndoPak") 32f..60f else 24f..46f ,
 						modifier = Modifier.width(300.dp)
 					  )
 
