@@ -18,8 +18,6 @@ class MissedPrayerReciever : BroadcastReceiver()
 
 	override fun onReceive(context : Context , intent : Intent)
 	{
-		Log.i(AppConstants.MISSED_PRAYER_RECEIVER_TAG , "Boot Completed or Locked Boot Completed!")
-		Log.i(AppConstants.MISSED_PRAYER_RECEIVER_TAG , "Resetting Alarms after BootUp!")
 
 		if (! LocalDataStore.isInitialized())
 		{

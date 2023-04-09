@@ -5,8 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.NotificationHelper
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import es.dmoral.toasty.Toasty
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class AdhanReciever : BroadcastReceiver()
 {
@@ -66,6 +74,40 @@ class AdhanReciever : BroadcastReceiver()
 					AppConstants.ADHAN_RECEIVER_TAG ,
 					"Notification for $title is not executed! The time has passed"
 				 )
+		}
+
+		if(title == "Ishaa"){
+			Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Past Isha, Re-creating alarms for tomorrow")
+			val sharedPreferences = PrivateSharedPreferences(context)
+			CoroutineScope(Dispatchers.IO).launch {
+				try
+				{
+					val repository = PrayerTimesRepository.getPrayerTimes(context , LocalDate.now().plusDays(1).toString())
+					sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
+					val alarmLock =
+						sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+					if (! alarmLock)
+					{
+						CreateAlarms().exact(
+								context ,
+								repository.data?.fajr !! ,
+								repository.data.sunrise !! ,
+								repository.data.dhuhr !! ,
+								repository.data.asr !! ,
+								repository.data.maghrib !! ,
+								repository.data.isha !!
+											)
+						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+					}
+				} catch (e : Exception)
+				{
+					Log.e(AppConstants.ADHAN_RECEIVER_TAG , "Error in AdhanReciever: ${e.message}")
+					val mapForLoggingError = mapOf(
+							"Error" to "Error in AdhanReciever: ${e.message}"
+												  )
+					FirebaseLogger.logEvent(AppConstants.ADHAN_RECEIVER_TAG , mapForLoggingError)
+				}
+			}
 		}
 	}
 }

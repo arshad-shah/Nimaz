@@ -50,12 +50,6 @@
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
             android:enabled="true" />
 
-        <activity
-            android:name=".activities.ZakatCalculator"
-            android:exported="false"
-            android:label="@string/title_activity_zakat_calculator"
-            android:theme="@style/Theme.Nimaz" />
-
         <receiver
             android:name=".widgets.Nimaz"
             android:exported="false">
@@ -77,10 +71,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".utils.recievers.ResetAdhansReciever"
-            android:enabled="true"
-            android:exported="true" />
         <receiver
             android:name=".utils.recievers.AdhanReciever"
             android:enabled="true"
@@ -109,6 +99,7 @@
             android:exported="true"
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
+            android:hardwareAccelerated="true"
             android:theme="@style/Theme.Nimaz" />
     </application>
 

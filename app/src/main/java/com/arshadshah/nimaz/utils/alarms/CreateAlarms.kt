@@ -33,20 +33,17 @@ import com.arshadshah.nimaz.constants.AppConstants.ISHA_PI_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_CHANNEL_ID
 import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_NOTIFY_ID
 import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_PI_REQUEST_CODE
-import com.arshadshah.nimaz.constants.AppConstants.RESET_PENDING_INTENT_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_CHANNEL_ID
 import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_NOTIFY_ID
 import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_PI_REQUEST_CODE
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.recievers.AdhanReciever
-import com.arshadshah.nimaz.utils.recievers.ResetAdhansReciever
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.*
 
 class CreateAlarms
 {
@@ -79,49 +76,15 @@ class CreateAlarms
 			val maghribTime = maghrib.atZone(timeZone).toInstant().toEpochMilli()
 			val ishaaTime = ishaa.atZone(timeZone).toInstant().toEpochMilli()
 
-			//alarm lock
-			val oneOClock = GregorianCalendar.getInstance().apply {
-				set(Calendar.HOUR_OF_DAY , 1)
-				set(Calendar.MINUTE , 0)
-				set(Calendar.SECOND , 0)
-				set(Calendar.MILLISECOND , 0)
-			}
-
-			val current_time = System.currentTimeMillis()
-			if (current_time > oneOClock.timeInMillis)
-			{
-				scheduleAlarms(
-						context ,
-						fajrTime ,
-						sunriseTime ,
-						dhuhrTime ,
-						asrTime ,
-						maghribTime ,
-						ishaaTime
-							  )
-				//reset alarms
-				resetAlarms(
-						context ,
-						fajrTime ,
-						sunriseTime ,
-						dhuhrTime ,
-						asrTime ,
-						maghribTime ,
-						ishaaTime
-						   )
-			} else
-			{
-				//reset alarms
-				resetAlarms(
-						context ,
-						fajrTime ,
-						sunriseTime ,
-						dhuhrTime ,
-						asrTime ,
-						maghribTime ,
-						ishaaTime
-						   )
-			}
+			scheduleAlarms(
+					context ,
+					fajrTime ,
+					sunriseTime ,
+					dhuhrTime ,
+					asrTime ,
+					maghribTime ,
+					ishaaTime
+						  )
 		}
 	}
 
@@ -220,71 +183,6 @@ class CreateAlarms
 		alarms.setExactAlarm(context , ishaa , pendingIntent6)
 	}
 
-	/**
-	 * reset the onetime exact alarms
-	 * @param context the context of the Application
-	 * @param fajrAlarm time in milliseconds for fajr alarm
-	 * @param zuharAlarm time in milliseconds for zuhar alarm
-	 * @param asarAlarm time in milliseconds for asar alarm
-	 * @param maghribAlarm time in milliseconds for maghrib alarm
-	 * @param ishaaAlarm time in milliseconds for ishaaAlarm
-	 * */
-	fun resetAlarms(
-		context : Context ,
-		fajrAlarm : Long ,
-		sunriseAlarm : Long ,
-		zuharAlarm : Long ,
-		asarAlarm : Long ,
-		maghribAlarm : Long ,
-		ishaaAlarm : Long ,
-				   )
-	{
-		//recreate all alarms
-		val resetIntent =
-			Intent(context , ResetAdhansReciever::class.java).apply {
-				putExtra("fajrTime" , fajrAlarm)
-				putExtra("sunriseTime" , sunriseAlarm)
-				putExtra("zuharTime" , zuharAlarm)
-				putExtra("asarTime" , asarAlarm)
-				putExtra("maghribTime" , maghribAlarm)
-				putExtra("ishaaTime" , ishaaAlarm)
-			}
-		val resetPendingIntent = PendingIntent.getBroadcast(
-				context , RESET_PENDING_INTENT_REQUEST_CODE , resetIntent ,
-				PendingIntent.FLAG_IMMUTABLE
-														   )
-		val calendar = GregorianCalendar.getInstance().apply {
-			if (get(Calendar.HOUR_OF_DAY) >= 1)
-			{
-				add(Calendar.DAY_OF_MONTH , 1)
-			}
-			set(Calendar.HOUR_OF_DAY , 1)
-			set(Calendar.MINUTE , 0)
-			set(Calendar.SECOND , 0)
-			set(Calendar.MILLISECOND , 0)
-		}
-		Alarms().setAlarm(
-				context ,
-				resetPendingIntent ,
-				calendar.timeInMillis ,
-				message = "Reset alarm"
-						 )
-//
-//		//recreate all alarms
-//		val prayerCompletedIntent = Intent(context , MissedPrayerReciever::class.java)
-//		val prayerCompletedPendingIntent = PendingIntent.getBroadcast(
-//				context , AppConstants.PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE , prayerCompletedIntent ,
-//				PendingIntent.FLAG_IMMUTABLE
-//														   )
-//		val calendarPrayerCompleted = System.currentTimeMillis() + 10000
-//		Alarms().setAlarm(
-//				context ,
-//				prayerCompletedPendingIntent ,
-//				calendarPrayerCompleted ,
-//				message = "Prayer completed alarm"
-//						 )
-	}
-
 	fun createAllNotificationChannels(context : Context)
 	{
 		val fajrAdhan = "android.resource://" + context.packageName + "/" + R.raw.fajr
@@ -353,6 +251,8 @@ class CreateAlarms
 				ISHA_CHANNEL_ID ,
 				ishaaAdhan
 													)
+
+		//work for the missed prayer alarms
 //
 //		//sunrise
 //		notificationHelper.notificationChannelSilent(
@@ -363,6 +263,20 @@ class CreateAlarms
 //				CHANNEL_DESC_MISSED_PRAYER ,
 //				CHANNEL_MISSED_PRAYER_ID
 //													)
+		//
+//		//recreate all alarms
+//		val prayerCompletedIntent = Intent(context , MissedPrayerReciever::class.java)
+//		val prayerCompletedPendingIntent = PendingIntent.getBroadcast(
+//				context , AppConstants.PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE , prayerCompletedIntent ,
+//				PendingIntent.FLAG_IMMUTABLE
+//														   )
+//		val calendarPrayerCompleted = System.currentTimeMillis() + 10000
+//		Alarms().setAlarm(
+//				context ,
+//				prayerCompletedPendingIntent ,
+//				calendarPrayerCompleted ,
+//				message = "Prayer completed alarm"
+//						 )
 
 	}
 }

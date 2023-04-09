@@ -101,7 +101,7 @@ class SpacesFileRepository(context : Context)
 											 bytesTotal : Long ,
 																	   )
 										 {
-											 Log.i(
+											 Log.d(
 													 "S3 Download" ,
 													 "Progress ${((bytesCurrent / bytesTotal) * 100)}"
 												  )
@@ -122,7 +122,7 @@ class SpacesFileRepository(context : Context)
 											 {
 												 TransferState.COMPLETED ->
 												 {
-													 Log.i("S3 Download" , "Completed")
+													 Log.d("S3 Download" , "Completed")
 													 callback(file , null , 100 , true)
 //													 Toasty.success(
 //															 appContext ,
@@ -132,13 +132,13 @@ class SpacesFileRepository(context : Context)
 
 												 TransferState.IN_PROGRESS ->
 												 {
-													 Log.i("S3 Download" , "In Progress")
+													 Log.d("S3 Download" , "In Progress")
 													 callback(null , null , 0 , false)
 												 }
 
 												 TransferState.FAILED ->
 												 {
-													 Log.i("S3 Download" , "Failed")
+													 Log.d("S3 Download" , "Failed")
 													 callback(
 															 null ,
 															 Exception("Failed to download file") ,
@@ -153,7 +153,7 @@ class SpacesFileRepository(context : Context)
 
 												 TransferState.CANCELED ->
 												 {
-													 Log.i("S3 Download" , "Canceled")
+													 Log.d("S3 Download" , "Canceled")
 													 callback(
 															 null ,
 															 Exception("Canceled") ,
@@ -165,7 +165,7 @@ class SpacesFileRepository(context : Context)
 
 												 else ->
 												 {
-													 Log.i("S3 Download" , "Other")
+													 Log.d("S3 Download" , "Other")
 													 callback(null , Exception("Other") , 0 , false)
 													 Toasty.error(appContext , "Other").show()
 												 }
