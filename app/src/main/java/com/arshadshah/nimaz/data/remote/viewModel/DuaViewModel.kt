@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.data.remote.viewModel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.Chapter
@@ -11,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class DuaViewModel(context : Context) : ViewModel()
+class DuaViewModel: ViewModel()
 {
 
 	sealed class DuaState
@@ -54,11 +53,8 @@ class DuaViewModel(context : Context) : ViewModel()
 				if (chaptersCount == 0)
 				{
 					val response = DuaRepository.getChapters()
-					if (response != null)
-					{
-						_chapterState.value = ChapterState.Success(response.data !!)
-						dataStore.saveAllChapters(response.data)
-					}
+					_chapterState.value = ChapterState.Success(response.data !!)
+					dataStore.saveAllChapters(response.data)
 				} else
 				{
 					//get the chapters from the database

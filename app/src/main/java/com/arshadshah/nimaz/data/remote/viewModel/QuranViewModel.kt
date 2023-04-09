@@ -27,30 +27,6 @@ class QuranViewModel(context : Context) : ViewModel()
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
-//	val spaceFilesRepository = SpacesFileRepository(context)
-//	//for each surah, download all the audio files
-//	for (aya in response.data)
-//	{
-//		//get the audio file
-//		spaceFilesRepository.downloadAyaFile(
-//				aya.suraNumber ,
-//				aya.ayaNumberInSurah
-//											){ file: File? , error: Exception? , progress: Int , isCompleted: Boolean  ->
-//			//if file is downloaded, save the location in database
-//			if (isCompleted)
-//			{
-//				CoroutineScope(Dispatchers.IO).launch {
-//					dataStore.addAudioToAya(
-//							aya.suraNumber ,
-//							aya.ayaNumberInSurah ,
-//							file?.absolutePath.toString()
-//										   )
-//				}
-//			}
-//		}
-//	}
-
-
 	//general state for error and loading
 	private val _errorState = MutableStateFlow("")
 	val errorState = _errorState.asStateFlow()
@@ -883,10 +859,6 @@ class QuranViewModel(context : Context) : ViewModel()
 						ayaEvent.surahNumber ,
 						ayaEvent.ayaNumberInSurah
 									 )
-			}
-
-			else ->
-			{
 			}
 		}
 	}
