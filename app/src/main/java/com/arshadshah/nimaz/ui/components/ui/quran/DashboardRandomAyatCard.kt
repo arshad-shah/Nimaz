@@ -1,16 +1,12 @@
 package com.arshadshah.nimaz.ui.components.ui.quran
 
 import android.content.Intent
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,29 +36,12 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 			key = AppConstants.QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity)
-	//make sure this is called only once a day
-	val randomAyatLastFetched = PrivateSharedPreferences(context).getDataLong(
-			AppConstants.RANDOM_AYAT_LAST_FETCHED
-																			 )
-	//ayat last fetched number in surah
-	val randomAyatLastFetchedNumber = PrivateSharedPreferences(context).getDataInt(
-			AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED
-																				  )
 
-	Log.d("RandomAyat" , "Random Ayat Last Fetched: $randomAyatLastFetched")
-	Log.d("RandomAyat" , "Random Ayat Last Fetched Number: $randomAyatLastFetchedNumber")
-
-	//check if it has been more than a 3 hours since last fetch and fetch new ayat else use the old one from local storage
-	if (System.currentTimeMillis() - randomAyatLastFetched > 10800000 || randomAyatLastFetchedNumber == 0)
-	{
+	//only get the random aya once every time the screen is opened
+	LaunchedEffect(key1 = true) {
 		viewModel.getRandomAya()
-		PrivateSharedPreferences(context).saveDataLong(
-				AppConstants.RANDOM_AYAT_LAST_FETCHED , System.currentTimeMillis()
-													  )
-	} else
-	{
-		viewModel.getAyatByAyaNumberInSurah(randomAyatLastFetchedNumber)
 	}
+
 	val stateOfRandomAyat = remember {
 		viewModel.randomAyaState
 	}.collectAsState()

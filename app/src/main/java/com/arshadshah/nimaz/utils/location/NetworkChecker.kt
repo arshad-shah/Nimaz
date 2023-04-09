@@ -59,11 +59,11 @@ class NetworkChecker
 		val networkCheck = isNetworkAvailable(context)
 		return if (networkCheck)
 		{
-			Log.i("Network" , "Network is Successfully connected")
+			Log.d("Network" , "Network is Successfully connected")
 			true
 		} else
 		{
-			Log.i("Network" , "Network is not connected")
+			Log.d("Network" , "Network is not connected")
 			false
 		}
 	}

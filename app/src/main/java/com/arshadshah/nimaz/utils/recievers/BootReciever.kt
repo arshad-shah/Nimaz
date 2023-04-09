@@ -22,8 +22,8 @@ class BootReciever : BroadcastReceiver()
 			intent.action.equals(Intent.ACTION_LOCKED_BOOT_COMPLETED)
 		)
 		{
-			Log.i(AppConstants.BOOT_RECEIVER_TAG , "Boot Completed or Locked Boot Completed!")
-			Log.i(AppConstants.BOOT_RECEIVER_TAG , "Resetting Alarms after BootUp!")
+			Log.d(AppConstants.BOOT_RECEIVER_TAG , "Boot Completed or Locked Boot Completed!")
+			Log.d(AppConstants.BOOT_RECEIVER_TAG , "Resetting Alarms after BootUp!")
 
 			if (! FirebaseLogger.isInitialized())
 			{

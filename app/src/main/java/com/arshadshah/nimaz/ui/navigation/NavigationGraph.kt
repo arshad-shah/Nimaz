@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.activity
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
@@ -681,7 +680,7 @@ fun NavigationGraph(
 					paddingValues = paddingValues ,
 					onNavigateToPrayerTimes = {
 						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route) {
-							popUpTo(navController.graph.startDestinationId) { inclusive = true }
+							popUpTo(navController.graph.startDestinationId)
 						}
 
 					} ,
@@ -937,10 +936,6 @@ fun NavigationGraph(
 					chapterId = it.arguments?.getString("chapterId")?.toInt() ?: 0 ,
 					paddingValues = paddingValues
 				   )
-		}
-
-		activity("Zakat") {
-			this.activityClass = ZakatCalculator::class
 		}
 
 		composable(SHAHADAH_SCREEN_ROUTE) {
