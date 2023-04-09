@@ -141,10 +141,7 @@ object PrayerTimesRepository
 					return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 				}
 
-				if (prayerTimesLocal != null)
-				{
-					return ApiResponse.Success(prayerTimesLocal)
-				}
+				return ApiResponse.Success(prayerTimesLocal)
 			} else
 			{
 				val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
@@ -191,7 +188,6 @@ object PrayerTimesRepository
 				}
 				return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 			}
-			ApiResponse.Error("Prayer Times Not Available" , null)
 		} catch (e : ClientRequestException)
 		{
 			ApiResponse.Error(e.message , null)
