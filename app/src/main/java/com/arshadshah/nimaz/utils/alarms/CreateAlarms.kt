@@ -14,11 +14,14 @@ import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_ASAR
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_ISHAA
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_MAGHRIB
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_MISSED_PRAYER
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_SUNRISE
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_ZUHAR
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_ISHAA
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_MAGHRIB
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_MISSED_PRAYER
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_MISSED_PRAYER_ID
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_SUNRISE
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_ZUHAR
 import com.arshadshah.nimaz.constants.AppConstants.DHUHR_CHANNEL_ID
@@ -33,17 +36,20 @@ import com.arshadshah.nimaz.constants.AppConstants.ISHA_PI_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_CHANNEL_ID
 import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_NOTIFY_ID
 import com.arshadshah.nimaz.constants.AppConstants.MAGHRIB_PI_REQUEST_CODE
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_CHANNEL_ID
 import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_NOTIFY_ID
 import com.arshadshah.nimaz.constants.AppConstants.SUNRISE_PI_REQUEST_CODE
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.recievers.AdhanReciever
+import com.arshadshah.nimaz.utils.recievers.MissedPrayerReciever
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.*
 
 class CreateAlarms
 {
@@ -60,11 +66,33 @@ class CreateAlarms
 	{
 		CoroutineScope(Dispatchers.IO).launch {
 			val sharedPreferences = PrivateSharedPreferences(context)
+			//check if all the channels have been created
 			val channelLock = sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK , false)
 			if (! channelLock)
 			{
 				createAllNotificationChannels(context)
 				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK , true)
+			}else{
+				val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+				//find out whioch i fthe channles are not created
+				if (
+					notificationManager.getNotificationChannel(FAJR_CHANNEL_ID) == null
+					||
+					notificationManager.getNotificationChannel(SUNRISE_CHANNEL_ID) == null
+					||
+					notificationManager.getNotificationChannel(DHUHR_CHANNEL_ID) == null
+					||
+					notificationManager.getNotificationChannel(ASR_CHANNEL_ID) == null
+					||
+					notificationManager.getNotificationChannel(MAGHRIB_CHANNEL_ID) == null
+					||
+					notificationManager.getNotificationChannel(ISHA_CHANNEL_ID) == null
+					||
+					notificationManager.getNotificationChannel(CHANNEL_MISSED_PRAYER_ID) == null
+				)
+				{
+					createAllNotificationChannels(context)
+				}
 			}
 			//time zne
 			val timeZone = ZoneId.systemDefault()
@@ -181,6 +209,31 @@ class CreateAlarms
 		alarms.setExactAlarm(context , asr , pendingIntent4)
 		alarms.setExactAlarm(context , maghrib , pendingIntent5)
 		alarms.setExactAlarm(context , ishaa , pendingIntent6)
+
+		//
+		//recreate all alarms
+		val prayerCompletedIntent = Intent(context , MissedPrayerReciever::class.java)
+		val prayerCompletedPendingIntent = PendingIntent.getBroadcast(
+				context ,
+				PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE ,
+				prayerCompletedIntent ,
+				PendingIntent.FLAG_IMMUTABLE
+														   )
+		val calendarPrayerCompleted = Calendar.getInstance()
+		if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 23)
+		{
+			calendarPrayerCompleted.add(Calendar.DAY_OF_MONTH , 1)
+		}
+		calendarPrayerCompleted.set(Calendar.HOUR_OF_DAY , 23)
+		calendarPrayerCompleted.set(Calendar.MINUTE , 0)
+		calendarPrayerCompleted.set(Calendar.SECOND , 0)
+
+
+		Alarms().setExactAlarm(
+				context ,
+				calendarPrayerCompleted.timeInMillis ,
+				prayerCompletedPendingIntent,
+						 )
 	}
 
 	fun createAllNotificationChannels(context : Context)
@@ -253,30 +306,15 @@ class CreateAlarms
 													)
 
 		//work for the missed prayer alarms
-//
-//		//sunrise
-//		notificationHelper.notificationChannelSilent(
-//				context ,
-//				NotificationManager.IMPORTANCE_DEFAULT ,
-//				false ,
-//				CHANNEL_MISSED_PRAYER ,
-//				CHANNEL_DESC_MISSED_PRAYER ,
-//				CHANNEL_MISSED_PRAYER_ID
-//													)
-		//
-//		//recreate all alarms
-//		val prayerCompletedIntent = Intent(context , MissedPrayerReciever::class.java)
-//		val prayerCompletedPendingIntent = PendingIntent.getBroadcast(
-//				context , AppConstants.PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE , prayerCompletedIntent ,
-//				PendingIntent.FLAG_IMMUTABLE
-//														   )
-//		val calendarPrayerCompleted = System.currentTimeMillis() + 10000
-//		Alarms().setAlarm(
-//				context ,
-//				prayerCompletedPendingIntent ,
-//				calendarPrayerCompleted ,
-//				message = "Prayer completed alarm"
-//						 )
+		//missed Prayer
+		notificationHelper.notificationChannelSilent(
+				context ,
+				NotificationManager.IMPORTANCE_MAX ,
+				true ,
+				CHANNEL_MISSED_PRAYER ,
+				CHANNEL_DESC_MISSED_PRAYER ,
+				CHANNEL_MISSED_PRAYER_ID
+													)
 
 	}
 }

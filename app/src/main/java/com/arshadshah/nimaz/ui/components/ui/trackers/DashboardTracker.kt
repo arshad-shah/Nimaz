@@ -35,14 +35,17 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
-	val dateState = remember {
-		viewModel.dateState
-	}.collectAsState()
+	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
 	LaunchedEffect(key1 = "getTrackerForDate") {
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(false))
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(dateState.value))
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(mutableDate.value.toString()))
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
 	}
+
+	val dateState = remember {
+		viewModel.dateState
+	}.collectAsState()
 
 	val stateOfTrackerForToday = remember {
 		viewModel.trackerState
