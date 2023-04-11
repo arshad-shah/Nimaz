@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +54,7 @@ class Introduction : ComponentActivity()
 
 				"SYSTEM" ->
 				{
+					dynamicTheme.value = true
 					darkTheme.value = isSystemInDarkTheme()
 					themeName.value = "Default"
 				}
@@ -100,10 +100,7 @@ class Introduction : ComponentActivity()
 					dynamicColor = dynamicTheme.value ,
 					ThemeName = themeName.value
 					  ) {
-				Scaffold {
-					it
-					IntroPage1()
-				}
+				IntroPage1()
 			}
 		}
 	}

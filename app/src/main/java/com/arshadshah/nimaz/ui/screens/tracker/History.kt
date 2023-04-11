@@ -27,8 +27,6 @@ import java.time.LocalDate
 @Composable
 fun History()
 {
-
-
 	val viewModel = viewModel(
 			key = TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,

@@ -25,7 +25,10 @@ object PrayerTimesRepository
 	 * @param context the context of the application
 	 * @return ApiResponse<PrayerTimes> the response from the API call see [ApiResponse]
 	 * */
-	suspend fun getPrayerTimes(context : Context) : ApiResponse<PrayerTimes>
+	suspend fun getPrayerTimes(
+		context : Context ,
+		dateForTimes : String = LocalDate.now().toString() ,
+							  ) : ApiResponse<PrayerTimes>
 	{
 
 		//check if the local datastore has been initialized if not initialize it
@@ -79,7 +82,7 @@ object PrayerTimesRepository
 			val prayerTimesAvailable = dataStore.countPrayerTimes() > 0
 			if (prayerTimesAvailable)
 			{
-				val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
+				val prayerTimesLocal = dataStore.getPrayerTimesForADate(dateForTimes)
 
 				//check if the date is for current month if not update the prayer times
 				val date = prayerTimesLocal?.date
@@ -141,10 +144,7 @@ object PrayerTimesRepository
 					return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 				}
 
-				if (prayerTimesLocal != null)
-				{
-					return ApiResponse.Success(prayerTimesLocal)
-				}
+				return ApiResponse.Success(prayerTimesLocal)
 			} else
 			{
 				val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
@@ -191,7 +191,6 @@ object PrayerTimesRepository
 				}
 				return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 			}
-			ApiResponse.Error("Prayer Times Not Available" , null)
 		} catch (e : ClientRequestException)
 		{
 			ApiResponse.Error(e.message , null)

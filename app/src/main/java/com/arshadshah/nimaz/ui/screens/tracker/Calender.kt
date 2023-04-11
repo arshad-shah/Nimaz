@@ -81,7 +81,7 @@ fun Calender(paddingValues : PaddingValues)
 						dayContent = {
 							CalenderDay(dayState = it , handleEvents = viewModel::onEvent)
 						} ,
-						weekHeader = { weekState ->
+						daysOfWeekHeader = { weekState ->
 							CalenderWeekHeader(weekState = weekState)
 						} ,
 						monthContainer = {

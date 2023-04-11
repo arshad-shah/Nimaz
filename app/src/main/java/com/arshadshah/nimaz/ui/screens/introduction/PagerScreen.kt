@@ -49,7 +49,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 				text = onBoardingPage.title ,
 				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
 				fontWeight = FontWeight.Bold ,
-				textAlign = TextAlign.Center
+				textAlign = TextAlign.Center ,
+				color = MaterialTheme.colorScheme.onBackground
 			)
 
 		Text(
@@ -61,7 +62,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 				text = onBoardingPage.description ,
 				fontSize = MaterialTheme.typography.bodyMedium.fontSize ,
 				fontWeight = FontWeight.Medium ,
-				textAlign = TextAlign.Center
+				textAlign = TextAlign.Center ,
+				color = MaterialTheme.colorScheme.onBackground
 			)
 		//if onBoardingPage.extra is not {} then show the extra content
 		if (onBoardingPage.extra != null)

@@ -149,10 +149,6 @@ class PrayerTimesViewModel : ViewModel()
 			{
 				setAlarms(event.context)
 			}
-
-			else ->
-			{
-			}
 		}
 	}
 
