@@ -56,6 +56,7 @@ fun SettingsScreen(
 	onNavigateToAboutScreen : () -> Unit ,
 	paddingValues : PaddingValues ,
 	onNavigateToWebViewScreen : (String) -> Unit ,
+	onNavigateToLicencesScreen : () -> Unit ,
 				  )
 {
 	val context = LocalContext.current
@@ -467,6 +468,29 @@ fun SettingsScreen(
 								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = R.drawable.help_icon) ,
 								contentDescription = "Help documentation"
+							)
+					} ,
+							)
+		}
+
+		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth()
+					) {
+			SettingsMenuLink(
+					title = { Text(text = "License & Acknowledgements") } ,
+					//version of the app
+					subtitle = { Text(text = "Open source libraries") } ,
+					onClick = {
+						onNavigateToLicencesScreen()
+					} ,
+					icon = {
+						Icon(
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.license_icon) ,
+								contentDescription = "License & Acknowledgements"
 							)
 					} ,
 							)

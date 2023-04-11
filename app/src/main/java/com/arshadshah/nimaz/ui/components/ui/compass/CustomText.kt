@@ -41,7 +41,7 @@ fun CustomText(
 				modifier = textModifier ,
 				text = processedText ,
 				textAlign = TextAlign.Center ,
-				style = MaterialTheme.typography.titleLarge ,
+				style = MaterialTheme.typography.titleMedium ,
 			)
 	}
 }
