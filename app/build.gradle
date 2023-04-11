@@ -6,7 +6,10 @@ plugins {
     id 'com.google.firebase.crashlytics'
     id 'com.google.firebase.firebase-perf'
     id "com.google.devtools.ksp"
+    id "com.mikepenz.aboutlibraries.plugin" version "10.6.2"
 }
+
+apply plugin: 'com.mikepenz.aboutlibraries.plugin'
 
 android {
     namespace 'com.arshadshah.nimaz'
@@ -16,8 +19,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 111
-        versionName '1.5.39'
+        versionCode 114
+        versionName '1.5.42'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -27,11 +30,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -78,7 +83,7 @@ dependencies {
     implementation "com.google.firebase:firebase-analytics-ktx"
     implementation 'com.google.firebase:firebase-perf-ktx'
 
-    implementation platform('androidx.compose:compose-bom:2023.03.00')
+    implementation platform('androidx.compose:compose-bom:2023.04.00')
     implementation "androidx.activity:activity-compose"
     implementation "androidx.compose.ui:ui"
     implementation "androidx.compose.ui:ui-tooling-preview"
@@ -89,7 +94,7 @@ dependencies {
 
     debugImplementation "androidx.compose.ui:ui-tooling"
     debugImplementation "androidx.compose.ui:ui-test-manifest"
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
+    androidTestImplementation('androidx.compose.ui:ui-test-junit4:1.4.1')
 
 
     implementation 'androidx.test:monitor:1.6.1'
@@ -127,15 +132,14 @@ dependencies {
     implementation "com.google.android.play:app-update:$app_update_version"
     implementation "com.google.android.play:app-update-ktx:$app_update_version"
 
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
 
-    implementation "io.github.boguszpawlowski.composecalendar:composecalendar:1.0.2"
+    implementation 'io.github.boguszpawlowski.composecalendar:composecalendar:1.1.1'
 
     //Add AWS S3 SDK
-    implementation 'com.amazonaws:aws-android-sdk-s3:2.12.5'
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.65.0'
 
-    //charts
-    implementation "com.patrykandpatrick.vico:core:1.6.4"
-    implementation "com.patrykandpatrick.vico:compose:1.6.4"
-    implementation "com.patrykandpatrick.vico:compose-m3:1.6.4"
+    // Open Source Libraries Screen.
+    implementation "com.mikepenz:aboutlibraries-core:10.6.2"
+    implementation "com.mikepenz:aboutlibraries-compose:10.6.2"
 }

@@ -37,17 +37,6 @@ fun AuthorDetails()
 							.fillMaxWidth() ,
 					  ) {
 					Text(
-							modifier = Modifier.fillMaxWidth() ,
-							text = "Author" ,
-							style = MaterialTheme.typography.titleLarge ,
-							textAlign = TextAlign.Center
-						)
-					Divider(
-							modifier = Modifier.padding(8.dp) ,
-							color = MaterialTheme.colorScheme.outline ,
-							thickness = 1.dp
-						   )
-					Text(
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth() ,
@@ -84,31 +73,6 @@ fun AuthorDetails()
 							textAlign = TextAlign.Center
 						)
 					AuthorLinks()
-					Divider(
-							modifier = Modifier.padding(8.dp) ,
-							color = MaterialTheme.colorScheme.outline ,
-							thickness = 1.dp
-						   )
-					Text(
-							modifier = Modifier.padding(8.dp) ,
-							text = "Loves to code, create, and learn new things." ,
-							style = MaterialTheme.typography.bodyMedium ,
-						)
-					Text(
-							modifier = Modifier.padding(8.dp) ,
-							text = "Nimaz is a project that I created to learn more about Android development and to help others learn about Islam." ,
-							style = MaterialTheme.typography.bodyMedium ,
-						)
-					Text(
-							modifier = Modifier.padding(8.dp) ,
-							text = "It is created as part of my final year project for my BSc in Computer Science." ,
-							style = MaterialTheme.typography.bodyMedium ,
-						)
-					Text(
-							modifier = Modifier.padding(8.dp) ,
-							text = "It is a free, Ad-free and open source project that I hope will be useful to many people.I hope you enjoy it." ,
-							style = MaterialTheme.typography.bodyMedium ,
-						)
 				}
 			} ,
 				)

@@ -2,22 +2,20 @@ package com.arshadshah.nimaz.ui.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.activity
 import com.arshadshah.nimaz.activities.*
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.LICENCES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
@@ -34,6 +32,7 @@ import com.arshadshah.nimaz.ui.screens.*
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.About
+import com.arshadshah.nimaz.ui.screens.settings.Licences
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
@@ -62,7 +61,7 @@ fun NavigationGraph(
 				{
 					BottomNavItem.PrayerTimesScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -70,7 +69,7 @@ fun NavigationGraph(
 										  )
 					QIBLA_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -78,7 +77,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.QuranScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -86,7 +85,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.MoreScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -94,7 +93,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.SettingsScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -102,7 +101,7 @@ fun NavigationGraph(
 										  )
 					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -110,7 +109,7 @@ fun NavigationGraph(
 										  )
 					ABOUT_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -118,7 +117,7 @@ fun NavigationGraph(
 										  )
 					QURAN_AYA_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -126,7 +125,7 @@ fun NavigationGraph(
 										  )
 					CHAPTER_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -134,7 +133,7 @@ fun NavigationGraph(
 										  )
 					CHAPTERS_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -142,7 +141,7 @@ fun NavigationGraph(
 										  )
 					TASBIH_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -150,7 +149,7 @@ fun NavigationGraph(
 										  )
 					NAMESOFALLAH_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -158,7 +157,7 @@ fun NavigationGraph(
 										  )
 					SHAHADAH_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -166,7 +165,7 @@ fun NavigationGraph(
 										  )
 					PRAYER_TRACKER_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -174,7 +173,7 @@ fun NavigationGraph(
 										  )
 					CALENDER_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -182,7 +181,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.Dashboard.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -190,7 +189,7 @@ fun NavigationGraph(
 										  )
 					TASBIH_LIST_SCREEN ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -198,7 +197,7 @@ fun NavigationGraph(
 										  )
 					MY_QURAN_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -206,7 +205,7 @@ fun NavigationGraph(
 										  )
 					WEB_VIEW_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -220,7 +219,7 @@ fun NavigationGraph(
 				{
 					BottomNavItem.PrayerTimesScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -228,7 +227,7 @@ fun NavigationGraph(
 										   )
 					QIBLA_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -236,7 +235,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.QuranScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -244,7 +243,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.MoreScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -252,7 +251,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.SettingsScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -260,7 +259,7 @@ fun NavigationGraph(
 										   )
 					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -268,7 +267,7 @@ fun NavigationGraph(
 										   )
 					ABOUT_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -276,7 +275,7 @@ fun NavigationGraph(
 										   )
 					CHAPTERS_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -284,7 +283,7 @@ fun NavigationGraph(
 										   )
 					TASBIH_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -292,7 +291,7 @@ fun NavigationGraph(
 										   )
 					NAMESOFALLAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -300,7 +299,7 @@ fun NavigationGraph(
 										   )
 					SHAHADAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -308,7 +307,7 @@ fun NavigationGraph(
 										   )
 					PRAYER_TRACKER_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -316,7 +315,7 @@ fun NavigationGraph(
 										   )
 					CALENDER_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -324,7 +323,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.Dashboard.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -332,7 +331,7 @@ fun NavigationGraph(
 										   )
 					TASBIH_LIST_SCREEN ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -340,7 +339,7 @@ fun NavigationGraph(
 										   )
 					MY_QURAN_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -348,7 +347,15 @@ fun NavigationGraph(
 										   )
 					WEB_VIEW_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
+								animationSpec = tween(
+										easing = LinearOutSlowInEasing ,
+										durationMillis = SCREEN_ANIMATION_DURATION_Exit
+													 )
+										   )
+					LICENCES_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -362,7 +369,7 @@ fun NavigationGraph(
 				{
 					BottomNavItem.PrayerTimesScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -370,7 +377,7 @@ fun NavigationGraph(
 										  )
 					QIBLA_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -378,7 +385,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.QuranScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -386,7 +393,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.MoreScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -394,7 +401,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.SettingsScreen.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -402,7 +409,7 @@ fun NavigationGraph(
 										  )
 					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -410,7 +417,7 @@ fun NavigationGraph(
 										  )
 					ABOUT_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -418,7 +425,7 @@ fun NavigationGraph(
 										  )
 					QURAN_AYA_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -426,7 +433,7 @@ fun NavigationGraph(
 										  )
 					CHAPTER_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -434,7 +441,7 @@ fun NavigationGraph(
 										  )
 					CHAPTERS_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -442,7 +449,7 @@ fun NavigationGraph(
 										  )
 					TASBIH_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -450,7 +457,7 @@ fun NavigationGraph(
 										  )
 					NAMESOFALLAH_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -458,7 +465,7 @@ fun NavigationGraph(
 										  )
 					SHAHADAH_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -466,7 +473,7 @@ fun NavigationGraph(
 										  )
 					PRAYER_TRACKER_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -474,7 +481,7 @@ fun NavigationGraph(
 										  )
 					CALENDER_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -482,7 +489,7 @@ fun NavigationGraph(
 										  )
 					BottomNavItem.Dashboard.screen_route ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -490,7 +497,7 @@ fun NavigationGraph(
 										  )
 					TASBIH_LIST_SCREEN ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -498,7 +505,7 @@ fun NavigationGraph(
 										  )
 					MY_QURAN_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -506,7 +513,15 @@ fun NavigationGraph(
 										  )
 					WEB_VIEW_SCREEN_ROUTE ->
 						slideIntoContainer(
-								AnimatedContentScope.SlideDirection.Left ,
+								AnimatedContentTransitionScope.SlideDirection.Left ,
+								animationSpec = tween(
+										easing = LinearOutSlowInEasing ,
+										durationMillis = SCREEN_ANIMATION_DURATION
+													 )
+										  )
+					LICENCES_SCREEN_ROUTE ->
+						slideIntoContainer(
+								AnimatedContentTransitionScope.SlideDirection.Left ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION
@@ -520,7 +535,7 @@ fun NavigationGraph(
 				{
 					BottomNavItem.PrayerTimesScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -528,7 +543,7 @@ fun NavigationGraph(
 										   )
 					QIBLA_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -536,7 +551,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.QuranScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -544,7 +559,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.MoreScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -552,7 +567,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.SettingsScreen.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -560,7 +575,7 @@ fun NavigationGraph(
 										   )
 					PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -568,7 +583,7 @@ fun NavigationGraph(
 										   )
 					ABOUT_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -576,7 +591,7 @@ fun NavigationGraph(
 										   )
 					QURAN_AYA_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -584,7 +599,7 @@ fun NavigationGraph(
 										   )
 					CHAPTER_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -592,7 +607,7 @@ fun NavigationGraph(
 										   )
 					CHAPTERS_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -600,7 +615,7 @@ fun NavigationGraph(
 										   )
 					TASBIH_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -608,7 +623,7 @@ fun NavigationGraph(
 										   )
 					NAMESOFALLAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -616,7 +631,7 @@ fun NavigationGraph(
 										   )
 					SHAHADAH_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -624,7 +639,7 @@ fun NavigationGraph(
 										   )
 					PRAYER_TRACKER_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -632,7 +647,7 @@ fun NavigationGraph(
 										   )
 					CALENDER_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -640,7 +655,7 @@ fun NavigationGraph(
 										   )
 					BottomNavItem.Dashboard.screen_route ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -648,7 +663,7 @@ fun NavigationGraph(
 										   )
 					TASBIH_LIST_SCREEN ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -656,7 +671,7 @@ fun NavigationGraph(
 										   )
 					MY_QURAN_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -664,7 +679,15 @@ fun NavigationGraph(
 										   )
 					WEB_VIEW_SCREEN_ROUTE ->
 						slideOutOfContainer(
-								AnimatedContentScope.SlideDirection.Right ,
+								AnimatedContentTransitionScope.SlideDirection.Right ,
+								animationSpec = tween(
+										easing = LinearOutSlowInEasing ,
+										durationMillis = SCREEN_ANIMATION_DURATION_Exit
+													 )
+										   )
+					LICENCES_SCREEN_ROUTE ->
+						slideOutOfContainer(
+								AnimatedContentTransitionScope.SlideDirection.Right ,
 								animationSpec = tween(
 										easing = LinearOutSlowInEasing ,
 										durationMillis = SCREEN_ANIMATION_DURATION_Exit
@@ -681,7 +704,7 @@ fun NavigationGraph(
 					paddingValues = paddingValues ,
 					onNavigateToPrayerTimes = {
 						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route) {
-							popUpTo(navController.graph.startDestinationId) { inclusive = true }
+							popUpTo(navController.graph.startDestinationId)
 						}
 
 					} ,
@@ -939,10 +962,6 @@ fun NavigationGraph(
 				   )
 		}
 
-		activity("Zakat") {
-			this.activityClass = ZakatCalculator::class
-		}
-
 		composable(SHAHADAH_SCREEN_ROUTE) {
 			ShahadahScreen(paddingValues)
 		}
@@ -952,6 +971,11 @@ fun NavigationGraph(
 					onNavigateToPrayerTimeCustomizationScreen = {
 						navController.navigate(
 								PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
+											  )
+					} ,
+					onNavigateToLicencesScreen = {
+						navController.navigate(
+								LICENCES_SCREEN_ROUTE
 											  )
 					} ,
 					onNavigateToAboutScreen = {
@@ -978,6 +1002,9 @@ fun NavigationGraph(
 		}
 		composable(ABOUT_SCREEN_ROUTE) {
 			About(paddingValues)
+		}
+		composable(LICENCES_SCREEN_ROUTE) {
+			Licences(paddingValues)
 		}
 		composable(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
 			PrayerTimesCustomizations(paddingValues)

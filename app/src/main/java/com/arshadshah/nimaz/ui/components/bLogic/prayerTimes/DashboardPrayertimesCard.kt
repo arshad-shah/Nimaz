@@ -57,9 +57,20 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context
 									)
-	LaunchedEffect(Unit) {
+	val sharedPreferences = remember { PrivateSharedPreferences(context) }
+	LaunchedEffect(key1 = Unit) {
 		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
 		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
+		//set the alarms
+		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
+		if (! alarmLock)
+		{
+			viewModel.handleEvent(
+					context ,
+					PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context)
+								 )
+			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
+		}
 	}
 
 	val nextPrayerName = remember {
@@ -90,8 +101,6 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 		viewModel.isLoading
 	}.collectAsState()
 
-	val sharedPreferences = remember { PrivateSharedPreferences(context) }
-
 	LaunchedEffect(locationName.value) {
 		//update the prayer times
 		viewModel.handleEvent(
@@ -105,19 +114,6 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 						context
 																   )
 							 )
-	}
-
-	LaunchedEffect(key1 = Unit) {
-		//set the alarms
-		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-		if (! alarmLock)
-		{
-			viewModel.handleEvent(
-					context ,
-					PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context)
-								 )
-			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-		}
 	}
 
 	val phaseOfMoon = SunMoonCalc(

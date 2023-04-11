@@ -14,41 +14,6 @@ class Alarms
 {
 
 	/**
-	 * Sets a Repeating alarm
-	 * @author Arshad Shah
-	 * @param context The Context of the Application
-	 * @param pendingIntent The pending Intent for the alarm
-	 * @return Alarm
-	 * */
-	fun setAlarm(
-		context : Context ,
-		pendingIntent : PendingIntent ,
-		timeToNotify : Long ,
-		message : String ,
-				)
-	{
-		// get alarm manager
-		val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
-
-		alarmManager.setRepeating(
-				AlarmManager.RTC_WAKEUP ,
-				timeToNotify ,
-				AlarmManager.INTERVAL_DAY ,
-				pendingIntent
-								 )
-
-		val time = LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(timeToNotify) ,
-				ZoneId.systemDefault()
-										  )
-			.format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a"))
-
-		//logs
-		Log.i("Nimaz: Alarms for Adhan" , "Alarm for $message at $time is successfully created")
-	} // end of alarm set
-
-
-	/**
 	 * Sets a Exact alarm that is allowed in doze mode
 	 * @author Arshad Shah
 	 * @param context The Context of the Application
@@ -69,23 +34,9 @@ class Alarms
 		val time = LocalDateTime.ofInstant(
 				Instant.ofEpochMilli(timeToNotify) ,
 				ZoneId.systemDefault()
-										  ).format(DateTimeFormatter.ofPattern("hh:mm a"))
+										  )
+			.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
 		//logs
-		Log.i("Nimaz: Alarms for Adhan" , "Alarm for $time is successfully created")
+		Log.d("Nimaz: Alarms for Adhan" , "Alarm for $time is successfully created")
 	} // end of alarm set
-
-
-	/**
-	 * Cancels an alarm
-	 * @author Arshad Shah
-	 * @param pendingIntent the intent of the alarm to be canceled
-	 * @param context the context of the Application
-	 * */
-	fun cancelAlarm(context : Context , pendingIntent : PendingIntent)
-	{
-		val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
-		alarmManager.cancel(pendingIntent)
-		Log.i("Alarms for Adhan" , "ALL alarms are cancelled")
-	}
-
 }

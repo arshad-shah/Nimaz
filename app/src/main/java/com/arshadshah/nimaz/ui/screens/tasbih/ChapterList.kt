@@ -23,7 +23,7 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 
 	val viewModel = viewModel(
 			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			initializer = { DuaViewModel(context) } ,
+			initializer = { DuaViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 

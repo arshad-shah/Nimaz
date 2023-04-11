@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
+	const val LICENCES_SCREEN_ROUTE : String = "Licences"
 	const val UPDATE_WIDGET_ACTION : String = "com.arshadshah.nimaz.UPDATE_WIDGET"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
 //	private const val BASE_URL = "http://192.168.0.62:8000/api"
