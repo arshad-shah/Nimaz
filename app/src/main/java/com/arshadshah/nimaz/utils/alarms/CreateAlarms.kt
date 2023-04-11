@@ -72,8 +72,10 @@ class CreateAlarms
 			{
 				createAllNotificationChannels(context)
 				sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK , true)
-			}else{
-				val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+			} else
+			{
+				val notificationManager =
+					context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 				//find out whioch i fthe channles are not created
 				if (
 					notificationManager.getNotificationChannel(FAJR_CHANNEL_ID) == null
@@ -218,7 +220,7 @@ class CreateAlarms
 				PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE ,
 				prayerCompletedIntent ,
 				PendingIntent.FLAG_IMMUTABLE
-														   )
+																	 )
 		val calendarPrayerCompleted = Calendar.getInstance()
 		if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 23)
 		{
@@ -232,8 +234,8 @@ class CreateAlarms
 		Alarms().setExactAlarm(
 				context ,
 				calendarPrayerCompleted.timeInMillis ,
-				prayerCompletedPendingIntent,
-						 )
+				prayerCompletedPendingIntent ,
+							  )
 	}
 
 	fun createAllNotificationChannels(context : Context)

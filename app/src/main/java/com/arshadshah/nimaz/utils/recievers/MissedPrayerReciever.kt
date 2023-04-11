@@ -58,38 +58,39 @@ class MissedPrayerReciever : BroadcastReceiver()
 					 )
 
 
-					if (!tracker.fajr)
-					{
-						amountMissed++
-						nameOfMissedPrayers.add("Fajr")
-					}
-					if (!tracker.dhuhr)
-					{
-						amountMissed++
-						nameOfMissedPrayers.add("Dhuhr")
-					}
-					if (!tracker.asr)
-					{
-						amountMissed++
-						nameOfMissedPrayers.add("Asr")
-					}
-					if (!tracker.maghrib)
-					{
-						amountMissed++
-						nameOfMissedPrayers.add("Maghrib")
-					}
-					if (!tracker.isha)
-					{
-						amountMissed++
-						nameOfMissedPrayers.add("Isha")
-					}
+				if (! tracker.fajr)
+				{
+					amountMissed ++
+					nameOfMissedPrayers.add("Fajr")
+				}
+				if (! tracker.dhuhr)
+				{
+					amountMissed ++
+					nameOfMissedPrayers.add("Dhuhr")
+				}
+				if (! tracker.asr)
+				{
+					amountMissed ++
+					nameOfMissedPrayers.add("Asr")
+				}
+				if (! tracker.maghrib)
+				{
+					amountMissed ++
+					nameOfMissedPrayers.add("Maghrib")
+				}
+				if (! tracker.isha)
+				{
+					amountMissed ++
+					nameOfMissedPrayers.add("Isha")
+				}
 
 
 				val title = if (amountMissed > 0) "$amountMissed prayers missed"
 				else "Well Done!"
 
 				//get time left to complete missed prayers
-				val timeLeft = LocalTime.now().until(LocalTime.of(23 , 59 , 59) , ChronoUnit.MINUTES)
+				val timeLeft =
+					LocalTime.now().until(LocalTime.of(23 , 59 , 59) , ChronoUnit.MINUTES)
 
 				//create message
 				val message =

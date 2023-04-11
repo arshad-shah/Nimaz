@@ -25,7 +25,10 @@ object PrayerTimesRepository
 	 * @param context the context of the application
 	 * @return ApiResponse<PrayerTimes> the response from the API call see [ApiResponse]
 	 * */
-	suspend fun getPrayerTimes(context : Context, dateForTimes: String = LocalDate.now().toString()) : ApiResponse<PrayerTimes>
+	suspend fun getPrayerTimes(
+		context : Context ,
+		dateForTimes : String = LocalDate.now().toString() ,
+							  ) : ApiResponse<PrayerTimes>
 	{
 
 		//check if the local datastore has been initialized if not initialize it

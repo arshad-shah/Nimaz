@@ -27,6 +27,7 @@ import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.LICENCES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
@@ -174,18 +175,9 @@ class MainActivity : ComponentActivity()
 
 				"SYSTEM" ->
 				{
-					//if is dark theme is true then it will be dark theme
-					if (isDarkTheme.value)
-					{
-						dynamicTheme.value = false
-						darkTheme.value = isDarkTheme.value
-						themeName.value = "Default"
-					} else
-					{
-						dynamicTheme.value = false
-						darkTheme.value = isSystemInDarkTheme()
-						themeName.value = "Default"
-					}
+					dynamicTheme.value = true
+					darkTheme.value = isSystemInDarkTheme()
+					themeName.value = "Default"
 				}
 
 				"DEFAULT" ->
@@ -616,6 +608,8 @@ class MainActivity : ComponentActivity()
 				}
 			}
 
+			LICENCES_SCREEN_ROUTE -> "Open Source Libraries"
+
 			else -> ""
 		}
 	}
@@ -639,7 +633,8 @@ class MainActivity : ComponentActivity()
 				QIBLA_SCREEN_ROUTE ,
 				AppConstants.TASBIH_LIST_SCREEN ,
 				MY_QURAN_SCREEN_ROUTE ,
-				WEB_VIEW_SCREEN_ROUTE
+				WEB_VIEW_SCREEN_ROUTE ,
+				LICENCES_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)

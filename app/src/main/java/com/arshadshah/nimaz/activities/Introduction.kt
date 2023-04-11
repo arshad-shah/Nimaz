@@ -54,6 +54,7 @@ class Introduction : ComponentActivity()
 
 				"SYSTEM" ->
 				{
+					dynamicTheme.value = true
 					darkTheme.value = isSystemInDarkTheme()
 					themeName.value = "Default"
 				}
@@ -99,7 +100,7 @@ class Introduction : ComponentActivity()
 					dynamicColor = dynamicTheme.value ,
 					ThemeName = themeName.value
 					  ) {
-					IntroPage1()
+				IntroPage1()
 			}
 		}
 	}

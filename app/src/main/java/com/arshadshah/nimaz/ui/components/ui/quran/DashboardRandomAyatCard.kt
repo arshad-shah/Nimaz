@@ -78,28 +78,24 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(vertical = 8.dp , horizontal = 16.dp) ,
+					.padding(top = 8.dp , bottom = 8.dp , end = 8.dp) ,
 				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
-			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
-						) {
-				Row(
-						modifier = Modifier.padding(8.dp) ,
-				   ) {
-					CustomText(
-							modifier = Modifier ,
-							heading = "Chapter" ,
-							text = stateOfRandomAyat.value.suraNumber.toString()
-							  )
-					Spacer(modifier = Modifier.width(4.dp))
-					CustomText(
-							modifier = Modifier ,
-							heading = "Verse" ,
-							text = stateOfRandomAyat.value.ayaNumber.toString()
-							  )
-				}
+			Row(
+					modifier = Modifier.padding(8.dp) ,
+			   ) {
+				CustomText(
+						modifier = Modifier ,
+						heading = "Chapter" ,
+						text = stateOfRandomAyat.value.suraNumber.toString()
+						  )
+				Spacer(modifier = Modifier.width(8.dp))
+				CustomText(
+						modifier = Modifier ,
+						heading = "Verse" ,
+						text = stateOfRandomAyat.value.ayaNumber.toString()
+						  )
 			}
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(

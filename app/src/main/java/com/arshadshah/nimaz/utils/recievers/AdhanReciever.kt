@@ -76,13 +76,17 @@ class AdhanReciever : BroadcastReceiver()
 				 )
 		}
 
-		if(title == "Ishaa"){
+		if (title == "Ishaa")
+		{
 			Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Past Isha, Re-creating alarms for tomorrow")
 			val sharedPreferences = PrivateSharedPreferences(context)
 			CoroutineScope(Dispatchers.IO).launch {
 				try
 				{
-					val repository = PrayerTimesRepository.getPrayerTimes(context , LocalDate.now().plusDays(1).toString())
+					val repository = PrayerTimesRepository.getPrayerTimes(
+							context ,
+							LocalDate.now().plusDays(1).toString()
+																		 )
 					sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
 					val alarmLock =
 						sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)

@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter
 
 class Alarms
 {
+
 	/**
 	 * Sets a Exact alarm that is allowed in doze mode
 	 * @author Arshad Shah
@@ -33,7 +34,8 @@ class Alarms
 		val time = LocalDateTime.ofInstant(
 				Instant.ofEpochMilli(timeToNotify) ,
 				ZoneId.systemDefault()
-										  ).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
+										  )
+			.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
 		//logs
 		Log.d("Nimaz: Alarms for Adhan" , "Alarm for $time is successfully created")
 	} // end of alarm set
