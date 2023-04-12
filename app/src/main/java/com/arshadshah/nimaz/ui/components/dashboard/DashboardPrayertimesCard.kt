@@ -390,7 +390,7 @@ fun getTimerText(timeToNextPrayer : CountDownTime) : String
 
 		else ->
 		{
-			"Prayer Time"
+			"Loading..."
 		}
 	}
 }
