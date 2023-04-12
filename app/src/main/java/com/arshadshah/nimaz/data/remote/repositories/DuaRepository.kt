@@ -2,8 +2,8 @@ package com.arshadshah.nimaz.data.remote.repositories
 
 import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.arshadshah.nimaz.data.remote.models.Dua
-import com.arshadshah.nimaz.utils.network.ApiResponse
-import com.arshadshah.nimaz.utils.network.NimazServicesImpl
+import com.arshadshah.nimaz.utils.api.ApiResponse
+import com.arshadshah.nimaz.utils.api.NimazServicesImpl
 import io.ktor.client.plugins.*
 import java.io.IOException
 

@@ -15,12 +15,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
+import com.arshadshah.nimaz.ui.components.prayerTimes.DatesContainer
+import com.arshadshah.nimaz.ui.components.prayerTimes.LocationTimeContainer
+import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
+import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
+import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

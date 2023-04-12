@@ -4,20 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.screens.introduction.IntroPage1
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 class Introduction : ComponentActivity()
 {
 
-	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onCreate(savedInstanceState : Bundle?)
 	{
 		super.onCreate(savedInstanceState)

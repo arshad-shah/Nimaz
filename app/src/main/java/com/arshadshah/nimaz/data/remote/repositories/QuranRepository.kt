@@ -3,8 +3,8 @@ package com.arshadshah.nimaz.data.remote.repositories
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
-import com.arshadshah.nimaz.utils.network.ApiResponse
-import com.arshadshah.nimaz.utils.network.NimazServicesImpl
+import com.arshadshah.nimaz.utils.api.ApiResponse
+import com.arshadshah.nimaz.utils.api.NimazServicesImpl
 import io.ktor.client.plugins.*
 
 object QuranRepository

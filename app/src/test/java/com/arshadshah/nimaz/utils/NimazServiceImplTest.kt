@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.utils
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.utils.network.NimazServicesImpl
+import com.arshadshah.nimaz.utils.api.NimazServicesImpl
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue

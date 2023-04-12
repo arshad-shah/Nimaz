@@ -25,10 +25,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
-import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardFastTracker
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
 import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.header.MonthState

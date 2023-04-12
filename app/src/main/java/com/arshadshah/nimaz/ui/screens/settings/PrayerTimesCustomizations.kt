@@ -21,17 +21,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
+import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
+import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
+import com.arshadshah.nimaz.ui.components.settings.SettingsNumberPickerDialog
+import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.components.ui.intro.CalculationMethodUI
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsNumberPickerDialog
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper.getParams
+import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper.getParams
+import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @Composable
 fun PrayerTimesCustomizations(paddingValues : PaddingValues)

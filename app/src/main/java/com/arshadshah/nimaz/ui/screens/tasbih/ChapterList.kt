@@ -12,8 +12,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CHAPTERS
 import com.arshadshah.nimaz.data.remote.models.Chapter
-import com.arshadshah.nimaz.data.remote.viewModel.DuaViewModel
 import com.arshadshah.nimaz.ui.components.bLogic.tasbih.ChapterListItem
+import com.arshadshah.nimaz.viewModel.DuaViewModel
 import es.dmoral.toasty.Toasty
 
 @Composable
