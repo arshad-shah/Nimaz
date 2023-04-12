@@ -305,8 +305,7 @@ class MainActivity : ComponentActivity()
 									content = {
 										TopAppBar(
 												modifier = Modifier
-													.testTag("topAppBar")
-													.padding(start = 8.dp) ,
+													.testTag("topAppBar") ,
 												title = {
 													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
 													{
@@ -338,7 +337,10 @@ class MainActivity : ComponentActivity()
 													}
 												} ,
 												navigationIcon = {
-													OutlinedIconButton(onClick = {
+													OutlinedIconButton(
+															modifier = Modifier
+																.testTag("backButton").padding(start = 8.dp) ,
+															onClick = {
 														Log.d(
 																MAIN_ACTIVITY_TAG ,
 																"onCreate:  back button pressed"
