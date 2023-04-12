@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.trackers
+package com.arshadshah.nimaz.ui.components.trackers
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
@@ -46,11 +46,14 @@ fun DateSelector(
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(4.dp) ,
+					.padding(horizontal = 16.dp , vertical = 8.dp) ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
-			IconButton(onClick = {
+			FilledIconButton(
+					modifier = Modifier
+						.size(52.dp) ,
+					onClick = {
 				date.value = date.value.minusDays(1)
 				handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
 				handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
@@ -61,9 +64,9 @@ fun DateSelector(
 				hijrahDate.value = HijrahDate.from(date.value)
 			}) {
 				Icon(
-						painter = painterResource(id = R.drawable.angle_small_left_icon) ,
+						modifier = Modifier.size(24.dp) ,
+						painter = painterResource(id = R.drawable.angle_left_icon) ,
 						contentDescription = "Previous Day" ,
-						tint = MaterialTheme.colorScheme.primary
 					)
 			}
 			Column(
@@ -124,6 +127,7 @@ fun DateSelector(
 									painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 									contentDescription = "Next Day" ,
 									tint = MaterialTheme.colorScheme.primary
+
 								)
 						}
 					}
@@ -137,7 +141,10 @@ fun DateSelector(
 						style = MaterialTheme.typography.bodySmall
 					)
 			}
-			IconButton(onClick = {
+			FilledIconButton(
+					modifier = Modifier
+						.size(52.dp) ,
+					onClick = {
 				date.value = date.value.plusDays(1)
 				handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
 				handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
@@ -148,9 +155,9 @@ fun DateSelector(
 				hijrahDate.value = HijrahDate.from(date.value)
 			}) {
 				Icon(
-						painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+						modifier = Modifier.size(24.dp) ,
+						painter = painterResource(id = R.drawable.angle_right_icon) ,
 						contentDescription = "Next Day" ,
-						tint = MaterialTheme.colorScheme.primary
 					)
 			}
 		}

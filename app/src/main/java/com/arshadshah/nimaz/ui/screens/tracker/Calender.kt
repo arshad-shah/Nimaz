@@ -1,10 +1,7 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -40,7 +37,6 @@ import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
-import kotlin.reflect.KFunction1
 
 @Composable
 fun Calender(paddingValues : PaddingValues)
@@ -79,7 +75,7 @@ fun Calender(paddingValues : PaddingValues)
 						) {
 				SelectableCalendar(
 						dayContent = {
-							CalenderDay(dayState = it , handleEvents = viewModel::onEvent)
+							CalenderDay(dayState = it)
 						} ,
 						daysOfWeekHeader = { weekState ->
 							CalenderWeekHeader(weekState = weekState)
@@ -104,7 +100,10 @@ fun Calender(paddingValues : PaddingValues)
 				Row(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
+							.padding(
+									start =
+									24.dp , end = 24.dp , top = 12.dp , bottom = 8.dp
+									) ,
 						horizontalArrangement = Arrangement.SpaceBetween ,
 						verticalAlignment = Alignment.CenterVertically
 				   ) {
@@ -214,20 +213,23 @@ fun CalenderHeader(monthState : MonthState)
 				) {
 		Row(
 				modifier = Modifier
+					.padding(horizontal = 24.dp)
 					.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			//left arrow
-			IconButton(
+			FilledIconButton(
+					modifier = Modifier
+						.size(52.dp) ,
 					onClick = {
 						monthState.currentMonth = monthState.currentMonth.minusMonths(1)
 						inCurrentMonth.value = false
 					} ,
 					  ) {
 				Icon(
-						modifier = Modifier.size(48.dp) ,
-						painter = painterResource(id = R.drawable.angle_small_left_icon) ,
+						modifier = Modifier.size(24.dp) ,
+						painter = painterResource(id = R.drawable.angle_left_icon) ,
 						contentDescription = "Previous Month"
 					)
 			}
@@ -299,15 +301,16 @@ fun CalenderHeader(monthState : MonthState)
 			}
 
 			//right arrow
-			IconButton(
+			FilledIconButton(
+					modifier = Modifier.size(52.dp),
 					onClick = {
 						monthState.currentMonth = monthState.currentMonth.plusMonths(1)
 						inCurrentMonth.value = false
 					} ,
 					  ) {
 				Icon(
-						modifier = Modifier.size(48.dp) ,
-						painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+						modifier = Modifier.size(24.dp) ,
+						painter = painterResource(id = R.drawable.angle_right_icon) ,
 						contentDescription = "Next Month"
 					)
 			}
@@ -365,9 +368,14 @@ fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 @Composable
 fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
-	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
 			   )
 {
+	val viewModel = viewModel(
+			key = TRACKING_VIEWMODEL_KEY ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+							 )
+
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
 	val currentDate = dayState.date
@@ -388,17 +396,19 @@ fun CalenderDay(
 														  ) ,
 			modifier = Modifier
 				.padding(2.dp)
-				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.5f)
+				.alpha(if (dayState.isFromCurrentMonth) 1f else 0.2f)
 				.border(
 						width = if (isSelectedDay || today) 2.dp else 0.dp ,
 						color = when (importantDay.first)
 						{
-							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary
-							else if (today) MaterialTheme.colorScheme.secondary
+							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary.copy(
+									alpha = 0.5f)
+							else if (today) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
 							else MaterialTheme.colorScheme.surface
-							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary
-							else if (today) MaterialTheme.colorScheme.secondary
-							else MaterialTheme.colorScheme.primary
+							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary.copy(
+									alpha = 0.5f)
+							else if (today) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+							else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 						} ,
 						shape = MaterialTheme.shapes.large
 					   ) ,
@@ -409,7 +419,7 @@ fun CalenderDay(
 						else if (today) MaterialTheme.colorScheme.secondaryContainer
 						else MaterialTheme.colorScheme.surface
 						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
-						else if (today) MaterialTheme.colorScheme.secondaryContainer
+						else if (today) MaterialTheme.colorScheme.surface
 						else MaterialTheme.colorScheme.primaryContainer
 					}
 													)
@@ -425,17 +435,17 @@ fun CalenderDay(
 									false -> if (dayState.isFromCurrentMonth)
 									{
 										dayState.selectionState.onDateSelected(dayState.date)
-										handleEvents(
+										viewModel.onEvent(
 												TrackerViewModel.TrackerEvent.SET_DATE(
 														dayState.date.toString()
 																					  )
 													)
-										handleEvents(
+										viewModel.onEvent(
 												TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
 														dayState.date.toString()
 																								  )
 													)
-										handleEvents(
+										viewModel.onEvent(
 												TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
 														dayState.date.toString()
 																									   )
@@ -447,17 +457,17 @@ fun CalenderDay(
 										if (dayState.isFromCurrentMonth)
 										{
 											dayState.selectionState.onDateSelected(dayState.date)
-											handleEvents(
+											viewModel.onEvent(
 													TrackerViewModel.TrackerEvent.SET_DATE(
 															dayState.date.toString()
 																						  )
 														)
-											handleEvents(
+											viewModel.onEvent(
 													TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																									  )
 														)
-											handleEvents(
+											viewModel.onEvent(
 													TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																										   )
@@ -467,7 +477,10 @@ fun CalenderDay(
 								}
 							} ,
 							onLongClick = {
-								hasDescription.value = ! hasDescription.value
+								if (importantDay.first)
+								{
+									hasDescription.value = ! hasDescription.value
+								}
 							}
 									  ) ,
 				horizontalAlignment = Alignment.CenterHorizontally
@@ -480,14 +493,17 @@ fun CalenderDay(
 					modifier = Modifier.padding(horizontal = 6.dp , vertical = 4.dp) ,
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
-						true -> MaterialTheme.colorScheme.onPrimaryContainer
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
+						else if (today) MaterialTheme.colorScheme.onSecondaryContainer
+						else MaterialTheme.colorScheme.onSurface
+						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
+						else if (today) MaterialTheme.colorScheme.onSurface
+						else MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
 			Divider(
-					modifier = Modifier
-						.fillMaxWidth() ,
-					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) ,
+					thickness = 1.dp
 				   )
 			Text(
 					//put a letter scissor ha in front of the day to show that it is a hijri day
@@ -498,8 +514,12 @@ fun CalenderDay(
 					modifier = Modifier.padding(horizontal = 6.dp , vertical = 4.dp) ,
 					color = when (importantDay.first)
 					{
-						false -> if (today) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer
-						else -> MaterialTheme.colorScheme.onTertiaryContainer
+						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
+						else if (today) MaterialTheme.colorScheme.onSecondaryContainer
+						else MaterialTheme.colorScheme.onSurface
+						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
+						else if (today) MaterialTheme.colorScheme.onSurface
+						else MaterialTheme.colorScheme.onTertiaryContainer
 					}
 				)
 		}

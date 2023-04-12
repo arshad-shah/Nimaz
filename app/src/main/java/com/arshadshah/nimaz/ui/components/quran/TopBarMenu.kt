@@ -75,6 +75,7 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.width(150.dp)
+				.padding(start = 8.dp)
 				) {
 		//an elevation card that shows the text and icon
 		ElevatedCard(
