@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT_PAGE
-import com.arshadshah.nimaz.ui.components.bLogic.settings.AuthorDetails
+import com.arshadshah.nimaz.ui.components.settings.AuthorDetails
 
 @Composable
 fun About(paddingValues : PaddingValues)

@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
 import com.arshadshah.nimaz.ui.components.ui.trackers.PrayerTrackerListItems
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import es.dmoral.toasty.Toasty
 
 

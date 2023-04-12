@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
-import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
-import com.arshadshah.nimaz.ui.components.ProgressBarCustom
+import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 
 @Composable

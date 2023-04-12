@@ -21,8 +21,8 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @OptIn(ExperimentalAnimationApi::class , ExperimentalMaterial3Api::class)
 @Composable

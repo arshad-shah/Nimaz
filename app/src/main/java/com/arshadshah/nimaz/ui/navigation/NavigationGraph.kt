@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.activities.*
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE

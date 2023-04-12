@@ -44,18 +44,16 @@ import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.data.remote.viewModel.*
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.arshadshah.nimaz.utils.FirebaseLogger
-import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.location.AutoLocationUtils
-import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.arshadshah.nimaz.utils.*
+import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -143,6 +141,7 @@ class MainActivity : ComponentActivity()
 
 		//this is used to show the full activity on the screen
 		setContent {
+
 			val viewModelSettings = viewModel(
 					key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 					initializer = { SettingsViewModel(this@MainActivity) } ,
