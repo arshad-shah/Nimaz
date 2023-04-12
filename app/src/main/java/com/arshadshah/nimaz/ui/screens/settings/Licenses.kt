@@ -84,6 +84,33 @@ fun Licences(paddingValues : PaddingValues)
 	if (openDialog.value)
 	{
 		AlertDialogNimaz(
+				action = {
+					val website = libraryToShow.value?.website
+					if (website != null)
+					{
+						if (website.isNotBlank())
+						{
+							FilledIconButton(
+									colors = IconButtonDefaults.filledIconButtonColors(
+											containerColor = MaterialTheme.colorScheme.primary ,
+											contentColor = MaterialTheme.colorScheme.onPrimary ,
+																					  ) ,
+									onClick = {
+										val intent =
+											Intent(Intent.ACTION_VIEW , Uri.parse(website))
+										context.startActivity(intent)
+									} ,
+									content = {
+										Icon(
+												modifier = Modifier.size(24.dp) ,
+												painter = painterResource(id = R.drawable.external_link_icon) ,
+												contentDescription = "Portfolio Website Link" ,
+											)
+									}
+											)
+						}
+					}
+				},
 				contentHeight = 400.dp ,
 				contentDescription = libraryToShow.value?.name ?: "Library" ,
 				title = libraryToShow.value?.name ?: "Library" ,
@@ -162,7 +189,8 @@ fun LibraryItem(
 							.weight(1f) ,
 						style = MaterialTheme.typography.titleMedium ,
 						maxLines = 1 ,
-						overflow = TextOverflow.Ellipsis
+						overflow = TextOverflow.Ellipsis,
+						color = MaterialTheme.colorScheme.onSurface ,
 					)
 				Spacer(modifier = Modifier.width(8.dp))
 				val version = library.artifactVersion
@@ -171,7 +199,8 @@ fun LibraryItem(
 					Text(
 							version ,
 							style = MaterialTheme.typography.bodySmall ,
-							textAlign = TextAlign.Center
+							textAlign = TextAlign.Center,
+							color = MaterialTheme.colorScheme.onSurface ,
 						)
 				}
 			}
@@ -182,6 +211,7 @@ fun LibraryItem(
 						modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
 						text = author ,
 						style = MaterialTheme.typography.bodySmall ,
+						color = MaterialTheme.colorScheme.onSurface ,
 					)
 			}
 			val description = library.description
@@ -193,32 +223,8 @@ fun LibraryItem(
 							modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
 							text = description ,
 							style = MaterialTheme.typography.bodySmall ,
+							color = MaterialTheme.colorScheme.onSurface ,
 						)
-				}
-			}
-			val website = library.website
-			if (website != null)
-			{
-				if (website.isNotBlank())
-				{
-					FilledIconButton(
-							colors = IconButtonDefaults.filledIconButtonColors(
-									containerColor = MaterialTheme.colorScheme.primary ,
-									contentColor = MaterialTheme.colorScheme.onPrimary ,
-																			  ) ,
-							onClick = {
-								val intent =
-									Intent(Intent.ACTION_VIEW , Uri.parse(website))
-								context.startActivity(intent)
-							} ,
-							content = {
-								Icon(
-										modifier = Modifier.size(24.dp) ,
-										painter = painterResource(id = R.drawable.external_link_icon) ,
-										contentDescription = "Portfolio Website Link" ,
-									)
-							}
-									)
 				}
 			}
 			if (showLicenseBadges && library.licenses.isNotEmpty())
@@ -230,8 +236,8 @@ fun LibraryItem(
 				   ) {
 					library.licenses.forEach {
 						Badge(
-								contentColor = MaterialTheme.colorScheme.primary ,
-								backgroundColor = MaterialTheme.colorScheme.onPrimary ,
+								contentColor = MaterialTheme.colorScheme.onPrimary ,
+								backgroundColor = MaterialTheme.colorScheme.primary ,
 							 ) {
 							Text(
 									modifier = Modifier.padding(4.dp) ,
