@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.ui.screens.tracker
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -16,11 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
+import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerListItems
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
-import com.arshadshah.nimaz.ui.components.ui.trackers.PrayerTrackerListItems
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import es.dmoral.toasty.Toasty
-
 
 @Composable
 fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false)
@@ -84,6 +85,8 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 	Column(
 			modifier = Modifier
 				.padding(paddingValues)
+				.fillMaxSize()
+				.verticalScroll(rememberScrollState())
 				.testTag(TEST_TAG_PRAYER_TRACKER) ,
 			horizontalAlignment = Alignment.CenterHorizontally
 		  ) {

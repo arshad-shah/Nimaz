@@ -22,7 +22,6 @@ import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,

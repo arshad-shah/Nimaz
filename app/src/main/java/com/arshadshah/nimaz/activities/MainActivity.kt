@@ -304,6 +304,9 @@ class MainActivity : ComponentActivity()
 									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
 									content = {
 										TopAppBar(
+												modifier = Modifier
+													.testTag("topAppBar")
+													.padding(start = 8.dp) ,
 												title = {
 													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
 													{
@@ -323,6 +326,9 @@ class MainActivity : ComponentActivity()
 													} else
 													{
 														Text(
+																modifier = Modifier
+																	.testTag("topAppBarText")
+																	.padding(start = 8.dp) ,
 																text = processPageTitle(
 																		route.value.toString() ,
 																		navController
@@ -332,7 +338,7 @@ class MainActivity : ComponentActivity()
 													}
 												} ,
 												navigationIcon = {
-													IconButton(onClick = {
+													OutlinedIconButton(onClick = {
 														Log.d(
 																MAIN_ACTIVITY_TAG ,
 																"onCreate:  back button pressed"
@@ -344,8 +350,8 @@ class MainActivity : ComponentActivity()
 														navController.navigateUp()
 													}) {
 														Icon(
-																modifier = Modifier.size(20.dp) ,
-																painter = painterResource(id = R.drawable.angle_left_icon) ,
+																modifier = Modifier.size(24.dp) ,
+																painter = painterResource(id = R.drawable.back_icon) ,
 																contentDescription = "Back"
 															)
 													}

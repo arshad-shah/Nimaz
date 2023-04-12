@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
+package com.arshadshah.nimaz.ui.components.dashboard
 
 import android.content.Intent
 import androidx.activity.ComponentActivity
@@ -25,7 +25,7 @@ import java.time.temporal.ChronoField
 
 
 @Composable
-fun RamadanTimesCard()
+fun RamadanTimesCard(isFasting : Boolean)
 {
 
 	val context = LocalContext.current
@@ -73,7 +73,7 @@ fun RamadanTimesCard()
 
 	//show card if it is the month of ramadan
 	val showCard =
-		todayHijri[ChronoField.MONTH_OF_YEAR] == 9 && todayHijri[ChronoField.DAY_OF_MONTH] <= 29
+		todayHijri[ChronoField.MONTH_OF_YEAR] == 9 && todayHijri[ChronoField.DAY_OF_MONTH] <= 29 || isFasting
 
 	//is ramadan time left less than 40 days
 	//if yes then show the card

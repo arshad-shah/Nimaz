@@ -71,7 +71,7 @@ class TrackerViewModel : ViewModel()
 	val progressState = _progressState.asStateFlow()
 
 	//a progressfor a specific date
-	private var _progressForDate = MutableStateFlow(Pair("" , 0))
+	private var _progressForDate = MutableStateFlow(Pair(LocalDate.now().toString() , 0))
 	val progressForDate = _progressForDate.asStateFlow()
 
 	//dates with trackers
