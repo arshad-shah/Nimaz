@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.FastTracker
+import com.arshadshah.nimaz.ui.components.common.ToggleableItemColumn
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -38,7 +39,8 @@ fun FastTrackerCard(
 				.padding(8.dp) ,
 				) {
 		ToggleableItemColumn(
-				text = if (isFastingToday.value) "Fasting" else "Not Fasting" ,
+				text = "Not Fasting",
+				selectedText = "Fasting Today" ,
 				checked = isFastingToday.value ,
 				onCheckedChange = {
 					//if the date is after today then don't allow the user to change the value

@@ -78,7 +78,7 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(top = 8.dp , bottom = 8.dp , end = 8.dp) ,
+					.padding(top = 8.dp , bottom = 8.dp , end = 16.dp) ,
 				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {

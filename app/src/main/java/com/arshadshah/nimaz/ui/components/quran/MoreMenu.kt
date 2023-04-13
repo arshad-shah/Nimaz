@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -15,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
@@ -26,6 +28,8 @@ import com.arshadshah.nimaz.ui.components.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
+import com.arshadshah.nimaz.ui.components.ui.quran.CustomDialog
+import com.arshadshah.nimaz.ui.components.ui.quran.FontSizeDialog
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import es.dmoral.toasty.Toasty
@@ -395,6 +399,9 @@ fun DownloadQuranDialog(
 		}
 	}
 	AlertDialogNimaz(
+			icon = painterResource(id = R.drawable.download_icon),
+			topDivider = false,
+			bottomDivider = false,
 			contentHeight = 200.dp ,
 			contentDescription = "Download Quran" ,
 			title = "Downloading Quran" ,
@@ -409,7 +416,7 @@ fun DownloadQuranDialog(
 				{
 					ProgressBarCustom(
 							progress = progress.value ,
-							radius = 60.dp ,
+							radius = 80.dp ,
 							waveAnimation = true ,
 									 )
 				}

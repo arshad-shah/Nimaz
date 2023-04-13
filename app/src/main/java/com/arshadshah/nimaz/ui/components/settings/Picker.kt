@@ -1,11 +1,13 @@
-package com.arshadshah.nimaz.ui.components.ui.settings
+package com.arshadshah.nimaz.ui.components.settings
 
+import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -15,12 +17,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -41,7 +46,7 @@ private fun <T> getItemIndexForOffset(
 }
 
 @Composable
-fun <T> ListItemPicker(
+fun <T> Picker(
 	modifier : Modifier = Modifier ,
 	label : (T) -> String = { it.toString() } ,
 	value : T ,
@@ -74,7 +79,22 @@ fun <T> ListItemPicker(
 	val indexOfElement =
 		getItemIndexForOffset(list , value , animatedOffset.value , halfNumbersColumnHeightPx)
 
+	Log.d("Picker" , "indexOfElement: $indexOfElement")
+
 	var dividersWidth by remember { mutableStateOf(0.dp) }
+
+	val scaleUp = remember { Animatable(0.8f) }
+
+	//scale down the label a bit
+	val animatedScaleDown = remember { Animatable(1f) }
+
+	LaunchedEffect(indexOfElement) {
+		scaleUp.animateTo(1f , tween(500, easing = FastOutSlowInEasing))
+		animatedScaleDown.animateTo(0.8f , tween(500, easing = FastOutSlowInEasing))
+	}
+
+	//haptic feedback
+	val hapticFeedback = LocalHapticFeedback.current
 
 	Layout(
 			modifier = modifier
@@ -116,6 +136,9 @@ fun <T> ListItemPicker(
 														   )
 								onValueChange(result)
 								animatedOffset.snapTo(0f)
+								hapticFeedback.performHapticFeedback(
+										hapticFeedbackType = HapticFeedbackType.LongPress
+																   )
 							}
 						}
 						  )
@@ -124,20 +147,20 @@ fun <T> ListItemPicker(
 				Box(
 						modifier
 							.width(dividersWidth)
-							.height(2.dp)
+							.height(1.dp)
 							.background(color = dividersColor)
 				   )
 				Box(
+						contentAlignment = Alignment.Center ,
 						modifier = Modifier
 							.padding(vertical = verticalMargin , horizontal = 20.dp)
 							.offset { IntOffset(x = 0 , y = coercedAnimatedOffset.roundToInt()) }
 				   ) {
-					val baseLabelModifier = Modifier.align(Alignment.Center)
 					ProvideTextStyle(textStyle) {
-						if (indexOfElement > 0)
+						if (indexOfElement > 0){
 							Label(
 									text = label(list.elementAt(indexOfElement - 1)) ,
-									modifier = baseLabelModifier
+									modifier = Modifier
 										.offset(y = - halfNumbersColumnHeight)
 										.alpha(
 												maxOf(
@@ -145,21 +168,26 @@ fun <T> ListItemPicker(
 														coercedAnimatedOffset / halfNumbersColumnHeightPx
 													 )
 											  )
+										//a bit smaller than the other labels
+										.scale(animatedScaleDown.value)
 								 )
+						}
 						Label(
 								text = label(list.elementAt(indexOfElement)) ,
-								modifier = baseLabelModifier
+								modifier = Modifier
 									.alpha(
 											(maxOf(
 													minimumAlpha ,
 													1 - abs(coercedAnimatedOffset) / halfNumbersColumnHeightPx
 												  ))
 										  )
+									.scale(scaleUp.value)
 							 )
 						if (indexOfElement < list.count() - 1)
+						{
 							Label(
 									text = label(list.elementAt(indexOfElement + 1)) ,
-									modifier = baseLabelModifier
+									modifier = Modifier
 										.offset(y = halfNumbersColumnHeight)
 										.alpha(
 												maxOf(
@@ -167,13 +195,15 @@ fun <T> ListItemPicker(
 														- coercedAnimatedOffset / halfNumbersColumnHeightPx
 													 )
 											  )
+										.scale(animatedScaleDown.value)
 								 )
+						}
 					}
 				}
 				Box(
 						modifier
 							.width(dividersWidth)
-							.height(2.dp)
+							.height(1.dp)
 							.background(color = dividersColor)
 				   )
 			}
@@ -217,11 +247,10 @@ fun <T> ListItemPicker(
 private fun Label(text : String , modifier : Modifier)
 {
 	Text(
-			modifier = modifier.pointerInput(Unit) {
-				detectTapGestures(onLongPress = {
-					// FIXME: Empty to disable text selection
-				})
-			} ,
+			modifier = modifier.indication(
+					indication = null,
+					interactionSource = MutableInteractionSource()
+										  ) ,
 			text = text ,
 			textAlign = TextAlign.Center ,
 		)
@@ -250,5 +279,26 @@ private suspend fun Animatable<Float , AnimationVector1D>.fling(
 				animationSpec = animationSpec ,
 				block = block ,
 					)
+	}
+}
+
+@Preview
+@Composable
+fun Preview()
+{
+	val list = listOf(1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10)
+	val selectedValue = remember { mutableStateOf(1) }
+	Column(
+			modifier = Modifier
+				.background(Color.White)
+				.fillMaxSize()
+	   ) {
+		Picker(
+				list = list ,
+				value = selectedValue.value ,
+				onValueChange ={
+					selectedValue.value = it
+				}
+			  )
 	}
 }
