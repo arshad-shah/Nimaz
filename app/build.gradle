@@ -136,7 +136,6 @@ dependencies {
 
     //calendar
     implementation 'io.github.boguszpawlowski.composecalendar:composecalendar:1.1.1'
-    implementation 'com.kizitonwose.calendar:compose:2.3.0'
 
     //Add AWS S3 SDK
     implementation 'com.amazonaws:aws-android-sdk-s3:2.65.0'
