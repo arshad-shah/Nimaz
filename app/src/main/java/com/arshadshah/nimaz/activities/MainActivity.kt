@@ -44,8 +44,8 @@ import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
-import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenuMain
+import com.arshadshah.nimaz.ui.components.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
@@ -495,10 +495,10 @@ class MainActivity : ComponentActivity()
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
 																		painter = if (vibrationAllowed.value) painterResource(
-																				id = R.drawable.vibration
+																				id = R.drawable.phone_vibration_on_icon
 																															 )
 																		else painterResource(
-																				id = R.drawable.cross_icon
+																				id = R.drawable.phone_vibration_off_icon
 																							) ,
 																		contentDescription = "Vibration"
 																	)

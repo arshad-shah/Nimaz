@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.trackers
+package com.arshadshah.nimaz.ui.components.common
 
 import android.util.Log
 import androidx.compose.animation.*
@@ -76,11 +76,37 @@ fun ToggleableItemRow(
 			}
 
 
-			Text(
-					text = text ,
-					modifier = Modifier.padding(8.dp) ,
-					style = MaterialTheme.typography.bodySmall ,
-				)
+			Crossfade(
+					targetState = checked ,
+					animationSpec = tween(durationMillis = 300)
+					 ) { targetState ->
+				if (! targetState)
+				{
+					Text(
+							modifier = Modifier.padding(
+									top = 8.dp ,
+									start = 8.dp ,
+									end = 8.dp ,
+									bottom = 8.dp
+													   ) ,
+							text = text ,
+							style = MaterialTheme.typography.bodySmall
+						)
+				} else
+				{
+					Text(
+							modifier = Modifier.padding(
+									top = 8.dp ,
+									start = 8.dp ,
+									end = 8.dp ,
+									bottom = 8.dp
+													   ) ,
+							text = text ,
+							style = MaterialTheme.typography.bodySmall ,
+							color = MaterialTheme.colorScheme.primary
+						)
+				}
+			}
 		}
 	}
 }
@@ -91,6 +117,7 @@ fun ToggleableItemRow(
 @Composable
 fun ToggleableItemColumn(
 	text : String ,
+	selectedText : String? = null ,
 	checked : Boolean ,
 	onCheckedChange : (Boolean) -> Unit ,
 	modifier : Modifier ,
@@ -139,16 +166,38 @@ fun ToggleableItemColumn(
 						)
 				}
 			}
-			Text(
-					modifier = Modifier.padding(
-							top = 8.dp ,
-							start = 8.dp ,
-							end = 8.dp ,
-							bottom = 8.dp
-											   ) ,
-					text = text ,
-					style = MaterialTheme.typography.bodyLarge
-				)
+
+			Crossfade(
+					targetState = checked ,
+					animationSpec = tween(durationMillis = 300)
+					 ) { targetState ->
+				if (! targetState)
+				{
+					Text(
+							modifier = Modifier.padding(
+									top = 8.dp ,
+									start = 8.dp ,
+									end = 8.dp ,
+									bottom = 8.dp
+													   ) ,
+							text = text ,
+							style = MaterialTheme.typography.bodyLarge
+						)
+				} else
+				{
+					Text(
+							modifier = Modifier.padding(
+									top = 8.dp ,
+									start = 8.dp ,
+									end = 8.dp ,
+									bottom = 8.dp
+													   ) ,
+							text = selectedText ?: text ,
+							style = MaterialTheme.typography.bodyLarge ,
+							color = MaterialTheme.colorScheme.primary
+						)
+				}
+			}
 		}
 	}
 }

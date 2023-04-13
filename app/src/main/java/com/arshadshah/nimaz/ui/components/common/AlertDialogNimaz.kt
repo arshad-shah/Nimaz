@@ -91,6 +91,7 @@ fun AlertDialogNimaz(
 									text = title ,
 									style = MaterialTheme.typography.titleLarge ,
 									modifier = Modifier
+										.weight(0.8f)
 										.padding(4.dp) ,
 									textAlign = TextAlign.Start ,
 									maxLines = 1 ,
@@ -207,7 +208,7 @@ fun AlertDialogNimazPreview()
 fun AlertDialogNimazPreviewWithAction()
 {
 	AlertDialogNimaz(
-			title = "Hello" ,
+			title = "very long title to test the alert dialog" ,
 			contentDescription = "Add" ,
 			contentToShow = { Text(text = "This is a content") } ,
 			onDismissRequest = { } ,
