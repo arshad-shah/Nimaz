@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.FastTracker
@@ -70,10 +69,6 @@ class TrackerViewModel : ViewModel()
 	private var _progressState = MutableStateFlow(0)
 	val progressState = _progressState.asStateFlow()
 
-	//a progressfor a specific date
-	private var _progressForDate = MutableStateFlow(Pair(LocalDate.now().toString() , 0))
-	val progressForDate = _progressForDate.asStateFlow()
-
 	//dates with trackers
 	private var _allTrackers = MutableStateFlow(listOf<PrayerTracker>())
 	val allTrackers = _allTrackers.asStateFlow()
@@ -105,9 +100,6 @@ class TrackerViewModel : ViewModel()
 		//progress event
 		class SET_PROGRESS(val progress : Int) : TrackerEvent()
 
-		//return dates with trackers
-		class GET_PROGRESS_FOR_DATE(val date : String) : TrackerEvent()
-
 		//update Chart Data
 		object GET_ALL_TRACKERS : TrackerEvent()
 	}
@@ -122,7 +114,6 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.SHOW_DATE_SELECTOR -> _showDateSelector.value = event.shouldShow
 			is TrackerEvent.SET_DATE -> _dateState.value = event.date
 			is TrackerEvent.SET_PROGRESS -> _progressState.value = event.progress
-			is TrackerEvent.GET_PROGRESS_FOR_DATE -> getProgressForDate(event.date)
 			is TrackerEvent.GET_ALL_TRACKERS -> getAllTrackers()
 			is TrackerEvent.UPDATE_FAST_TRACKER -> updateFastTracker(event.tracker)
 			is TrackerEvent.GET_FAST_TRACKER_FOR_DATE -> getFastTrackerForDate(event.date)
@@ -207,30 +198,6 @@ class TrackerViewModel : ViewModel()
 				val dataStore = LocalDataStore.getDataStore()
 				val trackers = dataStore.getAllTrackers()
 				_allTrackers.value = trackers
-			} catch (e : Exception)
-			{
-				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
-			}
-		}
-	}
-
-	private fun getProgressForDate(date : String)
-	{
-		viewModelScope.launch(Dispatchers.IO) {
-			try
-			{
-				val dataStore = LocalDataStore.getDataStore()
-				val trackerExists = dataStore.checkIfTrackerExists(date)
-				if (! trackerExists)
-				{
-					Log.d("TrackerViewModel highlightDay" , "Tracker does not exist for date $date")
-					_progressForDate.value = Pair(date , 0)
-				} else
-				{
-					Log.d("TrackerViewModel highlightDay" , "Tracker exists for date $date")
-					val tracker = dataStore.getProgressForDate(date)
-					_progressForDate.value = Pair(date , tracker)
-				}
 			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")

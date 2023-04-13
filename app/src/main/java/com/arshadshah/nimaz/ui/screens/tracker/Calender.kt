@@ -108,7 +108,7 @@ fun Calender(paddingValues : PaddingValues)
 						verticalAlignment = Alignment.CenterVertically
 				   ) {
 					Text(
-							text = "Prayer Tracker" , style = MaterialTheme.typography.titleMedium
+							text = "Trackers" , style = MaterialTheme.typography.titleMedium
 						)
 					Text(
 							text = LocalDate.parse(dateState.value)
@@ -402,11 +402,13 @@ fun CalenderDay(
 						color = when (importantDay.first)
 						{
 							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary.copy(
-									alpha = 0.5f)
+									alpha = 0.5f
+																										  )
 							else if (today) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
 							else MaterialTheme.colorScheme.surface
 							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary.copy(
-									alpha = 0.5f)
+									alpha = 0.5f
+																										 )
 							else if (today) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
 							else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 						} ,
@@ -501,10 +503,10 @@ fun CalenderDay(
 						else MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
-			Divider(
-					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) ,
-					thickness = 1.dp
-				   )
+				Divider(
+						color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) ,
+						thickness = 1.dp
+					   )
 			Text(
 					//put a letter scissor ha in front of the day to show that it is a hijri day
 					text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
