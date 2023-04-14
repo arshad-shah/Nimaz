@@ -41,6 +41,7 @@ fun AlertDialogNimaz(
 	dismissButtonText : String = "Cancel" ,
 	showConfirmButton : Boolean = true ,
 	showDismissButton : Boolean = true ,
+	cardContent : Boolean = true ,
 					)
 {
 	//state of the scrollable column
@@ -127,25 +128,44 @@ fun AlertDialogNimaz(
 						}
 					}
 					if (topDivider) Divider(color = MaterialTheme.colorScheme.outline)
-					Card(
-							modifier = Modifier.fillMaxWidth() ,
-						) {
-						Row(
-								modifier
-									.height(contentHeight)
-									.fillMaxWidth() ,
-								verticalAlignment = Alignment.CenterVertically ,
-								horizontalArrangement = Arrangement.Center
-						   ) {
-							Column(
-									Modifier
-										.verticalScroll(state = stateScroll) ,
-									verticalArrangement = Arrangement.Center ,
-									horizontalAlignment = Alignment.CenterHorizontally
-								  ) {
-								contentToShow()
+					if (cardContent){
+						Card(
+								modifier = Modifier.fillMaxWidth() ,
+							) {
+							Row(
+									modifier
+										.height(contentHeight)
+										.fillMaxWidth() ,
+									verticalAlignment = Alignment.CenterVertically ,
+									horizontalArrangement = Arrangement.Center
+							   ) {
+								Column(
+										Modifier
+											.verticalScroll(state = stateScroll) ,
+										verticalArrangement = Arrangement.Center ,
+										horizontalAlignment = Alignment.CenterHorizontally
+									  ) {
+									contentToShow()
+								}
 							}
 						}
+					}else{
+							Row(
+									modifier
+										.height(contentHeight)
+										.fillMaxWidth() ,
+									verticalAlignment = Alignment.CenterVertically ,
+									horizontalArrangement = Arrangement.Center
+							   ) {
+								Column(
+										Modifier
+											.verticalScroll(state = stateScroll) ,
+										verticalArrangement = Arrangement.Center ,
+										horizontalAlignment = Alignment.CenterHorizontally
+									  ) {
+									contentToShow()
+								}
+							}
 					}
 				}
 				if (bottomDivider) Divider(color = MaterialTheme.colorScheme.outline)

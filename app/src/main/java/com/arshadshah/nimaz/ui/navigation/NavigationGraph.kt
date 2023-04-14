@@ -703,10 +703,7 @@ fun NavigationGraph(
 			Dashboard(
 					paddingValues = paddingValues ,
 					onNavigateToPrayerTimes = {
-						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route) {
-							popUpTo(navController.graph.startDestinationId)
-						}
-
+						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route)
 					} ,
 					onNavigateToCalender = {
 						navController.navigate(CALENDER_SCREEN_ROUTE)

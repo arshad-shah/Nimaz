@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -26,30 +28,33 @@ fun RadioButtonCustom(
 	//a circle which gets filled and a checkmark icon is shown when selected else just an empty circle
 	Box(
 			modifier = modifier
-				.size(24.dp)
+				.size(32.dp)
 				.clickable(onClick = onClick) ,
 			contentAlignment = Alignment.Center ,
 	   ) {
 		//the circle
 		Box(
 				modifier = Modifier
-					.size(24.dp)
+					.size(28.dp)
 					.background(
 							color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-									alpha = 0.12f
+									alpha = 0.2f
 																																 ) ,
 							shape = CircleShape
 							   ) ,
 				contentAlignment = Alignment.Center ,
 		   ) {
-			Crossfade(targetState = selected) { selected ->
+			Crossfade(
+					targetState = selected,
+					animationSpec = tween(durationMillis = 200)
+					 ) { selected ->
 				//the checkmark icon
 				if (selected)
 				{
 					Icon(
 							painter = painterResource(id = R.drawable.check_icon) ,
 							contentDescription = "checkmark" ,
-							modifier = Modifier.size(16.dp) ,
+							modifier = Modifier.size(24.dp).padding(2.dp) ,
 							tint = MaterialTheme.colorScheme.onPrimary ,
 						)
 				} else
@@ -57,8 +62,8 @@ fun RadioButtonCustom(
 					Icon(
 							painter = painterResource(id = R.drawable.circle_open_icon) ,
 							contentDescription = "circle" ,
-							modifier = Modifier.size(16.dp) ,
-							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f) ,
+							modifier = Modifier.size(24.dp) ,
+							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) ,
 						)
 				}
 			}

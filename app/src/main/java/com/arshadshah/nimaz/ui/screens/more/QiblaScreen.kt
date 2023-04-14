@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
@@ -77,7 +78,7 @@ fun QiblaScreen(paddingValues : PaddingValues)
 		  ) {
 		BearingAndLocationContainer(state)
 		Dial(state = state , imageToDisplay = imageToDisplay !!)
-		ImageSwitcherCard(changeImageIndex)
+		ImageSwitcherCard(changeImageIndex = changeImageIndex)
 	}
 }
 
@@ -88,6 +89,7 @@ fun ImageSwitcherCard(changeImageIndex : (Int) -> Unit)
 
 	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 	val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
+	val state = rememberLazyListState(initialFirstVisibleItemIndex = imageIndexFromStorage)
 
 	//an is selected state that will be used to change the size of the image
 	//it tracks the index of the image
@@ -107,31 +109,32 @@ fun ImageSwitcherCard(changeImageIndex : (Int) -> Unit)
 			shape = MaterialTheme.shapes.extraLarge ,
 				) {
 		LazyRow(
+				state = state ,
 				modifier = Modifier
 					.padding(horizontal = 8.dp)
 					.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.Center ,
 				verticalAlignment = Alignment.CenterVertically
 			   ) {
-			item {
 				imagesMapped.forEach { (index , image) ->
-					Image(
-							painter = image ,
-							contentDescription = "Compass" ,
-							modifier = Modifier
-								.scale(animateFloatAsState(if (isSelected.value == index) 1.5f else 1f).value)
-								.size(80.dp)
-								.padding(vertical = 16.dp , horizontal = 8.dp)
-								.clickable(
-										role = Role.RadioButton ,
-										  ) {
-									changeImageIndex(index)
-									isSelected.value = index
-								} ,
-							alignment = Alignment.Center
-						 )
+					item{
+						Image(
+								painter = image ,
+								contentDescription = "Compass" ,
+								modifier = Modifier
+									.scale(animateFloatAsState(if (isSelected.value == index) 1.5f else 1f).value)
+									.size(80.dp)
+									.padding(vertical = 16.dp , horizontal = 8.dp)
+									.clickable(
+											role = Role.RadioButton ,
+											  ) {
+										changeImageIndex(index)
+										isSelected.value = index
+									} ,
+								alignment = Alignment.Center
+							 )
+					}
 				}
-			}
 		}
 	}
 
