@@ -67,7 +67,7 @@ fun IntroPage1()
 				.fillMaxSize()
 		  ) {
 		HorizontalPager(
-				userScrollEnabled = true ,
+				userScrollEnabled = false ,
 				modifier = Modifier
 					.weight(10f)
 					.testTag("introPager") ,
