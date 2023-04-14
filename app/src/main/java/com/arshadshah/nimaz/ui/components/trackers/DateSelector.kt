@@ -54,15 +54,15 @@ fun DateSelector(
 					modifier = Modifier
 						.size(52.dp) ,
 					onClick = {
-				date.value = date.value.minusDays(1)
-				handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
-				handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
-				handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value.toString()))
-				newDay.value = date.value.dayOfMonth
-				newMonth.value = date.value.monthValue
-				newYear.value = date.value.year
-				hijrahDate.value = HijrahDate.from(date.value)
-			}) {
+						date.value = date.value.minusDays(1)
+						handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
+						handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
+						handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value.toString()))
+						newDay.value = date.value.dayOfMonth
+						newMonth.value = date.value.monthValue
+						newYear.value = date.value.year
+						hijrahDate.value = HijrahDate.from(date.value)
+					}) {
 				Icon(
 						modifier = Modifier.size(24.dp) ,
 						painter = painterResource(id = R.drawable.angle_left_icon) ,
@@ -145,15 +145,15 @@ fun DateSelector(
 					modifier = Modifier
 						.size(52.dp) ,
 					onClick = {
-				date.value = date.value.plusDays(1)
-				handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
-				handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
-				handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value.toString()))
-				newDay.value = date.value.dayOfMonth
-				newMonth.value = date.value.monthValue
-				newYear.value = date.value.year
-				hijrahDate.value = HijrahDate.from(date.value)
-			}) {
+						date.value = date.value.plusDays(1)
+						handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
+						handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
+						handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value.toString()))
+						newDay.value = date.value.dayOfMonth
+						newMonth.value = date.value.monthValue
+						newYear.value = date.value.year
+						hijrahDate.value = HijrahDate.from(date.value)
+					}) {
 				Icon(
 						modifier = Modifier.size(24.dp) ,
 						painter = painterResource(id = R.drawable.angle_right_icon) ,

@@ -163,7 +163,6 @@ class SpacesFileRepository(context : Context)
 												 {
 													 Log.d("S3 Download" , "Other")
 													 callback(null , Exception("Other") , 0 , false)
-													 Toasty.error(appContext , "Other").show()
 												 }
 											 }
 										 }

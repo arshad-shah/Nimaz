@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,6 +17,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.RadioButtonCustom
 import com.arshadshah.nimaz.ui.components.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.settings.state.StringPreferenceSettingValueState
 import kotlinx.coroutines.launch
@@ -45,7 +45,7 @@ fun CustomDialog(
 			topDivider = false ,
 			bottomDivider = false ,
 			dismissButtonText = "Close" ,
-			contentHeight = 100.dp ,
+			contentHeight = 120.dp ,
 			properties = DialogProperties(
 					dismissOnBackPress = true ,
 					dismissOnClickOutside = true
@@ -63,7 +63,8 @@ fun CustomDialog(
 					Row(
 							modifier = Modifier
 								.fillMaxWidth()
-								.height(48.dp)
+								.padding(vertical = 4.dp , horizontal = 8.dp)
+								.height(52.dp)
 								.selectable(
 										role = Role.RadioButton ,
 										selected = isSelected ,
@@ -71,14 +72,16 @@ fun CustomDialog(
 										   ) ,
 							verticalAlignment = Alignment.CenterVertically
 					   ) {
-						RadioButton(
+						RadioButtonCustom(
 								selected = isSelected ,
-								onClick = { if (! isSelected) onSelected(index) }
-								   )
+								onClick = { if (! isSelected) onSelected(index) } ,
+								modifier = Modifier.padding(start = 16.dp)
+										 )
+
 						Text(
 								text = item ,
 								style = MaterialTheme.typography.titleMedium ,
-								modifier = Modifier.padding(start = 8.dp)
+								modifier = Modifier.padding(start = 16.dp)
 							)
 					}
 				}

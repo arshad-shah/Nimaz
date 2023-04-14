@@ -17,7 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.ui.components.ui.trackers.Placeholder
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

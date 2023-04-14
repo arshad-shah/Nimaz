@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.settings
+package com.arshadshah.nimaz.ui.components.settings
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -6,20 +6,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.settings.SettingValueState
-import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
-import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
-import com.arshadshah.nimaz.ui.components.settings.rememberStringSettingState
+import com.arshadshah.nimaz.ui.components.common.RadioButtonCustom
 import kotlinx.coroutines.launch
 
 
@@ -84,6 +81,8 @@ fun SettingsList(
 		}
 	}
 	AlertDialogNimaz(
+			topDivider = false ,
+			bottomDivider = false ,
 			description = description ,
 			contentDescription = iconDescription ?: "" ,
 			icon = iconPainter ,
@@ -100,7 +99,8 @@ fun SettingsList(
 					Row(
 							modifier = Modifier
 								.fillMaxWidth()
-								.height(48.dp)
+								.padding(vertical = 4.dp , horizontal = 8.dp)
+								.height(52.dp)
 								.selectable(
 										role = Role.RadioButton ,
 										selected = isSelected ,
@@ -114,19 +114,23 @@ fun SettingsList(
 										   ) ,
 							verticalAlignment = Alignment.CenterVertically
 					   ) {
-						RadioButton(
+						RadioButtonCustom(
 								selected = isSelected ,
 								onClick = {
 									if (! isSelected) onSelected(items.keys.indexOf(s))
 								} ,
-								   )
+								modifier = Modifier.padding(start = 16.dp) ,
+										 )
 						Text(
 								text = s2 ,
 								style = MaterialTheme.typography.titleMedium ,
-								modifier = Modifier.padding(start = 8.dp) ,
+								modifier = Modifier.padding(start = 16.dp) ,
+								overflow = TextOverflow.Ellipsis ,
+								maxLines = 1
 							)
 					}
 				}
+
 			} ,
 			onDismissRequest = {
 				showDialog = false
@@ -138,61 +142,3 @@ fun SettingsList(
 				showDialog = false
 			})
 }
-
-//@Preview
-//@Composable
-//internal fun ListLinkPreview()
-//{
-//	//50 items
-//	NimazTheme {
-//		SettingsList(
-//				title = { Text(text = "Hello") } ,
-//				description = { Text(text = "This is a description") } ,
-//				items = mapOf(
-//						"1" to "Item 1" ,
-//						"2" to "Item 2" ,
-//						"3" to "Item 3" ,
-//						"4" to "Item 4" ,
-//						"5" to "Item 5" ,
-//						"6" to "Item 6" ,
-//						"7" to "Item 7" ,
-//						"8" to "Item 8" ,
-//						"9" to "Item 9" ,
-//						"10" to "Item 10" ,
-//						"11" to "Item 11" ,
-//						"12" to "Item 12" ,
-//						"13" to "Item 13" ,
-//						"14" to "Item 14" ,
-//						"15" to "Item 15" ,
-//						"16" to "Item 16" ,
-//						"17" to "Item 17" ,
-//						"18" to "Item 18" ,
-//						"19" to "Item 19" ,
-//						"20" to "Item 20" ,
-//						"21" to "Item 21" ,
-//						"22" to "Item 22" ,
-//						"23" to "Item 23" ,
-//						"24" to "Item 24" ,
-//						"25" to "Item 25" ,
-//						"26" to "Item 26" ,
-//						"27" to "Item 27" ,
-//						"28" to "Item 28" ,
-//						"29" to "Item 29" ,
-//						"30" to "Item 30" ,
-//						"31" to "Item 31" ,
-//						"32" to "Item 32" ,
-//						"33" to "Item 33" ,
-//						"34" to "Item 34" ,
-//						"35" to "Item 35" ,
-//						"36" to "Item 36" ,
-//						"37" to "Item 37" ,
-//						"38" to "Item 38" ,
-//						"39" to "Item 39" ,
-//						"40" to "Item 40" ,
-//						"41" to "Item 41" ,
-//							 ) ,
-//				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-//				subtitle = { Text(text = "This is a longer text") } ,
-//					)
-//	}
-//}

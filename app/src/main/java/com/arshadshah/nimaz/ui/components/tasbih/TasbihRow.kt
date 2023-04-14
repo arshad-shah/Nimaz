@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.bLogic.tasbih
+package com.arshadshah.nimaz.ui.components.tasbih
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Tasbih
-import com.arshadshah.nimaz.ui.components.ui.trackers.TasbihGoalDialog
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import java.time.LocalDate

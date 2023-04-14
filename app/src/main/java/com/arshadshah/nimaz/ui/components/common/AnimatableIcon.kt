@@ -23,30 +23,33 @@ import com.arshadshah.nimaz.R
 
 @Composable
 fun AnimatableIcon(
-	modifier: Modifier = Modifier ,
+	modifier : Modifier = Modifier ,
 	painter : Painter ,
 	contentDescription : String? = null ,
-	iconSize: Dp = 24.dp ,
-	scale: Float = 1f ,
-	color: Color = Color.Unspecified ,
-	onClick: () -> Unit
-				  ) {
+	iconSize : Dp = 24.dp ,
+	scale : Float = 1f ,
+	color : Color = Color.Unspecified ,
+	onClick : () -> Unit ,
+				  )
+{
 	// Animation params
-	val animatedScale: Float by animateFloatAsState(
-			targetValue = scale,
-												   )
+	val animatedScale : Float by animateFloatAsState(
+			targetValue = scale ,
+													)
 	val animatedColor by animateColorAsState(
-			targetValue = color,
+			targetValue = color ,
 											)
 
 	IconButton(
-			onClick = onClick,
-			modifier = modifier.size(iconSize).indication(MutableInteractionSource(),null)
+			onClick = onClick ,
+			modifier = modifier
+				.size(iconSize)
+				.indication(MutableInteractionSource() , null)
 			  ) {
 		Icon(
-				painter = painter,
-				contentDescription = contentDescription,
-				tint = animatedColor,
+				painter = painter ,
+				contentDescription = contentDescription ,
+				tint = animatedColor ,
 				modifier = modifier.scale(animatedScale)
 			)
 	}
@@ -54,9 +57,12 @@ fun AnimatableIcon(
 
 @Preview(group = "Icon")
 @Composable
-fun PreviewIcon() {
+fun PreviewIcon()
+{
 	Surface(
-			modifier = Modifier.fillMaxWidth().size(100.dp) ,
+			modifier = Modifier
+				.fillMaxWidth()
+				.size(100.dp) ,
 		   ) {
 
 		var selected by remember {
@@ -64,11 +70,15 @@ fun PreviewIcon() {
 		}
 
 		AnimatableIcon(
-				painter = if (selected) painterResource(id = R.drawable.dashboard_icon) else painterResource(id = R.drawable.dashboard_icon_empty) ,
+				painter = if (selected) painterResource(id = R.drawable.dashboard_icon) else painterResource(
+						id = R.drawable.dashboard_icon_empty
+																											) ,
 				scale = if (selected) 1.5f else 1f ,
-				color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) ,
+				color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
+						alpha = 0.5f
+																												   ) ,
 					  ) {
-			selected = !selected
+			selected = ! selected
 		}
 	}
 }

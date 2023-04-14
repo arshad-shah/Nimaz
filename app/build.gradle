@@ -143,4 +143,13 @@ dependencies {
     // Open Source Libraries Screen.
     implementation "com.mikepenz:aboutlibraries-core:10.6.2"
     implementation "com.mikepenz:aboutlibraries-compose:10.6.2"
+
+    //markdown
+    final def markwon_version = '4.6.2'
+
+    implementation "io.noties.markwon:core:$markwon_version"
+    implementation "io.noties.markwon:ext-strikethrough:$markwon_version"
+    implementation "io.noties.markwon:ext-tables:$markwon_version"
+    implementation "io.noties.markwon:html:$markwon_version"
+    implementation "io.noties.markwon:linkify:$markwon_version"
 }

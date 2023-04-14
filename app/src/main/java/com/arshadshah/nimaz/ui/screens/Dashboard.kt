@@ -24,14 +24,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_EVENTS_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.*
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
-import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
-import com.arshadshah.nimaz.ui.components.dashboard.DashboardQuranTracker
-import com.arshadshah.nimaz.ui.components.dashboard.DashboardTasbihTracker
-import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
-import com.arshadshah.nimaz.ui.components.ui.quran.DashboardRandomAyatCard
-import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
+import com.arshadshah.nimaz.ui.components.dashboard.*
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.viewModel.TrackerViewModel

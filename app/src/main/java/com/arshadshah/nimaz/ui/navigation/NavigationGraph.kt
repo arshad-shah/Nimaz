@@ -28,12 +28,13 @@ import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.*
+import com.arshadshah.nimaz.ui.screens.more.MoreScreen
+import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
+import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
+import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
-import com.arshadshah.nimaz.ui.screens.settings.About
-import com.arshadshah.nimaz.ui.screens.settings.Licences
-import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
-import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
+import com.arshadshah.nimaz.ui.screens.settings.*
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih

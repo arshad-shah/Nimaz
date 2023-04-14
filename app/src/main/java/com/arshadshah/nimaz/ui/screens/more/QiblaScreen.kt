@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.screens
+package com.arshadshah.nimaz.ui.screens.more
 
 import android.util.Log
 import androidx.activity.ComponentActivity

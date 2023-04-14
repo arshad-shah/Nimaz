@@ -130,6 +130,12 @@ fun PrayerTrackerListItems(
 													 )
 																			)
 								   )
+						handleEvent(
+								TrackerViewModel.TrackerEvent.UPDATE_PROGRESS_FOR_DAY(
+										LocalDate.parse(dateState.value).dayOfWeek ,
+										progress.value.toInt()
+																					 )
+								   )
 					} ,
 								)
 		}

@@ -1,9 +1,8 @@
 package com.arshadshah.nimaz.ui.components.quran
 
 import android.content.Intent
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -54,12 +53,9 @@ fun AyatFeaturesPopUpMenu(
 					verticalAlignment = Alignment.CenterVertically
 			   ) {
 
-				IconButton(
-						modifier = Modifier.border(
-								1.dp ,
-								MaterialTheme.colorScheme.primary ,
-								RoundedCornerShape(50)
-												  ) ,
+				OutlinedIconButton(
+						modifier = Modifier.size(52.dp) ,
+						border = BorderStroke(1.dp , MaterialTheme.colorScheme.primary) ,
 						onClick = {
 							isBookMarkedVerse.value = ! isBookMarkedVerse.value
 							aya.bookmark = isBookMarkedVerse.value
@@ -73,23 +69,20 @@ fun AyatFeaturesPopUpMenu(
 										)
 							popUpOpen.value = false
 						}
-						  ) {
+								  ) {
 					Icon(
 							painter = painterResource(id = R.drawable.bookmark_icon) ,
 							contentDescription = "Bookmark" ,
 							tint = MaterialTheme.colorScheme.primary ,
 							modifier = Modifier
 								.size(24.dp)
-								.padding(4.dp) ,
+								.padding(2.dp) ,
 						)
 				}
 				Spacer(modifier = Modifier.width(8.dp))
-				IconButton(
-						modifier = Modifier.border(
-								1.dp ,
-								MaterialTheme.colorScheme.primary ,
-								RoundedCornerShape(50)
-												  ) ,
+				OutlinedIconButton(
+						modifier = Modifier.size(52.dp) ,
+						border = BorderStroke(1.dp , MaterialTheme.colorScheme.primary) ,
 						onClick = {
 							isFavouredVerse.value = ! isFavouredVerse.value
 							aya.favorite = isFavouredVerse.value
@@ -104,35 +97,32 @@ fun AyatFeaturesPopUpMenu(
 							popUpOpen.value = false
 						} ,
 						enabled = true ,
-						  ) {
+								  ) {
 					Icon(
 							painter = painterResource(id = R.drawable.favorite_icon) ,
 							contentDescription = "Favourite" ,
 							tint = MaterialTheme.colorScheme.primary ,
 							modifier = Modifier
 								.size(24.dp)
-								.padding(4.dp) ,
+								.padding(2.dp) ,
 						)
 				}
 
 
 				Spacer(modifier = Modifier.width(8.dp))
-				IconButton(
-						modifier = Modifier.border(
-								1.dp ,
-								MaterialTheme.colorScheme.primary ,
-								RoundedCornerShape(50)
-												  ) ,
+				OutlinedIconButton(
+						modifier = Modifier.size(52.dp) ,
+						border = BorderStroke(1.dp , MaterialTheme.colorScheme.primary) ,
 						onClick = {
 							showNoteDialog.value = ! showNoteDialog.value
 							popUpOpen.value = false
 						} ,
 						enabled = true ,
-						  ) {
+								  ) {
 					Icon(
 							modifier = Modifier
 								.size(24.dp)
-								.padding(4.dp) ,
+								.padding(2.dp) ,
 							painter = painterResource(id = R.drawable.edit_note_icon) ,
 							tint = MaterialTheme.colorScheme.primary ,
 							contentDescription = "Add Note" ,
@@ -140,12 +130,9 @@ fun AyatFeaturesPopUpMenu(
 				}
 
 				Spacer(modifier = Modifier.width(8.dp))
-				IconButton(
-						modifier = Modifier.border(
-								1.dp ,
-								MaterialTheme.colorScheme.primary ,
-								RoundedCornerShape(50)
-												  ) ,
+				OutlinedIconButton(
+						modifier = Modifier.size(52.dp) ,
+						border = BorderStroke(1.dp , MaterialTheme.colorScheme.primary) ,
 						onClick = {
 							//share the aya
 							val shareIntent = Intent(Intent.ACTION_SEND)
@@ -162,11 +149,11 @@ fun AyatFeaturesPopUpMenu(
 							context.startActivity(Intent.createChooser(shareIntent , "Share Aya"))
 						} ,
 						enabled = true ,
-						  ) {
+								  ) {
 					Icon(
 							modifier = Modifier
 								.size(24.dp)
-								.padding(4.dp) ,
+								.padding(2.dp) ,
 							painter = painterResource(id = R.drawable.share_icon) ,
 							tint = MaterialTheme.colorScheme.primary ,
 							contentDescription = "Share aya" ,
@@ -176,22 +163,18 @@ fun AyatFeaturesPopUpMenu(
 				if (aya.audioFileLocation.isEmpty())
 				{
 					Spacer(modifier = Modifier.width(8.dp))
-					IconButton(
-							modifier = Modifier.border(
-									1.dp ,
-									MaterialTheme.colorScheme.primary ,
-									RoundedCornerShape(50)
-													  ) ,
+					OutlinedIconButton(
+							modifier = Modifier.size(52.dp) ,
+							border = BorderStroke(1.dp , MaterialTheme.colorScheme.primary) ,
 							onClick = {
 								onDownloadClicked()
 								popUpOpen.value = false
 							} ,
 							enabled = true ,
-							  ) {
+									  ) {
 						Icon(
 								modifier = Modifier
-									.size(24.dp)
-									.padding(4.dp) ,
+									.size(24.dp) ,
 								painter = painterResource(id = R.drawable.download_icon) ,
 								tint = MaterialTheme.colorScheme.primary ,
 								contentDescription = "Play ayah" ,

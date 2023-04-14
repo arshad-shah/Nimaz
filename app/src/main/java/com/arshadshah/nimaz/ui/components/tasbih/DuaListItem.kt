@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.bLogic.tasbih
+package com.arshadshah.nimaz.ui.components.tasbih
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

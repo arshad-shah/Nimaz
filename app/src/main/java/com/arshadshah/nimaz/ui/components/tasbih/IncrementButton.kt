@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.bLogic.tasbih
+package com.arshadshah.nimaz.ui.components.tasbih
 
 import android.content.Context
 import android.os.VibrationEffect

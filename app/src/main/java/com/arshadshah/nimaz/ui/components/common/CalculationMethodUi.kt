@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.intro
+package com.arshadshah.nimaz.ui.components.common
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.AUTO_PARAMETERS
+import com.arshadshah.nimaz.ui.components.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc

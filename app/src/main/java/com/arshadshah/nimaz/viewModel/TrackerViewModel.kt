@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 class TrackerViewModel : ViewModel()
@@ -102,6 +103,12 @@ class TrackerViewModel : ViewModel()
 
 		//update Chart Data
 		object GET_ALL_TRACKERS : TrackerEvent()
+
+		//get progress for each day of the current week
+		class GET_PROGRESS_FOR_WEEK(val date : String) : TrackerEvent()
+
+		//update a days progress
+		class UPDATE_PROGRESS_FOR_DAY(val day : DayOfWeek , val progress : Int) : TrackerEvent()
 	}
 
 	fun onEvent(event : TrackerEvent)
@@ -118,6 +125,107 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.UPDATE_FAST_TRACKER -> updateFastTracker(event.tracker)
 			is TrackerEvent.GET_FAST_TRACKER_FOR_DATE -> getFastTrackerForDate(event.date)
 			is TrackerEvent.SAVE_FAST_TRACKER -> saveFastTracker(event.tracker)
+			is TrackerEvent.GET_PROGRESS_FOR_WEEK -> getProgressForWeek(event.date)
+			is TrackerEvent.UPDATE_PROGRESS_FOR_DAY -> updateProgressForDay(
+					event.day ,
+					event.progress
+																		   )
+		}
+	}
+
+	//progress for monday
+	private val _progressForMonday = MutableStateFlow(0)
+	val progressForMonday = _progressForMonday.asStateFlow()
+
+	//progress for tuesday
+	private val _progressForTuesday = MutableStateFlow(0)
+	val progressForTuesday = _progressForTuesday.asStateFlow()
+
+	//progress for wednesday
+	private val _progressForWednesday = MutableStateFlow(0)
+	val progressForWednesday = _progressForWednesday.asStateFlow()
+
+	//progress for thursday
+	private val _progressForThursday = MutableStateFlow(0)
+	val progressForThursday = _progressForThursday.asStateFlow()
+
+	//progress for friday
+	private val _progressForFriday = MutableStateFlow(0)
+	val progressForFriday = _progressForFriday.asStateFlow()
+
+	//progress for saturday
+	private val _progressForSaturday = MutableStateFlow(0)
+	val progressForSaturday = _progressForSaturday.asStateFlow()
+
+	//progress for sunday
+	private val _progressForSunday = MutableStateFlow(0)
+	val progressForSunday = _progressForSunday.asStateFlow()
+
+	private fun updateProgressForDay(day : DayOfWeek , progress : Int)
+	{
+		when (day)
+		{
+			DayOfWeek.MONDAY -> _progressForMonday.value = progress
+			DayOfWeek.TUESDAY -> _progressForTuesday.value = progress
+			DayOfWeek.WEDNESDAY -> _progressForWednesday.value = progress
+			DayOfWeek.THURSDAY -> _progressForThursday.value = progress
+			DayOfWeek.FRIDAY -> _progressForFriday.value = progress
+			DayOfWeek.SATURDAY -> _progressForSaturday.value = progress
+			DayOfWeek.SUNDAY -> _progressForSunday.value = progress
+		}
+	}
+
+	private fun getProgressForWeek(date : String)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			try
+			{
+				val dataStore = LocalDataStore.getDataStore()
+				//find the date of the first day of the week
+				val firstDayOfWeek = LocalDate.parse(date).with(DayOfWeek.MONDAY)
+				val lastDayOfWeek = LocalDate.parse(date).with(DayOfWeek.SUNDAY)
+
+				val listOfWeeklyProgress = mutableListOf<Pair<String , Int>>()
+				//check if the tracker exists for the date
+				for (i in 0 .. 6)
+				{
+					val date = firstDayOfWeek.plusDays(i.toLong()).toString()
+					val trackerExists = dataStore.checkIfTrackerExists(date)
+					if (trackerExists)
+					{
+						val tracker = dataStore.getTrackerForDate(date)
+						val progress = tracker.progress
+						//update appropriate day
+						when (i)
+						{
+							0 -> _progressForMonday.value = progress
+							1 -> _progressForTuesday.value = progress
+							2 -> _progressForWednesday.value = progress
+							3 -> _progressForThursday.value = progress
+							4 -> _progressForFriday.value = progress
+							5 -> _progressForSaturday.value = progress
+							6 -> _progressForSunday.value = progress
+						}
+					} else
+					{
+						//update appropriate day
+						when (i)
+						{
+							0 -> _progressForMonday.value = 0
+							1 -> _progressForTuesday.value = 0
+							2 -> _progressForWednesday.value = 0
+							3 -> _progressForThursday.value = 0
+							4 -> _progressForFriday.value = 0
+							5 -> _progressForSaturday.value = 0
+							6 -> _progressForSunday.value = 0
+						}
+					}
+				}
+			} catch (e : Exception)
+			{
+				_trackerState.value =
+					TrackerState.Error(e.message ?: "An unknown error occurred")
+			}
 		}
 	}
 

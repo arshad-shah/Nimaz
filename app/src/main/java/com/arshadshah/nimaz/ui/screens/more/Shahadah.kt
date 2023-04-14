@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.screens
+package com.arshadshah.nimaz.ui.screens.more
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text

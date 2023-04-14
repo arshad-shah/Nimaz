@@ -73,7 +73,7 @@ fun AppDetails()
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth() ,
-							text = "A free ,Ad-free , open-source app for calculating prayer times, qibla direction, and more." ,
+							text = "A free ,Ad-free , app for calculating prayer times, qibla direction, and more." ,
 							style = MaterialTheme.typography.bodyMedium ,
 							textAlign = TextAlign.Center
 						)
