@@ -64,10 +64,21 @@ fun FontSizeDialog(
 					SliderWithIcons(
 							value = arabicFontSizeState.value ,
 							onValueChange = {
-								arabicFontSizeState.value = it
+								//check if the value is in the range
+								//if not then set it to the min or max value
+								//this is to prevent the slider from going out of range
+								if (fontStyleState.value == "IndoPak"){
+									if (it < 32f) arabicFontSizeState.value = 32f
+									if (it > 60f) arabicFontSizeState.value = 60f
+									if (it in 32f .. 60f) arabicFontSizeState.value = it
+								}else{
+									if (it < 24f) arabicFontSizeState.value = 24f
+									if (it > 46f) arabicFontSizeState.value = 46f
+									if (it in 24f .. 46f) arabicFontSizeState.value = it
+								}
 								handleQuranEvents(
 										QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(
-												it
+												arabicFontSizeState.value
 																							  )
 												 )
 							} ,
@@ -100,11 +111,13 @@ fun FontSizeDialog(
 					SliderWithIcons(
 							value = translationFontSizeState.value ,
 							onValueChange = {
-								translationFontSizeState.value = it
+								if (it < 16f) translationFontSizeState.value = 16f
+								if (it > 40f) translationFontSizeState.value = 40f
+								if (it in 16f .. 40f) translationFontSizeState.value = it
 								handleQuranEvents(
 										QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
-												it
-																								   )
+												translationFontSizeState.value
+																									)
 												 )
 							} ,
 							valueRange = 16f .. 40f ,
