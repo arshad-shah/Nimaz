@@ -46,6 +46,9 @@ fun MoreScreen(
 					} ,
 					title = "Tasbih" ,
 					  )
+
+		}
+			item {
 			LinkButton(
 					painter = painterResource(id = R.drawable.tasbih) ,
 					content = "Tasbih List" ,
@@ -54,6 +57,8 @@ fun MoreScreen(
 					} ,
 					title = "Tasbih List" ,
 					  )
+			}
+		item {
 			LinkButton(
 					painter = painterResource(id = R.drawable.qibla) ,
 					content = "Qibla" ,
@@ -62,7 +67,8 @@ fun MoreScreen(
 					} ,
 					title = "Qibla" ,
 					  )
-
+		}
+		item {
 			//linkdIn link
 			LinkButton(
 					painter = painterResource(id = R.drawable.names_of_allah) ,
@@ -72,6 +78,8 @@ fun MoreScreen(
 					} ,
 					title = "Names of Allah" ,
 					  )
+		}
+		item {
 			//email link
 			LinkButton(
 					painter = painterResource(id = R.drawable.dua) ,
@@ -81,6 +89,8 @@ fun MoreScreen(
 					} ,
 					title = "Duas" ,
 					  )
+		}
+		item {
 			LinkButton(
 					painter = painterResource(id = R.drawable.tracker_icon) ,
 					content = "Trackers" ,
@@ -89,7 +99,8 @@ fun MoreScreen(
 					} ,
 					title = "Trackers" ,
 					  )
-
+		}
+		item {
 			LinkButton(
 					painter = painterResource(id = R.drawable.calendar_icon) ,
 					content = "Calender" ,
@@ -98,6 +109,8 @@ fun MoreScreen(
 					} ,
 					title = "Calender" ,
 					  )
+		}
+		item {
 			//TODO: IN PROGRESS
 //		LinkButton(
 //				icon = {

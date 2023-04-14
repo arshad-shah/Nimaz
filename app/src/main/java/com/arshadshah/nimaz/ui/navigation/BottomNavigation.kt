@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.AnimatableIcon
+import com.arshadshah.nimaz.ui.components.common.AnimatedText
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
@@ -114,34 +115,59 @@ fun BottomNavigationBar(navController : NavController)
 									scale = if (selected) 1.3f else 1f ,
 									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
 									onClick = {
-										navController.navigate(bottomNavItem.screen_route) {
-											popUpTo(navController.graph.startDestinationId) {
-												saveState = true
+										if (currentRoute == BottomNavItem.PrayerTimesScreen.screen_route && bottomNavItem == BottomNavItem.Dashboard)
+										{
+											navController.popBackStack()
+										}else{
+											navController.navigate(bottomNavItem.screen_route) {
+												popUpTo(navController.graph.startDestinationId) {
+													saveState = true
+												}
+												launchSingleTop = true
+												restoreState = true
 											}
-											launchSingleTop = true
-											restoreState = true
 										}
 									}
 										  )
 						}
 					} ,
 					label = {
-						Text(
-								text = bottomNavItem.title ,
-								modifier = Modifier
-									.semantics {
-										contentDescription = bottomNavItem.title
+						AnimatedText(
+							text = bottomNavItem.title ,
+							scale = if (selected) 1.3f else 1f ,
+							modifier = Modifier
+								.semantics {
+									contentDescription = bottomNavItem.title
+								} ,
+							color =  if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
+									 ) {
+							if (currentRoute == BottomNavItem.PrayerTimesScreen.screen_route && bottomNavItem == BottomNavItem.Dashboard)
+							{
+								navController.popBackStack()
+							}else{
+								navController.navigate(bottomNavItem.screen_route) {
+									popUpTo(navController.graph.startDestinationId) {
+										saveState = true
 									}
-							)
+									launchSingleTop = true
+									restoreState = true
+								}
+							}
+					}
 					} ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
-						navController.navigate(bottomNavItem.screen_route) {
-							popUpTo(navController.graph.startDestinationId) {
-								saveState = true
+						if (currentRoute == BottomNavItem.PrayerTimesScreen.screen_route && bottomNavItem == BottomNavItem.Dashboard)
+						{
+							navController.popBackStack()
+						}else{
+							navController.navigate(bottomNavItem.screen_route) {
+								popUpTo(navController.graph.startDestinationId) {
+									saveState = true
+								}
+								launchSingleTop = true
+								restoreState = true
 							}
-							launchSingleTop = true
-							restoreState = true
 						}
 					}
 							 )

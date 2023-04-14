@@ -304,7 +304,6 @@ fun ResetQuranDataDialog(
 	handleEvents : (QuranViewModel.QuranMenuEvents) -> Unit ,
 						)
 {
-	//viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Reset_Quran_Data)
 	AlertDialogNimaz(
 			topDivider = false ,
 			bottomDivider = false ,

@@ -246,6 +246,7 @@ fun AyatFeatures(
 					openDialog.value = false
 				} ,
 				contentHeight = 100.dp ,
+				cardContent = false,
 				confirmButtonText = "Yes" ,
 				dismissButtonText = "No, Cancel" ,
 				onConfirm = {

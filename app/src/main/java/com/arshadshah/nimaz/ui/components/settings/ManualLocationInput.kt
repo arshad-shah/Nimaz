@@ -59,6 +59,7 @@ fun ManualLocationInput(
 	if (! showDialog.value) return
 
 	AlertDialogNimaz(
+			cardContent = false,
 			bottomDivider = false ,
 			topDivider = false ,
 			contentHeight = 100.dp ,

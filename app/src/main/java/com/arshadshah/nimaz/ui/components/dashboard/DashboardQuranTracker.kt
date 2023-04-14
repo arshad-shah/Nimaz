@@ -131,6 +131,7 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 				bottomDivider = false ,
 				contentDescription = "Ayat features dialog" ,
 				title = titleOfDialog.value ,
+				cardContent = false,
 				contentToShow = {
 					Text(
 							text = messageOfDialog.value ,
