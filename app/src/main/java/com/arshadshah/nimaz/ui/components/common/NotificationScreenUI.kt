@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.intro
+package com.arshadshah.nimaz.ui.components.common
 
 import android.Manifest
 import android.app.NotificationManager

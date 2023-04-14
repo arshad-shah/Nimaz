@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
+package com.arshadshah.nimaz.ui.components.dashboard
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image

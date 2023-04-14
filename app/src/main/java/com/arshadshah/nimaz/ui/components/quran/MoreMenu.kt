@@ -28,8 +28,6 @@ import com.arshadshah.nimaz.ui.components.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.components.ui.quran.CustomDialog
-import com.arshadshah.nimaz.ui.components.ui.quran.FontSizeDialog
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import es.dmoral.toasty.Toasty
@@ -308,8 +306,10 @@ fun ResetQuranDataDialog(
 {
 	//viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Reset_Quran_Data)
 	AlertDialogNimaz(
+			topDivider = false ,
+			bottomDivider = false ,
 			contentDescription = "Reset Quran Data" ,
-			contentHeight = 150.dp ,
+			contentHeight = 180.dp ,
 			title = "Reset Quran Data" ,
 			contentToShow = {
 				Text(
@@ -399,9 +399,9 @@ fun DownloadQuranDialog(
 		}
 	}
 	AlertDialogNimaz(
-			icon = painterResource(id = R.drawable.download_icon),
-			topDivider = false,
-			bottomDivider = false,
+			icon = painterResource(id = R.drawable.download_icon) ,
+			topDivider = false ,
+			bottomDivider = false ,
 			contentHeight = 200.dp ,
 			contentDescription = "Download Quran" ,
 			title = "Downloading Quran" ,

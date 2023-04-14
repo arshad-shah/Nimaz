@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.settings
+package com.arshadshah.nimaz.ui.components.settings
 
 import android.Manifest
 import android.content.Intent
@@ -26,8 +26,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
-import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
 import com.arshadshah.nimaz.ui.components.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.utils.FeatureThatRequiresLocationPermission

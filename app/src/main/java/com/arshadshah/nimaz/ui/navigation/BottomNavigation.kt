@@ -85,7 +85,7 @@ fun BottomNavigationBar(navController : NavController)
 							selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer ,
 							selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer ,
 							unselectedIconColor = MaterialTheme.colorScheme.secondary ,
-							unselectedTextColor = MaterialTheme.colorScheme.secondary  ,
+							unselectedTextColor = MaterialTheme.colorScheme.secondary ,
 							indicatorColor = MaterialTheme.colorScheme.secondaryContainer
 															 ) ,
 					icon = {
@@ -107,8 +107,10 @@ fun BottomNavigationBar(navController : NavController)
 						}) {
 							AnimatableIcon(
 									modifier = Modifier
-										.size(24.dp),
-									painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(id = bottomNavItem.icon_empty) ,
+										.size(24.dp) ,
+									painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
+											id = bottomNavItem.icon_empty
+																														 ) ,
 									scale = if (selected) 1.3f else 1f ,
 									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
 									onClick = {

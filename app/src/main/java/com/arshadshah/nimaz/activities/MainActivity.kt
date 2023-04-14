@@ -339,18 +339,19 @@ class MainActivity : ComponentActivity()
 												navigationIcon = {
 													OutlinedIconButton(
 															modifier = Modifier
-																.testTag("backButton").padding(start = 8.dp) ,
+																.testTag("backButton")
+																.padding(start = 8.dp) ,
 															onClick = {
-														Log.d(
-																MAIN_ACTIVITY_TAG ,
-																"onCreate:  back button pressed"
-															 )
-														Log.d(
-																MAIN_ACTIVITY_TAG ,
-																"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
-															 )
-														navController.navigateUp()
-													}) {
+																Log.d(
+																		MAIN_ACTIVITY_TAG ,
+																		"onCreate:  back button pressed"
+																	 )
+																Log.d(
+																		MAIN_ACTIVITY_TAG ,
+																		"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
+																	 )
+																navController.navigateUp()
+															}) {
 														Icon(
 																modifier = Modifier.size(24.dp) ,
 																painter = painterResource(id = R.drawable.back_icon) ,
@@ -495,10 +496,10 @@ class MainActivity : ComponentActivity()
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
 																		painter = if (vibrationAllowed.value) painterResource(
-																				id = R.drawable.phone_vibration_on_icon
+																				id = R.drawable.phone_vibration_off_icon
 																															 )
 																		else painterResource(
-																				id = R.drawable.phone_vibration_off_icon
+																				id = R.drawable.phone_vibration_on_icon
 																							) ,
 																		contentDescription = "Vibration"
 																	)

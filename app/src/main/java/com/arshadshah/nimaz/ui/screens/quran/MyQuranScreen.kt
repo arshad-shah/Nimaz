@@ -19,7 +19,7 @@ import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.ui.trackers.SwipeBackground
+import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlin.reflect.KFunction1

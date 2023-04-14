@@ -1,5 +1,7 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,9 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.SliderWithIcons
 import com.arshadshah.nimaz.ui.components.settings.state.FloatPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.settings.state.StringPreferenceSettingValueState
 import com.arshadshah.nimaz.viewModel.QuranViewModel
@@ -28,48 +32,7 @@ fun FontSizeDialog(
 	handleQuranEvents : (QuranViewModel.QuranMenuEvents) -> Unit ,
 				  )
 {
-	val fontMenuExpanded = remember { mutableStateOf(false) }
-	fun setFontBasedOnFontStyle(fontStyle : String)
-	{
-		when (fontStyle)
-		{
-			"Default" ->
-			{
-				arabicFontSizeState.value = 26f
-				translationFontSizeState.value = 16f
-			}
 
-			"Quranme" ->
-			{
-				arabicFontSizeState.value = 24f
-				translationFontSizeState.value = 16f
-			}
-
-			"Hidayat" ->
-			{
-				arabicFontSizeState.value = 24f
-				translationFontSizeState.value = 16f
-			}
-
-			"Amiri" ->
-			{
-				arabicFontSizeState.value = 24f
-				translationFontSizeState.value = 16f
-			}
-
-			"IndoPak" ->
-			{
-				arabicFontSizeState.value = 32f
-				translationFontSizeState.value = 16f
-			}
-		}
-	}
-
-	val icon = when (fontMenuExpanded.value)
-	{
-		true -> painterResource(id = R.drawable.arrow_up_icon)
-		false -> painterResource(id = R.drawable.arrow_down_icon)
-	}
 	AlertDialogNimaz(
 			topDivider = false ,
 			bottomDivider = false ,
@@ -98,7 +61,7 @@ fun FontSizeDialog(
 						//round this value to make it clean and easy to read
 						Text(text = arabicFontSizeState.value.roundToInt().toString())
 					}
-					Slider(
+					SliderWithIcons(
 							value = arabicFontSizeState.value ,
 							onValueChange = {
 								arabicFontSizeState.value = it
@@ -109,8 +72,13 @@ fun FontSizeDialog(
 												 )
 							} ,
 							valueRange = if (fontStyleState.value == "IndoPak") 32f .. 60f else 24f .. 46f ,
-							modifier = Modifier.width(300.dp)
-						  )
+							leadingIcon = painterResource(id = R.drawable.arabic_font_size_icon) ,
+							leadingIconSize = 24.dp ,
+							trailaingIcon = painterResource(id = R.drawable.arabic_font_size_icon) ,
+							trailingIconSize = 32.dp ,
+							contentDescription1 = "Decrease Arabic Font Size" ,
+							contentDescription2 = "Increase Arabic Font Size"
+								   )
 
 
 					Row(
@@ -129,7 +97,7 @@ fun FontSizeDialog(
 						Text(text = translationFontSizeState.value.roundToInt().toString())
 					}
 
-					Slider(
+					SliderWithIcons(
 							value = translationFontSizeState.value ,
 							onValueChange = {
 								translationFontSizeState.value = it
@@ -140,96 +108,35 @@ fun FontSizeDialog(
 												 )
 							} ,
 							valueRange = 16f .. 40f ,
-							modifier = Modifier.width(300.dp)
-						  )
+							leadingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
+							leadingIconSize = 16.dp ,
+							trailaingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
+							trailingIconSize = 24.dp ,
+							contentDescription1 = "Decrease Translation Font Size" ,
+							contentDescription2 = "Increase Translation Font Size"
+								   )
 
-					Row(
+					LabelWithDropdownMenu(
+							label = "Font Style (Arabic)" ,
+							items = items3 ,
+							selectedItem = fontStyleState.value ,
+							onItemSelected = {
+								fontStyleState.value = it
+								setFontBasedOnFontStyle(
+										it ,
+										arabicFontSizeState ,
+										translationFontSizeState
+													   )
+								handleQuranEvents(
+										QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
+												it
+																						 )
+												 )
+							} ,
 							modifier = Modifier
 								.fillMaxWidth()
-								.wrapContentHeight() ,
-							verticalAlignment = Alignment.CenterVertically ,
-							horizontalArrangement = Arrangement.SpaceBetween
-					   ) {
-						Text(
-								text = "Font Style (Arabic)" ,
-								style = MaterialTheme.typography.bodyMedium
-							)
-						ElevatedCard(
-								shape = MaterialTheme.shapes.extraLarge ,
-								elevation = CardDefaults.elevatedCardElevation(
-										defaultElevation = 4.dp
-																			  ) ,
-								modifier = Modifier
-									.width(120.dp)
-									) {
-							//an elevation card that shows the text and icon
-							ElevatedCard(
-									modifier = Modifier
-										.fillMaxWidth()
-										.clickable {
-											fontMenuExpanded.value = ! fontMenuExpanded.value
-										} ,
-									content = {
-										Row(
-												modifier = Modifier
-													.fillMaxWidth()
-													.padding(8.dp) ,
-												verticalAlignment = Alignment.CenterVertically ,
-												horizontalArrangement = Arrangement.SpaceBetween
-										   ) {
-											//find the font style from the list of font styles
-											//and then show it in the text
-											Text(
-													text = items3[items3.indexOf(fontStyleState.value)] ,
-													modifier = Modifier.padding(start = 8.dp) ,
-													style = MaterialTheme.typography.bodyMedium ,
-												)
-											Icon(
-													modifier = Modifier
-														.padding(start = 8.dp)
-														.size(18.dp) ,
-													painter = icon ,
-													contentDescription = null
-												)
-										}
-										DropdownMenu(
-												modifier = Modifier
-													.wrapContentWidth()
-													.wrapContentHeight() ,
-												expanded = fontMenuExpanded.value ,
-												onDismissRequest = {
-													fontMenuExpanded.value = false
-												} ,
-												content = {
-													items3.forEach { item ->
-														DropdownMenuItem(
-																onClick = {
-																	fontStyleState.value = item
-																	setFontBasedOnFontStyle(
-																			fontStyleState.value
-																						   )
-																	fontMenuExpanded.value =
-																		false
-																	handleQuranEvents(
-																			QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
-																					fontStyleState.value
-																															 )
-																					 )
-																} ,
-																text = {
-																	Text(
-																			text = item ,
-																			style = MaterialTheme.typography.bodyMedium
-																		)
-																}
-																		)
-													}
-												}
-													)
-									}
-										)
-						}
-					}
+								.wrapContentHeight()
+										 )
 				}
 			} ,
 			onDismissRequest = {
@@ -241,4 +148,147 @@ fun FontSizeDialog(
 			onDismiss = {
 				showDialog3(false)
 			})
+}
+
+//label with a dropdown menu at the end
+@Composable
+fun LabelWithDropdownMenu(
+	label : String ,
+	items : List<String> ,
+	selectedItem : String ,
+	onItemSelected : (String) -> Unit ,
+	modifier : Modifier = Modifier ,
+						 )
+{
+	val expanded = remember { mutableStateOf(false) }
+	Row(
+			modifier = modifier
+				.padding(vertical = 8.dp)
+				.fillMaxWidth()
+				.wrapContentHeight() ,
+			verticalAlignment = Alignment.CenterVertically ,
+			horizontalArrangement = Arrangement.SpaceBetween
+	   ) {
+		Text(text = label , style = MaterialTheme.typography.bodyMedium)
+		ElevatedCard(
+				modifier = Modifier
+					.width(120.dp)
+					) {
+			//an elevation card that shows the text and icon
+			ElevatedCard(
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable {
+							expanded.value = ! expanded.value
+						} ,
+					content = {
+						Row(
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(8.dp) ,
+								verticalAlignment = Alignment.CenterVertically ,
+								horizontalArrangement = Arrangement.SpaceBetween
+						   ) {
+							//find the font style from the list of font styles
+							//and then show it in the text
+							Text(
+									text = items[items.indexOf(selectedItem)] ,
+									modifier = Modifier.padding(start = 8.dp) ,
+									style = MaterialTheme.typography.bodyMedium ,
+								)
+							Crossfade(
+									targetState = expanded.value ,
+									animationSpec = tween(durationMillis = 300)
+									 ) { expanded ->
+								if (expanded)
+								{
+									Icon(
+											painter = painterResource(id = R.drawable.arrow_up_icon) ,
+											contentDescription = "dropdown icon" ,
+											modifier = Modifier
+												.padding(horizontal = 8.dp)
+												.size(18.dp)
+										)
+								} else
+								{
+									Icon(
+											painter = painterResource(id = R.drawable.arrow_down_icon) ,
+											contentDescription = "dropdown icon" ,
+											modifier = Modifier
+												.padding(horizontal = 8.dp)
+												.size(18.dp)
+										)
+								}
+							}
+						}
+						DropdownMenu(
+								offset = DpOffset(5.dp , 0.dp) ,
+								modifier = Modifier
+									.wrapContentWidth()
+									.wrapContentHeight() ,
+								expanded = expanded.value ,
+								onDismissRequest = {
+									expanded.value = false
+								} ,
+								content = {
+									items.forEach { item ->
+										DropdownMenuItem(
+												onClick = {
+													onItemSelected(item)
+													expanded.value = false
+												} ,
+												text = {
+													Text(
+															text = item ,
+															style = MaterialTheme.typography.bodyMedium
+														)
+												}
+														)
+									}
+								}
+									)
+					}
+						)
+		}
+	}
+}
+
+fun setFontBasedOnFontStyle(
+	fontStyle : String ,
+	arabicFontSizeState : FloatPreferenceSettingValueState ,
+	translationFontSizeState : FloatPreferenceSettingValueState ,
+						   )
+{
+	when (fontStyle)
+	{
+		"Default" ->
+		{
+			arabicFontSizeState.value = 26f
+			translationFontSizeState.value = 16f
+		}
+
+		"Quranme" ->
+		{
+			arabicFontSizeState.value = 24f
+			translationFontSizeState.value = 16f
+		}
+
+		"Hidayat" ->
+		{
+			arabicFontSizeState.value = 24f
+			translationFontSizeState.value = 16f
+		}
+
+		"Amiri" ->
+		{
+			arabicFontSizeState.value = 24f
+			translationFontSizeState.value = 16f
+		}
+
+		"IndoPak" ->
+		{
+			arabicFontSizeState.value = 32f
+			translationFontSizeState.value = 16f
+		}
+	}
 }

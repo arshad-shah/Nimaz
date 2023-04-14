@@ -84,6 +84,8 @@ fun Licences(paddingValues : PaddingValues)
 	if (openDialog.value)
 	{
 		AlertDialogNimaz(
+				topDivider = false ,
+				bottomDivider = false ,
 				action = {
 					val website = libraryToShow.value?.website
 					if (website != null)
@@ -121,6 +123,9 @@ fun Licences(paddingValues : PaddingValues)
 							html = if (isLicenseEmpty) "No license found" else libraryToShow.value?.licenses?.firstOrNull()?.htmlReadyLicenseContent
 								?: "No license found" ,
 							color = MaterialTheme.colorScheme.onSurface ,
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(8.dp)
 							)
 				} ,
 				onDismissRequest = {

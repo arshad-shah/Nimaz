@@ -88,8 +88,8 @@ fun SettingsNumberPickerDialog(
 		}
 	}
 	AlertDialogNimaz(
-			topDivider = false,
-			bottomDivider = false,
+			topDivider = false ,
+			bottomDivider = false ,
 			contentDescription = title ,
 			description = description ,
 			contentHeight = height ,
@@ -102,7 +102,7 @@ fun SettingsNumberPickerDialog(
 							modifier = Modifier.fillMaxWidth() ,
 							horizontalArrangement = Arrangement.Center ,
 							verticalAlignment = Alignment.CenterVertically ,
-							) {
+					   ) {
 						Picker(
 								modifier = modifier ,
 								value = if (items.size == 51) valueState.value.toDouble()
@@ -117,7 +117,7 @@ fun SettingsNumberPickerDialog(
 									else
 										if (it < 2 && it > - 1) "$it Minute " else if (it != - 1) "$it Minutes" else "$it Minute"
 								} ,
-									)
+							  )
 					}
 				}
 			} ,

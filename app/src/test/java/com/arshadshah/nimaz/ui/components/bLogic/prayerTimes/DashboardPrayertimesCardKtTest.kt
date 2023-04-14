@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.bLogic.prayerTimes
 
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
+import com.arshadshah.nimaz.ui.components.dashboard.getTimerText
 import org.junit.Test
 
 class DashboardPrayertimesCardKtTest

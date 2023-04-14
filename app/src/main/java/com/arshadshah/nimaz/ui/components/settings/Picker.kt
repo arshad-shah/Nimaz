@@ -54,7 +54,7 @@ fun <T> Picker(
 	dividersColor : Color = MaterialTheme.colorScheme.outline ,
 	list : List<T> ,
 	textStyle : TextStyle = LocalTextStyle.current ,
-					  )
+			  )
 {
 	val minimumAlpha = 0.3f
 	val verticalMargin = 8.dp
@@ -89,8 +89,8 @@ fun <T> Picker(
 	val animatedScaleDown = remember { Animatable(1f) }
 
 	LaunchedEffect(indexOfElement) {
-		scaleUp.animateTo(1f , tween(500, easing = FastOutSlowInEasing))
-		animatedScaleDown.animateTo(0.8f , tween(500, easing = FastOutSlowInEasing))
+		scaleUp.animateTo(1f , tween(500 , easing = FastOutSlowInEasing))
+		animatedScaleDown.animateTo(0.8f , tween(500 , easing = FastOutSlowInEasing))
 	}
 
 	//haptic feedback
@@ -138,7 +138,7 @@ fun <T> Picker(
 								animatedOffset.snapTo(0f)
 								hapticFeedback.performHapticFeedback(
 										hapticFeedbackType = HapticFeedbackType.LongPress
-																   )
+																	)
 							}
 						}
 						  )
@@ -157,7 +157,8 @@ fun <T> Picker(
 							.offset { IntOffset(x = 0 , y = coercedAnimatedOffset.roundToInt()) }
 				   ) {
 					ProvideTextStyle(textStyle) {
-						if (indexOfElement > 0){
+						if (indexOfElement > 0)
+						{
 							Label(
 									text = label(list.elementAt(indexOfElement - 1)) ,
 									modifier = Modifier
@@ -248,7 +249,7 @@ private fun Label(text : String , modifier : Modifier)
 {
 	Text(
 			modifier = modifier.indication(
-					indication = null,
+					indication = null ,
 					interactionSource = MutableInteractionSource()
 										  ) ,
 			text = text ,
@@ -292,11 +293,11 @@ fun Preview()
 			modifier = Modifier
 				.background(Color.White)
 				.fillMaxSize()
-	   ) {
+		  ) {
 		Picker(
 				list = list ,
 				value = selectedValue.value ,
-				onValueChange ={
+				onValueChange = {
 					selectedValue.value = it
 				}
 			  )

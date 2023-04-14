@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.settings
+package com.arshadshah.nimaz.ui.components.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Divider

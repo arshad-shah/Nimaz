@@ -10,8 +10,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Tasbih
-import com.arshadshah.nimaz.ui.components.bLogic.tasbih.DeleteDialog
+import com.arshadshah.nimaz.ui.components.common.DropDownHeader
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.common.Placeholder
+import com.arshadshah.nimaz.ui.components.tasbih.DeleteDialog
+import com.arshadshah.nimaz.ui.components.tasbih.GoalEditDialog
+import com.arshadshah.nimaz.ui.components.tasbih.TasbihDropdownItem
 import com.arshadshah.nimaz.ui.components.ui.trackers.*
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import java.time.LocalDate

@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.trackers
+package com.arshadshah.nimaz.ui.components.dashboard
 
 import android.util.Log
 import android.widget.Toast

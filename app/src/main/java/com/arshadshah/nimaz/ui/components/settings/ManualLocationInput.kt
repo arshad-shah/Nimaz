@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.settings
+package com.arshadshah.nimaz.ui.components.settings
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +17,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import kotlin.reflect.KFunction1

@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Intent.*
 import androidx.compose.runtime.Composable
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
-import com.arshadshah.nimaz.ui.components.ui.intro.CalculationMethodUI
-import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
-import com.arshadshah.nimaz.ui.components.ui.settings.LocationSettings
+import com.arshadshah.nimaz.ui.components.common.BatteryExemptionUI
+import com.arshadshah.nimaz.ui.components.common.CalculationMethodUI
+import com.arshadshah.nimaz.ui.components.common.NotificationScreenUI
+import com.arshadshah.nimaz.ui.components.settings.LocationSettings
 
 sealed class OnBoardingPage(
 	val image : Int ,

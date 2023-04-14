@@ -127,20 +127,24 @@ fun AlertDialogNimaz(
 						}
 					}
 					if (topDivider) Divider(color = MaterialTheme.colorScheme.outline)
-					Row(
-							modifier
-								.height(contentHeight)
-								.fillMaxWidth() ,
-							verticalAlignment = Alignment.CenterVertically ,
-							horizontalArrangement = Arrangement.Center
-					   ) {
-						Column(
-								Modifier
-									.verticalScroll(state = stateScroll) ,
-								verticalArrangement = Arrangement.Center ,
-								horizontalAlignment = Alignment.CenterHorizontally
-							  ) {
-							contentToShow()
+					Card(
+							modifier = Modifier.fillMaxWidth() ,
+						) {
+						Row(
+								modifier
+									.height(contentHeight)
+									.fillMaxWidth() ,
+								verticalAlignment = Alignment.CenterVertically ,
+								horizontalArrangement = Arrangement.Center
+						   ) {
+							Column(
+									Modifier
+										.verticalScroll(state = stateScroll) ,
+									verticalArrangement = Arrangement.Center ,
+									horizontalAlignment = Alignment.CenterHorizontally
+								  ) {
+								contentToShow()
+							}
 						}
 					}
 				}

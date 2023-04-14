@@ -39,7 +39,7 @@ fun FastTrackerCard(
 				.padding(8.dp) ,
 				) {
 		ToggleableItemColumn(
-				text = "Not Fasting",
+				text = "Not Fasting" ,
 				selectedText = "Fasting Today" ,
 				checked = isFastingToday.value ,
 				onCheckedChange = {

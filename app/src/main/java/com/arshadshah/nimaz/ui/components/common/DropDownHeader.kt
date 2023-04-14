@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.trackers
+package com.arshadshah.nimaz.ui.components.common
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Divider

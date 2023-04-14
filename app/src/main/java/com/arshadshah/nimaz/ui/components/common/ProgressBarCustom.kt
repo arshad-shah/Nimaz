@@ -49,6 +49,8 @@ fun ProgressBarCustom(
 	startDelay : Int = 1000 ,
 	radius : Dp = 80.dp ,
 	waveAnimation : Boolean = true ,
+	label : String? = null ,
+	labelColor : Color = MaterialTheme.colorScheme.onSurface ,
 					 )
 {
 
@@ -164,14 +166,26 @@ fun ProgressBarCustom(
 				   )
 		}
 
-		Text(
-				text = progress.toInt().toString() + "%" ,
-				color = progressColor ,
-				fontSize = radius.value.sp / 2 ,
-				fontWeight = FontWeight.SemiBold ,
-				fontFamily = FontFamily.Monospace ,
-				style = MaterialTheme.typography.bodySmall
-			)
+		if (label != null)
+		{
+			Text(
+					text = label ,
+					fontWeight = FontWeight.SemiBold ,
+					fontFamily = FontFamily.Monospace ,
+					style = MaterialTheme.typography.bodyMedium ,
+					color = labelColor
+				)
+		} else
+		{
+			Text(
+					text = progress.toInt().toString() + "%" ,
+					color = progressColor ,
+					fontSize = radius.value.sp / 2 ,
+					fontWeight = FontWeight.SemiBold ,
+					fontFamily = FontFamily.Monospace ,
+					style = MaterialTheme.typography.bodySmall
+				)
+		}
 	}
 
 

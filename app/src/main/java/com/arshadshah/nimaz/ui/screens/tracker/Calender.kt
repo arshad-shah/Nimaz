@@ -23,7 +23,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
-import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
@@ -213,7 +213,7 @@ fun CalenderHeader(monthState : MonthState)
 				) {
 		Row(
 				modifier = Modifier
-					.padding(horizontal = 24.dp)
+					.padding(horizontal = 14.dp)
 					.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
@@ -226,7 +226,7 @@ fun CalenderHeader(monthState : MonthState)
 						monthState.currentMonth = monthState.currentMonth.minusMonths(1)
 						inCurrentMonth.value = false
 					} ,
-					  ) {
+							) {
 				Icon(
 						modifier = Modifier.size(24.dp) ,
 						painter = painterResource(id = R.drawable.angle_left_icon) ,
@@ -302,12 +302,12 @@ fun CalenderHeader(monthState : MonthState)
 
 			//right arrow
 			FilledIconButton(
-					modifier = Modifier.size(52.dp),
+					modifier = Modifier.size(52.dp) ,
 					onClick = {
 						monthState.currentMonth = monthState.currentMonth.plusMonths(1)
 						inCurrentMonth.value = false
 					} ,
-					  ) {
+							) {
 				Icon(
 						modifier = Modifier.size(24.dp) ,
 						painter = painterResource(id = R.drawable.angle_right_icon) ,
@@ -441,17 +441,17 @@ fun CalenderDay(
 												TrackerViewModel.TrackerEvent.SET_DATE(
 														dayState.date.toString()
 																					  )
-													)
+														 )
 										viewModel.onEvent(
 												TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
 														dayState.date.toString()
 																								  )
-													)
+														 )
 										viewModel.onEvent(
 												TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
 														dayState.date.toString()
 																									   )
-													)
+														 )
 									}
 
 									else ->
@@ -463,17 +463,17 @@ fun CalenderDay(
 													TrackerViewModel.TrackerEvent.SET_DATE(
 															dayState.date.toString()
 																						  )
-														)
+															 )
 											viewModel.onEvent(
 													TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																									  )
-														)
+															 )
 											viewModel.onEvent(
 													TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																										   )
-														)
+															 )
 										}
 									}
 								}
@@ -503,10 +503,10 @@ fun CalenderDay(
 						else MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
-				Divider(
-						color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) ,
-						thickness = 1.dp
-					   )
+			Divider(
+					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) ,
+					thickness = 1.dp
+				   )
 			Text(
 					//put a letter scissor ha in front of the day to show that it is a hijri day
 					text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,

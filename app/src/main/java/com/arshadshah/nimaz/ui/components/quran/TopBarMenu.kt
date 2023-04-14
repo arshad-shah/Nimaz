@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.ui.quran
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -47,9 +48,31 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	}
 
 	//create a list with numbers from 1 to 114
-	val surahList = (1 .. 114).toList()
-	val juzList = (1 .. 30).toList()
+	//its expensive to create a list every time the composable is recomposed
+	//so we use remember to create the list only once
+	val surahList = remember { mutableListOf<Int>() }
+	val juzList = remember { mutableListOf<Int>() }
 	val (selectedSurah , setSelectedSurah) = remember { mutableStateOf(number) }
+
+	//create the list using a coroutine
+	val coroutineScope = rememberCoroutineScope()
+	LaunchedEffect(Unit) {
+		coroutineScope.launch {
+			if (isSurah)
+			{
+				for (i in 1 .. 114)
+				{
+					surahList.add(i)
+				}
+			} else
+			{
+				for (i in 1 .. 30)
+				{
+					juzList.add(i)
+				}
+			}
+		}
+	}
 
 	val label = when (isSurah)
 	{
@@ -64,15 +87,8 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	}
 
 	val expanded = remember { mutableStateOf(false) }
-	//the icon that is shown in the dropdown
-	val icon = when (expanded.value)
-	{
-		true -> painterResource(id = R.drawable.arrow_up_icon)
-		false -> painterResource(id = R.drawable.arrow_down_icon)
-	}
 	//size of the main button that opens the dropdown
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
 				.width(150.dp)
 				.padding(start = 8.dp)
@@ -118,15 +134,30 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 									)
 							}
 						}
-						//the icon
-						Icon(
-								painter = icon ,
-								contentDescription = "dropdown icon" ,
-								modifier = Modifier
-									.padding(horizontal = 8.dp)
-									.size(18.dp)
-							)
-
+						Crossfade(
+								targetState = expanded.value ,
+								animationSpec = tween(durationMillis = 300)
+								 ) { expanded ->
+							if (expanded)
+							{
+								Icon(
+										painter = painterResource(id = R.drawable.arrow_up_icon) ,
+										contentDescription = "dropdown icon" ,
+										modifier = Modifier
+											.padding(horizontal = 8.dp)
+											.size(18.dp)
+									)
+							} else
+							{
+								Icon(
+										painter = painterResource(id = R.drawable.arrow_down_icon) ,
+										contentDescription = "dropdown icon" ,
+										modifier = Modifier
+											.padding(horizontal = 8.dp)
+											.size(18.dp)
+									)
+							}
+						}
 					}
 				} ,
 					)
@@ -165,7 +196,7 @@ fun DropdownMenuQuranSection(
 	}
 	DropdownMenu(
 			modifier = Modifier
-				.width(150.dp)
+				.width(120.dp)
 				.height(300.dp) ,
 			expanded = expanded.value ,
 			onDismissRequest = {
@@ -176,7 +207,7 @@ fun DropdownMenuQuranSection(
 			DropdownMenuItem(
 					modifier = Modifier
 						.fillMaxWidth()
-						.height(40.dp) ,
+						.height(48.dp) ,
 					onClick = {
 						onSelected(surah)
 					} ,
