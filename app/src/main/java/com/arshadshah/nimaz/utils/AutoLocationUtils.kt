@@ -68,6 +68,23 @@ object AutoLocationUtils
 		Log.w("Nimaz: Location" , "Location Updates Started")
 	}
 
+	//get last known location
+	@SuppressLint("MissingPermission")
+	fun getLastKnownLocation()
+	{
+		//get the last known location
+		fusedLocationProviderClient?.lastLocation?.addOnSuccessListener {
+			if (it != null)
+			{
+				setLocationData(it)
+				Log.d(
+						"Nimaz: Location Auto" ,
+						"Latitude: ${it.latitude} Longitude: ${it.longitude}"
+					 )
+			}
+		}
+	}
+
 	fun stopLocationUpdates()
 	{
 		fusedLocationProviderClient?.removeLocationUpdates(
