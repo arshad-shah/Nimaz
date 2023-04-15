@@ -534,6 +534,7 @@ class MainActivity : ComponentActivity()
 									content = {
 										BottomNavigationBar(navController = navController)
 									})
+
 						}
 						) { it ->
 					NavigationGraph(navController = navController , it)
