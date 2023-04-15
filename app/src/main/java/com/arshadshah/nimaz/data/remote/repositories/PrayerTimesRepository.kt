@@ -5,9 +5,9 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.network.ApiResponse
-import com.arshadshah.nimaz.utils.network.NimazServicesImpl
-import com.arshadshah.nimaz.utils.network.PrayerTimeResponse
+import com.arshadshah.nimaz.utils.api.ApiResponse
+import com.arshadshah.nimaz.utils.api.NimazServicesImpl
+import com.arshadshah.nimaz.utils.api.PrayerTimeResponse
 import io.ktor.client.plugins.*
 import java.io.IOException
 import java.time.Instant

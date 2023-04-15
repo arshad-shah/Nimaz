@@ -21,17 +21,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.components.ui.intro.CalculationMethodUI
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsGroup
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsList
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsMenuLink
-import com.arshadshah.nimaz.ui.components.ui.settings.SettingsNumberPickerDialog
+import com.arshadshah.nimaz.ui.components.common.CalculationMethodUI
+import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
+import com.arshadshah.nimaz.ui.components.settings.SettingsList
+import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
+import com.arshadshah.nimaz.ui.components.settings.SettingsNumberPickerDialog
+import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper.getParams
+import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper.getParams
+import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @Composable
 fun PrayerTimesCustomizations(paddingValues : PaddingValues)
@@ -224,7 +224,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						description = "The madhab used to calculate the asr prayer times." ,
 						items = mapOfMadhabs ,
 						subtitle = madhabState.value ,
-						height = 150.dp
+						height = 120.dp
 							) { madhab : String ->
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.Madhab(
@@ -261,7 +261,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 						description = "The high latitude rule used to calculate the prayer times." ,
 						items = mapOfHighLatitudeRules ,
 						subtitle = highLatitudeRuleState.value ,
-						height = 150.dp
+						height = 180.dp
 							) { highLatRule : String ->
 					settingViewModel.handleEvent(
 							SettingsViewModel.SettingsEvent.HighLatitude(

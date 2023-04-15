@@ -1,15 +1,15 @@
 package com.arshadshah.nimaz.ui.navigation
 
 import androidx.activity.ComponentActivity
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -21,8 +21,10 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.ui.components.common.AnimatableIcon
+import com.arshadshah.nimaz.ui.components.common.AnimatedText
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @OptIn(ExperimentalAnimationApi::class , ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +66,19 @@ fun BottomNavigationBar(navController : NavController)
 				navBackStackEntry?.destination?.hierarchy?.any { it.route == bottomNavItem.screen_route } == true
 			NavigationBarItem(
 					modifier = Modifier
+						.clickable(
+								enabled = true ,
+								role = Role.Tab ,
+								onClick = {
+									navController.navigate(bottomNavItem.screen_route) {
+										popUpTo(navController.graph.startDestinationId) {
+											saveState = true
+										}
+										launchSingleTop = true
+										restoreState = true
+									}
+								}
+								  )
 						.semantics {
 							contentDescription = bottomNavItem.title
 						} ,
@@ -91,36 +106,68 @@ fun BottomNavigationBar(navController : NavController)
 								}
 							}
 						}) {
-							Crossfade(
-									targetState = selected ,
-									animationSpec = tween(durationMillis = 100)
-									 ) { targetState ->
-								Icon(
-										painter = painterResource(id = if (targetState) bottomNavItem.icon else bottomNavItem.icon_empty) ,
-										contentDescription = bottomNavItem.iconDescription ,
-										modifier = Modifier
-											.size(24.dp)
-									)
-							}
+							AnimatableIcon(
+									modifier = Modifier
+										.size(24.dp) ,
+									painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
+											id = bottomNavItem.icon_empty
+																														 ) ,
+									scale = if (selected) 1.3f else 1f ,
+									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
+									onClick = {
+										if (currentRoute == BottomNavItem.PrayerTimesScreen.screen_route && bottomNavItem == BottomNavItem.Dashboard)
+										{
+											navController.popBackStack()
+										}else{
+											navController.navigate(bottomNavItem.screen_route) {
+												popUpTo(navController.graph.startDestinationId) {
+													saveState = true
+												}
+												launchSingleTop = true
+												restoreState = true
+											}
+										}
+									}
+										  )
 						}
 					} ,
 					label = {
-						Text(
-								text = bottomNavItem.title ,
-								modifier = Modifier
-									.semantics {
-										contentDescription = bottomNavItem.title
+						AnimatedText(
+							text = bottomNavItem.title ,
+							scale = if (selected) 1.3f else 1f ,
+							modifier = Modifier
+								.semantics {
+									contentDescription = bottomNavItem.title
+								} ,
+							color =  if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
+									 ) {
+							if (currentRoute == BottomNavItem.PrayerTimesScreen.screen_route && bottomNavItem == BottomNavItem.Dashboard)
+							{
+								navController.popBackStack()
+							}else{
+								navController.navigate(bottomNavItem.screen_route) {
+									popUpTo(navController.graph.startDestinationId) {
+										saveState = true
 									}
-							)
+									launchSingleTop = true
+									restoreState = true
+								}
+							}
+					}
 					} ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
-						navController.navigate(bottomNavItem.screen_route) {
-							popUpTo(navController.graph.startDestinationId) {
-								saveState = true
+						if (currentRoute == BottomNavItem.PrayerTimesScreen.screen_route && bottomNavItem == BottomNavItem.Dashboard)
+						{
+							navController.popBackStack()
+						}else{
+							navController.navigate(bottomNavItem.screen_route) {
+								popUpTo(navController.graph.startDestinationId) {
+									saveState = true
+								}
+								launchSingleTop = true
+								restoreState = true
 							}
-							launchSingleTop = true
-							restoreState = true
 						}
 					}
 							 )

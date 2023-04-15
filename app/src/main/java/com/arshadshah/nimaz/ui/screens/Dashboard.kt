@@ -24,15 +24,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_EVENTS_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.*
-import com.arshadshah.nimaz.ui.components.ui.BannerSmall
-import com.arshadshah.nimaz.ui.components.ui.dashboard.DashboardTasbihTracker
-import com.arshadshah.nimaz.ui.components.ui.quran.DashboardQuranTracker
-import com.arshadshah.nimaz.ui.components.ui.quran.DashboardRandomAyatCard
-import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardFastTracker
-import com.arshadshah.nimaz.ui.components.ui.trackers.DashboardPrayerTracker
+import com.arshadshah.nimaz.ui.components.common.BannerSmall
+import com.arshadshah.nimaz.ui.components.dashboard.*
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 
 @Composable
 fun Dashboard(
@@ -51,7 +47,15 @@ fun Dashboard(
 			initializer = { SettingsViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 									 )
+	val viewModelTracker = viewModel(
+			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+									)
 
+	val isFasting = remember {
+		viewModelTracker.isFasting
+	}.collectAsState()
 	val updateAvailabile = remember {
 		viewModelSettings.isUpdateAvailable
 	}.collectAsState()
@@ -68,7 +72,7 @@ fun Dashboard(
 									)
 		}
 		item {
-			RamadanTimesCard()
+			RamadanTimesCard(isFasting.value)
 		}
 		item {
 			if (updateAvailabile.value)

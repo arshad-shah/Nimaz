@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.activities.*
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
@@ -29,12 +28,13 @@ import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.screens.*
+import com.arshadshah.nimaz.ui.screens.more.MoreScreen
+import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
+import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
+import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
-import com.arshadshah.nimaz.ui.screens.settings.About
-import com.arshadshah.nimaz.ui.screens.settings.Licences
-import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
-import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
+import com.arshadshah.nimaz.ui.screens.settings.*
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
@@ -703,10 +703,7 @@ fun NavigationGraph(
 			Dashboard(
 					paddingValues = paddingValues ,
 					onNavigateToPrayerTimes = {
-						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route) {
-							popUpTo(navController.graph.startDestinationId)
-						}
-
+						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route)
 					} ,
 					onNavigateToCalender = {
 						navController.navigate(CALENDER_SCREEN_ROUTE)

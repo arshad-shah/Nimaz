@@ -141,7 +141,7 @@ class CreateAlarms
 										 )
 	}
 
-	fun scheduleAlarms(
+	private fun scheduleAlarms(
 		context : Context ,
 		fajr : Long ,
 		sunrise : Long ,
@@ -149,7 +149,7 @@ class CreateAlarms
 		asr : Long ,
 		maghrib : Long ,
 		ishaa : Long ,
-					  )
+							  )
 	{
 
 		// Set up the pending intents for each alarm

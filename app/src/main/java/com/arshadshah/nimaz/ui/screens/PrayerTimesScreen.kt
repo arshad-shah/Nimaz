@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,14 +17,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.DatesContainer
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.LocationTimeContainer
-import com.arshadshah.nimaz.ui.components.bLogic.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.utils.network.PrayerTimesParamMapper
+import com.arshadshah.nimaz.ui.components.prayerTimes.DatesContainer
+import com.arshadshah.nimaz.ui.components.prayerTimes.LocationTimeContainer
+import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
+import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
+import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PrayerTimesScreen(
 	paddingValues : PaddingValues ,

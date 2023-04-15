@@ -28,6 +28,10 @@
 -keep class com.amazonaws.** { *; }
 -dontwarn com.amazonaws.**
 
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+-keepattributes Signature
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
 # Serializer for classes with named companion objects are retrieved using `getDeclaredClasses`.
 # If you have any, uncomment and replace classes with those containing named companion objects.
 #-keepattributes InnerClasses # Needed for `getDeclaredClasses`.

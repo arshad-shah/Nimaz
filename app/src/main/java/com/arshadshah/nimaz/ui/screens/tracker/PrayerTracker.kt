@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.ui.screens.tracker
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -10,17 +12,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
+import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerListItems
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
-import com.arshadshah.nimaz.ui.components.ui.trackers.PrayerTrackerListItems
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import es.dmoral.toasty.Toasty
-
 
 @Composable
 fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false)
@@ -84,6 +88,8 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 	Column(
 			modifier = Modifier
 				.padding(paddingValues)
+				.fillMaxSize()
+				.verticalScroll(rememberScrollState())
 				.testTag(TEST_TAG_PRAYER_TRACKER) ,
 			horizontalAlignment = Alignment.CenterHorizontally
 		  ) {
@@ -117,6 +123,170 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 						fastingState.value
 					   )
 			}
+		}
+		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
+				modifier = Modifier.padding(
+						top = 4.dp ,
+						bottom = 8.dp ,
+						start = 0.dp ,
+						end = 0.dp
+										   ) ,
+					) {
+			Column {
+				Text(
+						text = "Weekly Progress" ,
+						style = MaterialTheme.typography.bodyMedium ,
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth() ,
+						textAlign = TextAlign.Center
+					)
+				//the data
+				SevenDayTrend(dateState)
+			}
+		}
+	}
+}
+
+//composable to show the prayers for this week using 7 circular progress indicators
+@Composable
+fun SevenDayTrend(
+	dateState : State<String> ,
+				 )
+{
+
+	val viewModelTracker = viewModel(
+			key = TRACKING_VIEWMODEL_KEY ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+									)
+	LaunchedEffect(key1 = "getTrackerForWeek") {
+		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(dateState.value))
+	}
+	val progressForMonday = remember {
+		viewModelTracker.progressForMonday
+	}.collectAsState()
+
+	val progressForTuesday = remember {
+		viewModelTracker.progressForTuesday
+	}.collectAsState()
+
+	val progressForWednesday = remember {
+		viewModelTracker.progressForWednesday
+	}.collectAsState()
+
+	val progressForThursday = remember {
+		viewModelTracker.progressForThursday
+	}.collectAsState()
+
+	val progressForFriday = remember {
+		viewModelTracker.progressForFriday
+	}.collectAsState()
+
+	val progressForSaturday = remember {
+		viewModelTracker.progressForSaturday
+	}.collectAsState()
+
+	val progressForSunday = remember {
+		viewModelTracker.progressForSunday
+	}.collectAsState()
+
+	ElevatedCard(
+			shape = MaterialTheme.shapes.extraLarge ,
+			modifier = Modifier.padding(
+					vertical = 8.dp ,
+					horizontal = 4.dp
+									   ) ,
+				) {
+		Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(8.dp) ,
+				horizontalArrangement = Arrangement.SpaceEvenly ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
+			//monday
+			ProgressBarCustom(
+					progress = progressForMonday.value.toFloat() ,
+					progressColor = MaterialTheme.colorScheme.primary ,
+					radius = 20.dp ,
+					label = "M" ,
+					strokeWidth = 6.dp ,
+					strokeBackgroundWidth = 3.dp ,
+					startDelay = 0 ,
+					labelColor = if (progressForMonday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+							 )
+			//tuesday
+			ProgressBarCustom(
+					progress = progressForTuesday.value.toFloat() ,
+					progressColor = MaterialTheme.colorScheme.primary ,
+					radius = 20.dp ,
+					label = "T" ,
+					strokeWidth = 6.dp ,
+					strokeBackgroundWidth = 3.dp ,
+					startDelay = 0 ,
+					labelColor = if (progressForTuesday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+							 )
+			//wednesday
+			ProgressBarCustom(
+					progress = progressForWednesday.value.toFloat() ,
+					progressColor = MaterialTheme.colorScheme.primary ,
+					radius = 20.dp ,
+					label = "W" ,
+					strokeWidth = 6.dp ,
+					strokeBackgroundWidth = 3.dp ,
+					startDelay = 0 ,
+					labelColor = if (progressForWednesday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+							 )
+
+			//thursday
+			ProgressBarCustom(
+					progress = progressForThursday.value.toFloat() ,
+					progressColor = MaterialTheme.colorScheme.primary ,
+					radius = 20.dp ,
+					label = "T" ,
+					strokeWidth = 6.dp ,
+					strokeBackgroundWidth = 3.dp ,
+					startDelay = 0 ,
+					labelColor = if (progressForThursday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+							 )
+
+			//friday
+			ProgressBarCustom(
+					progress = progressForFriday.value.toFloat() ,
+					progressColor = MaterialTheme.colorScheme.primary ,
+					radius = 20.dp ,
+					label = "F" ,
+					strokeWidth = 6.dp ,
+					strokeBackgroundWidth = 3.dp ,
+					startDelay = 0 ,
+					labelColor = if (progressForFriday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+							 )
+
+			//saturday
+			ProgressBarCustom(
+					progress = progressForSaturday.value.toFloat() ,
+					progressColor = MaterialTheme.colorScheme.primary ,
+					radius = 20.dp ,
+					label = "S" ,
+					strokeWidth = 6.dp ,
+					strokeBackgroundWidth = 3.dp ,
+					startDelay = 0 ,
+					labelColor = if (progressForSaturday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+							 )
+
+			//sunday
+			ProgressBarCustom(
+					progress = progressForSunday.value.toFloat() ,
+					progressColor = MaterialTheme.colorScheme.primary ,
+					radius = 20.dp ,
+					label = "S" ,
+					strokeWidth = 6.dp ,
+					strokeBackgroundWidth = 3.dp ,
+					startDelay = 0 ,
+					labelColor = if (progressForSunday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+							 )
 		}
 	}
 }

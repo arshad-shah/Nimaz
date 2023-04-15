@@ -19,8 +19,7 @@ class TypeConvertorForListOfDuas
 	fun toLocalDuaList(localDuaList : String) : List<LocalDua>
 	{
 		val gson = Gson()
-		val type = object : TypeToken<List<LocalDua>>()
-		{}.type
+		val type = object : TypeToken<List<LocalDua>>() {}.type
 		return gson.fromJson(localDuaList , type)
 	}
 

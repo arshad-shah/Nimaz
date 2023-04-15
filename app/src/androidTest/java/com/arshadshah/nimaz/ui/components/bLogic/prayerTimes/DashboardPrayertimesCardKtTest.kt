@@ -9,7 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayertimesCard
+import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate

@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT_PAGE
-import com.arshadshah.nimaz.ui.components.bLogic.settings.AuthorDetails
+import com.arshadshah.nimaz.ui.components.settings.AuthorDetails
 
 @Composable
 fun About(paddingValues : PaddingValues)
@@ -73,7 +73,7 @@ fun AppDetails()
 							modifier = Modifier
 								.padding(8.dp)
 								.fillMaxWidth() ,
-							text = "A free ,Ad-free , open-source app for calculating prayer times, qibla direction, and more." ,
+							text = "A free ,Ad-free , app for calculating prayer times, qibla direction, and more." ,
 							style = MaterialTheme.typography.bodyMedium ,
 							textAlign = TextAlign.Center
 						)
