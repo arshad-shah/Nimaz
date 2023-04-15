@@ -5,9 +5,9 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.network.ApiResponse
-import com.arshadshah.nimaz.utils.network.NimazServicesImpl
-import com.arshadshah.nimaz.utils.network.PrayerTimeResponse
+import com.arshadshah.nimaz.utils.api.ApiResponse
+import com.arshadshah.nimaz.utils.api.NimazServicesImpl
+import com.arshadshah.nimaz.utils.api.PrayerTimeResponse
 import io.ktor.client.plugins.*
 import java.io.IOException
 import java.time.Instant
@@ -25,7 +25,10 @@ object PrayerTimesRepository
 	 * @param context the context of the application
 	 * @return ApiResponse<PrayerTimes> the response from the API call see [ApiResponse]
 	 * */
-	suspend fun getPrayerTimes(context : Context) : ApiResponse<PrayerTimes>
+	suspend fun getPrayerTimes(
+		context : Context ,
+		dateForTimes : String = LocalDate.now().toString() ,
+							  ) : ApiResponse<PrayerTimes>
 	{
 
 		//check if the local datastore has been initialized if not initialize it
@@ -38,9 +41,9 @@ object PrayerTimesRepository
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
 		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)
 		val fajrAngle : String =
-			sharedPreferences.getData(AppConstants.FAJR_ANGLE , "(timezoneOffsetHours.toLong())8")
+			sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 		val ishaAngle : String =
-			sharedPreferences.getData(AppConstants.ISHA_ANGLE , "(timezoneOffsetHours.toLong())7")
+			sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
 		val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
 		val calculationMethod : String =
 			sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
@@ -79,7 +82,7 @@ object PrayerTimesRepository
 			val prayerTimesAvailable = dataStore.countPrayerTimes() > 0
 			if (prayerTimesAvailable)
 			{
-				val prayerTimesLocal = dataStore.getPrayerTimesForADate(LocalDate.now().toString())
+				val prayerTimesLocal = dataStore.getPrayerTimesForADate(dateForTimes)
 
 				//check if the date is for current month if not update the prayer times
 				val date = prayerTimesLocal?.date
@@ -141,10 +144,7 @@ object PrayerTimesRepository
 					return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 				}
 
-				if (prayerTimesLocal != null)
-				{
-					return ApiResponse.Success(prayerTimesLocal)
-				}
+				return ApiResponse.Success(prayerTimesLocal)
 			} else
 			{
 				val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
@@ -191,7 +191,6 @@ object PrayerTimesRepository
 				}
 				return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
 			}
-			ApiResponse.Error("Prayer Times Not Available" , null)
 		} catch (e : ClientRequestException)
 		{
 			ApiResponse.Error(e.message , null)

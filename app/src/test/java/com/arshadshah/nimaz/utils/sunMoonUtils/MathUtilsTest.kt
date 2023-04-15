@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.utils.sunMoonUtils
 
+import com.arshadshah.nimaz.utils.sunMoonUtils.utils.MathUtils
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDateTime
@@ -33,7 +34,7 @@ class MathUtilsTest
 	@Test
 	fun toDaysTest() {
 		val date = LocalDateTime.parse("2021-08-16T12:00:00")
-		assertEquals(7898.0, MathUtils.toDays(date), 0.0001)
+		assertEquals(7898.0 , MathUtils.toDays(date) , 0.0001)
 	}
 
 

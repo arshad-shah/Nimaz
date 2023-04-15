@@ -12,8 +12,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Dua
-import com.arshadshah.nimaz.data.remote.viewModel.DuaViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.tasbih.DuaListItem
+import com.arshadshah.nimaz.ui.components.tasbih.DuaListItem
+import com.arshadshah.nimaz.viewModel.DuaViewModel
 import es.dmoral.toasty.Toasty
 
 @Composable
@@ -22,7 +22,7 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 	val context = LocalContext.current
 	val viewModel = viewModel(
 			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			initializer = { DuaViewModel(context) } ,
+			initializer = { DuaViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
@@ -39,7 +39,7 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 		remember { mutableStateOf(sharedPref.getInt("visibleItemIndexDua-${chapterId}" , - 1)) }
 
 	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-	LaunchedEffect(listState.firstVisibleItemIndex)
+	LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })
 	{
 		sharedPref.edit()
 			.putInt("visibleItemIndexDua-${chapterId}" , listState.firstVisibleItemIndex).apply()

@@ -12,23 +12,42 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
-import com.arshadshah.nimaz.data.remote.viewModel.TrackerViewModel
-import com.arshadshah.nimaz.ui.components.ProgressBarCustom
+import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+
+private enum class Level(val color : Color)
+{
+
+	Zero(Color(0xFFEBEDF0)) ,
+	One(Color(0xFF9BE9A8)) ,
+	Two(Color(0xFF40C463)) ,
+	Three(Color(0xFF30A14E)) ,
+	Four(Color(0xFF216E3A)) ,
+}
+
+private fun generateRandomData(startDate : LocalDate , endDate : LocalDate) : Map<LocalDate , Level>
+{
+	val levels = Level.values()
+	return (0 .. ChronoUnit.DAYS.between(startDate , endDate))
+		.associateTo(hashMapOf()) { count ->
+			startDate.plusDays(count) to levels.random()
+		}
+}
 
 @Composable
 fun History()
 {
-
-
 	val viewModel = viewModel(
 			key = TRACKING_VIEWMODEL_KEY ,
 			initializer = { TrackerViewModel() } ,

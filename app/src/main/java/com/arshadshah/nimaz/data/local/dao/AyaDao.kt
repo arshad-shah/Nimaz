@@ -117,4 +117,8 @@ interface AyaDao
 	//get ayat by aya number in surah
 	@Query("SELECT * FROM Aya WHERE ayaNumberInSurah = :ayaNumberInSurah")
 	suspend fun getAyatByAyaNumberInSurah(ayaNumberInSurah : Int) : LocalAya
+
+	//delete all the ayas
+	@Query("DELETE FROM Aya")
+	suspend fun deleteAllAyas()
 }

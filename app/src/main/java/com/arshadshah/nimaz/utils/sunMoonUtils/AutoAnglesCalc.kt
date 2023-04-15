@@ -1,30 +1,36 @@
 package com.arshadshah.nimaz.utils.sunMoonUtils
 
 import android.content.Context
+import android.util.Log
+import com.arshadshah.nimaz.utils.sunMoonUtils.sun.SunAngles
+import java.util.*
 import kotlin.math.roundToInt
 
 class AutoAnglesCalc
 {
 
-	private lateinit var sunCalc : SunMoonCalc
 	fun calculateFajrAngle(context : Context , latitude : Double , longitude : Double) : Int
 	{
-		sunCalc = SunMoonCalc(latitude , longitude)
-		val times = sunCalc.getTimes()
-		val sunPositionAtFajr = sunCalc.getSunPositionForTime(times.nightEnd)
 
-		val altitudeInDegreesFajr = Math.toDegrees(sunPositionAtFajr.altitude).roundToInt()
-		return altitudeInDegreesFajr
+		val timesFromNew = SunAngles.getTimes(Date() , latitude , longitude)
+		val sunPositionAtFajrNew =
+			SunAngles.getPosition(timesFromNew["nauticalDawn"] !! , latitude , longitude)
+		val altitudeInDegreesFajrNew =
+			Math.toDegrees(sunPositionAtFajrNew["altitude"] !!).roundToInt()
+		//all the times
+		Log.d("AutoAnglesCalc" , "times: $timesFromNew")
+
+		return (altitudeInDegreesFajrNew - 3) * - 1
 	}
 
 	fun calculateIshaaAngle(context : Context , latitude : Double , longitude : Double) : Int
 	{
-		sunCalc = SunMoonCalc(latitude , longitude)
-		val times = sunCalc.getTimes()
-		val sunPositionAtIshaa = sunCalc.getSunPositionForTime(times.dusk)
-
-		val altitudeInDegreesIshaa = Math.toDegrees(sunPositionAtIshaa.altitude).roundToInt()
-		return altitudeInDegreesIshaa
+		val timesFromNew = SunAngles.getTimes(Date() , latitude , longitude)
+		val sunPositionAtIsaaNew =
+			SunAngles.getPosition(timesFromNew["nauticalDusk"] !! , latitude , longitude)
+		val altitudeInDegreesIsaaNew =
+			Math.toDegrees(sunPositionAtIsaaNew["altitude"] !!).roundToInt()
+		return (altitudeInDegreesIsaaNew - 3) * - 1
 	}
 
 

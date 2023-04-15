@@ -10,9 +10,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.quran.AyaJuzList
-import com.arshadshah.nimaz.ui.components.bLogic.quran.AyaSurahList
+import com.arshadshah.nimaz.ui.components.quran.AyaJuzList
+import com.arshadshah.nimaz.ui.components.quran.AyaSurahList
+import com.arshadshah.nimaz.viewModel.QuranViewModel
 
 @Composable
 fun AyatScreen(

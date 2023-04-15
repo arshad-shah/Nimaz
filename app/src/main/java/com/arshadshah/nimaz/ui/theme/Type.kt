@@ -16,6 +16,8 @@ val hidayat = FontFamily(Font(R.font.noorehidayat))
 val amiri = FontFamily(Font(R.font.amiri))
 val urduFont = FontFamily(Font(R.font.urdu))
 
+val almajeed = FontFamily(Font(R.font.almajeed))
+
 // Set of Material typography styles to start with these are the default values
 val TypographyMain = Typography(
 		displayLarge = TextStyle(

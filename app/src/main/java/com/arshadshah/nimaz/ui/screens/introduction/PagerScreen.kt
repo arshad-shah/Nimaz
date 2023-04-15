@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -7,14 +8,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 
 @Composable
@@ -49,7 +54,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 				text = onBoardingPage.title ,
 				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
 				fontWeight = FontWeight.Bold ,
-				textAlign = TextAlign.Center
+				textAlign = TextAlign.Center ,
+				color = MaterialTheme.colorScheme.onBackground
 			)
 
 		Text(
@@ -61,7 +67,8 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 				text = onBoardingPage.description ,
 				fontSize = MaterialTheme.typography.bodyMedium.fontSize ,
 				fontWeight = FontWeight.Medium ,
-				textAlign = TextAlign.Center
+				textAlign = TextAlign.Center ,
+				color = MaterialTheme.colorScheme.onBackground
 			)
 		//if onBoardingPage.extra is not {} then show the extra content
 		if (onBoardingPage.extra != null)
@@ -87,6 +94,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 fun FinishButton(
 	modifier : Modifier ,
 	pagerState : PagerState ,
+	areSettingsComplete : Boolean ,
 	onClick : () -> Unit ,
 				)
 {
@@ -102,7 +110,10 @@ fun FinishButton(
 			Button(
 					onClick = onClick ,
 				  ) {
-				Text(text = "Let's Get Started")
+				Text(
+						text = if (areSettingsComplete) "Finish" else "Finish (Incomplete)" ,
+						style = MaterialTheme.typography.labelLarge
+					)
 			}
 		}
 	}
@@ -146,6 +157,37 @@ fun NextButton(
 			  )
 {
 
+	val context = LocalContext.current
+	val viewModel = viewModel(
+			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+			initializer = { SettingsViewModel(context) } ,
+			viewModelStoreOwner = context as ComponentActivity
+							 )
+
+	val locationName = remember {
+		viewModel.locationName
+	}.collectAsState()
+	val longitude = remember {
+		viewModel.longitude
+	}.collectAsState()
+	val latitude = remember {
+		viewModel.latitude
+	}.collectAsState()
+
+	//is location page
+	val isLocationPage = pagerState.currentPage == 5
+
+	val isButtonEnabled = remember {
+		mutableStateOf(!isLocationPage)
+	}
+
+	LaunchedEffect(locationName.value , longitude.value , latitude.value, isLocationPage) {
+		if (isLocationPage)
+		{
+			//if locationName is not empty then go to next page
+			isButtonEnabled.value = locationName.value.isNotEmpty() || (longitude.value != 0.0 && latitude.value != 0.0)
+		}
+	}
 	AnimatedVisibility(
 			visible = pagerState.currentPage != 8
 					  ) {
@@ -154,6 +196,7 @@ fun NextButton(
 					.padding(horizontal = 8.dp)
 					.testTag("introNextButton") ,
 				onClick = onClick ,
+				enabled = isButtonEnabled.value
 			  ) {
 			Text(text = "Next" , style = MaterialTheme.typography.labelLarge)
 		}

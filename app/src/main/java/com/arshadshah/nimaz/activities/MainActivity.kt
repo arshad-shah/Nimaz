@@ -1,8 +1,5 @@
 package com.arshadshah.nimaz.activities
 
-import android.app.ActivityManager
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +10,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +27,7 @@ import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.LICENCES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
@@ -47,19 +44,16 @@ import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.data.remote.viewModel.*
-import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.location.AutoLocationUtils
-import com.arshadshah.nimaz.utils.location.NetworkChecker
-import com.arshadshah.nimaz.widgets.Nimaz
-import com.arshadshah.nimaz.widgets.WidgetService
-import com.arshadshah.nimaz.widgets.updateAppWidget
+import com.arshadshah.nimaz.utils.*
+import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -122,8 +116,7 @@ class MainActivity : ComponentActivity()
 	}
 
 	@OptIn(
-			ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class ,
-			ExperimentalMaterialApi::class
+			ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class
 		  )
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
@@ -136,23 +129,19 @@ class MainActivity : ComponentActivity()
 			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and local data store initialized")
 		}
 
-		val appWidgetManager = AppWidgetManager.getInstance(this)
-		val appWidgetIds : IntArray = appWidgetManager.getAppWidgetIds(
-				ComponentName(
-						this ,
-						Nimaz::class.java
-							 )
-																	  )
-		for (appWidgetId in appWidgetIds)
+		if (! FirebaseLogger.isInitialized())
 		{
-			updateAppWidget(this , appWidgetManager , appWidgetId)
+			FirebaseLogger.init()
+			Log.d(MAIN_ACTIVITY_TAG , "onCreate:  called and firebase logger initialized")
 		}
-		Log.d(MAIN_ACTIVITY_TAG , "onCreate:  app widget updated")
+
+
 
 		super.onCreate(savedInstanceState)
 
 		//this is used to show the full activity on the screen
 		setContent {
+
 			val viewModelSettings = viewModel(
 					key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 					initializer = { SettingsViewModel(this@MainActivity) } ,
@@ -185,18 +174,9 @@ class MainActivity : ComponentActivity()
 
 				"SYSTEM" ->
 				{
-					//if is dark theme is true then it will be dark theme
-					if (isDarkTheme.value)
-					{
-						dynamicTheme.value = false
-						darkTheme.value = isDarkTheme.value
-						themeName.value = "Default"
-					} else
-					{
-						dynamicTheme.value = false
-						darkTheme.value = isSystemInDarkTheme()
-						themeName.value = "Default"
-					}
+					dynamicTheme.value = true
+					darkTheme.value = isSystemInDarkTheme()
+					themeName.value = "Default"
 				}
 
 				"DEFAULT" ->
@@ -247,6 +227,7 @@ class MainActivity : ComponentActivity()
 					route.value = destination.route
 				}
 				val (menuOpen , setMenuOpen) = remember { mutableStateOf(false) }
+				val (menuOpen2 , setMenuOpen2) = remember { mutableStateOf(false) }
 				val CustomAnimation = remember { CustomAnimation() }
 
 				val vibrationAllowed = remember { mutableStateOf(true) }
@@ -271,14 +252,6 @@ class MainActivity : ComponentActivity()
 						}
 					}
 				}
-
-
-//				this.startService(Intent(this , WidgetService::class.java))
-
-				Log.d(
-						MAIN_ACTIVITY_TAG ,
-						"Is service running: " + isMyServiceRunning(WidgetService::class.java).toString()
-					 )
 
 				val viewModelTasbih = viewModel(
 						key = TASBIH_VIEWMODEL_KEY ,
@@ -331,6 +304,8 @@ class MainActivity : ComponentActivity()
 									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
 									content = {
 										TopAppBar(
+												modifier = Modifier
+													.testTag("topAppBar") ,
 												title = {
 													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
 													{
@@ -350,6 +325,9 @@ class MainActivity : ComponentActivity()
 													} else
 													{
 														Text(
+																modifier = Modifier
+																	.testTag("topAppBarText")
+																	.padding(start = 8.dp) ,
 																text = processPageTitle(
 																		route.value.toString() ,
 																		navController
@@ -359,20 +337,24 @@ class MainActivity : ComponentActivity()
 													}
 												} ,
 												navigationIcon = {
-													IconButton(onClick = {
-														Log.d(
-																MAIN_ACTIVITY_TAG ,
-																"onCreate:  back button pressed"
-															 )
-														Log.d(
-																MAIN_ACTIVITY_TAG ,
-																"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
-															 )
-														navController.navigateUp()
-													}) {
+													OutlinedIconButton(
+															modifier = Modifier
+																.testTag("backButton")
+																.padding(start = 8.dp) ,
+															onClick = {
+																Log.d(
+																		MAIN_ACTIVITY_TAG ,
+																		"onCreate:  back button pressed"
+																	 )
+																Log.d(
+																		MAIN_ACTIVITY_TAG ,
+																		"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
+																	 )
+																navController.navigateUp()
+															}) {
 														Icon(
-																modifier = Modifier.size(20.dp) ,
-																painter = painterResource(id = R.drawable.angle_left_icon) ,
+																modifier = Modifier.size(24.dp) ,
+																painter = painterResource(id = R.drawable.back_icon) ,
 																contentDescription = "Back"
 															)
 													}
@@ -397,6 +379,23 @@ class MainActivity : ComponentActivity()
 																	menuOpen = menuOpen ,
 																	setMenuOpen = setMenuOpen ,
 																	)
+														}
+
+														QURAN_SCREEN_ROUTE ->
+														{
+															IconButton(onClick = {
+																setMenuOpen2(true)
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.settings_sliders_icon) ,
+																		contentDescription = "Menu"
+																	)
+															}
+															MoreMenuMain(
+																	menuOpen = menuOpen2 ,
+																	setMenuOpen = setMenuOpen2 ,
+																		)
 														}
 
 														NAMESOFALLAH_SCREEN_ROUTE ->
@@ -497,10 +496,10 @@ class MainActivity : ComponentActivity()
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
 																		painter = if (vibrationAllowed.value) painterResource(
-																				id = R.drawable.vibration
+																				id = R.drawable.phone_vibration_off_icon
 																															 )
 																		else painterResource(
-																				id = R.drawable.cross_icon
+																				id = R.drawable.phone_vibration_on_icon
 																							) ,
 																		contentDescription = "Vibration"
 																	)
@@ -535,6 +534,7 @@ class MainActivity : ComponentActivity()
 									content = {
 										BottomNavigationBar(navController = navController)
 									})
+
 						}
 						) { it ->
 					NavigationGraph(navController = navController , it)
@@ -617,6 +617,8 @@ class MainActivity : ComponentActivity()
 				}
 			}
 
+			LICENCES_SCREEN_ROUTE -> "Open Source Libraries"
+
 			else -> ""
 		}
 	}
@@ -640,25 +642,12 @@ class MainActivity : ComponentActivity()
 				QIBLA_SCREEN_ROUTE ,
 				AppConstants.TASBIH_LIST_SCREEN ,
 				MY_QURAN_SCREEN_ROUTE ,
-				WEB_VIEW_SCREEN_ROUTE
+				WEB_VIEW_SCREEN_ROUTE ,
+				LICENCES_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
 	}
-
-	private fun isMyServiceRunning(serviceClass : Class<*>) : Boolean
-	{
-		val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-		for (service in manager.getRunningServices(Int.MAX_VALUE))
-		{
-			if (serviceClass.name == service.service.className)
-			{
-				return true
-			}
-		}
-		return false
-	}
-
 }
 
 class CustomAnimation

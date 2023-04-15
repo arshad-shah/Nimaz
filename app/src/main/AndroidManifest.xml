@@ -8,21 +8,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <queries>
-        <intent>
-            <action android:name="android.speech.RecognitionService" />
-        </intent>
-    </queries>
 
     <application
         android:allowBackup="true"
@@ -37,25 +29,18 @@
         android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+        <receiver
+            android:name=".utils.recievers.MissedPrayerReciever"
+            android:enabled="true"
+            android:exported="false" />
 
         <meta-data
             android:name="firebase_performance_logcat_enabled"
             android:value="true" />
 
         <service
-            android:name=".widgets.WidgetService"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="TODO" />
-        <service
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
             android:enabled="true" />
-
-        <activity
-            android:name=".activities.ZakatCalculator"
-            android:exported="false"
-            android:label="@string/title_activity_zakat_calculator"
-            android:theme="@style/Theme.Nimaz" />
 
         <receiver
             android:name=".widgets.Nimaz"
@@ -79,10 +64,6 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".utils.recievers.ResetAdhansReciever"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
             android:name=".utils.recievers.AdhanReciever"
             android:enabled="true"
             android:exported="true"
@@ -93,8 +74,7 @@
             android:exported="false"
             android:label="@string/title_activity_introduction"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz">
-        </activity>
+            android:theme="@style/Theme.Nimaz" />
         <activity
             android:name=".activities.RoutingActivity"
             android:exported="true"
@@ -111,6 +91,7 @@
             android:exported="true"
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
+            android:hardwareAccelerated="true"
             android:theme="@style/Theme.Nimaz" />
     </application>
 
