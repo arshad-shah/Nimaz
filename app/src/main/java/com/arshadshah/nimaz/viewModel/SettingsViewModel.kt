@@ -234,7 +234,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 			{
 				_locationName.value = event.location
 				sharedPreferences.saveData(AppConstants.LOCATION_INPUT , event.location)
-				loadLocation(event.context , sharedPreferences.getDataBoolean(LOCATION_TYPE , true))
+				forwardGeocode(event.location)
 				Log.d("Nimaz: SettingsViewModel" , "Location input : ${event.location}")
 			}
 
@@ -555,7 +555,9 @@ class SettingsViewModel(context : Context) : ViewModel()
 							AutoLocationUtils.init(context)
 							AutoLocationUtils.startLocationUpdates()
 						}
+						AutoLocationUtils.getLastKnownLocation()
 						AutoLocationUtils.setLocationDataCallback { location ->
+							Log.d("Nimaz: SettingsViewModel" , "Location : $location")
 							sharedPreferences.saveData(
 									AppConstants.LATITUDE ,
 									location.latitude.toString()
@@ -564,6 +566,10 @@ class SettingsViewModel(context : Context) : ViewModel()
 									AppConstants.LONGITUDE ,
 									location.longitude.toString()
 													  )
+							Log.d(
+									"Nimaz: SettingsViewModel" ,
+									"Location saved : ${location.latitude} , ${location.longitude}"
+								 )
 							reverseGeocode(location.latitude , location.longitude)
 						}
 					} else
@@ -597,7 +603,6 @@ class SettingsViewModel(context : Context) : ViewModel()
 	fun reverseGeocode(latitude : Double , longitude : Double)
 	{
 		Log.d("Nimaz: reverseGeocode" , "reverseGeocode")
-		_locationName.value = "Loading..."
 		try
 		{
 			val gcd = geocoder.getFromLocation(latitude , longitude , 1)
@@ -611,17 +616,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 				{
 					_locationName.value = address.locality
 					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.locality)
-					_isLoading.value = false
 				} else if (address.adminArea != null)
 				{
 					_locationName.value = address.adminArea
 					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.adminArea)
-					_isLoading.value = false
 				} else
 				{
 					_locationName.value = address.countryName
 					sharedPreferences.saveData(AppConstants.LOCATION_INPUT , address.countryName)
-					_isLoading.value = false
 				}
 				_latitude.value = latitude
 				_longitude.value = longitude

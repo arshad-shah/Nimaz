@@ -60,9 +60,6 @@ fun LocationSettings(isIntro : Boolean = false)
 			initializer = { PrayerTimesViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 										)
-	val isLocationAuto = remember {
-		viewModel.isLocationAuto
-	}.collectAsState()
 
 	val locationNameState = remember {
 		viewModel.locationName
@@ -74,9 +71,6 @@ fun LocationSettings(isIntro : Boolean = false)
 
 	val longitudeState = remember {
 		viewModel.longitude
-	}.collectAsState()
-	val isLoading = remember {
-		viewModel.isLoading
 	}.collectAsState()
 
 	val isError = remember {
@@ -208,19 +202,8 @@ fun LocationSettings(isIntro : Boolean = false)
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth()
-							.placeholder(
-									visible = isLoading.value ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										)
 							) {
-					ManualLocationInput(
-							handleSettingEvents = viewModel::handleEvent ,
-							locationNameState = locationNameState ,
-									   )
+					ManualLocationInput()
 				}
 			}
 		} else
@@ -242,19 +225,8 @@ fun LocationSettings(isIntro : Boolean = false)
 								modifier = Modifier
 									.padding(8.dp)
 									.fillMaxWidth()
-									.placeholder(
-											visible = isLoading.value ,
-											color = MaterialTheme.colorScheme.outline ,
-											shape = RoundedCornerShape(4.dp) ,
-											highlight = PlaceholderHighlight.shimmer(
-													highlightColor = Color.White ,
-																					)
-												)
 									) {
-							ManualLocationInput(
-									handleSettingEvents = viewModel::handleEvent ,
-									locationNameState = locationNameState ,
-											   )
+							ManualLocationInput()
 						}
 						CoordinatesView(
 								longitudeState = longitudeState ,
@@ -518,40 +490,56 @@ fun LocationToggleSwitch(
 		//if locationNameState is longer than 10 characters, than add an ellipsis
 		val locationName = if (locationNameState.value.length > 15)
 		{
-			locationNameState.value.substring(0 , 15) + "..."
-		} else
-		{
-			locationNameState.value
-		}
-		if (locationNameState.value.isBlank())
-		{
-			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth()
-						) {
-				Text(
-						textAlign = TextAlign.Center ,
-						text = "Current Location: Loading..." ,
-						modifier = Modifier.padding(16.dp) ,
-						style = MaterialTheme.typography.bodyMedium
-					)
+			if (isLoading.value)
+			{
+				"Loading..."
+			} else
+			{
+				locationNameState.value.substring(0 , 15) + "..."
 			}
 		} else
 		{
-			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth()
-						) {
-				Text(
-						textAlign = TextAlign.Center ,
-						text = "Current Location: $locationName" ,
-						modifier = Modifier.padding(16.dp) ,
-						style = MaterialTheme.typography.bodyMedium
-					)
+			if (isLoading.value)
+			{
+				"Loading..."
+			} else
+			{
+				locationNameState.value
+			}
+		}
+		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth()
+					) {
+			SettingsMenuLink(
+					icon = {
+						Icon(
+								modifier = Modifier.size(24.dp) ,
+								painter = painterResource(id = R.drawable.target_icon) ,
+								contentDescription = "Location"
+							)
+					} ,
+					title = {
+						Text(
+								textAlign = TextAlign.Center ,
+								text = locationName ,
+								modifier = Modifier
+									.padding(16.dp)
+									.placeholder(
+											visible = isLoading.value ,
+											color = MaterialTheme.colorScheme.outline ,
+											shape = RoundedCornerShape(4.dp) ,
+											highlight = PlaceholderHighlight.shimmer(
+													highlightColor = Color.White ,
+																					)
+
+												) ,
+								style = MaterialTheme.typography.bodyMedium
+							)
+					}) {
+
 			}
 		}
 	}
