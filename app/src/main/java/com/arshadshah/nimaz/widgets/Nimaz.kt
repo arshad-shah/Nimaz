@@ -13,7 +13,7 @@ import com.arshadshah.nimaz.activities.RoutingActivity
 import com.arshadshah.nimaz.constants.AppConstants.WIDGET_PENDING_INTENT_REQUEST_CODE
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
-import com.arshadshah.nimaz.utils.network.ApiResponse
+import com.arshadshah.nimaz.utils.api.ApiResponse
 import kotlinx.coroutines.runBlocking
 import java.time.format.DateTimeFormatter
 

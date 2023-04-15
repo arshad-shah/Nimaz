@@ -16,12 +16,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.ui.FeatureDropdownItem
-import com.arshadshah.nimaz.ui.components.ui.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.ui.trackers.SwipeBackground
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
+import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalMaterial3Api::class , ExperimentalMaterialApi::class)

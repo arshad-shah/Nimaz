@@ -44,18 +44,16 @@ import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.data.remote.viewModel.*
-import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenu
-import com.arshadshah.nimaz.ui.components.ui.quran.MoreMenuMain
+import com.arshadshah.nimaz.ui.components.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.arshadshah.nimaz.utils.FirebaseLogger
-import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.location.AutoLocationUtils
-import com.arshadshah.nimaz.utils.location.NetworkChecker
+import com.arshadshah.nimaz.utils.*
+import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -143,6 +141,7 @@ class MainActivity : ComponentActivity()
 
 		//this is used to show the full activity on the screen
 		setContent {
+
 			val viewModelSettings = viewModel(
 					key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
 					initializer = { SettingsViewModel(this@MainActivity) } ,
@@ -305,6 +304,8 @@ class MainActivity : ComponentActivity()
 									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
 									content = {
 										TopAppBar(
+												modifier = Modifier
+													.testTag("topAppBar") ,
 												title = {
 													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
 													{
@@ -324,6 +325,9 @@ class MainActivity : ComponentActivity()
 													} else
 													{
 														Text(
+																modifier = Modifier
+																	.testTag("topAppBarText")
+																	.padding(start = 8.dp) ,
 																text = processPageTitle(
 																		route.value.toString() ,
 																		navController
@@ -333,20 +337,24 @@ class MainActivity : ComponentActivity()
 													}
 												} ,
 												navigationIcon = {
-													IconButton(onClick = {
-														Log.d(
-																MAIN_ACTIVITY_TAG ,
-																"onCreate:  back button pressed"
-															 )
-														Log.d(
-																MAIN_ACTIVITY_TAG ,
-																"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
-															 )
-														navController.navigateUp()
-													}) {
+													OutlinedIconButton(
+															modifier = Modifier
+																.testTag("backButton")
+																.padding(start = 8.dp) ,
+															onClick = {
+																Log.d(
+																		MAIN_ACTIVITY_TAG ,
+																		"onCreate:  back button pressed"
+																	 )
+																Log.d(
+																		MAIN_ACTIVITY_TAG ,
+																		"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
+																	 )
+																navController.navigateUp()
+															}) {
 														Icon(
-																modifier = Modifier.size(20.dp) ,
-																painter = painterResource(id = R.drawable.angle_left_icon) ,
+																modifier = Modifier.size(24.dp) ,
+																painter = painterResource(id = R.drawable.back_icon) ,
 																contentDescription = "Back"
 															)
 													}
@@ -488,10 +496,10 @@ class MainActivity : ComponentActivity()
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
 																		painter = if (vibrationAllowed.value) painterResource(
-																				id = R.drawable.vibration
+																				id = R.drawable.phone_vibration_off_icon
 																															 )
 																		else painterResource(
-																				id = R.drawable.cross_icon
+																				id = R.drawable.phone_vibration_on_icon
 																							) ,
 																		contentDescription = "Vibration"
 																	)
@@ -526,6 +534,7 @@ class MainActivity : ComponentActivity()
 									content = {
 										BottomNavigationBar(navController = navController)
 									})
+
 						}
 						) { it ->
 					NavigationGraph(navController = navController , it)

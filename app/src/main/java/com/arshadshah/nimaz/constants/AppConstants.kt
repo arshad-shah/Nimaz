@@ -3,10 +3,7 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
-	const val LICENCES_SCREEN_ROUTE : String = "Licences"
-	const val UPDATE_WIDGET_ACTION : String = "com.arshadshah.nimaz.UPDATE_WIDGET"
 	private const val BASE_URL = "https://nimazapi.arshadshah.online/api"
-//	private const val BASE_URL = "http://192.168.0.62:8000/api"
 
 	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/custom"
 	const val PRAYER_TIMES_MONTHLY_URL = "$BASE_URL/prayertimes/monthly"
@@ -19,8 +16,6 @@ object AppConstants
 	const val QURAN_JUZ_URL = "$BASE_URL/quran/juzs/"
 	const val QURAN_SURAH_AYAT_URL = "$BASE_URL/quran/surah/{surahNumber}/{translationLanguage}"
 	const val QURAN_JUZ_AYAT_URL = "$BASE_URL/quran/juz/{juzNumber}/{translationLanguage}"
-
-	const val QIBLA_URL = "$BASE_URL/prayertimes/qibla"
 
 	const val DUA_CHAPTERS_URL = "$BASE_URL/Duas/chapters"
 	const val DUA_CHAPTER_URL = "$BASE_URL/Duas/chapter/{chapterId}"
@@ -37,7 +32,6 @@ object AppConstants
 	const val SCREEN_ANIMATION_DURATION_Exit = 300
 
 	//pref keys
-	const val LOGIN_TOKEN = "login_token"
 	const val ARABIC_FONT_SIZE = "ArabicFontSize"
 	const val TRANSLATION_FONT_SIZE = "TranslationFontSize"
 	const val IS_FIRST_INSTALL = "isFirstInstall"
@@ -69,7 +63,6 @@ object AppConstants
 	const val DARK_MODE : String = "darkMode"
 	const val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String =
 		"randomAyatNumberInSurahLastFetched"
-	const val RANDOM_AYAT_LAST_FETCHED : String = "randomAyatLastFetched"
 
 
 	//viewmodel keys
@@ -114,7 +107,6 @@ object AppConstants
 	const val MAGHRIB_PI_REQUEST_CODE = 1004
 	const val ISHA_PI_REQUEST_CODE = 1005
 	const val TEST_PI_REQUEST_CODE = 1006
-	const val MISSED_PRAYER_PI_REQUEST_CODE = 1007
 
 	//channels titles
 	const val CHANNEL_FAJR = "Fajr"
@@ -138,20 +130,11 @@ object AppConstants
 	const val CHANNEL_DESC_MISSED_PRAYER = "Missed Prayer Notification"
 
 
-	//pending intent request codes
-	const val RESET_PENDING_INTENT_REQUEST_CODE = 7
-
 	//widget pending intent request codes
 	const val WIDGET_PENDING_INTENT_REQUEST_CODE = 9
 
 	//notification pending intent request codes
 	const val NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 8
-
-	//auto location permission request code
-	const val AUTO_LOCATION_PERMISSION_REQUEST_CODE = 10
-
-	//notification permission request code
-	const val NOTIFICATION_PERMISSION_REQUEST_CODE = 11
 
 	const val PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE = 12
 
@@ -186,6 +169,7 @@ object AppConstants
 	const val DASHBOARD_SCREEN = "dashboard_screen"
 	const val TASBIH_LIST_SCREEN = "tasbih_list_screen"
 	const val WEB_VIEW_SCREEN_ROUTE = "web_view_screen/{url}"
+	const val LICENCES_SCREEN_ROUTE : String = "Licences"
 
 	//Test tags
 	//navigation tags
@@ -260,9 +244,6 @@ object AppConstants
 
 	//data store tag
 	const val DATA_STORE_TAG = "$TAG: DataStore"
-
-	//ResetAdhansReciever
-	const val RESET_ADHANS_RECEIVER_TAG = "$TAG: ResetAdhansReciever"
 
 	//BootReciever
 	const val BOOT_RECEIVER_TAG = "$TAG: BootReciever"

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
@@ -32,17 +34,17 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_PI_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
-import com.arshadshah.nimaz.data.remote.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.data.remote.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceBooleanSettingState
-import com.arshadshah.nimaz.ui.components.bLogic.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.components.ui.intro.BatteryExemptionUI
-import com.arshadshah.nimaz.ui.components.ui.intro.NotificationScreenUI
-import com.arshadshah.nimaz.ui.components.ui.settings.*
+import com.arshadshah.nimaz.ui.components.common.BatteryExemptionUI
+import com.arshadshah.nimaz.ui.components.common.NotificationScreenUI
+import com.arshadshah.nimaz.ui.components.settings.*
+import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
+import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -146,6 +148,15 @@ fun SettingsScreen(
 								contentDescription = "Prayer Times settings"
 							)
 					} ,
+					action = {
+						Icon(
+								modifier = Modifier
+									.size(24.dp)
+									.padding(2.dp) ,
+								painter = painterResource(id = R.drawable.angle_right_icon) ,
+								contentDescription = "Update Available"
+							)
+					}
 							)
 		}
 
@@ -204,20 +215,22 @@ fun SettingsScreen(
 															 )
 							} ,
 							icon = {
-								if (stateDarkMode.value)
-								{
-									Icon(
-											modifier = Modifier.size(24.dp) ,
-											painter = painterResource(id = R.drawable.dark_icon) ,
-											contentDescription = "Dark Mode"
-										)
-								} else
-								{
-									Icon(
-											modifier = Modifier.size(24.dp) ,
-											painter = painterResource(id = R.drawable.light_icon) ,
-											contentDescription = "Light Mode"
-										)
+								Crossfade(targetState = stateDarkMode.value) { darkMode ->
+									if (darkMode)
+									{
+										Icon(
+												modifier = Modifier.size(24.dp) ,
+												painter = painterResource(id = R.drawable.dark_icon) ,
+												contentDescription = "Dark Mode"
+											)
+									} else
+									{
+										Icon(
+												modifier = Modifier.size(24.dp) ,
+												painter = painterResource(id = R.drawable.light_icon) ,
+												contentDescription = "Light Mode"
+											)
+									}
 								}
 							}
 								  )
@@ -395,6 +408,15 @@ fun SettingsScreen(
 									contentDescription = "Settings for notification"
 								)
 						} ,
+						action = {
+							Icon(
+									modifier = Modifier
+										.size(24.dp)
+										.padding(2.dp) ,
+									painter = painterResource(id = R.drawable.angle_right_icon) ,
+									contentDescription = "Update Available"
+								)
+						}
 								)
 			}
 
@@ -427,6 +449,15 @@ fun SettingsScreen(
 									contentDescription = "Privacy Policy"
 								)
 						} ,
+						action = {
+							Icon(
+									modifier = Modifier
+										.size(24.dp)
+										.padding(2.dp) ,
+									painter = painterResource(id = R.drawable.angle_right_icon) ,
+									contentDescription = "Update Available"
+								)
+						}
 								)
 			}
 
@@ -448,6 +479,15 @@ fun SettingsScreen(
 									contentDescription = "Privacy Policy"
 								)
 						} ,
+						action = {
+							Icon(
+									modifier = Modifier
+										.size(24.dp)
+										.padding(2.dp) ,
+									painter = painterResource(id = R.drawable.angle_right_icon) ,
+									contentDescription = "Update Available"
+								)
+						}
 								)
 			}
 		}
@@ -470,6 +510,15 @@ fun SettingsScreen(
 								contentDescription = "Help documentation"
 							)
 					} ,
+					action = {
+						Icon(
+								modifier = Modifier
+									.size(24.dp)
+									.padding(2.dp) ,
+								painter = painterResource(id = R.drawable.angle_right_icon) ,
+								contentDescription = "Update Available"
+							)
+					}
 							)
 		}
 
@@ -480,7 +529,13 @@ fun SettingsScreen(
 					.fillMaxWidth()
 					) {
 			SettingsMenuLink(
-					title = { Text(text = "License & Acknowledgements") } ,
+					title = {
+						Text(
+								text = "License & Acknowledgements" ,
+								maxLines = 1 ,
+								overflow = TextOverflow.Ellipsis
+							)
+					} ,
 					//version of the app
 					subtitle = { Text(text = "Open source libraries") } ,
 					onClick = {
@@ -493,6 +548,15 @@ fun SettingsScreen(
 								contentDescription = "License & Acknowledgements"
 							)
 					} ,
+					action = {
+						Icon(
+								modifier = Modifier
+									.size(24.dp)
+									.padding(2.dp) ,
+								painter = painterResource(id = R.drawable.angle_right_icon) ,
+								contentDescription = "Update Available"
+							)
+					}
 							)
 		}
 
@@ -532,6 +596,15 @@ fun SettingsScreen(
 								  ) {
 								Text(text = "Update")
 							}
+						} else
+						{
+							Icon(
+									modifier = Modifier
+										.size(24.dp)
+										.padding(2.dp) ,
+									painter = painterResource(id = R.drawable.angle_right_icon) ,
+									contentDescription = "Update Available"
+								)
 						}
 					}
 							)

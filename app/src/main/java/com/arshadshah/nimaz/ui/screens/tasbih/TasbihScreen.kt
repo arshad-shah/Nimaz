@@ -11,9 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_TASBIH
-import com.arshadshah.nimaz.ui.components.bLogic.tasbih.Counter
-import com.arshadshah.nimaz.ui.components.bLogic.tasbih.CustomCounter
-import com.arshadshah.nimaz.ui.components.bLogic.tasbih.TasbihRow
+import com.arshadshah.nimaz.ui.components.tasbih.Counter
+import com.arshadshah.nimaz.ui.components.tasbih.CustomCounter
+import com.arshadshah.nimaz.ui.components.tasbih.TasbihRow
 
 @Composable
 fun TasbihScreen(

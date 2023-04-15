@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
@@ -84,6 +84,8 @@ fun Licences(paddingValues : PaddingValues)
 	if (openDialog.value)
 	{
 		AlertDialogNimaz(
+				topDivider = false ,
+				bottomDivider = false ,
 				action = {
 					val website = libraryToShow.value?.website
 					if (website != null)
@@ -110,7 +112,7 @@ fun Licences(paddingValues : PaddingValues)
 											)
 						}
 					}
-				},
+				} ,
 				contentHeight = 400.dp ,
 				contentDescription = libraryToShow.value?.name ?: "Library" ,
 				title = libraryToShow.value?.name ?: "Library" ,
@@ -121,6 +123,9 @@ fun Licences(paddingValues : PaddingValues)
 							html = if (isLicenseEmpty) "No license found" else libraryToShow.value?.licenses?.firstOrNull()?.htmlReadyLicenseContent
 								?: "No license found" ,
 							color = MaterialTheme.colorScheme.onSurface ,
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(8.dp)
 							)
 				} ,
 				onDismissRequest = {
@@ -189,7 +194,7 @@ fun LibraryItem(
 							.weight(1f) ,
 						style = MaterialTheme.typography.titleMedium ,
 						maxLines = 1 ,
-						overflow = TextOverflow.Ellipsis,
+						overflow = TextOverflow.Ellipsis ,
 						color = MaterialTheme.colorScheme.onSurface ,
 					)
 				Spacer(modifier = Modifier.width(8.dp))
@@ -199,7 +204,7 @@ fun LibraryItem(
 					Text(
 							version ,
 							style = MaterialTheme.typography.bodySmall ,
-							textAlign = TextAlign.Center,
+							textAlign = TextAlign.Center ,
 							color = MaterialTheme.colorScheme.onSurface ,
 						)
 				}

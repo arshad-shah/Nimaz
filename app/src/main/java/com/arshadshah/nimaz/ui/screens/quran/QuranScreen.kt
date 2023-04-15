@@ -24,9 +24,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN
-import com.arshadshah.nimaz.data.remote.viewModel.QuranViewModel
-import com.arshadshah.nimaz.ui.components.bLogic.quran.JuzList
-import com.arshadshah.nimaz.ui.components.bLogic.quran.SurahList
+import com.arshadshah.nimaz.ui.components.quran.JuzList
+import com.arshadshah.nimaz.ui.components.quran.SurahList
+import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
