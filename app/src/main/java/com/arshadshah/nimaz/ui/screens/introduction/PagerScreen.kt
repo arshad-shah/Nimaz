@@ -98,60 +98,27 @@ fun FinishButton(
 	onClick : () -> Unit ,
 				)
 {
-	Row(
-			modifier = modifier
-				.padding(horizontal = 8.dp) ,
-			verticalAlignment = Alignment.Top ,
-			horizontalArrangement = Arrangement.Center
-	   ) {
 		AnimatedVisibility(
-				visible = pagerState.currentPage == 8
+				visible = pagerState.currentPage == 7
 						  ) {
 			Button(
+					modifier = modifier
+						.padding(horizontal = 8.dp)
+						.testTag("introFinishButton") ,
 					onClick = onClick ,
 				  ) {
 				Text(
 						text = if (areSettingsComplete) "Finish" else "Finish (Incomplete)" ,
-						style = MaterialTheme.typography.labelLarge
 					)
 			}
 		}
-	}
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@ExperimentalAnimationApi
-@Composable
-fun BackButton(
-	modifier : Modifier ,
-	pagerState : PagerState ,
-	onClick : () -> Unit ,
-			  )
-{
-	Row(
-			modifier = modifier ,
-			verticalAlignment = Alignment.Top ,
-			horizontalArrangement = Arrangement.Start
-	   ) {
-		AnimatedVisibility(
-				visible = pagerState.currentPage != 0
-						  ) {
-			Button(
-					modifier = Modifier
-						.padding(horizontal = 8.dp)
-						.testTag("introBackButton") ,
-					onClick = onClick ,
-				  ) {
-				Text(text = "Back" , style = MaterialTheme.typography.labelLarge)
-			}
-		}
-	}
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
 @Composable
 fun NextButton(
+	modifier : Modifier ,
 	pagerState : PagerState ,
 	onClick : () -> Unit ,
 			  )
@@ -173,12 +140,20 @@ fun NextButton(
 	val latitude = remember {
 		viewModel.latitude
 	}.collectAsState()
+	val notificationAllowed = remember {
+		viewModel.areNotificationsAllowed
+	}.collectAsState()
 
 	//is location page
-	val isLocationPage = pagerState.currentPage == 5
+	val isLocationPage = pagerState.currentPage == 4
+	val isNotificationPage = pagerState.currentPage == 3
 
 	val isButtonEnabled = remember {
 		mutableStateOf(!isLocationPage)
+	}
+
+	val textForButton = remember {
+		mutableStateOf("Next")
 	}
 
 	LaunchedEffect(locationName.value , longitude.value , latitude.value, isLocationPage) {
@@ -188,17 +163,26 @@ fun NextButton(
 			isButtonEnabled.value = locationName.value.isNotEmpty() || (longitude.value != 0.0 && latitude.value != 0.0)
 		}
 	}
+
+	LaunchedEffect(isNotificationPage, notificationAllowed.value) {
+		if (isNotificationPage)
+		{
+			textForButton.value = if (notificationAllowed.value) "Next" else "Skip"
+		}else{
+			textForButton.value = "Next"
+		}
+	}
 	AnimatedVisibility(
-			visible = pagerState.currentPage != 8
+			visible = pagerState.currentPage != 7
 					  ) {
 		Button(
-				modifier = Modifier
+				modifier = modifier
 					.padding(horizontal = 8.dp)
 					.testTag("introNextButton") ,
 				onClick = onClick ,
 				enabled = isButtonEnabled.value
 			  ) {
-			Text(text = "Next" , style = MaterialTheme.typography.labelLarge)
+			Text(text = textForButton.value)
 		}
 	}
 }

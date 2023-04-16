@@ -155,4 +155,6 @@ dependencies {
 
     //org.slf4j.impl.StaticLoggerBinder
     implementation 'org.slf4j:slf4j-android:1.7.30'
+
+    implementation 'nl.dionsegijn:konfetti-compose:2.0.2'
 }
