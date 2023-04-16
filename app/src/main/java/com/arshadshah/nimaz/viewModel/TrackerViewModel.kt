@@ -77,6 +77,44 @@ class TrackerViewModel : ViewModel()
 	private var _isFasting = MutableStateFlow(false)
 	val isFasting = _isFasting.asStateFlow()
 
+	//state for month progress
+	private val _progressForMonth = MutableStateFlow(mutableListOf<PrayerTracker>())
+	val progressForMonth = _progressForMonth.asStateFlow()
+
+	//fast progress for month
+	private val _fastProgressForMonth = MutableStateFlow(mutableListOf<FastTracker>())
+	val fastProgressForMonth = _fastProgressForMonth.asStateFlow()
+
+	//progress for monday
+	private val _progressForMonday = MutableStateFlow(0)
+	val progressForMonday = _progressForMonday.asStateFlow()
+
+	//progress for tuesday
+	private val _progressForTuesday = MutableStateFlow(0)
+	val progressForTuesday = _progressForTuesday.asStateFlow()
+
+	//progress for wednesday
+	private val _progressForWednesday = MutableStateFlow(0)
+	val progressForWednesday = _progressForWednesday.asStateFlow()
+
+	//progress for thursday
+	private val _progressForThursday = MutableStateFlow(0)
+	val progressForThursday = _progressForThursday.asStateFlow()
+
+	//progress for friday
+	private val _progressForFriday = MutableStateFlow(0)
+	val progressForFriday = _progressForFriday.asStateFlow()
+
+	//progress for saturday
+	private val _progressForSaturday = MutableStateFlow(0)
+	val progressForSaturday = _progressForSaturday.asStateFlow()
+
+	//progress for sunday
+	private val _progressForSunday = MutableStateFlow(0)
+	val progressForSunday = _progressForSunday.asStateFlow()
+
+
+
 
 	//event for the tracker for prayer
 	sealed class TrackerEvent
@@ -111,6 +149,9 @@ class TrackerViewModel : ViewModel()
 
 		//update a days progress
 		class UPDATE_PROGRESS_FOR_DAY(val day : DayOfWeek , val progress : Int) : TrackerEvent()
+
+		//progress of fast fro month
+		class GET_FAST_PROGRESS_FOR_MONTH(val date : String) : TrackerEvent()
 	}
 
 	fun onEvent(event : TrackerEvent)
@@ -134,42 +175,40 @@ class TrackerViewModel : ViewModel()
 																		   )
 
 			is TrackerEvent.GET_PROGRESS_FOR_MONTH -> getProgressForMonth(event.date)
+			is TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH -> getFastProgressForMonth(event.date)
 		}
 	}
 
+	private fun getFastProgressForMonth(date : String)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			val dataStore = LocalDataStore.getDataStore()
+			//first day of the month
+			val firstDayOfMonth = LocalDate.parse(date).withDayOfMonth(1)
+			val lastDayOfMonth =
+				LocalDate.parse(date).withDayOfMonth(LocalDate.parse(date).lengthOfMonth())
 
-	//state for month progress
-	private val _progressForMonth = MutableStateFlow(mutableListOf<PrayerTracker>())
-	val progressForMonth = _progressForMonth.asStateFlow()
+			val trackers = mutableListOf<FastTracker>()
 
-	//progress for monday
-	private val _progressForMonday = MutableStateFlow(0)
-	val progressForMonday = _progressForMonday.asStateFlow()
+			//get all trackers for the month
+			for (i in firstDayOfMonth.dayOfMonth .. lastDayOfMonth.dayOfMonth)
+			{
+				val date = firstDayOfMonth.withDayOfMonth(i).toString()
+				val trackerExists = dataStore.fastTrackerExistsForDate(date)
+				if (trackerExists)
+				{
+					val tracker = dataStore.getFastTrackerForDate(date)
+					trackers.add(tracker)
+				} else
+				{
+					val tracker = FastTracker(date , false)
+					trackers.add(tracker)
+				}
+			}
 
-	//progress for tuesday
-	private val _progressForTuesday = MutableStateFlow(0)
-	val progressForTuesday = _progressForTuesday.asStateFlow()
-
-	//progress for wednesday
-	private val _progressForWednesday = MutableStateFlow(0)
-	val progressForWednesday = _progressForWednesday.asStateFlow()
-
-	//progress for thursday
-	private val _progressForThursday = MutableStateFlow(0)
-	val progressForThursday = _progressForThursday.asStateFlow()
-
-	//progress for friday
-	private val _progressForFriday = MutableStateFlow(0)
-	val progressForFriday = _progressForFriday.asStateFlow()
-
-	//progress for saturday
-	private val _progressForSaturday = MutableStateFlow(0)
-	val progressForSaturday = _progressForSaturday.asStateFlow()
-
-	//progress for sunday
-	private val _progressForSunday = MutableStateFlow(0)
-	val progressForSunday = _progressForSunday.asStateFlow()
-
+			_fastProgressForMonth.value = trackers
+		}
+	}
 
 	private fun getProgressForMonth(date : String)
 	{
@@ -197,6 +236,7 @@ class TrackerViewModel : ViewModel()
 				}
 			}
 
+			//update only the stuff that has changed
 			_progressForMonth.value = trackers
 		}
 	}

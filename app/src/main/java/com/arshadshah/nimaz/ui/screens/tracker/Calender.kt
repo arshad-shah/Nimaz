@@ -52,7 +52,9 @@ fun Calender(paddingValues : PaddingValues)
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	//call this effect only once
-	LaunchedEffect(key1 = "getTrackerForDate") {
+	LaunchedEffect(Unit) {
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
 		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
 	}
@@ -76,6 +78,7 @@ fun Calender(paddingValues : PaddingValues)
 						.fillMaxWidth()
 						) {
 				SelectableCalendar(
+						horizontalSwipeEnabled = false ,
 						dayContent = {
 							CalenderDay(dayState = it)
 						} ,
@@ -195,6 +198,30 @@ fun CalenderHeader(monthState : MonthState)
 								LocalDate.now().toString()
 																		  )
 								 )
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+								LocalDate.now().toString()
+																			   )
+								 )
+				viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(LocalDate.now().toString()))
+				viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(LocalDate.now().toString()))
+
+			}else{
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.SET_DATE(
+								LocalDate.now().toString()
+															  )
+								 )
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+								LocalDate.now().toString()
+																		  )
+								 )
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+								LocalDate.now().toString()
+																			   )
+								 )
 			}
 			showCurrentMonth.value = false
 			inCurrentMonth.value = true
@@ -204,9 +231,7 @@ fun CalenderHeader(monthState : MonthState)
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier
-				.clickable(
-						enabled = ! inCurrentMonth.value
-						  ) {
+				.clickable {
 					showCurrentMonth.value = true
 				} ,
 			elevation = CardDefaults.elevatedCardElevation(
@@ -226,6 +251,10 @@ fun CalenderHeader(monthState : MonthState)
 						.size(52.dp) ,
 					onClick = {
 						monthState.currentMonth = monthState.currentMonth.minusMonths(1)
+						//get a date in the new month
+						val date = monthState.currentMonth.atDay(1)
+						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
+						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(date.toString()))
 						inCurrentMonth.value = false
 					} ,
 							) {
@@ -307,6 +336,10 @@ fun CalenderHeader(monthState : MonthState)
 					modifier = Modifier.size(52.dp) ,
 					onClick = {
 						monthState.currentMonth = monthState.currentMonth.plusMonths(1)
+						//get a date in the new month
+						val date = monthState.currentMonth.atDay(1)
+						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
+						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(date.toString()))
 						inCurrentMonth.value = false
 					} ,
 							) {
@@ -378,15 +411,12 @@ fun CalenderDay(
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
-	LaunchedEffect(Unit) {
-		//if its in current month, get the progress for the month
-		if (dayState.isFromCurrentMonth)
-		{
-			viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dayState.date.toString()))
-		}
-	}
 	val progressForMonth = remember {
 		viewModel.progressForMonth
+	}.collectAsState()
+
+	val fastProgressForMonth = remember {
+		viewModel.fastProgressForMonth
 	}.collectAsState()
 
 	//get the day for the hijri calendar
@@ -405,6 +435,7 @@ fun CalenderDay(
 
 	//find todays tracker in the list of trackers from progressForMonth
 	val todaysTracker = progressForMonth.value.find { it.date == currentDate.toString() }
+	val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate.toString() }
 	ElevatedCard(
 			shape = MaterialTheme.shapes.large ,
 			elevation = CardDefaults.elevatedCardElevation(
@@ -450,32 +481,6 @@ fun CalenderDay(
 					.combinedClickable(
 							enabled = dayState.isFromCurrentMonth ,
 							onClick = {
-								when (importantDay.first)
-								{
-									false -> if (dayState.isFromCurrentMonth)
-									{
-										dayState.selectionState.onDateSelected(dayState.date)
-										viewModel.onEvent(
-												TrackerViewModel.TrackerEvent.SET_DATE(
-														dayState.date.toString()
-																					  )
-														 )
-										viewModel.onEvent(
-												TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-														dayState.date.toString()
-																								  )
-														 )
-										viewModel.onEvent(
-												TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-														dayState.date.toString()
-																									   )
-														 )
-									}
-
-									else ->
-									{
-										if (dayState.isFromCurrentMonth)
-										{
 											dayState.selectionState.onDateSelected(dayState.date)
 											viewModel.onEvent(
 													TrackerViewModel.TrackerEvent.SET_DATE(
@@ -492,9 +497,6 @@ fun CalenderDay(
 															dayState.date.toString()
 																										   )
 															 )
-										}
-									}
-								}
 							} ,
 							onLongClick = {
 								if (importantDay.first)
@@ -579,24 +581,40 @@ fun CalenderDay(
 									   )
 				   )
 			}
-			Text(
-					//put a letter scissor ha in front of the day to show that it is a hijri day
-					text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
-					style = MaterialTheme.typography.titleMedium ,
-					maxLines = 1 ,
-					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(horizontal = 6.dp , vertical = 4.dp) ,
-					color = when (importantDay.first)
-					{
-						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
-						else if (today) MaterialTheme.colorScheme.onSecondaryContainer
-						else MaterialTheme.colorScheme.onSurface
+			Row(
+					modifier = Modifier,
+					horizontalArrangement = Arrangement.SpaceEvenly,
+					verticalAlignment = Alignment.CenterVertically
+			   ){
+				Text(
+						//put a letter scissor ha in front of the day to show that it is a hijri day
+						text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
+						style = MaterialTheme.typography.titleMedium ,
+						maxLines = 1 ,
+						overflow = TextOverflow.Ellipsis ,
+						modifier = Modifier
+							.padding(vertical = 4.dp, horizontal = 3.dp),
+						color = when (importantDay.first)
+						{
+							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
+							else if (today) MaterialTheme.colorScheme.onSecondaryContainer
+							else MaterialTheme.colorScheme.onSurface
 
-						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
-						else if (today) MaterialTheme.colorScheme.onSurface
-						else MaterialTheme.colorScheme.onTertiaryContainer
-					}
-				)
+							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
+							else if (today) MaterialTheme.colorScheme.onSurface
+							else MaterialTheme.colorScheme.onTertiaryContainer
+						}
+					)
+				Box(
+						modifier = Modifier
+							.size(6.dp)
+							.background(
+									color = if (todaysFastTracker?.isFasting == true) MaterialTheme.colorScheme.error
+									else Color.Transparent ,
+									shape = CircleShape
+									   )
+				   )
+			}
 		}
 
 	}
