@@ -2,14 +2,25 @@ package com.arshadshah.nimaz.ui.screens.tracker
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
+import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerGrid
 import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerListItems
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
@@ -146,6 +158,27 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 				SevenDayTrend(dateState)
 			}
 		}
+		ElevatedCard(
+				shape = MaterialTheme.shapes.extraLarge ,
+				modifier = Modifier.padding(
+						top = 4.dp ,
+						bottom = 8.dp ,
+						start = 0.dp ,
+						end = 0.dp
+										   ) ,
+					) {
+			Column {
+				Text(
+						text = "Monthly Progress" ,
+						style = MaterialTheme.typography.bodyMedium ,
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth() ,
+						textAlign = TextAlign.Center
+					)
+				PrayerTrackerGrid(dateState = dateState.value)
+			}
+		}
 	}
 }
 
@@ -192,13 +225,12 @@ fun SevenDayTrend(
 		viewModelTracker.progressForSunday
 	}.collectAsState()
 
-	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
+	Column(
 			modifier = Modifier.padding(
 					vertical = 8.dp ,
 					horizontal = 4.dp
 									   ) ,
-				) {
+		  ) {
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()

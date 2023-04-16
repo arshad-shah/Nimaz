@@ -23,7 +23,7 @@ fun NoteInput(
 {
 	val context = LocalContext.current
 	AlertDialogNimaz(
-			cardContent = false,
+			cardContent = false ,
 			contentDescription = "Note" ,
 			title = "Add Note" ,
 			topDivider = false ,

@@ -27,13 +27,13 @@ sealed class OnBoardingPage(
 			image = R.drawable.quran ,
 			title = "Quran" ,
 			description = "Quran with Urdu and English Translations, Audio Recitation, and Bookmarking Feature for Saving Ayahs to Read Later." ,
-								 )
+								  )
 
 	object Third : OnBoardingPage(
 			image = R.drawable.tracker_icon ,
 			title = "Prayer and Fasting tracker" ,
 			description = "Stay on track with your prayers and fasts with the Prayer and Fasting tracker." ,
-								  )
+								 )
 
 	//the Notification permission page
 	object Fourth : OnBoardingPage(
@@ -43,7 +43,7 @@ sealed class OnBoardingPage(
 			extra = {
 				NotificationScreenUI()
 			}
-								 )
+								  )
 
 	object Fifth : OnBoardingPage(
 			image = R.drawable.location_pin ,
@@ -61,7 +61,7 @@ sealed class OnBoardingPage(
 			extra = {
 				CalculationMethodUI()
 			}
-								   )
+								 )
 
 	//a page to ask for the battery optimization exemption
 	@SuppressLint("BatteryLife")
@@ -72,7 +72,7 @@ sealed class OnBoardingPage(
 			extra = {
 				BatteryExemptionUI()
 			}
-								  )
+								   )
 
 	object Eighth : OnBoardingPage(
 			image = R.drawable.check_mark ,
@@ -80,5 +80,5 @@ sealed class OnBoardingPage(
 			description = "You are all set to use Nimaz. You can always change these settings later. I hope Nimaz helps you in your daily life and Kindly keep me and my family in your prayers." ,
 			extra = {
 			}
-								 )
+								  )
 }

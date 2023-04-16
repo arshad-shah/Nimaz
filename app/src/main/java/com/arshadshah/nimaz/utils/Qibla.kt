@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.utils
 
-import kotlin.math.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.sin
+import kotlin.math.tan
 
 class Qibla
 {

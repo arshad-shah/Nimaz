@@ -1,63 +1,114 @@
 package com.arshadshah.nimaz.ui.components.trackers
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun PrayerTrackerGrid(prayerTrackerList: List<PrayerTracker>) {
+fun PrayerTrackerGrid(dateState : String)
+{
+	val viewModelTracker = viewModel(
+			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
+			initializer = { TrackerViewModel() } ,
+			viewModelStoreOwner = LocalContext.current as ComponentActivity
+									)
+	LaunchedEffect(Unit) {
+		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dateState))
+	}
+	val progressForMonth = remember {
+		viewModelTracker.progressForMonth
+	}.collectAsState()
 	val currentDate = LocalDate.now()
 	val yearMonth = YearMonth.of(currentDate.year , currentDate.month)
 	val daysInMonth = yearMonth.lengthOfMonth()
-	val prayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+	//Bit of a hack to get the day number to align
+	val prayers = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
 
-	LazyColumn(
-			modifier = Modifier.fillMaxWidth() ,
+	// a grid of 6 rows 1 for the number of the day and 5 for the prayers
+	// amount of days in the month columns + 1 for the name of the prayer
+	Column(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = 16.dp , vertical = 8.dp) ,
 			verticalArrangement = Arrangement.Center ,
 			horizontalAlignment = Alignment.Start
-			  ) {
-		items(prayers.size) { prayer ->
-			Row(
+		  ) {
+		prayers.forEach { prayer ->
+			LazyRow(
 					modifier = Modifier
-						.fillMaxWidth(),
-					horizontalArrangement = Arrangement.SpaceBetween,
+						.fillMaxWidth() ,
+					horizontalArrangement = Arrangement.SpaceBetween ,
 					verticalAlignment = Alignment.CenterVertically
 			   ) {
-				// Render the name of the prayer on the left
-				Text(
-						text = prayers[prayer] ,
-						style = MaterialTheme.typography.labelSmall ,
-						modifier = Modifier.padding(end = 8.dp)
-					)
-				// Render the small boxes (dots) for each day of the month
-				for (i in 0 until daysInMonth) {
-					val date = yearMonth.atDay(i + 1)
-					val prayerTracker = prayerTrackerList.find { it.date == date.toString() }
-					Box(
+				item {
+					// Render the name of the prayer on the left
+					//if its Maghri1 then it must be transparent
+					Text(
+							text = prayers[prayers.indexOf(prayer)] ,
+							style = MaterialTheme.typography.labelSmall ,
 							modifier = Modifier
-								.size(8.dp)
-								.background(
-										color = if (prayerTracker != null && prayerTracker.isPrayerCompleted(prayers[prayer])) Color.Green else Color.Gray ,
-										shape = CircleShape
+								.width(40.dp),
+						)
+				}
+				// Render the small boxes (dots) for each day of the month
+				for (i in 0 until daysInMonth)
+				{
+					val date = yearMonth.atDay(i + 1)
+					val prayerTracker = progressForMonth.value.find { it.date == date.toString() }
+					val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
+							prayers[prayers.indexOf(prayer)]
+																								)
+					val userSelectedDate = LocalDate.parse(dateState)
+					item{
+						Box(
+								modifier = Modifier
+									.size(8.dp)
+									//if the day is today then add border
+									.border(
+											width = 1.dp ,
+											color = when (date)
+											{
+												currentDate -> MaterialTheme.colorScheme.secondary
+												userSelectedDate -> MaterialTheme.colorScheme.primary
+												else -> Color.Transparent
+											} ,
+											shape = CircleShape
 										   )
-					   )
+									.background(
+											color = if (isHighlighted) MaterialTheme.colorScheme.primary
+											//if the day is not today thenhighlight it so that user knows what the day is
+											else if (date == userSelectedDate) MaterialTheme.colorScheme.tertiary
+											else Color.Gray ,
+											shape = CircleShape
+											   )
+						   )
+					}
 				}
 			}
 		}
@@ -65,8 +116,10 @@ fun PrayerTrackerGrid(prayerTrackerList: List<PrayerTracker>) {
 }
 
 // Extension function to check if a prayer is completed for a specific day
-fun PrayerTracker.isPrayerCompleted(prayer: String): Boolean {
-	return when (prayer) {
+fun PrayerTracker.isPrayerCompleted(prayer : String) : Boolean
+{
+	return when (prayer)
+	{
 		"Fajr" -> fajr
 		"Dhuhr" -> dhuhr
 		"Asr" -> asr
@@ -74,85 +127,4 @@ fun PrayerTracker.isPrayerCompleted(prayer: String): Boolean {
 		"Isha" -> isha
 		else -> false
 	}
-}
-
-
-@Preview(device = "id:S20 Fe" , showSystemUi = true , showBackground = true)
-@Composable
-fun PrayerTrackerGridPreview() {
-	val prayerTrackerList = listOf(
-			PrayerTracker(
-					date = "2021-09-01" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-02" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-03" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-04" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-05" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-06" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-07" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-08" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 ) ,
-			PrayerTracker(
-					date = "2021-09-09" ,
-					fajr = true ,
-					dhuhr = true ,
-					asr = true ,
-					maghrib = true ,
-					isha = true
-					 )
-			 )
-	PrayerTrackerGrid(prayerTrackerList = prayerTrackerList)
 }

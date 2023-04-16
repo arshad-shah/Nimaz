@@ -376,6 +376,13 @@ fun CalenderDay(
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
+	LaunchedEffect(Unit) {
+		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dayState.date.toString()))
+	}
+	val progressForMonth = remember {
+		viewModel.progressForMonth
+	}.collectAsState()
+
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
 	val currentDate = dayState.date
@@ -389,6 +396,9 @@ fun CalenderDay(
 	val hijriDayOfMonth = hijriDay[ChronoField.DAY_OF_MONTH]
 	//check if today is an important day and if so, display the description of the day and highlight the day
 	val importantDay = isImportantDay(hijriDayOfMonth , hijriMonth)
+
+	//find todays tracker in the list of trackers from progressForMonth
+	val todaysTracker = progressForMonth.value.find { it.date == currentDate.toString() }
 	ElevatedCard(
 			shape = MaterialTheme.shapes.large ,
 			elevation = CardDefaults.elevatedCardElevation(
@@ -406,6 +416,7 @@ fun CalenderDay(
 																										  )
 							else if (today) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
 							else MaterialTheme.colorScheme.surface
+
 							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary.copy(
 									alpha = 0.5f
 																										 )
@@ -420,6 +431,7 @@ fun CalenderDay(
 						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
 						else if (today) MaterialTheme.colorScheme.secondaryContainer
 						else MaterialTheme.colorScheme.surface
+
 						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
 						else if (today) MaterialTheme.colorScheme.surface
 						else MaterialTheme.colorScheme.primaryContainer
@@ -498,15 +510,16 @@ fun CalenderDay(
 						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
 						else if (today) MaterialTheme.colorScheme.onSecondaryContainer
 						else MaterialTheme.colorScheme.onSurface
+
 						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
 						else if (today) MaterialTheme.colorScheme.onSurface
 						else MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
-			Divider(
-					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) ,
-					thickness = 1.dp
-				   )
+			LinearProgressIndicator(
+					progress = todaysTracker?.progress?.toFloat() ?: 0f ,
+					modifier = Modifier.height(2.dp) ,
+								   )
 			Text(
 					//put a letter scissor ha in front of the day to show that it is a hijri day
 					text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
@@ -519,6 +532,7 @@ fun CalenderDay(
 						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
 						else if (today) MaterialTheme.colorScheme.onSecondaryContainer
 						else MaterialTheme.colorScheme.onSurface
+
 						true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
 						else if (today) MaterialTheme.colorScheme.onSurface
 						else MaterialTheme.colorScheme.onTertiaryContainer

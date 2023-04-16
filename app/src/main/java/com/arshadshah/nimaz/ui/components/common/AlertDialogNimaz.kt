@@ -128,7 +128,8 @@ fun AlertDialogNimaz(
 						}
 					}
 					if (topDivider) Divider(color = MaterialTheme.colorScheme.outline)
-					if (cardContent){
+					if (cardContent)
+					{
 						Card(
 								modifier = Modifier.fillMaxWidth() ,
 							) {
@@ -149,23 +150,24 @@ fun AlertDialogNimaz(
 								}
 							}
 						}
-					}else{
-							Row(
-									modifier
-										.height(contentHeight)
-										.fillMaxWidth() ,
-									verticalAlignment = Alignment.CenterVertically ,
-									horizontalArrangement = Arrangement.Center
-							   ) {
-								Column(
-										Modifier
-											.verticalScroll(state = stateScroll) ,
-										verticalArrangement = Arrangement.Center ,
-										horizontalAlignment = Alignment.CenterHorizontally
-									  ) {
-									contentToShow()
-								}
+					} else
+					{
+						Row(
+								modifier
+									.height(contentHeight)
+									.fillMaxWidth() ,
+								verticalAlignment = Alignment.CenterVertically ,
+								horizontalArrangement = Arrangement.Center
+						   ) {
+							Column(
+									Modifier
+										.verticalScroll(state = stateScroll) ,
+									verticalArrangement = Arrangement.Center ,
+									horizontalAlignment = Alignment.CenterHorizontally
+								  ) {
+								contentToShow()
 							}
+						}
 					}
 				}
 				if (bottomDivider) Divider(color = MaterialTheme.colorScheme.outline)

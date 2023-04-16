@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,20 +60,6 @@ fun IntroPage1()
 	val sharedPref = PrivateSharedPreferences(context)
 	val scope = rememberCoroutineScope()
 
-
-	val areSettingsComplete = remember {
-		mutableStateOf(false)
-	}
-
-	LaunchedEffect(key1 = pagerState.currentPage) {
-		val isLocationSet =
-			sharedPref.getData(AppConstants.LOCATION_INPUT , "").isNotBlank()
-		val isNotificationSet =
-			sharedPref.getDataBoolean(AppConstants.NOTIFICATION_ALLOWED , false)
-		areSettingsComplete.value =
-			pagerState.currentPage == pages.size - 1 && isLocationSet && isNotificationSet
-	}
-
 	val party = Party(
 			speed = 20f ,
 			maxSpeed = 40f ,
@@ -85,10 +70,18 @@ fun IntroPage1()
 					Size.SMALL ,
 					Size.MEDIUM ,
 					Size.LARGE ,
-						 ),
-			colors = listOf(0xfce18a, 0xff726d, 0xf4306d, 0xb48def, 0x6a4c93, 0x3f2c6f, 0x1d1b3d) ,
-			emitter = Emitter(duration = 150, TimeUnit.MILLISECONDS).max(150) ,
-			position = Position.Relative(0.0, 0.5)
+						 ) ,
+			colors = listOf(
+					0xfce18a ,
+					0xff726d ,
+					0xf4306d ,
+					0xb48def ,
+					0x6a4c93 ,
+					0x3f2c6f ,
+					0x1d1b3d
+						   ) ,
+			emitter = Emitter(duration = 150 , TimeUnit.MILLISECONDS).max(150) ,
+			position = Position.Relative(0.0 , 0.5)
 					 )
 
 	val startParty = remember {
@@ -111,25 +104,41 @@ fun IntroPage1()
 				verticalAlignment = Alignment.Top
 					   ) { position ->
 			PagerScreen(onBoardingPage = pages[position] , position)
-			if (startParty.value){
+			if (startParty.value)
+			{
 				KonfettiView(
-						modifier = Modifier.fillMaxSize().zIndex(2f),
+						modifier = Modifier
+							.fillMaxSize()
+							.zIndex(2f) ,
 						parties = listOf(
-								party,
+								party ,
 								party.copy(
-										angle = party.angle - 90, // flip angle from right to left
-										position = Position.Relative(1.0, 0.5)
+										angle = party.angle - 90 , // flip angle from right to left
+										position = Position.Relative(1.0 , 0.5)
 										  )
-										),
+										) ,
 						updateListener = object : OnParticleSystemUpdateListener
 						{
-							override fun onParticleSystemEnded(system: PartySystem , activeSystems: Int) {
-								if (activeSystems == 0){
+							override fun onParticleSystemEnded(
+								system : PartySystem ,
+								activeSystems : Int ,
+															  )
+							{
+								if (activeSystems == 0)
+								{
 									startParty.value = false
-								sharedPref.saveDataBoolean(AppConstants.IS_FIRST_INSTALL , false)
-								context.startActivity(Intent(context , MainActivity::class.java))
-								//remove the activity from the back stack
-								(context as Introduction).finish()
+									sharedPref.saveDataBoolean(
+											AppConstants.IS_FIRST_INSTALL ,
+											false
+															  )
+									context.startActivity(
+											Intent(
+													context ,
+													MainActivity::class.java
+												  )
+														 )
+									//remove the activity from the back stack
+									(context as Introduction).finish()
 								}
 							}
 						}
@@ -152,7 +161,6 @@ fun IntroPage1()
 				FinishButton(
 						modifier = Modifier.fillMaxWidth() ,
 						pagerState = pagerState ,
-						areSettingsComplete = areSettingsComplete.value ,
 							) {
 					startParty.value = true
 				}

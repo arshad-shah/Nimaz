@@ -94,24 +94,23 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 fun FinishButton(
 	modifier : Modifier ,
 	pagerState : PagerState ,
-	areSettingsComplete : Boolean ,
 	onClick : () -> Unit ,
 				)
 {
-		AnimatedVisibility(
-				visible = pagerState.currentPage == 7
-						  ) {
-			Button(
-					modifier = modifier
-						.padding(horizontal = 8.dp)
-						.testTag("introFinishButton") ,
-					onClick = onClick ,
-				  ) {
-				Text(
-						text = if (areSettingsComplete) "Finish" else "Finish (Incomplete)" ,
-					)
-			}
+	AnimatedVisibility(
+			visible = pagerState.currentPage == 7
+					  ) {
+		Button(
+				modifier = modifier
+					.padding(horizontal = 8.dp)
+					.testTag("introFinishButton") ,
+				onClick = onClick ,
+			  ) {
+			Text(
+					text = "Finish" ,
+				)
 		}
+	}
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -149,26 +148,28 @@ fun NextButton(
 	val isNotificationPage = pagerState.currentPage == 3
 
 	val isButtonEnabled = remember {
-		mutableStateOf(!isLocationPage)
+		mutableStateOf(! isLocationPage)
 	}
 
 	val textForButton = remember {
 		mutableStateOf("Next")
 	}
 
-	LaunchedEffect(locationName.value , longitude.value , latitude.value, isLocationPage) {
+	LaunchedEffect(locationName.value , longitude.value , latitude.value , isLocationPage) {
 		if (isLocationPage)
 		{
 			//if locationName is not empty then go to next page
-			isButtonEnabled.value = locationName.value.isNotEmpty() || (longitude.value != 0.0 && latitude.value != 0.0)
+			isButtonEnabled.value =
+				locationName.value.isNotEmpty() || (longitude.value != 0.0 && latitude.value != 0.0)
 		}
 	}
 
-	LaunchedEffect(isNotificationPage, notificationAllowed.value) {
+	LaunchedEffect(isNotificationPage , notificationAllowed.value) {
 		if (isNotificationPage)
 		{
 			textForButton.value = if (notificationAllowed.value) "Next" else "Skip"
-		}else{
+		} else
+		{
 			textForButton.value = "Next"
 		}
 	}

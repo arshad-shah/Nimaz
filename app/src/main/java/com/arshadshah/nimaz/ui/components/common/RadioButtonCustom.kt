@@ -45,7 +45,7 @@ fun RadioButtonCustom(
 				contentAlignment = Alignment.Center ,
 		   ) {
 			Crossfade(
-					targetState = selected,
+					targetState = selected ,
 					animationSpec = tween(durationMillis = 200)
 					 ) { selected ->
 				//the checkmark icon
@@ -54,7 +54,9 @@ fun RadioButtonCustom(
 					Icon(
 							painter = painterResource(id = R.drawable.check_icon) ,
 							contentDescription = "checkmark" ,
-							modifier = Modifier.size(24.dp).padding(2.dp) ,
+							modifier = Modifier
+								.size(24.dp)
+								.padding(2.dp) ,
 							tint = MaterialTheme.colorScheme.onPrimary ,
 						)
 				} else

@@ -8,7 +8,13 @@ import com.arshadshah.nimaz.utils.sunMoonUtils.utils.MathUtils.astroRefraction
 import com.arshadshah.nimaz.utils.sunMoonUtils.utils.MathUtils.azimuth
 import java.time.LocalDateTime
 import java.time.ZoneId
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+import kotlin.math.tan
 
 class MoonCalc @JvmOverloads constructor(
 	private val latitude : Double ,
