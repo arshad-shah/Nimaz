@@ -4,11 +4,13 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -377,7 +379,11 @@ fun CalenderDay(
 							 )
 
 	LaunchedEffect(Unit) {
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dayState.date.toString()))
+		//if its in current month, get the progress for the month
+		if (dayState.isFromCurrentMonth)
+		{
+			viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dayState.date.toString()))
+		}
 	}
 	val progressForMonth = remember {
 		viewModel.progressForMonth
@@ -516,10 +522,63 @@ fun CalenderDay(
 						else MaterialTheme.colorScheme.onPrimaryContainer
 					}
 				)
-			LinearProgressIndicator(
-					progress = todaysTracker?.progress?.toFloat() ?: 0f ,
-					modifier = Modifier.height(2.dp) ,
-								   )
+			Row(
+					modifier = Modifier
+						.padding(4.dp)
+						.fillMaxWidth() ,
+					horizontalArrangement = Arrangement.SpaceEvenly
+			   ) {
+				//fajr
+				Box(
+						modifier = Modifier
+							.size(4.dp)
+							.background(
+									color = if (todaysTracker?.fajr == true) MaterialTheme.colorScheme.primary
+									else Color.Transparent ,
+									shape = CircleShape
+									   )
+				   )
+				//dhuhr
+				Box(
+						modifier = Modifier
+							.size(4.dp)
+							.background(
+									color = if (todaysTracker?.dhuhr == true) MaterialTheme.colorScheme.primary
+									else Color.Transparent ,
+									shape = CircleShape
+									   )
+				   )
+				//asr
+				Box(
+						modifier = Modifier
+							.size(4.dp)
+							.background(
+									color = if (todaysTracker?.asr == true) MaterialTheme.colorScheme.primary
+									else Color.Transparent ,
+									shape = CircleShape
+									   )
+				   )
+				//maghrib
+				Box(
+						modifier = Modifier
+							.size(4.dp)
+							.background(
+									color = if (todaysTracker?.maghrib == true) MaterialTheme.colorScheme.primary
+									else Color.Transparent ,
+									shape = CircleShape
+									   )
+				   )
+				//isha
+				Box(
+						modifier = Modifier
+							.size(4.dp)
+							.background(
+									color = if (todaysTracker?.isha == true) MaterialTheme.colorScheme.primary
+									else Color.Transparent ,
+									shape = CircleShape
+									   )
+				   )
+			}
 			Text(
 					//put a letter scissor ha in front of the day to show that it is a hijri day
 					text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
