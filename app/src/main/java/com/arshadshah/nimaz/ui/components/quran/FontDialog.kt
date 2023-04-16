@@ -3,8 +3,22 @@ package com.arshadshah.nimaz.ui.components.quran
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,11 +81,13 @@ fun FontSizeDialog(
 								//check if the value is in the range
 								//if not then set it to the min or max value
 								//this is to prevent the slider from going out of range
-								if (fontStyleState.value == "IndoPak"){
+								if (fontStyleState.value == "IndoPak")
+								{
 									if (it < 32f) arabicFontSizeState.value = 32f
 									if (it > 60f) arabicFontSizeState.value = 60f
 									if (it in 32f .. 60f) arabicFontSizeState.value = it
-								}else{
+								} else
+								{
 									if (it < 24f) arabicFontSizeState.value = 24f
 									if (it > 46f) arabicFontSizeState.value = 46f
 									if (it in 24f .. 46f) arabicFontSizeState.value = it
@@ -117,7 +133,7 @@ fun FontSizeDialog(
 								handleQuranEvents(
 										QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
 												translationFontSizeState.value
-																									)
+																								   )
 												 )
 							} ,
 							valueRange = 16f .. 40f ,

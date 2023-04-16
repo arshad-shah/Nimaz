@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
 @Composable
-fun MonthlyTrend() {
+fun MonthlyTrend()
+{
 	//a composable that shows a grid of dots per prayer time
 	//for example:
 	//the UI will look like this:
@@ -45,16 +46,16 @@ fun MonthlyTrend() {
 		}
 		Column {
 			LazyHorizontalGrid(
-					rows = GridCells.Fixed(5),
-							   content = {
-								   items(daysInMonth) { day ->
-									   Box(
-											   modifier = Modifier
-													   .size(10.dp)
-													   .background(Color.Gray)
-									   )
-								   }
-							   }
+					rows = GridCells.Fixed(5) ,
+					content = {
+						items(daysInMonth) { day ->
+							Box(
+									modifier = Modifier
+										.size(10.dp)
+										.background(Color.Gray)
+							   )
+						}
+					}
 							  )
 		}
 	}
@@ -62,6 +63,7 @@ fun MonthlyTrend() {
 
 @Preview
 @Composable
-fun MonthlyTrendPreview() {
+fun MonthlyTrendPreview()
+{
 	MonthlyTrend()
 }

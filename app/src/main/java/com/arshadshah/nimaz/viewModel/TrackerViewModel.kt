@@ -107,6 +107,8 @@ class TrackerViewModel : ViewModel()
 		//get progress for each day of the current week
 		class GET_PROGRESS_FOR_WEEK(val date : String) : TrackerEvent()
 
+		class GET_PROGRESS_FOR_MONTH(val date : String) : TrackerEvent()
+
 		//update a days progress
 		class UPDATE_PROGRESS_FOR_DAY(val day : DayOfWeek , val progress : Int) : TrackerEvent()
 	}
@@ -130,8 +132,15 @@ class TrackerViewModel : ViewModel()
 					event.day ,
 					event.progress
 																		   )
+
+			is TrackerEvent.GET_PROGRESS_FOR_MONTH -> getProgressForMonth(event.date)
 		}
 	}
+
+
+	//state for month progress
+	private val _progressForMonth = MutableStateFlow(mutableListOf<PrayerTracker>())
+	val progressForMonth = _progressForMonth.asStateFlow()
 
 	//progress for monday
 	private val _progressForMonday = MutableStateFlow(0)
@@ -161,6 +170,37 @@ class TrackerViewModel : ViewModel()
 	private val _progressForSunday = MutableStateFlow(0)
 	val progressForSunday = _progressForSunday.asStateFlow()
 
+
+	private fun getProgressForMonth(date : String)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			val dataStore = LocalDataStore.getDataStore()
+			//first day of the month
+			val firstDayOfMonth = LocalDate.parse(date).withDayOfMonth(1)
+			val lastDayOfMonth =
+				LocalDate.parse(date).withDayOfMonth(LocalDate.parse(date).lengthOfMonth())
+
+			val trackers = mutableListOf<PrayerTracker>()
+
+			//get all trackers for the month
+			for (i in firstDayOfMonth.dayOfMonth .. lastDayOfMonth.dayOfMonth)
+			{
+				val date = firstDayOfMonth.withDayOfMonth(i).toString()
+				val trackerExists = dataStore.checkIfTrackerExists(date)
+				if (trackerExists)
+				{
+					val tracker = dataStore.getTrackerForDate(date)
+					trackers.add(tracker)
+				} else
+				{
+					trackers.add(PrayerTracker(date = date , progress = 0))
+				}
+			}
+
+			_progressForMonth.value = trackers
+		}
+	}
+
 	private fun updateProgressForDay(day : DayOfWeek , progress : Int)
 	{
 		when (day)
@@ -183,9 +223,6 @@ class TrackerViewModel : ViewModel()
 				val dataStore = LocalDataStore.getDataStore()
 				//find the date of the first day of the week
 				val firstDayOfWeek = LocalDate.parse(date).with(DayOfWeek.MONDAY)
-				val lastDayOfWeek = LocalDate.parse(date).with(DayOfWeek.SUNDAY)
-
-				val listOfWeeklyProgress = mutableListOf<Pair<String , Int>>()
 				//check if the tracker exists for the date
 				for (i in 0 .. 6)
 				{

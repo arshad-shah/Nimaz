@@ -9,7 +9,14 @@ import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.zeroFive
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.collect.Lists
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.collect.Maps
 import java.util.*
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.acos
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.round
+import kotlin.math.sin
+import kotlin.math.tan
 
 
 object SunAngles

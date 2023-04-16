@@ -39,12 +39,12 @@ fun FastTrackerCard(
 				.padding(8.dp) ,
 				) {
 		ToggleableItemColumn(
-				text = if(dateForTracker.isBefore(LocalDate.now())) "Did not fast"
+				text = if (dateForTracker.isBefore(LocalDate.now())) "Did not fast"
 				else "Not Fasting" ,
 				//if date state is in the fast then shoow the date
 				// like this:
 				// Fasted on 2021-09-01
-				selectedText = if(dateForTracker.isBefore(LocalDate.now())) "Fasted on ${dateState.value}" else "Fasting Today" ,
+				selectedText = if (dateForTracker.isBefore(LocalDate.now())) "Fasted on ${dateState.value}" else "Fasting Today" ,
 				checked = isFastingToday.value ,
 				onCheckedChange = {
 					//if the date is after today then don't allow the user to change the value

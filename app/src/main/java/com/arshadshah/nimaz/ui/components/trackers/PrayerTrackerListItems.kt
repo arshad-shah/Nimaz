@@ -136,6 +136,7 @@ fun PrayerTrackerListItems(
 										progress.value.toInt()
 																					 )
 								   )
+						handleEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dateState.value))
 					} ,
 								)
 		}

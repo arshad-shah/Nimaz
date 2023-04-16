@@ -157,7 +157,7 @@ fun Counter(
 	if (showObjectiveDialog.value)
 	{
 		AlertDialogNimaz(
-				cardContent = false,
+				cardContent = false ,
 				bottomDivider = false ,
 				topDivider = false ,
 				contentHeight = 100.dp ,
