@@ -20,29 +20,23 @@ sealed class OnBoardingPage(
 	object First : OnBoardingPage(
 			image = R.drawable.praying ,
 			title = "Assalamu alaykum" ,
-			description = "A user-friendly, Beautifully designed app for Muslims, completely Ad-Free." ,
+			description = "A user-friendly, Beautifully designed app for Muslims, with accurate prayer times completely Ad-Free." ,
 								 )
 
 	object Second : OnBoardingPage(
-			image = R.drawable.time ,
-			title = "Prayer Times" ,
-			description = "Accurate prayer times for your location, Adhan notifications, and more." ,
-								  )
-
-	object Third : OnBoardingPage(
 			image = R.drawable.quran ,
 			title = "Quran" ,
 			description = "Quran with Urdu and English Translations, Audio Recitation, and Bookmarking Feature for Saving Ayahs to Read Later." ,
 								 )
 
-	object Fourth : OnBoardingPage(
+	object Third : OnBoardingPage(
 			image = R.drawable.tracker_icon ,
 			title = "Prayer and Fasting tracker" ,
 			description = "Stay on track with your prayers and fasts with the Prayer and Fasting tracker." ,
 								  )
 
 	//the Notification permission page
-	object Fifth : OnBoardingPage(
+	object Fourth : OnBoardingPage(
 			image = R.drawable.adhan ,
 			title = "Adhan Notifications" ,
 			description = "Enable Adhan Notifications for Nimaz to get Prayer reminders in the form of Adhan." ,
@@ -51,7 +45,7 @@ sealed class OnBoardingPage(
 			}
 								 )
 
-	object Sixth : OnBoardingPage(
+	object Fifth : OnBoardingPage(
 			image = R.drawable.location_pin ,
 			title = "Location" ,
 			description = "Nimaz needs your location to get accurate prayer times and calculate Qibla direction. You can also use manual location." ,
@@ -60,7 +54,7 @@ sealed class OnBoardingPage(
 			}
 								 )
 
-	object Seventh : OnBoardingPage(
+	object Sixth : OnBoardingPage(
 			image = R.drawable.time_calculation ,
 			title = "Calculation Method" ,
 			description = "Nimaz uses the Muslim World League method by default in manual mode and uses altitude of the sun to calculate prayer times in automatic mode." ,
@@ -71,7 +65,7 @@ sealed class OnBoardingPage(
 
 	//a page to ask for the battery optimization exemption
 	@SuppressLint("BatteryLife")
-	object Eighth : OnBoardingPage(
+	object Seventh : OnBoardingPage(
 			image = R.drawable.battery ,
 			title = "Battery Exemption" ,
 			description = "Battery optimization can cause issues with Adhan Notifications. Please exempt Nimaz from battery optimization." ,
@@ -80,7 +74,7 @@ sealed class OnBoardingPage(
 			}
 								  )
 
-	object Ninth : OnBoardingPage(
+	object Eighth : OnBoardingPage(
 			image = R.drawable.check_mark ,
 			title = "Onboarding Complete" ,
 			description = "You are all set to use Nimaz. You can always change these settings later. I hope Nimaz helps you in your daily life and Kindly keep me and my family in your prayers." ,
