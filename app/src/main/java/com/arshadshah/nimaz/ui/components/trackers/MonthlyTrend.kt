@@ -31,7 +31,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun PrayerTrackerGrid(dateState : String)
+fun PrayerTrackerGrid()
 {
 	val viewModelTracker = viewModel(
 			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
@@ -39,16 +39,22 @@ fun PrayerTrackerGrid(dateState : String)
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 									)
 	LaunchedEffect(Unit) {
-		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dateState))
+		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(LocalDate.now().toString()))
 	}
 	val progressForMonth = remember {
 		viewModelTracker.progressForMonth
 	}.collectAsState()
+	val dateState = remember {
+		viewModelTracker.dateState
+	}.collectAsState()
+
 	val currentDate = LocalDate.now()
 	val yearMonth = YearMonth.of(currentDate.year , currentDate.month)
 	val daysInMonth = yearMonth.lengthOfMonth()
 	//Bit of a hack to get the day number to align
 	val prayers = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
+
+	val userSelectedDate = LocalDate.parse(dateState.value)
 
 	// a grid of 6 rows 1 for the number of the day and 5 for the prayers
 	// amount of days in the month columns + 1 for the name of the prayer
@@ -84,7 +90,6 @@ fun PrayerTrackerGrid(dateState : String)
 					val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
 							prayers[prayers.indexOf(prayer)]
 																								)
-					val userSelectedDate = LocalDate.parse(dateState)
 					item{
 						Box(
 								modifier = Modifier
@@ -94,17 +99,48 @@ fun PrayerTrackerGrid(dateState : String)
 											width = 1.dp ,
 											color = when (date)
 											{
-												currentDate -> MaterialTheme.colorScheme.secondary
-												userSelectedDate -> MaterialTheme.colorScheme.primary
-												else -> Color.Transparent
+												currentDate -> {
+														MaterialTheme.colorScheme.onPrimary
+												}
+												userSelectedDate -> {
+														MaterialTheme.colorScheme.onSecondaryContainer
+												}
+												else -> {
+													if (isHighlighted){
+														MaterialTheme.colorScheme.primary
+													}else{
+														Color.Gray
+													}
+												}
 											} ,
 											shape = CircleShape
 										   )
 									.background(
-											color = if (isHighlighted) MaterialTheme.colorScheme.primary
-											//if the day is not today thenhighlight it so that user knows what the day is
-											else if (date == userSelectedDate) MaterialTheme.colorScheme.tertiary
-											else Color.Gray ,
+											color =
+											when (date)
+											{
+												currentDate -> {
+													if (isHighlighted){
+														MaterialTheme.colorScheme.primary
+													}else{
+														Color.Gray
+													}
+												}
+												userSelectedDate -> {
+													if (isHighlighted){
+														MaterialTheme.colorScheme.primary
+													}else{
+														MaterialTheme.colorScheme.secondaryContainer
+													}
+												}
+												else -> {
+													if (isHighlighted){
+														MaterialTheme.colorScheme.primary
+													}else{
+														Color.Gray
+													}
+												}
+											} ,
 											shape = CircleShape
 											   )
 						   )

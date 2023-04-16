@@ -37,6 +37,7 @@ import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerListItems
 import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import es.dmoral.toasty.Toasty
+import java.time.LocalDate
 
 @Composable
 fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false)
@@ -147,7 +148,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 					) {
 			Column {
 				Text(
-						text = "Weekly Progress" ,
+						text = "Current Week Progress" ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier
 							.padding(8.dp)
@@ -155,7 +156,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 						textAlign = TextAlign.Center
 					)
 				//the data
-				SevenDayTrend(dateState)
+				SevenDayTrend()
 			}
 		}
 		ElevatedCard(
@@ -169,14 +170,14 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 					) {
 			Column {
 				Text(
-						text = "Monthly Progress" ,
+						text = "Current Month Progress" ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier
 							.padding(8.dp)
 							.fillMaxWidth() ,
 						textAlign = TextAlign.Center
 					)
-				PrayerTrackerGrid(dateState = dateState.value)
+				PrayerTrackerGrid()
 			}
 		}
 	}
@@ -184,9 +185,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 
 //composable to show the prayers for this week using 7 circular progress indicators
 @Composable
-fun SevenDayTrend(
-	dateState : State<String> ,
-				 )
+fun SevenDayTrend()
 {
 
 	val viewModelTracker = viewModel(
@@ -194,8 +193,8 @@ fun SevenDayTrend(
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 									)
-	LaunchedEffect(key1 = "getTrackerForWeek") {
-		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(dateState.value))
+	LaunchedEffect(Unit) {
+		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(LocalDate.now().toString()))
 	}
 	val progressForMonday = remember {
 		viewModelTracker.progressForMonday

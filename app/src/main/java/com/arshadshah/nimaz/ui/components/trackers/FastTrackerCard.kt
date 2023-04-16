@@ -67,6 +67,7 @@ fun FastTrackerCard(
 											   )
 																			 )
 							   )
+					handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(dateState.value))
 				} ,
 				modifier = Modifier
 					.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
