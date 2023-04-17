@@ -98,14 +98,14 @@ object QuranRepository
 						responseUrdu[indexOfAyaInUrdu].translation ,
 						ayaResponse.surahNumber ,
 						ayaResponse.ayaNumberInSurah ,
-						false ,
-						false ,
-						ayaResponse.note ,
-						ayaResponse.audioFileLocation ,
-						ayaResponse.sajda ,
-						ayaResponse.sajdaType ,
-						ayaResponse.ruku ,
-						ayaResponse.juzNumber ,
+						bookmark = false ,
+						favorite = false ,
+						note = ayaResponse.note ,
+						audioFileLocation = ayaResponse.audioFileLocation ,
+						sajda = ayaResponse.sajda ,
+						sajdaType = ayaResponse.sajdaType ,
+						ruku = ayaResponse.ruku ,
+						juzNumber = ayaResponse.juzNumber ,
 							 )
 				ayas.add(aya)
 			}

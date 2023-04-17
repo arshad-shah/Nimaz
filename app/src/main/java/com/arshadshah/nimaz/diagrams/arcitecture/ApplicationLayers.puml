@@ -1,5 +1,5 @@
 @startuml
-'This digram summarises the layers of the application
+'This diagram summarises the layers of the application
 skinparam componentStyle uml2
 skinparam component {
   BackgroundColor FloralWhite

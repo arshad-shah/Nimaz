@@ -25,7 +25,7 @@ import com.arshadshah.nimaz.R
 fun AlertDialogNimaz(
 	modifier : Modifier = Modifier ,
 	icon : Painter? = null ,
-	action : @Composable() (() -> Unit)? = null ,
+	action : @Composable (() -> Unit)? = null ,
 	contentDescription : String ,
 	title : String ,
 	description : String? = null ,

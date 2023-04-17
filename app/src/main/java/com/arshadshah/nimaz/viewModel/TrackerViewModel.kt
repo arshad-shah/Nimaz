@@ -147,11 +147,11 @@ class TrackerViewModel : ViewModel()
 
 		class GET_PROGRESS_FOR_MONTH(val date : String) : TrackerEvent()
 
-		//update a days progress
-		class UPDATE_PROGRESS_FOR_DAY(val day : DayOfWeek , val progress : Int) : TrackerEvent()
-
 		//progress of fast fro month
 		class GET_FAST_PROGRESS_FOR_MONTH(val date : String) : TrackerEvent()
+
+		//updateProgressForDay(day : DayOfWeek , progress : Int)
+		class UPDATE_PROGRESS_FOR_DAY(val day : DayOfWeek , val progress : Int) : TrackerEvent()
 	}
 
 	fun onEvent(event : TrackerEvent)
@@ -169,13 +169,9 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.GET_FAST_TRACKER_FOR_DATE -> getFastTrackerForDate(event.date)
 			is TrackerEvent.SAVE_FAST_TRACKER -> saveFastTracker(event.tracker)
 			is TrackerEvent.GET_PROGRESS_FOR_WEEK -> getProgressForWeek(event.date)
-			is TrackerEvent.UPDATE_PROGRESS_FOR_DAY -> updateProgressForDay(
-					event.day ,
-					event.progress
-																		   )
-
 			is TrackerEvent.GET_PROGRESS_FOR_MONTH -> getProgressForMonth(event.date)
 			is TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH -> getFastProgressForMonth(event.date)
+			is TrackerEvent.UPDATE_PROGRESS_FOR_DAY -> updateProgressForDay(event.day , event.progress)
 		}
 	}
 
@@ -217,7 +213,7 @@ class TrackerViewModel : ViewModel()
 			//first day of the month
 			val firstDayOfMonth = LocalDate.parse(date).withDayOfMonth(1)
 			val lastDayOfMonth =
-				LocalDate.parse(date).withDayOfMonth(LocalDate.parse(date).lengthOfMonth())
+				LocalDate.parse(date).lengthOfMonth().let { firstDayOfMonth.withDayOfMonth(it) }
 
 			val trackers = mutableListOf<PrayerTracker>()
 
@@ -306,7 +302,7 @@ class TrackerViewModel : ViewModel()
 		}
 	}
 
-	fun updateFastTracker(tracker : FastTracker)
+	private fun updateFastTracker(tracker : FastTracker)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -316,7 +312,7 @@ class TrackerViewModel : ViewModel()
 				if (! trackerExists)
 				{
 					dataStore.saveFastTracker(tracker)
-					_isFasting.value = false
+					_isFasting.value = tracker.isFasting
 					_fastTrackerState.value = FastTrackerState.Tracker(tracker)
 				} else
 				{
@@ -332,7 +328,7 @@ class TrackerViewModel : ViewModel()
 		}
 	}
 
-	fun getFastTrackerForDate(date : String)
+	private fun getFastTrackerForDate(date : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -359,7 +355,7 @@ class TrackerViewModel : ViewModel()
 		}
 	}
 
-	fun saveFastTracker(tracker : FastTracker)
+	private fun saveFastTracker(tracker : FastTracker)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -391,7 +387,7 @@ class TrackerViewModel : ViewModel()
 	}
 
 	//function to get the tracker for a specific date
-	fun getTrackerForDate(date : String)
+	private fun getTrackerForDate(date : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -447,7 +443,7 @@ class TrackerViewModel : ViewModel()
 	}
 
 	//function to update a tracker
-	fun updateTracker(tracker : PrayerTracker)
+	private fun updateTracker(tracker : PrayerTracker)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -490,7 +486,7 @@ class TrackerViewModel : ViewModel()
 	}
 
 	//function to save a tracker
-	fun saveTracker(tracker : PrayerTracker)
+	private fun saveTracker(tracker : PrayerTracker)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try

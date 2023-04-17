@@ -16,7 +16,6 @@ import com.arshadshah.nimaz.ui.components.common.Placeholder
 import com.arshadshah.nimaz.ui.components.tasbih.DeleteDialog
 import com.arshadshah.nimaz.ui.components.tasbih.GoalEditDialog
 import com.arshadshah.nimaz.ui.components.tasbih.TasbihDropdownItem
-import com.arshadshah.nimaz.ui.components.ui.trackers.*
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import java.time.LocalDate
 

@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*

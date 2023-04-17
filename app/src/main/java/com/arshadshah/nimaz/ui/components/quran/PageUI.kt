@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
 import android.util.Log
 import androidx.activity.ComponentActivity

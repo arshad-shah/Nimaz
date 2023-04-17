@@ -27,7 +27,6 @@ import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.ui.quran.NoteInput
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight

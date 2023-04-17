@@ -22,11 +22,6 @@ object CustomThemes
 				if (darkTheme) DarkColorsDarkRed else LightColorsDarkRed
 			}
 
-			"Dark_Liver" ->
-			{
-				if (darkTheme) DarkColorsLiver else LightColorsLiver
-			}
-
 			"Rustic_brown" ->
 			{
 				if (darkTheme) DarkColorsRusticBrown else LightColorsRusticBrown
@@ -216,67 +211,6 @@ object CustomThemes
 			inverseSurface = Dark_Red_md_theme_dark_inverseSurface ,
 			inversePrimary = Dark_Red_md_theme_dark_inversePrimary ,
 												   )
-
-
-	//liver_md_theme_
-	//each color starts as liver_md_theme_
-	private val LightColorsLiver = lightColorScheme(
-			primary = liver_md_theme_light_primary ,
-			onPrimary = liver_md_theme_light_onPrimary ,
-			primaryContainer = liver_md_theme_light_primaryContainer ,
-			onPrimaryContainer = liver_md_theme_light_onPrimaryContainer ,
-			secondary = liver_md_theme_light_secondary ,
-			onSecondary = liver_md_theme_light_onSecondary ,
-			secondaryContainer = liver_md_theme_light_secondaryContainer ,
-			onSecondaryContainer = liver_md_theme_light_onSecondaryContainer ,
-			tertiary = liver_md_theme_light_tertiary ,
-			onTertiary = liver_md_theme_light_onTertiary ,
-			tertiaryContainer = liver_md_theme_light_tertiaryContainer ,
-			onTertiaryContainer = liver_md_theme_light_onTertiaryContainer ,
-			error = liver_md_theme_light_error ,
-			errorContainer = liver_md_theme_light_errorContainer ,
-			onError = liver_md_theme_light_onError ,
-			onErrorContainer = liver_md_theme_light_onErrorContainer ,
-			background = liver_md_theme_light_background ,
-			onBackground = liver_md_theme_light_onBackground ,
-			surface = liver_md_theme_light_surface ,
-			onSurface = liver_md_theme_light_onSurface ,
-			surfaceVariant = liver_md_theme_light_surfaceVariant ,
-			onSurfaceVariant = liver_md_theme_light_onSurfaceVariant ,
-			outline = liver_md_theme_light_outline ,
-			inverseOnSurface = liver_md_theme_light_inverseOnSurface ,
-			inverseSurface = liver_md_theme_light_inverseSurface ,
-			inversePrimary = liver_md_theme_light_inversePrimary ,
-												   )
-
-	private val DarkColorsLiver = darkColorScheme(
-			primary = liver_md_theme_dark_primary ,
-			onPrimary = liver_md_theme_dark_onPrimary ,
-			primaryContainer = liver_md_theme_dark_primaryContainer ,
-			onPrimaryContainer = liver_md_theme_dark_onPrimaryContainer ,
-			secondary = liver_md_theme_dark_secondary ,
-			onSecondary = liver_md_theme_dark_onSecondary ,
-			secondaryContainer = liver_md_theme_dark_secondaryContainer ,
-			onSecondaryContainer = liver_md_theme_dark_onSecondaryContainer ,
-			tertiary = liver_md_theme_dark_tertiary ,
-			onTertiary = liver_md_theme_dark_onTertiary ,
-			tertiaryContainer = liver_md_theme_dark_tertiaryContainer ,
-			onTertiaryContainer = liver_md_theme_dark_onTertiaryContainer ,
-			error = liver_md_theme_dark_error ,
-			errorContainer = liver_md_theme_dark_errorContainer ,
-			onError = liver_md_theme_dark_onError ,
-			onErrorContainer = liver_md_theme_dark_onErrorContainer ,
-			background = liver_md_theme_dark_background ,
-			onBackground = liver_md_theme_dark_onBackground ,
-			surface = liver_md_theme_dark_surface ,
-			onSurface = liver_md_theme_dark_onSurface ,
-			surfaceVariant = liver_md_theme_dark_surfaceVariant ,
-			onSurfaceVariant = liver_md_theme_dark_onSurfaceVariant ,
-			outline = liver_md_theme_dark_outline ,
-			inverseOnSurface = liver_md_theme_dark_inverseOnSurface ,
-			inverseSurface = liver_md_theme_dark_inverseSurface ,
-			inversePrimary = liver_md_theme_dark_inversePrimary ,
-												 )
 
 	//DarkColorsRusticBrown
 	//LightColorsRusticBrown

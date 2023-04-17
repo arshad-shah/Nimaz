@@ -57,7 +57,7 @@ fun AppDetails()
 						verticalArrangement = Arrangement.Center ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
-					//ceircluar image
+					//circular image
 					Image(
 							painter = painterResource(id = R.drawable.logo) ,
 							contentDescription = "App Icon" ,

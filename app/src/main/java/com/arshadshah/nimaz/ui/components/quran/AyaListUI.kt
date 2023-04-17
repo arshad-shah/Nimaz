@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -36,9 +36,6 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
-import com.arshadshah.nimaz.ui.components.quran.AyatFeatures
-import com.arshadshah.nimaz.ui.components.quran.AyatFeaturesPopUpMenu
-import com.arshadshah.nimaz.ui.components.quran.PlayerForAyat
 import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight

@@ -29,7 +29,7 @@ class MoonCalc @JvmOverloads constructor(
 	 * Returns the moon position
 	 * @return {@link MoonPosition} which represents the moon position
 	 */
-	fun getMoonPosition(date : LocalDateTime = this.date) : MoonPosition
+	private fun getMoonPosition(date : LocalDateTime = this.date) : MoonPosition
 	{
 		val lw = rad * - longitude
 		val phi = rad * latitude
@@ -116,9 +116,8 @@ class MoonCalc @JvmOverloads constructor(
 
 			MoonPhase.WANING_GIBBOUS ->
 			{
-				val percentageProcessed = 100 - percentage
 				//get the image to show
-				when (percentageProcessed)
+				when (100 - percentage)
 				{
 					in 0 .. 10 -> R.drawable.wanning_gib_7
 					in 10 .. 20 -> R.drawable.wanning_gib_14
@@ -137,9 +136,8 @@ class MoonCalc @JvmOverloads constructor(
 
 			MoonPhase.WANING_CRESCENT ->
 			{
-				val percentageProcessed = 100 - percentage
 				//get the image to show
-				when (percentageProcessed)
+				when (100 - percentage)
 				{
 					in 50 .. 60 -> R.drawable.wanning_cres_57
 					in 60 .. 70 -> R.drawable.wanning_cres_64
