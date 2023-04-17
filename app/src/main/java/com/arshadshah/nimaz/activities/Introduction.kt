@@ -44,12 +44,6 @@ class Introduction : ComponentActivity()
 
 			when (themeState.value)
 			{
-				"DYNAMIC" ->
-				{
-					dynamicTheme.value = true
-					darkTheme.value = isDarkTheme.value
-				}
-
 				"SYSTEM" ->
 				{
 					dynamicTheme.value = true
@@ -77,14 +71,6 @@ class Introduction : ComponentActivity()
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Red"
 				}
-
-				"Dark_Liver" ->
-				{
-					dynamicTheme.value = false
-					darkTheme.value = isDarkTheme.value
-					themeName.value = "Dark_Liver"
-				}
-
 				"Rustic_brown" ->
 				{
 					dynamicTheme.value = false

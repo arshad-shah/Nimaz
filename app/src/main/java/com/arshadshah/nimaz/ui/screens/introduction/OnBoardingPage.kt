@@ -13,7 +13,7 @@ sealed class OnBoardingPage(
 	val image : Int ,
 	val title : String ,
 	val description : String ,
-	val extra : @Composable() (() -> Unit)? = null ,
+	val extra : @Composable (() -> Unit)? = null ,
 						   )
 {
 

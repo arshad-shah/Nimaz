@@ -71,14 +71,14 @@ class QuranViewModel(context : Context) : ViewModel()
 					"" ,
 					0 ,
 					0 ,
-					false ,
-					false ,
-					"" ,
-					"" ,
-					false ,
-					"" ,
-					0 ,
-					0
+					bookmark = false ,
+					favorite = false ,
+					note = "" ,
+					audioFileLocation = "" ,
+					sajda = false ,
+					sajdaType = "" ,
+					ruku = 0 ,
+					juzNumber = 0
 			   )
 												  )
 	val randomAyaState = _randomAyaState.asStateFlow()
@@ -356,7 +356,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun getSurahList()
+	private fun getSurahList()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			_loadingState.value = true
@@ -396,7 +396,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun getJuzList()
+	private fun getJuzList()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			_loadingState.value = true
@@ -487,11 +487,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun addBismillahToFirstAya(
+	private fun addBismillahToFirstAya(
 		surahAyatList : ArrayList<Aya> ,
 		languageConverted : String ,
 		surahNumber : Int ,
-							  ) : ArrayList<Aya>
+									  ) : ArrayList<Aya>
 	{
 		//an empty number
 		val ayaNumberOfBismillah = 0
@@ -613,7 +613,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//function to add biismillah to the start of every surah
-	fun addBismillahInJuz(
+	private fun addBismillahInJuz(
 		juzNumber : Int ,
 		languageConverted : String ,
 		listOfJuzAyat : ArrayList<Aya> ,
@@ -864,7 +864,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//add audio to aya
-	fun addAudioToAya(
+	private fun addAudioToAya(
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
 		audio : String ,
@@ -883,7 +883,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//bookmark an aya
-	fun bookmarkAya(
+	private fun bookmarkAya(
 		ayaNumber : Int ,
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
@@ -903,7 +903,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//favorite an aya
-	fun favoriteAya(
+	private fun favoriteAya(
 		ayaNumber : Int ,
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
@@ -923,7 +923,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//add a note to an aya
-	fun addNoteToAya(id : Int , surahNumber : Int , ayaNumberInSurah : Int , note : String)
+	private fun addNoteToAya(id : Int , surahNumber : Int , ayaNumberInSurah : Int , note : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -938,7 +938,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//get a note for an aya
-	fun getNoteForAya(ayaNumber : Int , surahNumber : Int , ayaNumberInSurah : Int)
+	private fun getNoteForAya(ayaNumber : Int , surahNumber : Int , ayaNumberInSurah : Int)
 	{
 		viewModelScope.launch(Dispatchers.Main) {
 			try
@@ -962,11 +962,11 @@ class QuranViewModel(context : Context) : ViewModel()
 	private val _notes = MutableStateFlow(listOf<Aya>())
 	val notes = _notes.asStateFlow()
 
-	fun deleteNoteFromAya(
+	private fun deleteNoteFromAya(
 		ayaNumber : Int ,
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
-						 )
+								 )
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -982,11 +982,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun deleteBookmarkFromAya(
+	private fun deleteBookmarkFromAya(
 		ayaNumber : Int ,
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
-							 )
+									 )
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -1002,11 +1002,11 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun deleteFavoriteFromAya(
+	private fun deleteFavoriteFromAya(
 		ayaNumber : Int ,
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
-							 )
+									 )
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -1022,7 +1022,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun getAllNotes()
+	private fun getAllNotes()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -1039,7 +1039,7 @@ class QuranViewModel(context : Context) : ViewModel()
 
 
 	//get all favorites
-	fun getAllFavorites()
+	private fun getAllFavorites()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -1055,7 +1055,7 @@ class QuranViewModel(context : Context) : ViewModel()
 	}
 
 	//get all bookmarks
-	fun getAllBookmarks()
+	private fun getAllBookmarks()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try

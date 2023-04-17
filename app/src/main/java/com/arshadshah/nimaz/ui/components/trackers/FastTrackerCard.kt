@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.trackers
+package com.arshadshah.nimaz.ui.components.trackers
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

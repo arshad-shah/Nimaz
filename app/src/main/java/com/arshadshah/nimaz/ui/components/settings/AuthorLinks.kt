@@ -63,7 +63,7 @@ fun AuthorLinks()
 					}
 							)
 
-			//linkdIn link
+			//linkedIn link
 			FilledIconButton(
 					colors = IconButtonDefaults.filledIconButtonColors(
 							containerColor = MaterialTheme.colorScheme.primary ,

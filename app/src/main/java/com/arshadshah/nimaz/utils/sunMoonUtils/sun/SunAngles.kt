@@ -163,7 +163,7 @@ object SunAngles
 		return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L)
 	}
 
-	fun hourAngle(h : Double , phi : Double , d : Double) : Double
+	private fun hourAngle(h : Double , phi : Double , d : Double) : Double
 	{
 		return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d)))
 	}

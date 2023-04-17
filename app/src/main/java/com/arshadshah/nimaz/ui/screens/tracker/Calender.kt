@@ -24,6 +24,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
+import com.arshadshah.nimaz.data.remote.models.FastTracker
+import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -39,6 +41,7 @@ import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
+import kotlin.reflect.KFunction1
 
 @Composable
 fun Calender(paddingValues : PaddingValues)
@@ -63,6 +66,14 @@ fun Calender(paddingValues : PaddingValues)
 		viewModel.dateState
 	}.collectAsState()
 
+	val progressForMonth = remember {
+		viewModel.progressForMonth
+	}.collectAsState()
+
+	val fastProgressForMonth = remember {
+		viewModel.fastProgressForMonth
+	}.collectAsState()
+
 	LazyColumn(
 			modifier = Modifier
 				.fillMaxSize()
@@ -80,7 +91,7 @@ fun Calender(paddingValues : PaddingValues)
 				SelectableCalendar(
 						horizontalSwipeEnabled = false ,
 						dayContent = {
-							CalenderDay(dayState = it)
+							CalenderDay(dayState = it, handleEvents = viewModel::onEvent, progressForMonth, fastProgressForMonth)
 						} ,
 						daysOfWeekHeader = { weekState ->
 							CalenderWeekHeader(weekState = weekState)
@@ -403,21 +414,11 @@ fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 @Composable
 fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
+	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
+	progressForMonth : State<MutableList<PrayerTracker>> ,
+	fastProgressForMonth : State<MutableList<FastTracker>> ,
 			   )
 {
-	val viewModel = viewModel(
-			key = TRACKING_VIEWMODEL_KEY ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
-
-	val progressForMonth = remember {
-		viewModel.progressForMonth
-	}.collectAsState()
-
-	val fastProgressForMonth = remember {
-		viewModel.fastProgressForMonth
-	}.collectAsState()
 
 	//get the day for the hijri calendar
 	val hijriDay = HijrahDate.from(dayState.date)
@@ -482,21 +483,23 @@ fun CalenderDay(
 							enabled = dayState.isFromCurrentMonth ,
 							onClick = {
 											dayState.selectionState.onDateSelected(dayState.date)
-											viewModel.onEvent(
+								handleEvents(
 													TrackerViewModel.TrackerEvent.SET_DATE(
 															dayState.date.toString()
 																						  )
 															 )
-											viewModel.onEvent(
+								handleEvents(
 													TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																									  )
 															 )
-											viewModel.onEvent(
+								handleEvents(
 													TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
 															dayState.date.toString()
 																										   )
 															 )
+								handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dayState.date.toString()))
+								handleEvents(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(dayState.date.toString()))
 							} ,
 							onLongClick = {
 								if (importantDay.first)

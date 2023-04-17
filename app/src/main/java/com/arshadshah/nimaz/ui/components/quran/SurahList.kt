@@ -4,7 +4,6 @@ package com.arshadshah.nimaz.ui.components.quran
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.arshadshah.nimaz.data.remote.models.Surah
-import com.arshadshah.nimaz.ui.components.ui.quran.SurahListUI
 
 @Composable
 fun SurahList(

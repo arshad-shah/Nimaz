@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

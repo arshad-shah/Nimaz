@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -558,7 +560,7 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp) ,
+												.size(48.dp).clip(CircleShape) ,
 											painter = painterResource(id = R.drawable.sunrise_icon) ,
 											contentDescription = "Sunrise Time"
 										 )

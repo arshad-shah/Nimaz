@@ -502,9 +502,8 @@ fun MoonPhaseImagePreview()
 
 		MoonPhase.WANING_GIBBOUS ->
 		{
-			val percentageProcessed = 100 - percentage
 			//get the image to show
-			when (percentageProcessed)
+			when (100 - percentage)
 			{
 				in 0 .. 10 -> R.drawable.wanning_gib_7
 				in 10 .. 20 -> R.drawable.wanning_gib_14
@@ -523,9 +522,8 @@ fun MoonPhaseImagePreview()
 
 		MoonPhase.WANING_CRESCENT ->
 		{
-			val percentageProcessed = 100 - percentage
 			//get the image to show
-			when (percentageProcessed)
+			when (100 - percentage)
 			{
 				in 50 .. 60 -> R.drawable.wanning_cres_57
 				in 60 .. 70 -> R.drawable.wanning_cres_64

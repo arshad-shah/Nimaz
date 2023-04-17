@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.ui.trackers.FastTrackerCard
+import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 
