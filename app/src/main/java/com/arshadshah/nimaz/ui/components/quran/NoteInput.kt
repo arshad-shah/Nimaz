@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.quran
+package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -23,7 +23,7 @@ fun NoteInput(
 {
 	val context = LocalContext.current
 	AlertDialogNimaz(
-			cardContent = false,
+			cardContent = false ,
 			contentDescription = "Note" ,
 			title = "Add Note" ,
 			topDivider = false ,

@@ -119,7 +119,7 @@ object AppConstants
 	const val CHANNEL_MISSED_PRAYER = "Missed Prayer"
 
 	//channel descriptions
-	const val CHANNEL_DESC = "Prayer Adhan Notification"
+	private const val CHANNEL_DESC = "Prayer Adhan Notification"
 	const val CHANNEL_DESC_FAJR = "Fajr $CHANNEL_DESC"
 	const val CHANNEL_DESC_SUNRISE = "Sunrise $CHANNEL_DESC"
 	const val CHANNEL_DESC_ZUHAR = "Zuhar $CHANNEL_DESC"
@@ -214,7 +214,7 @@ object AppConstants
 
 
 	//logging tags
-	const val TAG = "Nimaz"
+	private const val TAG = "Nimaz"
 
 	//splash screen tag
 	const val SPLASH_SCREEN_TAG = "$TAG: SplashScreen"

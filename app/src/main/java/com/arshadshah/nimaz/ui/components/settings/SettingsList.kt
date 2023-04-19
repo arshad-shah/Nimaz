@@ -7,7 +7,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -28,12 +34,12 @@ fun SettingsList(
 	title : String ,
 	description : String? = null ,
 	items : Map<String , String> ,
-	icon : @Composable() (() -> Unit)? = null ,
+	icon : @Composable (() -> Unit)? = null ,
 	iconPainter : Painter? = null ,
 	iconDescription : String? = null ,
 	useSelectedValueAsSubtitle : Boolean = true ,
 	subtitle : String? = null ,
-	action : @Composable() (() -> Unit)? = null ,
+	action : @Composable (() -> Unit)? = null ,
 	height : Dp = 56.dp ,
 	onChange : (String) -> Unit = { } ,
 				)

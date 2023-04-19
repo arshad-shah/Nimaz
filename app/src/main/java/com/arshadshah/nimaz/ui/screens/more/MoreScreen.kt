@@ -48,7 +48,7 @@ fun MoreScreen(
 					  )
 
 		}
-			item {
+		item {
 			LinkButton(
 					painter = painterResource(id = R.drawable.tasbih) ,
 					content = "Tasbih List" ,
@@ -57,7 +57,7 @@ fun MoreScreen(
 					} ,
 					title = "Tasbih List" ,
 					  )
-			}
+		}
 		item {
 			LinkButton(
 					painter = painterResource(id = R.drawable.qibla) ,

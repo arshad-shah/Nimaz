@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.utils
 
-import kotlin.math.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.sin
+import kotlin.math.tan
 
 class Qibla
 {
@@ -9,8 +13,8 @@ class Qibla
 	private object MAKKAH
 	{
 
-		val latitude = 21.4225241
-		val longitude = 39.8261818
+		const val latitude = 21.4225241
+		const val longitude = 39.8261818
 	}
 
 	fun calculateQiblaDirection(latitude : Double , longitude : Double) : Double
