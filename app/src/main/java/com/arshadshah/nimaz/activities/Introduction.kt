@@ -71,6 +71,7 @@ class Introduction : ComponentActivity()
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Red"
 				}
+
 				"Rustic_brown" ->
 				{
 					dynamicTheme.value = false

@@ -617,7 +617,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		juzNumber : Int ,
 		languageConverted : String ,
 		listOfJuzAyat : ArrayList<Aya> ,
-						 ) : ArrayList<Aya>
+								 ) : ArrayList<Aya>
 	{
 
 		//add the following object to index 0 of ayaForSurah without losing value of index 0 in ayaForSurah
@@ -868,7 +868,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
 		audio : String ,
-					 )
+							 )
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -888,7 +888,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
 		bookmark : Boolean ,
-				   )
+						   )
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try
@@ -908,7 +908,7 @@ class QuranViewModel(context : Context) : ViewModel()
 		surahNumber : Int ,
 		ayaNumberInSurah : Int ,
 		favorite : Boolean ,
-				   )
+						   )
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try

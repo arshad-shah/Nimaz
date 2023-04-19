@@ -7,9 +7,10 @@ import android.os.Looper
 import android.util.Log
 import com.google.android.gms.location.*
 
-@Suppress("BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
-		  "BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
-		  "BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted"
+@Suppress(
+		"BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
+		"BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
+		"BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted"
 		 )
 object AutoLocationUtils
 {

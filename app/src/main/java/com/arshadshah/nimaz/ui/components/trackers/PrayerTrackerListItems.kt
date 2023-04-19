@@ -133,7 +133,8 @@ fun PrayerTrackerListItems(
 								   )
 						val firstDayOfWeek = LocalDate.now().with(DayOfWeek.MONDAY)
 						val lastDayOfWeek = LocalDate.now().with(DayOfWeek.SUNDAY)
-						if (LocalDate.parse(dateState.value) in firstDayOfWeek .. lastDayOfWeek){
+						if (LocalDate.parse(dateState.value) in firstDayOfWeek .. lastDayOfWeek)
+						{
 							handleEvent(
 									TrackerViewModel.TrackerEvent.UPDATE_PROGRESS_FOR_DAY(
 											LocalDate.parse(dateState.value).dayOfWeek ,
@@ -141,7 +142,11 @@ fun PrayerTrackerListItems(
 																						 )
 									   )
 						}
-						handleEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(LocalDate.now().toString()))
+						handleEvent(
+								TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+										LocalDate.now().toString()
+																					)
+								   )
 					} ,
 								)
 		}

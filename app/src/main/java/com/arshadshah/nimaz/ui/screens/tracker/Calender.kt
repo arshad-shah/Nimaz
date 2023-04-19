@@ -91,7 +91,12 @@ fun Calender(paddingValues : PaddingValues)
 				SelectableCalendar(
 						horizontalSwipeEnabled = false ,
 						dayContent = {
-							CalenderDay(dayState = it, handleEvents = viewModel::onEvent, progressForMonth, fastProgressForMonth)
+							CalenderDay(
+									dayState = it ,
+									handleEvents = viewModel::onEvent ,
+									progressForMonth ,
+									fastProgressForMonth
+									   )
 						} ,
 						daysOfWeekHeader = { weekState ->
 							CalenderWeekHeader(weekState = weekState)
@@ -214,10 +219,19 @@ fun CalenderHeader(monthState : MonthState)
 								LocalDate.now().toString()
 																			   )
 								 )
-				viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(LocalDate.now().toString()))
-				viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(LocalDate.now().toString()))
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+								LocalDate.now().toString()
+																			)
+								 )
+				viewModel.onEvent(
+						TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+								LocalDate.now().toString()
+																				 )
+								 )
 
-			}else{
+			} else
+			{
 				viewModel.onEvent(
 						TrackerViewModel.TrackerEvent.SET_DATE(
 								LocalDate.now().toString()
@@ -265,7 +279,11 @@ fun CalenderHeader(monthState : MonthState)
 						//get a date in the new month
 						val date = monthState.currentMonth.atDay(1)
 						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
-						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(date.toString()))
+						viewModel.onEvent(
+								TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+										date.toString()
+																						 )
+										 )
 						inCurrentMonth.value = false
 					} ,
 							) {
@@ -350,7 +368,11 @@ fun CalenderHeader(monthState : MonthState)
 						//get a date in the new month
 						val date = monthState.currentMonth.atDay(1)
 						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
-						viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(date.toString()))
+						viewModel.onEvent(
+								TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+										date.toString()
+																						 )
+										 )
 						inCurrentMonth.value = false
 					} ,
 							) {
@@ -482,24 +504,32 @@ fun CalenderDay(
 					.combinedClickable(
 							enabled = dayState.isFromCurrentMonth ,
 							onClick = {
-											dayState.selectionState.onDateSelected(dayState.date)
+								dayState.selectionState.onDateSelected(dayState.date)
 								handleEvents(
-													TrackerViewModel.TrackerEvent.SET_DATE(
-															dayState.date.toString()
+										TrackerViewModel.TrackerEvent.SET_DATE(
+												dayState.date.toString()
+																			  )
+											)
+								handleEvents(
+										TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+												dayState.date.toString()
 																						  )
-															 )
+											)
 								handleEvents(
-													TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-															dayState.date.toString()
-																									  )
-															 )
+										TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+												dayState.date.toString()
+																							   )
+											)
 								handleEvents(
-													TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-															dayState.date.toString()
-																										   )
-															 )
-								handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dayState.date.toString()))
-								handleEvents(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(dayState.date.toString()))
+										TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+												dayState.date.toString()
+																							)
+											)
+								handleEvents(
+										TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+												dayState.date.toString()
+																								 )
+											)
 							} ,
 							onLongClick = {
 								if (importantDay.first)
@@ -585,10 +615,10 @@ fun CalenderDay(
 				   )
 			}
 			Row(
-					modifier = Modifier,
-					horizontalArrangement = Arrangement.SpaceEvenly,
+					modifier = Modifier ,
+					horizontalArrangement = Arrangement.SpaceEvenly ,
 					verticalAlignment = Alignment.CenterVertically
-			   ){
+			   ) {
 				Text(
 						//put a letter scissor ha in front of the day to show that it is a hijri day
 						text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString() ,
@@ -596,7 +626,7 @@ fun CalenderDay(
 						maxLines = 1 ,
 						overflow = TextOverflow.Ellipsis ,
 						modifier = Modifier
-							.padding(vertical = 4.dp, horizontal = 3.dp),
+							.padding(vertical = 4.dp , horizontal = 3.dp) ,
 						color = when (importantDay.first)
 						{
 							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer

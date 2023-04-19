@@ -39,7 +39,11 @@ fun PrayerTrackerGrid()
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 									)
 	LaunchedEffect(Unit) {
-		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(LocalDate.now().toString()))
+		viewModelTracker.onEvent(
+				TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+						LocalDate.now().toString()
+																	)
+								)
 	}
 	val progressForMonth = remember {
 		viewModelTracker.progressForMonth
@@ -71,7 +75,7 @@ fun PrayerTrackerGrid()
 						.fillMaxWidth() ,
 					horizontalArrangement = Arrangement.SpaceBetween ,
 					verticalAlignment = Alignment.CenterVertically
-			   ) {
+				   ) {
 				item {
 					// Render the name of the prayer on the left
 					//if its Maghri1 then it must be transparent
@@ -79,7 +83,7 @@ fun PrayerTrackerGrid()
 							text = prayers[prayers.indexOf(prayer)] ,
 							style = MaterialTheme.typography.labelSmall ,
 							modifier = Modifier
-								.width(40.dp),
+								.width(40.dp) ,
 						)
 				}
 				// Render the small boxes (dots) for each day of the month
@@ -90,7 +94,7 @@ fun PrayerTrackerGrid()
 					val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
 							prayers[prayers.indexOf(prayer)]
 																								)
-					item{
+					item {
 						Box(
 								modifier = Modifier
 									.size(8.dp)
@@ -99,16 +103,23 @@ fun PrayerTrackerGrid()
 											width = 1.dp ,
 											color = when (date)
 											{
-												currentDate -> {
-														MaterialTheme.colorScheme.onPrimary
+												currentDate ->
+												{
+													MaterialTheme.colorScheme.onPrimary
 												}
-												userSelectedDate -> {
-														MaterialTheme.colorScheme.onSecondaryContainer
+
+												userSelectedDate ->
+												{
+													MaterialTheme.colorScheme.onSecondaryContainer
 												}
-												else -> {
-													if (isHighlighted){
+
+												else ->
+												{
+													if (isHighlighted)
+													{
 														MaterialTheme.colorScheme.primary
-													}else{
+													} else
+													{
 														Color.Gray
 													}
 												}
@@ -119,24 +130,35 @@ fun PrayerTrackerGrid()
 											color =
 											when (date)
 											{
-												currentDate -> {
-													if (isHighlighted){
+												currentDate ->
+												{
+													if (isHighlighted)
+													{
 														MaterialTheme.colorScheme.primary
-													}else{
+													} else
+													{
 														Color.Gray
 													}
 												}
-												userSelectedDate -> {
-													if (isHighlighted){
+
+												userSelectedDate ->
+												{
+													if (isHighlighted)
+													{
 														MaterialTheme.colorScheme.primary
-													}else{
+													} else
+													{
 														MaterialTheme.colorScheme.secondaryContainer
 													}
 												}
-												else -> {
-													if (isHighlighted){
+
+												else ->
+												{
+													if (isHighlighted)
+													{
 														MaterialTheme.colorScheme.primary
-													}else{
+													} else
+													{
 														Color.Gray
 													}
 												}
