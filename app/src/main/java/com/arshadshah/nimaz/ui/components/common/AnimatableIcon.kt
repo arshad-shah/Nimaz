@@ -2,13 +2,9 @@ package com.arshadshah.nimaz.ui.components.common
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,7 +32,6 @@ fun AnimatableIcon(
 	iconSize : Dp = 24.dp ,
 	scale : Float = 1f ,
 	color : Color = Color.Unspecified ,
-	onClick : () -> Unit ,
 				  )
 {
 	// Animation params
@@ -46,20 +41,13 @@ fun AnimatableIcon(
 	val animatedColor by animateColorAsState(
 			targetValue = color ,
 											)
-
-	IconButton(
-			onClick = onClick ,
-			modifier = modifier
-				.size(iconSize)
-				.indication(MutableInteractionSource() , null)
-			  ) {
 		Icon(
 				painter = painter ,
 				contentDescription = contentDescription ,
 				tint = animatedColor ,
-				modifier = modifier.scale(animatedScale)
+				modifier = modifier.scale(animatedScale).size(iconSize) ,
 			)
-	}
+
 }
 
 //animated text
@@ -70,7 +58,6 @@ fun AnimatedText(
 	color : Color = MaterialTheme.colorScheme.onSurface ,
 	textAlign : TextAlign = TextAlign.Center ,
 	scale : Float = 1f ,
-	onClick : () -> Unit ,
 				)
 {
 	// Animation params
@@ -86,8 +73,7 @@ fun AnimatedText(
 			color = animatedColor ,
 			textAlign = textAlign ,
 			modifier = modifier
-				.scale(animatedScale)
-				.clickable { onClick() } ,
+				.scale(animatedScale),
 		)
 
 
@@ -115,9 +101,7 @@ fun PreviewIcon()
 				color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
 						alpha = 0.5f
 																												   ) ,
-					  ) {
-			selected = ! selected
-		}
+					  )
 	}
 }
 
@@ -142,8 +126,6 @@ fun PreviewAnimatedText()
 				color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
 						alpha = 0.5f
 																												   ) ,
-					) {
-			selected = ! selected
-		}
+					)
 	}
 }

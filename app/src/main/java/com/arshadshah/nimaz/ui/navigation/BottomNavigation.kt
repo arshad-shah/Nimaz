@@ -82,15 +82,6 @@ fun BottomNavigationBar(navController : NavController)
 																														 ) ,
 									scale = if (selected) 1.1f else 1f ,
 									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
-									onClick = {
-											navController.navigate(bottomNavItem.screen_route) {
-												popUpTo(navController.graph.startDestinationId) {
-													saveState = true
-												}
-												launchSingleTop = true
-												restoreState = true
-											}
-									}
 										  )
 					} ,
 					label = {
@@ -102,15 +93,7 @@ fun BottomNavigationBar(navController : NavController)
 										contentDescription = bottomNavItem.title
 									} ,
 								color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
-									) {
-								navController.navigate(bottomNavItem.screen_route) {
-									popUpTo(navController.graph.startDestinationId) {
-										saveState = true
-									}
-									launchSingleTop = true
-									restoreState = true
-								}
-						}
+									)
 					} ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
