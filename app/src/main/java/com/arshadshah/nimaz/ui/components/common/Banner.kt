@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.delay
+import java.time.LocalDateTime
 
 //Banner Variant
 sealed class BannerVariant
@@ -76,6 +77,7 @@ fun BannerSmall(
 				delay(showFor.toLong())
 				isOpen.value = false
 				sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
+				sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 			}
 		}
 	}
@@ -99,6 +101,7 @@ fun BannerSmall(
 								onClick()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
+								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 							} ,
 							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
@@ -153,6 +156,7 @@ fun BannerSmall(
 							onClick = {
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
+								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 							} ,
 							modifier = Modifier
 								.size(32.dp) ,
@@ -201,6 +205,7 @@ fun BannerLarge(
 			delay(showFor.toLong())
 			isOpen.value = false
 			sharedPref.saveDataBoolean("$title-bannerOpen" , false)
+			sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 		}
 	}
 	if (isOpen.value)
@@ -223,6 +228,7 @@ fun BannerLarge(
 								onClick()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
+								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 							} ,
 							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
@@ -279,6 +285,7 @@ fun BannerLarge(
 								onDismiss.invoke()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
+								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 							} ,
 							modifier = Modifier
 								.size(32.dp) ,
