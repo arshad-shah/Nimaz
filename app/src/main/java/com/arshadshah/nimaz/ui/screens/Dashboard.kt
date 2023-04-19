@@ -11,6 +11,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +44,6 @@ import com.arshadshah.nimaz.viewModel.TrackerViewModel
 fun Dashboard(
 	onNavigateToTracker : () -> Unit ,
 	onNavigateToCalender : () -> Unit ,
-	onNavigateToPrayerTimes : () -> Unit ,
 	onNavigateToTasbihScreen : (String , String , String , String) -> Unit ,
 	paddingValues : PaddingValues ,
 	onNavigateToTasbihListScreen : () -> Unit ,
@@ -61,12 +61,17 @@ fun Dashboard(
 			initializer = { TrackerViewModel() } ,
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 									)
+	LaunchedEffect(Unit) {
+		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
+	}
+
+
+	val updateAvailable = remember {
+		viewModelSettings.isUpdateAvailable
+	}.collectAsState()
 
 	val isFasting = remember {
 		viewModelTracker.isFasting
-	}.collectAsState()
-	val updateAvailabile = remember {
-		viewModelSettings.isUpdateAvailable
 	}.collectAsState()
 	val stateScroll = rememberLazyListState()
 	LazyColumn(
@@ -76,15 +81,13 @@ fun Dashboard(
 			contentPadding = paddingValues
 			  ) {
 		item {
-			DashboardPrayertimesCard(
-					onNavigateToPrayerTimes = onNavigateToPrayerTimes
-									)
+			DashboardPrayertimesCard()
 		}
 		item {
 			RamadanTimesCard(isFasting.value)
 		}
 		item {
-			if (updateAvailabile.value)
+			if (updateAvailable.value)
 			{
 				val isOpen = remember { mutableStateOf(true) }
 				BannerSmall(
@@ -194,7 +197,6 @@ fun DashboardPreview()
 		Dashboard(
 				onNavigateToTracker = { } ,
 				onNavigateToCalender = { } ,
-				onNavigateToPrayerTimes = { } ,
 				onNavigateToTasbihScreen = { _ , _ , _ , _ -> } ,
 				paddingValues = PaddingValues(8.dp) ,
 				onNavigateToTasbihListScreen = { } ,

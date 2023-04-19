@@ -778,9 +778,6 @@ fun NavigationGraph(
 		composable(BottomNavItem.Dashboard.screen_route) {
 			Dashboard(
 					paddingValues = paddingValues ,
-					onNavigateToPrayerTimes = {
-						navController.navigate(BottomNavItem.PrayerTimesScreen.screen_route)
-					} ,
 					onNavigateToCalender = {
 						navController.navigate(CALENDER_SCREEN_ROUTE)
 					} ,

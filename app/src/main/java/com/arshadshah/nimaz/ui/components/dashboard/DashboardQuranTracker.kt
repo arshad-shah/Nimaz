@@ -43,12 +43,12 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 			initializer = { QuranViewModel(context) } ,
 			viewModelStoreOwner = context as ComponentActivity
 							 )
-	val bookmarks = remember { viewModel.bookmarks }.collectAsState()
 
 	LaunchedEffect(Unit)
 	{
 		viewModel.handleAyaEvent(QuranViewModel.AyaEvent.getBookmarks)
 	}
+	val bookmarks = remember { viewModel.bookmarks }.collectAsState()
 
 	val translationType =
 		PrivateSharedPreferences(LocalContext.current).getData(
@@ -148,6 +148,12 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 						)
 				} ,
 				onDismissRequest = {
+					openDialog.value = false
+				} ,
+				contentHeight = 100.dp ,
+				confirmButtonText = "Yes" ,
+				dismissButtonText = "No, Cancel" ,
+				onConfirm = {
 					viewModel.handleAyaEvent(
 							QuranViewModel.AyaEvent.deleteBookmarkFromAya(
 									itemToDelete.value !!.ayaNumber ,
@@ -155,12 +161,6 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 									itemToDelete.value !!.ayaNumberInSurah
 																		 )
 											)
-					openDialog.value = false
-				} ,
-				contentHeight = 100.dp ,
-				confirmButtonText = "Yes" ,
-				dismissButtonText = "No, Cancel" ,
-				onConfirm = {
 					openDialog.value = false
 				} ,
 				onDismiss = {
