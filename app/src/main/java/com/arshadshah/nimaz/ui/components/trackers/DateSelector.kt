@@ -129,7 +129,7 @@ fun DateSelector(
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
 										.padding(start = 4.dp)
-										.alpha(0.5f)
+										.alpha(0.8f)
 								)
 							Icon(
 									modifier = Modifier.size(16.dp) ,

@@ -19,8 +19,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 126
-        versionName '1.5.53'
+        versionCode 127
+        versionName '1.5.54'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
