@@ -194,7 +194,11 @@ fun SevenDayTrend()
 			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 									)
 	LaunchedEffect(Unit) {
-		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(LocalDate.now().toString()))
+		viewModelTracker.onEvent(
+				TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(
+						LocalDate.now().toString()
+																   )
+								)
 	}
 	val progressForMonday = remember {
 		viewModelTracker.progressForMonday

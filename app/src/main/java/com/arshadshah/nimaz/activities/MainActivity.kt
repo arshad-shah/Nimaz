@@ -595,10 +595,12 @@ class MainActivity : ComponentActivity()
 					{
 						"Privacy Policy"
 					}
+
 					"help" ->
 					{
 						"Help"
 					}
+
 					else ->
 					{
 						"Terms and Conditions"

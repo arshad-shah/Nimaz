@@ -560,7 +560,8 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 								icon = {
 									Image(
 											modifier = Modifier
-												.size(48.dp).clip(CircleShape) ,
+												.size(48.dp)
+												.clip(CircleShape) ,
 											painter = painterResource(id = R.drawable.sunrise_icon) ,
 											contentDescription = "Sunrise Time"
 										 )

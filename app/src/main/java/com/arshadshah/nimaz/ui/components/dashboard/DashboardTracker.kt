@@ -246,7 +246,11 @@ fun PrayerTrackerListItemsRow(
 														 )
 																				)
 									   )
-							handleEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(dateState.value))
+							handleEvent(
+									TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+											dateState.value
+																						)
+									   )
 						} ,
 						modifier = Modifier
 							.placeholder(

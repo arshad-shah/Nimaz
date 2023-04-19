@@ -114,8 +114,6 @@ class TrackerViewModel : ViewModel()
 	val progressForSunday = _progressForSunday.asStateFlow()
 
 
-
-
 	//event for the tracker for prayer
 	sealed class TrackerEvent
 	{
@@ -171,7 +169,10 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.GET_PROGRESS_FOR_WEEK -> getProgressForWeek(event.date)
 			is TrackerEvent.GET_PROGRESS_FOR_MONTH -> getProgressForMonth(event.date)
 			is TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH -> getFastProgressForMonth(event.date)
-			is TrackerEvent.UPDATE_PROGRESS_FOR_DAY -> updateProgressForDay(event.day , event.progress)
+			is TrackerEvent.UPDATE_PROGRESS_FOR_DAY -> updateProgressForDay(
+					event.day ,
+					event.progress
+																		   )
 		}
 	}
 
