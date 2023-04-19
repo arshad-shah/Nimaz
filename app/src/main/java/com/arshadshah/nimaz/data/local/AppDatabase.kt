@@ -5,8 +5,23 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.arshadshah.nimaz.data.local.dao.*
-import com.arshadshah.nimaz.data.local.models.*
+import com.arshadshah.nimaz.data.local.dao.AyaDao
+import com.arshadshah.nimaz.data.local.dao.DuaDao
+import com.arshadshah.nimaz.data.local.dao.FastTrackerDao
+import com.arshadshah.nimaz.data.local.dao.JuzDao
+import com.arshadshah.nimaz.data.local.dao.PrayerTimesDao
+import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
+import com.arshadshah.nimaz.data.local.dao.SurahDao
+import com.arshadshah.nimaz.data.local.dao.TasbihTrackerDao
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalChapter
+import com.arshadshah.nimaz.data.local.models.LocalDua
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
+import com.arshadshah.nimaz.data.local.models.LocalJuz
+import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 
 @TypeConverters(
 		TimestampTypeConvertor::class ,

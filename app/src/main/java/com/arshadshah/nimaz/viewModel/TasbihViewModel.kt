@@ -271,7 +271,7 @@ class TasbihViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun getTasbih(id : Int)
+	private fun getTasbih(id : Int)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			try

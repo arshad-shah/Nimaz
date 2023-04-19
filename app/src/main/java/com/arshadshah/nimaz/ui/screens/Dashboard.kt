@@ -25,7 +25,16 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_EVENTS_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
-import com.arshadshah.nimaz.ui.components.dashboard.*
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayertimesCard
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardQuranTracker
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardRandomAyatCard
+import com.arshadshah.nimaz.ui.components.dashboard.DashboardTasbihTracker
+import com.arshadshah.nimaz.ui.components.dashboard.EidUlAdhaCard
+import com.arshadshah.nimaz.ui.components.dashboard.EidUlFitrCard
+import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
+import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.viewModel.TrackerViewModel

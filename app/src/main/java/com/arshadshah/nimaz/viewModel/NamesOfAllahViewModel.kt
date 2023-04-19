@@ -49,7 +49,7 @@ class NamesOfAllahViewModel : ViewModel()
 	}
 
 	//play audio
-	fun playAudio(context : Context)
+	private fun playAudio(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			//if the audio is paused
@@ -80,7 +80,7 @@ class NamesOfAllahViewModel : ViewModel()
 	}
 
 	//pause audio
-	fun pauseAudio()
+	private fun pauseAudio()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			//if the audio is playing
@@ -99,7 +99,7 @@ class NamesOfAllahViewModel : ViewModel()
 	}
 
 	//stop audio
-	fun stopAudio()
+	private fun stopAudio()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			//stop the audio

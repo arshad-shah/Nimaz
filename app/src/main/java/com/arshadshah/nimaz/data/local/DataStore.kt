@@ -1,7 +1,23 @@
 package com.arshadshah.nimaz.data.local
 
-import com.arshadshah.nimaz.data.local.models.*
-import com.arshadshah.nimaz.data.remote.models.*
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalChapter
+import com.arshadshah.nimaz.data.local.models.LocalDua
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
+import com.arshadshah.nimaz.data.local.models.LocalJuz
+import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.remote.models.Chapter
+import com.arshadshah.nimaz.data.remote.models.Dua
+import com.arshadshah.nimaz.data.remote.models.FastTracker
+import com.arshadshah.nimaz.data.remote.models.Juz
+import com.arshadshah.nimaz.data.remote.models.PrayerTimes
+import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.data.remote.models.Surah
+import com.arshadshah.nimaz.data.remote.models.Tasbih
 import java.time.LocalDate
 import java.time.LocalDateTime
 

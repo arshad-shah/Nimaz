@@ -20,6 +20,7 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Composable
@@ -130,11 +131,21 @@ fun PrayerTrackerListItems(
 													 )
 																			)
 								   )
+						val firstDayOfWeek = LocalDate.now().with(DayOfWeek.MONDAY)
+						val lastDayOfWeek = LocalDate.now().with(DayOfWeek.SUNDAY)
+						if (LocalDate.parse(dateState.value) in firstDayOfWeek .. lastDayOfWeek)
+						{
+							handleEvent(
+									TrackerViewModel.TrackerEvent.UPDATE_PROGRESS_FOR_DAY(
+											LocalDate.parse(dateState.value).dayOfWeek ,
+											progress.value.toInt()
+																						 )
+									   )
+						}
 						handleEvent(
-								TrackerViewModel.TrackerEvent.UPDATE_PROGRESS_FOR_DAY(
-										LocalDate.parse(dateState.value).dayOfWeek ,
-										progress.value.toInt()
-																					 )
+								TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+										LocalDate.now().toString()
+																					)
 								   )
 					} ,
 								)

@@ -113,7 +113,7 @@ private fun createTextView(
 		onClick?.let { setOnClickListener { onClick() } }
 		setTextColor(textColor.toArgb())
 		setMaxLines(maxLines)
-		setTextSize(TypedValue.COMPLEX_UNIT_DIP , mergedStyle.fontSize.value)
+		setTextSize(TypedValue.COMPLEX_UNIT_SP , mergedStyle.fontSize.value)
 
 		viewId?.let { id = viewId }
 		textAlign?.let { align ->

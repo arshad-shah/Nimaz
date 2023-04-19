@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.ui.components.ui.quran.AyaListUI
-import com.arshadshah.nimaz.ui.components.ui.quran.Page
 
 @Composable
 fun AyaJuzList(

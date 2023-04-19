@@ -56,17 +56,20 @@ fun ManualLocationInput()
 	//onclick open dialog
 	SettingsMenuLink(
 			title = { Text(text = "Edit Location") } ,
-			subtitle = { Text(
-					text = locationNameState.value,
-					modifier = Modifier.placeholder(
-					visible = isLoading.value ,
-					color = MaterialTheme.colorScheme.outline ,
-					shape = RoundedCornerShape(4.dp) ,
-					highlight = PlaceholderHighlight.shimmer(
-							highlightColor = Color.White ,
-															)
+			subtitle = {
+				Text(
+						text = locationNameState.value ,
+						modifier = Modifier.placeholder(
+								visible = isLoading.value ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
 
-												   )) } ,
+													   )
+					)
+			} ,
 			onClick = {
 				showDialog.value = true
 			} ,
@@ -82,7 +85,7 @@ fun ManualLocationInput()
 	if (! showDialog.value) return
 
 	AlertDialogNimaz(
-			cardContent = false,
+			cardContent = false ,
 			bottomDivider = false ,
 			topDivider = false ,
 			contentHeight = 100.dp ,
@@ -111,7 +114,7 @@ fun ManualLocationInput()
 								context ,
 								name.value
 																	 )
-								   )
+									 )
 				viewModelPrayerTimes.handleEvent(
 						context ,
 						PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
