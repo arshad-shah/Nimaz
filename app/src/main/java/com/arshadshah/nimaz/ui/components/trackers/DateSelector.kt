@@ -2,8 +2,17 @@ package com.arshadshah.nimaz.ui.components.trackers
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -120,7 +129,7 @@ fun DateSelector(
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
 										.padding(start = 4.dp)
-										.alpha(0.5f)
+										.alpha(0.8f)
 								)
 							Icon(
 									modifier = Modifier.size(16.dp) ,

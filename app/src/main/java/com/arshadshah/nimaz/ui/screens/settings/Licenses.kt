@@ -72,7 +72,7 @@ fun Licences(paddingValues : PaddingValues)
 								showVersion = true ,
 								showLicenseBadges = true ,
 								onClick = {
-									libraryToShow.value = uniqueLibs.get(index)
+									libraryToShow.value = uniqueLibs[index]
 									openDialog.value = true
 								} ,
 								   )

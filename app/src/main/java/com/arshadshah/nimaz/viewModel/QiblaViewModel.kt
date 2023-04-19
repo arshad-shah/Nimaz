@@ -30,7 +30,7 @@ class QiblaViewModel(context : Context) : ViewModel()
 		loadQibla(context)
 	}
 
-	fun loadQibla(context : Context)
+	private fun loadQibla(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			_qiblaState.value = QiblaState.Loading

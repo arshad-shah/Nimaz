@@ -217,7 +217,7 @@ class PrayerTimesViewModel : ViewModel()
 	}
 
 	//function to update the prayer times
-	fun updatePrayerTimes(mapOfParameters : Map<String , String>)
+	private fun updatePrayerTimes(mapOfParameters : Map<String , String>)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			_isLoading.value = true
@@ -360,7 +360,7 @@ class PrayerTimesViewModel : ViewModel()
 		}
 	}
 
-	fun startTimer(context : Context , timeToNextPrayer : Long)
+	private fun startTimer(context : Context , timeToNextPrayer : Long)
 	{
 		countDownTimer?.cancel()
 		countDownTimer = object : CountDownTimer(timeToNextPrayer , 1000)

@@ -1,7 +1,13 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
@@ -51,7 +57,7 @@ fun AppDetails()
 						verticalArrangement = Arrangement.Center ,
 						horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
-					//ceircluar image
+					//circular image
 					Image(
 							painter = painterResource(id = R.drawable.logo) ,
 							contentDescription = "App Icon" ,

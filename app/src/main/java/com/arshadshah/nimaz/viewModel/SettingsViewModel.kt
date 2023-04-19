@@ -32,7 +32,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 	//theme state
 	//it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
-	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , "SYSTEM"))
+	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , "DEFAULT"))
 	val theme = _theme.asStateFlow()
 
 	//dark mode state
@@ -600,7 +600,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun reverseGeocode(latitude : Double , longitude : Double)
+	private fun reverseGeocode(latitude : Double , longitude : Double)
 	{
 		Log.d("Nimaz: reverseGeocode" , "reverseGeocode")
 		try
@@ -657,7 +657,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 		}
 	}
 
-	fun forwardGeocode(cityName : String)
+	private fun forwardGeocode(cityName : String)
 	{
 		Log.d("Nimaz: forwardGeocode" , "forwardGeocode")
 		_isLoading.value = true

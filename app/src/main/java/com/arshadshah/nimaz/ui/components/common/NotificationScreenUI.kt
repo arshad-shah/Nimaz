@@ -36,6 +36,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun NotificationScreenUI()
@@ -126,12 +127,6 @@ fun NotificationScreenUI()
 			}
 
 			sharedpref.saveDataBoolean(AppConstants.NOTIFICATION_ALLOWED , true)
-		} else
-		{
-			//if the user has not granted the notification permission then set the state of the switch to false
-			state.value = false
-			//set the isChecked to false
-			isChecked.value = false
 		}
 	}
 

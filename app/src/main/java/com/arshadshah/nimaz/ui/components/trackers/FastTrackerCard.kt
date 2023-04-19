@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.ui.trackers
+package com.arshadshah.nimaz.ui.components.trackers
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,12 +39,12 @@ fun FastTrackerCard(
 				.padding(8.dp) ,
 				) {
 		ToggleableItemColumn(
-				text = if(dateForTracker.isBefore(LocalDate.now())) "Did not fast"
+				text = if (dateForTracker.isBefore(LocalDate.now())) "Did not fast"
 				else "Not Fasting" ,
 				//if date state is in the fast then shoow the date
 				// like this:
 				// Fasted on 2021-09-01
-				selectedText = if(dateForTracker.isBefore(LocalDate.now())) "Fasted on ${dateState.value}" else "Fasting Today" ,
+				selectedText = if (dateForTracker.isBefore(LocalDate.now())) "Fasted on ${dateState.value}" else "Fasting Today" ,
 				checked = isFastingToday.value ,
 				onCheckedChange = {
 					//if the date is after today then don't allow the user to change the value
@@ -67,6 +67,7 @@ fun FastTrackerCard(
 											   )
 																			 )
 							   )
+					handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(dateState.value))
 				} ,
 				modifier = Modifier
 					.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)

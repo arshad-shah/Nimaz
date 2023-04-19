@@ -13,6 +13,7 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">Nimaz daily prayer times at a glance.</string>
+    <string name="app_widget_tracker_description">Prayer Tracker widget for Nimaz.</string>
     <string name="app_widget_service_description">A service to update the prayer times shown in widgets by Nimaz.</string>
     <string name="title_activity_aya">AyaActivity</string>
     <string name="title_activity_quran">Quran</string>

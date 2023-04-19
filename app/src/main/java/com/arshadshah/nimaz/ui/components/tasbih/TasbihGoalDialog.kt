@@ -29,7 +29,7 @@ fun TasbihGoalDialog(
 	if (! isOpen.value) return
 
 	AlertDialogNimaz(
-			cardContent = false,
+			cardContent = false ,
 			bottomDivider = false ,
 			topDivider = false ,
 			contentHeight = 100.dp ,

@@ -46,7 +46,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.components.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
-import com.arshadshah.nimaz.ui.components.ui.quran.TopBarMenu
+import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -166,12 +166,6 @@ class MainActivity : ComponentActivity()
 
 			when (themeState.value)
 			{
-				"DYNAMIC" ->
-				{
-					dynamicTheme.value = true
-					darkTheme.value = isDarkTheme.value
-				}
-
 				"SYSTEM" ->
 				{
 					dynamicTheme.value = true
@@ -198,13 +192,6 @@ class MainActivity : ComponentActivity()
 					dynamicTheme.value = false
 					darkTheme.value = isDarkTheme.value
 					themeName.value = "Dark_Red"
-				}
-
-				"Dark_Liver" ->
-				{
-					dynamicTheme.value = false
-					darkTheme.value = isDarkTheme.value
-					themeName.value = "Dark_Liver"
 				}
 
 				"Rustic_brown" ->
@@ -602,18 +589,22 @@ class MainActivity : ComponentActivity()
 			WEB_VIEW_SCREEN_ROUTE ->
 			{
 				//check if the url of the route is privacy_policy using the nav controller
-				val url = navController.currentBackStackEntry?.arguments?.getString("url")
-				if (url == "privacy_policy")
+				when (navController.currentBackStackEntry?.arguments?.getString("url"))
 				{
-					"Privacy Policy"
-				} else if (
-					url == "help"
-				)
-				{
-					"Help"
-				} else
-				{
-					"Terms and Conditions"
+					"privacy_policy" ->
+					{
+						"Privacy Policy"
+					}
+
+					"help" ->
+					{
+						"Help"
+					}
+
+					else ->
+					{
+						"Terms and Conditions"
+					}
 				}
 			}
 

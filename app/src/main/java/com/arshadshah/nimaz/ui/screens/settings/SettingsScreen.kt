@@ -5,21 +5,42 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
@@ -36,9 +57,22 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMI
 import com.arshadshah.nimaz.constants.AppConstants.THEME
 import com.arshadshah.nimaz.ui.components.common.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.common.NotificationScreenUI
-import com.arshadshah.nimaz.ui.components.settings.*
+import com.arshadshah.nimaz.ui.components.settings.LocationSettings
+import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
+import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
+import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
+import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileIcon
+import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
+import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_dark_primary
+import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_light_primary
+import com.arshadshah.nimaz.ui.theme.md_theme_dark_primary
+import com.arshadshah.nimaz.ui.theme.md_theme_light_primary
+import com.arshadshah.nimaz.ui.theme.raison_black_md_theme_dark_primary
+import com.arshadshah.nimaz.ui.theme.raison_black_md_theme_light_primary
+import com.arshadshah.nimaz.ui.theme.rustic_md_theme_dark_primary
+import com.arshadshah.nimaz.ui.theme.rustic_md_theme_light_primary
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.Alarms
@@ -123,6 +157,60 @@ fun SettingsScreen(
 
 	val sharedPreferences = PrivateSharedPreferences(context)
 
+	val isSelectedTheme = remember {
+		mutableStateOf(
+				ThemeOption(
+						themeName = "App Default" ,
+						themeKey = "DEFAULT" ,
+						themeColor = if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary ,
+						isSelected = themeState.value == "DEFAULT"
+						   )
+					  )
+	}
+
+
+	val themeOptionsList =
+		listOf(
+				ThemeOption(
+						themeName = "Forest Green" ,
+						themeKey = "DEFAULT" ,
+						themeColor = if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary ,
+						isSelected = themeState.value == "DEFAULT"
+						   ) ,
+				ThemeOption(
+						themeName = "Raisin Black" ,
+						themeKey = "Raisin_Black" ,
+						themeColor = if (isDarkMode.value) raison_black_md_theme_light_primary else raison_black_md_theme_dark_primary ,
+						isSelected = themeState.value == "Raisin_Black"
+						   ) ,
+				ThemeOption(
+						themeName = "Burgundy" ,
+						themeKey = "Dark_Red" ,
+						themeColor = if (isDarkMode.value) Dark_Red_md_theme_dark_primary else Dark_Red_md_theme_light_primary ,
+						isSelected = themeState.value == "Dark_Red"
+						   ) ,
+				ThemeOption(
+						themeName = "Rustic Brown" ,
+						themeKey = "Rustic_brown" ,
+						themeColor = if (isDarkMode.value) rustic_md_theme_dark_primary else rustic_md_theme_light_primary ,
+						isSelected = themeState.value == "Rustic_brown"
+						   ) ,
+				ThemeOption(
+						themeName = "System" ,
+						themeKey = "SYSTEM" ,
+						themeColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+						{
+							if (isDarkMode.value) dynamicDarkColorScheme(context).primary else dynamicLightColorScheme(
+									context
+																													  ).primary
+						} else
+						{
+							if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary
+						} ,
+						isSelected = themeState.value == "SYSTEM"
+						   ) ,
+			  )
+
 	Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState() , true)
@@ -165,26 +253,6 @@ fun SettingsScreen(
 
 		stateOfTheme.value = themeState.value
 
-		//map of theme to theme name
-//		keys are like this LIGHT , DARK , SYSTEM
-		val themeMapForDynamic = mapOf(
-				"DEFAULT" to "App Default" ,
-				"Raisin_Black" to "Raisin Black" ,
-				"Dark_Red" to "Burgundy" ,
-				"Dark_Liver" to "Dark Liver" ,
-				"Rustic_brown" to "Rustic Brown" ,
-				"SYSTEM" to "System Default" ,
-				"DYNAMIC" to "Dynamic"
-									  )
-		val themeMapForNonDynamic = mapOf(
-				"DEFAULT" to "App Default" ,
-				"Raisin_Black" to "Raisin Black" ,
-				"Dark_Red" to "Burgundy" ,
-				"Dark_Liver" to "Dark Liver" ,
-				"Rustic_brown" to "Rustic Brown" ,
-				"SYSTEM" to "System Default" ,
-										 )
-
 		val stateDarkMode =
 			rememberPreferenceBooleanSettingState(
 					DARK_MODE ,
@@ -193,10 +261,9 @@ fun SettingsScreen(
 		stateDarkMode.value = isDarkMode.value
 
 		SettingsGroup(
-				title = { Text(text = "Theme") } ,
+				title = { Text(text = "Appearance") } ,
 					 ) {
-			if (stateOfTheme.value != "SYSTEM")
-			{
+			AnimatedVisibility(visible = stateOfTheme.value != "SYSTEM") {
 				ElevatedCard(
 						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
@@ -243,36 +310,21 @@ fun SettingsScreen(
 						.padding(8.dp)
 						.fillMaxWidth()
 						) {
-				SettingsList(
-						onChange = {
-							viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.Theme(it))
-						} ,
-						height = 250.dp ,
-						icon = {
-							Icon(
-									modifier = Modifier.size(24.dp) ,
-									painter = painterResource(id = R.drawable.theme_icon) ,
-									contentDescription = "Theme"
-								)
-						} ,
-						iconPainter = painterResource(id = R.drawable.theme_icon) ,
-						iconDescription = "Theme" ,
-						useSelectedValueAsSubtitle = false ,
-						valueState = stateOfTheme ,
-						title =
-						when (stateOfTheme.value)
-						{
-							"DEFAULT" -> "App Default"
-							"Raisin_Black" -> "Raisin Black"
-							"Dark_Red" -> "Burgundy"
-							"Dark_Liver" -> "Dark Liver"
-							"Rustic_brown" -> "Rustic Brown"
-							"SYSTEM" -> "System Default"
-							"DYNAMIC" -> "Dynamic"
-							else -> "App Default"
-						} ,
-						items = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) themeMapForDynamic else themeMapForNonDynamic ,
-							)
+
+				ThemeGrid(
+						themeOptions = themeOptionsList ,
+						onThemeOptionSelected = {
+							//set current selected theme to false
+							isSelectedTheme.value.isSelected = ! isSelectedTheme.value.isSelected
+							isSelectedTheme.value = themeOptionsList[themeOptionsList.indexOf(it)]
+							isSelectedTheme.value.isSelected = ! isSelectedTheme.value.isSelected
+							viewModelSettings.handleEvent(
+									SettingsViewModel.SettingsEvent.Theme(
+											isSelectedTheme.value.themeKey
+																		 )
+														 )
+						}
+						 )
 			}
 		}
 
@@ -620,4 +672,175 @@ fun SettingsScreen(
 				style = MaterialTheme.typography.bodyMedium
 			)
 	}
+}
+
+class ThemeOption(
+	var themeName : String ,
+	var themeKey : String ,
+	var themeColor : Color ,
+	var isSelected : Boolean ,
+				 )
+
+@Composable
+fun ThemeGrid(
+	themeOptions : List<ThemeOption> ,
+	onThemeOptionSelected : (ThemeOption) -> Unit ,
+			 )
+{
+	Column(
+			modifier = Modifier
+				.fillMaxWidth()
+		  ) {
+		//name of current theme
+		Row(
+				modifier = Modifier
+					.fillMaxWidth() ,
+				horizontalArrangement = Arrangement.SpaceBetween
+		   ) {
+			Row(
+					modifier = Modifier ,
+					verticalAlignment = Alignment.CenterVertically
+			   ) {
+
+				SettingsTileIcon(icon = {
+					Icon(
+							modifier = Modifier
+								.size(24.dp) ,
+							painter = painterResource(id = R.drawable.theme_icon) ,
+							contentDescription = "Color"
+						)
+				})
+				SettingsTileTexts(title = {
+					Text(
+							text = "Color" ,
+						)
+				} ,
+								  subtitle = {
+									  Text(
+											  text = themeOptions.find { it.isSelected }?.themeName
+												  ?: "" ,
+										  )
+								  })
+			}
+		}
+		//the row
+		Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(8.dp) ,
+				horizontalArrangement = Arrangement.SpaceBetween
+		   ) {
+			themeOptions.forEachIndexed { index , themeOption ->
+				//the theme item
+				ToggleableCustomThemeItem(
+						checked = themeOption.isSelected ,
+						onCheckedChange = {
+							onThemeOptionSelected(themeOption)
+						} ,
+						color = themeOption.themeColor ,
+						//if the thtme key is SYSTEM then show the system icon
+						icon = if (themeOption.themeKey == "SYSTEM")
+						{
+							@Composable {
+								Icon(
+										modifier = Modifier.size(24.dp) ,
+										painter = painterResource(id = R.drawable.system_icon) ,
+										contentDescription = "System" ,
+										tint = MaterialTheme.colorScheme.onPrimary
+									)
+							}
+						} else null
+										 )
+			}
+		}
+	}
+}
+
+//a theme toggle item with a circle that gets highlighted witha  thick border when selected
+@Composable
+fun ToggleableCustomThemeItem(
+	modifier : Modifier = Modifier ,
+	checked : Boolean ,
+	onCheckedChange : (Boolean) -> Unit ,
+	color : Color = MaterialTheme.colorScheme.primary ,
+	icon : @Composable (() -> Unit)? = null ,
+							 )
+{
+	Box(
+			modifier = modifier
+				.border(
+						width = 2.dp ,
+						color = if (checked) Color.Gray else Color.Transparent ,
+						shape = CircleShape
+					   ) ,
+			contentAlignment = Alignment.Center ,
+	   ) {
+		//the circle
+		Box(
+
+				modifier = modifier
+					.padding(6.dp)
+					.size(48.dp)
+					.clickable {
+						onCheckedChange(! checked)
+					}
+					.background(
+							color = color ,
+							shape = CircleShape
+							   ) ,
+				contentAlignment = Alignment.Center
+		   ) {
+			//the icon
+			icon?.invoke()
+		}
+	}
+}
+
+
+@Preview(showBackground = true)
+@Composable
+//preview of the theme grid
+fun ThemeGridPreview()
+{
+	ThemeGrid(
+			themeOptions = listOf(
+					ThemeOption("Light" , "light" , Color.White , true) ,
+					ThemeOption("Dark" , "dark" , Color.Black , false) ,
+					ThemeOption("Red" , "red" , Color.Red , false) ,
+					ThemeOption("Green" , "green" , Color.Green , false) ,
+					ThemeOption("Blue" , "blue" , Color.Blue , false) ,
+								 ) ,
+			onThemeOptionSelected = {}
+			 )
+}
+
+//preview of ToggleableItemRow
+@Preview(showBackground = true , name = "Theme Toggle Selected" , group = "Theme Toggle")
+@Composable
+fun ToggleableItemRowPreview()
+{
+	ToggleableCustomThemeItem(
+			checked = true ,
+			onCheckedChange = {} ,
+			color = Color.Red ,
+			icon = {
+				Icon(
+						modifier = Modifier
+							.size(24.dp) ,
+						painter = painterResource(id = R.drawable.settings_icon) ,
+						contentDescription = "Selected"
+					)
+			}
+							 )
+}
+
+@Preview(showBackground = true , name = "Theme Toggle Unselected" , group = "Theme Toggle")
+@Composable
+fun ToggleableItemRowPreview2()
+{
+	ToggleableCustomThemeItem(
+			checked = false ,
+			onCheckedChange = {} ,
+			color = Color.Red
+							 )
 }
