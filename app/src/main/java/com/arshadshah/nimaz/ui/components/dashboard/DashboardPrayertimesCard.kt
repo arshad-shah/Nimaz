@@ -210,8 +210,8 @@ fun DashboardPrayertimesCard()
 				{
 					Text(
 							text = locationName.value ,
-							style = MaterialTheme.typography.titleMedium,
-							maxLines = 1,
+							style = MaterialTheme.typography.titleMedium ,
+							maxLines = 1 ,
 							overflow = TextOverflow.Ellipsis
 						)
 				}

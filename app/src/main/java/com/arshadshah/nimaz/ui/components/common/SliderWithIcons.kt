@@ -90,7 +90,7 @@ fun SliderWithIconsPreview()
 	SliderWithIcons(
 			value = 1f ,
 			onValueChange = { } ,
-			valueRange = 0f..10f ,
+			valueRange = 0f .. 10f ,
 			leadingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
 			trailaingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
 			contentDescription1 = "decrease font size" ,
