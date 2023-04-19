@@ -101,7 +101,12 @@ fun BannerSmall(
 								onClick()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
-								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime
+											.now()
+											.toString()
+												   )
 							} ,
 							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
@@ -156,7 +161,10 @@ fun BannerSmall(
 							onClick = {
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
-								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime.now().toString()
+												   )
 							} ,
 							modifier = Modifier
 								.size(32.dp) ,
@@ -228,7 +236,12 @@ fun BannerLarge(
 								onClick()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
-								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime
+											.now()
+											.toString()
+												   )
 							} ,
 							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
@@ -285,7 +298,10 @@ fun BannerLarge(
 								onDismiss.invoke()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
-								sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime.now().toString()
+												   )
 							} ,
 							modifier = Modifier
 								.size(32.dp) ,

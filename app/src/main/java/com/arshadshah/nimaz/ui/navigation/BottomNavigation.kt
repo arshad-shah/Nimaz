@@ -36,6 +36,7 @@ fun BottomNavigationBar(navController : NavController)
 			BottomNavItem.MoreScreen ,
 			BottomNavItem.SettingsScreen
 							   )
+
 	NavigationBar(
 			containerColor = MaterialTheme.colorScheme.surface ,
 			contentColor = MaterialTheme.colorScheme.secondary ,
@@ -74,15 +75,15 @@ fun BottomNavigationBar(navController : NavController)
 							indicatorColor = MaterialTheme.colorScheme.secondaryContainer
 															 ) ,
 					icon = {
-							AnimatableIcon(
-									modifier = Modifier
-										.size(24.dp) ,
-									painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
-											id = bottomNavItem.icon_empty
-																														 ) ,
-									scale = if (selected) 1.1f else 1f ,
-									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
-										  )
+						AnimatableIcon(
+								modifier = Modifier
+									.size(24.dp) ,
+								painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
+										id = bottomNavItem.icon_empty
+																													 ) ,
+								scale = if (selected) 1.1f else 1f ,
+								color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
+									  )
 					} ,
 					label = {
 						AnimatedText(
@@ -97,13 +98,13 @@ fun BottomNavigationBar(navController : NavController)
 					} ,
 					selected = currentRoute == bottomNavItem.screen_route ,
 					onClick = {
-							navController.navigate(bottomNavItem.screen_route) {
-								popUpTo(navController.graph.startDestinationId) {
-									saveState = true
-								}
-								launchSingleTop = true
-								restoreState = true
+						navController.navigate(bottomNavItem.screen_route) {
+							popUpTo(navController.graph.startDestinationId) {
+								saveState = true
 							}
+							launchSingleTop = true
+							restoreState = true
+						}
 					}
 							 )
 		}

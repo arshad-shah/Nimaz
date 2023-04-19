@@ -83,7 +83,7 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 	//show card where there are 3 days left for eid ul adha
 	val showCard = eidUlAdhaTimeLeft.value <= 3
 
-	if(isAfterEidUlAdhaStart && eidUlAdhaTimeLeft.value == 0L)
+	if (isAfterEidUlAdhaStart && eidUlAdhaTimeLeft.value == 0L)
 	{
 		return
 	}

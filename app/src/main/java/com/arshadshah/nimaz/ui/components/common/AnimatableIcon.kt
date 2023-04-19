@@ -41,12 +41,14 @@ fun AnimatableIcon(
 	val animatedColor by animateColorAsState(
 			targetValue = color ,
 											)
-		Icon(
-				painter = painter ,
-				contentDescription = contentDescription ,
-				tint = animatedColor ,
-				modifier = modifier.scale(animatedScale).size(iconSize) ,
-			)
+	Icon(
+			painter = painter ,
+			contentDescription = contentDescription ,
+			tint = animatedColor ,
+			modifier = modifier
+				.scale(animatedScale)
+				.size(iconSize) ,
+		)
 
 }
 
@@ -73,7 +75,7 @@ fun AnimatedText(
 			color = animatedColor ,
 			textAlign = textAlign ,
 			modifier = modifier
-				.scale(animatedScale),
+				.scale(animatedScale) ,
 		)
 
 
