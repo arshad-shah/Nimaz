@@ -37,8 +37,10 @@ import com.arshadshah.nimaz.ui.components.dashboard.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import java.time.LocalDateTime
 
 @Composable
 fun Dashboard(
@@ -89,7 +91,16 @@ fun Dashboard(
 		item {
 			if (updateAvailable.value)
 			{
+				val sharedPref = PrivateSharedPreferences(context)
+				val bannerShownLastTime = sharedPref.getData("Update Available-bannerIsOpen-time" , "")
+				//has it been 24 hours since the last time the banner was shown
+				val has24HoursPassed = LocalDateTime.now().isAfter(
+						LocalDateTime.parse(bannerShownLastTime).plusHours(24)
+															  )
 				val isOpen = remember { mutableStateOf(true) }
+				if(has24HoursPassed){
+					sharedPref.saveDataBoolean("Update Available-bannerIsOpen" , true)
+				}
 				BannerSmall(
 						title = "Update Available" ,
 						message = "Tap here to update to the latest version" ,
