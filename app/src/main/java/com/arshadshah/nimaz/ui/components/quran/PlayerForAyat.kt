@@ -70,7 +70,6 @@ fun PlayerForAyat(
 						if (currentProgress.value >= seconds || isStopped.value)
 						{
 							isPlaying.value = false
-							onStopClicked()
 							cancel(
 									cause = CancellationException(
 											"Audio finished playing"
