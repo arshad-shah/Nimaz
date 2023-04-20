@@ -93,7 +93,7 @@ fun Dashboard(
 			{
 				val sharedPref = PrivateSharedPreferences(context)
 				val bannerShownLastTime =
-					sharedPref.getData("Update Available-bannerIsOpen-time" , "")
+					sharedPref.getData("Update Available-bannerIsOpen-time" , LocalDateTime.now().toString())
 				//has it been 24 hours since the last time the banner was shown
 				val has24HoursPassed = LocalDateTime.now().isAfter(
 						LocalDateTime.parse(bannerShownLastTime).plusHours(24)
@@ -105,7 +105,7 @@ fun Dashboard(
 				}
 				BannerSmall(
 						title = "Update Available" ,
-						message = "Tap here to update to the latest version" ,
+						message = "Tap here to update the app" ,
 						isOpen = isOpen ,
 						onClick = {
 							viewModelSettings.handleEvent(
