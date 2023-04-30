@@ -39,7 +39,7 @@ sealed class OnBoardingPage(
 	object Fourth : OnBoardingPage(
 			image = R.drawable.adhan ,
 			title = "Adhan Notifications" ,
-			description = "Enable Adhan Notifications for Nimaz to get Prayer reminders in the form of Adhan." ,
+			description = "Adhan Notifications for Nimaz to get Prayer reminders in the form of Adhan." ,
 			extra = {
 				NotificationScreenUI()
 			}
@@ -68,7 +68,7 @@ sealed class OnBoardingPage(
 	object Seventh : OnBoardingPage(
 			image = R.drawable.battery ,
 			title = "Battery Exemption" ,
-			description = "Battery optimization can cause issues with Adhan Notifications. Please exempt Nimaz from battery optimization." ,
+			description = "Battery optimization can cause issues with Adhan Notifications." ,
 			extra = {
 				BatteryExemptionUI()
 			}
