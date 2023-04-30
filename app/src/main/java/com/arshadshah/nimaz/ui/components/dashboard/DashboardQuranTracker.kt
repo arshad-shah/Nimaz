@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
@@ -62,12 +64,6 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 		else -> "english"
 	}
 
-	if (bookmarks.value.isEmpty())
-	{
-		Placeholder(nameOfDropdown = "Quran Bookmarks")
-		return
-	}
-
 	val titleOfDialog = remember {
 		mutableStateOf("")
 	}
@@ -80,58 +76,71 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 	val itemToDelete = remember {
 		mutableStateOf<Aya?>(null)
 	}
-	FeaturesDropDown(
-			label = "Quran Bookmarks" ,
-			items = bookmarks.value ,
-			dropDownItem = { Aya ->
-				val currentItem = rememberUpdatedState(newValue = Aya)
-				val dismissState = rememberDismissState(
-						confirmStateChange = {
-							if (it == DismissValue.DismissedToStart)
-							{
-								titleOfDialog.value = "Delete Bookmark"
-								messageOfDialog.value =
-									"Are you sure you want to delete this bookmark?"
-								itemToDelete.value = currentItem.value
-								openDialog.value = true
+	if (bookmarks.value.isEmpty())
+	{
+		Box(
+				modifier = Modifier.clickable {
+					onNavigateToAyatScreen(1.toString() , true , translation , 1)
+				}
+		   ) {
+			Placeholder(nameOfDropdown = "Quran Bookmarks")
+		}
+	} else
+	{
+		FeaturesDropDown(
+				label = "Quran Bookmarks" ,
+				items = bookmarks.value ,
+				dropDownItem = { Aya ->
+					val currentItem = rememberUpdatedState(newValue = Aya)
+					val dismissState = rememberDismissState(
+							confirmStateChange = {
+								if (it == DismissValue.DismissedToStart)
+								{
+									titleOfDialog.value = "Delete Bookmark"
+									messageOfDialog.value =
+										"Are you sure you want to delete this bookmark?"
+									itemToDelete.value = currentItem.value
+									openDialog.value = true
+								}
+								false
 							}
-							false
-						}
-													   )
+														   )
 
-				SwipeToDismiss(
-						directions = setOf(DismissDirection.EndToStart) ,
-						state = dismissState ,
-						background = {
-							SwipeBackground(dismissState = dismissState)
-						} ,
-						dismissContent = {
-							FeatureDropdownItem(
-									item = Aya ,
-									onClick = { aya ->
-										onNavigateToAyatScreen(
-												aya.suraNumber.toString() ,
-												true ,
-												translation ,
-												aya.ayaNumberInSurah
-															  )
-									} ,
-									itemContent = { aya ->
-										//the text
-										Text(
-												modifier = Modifier
-													.padding(8.dp) ,
-												text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-												textAlign = TextAlign.Start ,
-												maxLines = 2 ,
-												overflow = TextOverflow.Ellipsis ,
-												style = MaterialTheme.typography.bodyLarge
-											)
-									}
-											   )
-						})
-			}
-					)
+					SwipeToDismiss(
+							directions = setOf(DismissDirection.EndToStart) ,
+							state = dismissState ,
+							background = {
+								SwipeBackground(dismissState = dismissState)
+							} ,
+							dismissContent = {
+								FeatureDropdownItem(
+										item = Aya ,
+										onClick = { aya ->
+											onNavigateToAyatScreen(
+													aya.suraNumber.toString() ,
+													true ,
+													translation ,
+													aya.ayaNumberInSurah
+																  )
+										} ,
+										itemContent = { aya ->
+											//the text
+											Text(
+													modifier = Modifier
+														.padding(8.dp) ,
+													text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
+													textAlign = TextAlign.Start ,
+													maxLines = 2 ,
+													overflow = TextOverflow.Ellipsis ,
+													style = MaterialTheme.typography.bodyLarge
+												)
+										}
+												   )
+							})
+				}
+						)
+	}
+
 
 	if (openDialog.value)
 	{

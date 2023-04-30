@@ -75,7 +75,10 @@ fun Dashboard(
 	val isFasting = remember {
 		viewModelTracker.isFasting
 	}.collectAsState()
+
 	val stateScroll = rememberLazyListState()
+
+
 	LazyColumn(
 			state = stateScroll ,
 			modifier = Modifier
@@ -93,7 +96,10 @@ fun Dashboard(
 			{
 				val sharedPref = PrivateSharedPreferences(context)
 				val bannerShownLastTime =
-					sharedPref.getData("Update Available-bannerIsOpen-time" , LocalDateTime.now().toString())
+					sharedPref.getData(
+							"Update Available-bannerIsOpen-time" ,
+							LocalDateTime.now().toString()
+									  )
 				//has it been 24 hours since the last time the banner was shown
 				val has24HoursPassed = LocalDateTime.now().isAfter(
 						LocalDateTime.parse(bannerShownLastTime).plusHours(24)
@@ -171,6 +177,24 @@ fun Dashboard(
 				//if its ramaadan then show the fast tracker
 				//DashboardFastTracker
 				DashboardFastTracker()
+			}
+		}
+		//quick links to the tasbih and quran
+		item {
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
+						) {
+				Text(
+						text = "Quick Links" ,
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth() ,
+						textAlign = TextAlign.Center ,
+						style = MaterialTheme.typography.titleMedium
+					)
 				DashboardQuranTracker(onNavigateToAyatScreen = onNavigateToAyatScreen)
 				DashboardTasbihTracker(
 						onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
