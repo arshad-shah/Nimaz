@@ -45,10 +45,9 @@ class BootReciever : BroadcastReceiver()
 				{
 					val repository = PrayerTimesRepository.getPrayerTimes(context)
 					val ishaTime = repository.data?.isha?.toLocalTime()?.hour
-					val ishaTimeMinutes = repository.data?.isha?.toLocalTime()?.minute
-					val newIshaTime = if (ishaTime !! >= 22 && ishaTimeMinutes !! >= 30)
+					val newIshaTime = if (ishaTime !! >= 22)
 					{
-						repository.data.maghrib?.plusMinutes(30)
+						repository.data.maghrib?.plusMinutes(60)
 					} else
 					{
 						repository.data.isha

@@ -21,6 +21,11 @@ class AdhanReciever : BroadcastReceiver()
 
 	override fun onReceive(context : Context , intent : Intent)
 	{
+		if (! FirebaseLogger.isInitialized())
+		{
+			FirebaseLogger.init()
+			Log.d(AppConstants.ADHAN_RECEIVER_TAG , "Firebase logger initialized")
+		}
 		// When the reciever is called, it will send a notification to the user
 		//send notification
 		// This method is called when the BroadcastReceiver is receiving an Intent broadcast.
@@ -90,10 +95,9 @@ class AdhanReciever : BroadcastReceiver()
 					//check if the isha time is past 11 pm
 					//if it is set the isha time to 30 mins after maghrib
 					val ishaTime = repository.data?.isha?.toLocalTime()?.hour
-					val ishaTimeMinutes = repository.data?.isha?.toLocalTime()?.minute
-					val newIshaTime = if (ishaTime !! >= 22 && ishaTimeMinutes !! >= 30)
+					val newIshaTime = if (ishaTime !! >= 22)
 					{
-						repository.data.maghrib?.plusMinutes(30)
+						repository.data.maghrib?.plusMinutes(60)
 					} else
 					{
 						repository.data.isha

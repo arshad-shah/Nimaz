@@ -205,10 +205,9 @@ class PrayerTimesViewModel : ViewModel()
 						repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
 				val ishaTime = repository.data?.isha?.toLocalTime()?.hour
-				val ishaTimeMinutes = repository.data?.isha?.toLocalTime()?.minute
-				val newIshaTime = if (ishaTime !! >= 22 && ishaTimeMinutes !! >= 30)
+				val newIshaTime = if (ishaTime !! >= 22)
 				{
-					repository.data.maghrib?.plusMinutes(30)
+					repository.data.maghrib?.plusMinutes(60)
 				} else
 				{
 					repository.data.isha
@@ -275,10 +274,9 @@ class PrayerTimesViewModel : ViewModel()
 					_asrTimeState.value = response.data.asr !!
 					_maghribTimeState.value = response.data.maghrib !!
 					val ishaTime = response.data.isha?.toLocalTime()?.hour
-					val ishaTimeMinutes = response.data?.isha?.toLocalTime()?.minute
-					val newIshaTime = if (ishaTime !! >= 22 && ishaTimeMinutes !! >= 30)
+					val newIshaTime = if (ishaTime !! >= 22)
 					{
-						response.data.maghrib?.plusMinutes(30)
+						response.data.maghrib?.plusMinutes(60)
 					} else
 					{
 						response.data.isha
@@ -357,10 +355,9 @@ class PrayerTimesViewModel : ViewModel()
 					_maghribTimeState.value = response.data.maghrib !!
 
 					val ishaTime = response.data.isha?.toLocalTime()?.hour
-					val ishaTimeMinutes = response.data?.isha?.toLocalTime()?.minute
-					val newIshaTime = if (ishaTime !! >= 22 && ishaTimeMinutes !! >= 30)
+					val newIshaTime = if (ishaTime !! >= 22)
 					{
-						response.data.maghrib?.plusMinutes(30)
+						response.data.maghrib?.plusMinutes(60)
 					} else
 					{
 						response.data.isha
