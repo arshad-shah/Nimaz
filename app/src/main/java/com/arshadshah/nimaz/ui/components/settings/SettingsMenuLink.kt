@@ -38,12 +38,13 @@ fun SettingsMenuLink(
 {
 	Surface {
 		Row(
-				modifier = modifier.fillMaxWidth() ,
+				modifier = modifier
+					.fillMaxWidth()
+					.clickable(onClick = onClick) ,
 		   ) {
 			Row(
 					modifier = Modifier
-						.weight(1f)
-						.clickable(onClick = onClick) ,
+						.weight(1f) ,
 					verticalAlignment = Alignment.CenterVertically ,
 			   ) {
 				if (icon != null)

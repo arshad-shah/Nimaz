@@ -21,44 +21,41 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.CustomText
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.QiblaViewModel
 import es.dmoral.toasty.Toasty
+import kotlin.math.roundToInt
 
 @Composable
-fun BearingAndLocationContainer(state : State<QiblaViewModel.QiblaState>)
+fun BearingAndLocationContainer(
+	state : State<Double> ,
+	isLoading : State<Boolean> ,
+	errorMessage : State<String> ,
+							   )
 {
 
 	//get the context
 	val context = LocalContext.current
 	//get the shared preferences
 	val sharedPref = PrivateSharedPreferences(context)
-	when (val qiblaState = state.value)
+
+	if (isLoading.value)
 	{
-		is QiblaViewModel.QiblaState.Loading ->
-		{
-			//show a loading indicator
-			BearingAndLocationContainerUI(location = "Loading..." , heading = "Loading...")
-
-		}
-
-		is QiblaViewModel.QiblaState.Success ->
-		{
-			//get the location
-			val location = sharedPref.getData(AppConstants.LOCATION_INPUT , "")
-			//round the bearing to 2 decimal places
-			val bearing = qiblaState.bearing !!.toString().substring(0 , 5)
-			val compassDirection = bearingToCompassDirection(qiblaState.bearing.toFloat())
-			val heading = "$bearing° $compassDirection"
-			Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "BearingAndLocationContainer: $heading")
-			//show the bearing and location
-			BearingAndLocationContainerUI(location , heading)
-		}
-
-		is QiblaViewModel.QiblaState.Error ->
-		{
-			BearingAndLocationContainerUI(location = "Error" , heading = "Error")
-			Toasty.error(LocalContext.current , qiblaState.errorMessage).show()
-		}
+		//show a loading indicator
+		BearingAndLocationContainerUI(location = "Loading..." , heading = "Loading...")
+	} else if (errorMessage.value != "")
+	{
+		BearingAndLocationContainerUI(location = "Error" , heading = "Error")
+		Toasty.error(LocalContext.current , errorMessage.value).show()
+	} else
+	{
+		//get the location
+		val location = sharedPref.getData(AppConstants.LOCATION_INPUT , "")
+		//round the bearing to 2 decimal places
+		val bearing = state.value.roundToInt()
+		val compassDirection = bearingToCompassDirection(state.value.toFloat())
+		val heading = "$bearing° $compassDirection"
+		Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "BearingAndLocationContainer: $heading")
+		//show the bearing and location
+		BearingAndLocationContainerUI(location , heading)
 	}
 }
 

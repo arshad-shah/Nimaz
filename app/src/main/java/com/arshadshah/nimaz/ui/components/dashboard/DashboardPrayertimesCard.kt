@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -55,7 +55,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
+fun DashboardPrayertimesCard()
 {
 
 	val context = LocalContext.current
@@ -166,10 +166,7 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 			modifier = Modifier
 				.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 				.fillMaxWidth()
-				.testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD)
-				.clickable {
-					onNavigateToPrayerTimes()
-				} ,
+				.testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD) ,
 				) {
 		Column(
 				modifier = Modifier
@@ -211,18 +208,11 @@ fun DashboardPrayertimesCard(onNavigateToPrayerTimes : () -> Unit)
 					Text(text = "Loading..." , style = MaterialTheme.typography.titleMedium)
 				} else
 				{
-					//process the location name to show only 10 characters and add ... if more than 10 characters
-					val locationNameValue = locationName.value
-					val locationNameValueLength = locationNameValue.length
-					val locationNameValueSubstring = locationNameValue.substring(
-							0 ,
-							if (locationNameValueLength > 10) 10 else locationNameValueLength
-																				)
-					val locationNameValueFinal =
-						if (locationNameValueLength > 10) "$locationNameValueSubstring..." else locationNameValueSubstring
 					Text(
-							text = locationNameValueFinal ,
-							style = MaterialTheme.typography.titleMedium
+							text = locationName.value ,
+							style = MaterialTheme.typography.titleMedium ,
+							maxLines = 1 ,
+							overflow = TextOverflow.Ellipsis
 						)
 				}
 

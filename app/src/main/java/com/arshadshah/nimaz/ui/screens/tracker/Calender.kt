@@ -5,6 +5,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -255,10 +256,6 @@ fun CalenderHeader(monthState : MonthState)
 
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.clickable {
-					showCurrentMonth.value = true
-				} ,
 			elevation = CardDefaults.elevatedCardElevation(
 					defaultElevation = 4.dp ,
 														  )
@@ -294,6 +291,10 @@ fun CalenderHeader(monthState : MonthState)
 					)
 			}
 			Column(
+					modifier = Modifier
+						.clickable {
+							showCurrentMonth.value = true
+						} ,
 					horizontalAlignment = Alignment.CenterHorizontally ,
 					verticalArrangement = Arrangement.Center
 				  ) {
@@ -309,6 +310,12 @@ fun CalenderHeader(monthState : MonthState)
 				} else
 				{
 					Row(
+							modifier = Modifier
+								.background(
+										color = MaterialTheme.colorScheme.primary ,
+										shape = MaterialTheme.shapes.small
+										   )
+								.padding(horizontal = 8.dp) ,
 							horizontalArrangement = Arrangement.Center ,
 							verticalAlignment = Alignment.CenterVertically
 					   ) {
@@ -318,14 +325,14 @@ fun CalenderHeader(monthState : MonthState)
 									modifier = Modifier.size(16.dp) ,
 									painter = painterResource(id = R.drawable.angle_small_left_icon) ,
 									contentDescription = "Previous Day" ,
-									tint = MaterialTheme.colorScheme.primary
+									tint = MaterialTheme.colorScheme.onPrimary
 								)
 							Text(
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
-										.alpha(0.5f)
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
+									color = MaterialTheme.colorScheme.onPrimary
 								)
 						} else
 						{
@@ -333,14 +340,14 @@ fun CalenderHeader(monthState : MonthState)
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp)
-										.alpha(0.5f)
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
+									color = MaterialTheme.colorScheme.onPrimary
 								)
 							Icon(
 									modifier = Modifier.size(16.dp) ,
 									painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 									contentDescription = "Next Day" ,
-									tint = MaterialTheme.colorScheme.primary
+									tint = MaterialTheme.colorScheme.onPrimary
 								)
 						}
 					}
@@ -390,7 +397,10 @@ fun CalenderHeader(monthState : MonthState)
 fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
+			shape = MaterialTheme.shapes.extraLarge.copy(
+					bottomStart = CornerSize(8.dp) ,
+					bottomEnd = CornerSize(8.dp)
+														) ,
 			modifier = Modifier.padding(top = 8.dp) ,
 				) {
 		Row(
@@ -426,7 +436,10 @@ fun CalenderWeekHeader(weekState : List<DayOfWeek>)
 fun CalenderMonth(monthState : @Composable (PaddingValues) -> Unit)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
+			shape = MaterialTheme.shapes.extraLarge.copy(
+					topStart = CornerSize(8.dp) ,
+					topEnd = CornerSize(8.dp)
+														) ,
 				) {
 		monthState(PaddingValues(0.dp))
 	}

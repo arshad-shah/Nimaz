@@ -77,6 +77,13 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 	//show card when there are 3 days left for eid ul fitr
 	val showCard = eidUlFitrTimeLeft.value <= 3
 
+	//hide the card if its 3 days after eid ul fitr
+	if (isAfterEidUlFitrStart && eidUlFitrTimeLeft.value == 0L)
+	{
+		return
+	}
+
+
 	//is ramadan time left less than 40 days
 	//if yes then show the card
 	if (showCard)

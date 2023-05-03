@@ -18,9 +18,12 @@ internal fun SettingsTileIcon(
 	icon : @Composable (() -> Unit) ,
 							 )
 {
+	//the circle
 	Box(
-			modifier = modifier.size(64.dp) ,
-			contentAlignment = Alignment.Center ,
+
+			modifier = modifier
+				.size(60.dp) ,
+			contentAlignment = Alignment.Center
 	   ) {
 		icon()
 	}
