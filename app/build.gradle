@@ -19,8 +19,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 127
-        versionName '1.5.54'
+        versionCode 134
+        versionName '1.5.61'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -157,4 +157,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-android:1.7.30'
 
     implementation 'nl.dionsegijn:konfetti-compose:2.0.2'
+
+    implementation("com.google.android.play:review:2.0.1")
+    implementation("com.google.android.play:review-ktx:2.0.1")
 }

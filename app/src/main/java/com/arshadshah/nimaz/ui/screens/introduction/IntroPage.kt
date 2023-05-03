@@ -1,8 +1,10 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,6 +93,7 @@ fun IntroPage1()
 
 	Column(
 			modifier = Modifier
+				.background(color = MaterialTheme.colorScheme.background)
 				.padding(bottom = 20.dp)
 				.fillMaxSize()
 		  ) {
@@ -150,6 +154,7 @@ fun IntroPage1()
 		Row(
 				modifier = Modifier
 					.padding(horizontal = 16.dp)
+					.background(color = MaterialTheme.colorScheme.background)
 					.fillMaxWidth()
 					.testTag("introButtons") ,
 				//if we are on firts or last page than use space between else use end for page 1 and start for last page
@@ -179,7 +184,10 @@ fun IntroPage1()
 	}
 }
 
-@Preview
+@Preview(showBackground = true , showSystemUi = true ,
+		 uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL ,
+		 device = "id:S20 Fe"
+		)
 @Composable
 fun IntroPage1Preview()
 {

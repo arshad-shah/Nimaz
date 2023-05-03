@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +54,13 @@ fun QiblaScreen(paddingValues : PaddingValues)
 			viewModelStoreOwner = context as ComponentActivity
 							 )
 
+	LaunchedEffect(Unit) {
+		viewModel.loadQibla(context)
+	}
+
 	val state = remember { viewModel.qiblaState }.collectAsState()
+	val isLoading = remember { viewModel.isLoading }.collectAsState()
+	val errorMessage = remember { viewModel.errorMessage }.collectAsState()
 	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "QiblaScreen: ${state.value}")
 
 	val sharedPreferences = PrivateSharedPreferences(context)
@@ -87,8 +94,13 @@ fun QiblaScreen(paddingValues : PaddingValues)
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Top
 		  ) {
-		BearingAndLocationContainer(state)
-		Dial(state = state , imageToDisplay = imageToDisplay !!)
+		BearingAndLocationContainer(state , isLoading , errorMessage)
+		Dial(
+				state = state ,
+				imageToDisplay = imageToDisplay !! ,
+				isLoading = isLoading.value ,
+				errorMessage = errorMessage.value
+			)
 		ImageSwitcherCard(changeImageIndex = changeImageIndex)
 	}
 }

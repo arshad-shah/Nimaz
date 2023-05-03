@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.delay
+import java.time.LocalDateTime
 
 //Banner Variant
 sealed class BannerVariant
@@ -43,14 +44,24 @@ sealed class BannerVariant
 	object Warning : BannerVariant()
 }
 
+//length of time the banner is shown for
+enum class BannerShowFor(val value : Int)
+{
+
+	SHORT_TIME(3000) ,
+	MEDIUM_TIME(5000) ,
+	LONG_TIME(7000) ,
+	FOREVER(- 1)
+}
+
 @Composable
 fun BannerSmall(
 	modifier : Modifier = Modifier ,
 	variant : BannerVariant = BannerVariant.Info ,
-	title : String ,
+	title : String? = null ,
 	message : String? = null ,
 	onClick : () -> Unit = {} ,
-	showFor : Int = 3000 ,
+	showFor : Int = BannerShowFor.SHORT_TIME.value ,
 	paddingValues : PaddingValues? = null ,
 	isOpen : MutableState<Boolean> = remember {
 		mutableStateOf(true)
@@ -76,6 +87,7 @@ fun BannerSmall(
 				delay(showFor.toLong())
 				isOpen.value = false
 				sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
+				sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 			}
 		}
 	}
@@ -99,6 +111,12 @@ fun BannerSmall(
 								onClick()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime
+											.now()
+											.toString()
+												   )
 							} ,
 							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
@@ -135,11 +153,14 @@ fun BannerSmall(
 						verticalArrangement = Arrangement.Center ,
 					  ) {
 					//title
-					Text(
-							text = title ,
-							style = MaterialTheme.typography.titleMedium ,
-							color = textColor ,
-						)
+					if (title != null)
+					{
+						Text(
+								text = title ,
+								style = MaterialTheme.typography.titleMedium ,
+								color = textColor ,
+							)
+					}
 					//message
 					Text(
 							text = message ?: "" ,
@@ -153,6 +174,10 @@ fun BannerSmall(
 							onClick = {
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerIsOpen" , false)
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime.now().toString()
+												   )
 							} ,
 							modifier = Modifier
 								.size(32.dp) ,
@@ -201,6 +226,7 @@ fun BannerLarge(
 			delay(showFor.toLong())
 			isOpen.value = false
 			sharedPref.saveDataBoolean("$title-bannerOpen" , false)
+			sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 		}
 	}
 	if (isOpen.value)
@@ -223,6 +249,12 @@ fun BannerLarge(
 								onClick()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime
+											.now()
+											.toString()
+												   )
 							} ,
 							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
@@ -279,6 +311,10 @@ fun BannerLarge(
 								onDismiss.invoke()
 								isOpen.value = false
 								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
+								sharedPref.saveData(
+										"$title-bannerIsOpen-time" ,
+										LocalDateTime.now().toString()
+												   )
 							} ,
 							modifier = Modifier
 								.size(32.dp) ,

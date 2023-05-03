@@ -44,6 +44,14 @@ class BootReciever : BroadcastReceiver()
 				try
 				{
 					val repository = PrayerTimesRepository.getPrayerTimes(context)
+					val ishaTime = repository.data?.isha?.toLocalTime()?.hour
+					val newIshaTime = if (ishaTime !! >= 22)
+					{
+						repository.data.maghrib?.plusMinutes(60)
+					} else
+					{
+						repository.data.isha
+					}
 					sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
 					val alarmLock =
 						sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
@@ -51,12 +59,12 @@ class BootReciever : BroadcastReceiver()
 					{
 						CreateAlarms().exact(
 								context ,
-								repository.data?.fajr !! ,
+								repository.data.fajr !! ,
 								repository.data.sunrise !! ,
 								repository.data.dhuhr !! ,
 								repository.data.asr !! ,
 								repository.data.maghrib !! ,
-								repository.data.isha !!
+								newIshaTime!!
 											)
 						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 					}

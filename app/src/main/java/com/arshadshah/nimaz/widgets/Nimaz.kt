@@ -61,9 +61,18 @@ class Nimaz : AppWidgetProvider()
 						R.id.Maghrib_time ,
 						repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
+				val ishaTime = repository.data?.isha?.toLocalTime()?.hour
+				val newIshaTime = if (ishaTime !! >= 22)
+				{
+					repository.data.maghrib?.plusMinutes(60)
+				} else
+				{
+					repository.data.isha
+				}
 				views.setTextViewText(
-						R.id.Ishaa_time ,
-						repository.data?.isha?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+						R.id.Ishaa_time , newIshaTime?.format(
+						DateTimeFormatter.ofPattern("hh:mm a")
+															 )
 									 )
 			}
 			Log.d("Nimaz: Widget" , "onUpdate: Setting click listener")
@@ -129,9 +138,18 @@ internal fun updateAppWidget(
 			R.id.Maghrib_time ,
 			repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 						 )
+	val ishaTime = repository.data?.isha?.toLocalTime()?.hour
+	val newIshaTime = if (ishaTime !! >= 22)
+	{
+		repository.data?.maghrib?.plusMinutes(60)
+	} else
+	{
+		repository.data?.isha
+	}
 	views.setTextViewText(
-			R.id.Ishaa_time ,
-			repository.data?.isha?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+			R.id.Ishaa_time , newIshaTime?.format(
+			DateTimeFormatter.ofPattern("hh:mm a")
+												 )
 						 )
 
 	views.setOnClickPendingIntent(R.id.widget , pendingIntent)

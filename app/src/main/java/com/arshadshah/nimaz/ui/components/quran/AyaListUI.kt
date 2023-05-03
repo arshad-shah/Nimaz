@@ -503,13 +503,9 @@ fun AyaListItemUI(
 
 	fun prepareMediaPlayer()
 	{
-		//if a media player is already playing then stop it
-		if (mediaPlayer.isPlaying)
-		{
-			mediaPlayer.stop()
-			//reset the media player
-			mediaPlayer.reset()
-		}
+		mediaPlayer.stop()
+		//reset the media player
+		mediaPlayer.reset()
 		val uri = Uri.fromFile(fileToBePlayed.value)
 		mediaPlayer.setAudioAttributes(
 				AudioAttributes.Builder()
