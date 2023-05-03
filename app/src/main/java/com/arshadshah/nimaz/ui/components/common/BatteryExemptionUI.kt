@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -109,19 +108,9 @@ fun BatteryExemptionUI()
 				}
 			} ,
 			title = {
-				if (isBatteryExempt.value)
-				{
-					Text(
-							text = "Optimization Disabled" ,
-							style = MaterialTheme.typography.titleSmall
-						)
-				} else
-				{
-					Text(
-							text = "Disable Optimization" ,
-							style = MaterialTheme.typography.titleSmall
-						)
-				}
+				Text(
+						text = "Battery Optimization" ,
+					)
 			} ,
 			subtitle = {
 				//if the permission is granted, show a checkmark and text saying "Allowed"
@@ -137,7 +126,7 @@ fun BatteryExemptionUI()
 								painter = painterResource(id = R.drawable.checkbox_icon) ,
 								contentDescription = "Battery Exemption Allowed"
 							)
-						Text(text = "Exempt" , style = MaterialTheme.typography.bodySmall)
+						Text(text = "Exempt")
 					}
 				} else
 				{
@@ -152,7 +141,7 @@ fun BatteryExemptionUI()
 								painter = painterResource(id = R.drawable.cross_circle_icon) ,
 								contentDescription = "Battery Exemption Not Allowed"
 							)
-						Text(text = "Optimizing" , style = MaterialTheme.typography.bodySmall)
+						Text(text = "Optimizing")
 					}
 				}
 			} ,
@@ -164,4 +153,12 @@ fun BatteryExemptionUI()
 					)
 			}
 				  )
+
+	if (! isBatteryExempt.value)
+	{
+		BannerSmall(
+				message = "Exempt Nimaz from battery optimization to receive Adhan notifications on time" ,
+				showFor = BannerShowFor.FOREVER.value
+				   )
+	}
 }

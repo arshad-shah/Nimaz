@@ -135,7 +135,7 @@ fun QuranScreen(
 									overflow = TextOverflow.Ellipsis ,
 									style = MaterialTheme.typography.titleMedium ,
 									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
-									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
 								)
 						}
 				   )

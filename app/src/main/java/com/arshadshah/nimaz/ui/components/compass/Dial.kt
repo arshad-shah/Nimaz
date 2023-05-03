@@ -25,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.viewModel.QiblaViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -33,7 +32,12 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
-fun Dial(state : State<QiblaViewModel.QiblaState> , imageToDisplay : Painter)
+fun Dial(
+	state : State<Double> ,
+	imageToDisplay : Painter ,
+	errorMessage : String ,
+	isLoading : Boolean ,
+		)
 {
 
 	val context = LocalContext.current
@@ -59,22 +63,29 @@ fun Dial(state : State<QiblaViewModel.QiblaState> , imageToDisplay : Painter)
 			job.cancel()
 		}
 	}
-	when (val qiblaState = state.value)
+
+	if (isLoading)
 	{
-		is QiblaViewModel.QiblaState.Loading ->
+		DialUI(0.0 , data , imageToDisplay)
+	} else if (errorMessage != "")
+	{
+		ElevatedCard(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(16.dp) ,
+					)
 		{
-			DialUI(0.0 , data , imageToDisplay)
+			Text(
+					text = errorMessage ,
+					style = MaterialTheme.typography.titleMedium ,
+					color = Color.Red ,
+					textAlign = TextAlign.Center ,
+					modifier = Modifier.padding(16.dp)
+				)
 		}
-
-		is QiblaViewModel.QiblaState.Error ->
-		{
-			DialUI(0.0 , data , imageToDisplay)
-		}
-
-		is QiblaViewModel.QiblaState.Success ->
-		{
-			qiblaState.bearing?.let { DialUI(it , data , imageToDisplay) }
-		}
+	} else
+	{
+		DialUI(state.value , data , imageToDisplay)
 	}
 }
 

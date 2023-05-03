@@ -14,36 +14,32 @@ import kotlinx.coroutines.launch
 class QiblaViewModel(context : Context) : ViewModel()
 {
 
-	sealed class QiblaState
-	{
-
-		object Loading : QiblaState()
-		data class Success(val bearing : Double?) : QiblaState()
-		data class Error(val errorMessage : String) : QiblaState()
-	}
-
-	private var _qiblaState = MutableStateFlow(QiblaState.Loading as QiblaState)
+	private var _qiblaState = MutableStateFlow(0.0)
 	val qiblaState = _qiblaState.asStateFlow()
 
-	init
-	{
-		loadQibla(context)
-	}
+	private var _isLoading = MutableStateFlow(false)
+	val isLoading = _isLoading.asStateFlow()
 
-	private fun loadQibla(context : Context)
+	private var _errorMessage = MutableStateFlow("")
+	val errorMessage = _errorMessage.asStateFlow()
+
+	fun loadQibla(context : Context)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			_qiblaState.value = QiblaState.Loading
+			_isLoading.value = true
 			try
 			{
 				val sharedPreferences = PrivateSharedPreferences(context)
 				val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 53.3498)
 				val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , - 6.2603)
 				val qiblaBearing = Qibla().calculateQiblaDirection(latitude , longitude)
-				_qiblaState.value = QiblaState.Success(qiblaBearing)
+				_qiblaState.value = qiblaBearing
 			} catch (e : Exception)
 			{
-				_qiblaState.value = QiblaState.Error(e.message.toString())
+				_errorMessage.value = e.message.toString()
+			} finally
+			{
+				_isLoading.value = false
 			}
 		}
 	}

@@ -190,7 +190,7 @@ fun ListOfTasbih(
 									overflow = TextOverflow.Ellipsis ,
 									style = MaterialTheme.typography.titleMedium ,
 									color = if (selectedTabIndx) MaterialTheme.colorScheme.onSecondaryContainer
-									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
 								)
 						}
 				   )

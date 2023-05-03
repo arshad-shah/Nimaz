@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
+import android.app.Activity
 import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
@@ -7,19 +8,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
@@ -35,12 +29,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.BuildConfig
@@ -61,8 +53,8 @@ import com.arshadshah.nimaz.ui.components.settings.LocationSettings
 import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
 import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
-import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileIcon
-import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
+import com.arshadshah.nimaz.ui.components.settings.ThemeGrid
+import com.arshadshah.nimaz.ui.components.settings.ThemeOption
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_dark_primary
@@ -79,6 +71,7 @@ import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
+import com.google.android.play.core.review.ReviewManagerFactory
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -543,113 +536,26 @@ fun SettingsScreen(
 								)
 			}
 		}
-
-		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth()
-					) {
-			SettingsMenuLink(
-					title = { Text(text = "Help") } ,
-					onClick = {
-						onNavigateToWebViewScreen("help")
-					} ,
-					icon = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.help_icon) ,
-								contentDescription = "Help documentation"
-							)
-					} ,
-					action = {
-						Icon(
-								modifier = Modifier
-									.size(24.dp)
-									.padding(2.dp) ,
-								painter = painterResource(id = R.drawable.angle_right_icon) ,
-								contentDescription = "Update Available"
-							)
-					}
-							)
-		}
-
-		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth()
-					) {
-			SettingsMenuLink(
-					title = {
-						Text(
-								text = "License & Acknowledgements" ,
-								maxLines = 1 ,
-								overflow = TextOverflow.Ellipsis
-							)
-					} ,
-					//version of the app
-					subtitle = { Text(text = "Open source libraries") } ,
-					onClick = {
-						onNavigateToLicencesScreen()
-					} ,
-					icon = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.license_icon) ,
-								contentDescription = "License & Acknowledgements"
-							)
-					} ,
-					action = {
-						Icon(
-								modifier = Modifier
-									.size(24.dp)
-									.padding(2.dp) ,
-								painter = painterResource(id = R.drawable.angle_right_icon) ,
-								contentDescription = "Update Available"
-							)
-					}
-							)
-		}
-
-		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth()
-					.testTag(TEST_TAG_ABOUT)
-					) {
-			SettingsMenuLink(
-					title = { Text(text = "About") } ,
-					//version of the app
-					subtitle = { Text(text = updateAvailableText) } ,
-					onClick = {
-						onNavigateToAboutScreen()
-					} ,
-					icon = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.info_icon) ,
-								contentDescription = "About"
-							)
-					} ,
-					action = {
-						if (updateAvailabile.value)
-						{
-							Button(
-									onClick = {
-										viewModelSettings.handleEvent(
-												SettingsViewModel.SettingsEvent.CheckUpdate(
-														context ,
-														true
-																						   )
-																	 )
-									} ,
-								  ) {
-								Text(text = "Update")
-							}
-						} else
-						{
+		SettingsGroup(title = { Text(text = "Other") }) {
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						) {
+				SettingsMenuLink(
+						title = { Text(text = "Help") } ,
+						onClick = {
+							onNavigateToWebViewScreen("help")
+						} ,
+						icon = {
+							Icon(
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.help_icon) ,
+									contentDescription = "Help documentation"
+								)
+						} ,
+						action = {
 							Icon(
 									modifier = Modifier
 										.size(24.dp)
@@ -658,8 +564,166 @@ fun SettingsScreen(
 									contentDescription = "Update Available"
 								)
 						}
-					}
-							)
+								)
+			}
+
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						) {
+				SettingsMenuLink(
+						title = {
+							Text(
+									text = "License & Acknowledgements" ,
+									maxLines = 1 ,
+									overflow = TextOverflow.Ellipsis
+								)
+						} ,
+						//version of the app
+						subtitle = { Text(text = "Open source libraries") } ,
+						onClick = {
+							onNavigateToLicencesScreen()
+						} ,
+						icon = {
+							Icon(
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.license_icon) ,
+									contentDescription = "License & Acknowledgements"
+								)
+						} ,
+						action = {
+							Icon(
+									modifier = Modifier
+										.size(24.dp)
+										.padding(2.dp) ,
+									painter = painterResource(id = R.drawable.angle_right_icon) ,
+									contentDescription = "Update Available"
+								)
+						}
+								)
+			}
+
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						.testTag(TEST_TAG_ABOUT)
+						) {
+				SettingsMenuLink(
+						title = { Text(text = "Rate Nimaz") } ,
+						onClick = {
+							val manager = ReviewManagerFactory.create(context)
+							val request = manager.requestReviewFlow()
+							request.addOnCompleteListener { task ->
+								if (task.isSuccessful) {
+									// We got the ReviewInfo object
+									val reviewInfo = task.result
+									val flow = manager.launchReviewFlow(context as Activity , reviewInfo)
+									flow.addOnCompleteListener { _ ->
+										// The flow has finished. The API does not indicate whether the user
+										// reviewed or not, or even whether the review dialog was shown. Thus, no
+										// matter the result, we continue our app flow.
+									}
+								} else {
+									// There was some problem, log or handle the error code.
+									Toasty.error(context , task.exception?.message ?: "Error" , Toast.LENGTH_SHORT)
+										.show()
+								}
+							}
+						} ,
+						icon = {
+							Icon(
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.rating_icon) ,
+									contentDescription = "Rate Nimaz"
+								)
+						} ,
+								)
+			}
+
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						.testTag(TEST_TAG_ABOUT)
+						) {
+				SettingsMenuLink(
+						title = { Text(text = "Share Nimaz") } ,
+						onClick = {
+							val shareIntent = Intent(Intent.ACTION_SEND)
+							shareIntent.type = "text/plain"
+							shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Nimaz")
+							var shareMessage = "\nCheck out this app\n\n"
+							shareMessage = """
+								${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
+								
+								""".trimIndent()
+							shareIntent.putExtra(Intent.EXTRA_TEXT , shareMessage)
+							context.startActivity(Intent.createChooser(shareIntent , "choose one"))
+						} ,
+						icon = {
+							Icon(
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.share_icon) ,
+									contentDescription = "Share Nimaz"
+								)
+						} ,
+								)
+			}
+
+			ElevatedCard(
+					shape = MaterialTheme.shapes.extraLarge ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth()
+						.testTag(TEST_TAG_ABOUT)
+						) {
+				SettingsMenuLink(
+						title = { Text(text = "About") } ,
+						//version of the app
+						subtitle = { Text(text = updateAvailableText) } ,
+						onClick = {
+							onNavigateToAboutScreen()
+						} ,
+						icon = {
+							Icon(
+									modifier = Modifier.size(24.dp) ,
+									painter = painterResource(id = R.drawable.info_icon) ,
+									contentDescription = "About"
+								)
+						} ,
+						action = {
+							if (updateAvailabile.value)
+							{
+								Button(
+										onClick = {
+											viewModelSettings.handleEvent(
+													SettingsViewModel.SettingsEvent.CheckUpdate(
+															context ,
+															true
+																							   )
+																		 )
+										} ,
+									  ) {
+									Text(text = "Update")
+								}
+							} else
+							{
+								Icon(
+										modifier = Modifier
+											.size(24.dp)
+											.padding(2.dp) ,
+										painter = painterResource(id = R.drawable.angle_right_icon) ,
+										contentDescription = "Update Available"
+									)
+							}
+						}
+								)
+			}
 		}
 
 		//get the current year
@@ -672,175 +736,4 @@ fun SettingsScreen(
 				style = MaterialTheme.typography.bodyMedium
 			)
 	}
-}
-
-class ThemeOption(
-	var themeName : String ,
-	var themeKey : String ,
-	var themeColor : Color ,
-	var isSelected : Boolean ,
-				 )
-
-@Composable
-fun ThemeGrid(
-	themeOptions : List<ThemeOption> ,
-	onThemeOptionSelected : (ThemeOption) -> Unit ,
-			 )
-{
-	Column(
-			modifier = Modifier
-				.fillMaxWidth()
-		  ) {
-		//name of current theme
-		Row(
-				modifier = Modifier
-					.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceBetween
-		   ) {
-			Row(
-					modifier = Modifier ,
-					verticalAlignment = Alignment.CenterVertically
-			   ) {
-
-				SettingsTileIcon(icon = {
-					Icon(
-							modifier = Modifier
-								.size(24.dp) ,
-							painter = painterResource(id = R.drawable.theme_icon) ,
-							contentDescription = "Color"
-						)
-				})
-				SettingsTileTexts(title = {
-					Text(
-							text = "Color" ,
-						)
-				} ,
-								  subtitle = {
-									  Text(
-											  text = themeOptions.find { it.isSelected }?.themeName
-												  ?: "" ,
-										  )
-								  })
-			}
-		}
-		//the row
-		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp) ,
-				horizontalArrangement = Arrangement.SpaceBetween
-		   ) {
-			themeOptions.forEachIndexed { index , themeOption ->
-				//the theme item
-				ToggleableCustomThemeItem(
-						checked = themeOption.isSelected ,
-						onCheckedChange = {
-							onThemeOptionSelected(themeOption)
-						} ,
-						color = themeOption.themeColor ,
-						//if the thtme key is SYSTEM then show the system icon
-						icon = if (themeOption.themeKey == "SYSTEM")
-						{
-							@Composable {
-								Icon(
-										modifier = Modifier.size(24.dp) ,
-										painter = painterResource(id = R.drawable.system_icon) ,
-										contentDescription = "System" ,
-										tint = MaterialTheme.colorScheme.onPrimary
-									)
-							}
-						} else null
-										 )
-			}
-		}
-	}
-}
-
-//a theme toggle item with a circle that gets highlighted witha  thick border when selected
-@Composable
-fun ToggleableCustomThemeItem(
-	modifier : Modifier = Modifier ,
-	checked : Boolean ,
-	onCheckedChange : (Boolean) -> Unit ,
-	color : Color = MaterialTheme.colorScheme.primary ,
-	icon : @Composable (() -> Unit)? = null ,
-							 )
-{
-	Box(
-			modifier = modifier
-				.border(
-						width = 2.dp ,
-						color = if (checked) Color.Gray else Color.Transparent ,
-						shape = CircleShape
-					   ) ,
-			contentAlignment = Alignment.Center ,
-	   ) {
-		//the circle
-		Box(
-
-				modifier = modifier
-					.padding(6.dp)
-					.size(48.dp)
-					.clickable {
-						onCheckedChange(! checked)
-					}
-					.background(
-							color = color ,
-							shape = CircleShape
-							   ) ,
-				contentAlignment = Alignment.Center
-		   ) {
-			//the icon
-			icon?.invoke()
-		}
-	}
-}
-
-
-@Preview(showBackground = true)
-@Composable
-//preview of the theme grid
-fun ThemeGridPreview()
-{
-	ThemeGrid(
-			themeOptions = listOf(
-					ThemeOption("Light" , "light" , Color.White , true) ,
-					ThemeOption("Dark" , "dark" , Color.Black , false) ,
-					ThemeOption("Red" , "red" , Color.Red , false) ,
-					ThemeOption("Green" , "green" , Color.Green , false) ,
-					ThemeOption("Blue" , "blue" , Color.Blue , false) ,
-								 ) ,
-			onThemeOptionSelected = {}
-			 )
-}
-
-//preview of ToggleableItemRow
-@Preview(showBackground = true , name = "Theme Toggle Selected" , group = "Theme Toggle")
-@Composable
-fun ToggleableItemRowPreview()
-{
-	ToggleableCustomThemeItem(
-			checked = true ,
-			onCheckedChange = {} ,
-			color = Color.Red ,
-			icon = {
-				Icon(
-						modifier = Modifier
-							.size(24.dp) ,
-						painter = painterResource(id = R.drawable.settings_icon) ,
-						contentDescription = "Selected"
-					)
-			}
-							 )
-}
-
-@Preview(showBackground = true , name = "Theme Toggle Unselected" , group = "Theme Toggle")
-@Composable
-fun ToggleableItemRowPreview2()
-{
-	ToggleableCustomThemeItem(
-			checked = false ,
-			onCheckedChange = {} ,
-			color = Color.Red
-							 )
 }

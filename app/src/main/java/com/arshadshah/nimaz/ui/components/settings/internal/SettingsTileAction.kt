@@ -74,3 +74,18 @@ internal fun SettingsTileActionPreview2()
 			  )
 	}
 }
+
+//preview with right arrow
+@Preview
+@Composable
+internal fun SettingsTileActionPreview3()
+{
+	SettingsTileAction {
+		Icon(
+				painter = painterResource(id = R.drawable.angle_right_icon) ,
+				contentDescription = null ,
+				modifier = Modifier
+					.size(24.dp)
+			)
+	}
+}

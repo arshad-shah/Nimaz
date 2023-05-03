@@ -204,8 +204,16 @@ class PrayerTimesViewModel : ViewModel()
 						R.id.Maghrib_time ,
 						repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
+				val ishaTime = repository.data?.isha?.toLocalTime()?.hour
+				val newIshaTime = if (ishaTime !! >= 22)
+				{
+					repository.data.maghrib?.plusMinutes(60)
+				} else
+				{
+					repository.data.isha
+				}
 				views.setTextViewText(
-						R.id.Ishaa_time , repository.data?.isha?.format(
+						R.id.Ishaa_time , newIshaTime?.format(
 						DateTimeFormatter.ofPattern("hh:mm a")
 																	   )
 									 )
@@ -265,7 +273,15 @@ class PrayerTimesViewModel : ViewModel()
 					_dhuhrTimeState.value = response.data.dhuhr !!
 					_asrTimeState.value = response.data.asr !!
 					_maghribTimeState.value = response.data.maghrib !!
-					_ishaTimeState.value = response.data.isha !!
+					val ishaTime = response.data.isha?.toLocalTime()?.hour
+					val newIshaTime = if (ishaTime !! >= 22)
+					{
+						response.data.maghrib?.plusMinutes(60)
+					} else
+					{
+						response.data.isha
+					}
+					_ishaTimeState.value = newIshaTime!!
 					Log.d(
 							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 							"UpdatePrayerTimes: ${response.data}"
@@ -337,7 +353,16 @@ class PrayerTimesViewModel : ViewModel()
 					_dhuhrTimeState.value = response.data.dhuhr !!
 					_asrTimeState.value = response.data.asr !!
 					_maghribTimeState.value = response.data.maghrib !!
-					_ishaTimeState.value = response.data.isha !!
+
+					val ishaTime = response.data.isha?.toLocalTime()?.hour
+					val newIshaTime = if (ishaTime !! >= 22)
+					{
+						response.data.maghrib?.plusMinutes(60)
+					} else
+					{
+						response.data.isha
+					}
+					_ishaTimeState.value = newIshaTime!!
 
 					_isLoading.value = false
 					_isRefreshing.value = false

@@ -219,4 +219,12 @@ fun NotificationScreenUI()
 					)
 			}
 				  )
+
+	if (! notificationAllowed.value)
+	{
+		BannerSmall(
+				message = "Please enable notifications to receive Adhan notifications" ,
+				showFor = BannerShowFor.FOREVER.value
+				   )
+	}
 }

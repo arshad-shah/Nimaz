@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.*
@@ -30,6 +31,9 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 			modifier = Modifier
 				.fillMaxWidth()
 				.fillMaxHeight()
+				.background(
+						color = MaterialTheme.colorScheme.background
+						   )
 				.testTag("pagerScreen $position") ,
 			horizontalAlignment = Alignment.CenterHorizontally ,
 			verticalArrangement = Arrangement.Center
@@ -55,7 +59,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 				fontSize = MaterialTheme.typography.headlineMedium.fontSize ,
 				fontWeight = FontWeight.Bold ,
 				textAlign = TextAlign.Center ,
-				color = MaterialTheme.colorScheme.onBackground
+				color = MaterialTheme.colorScheme.onBackground ,
 			)
 
 		Text(
@@ -68,7 +72,7 @@ fun PagerScreen(onBoardingPage : OnBoardingPage , position : Int)
 				fontSize = MaterialTheme.typography.bodyMedium.fontSize ,
 				fontWeight = FontWeight.Medium ,
 				textAlign = TextAlign.Center ,
-				color = MaterialTheme.colorScheme.onBackground
+				color = MaterialTheme.colorScheme.onBackground ,
 			)
 		//if onBoardingPage.extra is not {} then show the extra content
 		if (onBoardingPage.extra != null)

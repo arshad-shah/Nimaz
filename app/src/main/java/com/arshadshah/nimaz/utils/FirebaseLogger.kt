@@ -9,11 +9,11 @@ import com.google.firebase.ktx.Firebase
 object FirebaseLogger
 {
 
-	private lateinit var firebaseAnalytics : FirebaseAnalytics
+	private var firebaseAnalytics : FirebaseAnalytics? = null
 
 	fun init()
 	{
-		if (! ::firebaseAnalytics.isInitialized)
+		if (firebaseAnalytics == null)
 		{
 			this.firebaseAnalytics = Firebase.analytics
 			Log.d("Nimaz: FirebaseLogger" , "Firebase Analytics Initialized")
@@ -34,17 +34,17 @@ object FirebaseLogger
 				is Boolean -> bundle.putBoolean(key , value)
 			}
 		}
-		firebaseAnalytics.logEvent(eventName , bundle)
+		firebaseAnalytics?.logEvent(eventName , bundle)
 		Log.d("Nimaz: FirebaseLogger" , "Logged Event: $eventName")
 	}
 
 	fun logEvent(eventName : String)
 	{
-		firebaseAnalytics.logEvent(eventName , null)
+		firebaseAnalytics?.logEvent(eventName , null)
 		Log.d("Nimaz: FirebaseLogger" , "Logged Event: $eventName")
 	}
 
-	fun getFirebaseAnalytics() : FirebaseAnalytics
+	fun getFirebaseAnalytics() : FirebaseAnalytics?
 	{
 		Log.d("Nimaz: FirebaseLogger" , "Firebase Analytics Returned")
 		return firebaseAnalytics
@@ -52,7 +52,7 @@ object FirebaseLogger
 
 	fun isInitialized() : Boolean
 	{
-		return ::firebaseAnalytics.isInitialized
+		return firebaseAnalytics != null
 	}
 
 

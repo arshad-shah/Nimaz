@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.trackers
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -104,6 +104,12 @@ fun DateSelector(
 				} else
 				{
 					Row(
+							modifier = Modifier
+								.background(
+										color = MaterialTheme.colorScheme.primary ,
+										shape = MaterialTheme.shapes.small
+										   )
+								.padding(horizontal = 8.dp) ,
 							horizontalArrangement = Arrangement.Center ,
 							verticalAlignment = Alignment.CenterVertically
 					   ) {
@@ -113,14 +119,14 @@ fun DateSelector(
 									modifier = Modifier.size(16.dp) ,
 									painter = painterResource(id = R.drawable.angle_small_left_icon) ,
 									contentDescription = "Previous Day" ,
-									tint = MaterialTheme.colorScheme.primary
+									tint = MaterialTheme.colorScheme.onPrimary
 								)
 							Text(
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp)
-										.alpha(0.5f)
+										.padding(start = 4.dp) ,
+									color = MaterialTheme.colorScheme.onPrimary
 								)
 						} else
 						{
@@ -128,14 +134,14 @@ fun DateSelector(
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp)
-										.alpha(0.8f)
+										.padding(start = 4.dp) ,
+									color = MaterialTheme.colorScheme.onPrimary
 								)
 							Icon(
 									modifier = Modifier.size(16.dp) ,
 									painter = painterResource(id = R.drawable.angle_small_right_icon) ,
 									contentDescription = "Next Day" ,
-									tint = MaterialTheme.colorScheme.primary
+									tint = MaterialTheme.colorScheme.onPrimary
 
 								)
 						}

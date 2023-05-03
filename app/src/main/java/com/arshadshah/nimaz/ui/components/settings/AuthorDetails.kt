@@ -65,13 +65,6 @@ fun AuthorDetails()
 							color = MaterialTheme.colorScheme.outline ,
 							thickness = 1.dp
 						   )
-					//links
-					Text(
-							modifier = Modifier.fillMaxWidth() ,
-							text = "Links" ,
-							style = MaterialTheme.typography.titleLarge ,
-							textAlign = TextAlign.Center
-						)
 					AuthorLinks()
 				}
 			} ,

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -45,6 +46,8 @@ fun AuthorLinks()
 		   ) {
 			//website link
 			FilledIconButton(
+					modifier = Modifier.size(48.dp) ,
+					shape = CircleShape ,
 					colors = IconButtonDefaults.filledIconButtonColors(
 							containerColor = MaterialTheme.colorScheme.primary ,
 							contentColor = MaterialTheme.colorScheme.onPrimary ,
@@ -65,6 +68,8 @@ fun AuthorLinks()
 
 			//linkedIn link
 			FilledIconButton(
+					modifier = Modifier.size(48.dp) ,
+					shape = CircleShape ,
 					colors = IconButtonDefaults.filledIconButtonColors(
 							containerColor = MaterialTheme.colorScheme.primary ,
 							contentColor = MaterialTheme.colorScheme.onPrimary ,
@@ -86,6 +91,8 @@ fun AuthorLinks()
 							)
 			//email link
 			FilledIconButton(
+					modifier = Modifier.size(48.dp) ,
+					shape = CircleShape ,
 					colors = IconButtonDefaults.filledIconButtonColors(
 							containerColor = MaterialTheme.colorScheme.primary ,
 							contentColor = MaterialTheme.colorScheme.onPrimary ,
@@ -104,6 +111,8 @@ fun AuthorLinks()
 					}
 							)
 			FilledIconButton(
+					modifier = Modifier.size(48.dp) ,
+					shape = CircleShape ,
 					colors = IconButtonDefaults.filledIconButtonColors(
 							containerColor = MaterialTheme.colorScheme.primary ,
 							contentColor = MaterialTheme.colorScheme.onPrimary ,

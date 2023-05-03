@@ -70,7 +70,7 @@ fun FontSizeDialog(
 							verticalAlignment = Alignment.CenterVertically ,
 							horizontalArrangement = Arrangement.SpaceBetween
 					   ) {
-						Text(text = "Arabic Font" , style = MaterialTheme.typography.bodyMedium)
+						Text(text = "Arabic Size" , style = MaterialTheme.typography.bodyMedium)
 						Spacer(modifier = Modifier.width(8.dp))
 						//round this value to make it clean and easy to read
 						Text(text = arabicFontSizeState.value.roundToInt().toString())
@@ -116,7 +116,7 @@ fun FontSizeDialog(
 							horizontalArrangement = Arrangement.SpaceBetween
 					   ) {
 						Text(
-								text = "Translation Font" ,
+								text = "Translation Size" ,
 								style = MaterialTheme.typography.bodyMedium
 							)
 						//a text to show the font value of the translation
@@ -146,7 +146,7 @@ fun FontSizeDialog(
 								   )
 
 					LabelWithDropdownMenu(
-							label = "Font Style (Arabic)" ,
+							label = "Arabic Style" ,
 							items = items3 ,
 							selectedItem = fontStyleState.value ,
 							onItemSelected = {
