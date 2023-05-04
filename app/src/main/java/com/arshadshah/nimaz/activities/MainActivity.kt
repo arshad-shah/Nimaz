@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -54,6 +55,7 @@ import com.arshadshah.nimaz.utils.*
 import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
+import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -250,6 +252,18 @@ class MainActivity : ComponentActivity()
 						initializer = { NamesOfAllahViewModel() } ,
 						viewModelStoreOwner = LocalContext.current as ComponentActivity
 											  )
+
+				val viewModelTracker = viewModel(
+						key = AppConstants.TRACKING_VIEWMODEL_KEY ,
+						initializer = { TrackerViewModel() } ,
+						viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+												)
+
+				val isMenstruatingState = remember {
+					viewModelTracker.isMenstrauting
+				}.collectAsState()
+
+
 				val isPlaying = remember {
 					viewModelNames.isPlaying
 				}.collectAsState()
@@ -504,6 +518,26 @@ class MainActivity : ComponentActivity()
 																		modifier = Modifier.size(24.dp) ,
 																		painter = painterResource(id = R.drawable.refresh_icon) ,
 																		contentDescription = "Reset" ,
+																	)
+															}
+														}
+//
+//														//trackers screen
+														PRAYER_TRACKER_SCREEN_ROUTE,
+														CALENDER_SCREEN_ROUTE
+														->
+														{
+															FilledIconButton(onClick = {
+																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
+																		! isMenstruatingState.value
+																																				))
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.menstruation_icon) ,
+																		contentDescription = "Menstruation",
+																	//color it pink
+																	tint = Color(0xFFE91E63)
 																	)
 															}
 														}
