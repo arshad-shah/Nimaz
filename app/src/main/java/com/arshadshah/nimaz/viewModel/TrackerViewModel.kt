@@ -113,6 +113,10 @@ class TrackerViewModel : ViewModel()
 	private val _progressForSunday = MutableStateFlow(0)
 	val progressForSunday = _progressForSunday.asStateFlow()
 
+	//isMenstrauting state
+	private val _isMenstrauting = MutableStateFlow(false)
+	val isMenstrauting = _isMenstrauting.asStateFlow()
+
 
 	//event for the tracker for prayer
 	sealed class TrackerEvent
@@ -150,6 +154,9 @@ class TrackerViewModel : ViewModel()
 
 		//updateProgressForDay(day : DayOfWeek , progress : Int)
 		class UPDATE_PROGRESS_FOR_DAY(val day : DayOfWeek , val progress : Int) : TrackerEvent()
+
+		//update menstrauting state
+		class UPDATE_MENSTRAUTING_STATE(val isMenstrauting : Boolean) : TrackerEvent()
 	}
 
 	fun onEvent(event : TrackerEvent)
@@ -173,6 +180,35 @@ class TrackerViewModel : ViewModel()
 					event.day ,
 					event.progress
 																		   )
+			is TrackerEvent.UPDATE_MENSTRAUTING_STATE -> updateMenstrautingState(
+					event.isMenstrauting
+																				 )
+
+		}
+	}
+
+
+	private fun updateMenstrautingState(menstrauting : Boolean)
+	{
+		viewModelScope.launch(Dispatchers.IO) {
+			val dataStore = LocalDataStore.getDataStore()
+			updateTracker(
+					PrayerTracker(
+					date = _dateState.value ,
+					progress = _progressState.value ,
+					isMenstruating = menstrauting,
+					fajr = _fajrState.value,
+					dhuhr = _zuhrState.value,
+					asr = _asrState.value,
+					maghrib = _maghribState.value,
+					isha = _ishaState.value
+								 ))
+			updateFastTracker(
+					FastTracker(
+					date = _dateState.value ,
+					isFasting = _isFasting.value ,
+					isMenstruating = menstrauting
+							 ))
 		}
 	}
 
@@ -411,6 +447,7 @@ class TrackerViewModel : ViewModel()
 						_maghribState.value = false
 						_ishaState.value = false
 						_progressState.value = 0
+						_isMenstrauting.value = false
 					} else
 					{
 						val tracker = PrayerTracker(date)
@@ -423,6 +460,7 @@ class TrackerViewModel : ViewModel()
 						_maghribState.value = false
 						_ishaState.value = false
 						_progressState.value = 0
+						_isMenstrauting.value = false
 					}
 				} else
 				{
@@ -435,6 +473,7 @@ class TrackerViewModel : ViewModel()
 					_ishaState.value = tracker.isha
 					_trackerState.value = TrackerState.Tracker(tracker)
 					_progressState.value = tracker.progress
+					_isMenstrauting.value = tracker.isMenstruating
 				}
 			} catch (e : Exception)
 			{
@@ -465,6 +504,7 @@ class TrackerViewModel : ViewModel()
 					_maghribState.value = tracker.maghrib
 					_ishaState.value = tracker.isha
 					_progressState.value = tracker.progress
+					_isMenstrauting.value = tracker.isMenstruating
 				} else
 				{
 					dataStore.saveTracker(tracker)
@@ -478,6 +518,7 @@ class TrackerViewModel : ViewModel()
 					_maghribState.value = tracker.maghrib
 					_ishaState.value = tracker.isha
 					_progressState.value = tracker.progress
+					_isMenstrauting.value = tracker.isMenstruating
 				}
 			} catch (e : Exception)
 			{
@@ -504,6 +545,7 @@ class TrackerViewModel : ViewModel()
 				_ishaState.value = tracker.isha
 				_trackerState.value = TrackerState.Tracker(updatedTracker)
 				_progressState.value = tracker.progress
+				_isMenstrauting.value = tracker.isMenstruating
 			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
