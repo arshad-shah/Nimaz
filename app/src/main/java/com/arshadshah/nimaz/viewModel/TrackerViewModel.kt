@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -191,7 +192,6 @@ class TrackerViewModel : ViewModel()
 	private fun updateMenstrautingState(menstrauting : Boolean)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
-			val dataStore = LocalDataStore.getDataStore()
 			updateTracker(
 					PrayerTracker(
 					date = _dateState.value ,
@@ -209,6 +209,12 @@ class TrackerViewModel : ViewModel()
 					isFasting = _isFasting.value ,
 					isMenstruating = menstrauting
 							 ))
+
+			//get the monthly trackers
+			getProgressForMonth(_dateState.value)
+			getFastProgressForMonth(_dateState.value)
+			//get weekly trackers
+			getProgressForWeek(_dateState.value)
 		}
 	}
 
@@ -288,6 +294,9 @@ class TrackerViewModel : ViewModel()
 		}
 	}
 
+	private val _trackersForWeek = MutableStateFlow<List<PrayerTracker>>(listOf())
+	val trackersForWeek : StateFlow<List<PrayerTracker>> = _trackersForWeek
+
 	private fun getProgressForWeek(date : String)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
@@ -316,6 +325,8 @@ class TrackerViewModel : ViewModel()
 							5 -> _progressForSaturday.value = progress
 							6 -> _progressForSunday.value = progress
 						}
+						//add the tracker to the list all trackers
+						_trackersForWeek.value = _trackersForWeek.value + tracker
 					} else
 					{
 						//update appropriate day
@@ -329,6 +340,9 @@ class TrackerViewModel : ViewModel()
 							5 -> _progressForSaturday.value = 0
 							6 -> _progressForSunday.value = 0
 						}
+						//add the tracker to the list all trackers
+						_trackersForWeek.value =
+							_trackersForWeek.value + PrayerTracker(date = date , progress = 0)
 					}
 				}
 			} catch (e : Exception)
