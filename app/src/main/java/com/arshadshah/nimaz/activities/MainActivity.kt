@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -522,22 +523,24 @@ class MainActivity : ComponentActivity()
 														}
 //
 //														//trackers screen
-//														PRAYER_TRACKER_SCREEN_ROUTE ->
-//														{
-//															FilledIconButton(onClick = {
-//																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
-//																		! isMenstruatingState.value
-//																																				))
-//															}) {
-//																Icon(
-//																		modifier = Modifier.size(24.dp) ,
-//																		painter = painterResource(id = R.drawable.menstruation_icon) ,
-//																		contentDescription = "Menstruation",
-//																	//color it pink
-//																	tint = Color(0xFFE91E63)
-//																	)
-//															}
-//														}
+														PRAYER_TRACKER_SCREEN_ROUTE,
+														CALENDER_SCREEN_ROUTE
+														->
+														{
+															FilledIconButton(onClick = {
+																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
+																		! isMenstruatingState.value
+																																				))
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.menstruation_icon) ,
+																		contentDescription = "Menstruation",
+																	//color it pink
+																	tint = Color(0xFFE91E63)
+																	)
+															}
+														}
 													}
 												}
 												 )
