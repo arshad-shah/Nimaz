@@ -14,4 +14,5 @@ data class LocalPrayersTracker(
 	val maghrib : Boolean = false ,
 	val isha : Boolean = false ,
 	val progress : Int = 0 ,
+	val isMenstruating : Boolean = false ,
 							  )

@@ -138,9 +138,7 @@ fun Calender(paddingValues : PaddingValues)
 							style = MaterialTheme.typography.titleMedium
 						)
 				}
-				DashboardPrayerTracker(
-						onNavigateToTracker = {}
-									  )
+				DashboardPrayerTracker()
 
 				DashboardFastTracker()
 			}

@@ -164,6 +164,9 @@ fun Dashboard(
 						.fillMaxWidth()
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						.testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
+						.clickable {
+							onNavigateToTracker()
+						}
 						) {
 				Text(
 						text = "Trackers" ,
@@ -173,7 +176,7 @@ fun Dashboard(
 						textAlign = TextAlign.Center ,
 						style = MaterialTheme.typography.titleMedium
 					)
-				DashboardPrayerTracker(onNavigateToTracker = onNavigateToTracker)
+				DashboardPrayerTracker()
 				//if its ramaadan then show the fast tracker
 				//DashboardFastTracker
 				DashboardFastTracker()
