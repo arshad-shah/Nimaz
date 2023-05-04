@@ -148,7 +148,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 					) {
 			Column {
 				Text(
-						text = "Current Week Progress" ,
+						text = "7 Day Trend" ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier
 							.padding(8.dp)
@@ -170,7 +170,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 					) {
 			Column {
 				Text(
-						text = "Current Month Progress" ,
+						text = "Monthly Progress" ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier
 							.padding(8.dp)
