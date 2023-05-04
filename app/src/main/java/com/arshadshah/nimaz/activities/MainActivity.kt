@@ -523,24 +523,24 @@ class MainActivity : ComponentActivity()
 														}
 //
 //														//trackers screen
-//														PRAYER_TRACKER_SCREEN_ROUTE,
-//														CALENDER_SCREEN_ROUTE
-//														->
-//														{
-//															FilledIconButton(onClick = {
-//																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
-//																		! isMenstruatingState.value
-//																																				))
-//															}) {
-//																Icon(
-//																		modifier = Modifier.size(24.dp) ,
-//																		painter = painterResource(id = R.drawable.menstruation_icon) ,
-//																		contentDescription = "Menstruation",
-//																	//color it pink
-//																	tint = Color(0xFFE91E63)
-//																	)
-//															}
-//														}
+														PRAYER_TRACKER_SCREEN_ROUTE,
+														CALENDER_SCREEN_ROUTE
+														->
+														{
+															FilledIconButton(onClick = {
+																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
+																		! isMenstruatingState.value
+																																				))
+															}) {
+																Icon(
+																		modifier = Modifier.size(24.dp) ,
+																		painter = painterResource(id = R.drawable.menstruation_icon) ,
+																		contentDescription = "Menstruation",
+																	//color it pink
+																	tint = Color(0xFFE91E63)
+																	)
+															}
+														}
 													}
 												}
 												 )
