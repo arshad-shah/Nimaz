@@ -33,13 +33,17 @@ fun DashboardFastTracker()
 	val isFasting = remember {
 		viewModelTracker.isFasting
 	}.collectAsState()
+	val isMenstrauting = remember {
+		viewModelTracker.isMenstrauting
+	}.collectAsState()
 
 	val isFastingToday = remember { mutableStateOf(false) }
 
 	isFastingToday.value = isFasting.value
 	FastTrackerCard(
+			handleEvent = viewModelTracker::onEvent ,
 			dateState = dateState ,
 			isFastingToday = isFastingToday ,
-			handleEvent = viewModelTracker::onEvent
+			isMenstrauting = isMenstrauting
 				   )
 }

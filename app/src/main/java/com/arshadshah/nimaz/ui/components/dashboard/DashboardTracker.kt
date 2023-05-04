@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.components.dashboard
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -37,7 +36,7 @@ import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
 @Composable
-fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
+fun DashboardPrayerTracker()
 {
 
 	val viewModel = viewModel(
@@ -86,6 +85,10 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 		viewModel.progressState
 	}.collectAsState()
 
+	val isMenstrating = remember {
+		viewModel.isMenstrauting
+	}.collectAsState()
+
 	val context = LocalContext.current
 
 	//a list of booleans to keep track of the state of the toggleable items
@@ -97,9 +100,6 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 	val progress = remember { mutableStateOf(0f) }
 
 	Box(
-			modifier = Modifier.clickable {
-				onNavigateToTracker()
-			}
 	   ) {
 		when (stateOfTrackerForToday.value)
 		{
@@ -115,7 +115,8 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 						ishaChecked = ishaChecked ,
 						handleEvent = viewModel::onEvent ,
 						dateState = dateState ,
-						progress = progress
+						progress = progress ,
+						isMenstrating = isMenstrating
 										 )
 			}
 
@@ -136,7 +137,8 @@ fun DashboardPrayerTracker(onNavigateToTracker : () -> Unit)
 						ishaChecked = ishaChecked ,
 						handleEvent = viewModel::onEvent ,
 						dateState = dateState ,
-						progress = progress
+						progress = progress,
+						isMenstrating = isMenstrating
 										 )
 			}
 
@@ -166,6 +168,7 @@ fun PrayerTrackerListItemsRow(
 	handleEvent : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
 	dateState : State<String> ,
 	progress : MutableState<Float> ,
+	isMenstrating : State<Boolean> ,
 							 )
 {
 	val context = LocalContext.current
@@ -190,6 +193,7 @@ fun PrayerTrackerListItemsRow(
 			items.forEachIndexed { index , item ->
 				//the toggleable item
 				ToggleableItemRow(
+						enabled = !isMenstrating.value ,
 						text = item ,
 						checked = when (item)
 						{

@@ -26,6 +26,7 @@ object LocalDataStore
 				.addMigrations(AppDatabase.Migration8To9())
 				.addMigrations(AppDatabase.Migration9To10())
 				.addMigrations(AppDatabase.Migration10To11())
+				.addMigrations(AppDatabase.Migration11To12())
 				.build()
 			dataStore = DataStore(db)
 			Log.d(AppConstants.DATA_STORE_TAG , "DataStore initialized")

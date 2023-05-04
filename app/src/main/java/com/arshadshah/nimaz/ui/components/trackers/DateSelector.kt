@@ -98,6 +98,8 @@ fun DateSelector(
 				if (date.value == LocalDate.now())
 				{
 					Text(
+							modifier = Modifier
+								.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
 							text = "Today" ,
 							style = MaterialTheme.typography.titleSmall
 						)
@@ -125,7 +127,7 @@ fun DateSelector(
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp) ,
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
 									color = MaterialTheme.colorScheme.onPrimary
 								)
 						} else
@@ -134,7 +136,7 @@ fun DateSelector(
 									text = "Today" ,
 									style = MaterialTheme.typography.titleSmall ,
 									modifier = Modifier
-										.padding(start = 4.dp) ,
+										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
 									color = MaterialTheme.colorScheme.onPrimary
 								)
 							Icon(
