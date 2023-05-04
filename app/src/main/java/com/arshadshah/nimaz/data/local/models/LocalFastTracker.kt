@@ -9,4 +9,5 @@ data class LocalFastTracker(
 	@PrimaryKey
 	val date : String = LocalDate.now().toString() ,
 	val isFasting : Boolean = false ,
+	val isMenstruating : Boolean = false ,
 						   )

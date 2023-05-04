@@ -29,7 +29,7 @@ import com.arshadshah.nimaz.data.local.models.LocalTasbih
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
-		version = 11 ,
+		version = 12 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -227,6 +227,21 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("DROP TABLE Tasbih")
 			//4. Change the table name to the correct one
 			database.execSQL("ALTER TABLE Tasbih_new RENAME TO Tasbih")
+		}
+	}
+
+	//migration from version 11 to 12
+	//add a new column to the table PrayersTracker and FastTracker
+	//called isMenstruating
+	class Migration11To12 : Migration(11 , 12)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//add a new column to the table PrayersTracker
+			database.execSQL("ALTER TABLE PrayersTracker ADD COLUMN isMenstruating INTEGER NOT NULL DEFAULT 0")
+			//add a new column to the table FastTracker
+			database.execSQL("ALTER TABLE FastTracker ADD COLUMN isMenstruating INTEGER NOT NULL DEFAULT 0")
 		}
 	}
 }

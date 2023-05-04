@@ -138,9 +138,7 @@ fun Calender(paddingValues : PaddingValues)
 							style = MaterialTheme.typography.titleMedium
 						)
 				}
-				DashboardPrayerTracker(
-						onNavigateToTracker = {}
-									  )
+				DashboardPrayerTracker()
 
 				DashboardFastTracker()
 			}
@@ -472,6 +470,7 @@ fun CalenderDay(
 	//find todays tracker in the list of trackers from progressForMonth
 	val todaysTracker = progressForMonth.value.find { it.date == currentDate.toString() }
 	val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate.toString() }
+	val isMenstratingToday = todaysTracker?.isMenstruating ?: false
 	ElevatedCard(
 			shape = MaterialTheme.shapes.large ,
 			elevation = CardDefaults.elevatedCardElevation(

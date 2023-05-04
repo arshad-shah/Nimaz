@@ -1,4 +1,6 @@
+[![better commits is enabled](https://img.shields.io/badge/better--commits-enabled?style=for-the-badge&logo=git&color=a6e3a1&logoColor=D9E0EE&labelColor=302D41)](https://github.com/Everduin94/better-commits)
 # Nimaz
+
 
 Nimaz is an android app that helps you keep track of your prayer times and stay connected with your faith. The app is built using Compose and Material You, with a Spring Boot backend.
 

@@ -36,6 +36,7 @@ fun PrayerTrackerListItems(
 	showDateSelector : State<Boolean> ,
 	dateState : State<String> ,
 	progress : MutableState<Float> ,
+	isMenstrauting : State<Boolean> ,
 						  )
 {
 	val context = LocalContext.current
@@ -64,6 +65,7 @@ fun PrayerTrackerListItems(
 			}
 			//the toggleable item
 			ToggleableItemColumn(
+					enabled = !isMenstrauting.value ,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)

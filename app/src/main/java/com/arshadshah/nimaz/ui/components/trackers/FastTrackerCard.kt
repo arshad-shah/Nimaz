@@ -26,6 +26,7 @@ fun FastTrackerCard(
 	handleEvent : (TrackerViewModel.TrackerEvent) -> Unit ,
 	dateState : State<String> ,
 	isFastingToday : MutableState<Boolean> ,
+	isMenstrauting : State<Boolean> ,
 				   )
 {
 	val context = LocalContext.current
@@ -39,6 +40,7 @@ fun FastTrackerCard(
 				.padding(8.dp) ,
 				) {
 		ToggleableItemColumn(
+				enabled = ! isMenstrauting.value ,
 				text = if (dateForTracker.isBefore(LocalDate.now())) "Did not fast"
 				else "Not Fasting" ,
 				//if date state is in the fast then shoow the date

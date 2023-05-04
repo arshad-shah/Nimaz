@@ -450,6 +450,7 @@ private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
 		maghrib = maghrib ,
 		isha = isha ,
 		progress = progress ,
+		isMenstruating = isMenstruating ,
 																	   )
 
 private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
@@ -460,17 +461,20 @@ private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
 		maghrib = maghrib ,
 		isha = isha ,
 		progress = progress ,
+		isMenstruating = isMenstruating ,
 																 )
 
 //fasting
 private fun FastTracker.toLocalFastTracker() = LocalFastTracker(
 		date = date ,
 		isFasting = isFasting ,
+		isMenstruating = isMenstruating ,
 															   )
 
 private fun LocalFastTracker.toFastTracker() = FastTracker(
 		date = date ,
 		isFasting = isFasting ,
+		isMenstruating = isMenstruating ,
 														  )
 
 private fun Tasbih.toLocalTasbih() = LocalTasbih(

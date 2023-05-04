@@ -27,6 +27,7 @@ fun ToggleableItemRow(
 	text : String ,
 	checked : Boolean ,
 	onCheckedChange : (Boolean) -> Unit ,
+	enabled : Boolean = true ,
 	modifier : Modifier ,
 					 )
 {
@@ -38,7 +39,9 @@ fun ToggleableItemRow(
 
 		Column(
 				modifier = modifier
-					.clickable {
+					.clickable (
+							enabled = enabled ,
+							){
 						onCheckedChange(! targetState)
 					} ,
 				verticalArrangement = Arrangement.Center ,
@@ -46,11 +49,14 @@ fun ToggleableItemRow(
 			  ) {
 			//a icon button to toggle the state of the toggleable item
 			OutlinedIconToggleButton(
+					enabled = enabled ,
 					colors = IconButtonDefaults.outlinedIconToggleButtonColors(
 							containerColor = MaterialTheme.colorScheme.surface ,
 							contentColor = MaterialTheme.colorScheme.onSurface ,
 							checkedContainerColor = MaterialTheme.colorScheme.primary ,
 							checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
+							disabledContentColor = Color(0xFFE91E63) ,
+							disabledContainerColor = Color(0x1FE91E63) ,
 																			  ) ,
 					checked = targetState ,
 					onCheckedChange = {
@@ -120,6 +126,7 @@ fun ToggleableItemColumn(
 	selectedText : String? = null ,
 	checked : Boolean ,
 	onCheckedChange : (Boolean) -> Unit ,
+	enabled : Boolean = true ,
 	modifier : Modifier ,
 						)
 {
@@ -130,7 +137,9 @@ fun ToggleableItemColumn(
 		Row(
 				modifier = modifier
 					.fillMaxWidth()
-					.clickable {
+					.clickable(
+							enabled = enabled ,
+							  ) {
 						onCheckedChange(! targetState)
 					} ,
 				verticalAlignment = Alignment.CenterVertically ,
@@ -138,11 +147,14 @@ fun ToggleableItemColumn(
 		   ) {
 			//a icon button to toggle the state of the toggleable item
 			OutlinedIconToggleButton(
+					enabled = enabled ,
 					colors = IconButtonDefaults.outlinedIconToggleButtonColors(
 							containerColor = MaterialTheme.colorScheme.surface ,
 							contentColor = MaterialTheme.colorScheme.onSurface ,
 							checkedContainerColor = MaterialTheme.colorScheme.primary ,
 							checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
+							disabledContentColor = Color(0xFFE91E63) ,
+							disabledContainerColor = Color(0x1FE91E63) ,
 																			  ) ,
 					checked = targetState ,
 					onCheckedChange = {

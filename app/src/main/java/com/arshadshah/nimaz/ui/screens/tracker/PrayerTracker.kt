@@ -98,6 +98,10 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 		viewModel.fastTrackerState
 	}.collectAsState()
 
+	val isMenstrauting = remember {
+		viewModel.isMenstrauting
+	}.collectAsState()
+
 	Column(
 			modifier = Modifier
 				.padding(paddingValues)
@@ -127,13 +131,15 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 						ishaState.value ,
 						showDateSelector ,
 						dateState ,
-						progressState
+						progressState,
+						isMenstrauting
 								 )
 				Fasting(
 						viewModel::onEvent ,
 						dateState ,
 						isFasting.value ,
-						fastingState.value
+						fastingState.value,
+						isMenstrauting
 					   )
 			}
 		}
@@ -148,7 +154,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 					) {
 			Column {
 				Text(
-						text = "Current Week Progress" ,
+						text = "7 Day Trend" ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier
 							.padding(8.dp)
@@ -170,7 +176,7 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 					) {
 			Column {
 				Text(
-						text = "Current Month Progress" ,
+						text = "Monthly Progress" ,
 						style = MaterialTheme.typography.bodyMedium ,
 						modifier = Modifier
 							.padding(8.dp)
@@ -244,6 +250,7 @@ fun SevenDayTrend()
 			//monday
 			ProgressBarCustom(
 					progress = progressForMonday.value.toFloat() ,
+					//if menstrauting then show pink else show primary
 					progressColor = MaterialTheme.colorScheme.primary ,
 					radius = 20.dp ,
 					label = "M" ,
@@ -332,6 +339,7 @@ fun Fasting(
 	dateState : State<String> ,
 	isFasting : Boolean ,
 	fastingState : TrackerViewModel.FastTrackerState ,
+	isMenstrauting : State<Boolean> ,
 		   )
 {
 
@@ -358,7 +366,8 @@ fun Fasting(
 			FastTrackerCard(
 					handleEvent = handleEvent ,
 					dateState = dateState ,
-					isFastingToday = isFastingToday
+					isFastingToday = isFastingToday,
+					isMenstrauting = isMenstrauting
 						   )
 
 		}
@@ -392,6 +401,7 @@ fun PrayerTrackerList(
 	showDateSelector : State<Boolean> ,
 	dateState : State<String> ,
 	progressState : State<Int> ,
+	isMenstrauting : State<Boolean> ,
 					 )
 {
 	val context = LocalContext.current
@@ -424,7 +434,8 @@ fun PrayerTrackerList(
 					handleEvent = handleEvent ,
 					showDateSelector = showDateSelector ,
 					dateState = dateState ,
-					progress = progress
+					progress = progress,
+					isMenstrauting = isMenstrauting
 								  )
 		}
 
@@ -448,7 +459,8 @@ fun PrayerTrackerList(
 					handleEvent = handleEvent ,
 					showDateSelector = showDateSelector ,
 					dateState = dateState ,
-					progress = progress
+					progress = progress ,
+					isMenstrauting = isMenstrauting
 								  )
 		}
 
