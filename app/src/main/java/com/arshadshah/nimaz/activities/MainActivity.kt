@@ -527,7 +527,7 @@ class MainActivity : ComponentActivity()
 														CALENDER_SCREEN_ROUTE
 														->
 														{
-															FilledIconButton(onClick = {
+															IconButton(onClick = {
 																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
 																		! isMenstruatingState.value
 																																				))

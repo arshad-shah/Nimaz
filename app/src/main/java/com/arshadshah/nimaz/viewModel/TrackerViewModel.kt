@@ -294,7 +294,15 @@ class TrackerViewModel : ViewModel()
 		}
 	}
 
-	private val _trackersForWeek = MutableStateFlow<List<PrayerTracker>>(listOf())
+	private val _trackersForWeek = MutableStateFlow(listOf(
+			PrayerTracker() ,
+			PrayerTracker() ,
+			PrayerTracker() ,
+			PrayerTracker() ,
+			PrayerTracker() ,
+			PrayerTracker() ,
+			PrayerTracker()
+																			   ))
 	val trackersForWeek : StateFlow<List<PrayerTracker>> = _trackersForWeek
 
 	private fun getProgressForWeek(date : String)
@@ -302,6 +310,7 @@ class TrackerViewModel : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
+				val trackers = mutableListOf<PrayerTracker>()
 				val dataStore = LocalDataStore.getDataStore()
 				//find the date of the first day of the week
 				val firstDayOfWeek = LocalDate.parse(date).with(DayOfWeek.MONDAY)
@@ -326,7 +335,7 @@ class TrackerViewModel : ViewModel()
 							6 -> _progressForSunday.value = progress
 						}
 						//add the tracker to the list all trackers
-						_trackersForWeek.value = _trackersForWeek.value + tracker
+						trackers.add(tracker)
 					} else
 					{
 						//update appropriate day
@@ -341,10 +350,11 @@ class TrackerViewModel : ViewModel()
 							6 -> _progressForSunday.value = 0
 						}
 						//add the tracker to the list all trackers
-						_trackersForWeek.value =
-							_trackersForWeek.value + PrayerTracker(date = date , progress = 0)
+						trackers.add(PrayerTracker(date = date , progress = 0))
 					}
 				}
+				//update only the stuff that has changed
+				_trackersForWeek.value = trackers
 			} catch (e : Exception)
 			{
 				_trackerState.value =

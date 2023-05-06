@@ -94,6 +94,7 @@ fun PrayerTrackerGrid()
 					val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
 							prayers[prayers.indexOf(prayer)]
 																								)
+					val isMenstrauting = prayerTracker?.isMenstruating ?: false
 					item {
 						Box(
 								modifier = Modifier
@@ -105,7 +106,7 @@ fun PrayerTrackerGrid()
 											{
 												currentDate ->
 												{
-													MaterialTheme.colorScheme.onPrimary
+													MaterialTheme.colorScheme.tertiary
 												}
 
 												userSelectedDate ->
@@ -115,10 +116,13 @@ fun PrayerTrackerGrid()
 
 												else ->
 												{
-													if (isHighlighted)
+													if (isHighlighted && !isMenstrauting)
 													{
 														MaterialTheme.colorScheme.primary
-													} else
+													} else if(isMenstrauting){
+														//pink
+														Color(0xFFE91E63)
+													}else
 													{
 														Color.Gray
 													}
@@ -135,7 +139,10 @@ fun PrayerTrackerGrid()
 													if (isHighlighted)
 													{
 														MaterialTheme.colorScheme.primary
-													} else
+													} else if(isMenstrauting){
+														//pink
+														Color(0xFFE91E63)
+													}else
 													{
 														Color.Gray
 													}
@@ -146,6 +153,11 @@ fun PrayerTrackerGrid()
 													if (isHighlighted)
 													{
 														MaterialTheme.colorScheme.primary
+													} else if(isMenstrauting){
+														//pink
+														androidx.compose.ui.graphics.Color(
+																0xFFE91E63
+																						  )
 													} else
 													{
 														MaterialTheme.colorScheme.secondaryContainer
@@ -157,7 +169,10 @@ fun PrayerTrackerGrid()
 													if (isHighlighted)
 													{
 														MaterialTheme.colorScheme.primary
-													} else
+													} else if(isMenstrauting){
+														//pink
+														Color(0xFFE91E63)
+													}else
 													{
 														Color.Gray
 													}

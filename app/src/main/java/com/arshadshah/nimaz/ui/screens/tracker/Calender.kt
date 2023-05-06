@@ -483,16 +483,18 @@ fun CalenderDay(
 						width = if (isSelectedDay || today) 2.dp else 0.dp ,
 						color = when (importantDay.first)
 						{
-							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary.copy(
+							false -> if (isSelectedDay && ! today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
 									alpha = 0.5f
 																										  )
-							else if (today) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+							else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+							else if(isMenstratingToday)  Color(0xFFE91E63)
 							else MaterialTheme.colorScheme.surface
 
-							true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiary.copy(
+							true -> if (isSelectedDay && ! today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
 									alpha = 0.5f
 																										 )
-							else if (today) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+							else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+							else if(isMenstratingToday) Color(0xFFE91E63)
 							else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 						} ,
 						shape = MaterialTheme.shapes.large
