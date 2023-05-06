@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.navigation
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.activities.*
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
@@ -36,6 +38,7 @@ import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.*
+import com.arshadshah.nimaz.ui.screens.tasbih.Categories
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
@@ -948,7 +951,7 @@ fun NavigationGraph(
 						navController.navigate(NAMESOFALLAH_SCREEN_ROUTE)
 					} ,
 					onNavigateToListOfTasbeeh = {
-						navController.navigate(CHAPTERS_SCREEN_ROUTE)
+						navController.navigate(AppConstants.CATEGORY_SCREEN_ROUTE)
 					} ,
 					onNavigateToQibla = {
 						navController.navigate(QIBLA_SCREEN_ROUTE)
@@ -1012,25 +1015,43 @@ fun NavigationGraph(
 			NamesOfAllah(paddingValues = paddingValues)
 		}
 
+		composable(AppConstants.CATEGORY_SCREEN_ROUTE) {
+			Categories(
+					paddingValues = paddingValues ,
+					  )
+			//pass the category name to the next screen
+			{ category : String ->
+				Log.d("Category" , category)
+				navController.navigate(
+						CHAPTERS_SCREEN_ROUTE
+							.replace(
+									"{title}" ,
+									category
+									)
+									  )
+			}
+		}
+
 		composable(CHAPTERS_SCREEN_ROUTE) {
 			ChapterList(
-					paddingValues ,
+					category = it.arguments?.getString("title") !! ,
+					paddingValues = paddingValues ,
 					onNavigateToChapter = { chapterId : Int ->
-						//replace CHAPTER_SCREEN_ROUTE with the actual route and pass the chapterId
 						navController.navigate(
-								CHAPTER_SCREEN_ROUTE.replace(
-										"{chapterId}" ,
-										chapterId.toString()
-															)
+								CHAPTER_SCREEN_ROUTE
+									.replace(
+											"{chapterId}" ,
+											chapterId.toString()
+											)
 											  )
-					}
-					   )
+					} ,
+						  )
 		}
-		composable(CHAPTER_SCREEN_ROUTE) {
+
+		composable(CHAPTER_SCREEN_ROUTE){
 			DuaList(
-					chapterId = it.arguments?.getString("chapterId")?.toInt() ?: 0 ,
-					paddingValues = paddingValues
-				   )
+					chapterId = it.arguments?.getString("chapterId") !! ,
+					paddingValues = paddingValues)
 		}
 
 		composable(SHAHADAH_SCREEN_ROUTE) {

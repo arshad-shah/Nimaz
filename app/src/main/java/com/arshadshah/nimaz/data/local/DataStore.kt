@@ -286,7 +286,7 @@ class DataStore(db : AppDatabase)
 	suspend fun getAllChapters() = duaDao.getAllChapters().map { it.toChapter() }
 
 	//get duas of a chapter by chapter id
-	suspend fun getDuasOfChapter(chapterId : Int) = duaDao.getDuasOfChapter(chapterId).toChapter()
+	suspend fun getDuasOfChapter(chapterId : Int) = duaDao.getDuasOfChapter(chapterId).map { it.toDua() }
 
 	//count
 	suspend fun countChapters() = duaDao.countChapters()
@@ -298,8 +298,9 @@ class DataStore(db : AppDatabase)
 	suspend fun saveAllChapters(chapters : ArrayList<Chapter>) =
 		duaDao.saveChapters(chapters.map { it.toLocalChapter() })
 
-	//save one chapter
-	suspend fun saveChapter(chapter : Chapter) = duaDao.saveDuas(chapter.toLocalChapter())
+	//save all duas
+	suspend fun saveAllDuas(duas : ArrayList<Dua>) =
+		duaDao.saveDuas(duas.map { it.toLocalDua() })
 }
 
 private fun Aya.toLocalAya() = LocalAya(
@@ -416,6 +417,8 @@ private fun Dua.toLocalDua() = LocalDua(
 		arabic_dua = arabic_dua ,
 		english_translation = english_translation ,
 		english_reference = english_reference ,
+		category = category ,
+		isFavourite = isFavourite ,
 									   )
 
 private fun LocalDua.toDua() = Dua(
@@ -425,6 +428,8 @@ private fun LocalDua.toDua() = Dua(
 		arabic_dua = arabic_dua ,
 		english_translation = english_translation ,
 		english_reference = english_reference ,
+		category = category ,
+		isFavourite = isFavourite ,
 								  )
 
 
@@ -432,14 +437,14 @@ private fun Chapter.toLocalChapter() = LocalChapter(
 		_id = _id ,
 		arabic_title = arabic_title ,
 		english_title = english_title ,
-		duas = duas.map { it.toLocalDua() } ,
+		category = category ,
 												   )
 
 private fun LocalChapter.toChapter() = Chapter(
 		_id = _id ,
 		arabic_title = arabic_title ,
 		english_title = english_title ,
-		duas = duas.map { it.toDua() } as ArrayList<Dua> ,
+		category = category ,
 											  )
 
 private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(

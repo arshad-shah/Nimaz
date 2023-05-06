@@ -50,7 +50,7 @@ fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , lo
 				  ) {
 				Text(
 						text = chapter.english_title ,
-						style = MaterialTheme.typography.titleLarge ,
+						style = MaterialTheme.typography.titleMedium ,
 						modifier = Modifier
 							.padding(4.dp)
 							.fillMaxWidth()

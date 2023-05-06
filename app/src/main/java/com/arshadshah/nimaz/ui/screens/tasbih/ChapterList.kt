@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,13 +16,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CHAPTERS
-import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.arshadshah.nimaz.ui.components.tasbih.ChapterListItem
 import com.arshadshah.nimaz.viewModel.DuaViewModel
-import es.dmoral.toasty.Toasty
 
 @Composable
-fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> Unit)
+fun ChapterList(
+	paddingValues : PaddingValues ,
+	onNavigateToChapter : (Int) -> Unit ,
+	category : String
+			   )
 {
 	val context = LocalContext.current
 
@@ -33,10 +34,11 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
+	LaunchedEffect(Unit){
+		viewModel.getChapters(category)
+	}
 
-	val chapterState = remember { viewModel.chapterState }.collectAsState()
-
-	viewModel.getChapterList()
+	val chapterState = remember { viewModel.chapters }.collectAsState()
 
 	//if a new item is viewed, then scroll to that item
 	val sharedPref = context.getSharedPreferences("dua" , 0)
@@ -59,56 +61,20 @@ fun ChapterList(paddingValues : PaddingValues , onNavigateToChapter : (Int) -> U
 			visibleItemIndex.value = - 1
 		}
 	}
-	when (val chapters = chapterState.value)
-	{
-		is DuaViewModel.ChapterState.Loading ->
-		{
-			LazyColumn(
 
-					contentPadding = paddingValues ,
-					state = listState
-					  )
-			{
-				items(8)
-				{
-					ChapterListItem(
-							chapter = Chapter(
-									_id = 0 ,
-									arabic_title = "Loading" ,
-									english_title = "Loading" ,
-									duas = ArrayList(6)
-											 ) ,
-							onNavigateToChapter = onNavigateToChapter ,
-							loading = true
-								   )
-				}
-			}
-
-		}
-
-		is DuaViewModel.ChapterState.Success ->
-		{
 			LazyColumn(
 					modifier = Modifier.testTag(TEST_TAG_CHAPTERS) ,
 					contentPadding = paddingValues ,
 					state = listState
 					  )
 			{
-				items(chapters.chapterList.size)
+				items(chapterState.value.size)
 				{
 					ChapterListItem(
-							chapter = chapters.chapterList[it] ,
+							chapter = chapterState.value[it] ,
 							onNavigateToChapter = onNavigateToChapter ,
 							loading = false
 								   )
 				}
 			}
-		}
-
-		is DuaViewModel.ChapterState.Error ->
-		{
-			Log.e("Nimaz: ChapterList" , chapters.error)
-			Toasty.error(context , chapters.error).show()
-		}
-	}
 }
