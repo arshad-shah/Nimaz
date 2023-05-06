@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.DEBUG_MODE
 import com.arshadshah.nimaz.constants.AppConstants.LICENCES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
@@ -1062,6 +1063,11 @@ fun NavigationGraph(
 											) ,
 											  )
 					} ,
+					onNavigateToDebugScreen = {
+						navController.navigate(
+								DEBUG_MODE
+											  )
+					} ,
 					paddingValues = paddingValues)
 		}
 		composable(WEB_VIEW_SCREEN_ROUTE) {
@@ -1071,13 +1077,22 @@ fun NavigationGraph(
 						 )
 		}
 		composable(ABOUT_SCREEN_ROUTE) {
-			About(paddingValues)
+			About(paddingValues
+				 )
+			//navigate to the debug screen
+			{
+				navController.navigate(DEBUG_MODE)
+			}
 		}
 		composable(LICENCES_SCREEN_ROUTE) {
 			Licences(paddingValues)
 		}
 		composable(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
 			PrayerTimesCustomizations(paddingValues)
+		}
+		
+		composable(DEBUG_MODE) {
+			DebugScreen(paddingValues)
 		}
 	}
 }
