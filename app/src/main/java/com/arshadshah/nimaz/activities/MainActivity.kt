@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.CATEGORY_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.LICENCES_SCREEN_ROUTE
@@ -527,7 +528,7 @@ class MainActivity : ComponentActivity()
 														CALENDER_SCREEN_ROUTE
 														->
 														{
-															FilledIconButton(onClick = {
+															IconButton(onClick = {
 																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
 																		! isMenstruatingState.value
 																																				))
@@ -588,7 +589,7 @@ class MainActivity : ComponentActivity()
 			}
 
 			SHAHADAH_SCREEN_ROUTE -> "Shahadah"
-			CHAPTERS_SCREEN_ROUTE -> "Categories of Dua"
+			CHAPTERS_SCREEN_ROUTE -> "Chapters"
 
 			CHAPTER_SCREEN_ROUTE ->
 			{
@@ -643,6 +644,8 @@ class MainActivity : ComponentActivity()
 			}
 
 			LICENCES_SCREEN_ROUTE -> "Open Source Libraries"
+			AppConstants.DEBUG_MODE -> "Debug Tools"
+			CATEGORY_SCREEN_ROUTE -> "Hisnul Muslim"
 
 			else -> ""
 		}
@@ -668,7 +671,9 @@ class MainActivity : ComponentActivity()
 				AppConstants.TASBIH_LIST_SCREEN ,
 				MY_QURAN_SCREEN_ROUTE ,
 				WEB_VIEW_SCREEN_ROUTE ,
-				LICENCES_SCREEN_ROUTE
+				LICENCES_SCREEN_ROUTE,
+				AppConstants.DEBUG_MODE,
+				CATEGORY_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)

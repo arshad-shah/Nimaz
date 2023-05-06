@@ -1,11 +1,11 @@
 package com.arshadshah.nimaz.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.Chapter
+import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.data.remote.repositories.DuaRepository
-import com.arshadshah.nimaz.utils.LocalDataStore
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -13,74 +13,53 @@ import kotlinx.coroutines.launch
 class DuaViewModel : ViewModel()
 {
 
-	sealed class DuaState
-	{
+	//categories
+	private val _categories = MutableStateFlow(ArrayList<Map<String, ArrayList<Chapter>>>())
+	val categories = _categories.asStateFlow()
 
-		object Loading : DuaState()
-		class Success(val duaList : Chapter) : DuaState()
-		data class Error(val error : String) : DuaState()
-	}
+	//chapters for a category
+	private val _chapters = MutableStateFlow(ArrayList<Chapter>())
+	val chapters = _chapters.asStateFlow()
 
-	private val _duaState = MutableStateFlow<DuaState>(DuaState.Loading)
-	val duaState = _duaState.asStateFlow()
+	//duas for a chapter
+	private val _duas = MutableStateFlow(ArrayList<Dua>())
+	val duas = _duas.asStateFlow()
 
-	//chapter state
-	sealed class ChapterState
-	{
-
-		object Loading : ChapterState()
-		class Success(val chapterList : ArrayList<Chapter>) : ChapterState()
-		data class Error(val error : String) : ChapterState()
-	}
-
-	private val _chapterState = MutableStateFlow<ChapterState>(ChapterState.Loading)
-	val chapterState = _chapterState.asStateFlow()
-
-	init
-	{
-		_duaState.value = DuaState.Loading
-		_chapterState.value = ChapterState.Loading
-	}
-
-	//get chapter list
-	fun getChapterList()
-	{
-		viewModelScope.launch(Dispatchers.IO) {
-			try
+	//get the categories
+	fun getCategories(){
+		viewModelScope.launch {
+			val response = DuaRepository.getChaptersByCategories()
+			if (response.data != null)
 			{
-				val dataStore = LocalDataStore.getDataStore()
-				val chaptersCount = dataStore.countChapters()
-				if (chaptersCount == 0)
-				{
-					val response = DuaRepository.getChapters()
-					_chapterState.value = ChapterState.Success(response.data !!)
-					dataStore.saveAllChapters(response.data)
-				} else
-				{
-					//get the chapters from the database
-					val chapters = dataStore.getAllChapters()
-					_chapterState.value = ChapterState.Success(chapters as ArrayList<Chapter>)
-				}
-			} catch (e : Exception)
+				_categories.value = response.data
+			}
+			else
 			{
-				_chapterState.value = ChapterState.Error(e.message.toString())
+				Log.e("DuaViewModel" , "getCategories: ${response.message}")
 			}
 		}
 	}
 
-	//get one chapter by id
-	fun getChapterById(id : Int)
-	{
-		viewModelScope.launch(Dispatchers.IO) {
-			try
+	//get the chapters of a category
+	fun getChapters(category : String){
+		viewModelScope.launch {
+			if(category == "All Chapters")
 			{
-				val dataStore = LocalDataStore.getDataStore()
-				val chapter = dataStore.getDuasOfChapter(id)
-				_duaState.value = DuaState.Success(chapter)
-			} catch (e : Exception)
-			{
-				_duaState.value = DuaState.Error(e.message.toString())
+				val response = DuaRepository.getAllChapters()
+				_chapters.value = response
+				return@launch
 			}
+			val response = DuaRepository.getChaptersByCategory(category)
+			_chapters.value = response
 		}
 	}
+
+	//get the duas of a chapter
+	fun getDuas(chapterId : Int){
+		viewModelScope.launch {
+			val response = DuaRepository.getDuasOfChapter(chapterId)
+			_duas.value = response
+		}
+	}
+
 }

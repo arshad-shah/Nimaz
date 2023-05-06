@@ -17,8 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Dua
-import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+import com.arshadshah.nimaz.ui.components.common.MarkdownText
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -38,39 +39,31 @@ fun DuaListItem(dua : Dua , loading : Boolean)
 					.padding(8.dp)
 			  ) {
 			CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-				Text(
-						text = dua.arabic_dua ,
-						style = MaterialTheme.typography.titleLarge ,
-						fontSize = 28.sp ,
-						fontFamily = utmaniQuranFont ,
+				MarkdownText(
+						markdown = dua.arabic_dua ,
 						modifier = Modifier
 							.padding(4.dp)
-							.fillMaxWidth()
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										)
-					)
+							.fillMaxWidth() ,
+						fontSize = 28.sp ,
+						fontResource = R.font.uthman ,
+							)
 			}
-			Text(
-					text = dua.english_translation ,
-					style = MaterialTheme.typography.titleMedium ,
-					modifier = Modifier
-						.padding(4.dp)
-						.fillMaxWidth()
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									) ,
-				)
+
+			MarkdownText(markdown = dua.english_translation ,
+						 modifier = Modifier
+							 .padding(4.dp)
+							 .fillMaxWidth()
+							 .placeholder(
+									 visible = loading ,
+									 color = MaterialTheme.colorScheme.outline ,
+									 shape = RoundedCornerShape(4.dp) ,
+									 highlight = PlaceholderHighlight.shimmer(
+											 highlightColor = Color.White ,
+																			 )
+												 ) ,
+						 fontSize = 18.sp ,
+						 fontResource = R.font.nunito ,
+						 )
 			Row {
 				Text(
 						text = "Reference: ${dua.english_reference}" ,
@@ -102,8 +95,9 @@ fun DuaListItemPreview()
 			1 ,
 			0 ,
 			"اللهم صل على محمد وآل محمد" ,
+			"O Allah, <small>send</small> blessings on Muhammad and the family of Muhammad" ,
 			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
-			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
+			category = "Salawat" ,
 				 )
 	DuaListItem(dua , false)
 }

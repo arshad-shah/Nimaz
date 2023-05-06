@@ -63,6 +63,7 @@ object AppConstants
 	const val DARK_MODE : String = "darkMode"
 	const val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String =
 		"randomAyatNumberInSurahLastFetched"
+	const val DEBUG_MODE : String = "debug"
 
 
 	//viewmodel keys
@@ -156,7 +157,8 @@ object AppConstants
 	const val MORE_SCREEN_ROUTE = "more_screen"
 	const val SHAHADAH_SCREEN_ROUTE = "shahadah_screen"
 
-	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen"
+	const val CATEGORY_SCREEN_ROUTE = "category_screen"
+	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen/{title}"
 	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}"
 	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{id}/{arabic}/{translation}/{transliteration}"
 	const val NAMESOFALLAH_SCREEN_ROUTE = "namesofallah_screen"

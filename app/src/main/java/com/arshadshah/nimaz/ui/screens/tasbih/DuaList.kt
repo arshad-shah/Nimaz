@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,13 +15,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.ui.components.tasbih.DuaListItem
 import com.arshadshah.nimaz.viewModel.DuaViewModel
-import es.dmoral.toasty.Toasty
 
 @Composable
-fun DuaList(chapterId : Int , paddingValues : PaddingValues)
+fun DuaList(chapterId : String , paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
@@ -31,11 +28,13 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
-	val duaState = remember {
-		viewModel.duaState
-	}.collectAsState()
+	LaunchedEffect(Unit){
+		viewModel.getDuas(chapterId.toInt())
+	}
 
-	viewModel.getChapterById(chapterId)
+	val duaState = remember {
+		viewModel.duas
+	}.collectAsState()
 
 	//if a new item is viewed, then scroll to that item
 	val sharedPref = context.getSharedPreferences("dua" , 0)
@@ -60,53 +59,15 @@ fun DuaList(chapterId : Int , paddingValues : PaddingValues)
 			visibleItemIndex.value = - 1
 		}
 	}
-
-	when (val duas = duaState.value)
-	{
-		is DuaViewModel.DuaState.Loading ->
-		{
-			LazyColumn(
-					contentPadding = paddingValues ,
-					state = listState ,
-					content = {
-						items(3)
-						{
-							DuaListItem(
-									dua = Dua(
-											- 1 ,
-											- 1 ,
-											- 1 ,
-											"" ,
-											"" ,
-											"" ,
-											 ) ,
-									loading = true
-									   )
-						}
-					})
-
-		}
-
-		is DuaViewModel.DuaState.Success ->
-		{
 			LazyColumn(
 					modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER) ,
 					contentPadding = paddingValues ,
 					state = listState ,
 					content = {
-						items(duas.duaList.duas.size)
+						items(duaState.value.size)
 						{
-							DuaListItem(dua = duas.duaList.duas[it] , loading = false)
+							DuaListItem(dua = duaState.value[it] ,
+										loading = false)
 						}
 					})
-
-		}
-
-		is DuaViewModel.DuaState.Error ->
-		{
-			Toasty.error(context , duas.error).show()
-			Log.e("Nimaz: DuaList" , duas.error)
-
-		}
-	}
 }
