@@ -643,6 +643,7 @@ class MainActivity : ComponentActivity()
 			}
 
 			LICENCES_SCREEN_ROUTE -> "Open Source Libraries"
+			AppConstants.DEBUG_MODE -> "Debug Tools"
 
 			else -> ""
 		}
@@ -668,7 +669,8 @@ class MainActivity : ComponentActivity()
 				AppConstants.TASBIH_LIST_SCREEN ,
 				MY_QURAN_SCREEN_ROUTE ,
 				WEB_VIEW_SCREEN_ROUTE ,
-				LICENCES_SCREEN_ROUTE
+				LICENCES_SCREEN_ROUTE,
+				AppConstants.DEBUG_MODE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)

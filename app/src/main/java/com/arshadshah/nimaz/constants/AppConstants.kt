@@ -63,6 +63,7 @@ object AppConstants
 	const val DARK_MODE : String = "darkMode"
 	const val RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED : String =
 		"randomAyatNumberInSurahLastFetched"
+	const val DEBUG_MODE : String = "debug"
 
 
 	//viewmodel keys
