@@ -86,6 +86,7 @@ fun SettingsScreen(
 	paddingValues : PaddingValues ,
 	onNavigateToWebViewScreen : (String) -> Unit ,
 	onNavigateToLicencesScreen : () -> Unit ,
+	onNavigateToDebugScreen : () -> Unit ,
 				  )
 {
 	val context = LocalContext.current
@@ -149,6 +150,10 @@ fun SettingsScreen(
 	}.collectAsState()
 
 	val sharedPreferences = PrivateSharedPreferences(context)
+
+	val isDebugMode = remember {
+		sharedPreferences.getDataBoolean(AppConstants.DEBUG_MODE , false)
+	}
 
 	val isSelectedTheme = remember {
 		mutableStateOf(
@@ -723,6 +728,41 @@ fun SettingsScreen(
 							}
 						}
 								)
+			}
+
+			if(isDebugMode){
+				ElevatedCard(
+						shape = MaterialTheme.shapes.extraLarge ,
+						modifier = Modifier
+							.padding(8.dp)
+							.fillMaxWidth()
+							.testTag(TEST_TAG_ABOUT)
+							) {
+					SettingsMenuLink(
+							title = { Text(text = "Debug Tools") } ,
+							//version of the app
+							subtitle = { Text(text = "For testing purposes only")} ,
+							onClick = {
+								onNavigateToDebugScreen()
+							} ,
+							icon = {
+								Icon(
+										modifier = Modifier.size(24.dp) ,
+										painter = painterResource(id = R.drawable.debug_icon) ,
+										contentDescription = "Debug Tools"
+									)
+							} ,
+							action = {
+								Icon(
+										modifier = Modifier
+											.size(24.dp)
+											.padding(2.dp) ,
+										painter = painterResource(id = R.drawable.angle_right_icon) ,
+										contentDescription = "Go to Debug Tools"
+									)
+							}
+									)
+				}
 			}
 		}
 

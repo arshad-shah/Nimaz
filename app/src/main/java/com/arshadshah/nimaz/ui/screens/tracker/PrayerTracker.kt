@@ -234,6 +234,12 @@ fun SevenDayTrend()
 		viewModelTracker.progressForSunday
 	}.collectAsState()
 
+	val weeklyTrackers = remember {
+		viewModelTracker.trackersForWeek
+	}.collectAsState()
+
+	Log.d("SevenDayTrend" , "SevenDayTrend: ${weeklyTrackers.value[0]}")
+
 	Column(
 			modifier = Modifier.padding(
 					vertical = 8.dp ,
@@ -257,7 +263,9 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForMonday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForMonday.value == 0 && !weeklyTrackers.value[0].isMenstruating) Color.Gray
+					else if (weeklyTrackers.value[0].isMenstruating) Color(0xFFE91E63)
+					else MaterialTheme.colorScheme.primary
 							 )
 			//tuesday
 			ProgressBarCustom(
@@ -268,7 +276,9 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForTuesday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForTuesday.value == 0 && !weeklyTrackers.value[1].isMenstruating) Color.Gray
+					else if (weeklyTrackers.value[1].isMenstruating) Color(0xFFE91E63)
+					else MaterialTheme.colorScheme.primary
 							 )
 			//wednesday
 			ProgressBarCustom(
@@ -279,7 +289,9 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForWednesday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForWednesday.value == 0 && !weeklyTrackers.value[2].isMenstruating) Color.Gray
+					else if (weeklyTrackers.value[2].isMenstruating) Color(0xFFE91E63)
+					else MaterialTheme.colorScheme.primary
 							 )
 
 			//thursday
@@ -291,7 +303,9 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForThursday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForThursday.value == 0 && !weeklyTrackers.value[3].isMenstruating) Color.Gray
+					else if (weeklyTrackers.value[3].isMenstruating) Color(0xFFE91E63)
+					else MaterialTheme.colorScheme.primary
 							 )
 
 			//friday
@@ -303,7 +317,9 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForFriday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForFriday.value == 0 && !weeklyTrackers.value[4].isMenstruating) Color.Gray
+					else if (weeklyTrackers.value[4].isMenstruating) Color(0xFFE91E63)
+					else MaterialTheme.colorScheme.primary
 							 )
 
 			//saturday
@@ -315,7 +331,7 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForSaturday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForSaturday.value == 0 && !weeklyTrackers.value[5].isMenstruating) Color.Gray else if (weeklyTrackers.value[5].isMenstruating) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary
 							 )
 
 			//sunday
@@ -327,7 +343,7 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForSunday.value == 0) Color.Gray else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForSunday.value == 0 && !weeklyTrackers.value[6].isMenstruating) Color.Gray else if (weeklyTrackers.value[6].isMenstruating) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary
 							 )
 		}
 	}

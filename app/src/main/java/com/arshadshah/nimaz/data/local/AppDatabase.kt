@@ -29,7 +29,7 @@ import com.arshadshah.nimaz.data.local.models.LocalTasbih
 			   )
 @Database(
 		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
-		version = 12 ,
+		version = 13 ,
 		exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
@@ -242,6 +242,31 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("ALTER TABLE PrayersTracker ADD COLUMN isMenstruating INTEGER NOT NULL DEFAULT 0")
 			//add a new column to the table FastTracker
 			database.execSQL("ALTER TABLE FastTracker ADD COLUMN isMenstruating INTEGER NOT NULL DEFAULT 0")
+		}
+	}
+
+	//migration from version 12 to 13
+	//add a column in table Chapter called category
+	//add a column in table Dua called category, isFavorite
+	class Migration12To13 : Migration(12 , 13)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			//remove the column duas from the table Chapter
+			database.execSQL("ALTER TABLE Chapter RENAME TO Chapter_old")
+			//create a new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Chapter` (`id` INTEGER NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `category` TEXT NOT NULL, PRIMARY KEY(`id`))")
+			//copy the data
+			database.execSQL("INSERT INTO Chapter SELECT id, arabicName, englishName, translationName, '' FROM Chapter_old")
+			//remove the old table
+			database.execSQL("DROP TABLE Chapter_old")
+
+			//add a new column to the table Dua
+			database.execSQL("ALTER TABLE Dua ADD COLUMN category TEXT NOT NULL DEFAULT ''")
+			//add a new column to the table Dua
+			database.execSQL("ALTER TABLE Dua ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0")
+
 		}
 	}
 }

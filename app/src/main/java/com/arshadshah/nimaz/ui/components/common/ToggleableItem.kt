@@ -96,7 +96,8 @@ fun ToggleableItemRow(
 									bottom = 8.dp
 													   ) ,
 							text = text ,
-							style = MaterialTheme.typography.bodySmall
+							style = MaterialTheme.typography.bodySmall,
+							color = if(enabled) MaterialTheme.colorScheme.onSurface else Color(0xFFE91E63)
 						)
 				} else
 				{
@@ -109,7 +110,7 @@ fun ToggleableItemRow(
 													   ) ,
 							text = text ,
 							style = MaterialTheme.typography.bodySmall ,
-							color = MaterialTheme.colorScheme.primary
+							color = if(enabled) MaterialTheme.colorScheme.primary else Color(0xFFE91E63)
 						)
 				}
 			}
@@ -193,7 +194,8 @@ fun ToggleableItemColumn(
 									bottom = 8.dp
 													   ) ,
 							text = text ,
-							style = MaterialTheme.typography.bodyLarge
+							style = MaterialTheme.typography.bodyLarge,
+							color = if(enabled) MaterialTheme.colorScheme.onSurface else Color(0xFFE91E63)
 						)
 				} else
 				{
@@ -206,7 +208,7 @@ fun ToggleableItemColumn(
 													   ) ,
 							text = selectedText ?: text ,
 							style = MaterialTheme.typography.bodyLarge ,
-							color = MaterialTheme.colorScheme.primary
+							color = if(enabled) MaterialTheme.colorScheme.primary else Color(0xFFE91E63)
 						)
 				}
 			}
