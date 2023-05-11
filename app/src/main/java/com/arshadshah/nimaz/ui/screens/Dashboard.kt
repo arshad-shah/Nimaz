@@ -67,7 +67,6 @@ fun Dashboard(
 		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
 	}
 
-
 	val updateAvailable = remember {
 		viewModelSettings.isUpdateAvailable
 	}.collectAsState()
@@ -78,11 +77,11 @@ fun Dashboard(
 
 	val stateScroll = rememberLazyListState()
 
-
 	LazyColumn(
 			state = stateScroll ,
 			modifier = Modifier
-				.testTag(TEST_TAG_HOME) ,
+				.testTag(TEST_TAG_HOME)
+			,
 			contentPadding = paddingValues
 			  ) {
 		item {
@@ -102,7 +101,7 @@ fun Dashboard(
 									  )
 				//has it been 24 hours since the last time the banner was shown
 				val has24HoursPassed = LocalDateTime.now().isAfter(
-						LocalDateTime.parse(bannerShownLastTime).plusHours(24)
+						LocalDateTime.parse(bannerShownLastTime).plusHours(2)
 																  )
 				val isOpen = remember { mutableStateOf(true) }
 				if (has24HoursPassed)
@@ -177,8 +176,6 @@ fun Dashboard(
 						style = MaterialTheme.typography.titleMedium
 					)
 				DashboardPrayerTracker()
-				//if its ramaadan then show the fast tracker
-				//DashboardFastTracker
 				DashboardFastTracker()
 			}
 		}
