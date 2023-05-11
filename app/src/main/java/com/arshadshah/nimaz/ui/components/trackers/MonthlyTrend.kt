@@ -6,11 +6,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -70,22 +70,21 @@ fun PrayerTrackerGrid()
 			horizontalAlignment = Alignment.Start
 		  ) {
 		prayers.forEach { prayer ->
-			LazyRow(
+			Row(
 					modifier = Modifier
 						.fillMaxWidth() ,
 					horizontalArrangement = Arrangement.SpaceBetween ,
 					verticalAlignment = Alignment.CenterVertically
-				   ) {
-				item {
-					// Render the name of the prayer on the left
-					//if its Maghri1 then it must be transparent
-					Text(
-							text = prayers[prayers.indexOf(prayer)] ,
-							style = MaterialTheme.typography.labelSmall ,
-							modifier = Modifier
-								.width(40.dp) ,
-						)
-				}
+			   ) {
+				// Render the name of the prayer on the left
+				//if its Maghri1 then it must be transparent
+				Text(
+						text = prayers[prayers.indexOf(prayer)] ,
+						style = MaterialTheme.typography.labelSmall ,
+						modifier = Modifier
+							.width(40.dp) ,
+					)
+
 				// Render the small boxes (dots) for each day of the month
 				for (i in 0 until daysInMonth)
 				{
@@ -95,93 +94,92 @@ fun PrayerTrackerGrid()
 							prayers[prayers.indexOf(prayer)]
 																								)
 					val isMenstrauting = prayerTracker?.isMenstruating ?: false
-					item {
-						Box(
-								modifier = Modifier
-									.size(8.dp)
-									//if the day is today then add border
-									.border(
-											width = 1.dp ,
-											color = when (date)
+
+					Box(
+							modifier = Modifier
+								.size(8.dp)
+								//if the day is today then add border
+								.border(
+										width = 1.dp ,
+										color = when (date)
+										{
+											currentDate ->
 											{
-												currentDate ->
-												{
-													MaterialTheme.colorScheme.tertiary
-												}
+												MaterialTheme.colorScheme.tertiary
+											}
 
-												userSelectedDate ->
-												{
-													MaterialTheme.colorScheme.onSecondaryContainer
-												}
+											userSelectedDate ->
+											{
+												MaterialTheme.colorScheme.onSecondaryContainer
+											}
 
-												else ->
+											else ->
+											{
+												if (isHighlighted && !isMenstrauting)
 												{
-													if (isHighlighted && !isMenstrauting)
-													{
-														MaterialTheme.colorScheme.primary
-													} else if(isMenstrauting){
-														//pink
-														Color(0xFFE91E63)
-													}else
-													{
-														Color.Gray
-													}
+													MaterialTheme.colorScheme.primary
+												} else if(isMenstrauting){
+													//pink
+													Color(0xFFE91E63)
+												}else
+												{
+													Color.Gray
 												}
-											} ,
-											shape = CircleShape
+											}
+										} ,
+										shape = CircleShape
+									   )
+								.background(
+										color =
+										when (date)
+										{
+											currentDate ->
+											{
+												if (isHighlighted)
+												{
+													MaterialTheme.colorScheme.primary
+												} else if(isMenstrauting){
+													//pink
+													Color(0xFFE91E63)
+												}else
+												{
+													Color.Gray
+												}
+											}
+
+											userSelectedDate ->
+											{
+												if (isHighlighted)
+												{
+													MaterialTheme.colorScheme.primary
+												} else if(isMenstrauting){
+													//pink
+													Color(
+															0xFFE91E63
+														 )
+												} else
+												{
+													MaterialTheme.colorScheme.secondaryContainer
+												}
+											}
+
+											else ->
+											{
+												if (isHighlighted)
+												{
+													MaterialTheme.colorScheme.primary
+												} else if(isMenstrauting){
+													//pink
+													Color(0xFFE91E63)
+												}else
+												{
+													Color.Gray
+												}
+											}
+										} ,
+										shape = CircleShape
 										   )
-									.background(
-											color =
-											when (date)
-											{
-												currentDate ->
-												{
-													if (isHighlighted)
-													{
-														MaterialTheme.colorScheme.primary
-													} else if(isMenstrauting){
-														//pink
-														Color(0xFFE91E63)
-													}else
-													{
-														Color.Gray
-													}
-												}
-
-												userSelectedDate ->
-												{
-													if (isHighlighted)
-													{
-														MaterialTheme.colorScheme.primary
-													} else if(isMenstrauting){
-														//pink
-														androidx.compose.ui.graphics.Color(
-																0xFFE91E63
-																						  )
-													} else
-													{
-														MaterialTheme.colorScheme.secondaryContainer
-													}
-												}
-
-												else ->
-												{
-													if (isHighlighted)
-													{
-														MaterialTheme.colorScheme.primary
-													} else if(isMenstrauting){
-														//pink
-														Color(0xFFE91E63)
-													}else
-													{
-														Color.Gray
-													}
-												}
-											} ,
-											shape = CircleShape
-											   )
-						   )
-					}
+					   )
 				}
 			}
 		}
