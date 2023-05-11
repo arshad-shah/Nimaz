@@ -10,12 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -68,8 +68,8 @@ fun ToggleableItemRow(
 				{
 					Icon(
 							painter = painterResource(id = R.drawable.cross_icon) ,
-							contentDescription = "Close" ,
-							modifier = Modifier.padding(10.dp)
+							contentDescription = "Uncheck" ,
+							modifier = Modifier.padding(10.dp).alpha(0.6f)
 						)
 				} else
 				{
@@ -168,7 +168,7 @@ fun ToggleableItemColumn(
 					Icon(
 							painter = painterResource(id = R.drawable.cross_icon) ,
 							contentDescription = "Close" ,
-							modifier = Modifier.padding(10.dp)
+							modifier = Modifier.padding(10.dp).alpha(0.6f)
 						)
 				} else
 				{
@@ -224,8 +224,6 @@ fun ToggleableItemRowPreview()
 	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
 
 	var isChecked by remember { mutableStateOf(false) }
-
-	NimazTheme {
 		ElevatedCard(
 				modifier = Modifier
 					.padding(16.dp)
@@ -259,7 +257,6 @@ fun ToggleableItemRowPreview()
 				}
 			}
 		}
-	}
 }
 
 @Preview
@@ -269,8 +266,6 @@ fun ToggleableItemColumnPreview()
 	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
 
 	var isChecked by remember { mutableStateOf(false) }
-
-	NimazTheme {
 		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
@@ -303,5 +298,4 @@ fun ToggleableItemColumnPreview()
 				}
 			}
 		}
-	}
 }
