@@ -25,7 +25,6 @@ fun CalenderWeekHeader(
 					bottomStart = CornerSize(8.dp) ,
 					bottomEnd = CornerSize(8.dp)
 														) ,
-			modifier = Modifier.padding(top = 8.dp) ,
 				) {
 		Row(
 				modifier = Modifier

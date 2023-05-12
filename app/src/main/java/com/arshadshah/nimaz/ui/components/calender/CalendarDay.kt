@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -67,7 +68,7 @@ fun CalenderDay(
 	val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate.toString() }
 	val isMenstratingToday = todaysTracker?.isMenstruating ?: false
 	ElevatedCard(
-			shape = MaterialTheme.shapes.large ,
+			shape = MaterialTheme.shapes.medium ,
 			elevation = CardDefaults.elevatedCardElevation(
 					defaultElevation = if (dayState.isFromCurrentMonth) 2.dp else 0.dp ,
 														  ) ,
@@ -92,7 +93,7 @@ fun CalenderDay(
 							else if(isMenstratingToday) Color(0xFFE91E63)
 							else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 						} ,
-						shape = MaterialTheme.shapes.large
+						shape = MaterialTheme.shapes.medium
 					   ) ,
 			colors = CardDefaults.elevatedCardColors(
 					containerColor = when (importantDay.first)
@@ -152,9 +153,11 @@ fun CalenderDay(
 			Text(
 					text = dayState.date.dayOfMonth.toString() ,
 					style = MaterialTheme.typography.titleMedium ,
+					//if today then bolden the text
+					fontWeight = if (today) FontWeight.ExtraBold else FontWeight.Normal ,
 					maxLines = 1 ,
 					overflow = TextOverflow.Ellipsis ,
-					modifier = Modifier.padding(horizontal = 6.dp , vertical = 4.dp) ,
+					modifier = Modifier.padding(horizontal = 3.dp , vertical = 3.dp) ,
 					color = when (importantDay.first)
 					{
 						false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
@@ -168,7 +171,6 @@ fun CalenderDay(
 				)
 			Row(
 					modifier = Modifier
-						.padding(4.dp)
 						.fillMaxWidth() ,
 					horizontalArrangement = Arrangement.SpaceEvenly
 			   ) {
@@ -234,8 +236,9 @@ fun CalenderDay(
 						style = MaterialTheme.typography.titleMedium ,
 						maxLines = 1 ,
 						overflow = TextOverflow.Ellipsis ,
+						fontWeight = if (today) FontWeight.ExtraBold else FontWeight.Normal ,
 						modifier = Modifier
-							.padding(vertical = 4.dp , horizontal = 3.dp) ,
+							.padding(vertical = 3.dp , horizontal = 3.dp) ,
 						color = when (importantDay.first)
 						{
 							false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.onTertiaryContainer
