@@ -4,7 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
@@ -23,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileAction
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileIcon
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 
 @Composable
@@ -40,6 +40,7 @@ fun SettingsMenuLink(
 		Row(
 				modifier = modifier
 					.fillMaxWidth()
+					.height(60.dp)
 					.clickable(onClick = onClick) ,
 		   ) {
 			Row(
@@ -52,7 +53,7 @@ fun SettingsMenuLink(
 					SettingsTileIcon(icon = icon)
 				} else
 				{
-					Spacer(modifier = Modifier.size(24.dp))
+					Spacer(modifier = Modifier.width(24.dp).height(60.dp))
 				}
 				SettingsTileTexts(title = title , subtitle = subtitle)
 			}
@@ -70,7 +71,7 @@ fun SettingsMenuLink(
 @Composable
 internal fun SettingsMenuLinkPreview()
 {
-	NimazTheme {
+
 		SettingsMenuLink(
 				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				title = { Text(text = "Hello") } ,
@@ -78,21 +79,19 @@ internal fun SettingsMenuLinkPreview()
 						) {
 
 		}
-	}
 }
 
 @Preview
 @Composable
 internal fun SettingsMenuLinkNoIconPreview()
 {
-	NimazTheme {
+
 		SettingsMenuLink(
 				title = { Text(text = "Hello") } ,
 				subtitle = { Text(text = "This is a longer text") } ,
 						) {
 
 		}
-	}
 }
 
 @Preview
@@ -100,7 +99,7 @@ internal fun SettingsMenuLinkNoIconPreview()
 internal fun SettingsMenuLinkActionPreview()
 {
 	var rememberCheckBoxState by remember { mutableStateOf(true) }
-	NimazTheme {
+
 		SettingsMenuLink(
 				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				title = { Text(text = "Hello") } ,
@@ -115,5 +114,4 @@ internal fun SettingsMenuLinkActionPreview()
 						) {
 
 		}
-	}
 }

@@ -24,8 +24,8 @@ fun Calender(
 {
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge.copy(
-					bottomStart = CornerSize(8.dp) ,
-					bottomEnd = CornerSize(8.dp)
+					bottomStart = CornerSize(0.dp) ,
+					bottomEnd = CornerSize(0.dp),
 														) ,
 			modifier = Modifier
 				.fillMaxWidth()

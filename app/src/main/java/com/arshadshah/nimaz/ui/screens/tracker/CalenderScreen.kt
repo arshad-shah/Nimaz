@@ -3,14 +3,13 @@ package com.arshadshah.nimaz.ui.screens.tracker
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +28,6 @@ import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun CalenderScreen(paddingValues : PaddingValues)
@@ -79,30 +77,13 @@ fun CalenderScreen(paddingValues : PaddingValues)
 		}
 		item {
 			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
+					shape = MaterialTheme.shapes.extraLarge.copy(
+							topStart = CornerSize(0.dp) ,
+							topEnd = CornerSize(0.dp) ,
+																) ,
 					modifier = Modifier
-						.padding(top = 8.dp)
 						.fillMaxWidth()
 						) {
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(
-									start =
-									24.dp , end = 24.dp , top = 12.dp , bottom = 8.dp
-									) ,
-						horizontalArrangement = Arrangement.SpaceBetween ,
-						verticalAlignment = Alignment.CenterVertically
-				   ) {
-					Text(
-							text = "Trackers" , style = MaterialTheme.typography.titleMedium
-						)
-					Text(
-							text = LocalDate.parse(dateState.value)
-								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							style = MaterialTheme.typography.titleMedium
-						)
-				}
 				DashboardPrayerTracker()
 
 				DashboardFastTracker()

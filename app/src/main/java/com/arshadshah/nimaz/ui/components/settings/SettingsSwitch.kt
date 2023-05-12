@@ -23,7 +23,6 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileAction
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileIcon
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun SettingsSwitch(
@@ -41,7 +40,7 @@ fun SettingsSwitch(
 		onCheckedChange(storageValue)
 	}
 
-	val iconForSwitch : (@Composable () -> Unit)? = if (state.value)
+	val iconForSwitch : (@Composable () -> Unit) = if (state.value)
 	{
 		{
 			Icon(
@@ -53,7 +52,14 @@ fun SettingsSwitch(
 		}
 	} else
 	{
-		null
+		{
+			Icon(
+					painter = painterResource(id = R.drawable.cross_icon) ,
+					contentDescription = null ,
+					modifier = Modifier
+						.size(10.dp)
+				)
+		}
 	}
 
 
@@ -92,7 +98,6 @@ fun SettingsSwitch(
 @Composable
 internal fun SettingsSwitchPreview()
 {
-	NimazTheme {
 		val storage = rememberBooleanSettingState(defaultValue = true)
 		SettingsSwitch(
 				state = storage ,
@@ -101,7 +106,6 @@ internal fun SettingsSwitchPreview()
 				subtitle = { Text(text = "This is a longer text") } ,
 				onCheckedChange = { }
 					  )
-	}
 }
 
 //preview with checked state as false
@@ -109,7 +113,6 @@ internal fun SettingsSwitchPreview()
 @Composable
 internal fun SettingsSwitchPreview2()
 {
-	NimazTheme {
 		val storage = rememberBooleanSettingState(defaultValue = false)
 		SettingsSwitch(
 				state = storage ,
@@ -118,7 +121,6 @@ internal fun SettingsSwitchPreview2()
 				subtitle = { Text(text = "This is a longer text") } ,
 				onCheckedChange = { }
 					  )
-	}
 }
 
 //preview of checked state as true in dark theme
@@ -126,7 +128,6 @@ internal fun SettingsSwitchPreview2()
 @Composable
 internal fun SettingsSwitchPreview3()
 {
-	NimazTheme(darkTheme = true) {
 		val storage = rememberBooleanSettingState(defaultValue = true)
 		SettingsSwitch(
 				state = storage ,
@@ -135,5 +136,4 @@ internal fun SettingsSwitchPreview3()
 				subtitle = { Text(text = "This is a longer text") } ,
 				onCheckedChange = { }
 					  )
-	}
 }
