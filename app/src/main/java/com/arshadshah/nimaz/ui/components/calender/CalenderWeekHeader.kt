@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,15 +20,13 @@ fun CalenderWeekHeader(
 					  )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge.copy(
-					bottomStart = CornerSize(8.dp) ,
-					bottomEnd = CornerSize(8.dp)
-														) ,
+			shape = MaterialTheme.shapes.small,
+			modifier = Modifier.padding(top = 4.dp)
 				) {
 		Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 4.dp , vertical = 8.dp) ,
+					.padding(horizontal = 4.dp , vertical = 4.dp) ,
 				horizontalArrangement = Arrangement.Center
 		   ) {
 			weekState.forEach { dayOfWeek ->
