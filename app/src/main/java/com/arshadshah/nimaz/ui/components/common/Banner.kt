@@ -45,7 +45,7 @@ sealed class BannerVariant
 }
 
 //length of time the banner is shown for
-enum class BannerShowFor(val value : Int)
+enum class BannerDuration(val value : Int)
 {
 
 	SHORT_TIME(3000) ,
@@ -61,7 +61,7 @@ fun BannerSmall(
 	title : String? = null ,
 	message : String? = null ,
 	onClick : () -> Unit = {} ,
-	showFor : Int = BannerShowFor.SHORT_TIME.value ,
+	showFor : Int = BannerDuration.SHORT_TIME.value ,
 	paddingValues : PaddingValues? = null ,
 	isOpen : MutableState<Boolean> = remember {
 		mutableStateOf(true)
@@ -209,7 +209,6 @@ fun BannerLarge(
 	onDismiss : () -> Unit ,
 			   )
 {
-	val sharedPref = PrivateSharedPreferences(LocalContext.current)
 	val colors = mapOf(
 			BannerVariant.Success to Color(0xFF388E3C) ,
 			BannerVariant.Error to Color(0xFFD50000) ,
@@ -218,15 +217,11 @@ fun BannerLarge(
 					  )
 	val textColor = Color(0xFFFFFFFF)
 
-	isOpen.value = sharedPref.getDataBoolean("$title-bannerOpen" , true)
-
 	LaunchedEffect(Unit) {
 		if (showFor > 0)
 		{
 			delay(showFor.toLong())
 			isOpen.value = false
-			sharedPref.saveDataBoolean("$title-bannerOpen" , false)
-			sharedPref.saveData("$title-bannerIsOpen-time" , LocalDateTime.now().toString())
 		}
 	}
 	if (isOpen.value)
@@ -248,13 +243,6 @@ fun BannerLarge(
 							onClick = {
 								onClick()
 								isOpen.value = false
-								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
-								sharedPref.saveData(
-										"$title-bannerIsOpen-time" ,
-										LocalDateTime
-											.now()
-											.toString()
-												   )
 							} ,
 							  ) ,
 				//cardColors = CardColors(backgroundColor = Color(0xFFE0E0E0)),
@@ -310,11 +298,6 @@ fun BannerLarge(
 							onClick = {
 								onDismiss.invoke()
 								isOpen.value = false
-								sharedPref.saveDataBoolean("$title-bannerOpen" , false)
-								sharedPref.saveData(
-										"$title-bannerIsOpen-time" ,
-										LocalDateTime.now().toString()
-												   )
 							} ,
 							modifier = Modifier
 								.size(32.dp) ,

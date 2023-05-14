@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -137,21 +136,16 @@ fun CalenderHeader(
 
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
-			elevation = CardDefaults.elevatedCardElevation(
-					defaultElevation = 4.dp ,
-														  )
 				) {
 		Row(
 				modifier = Modifier
-					.padding(horizontal = 14.dp)
+					.padding(horizontal = 12.dp)
 					.fillMaxWidth() ,
 				horizontalArrangement = Arrangement.SpaceBetween ,
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			//left arrow
 			FilledIconButton(
-					modifier = Modifier
-						.size(52.dp) ,
 					onClick = {
 						monthState.currentMonth = monthState.currentMonth.minusMonths(1)
 						//get a date in the new month
@@ -250,7 +244,6 @@ fun CalenderHeader(
 
 			//right arrow
 			FilledIconButton(
-					modifier = Modifier.size(52.dp) ,
 					onClick = {
 						monthState.currentMonth = monthState.currentMonth.plusMonths(1)
 						//get a date in the new month

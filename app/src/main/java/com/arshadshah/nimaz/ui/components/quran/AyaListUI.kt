@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.quran
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,6 +34,10 @@ import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.BannerDuration
+import com.arshadshah.nimaz.ui.components.common.BannerLarge
+import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -81,37 +87,8 @@ fun AyaListUI(
 		viewModel.scrollToAya
 	}.collectAsState()
 
-
-	//media player
-	val mediaPlayer = remember {
-		MediaPlayer()
-	}
-
 	val state = rememberLazyListState()
 
-	//when we close or move to another screen, we want to clean the state o'f the AyaListItemUI so that we don't have any bugs such as dangling data
-	val lifecycle = LocalLifecycleOwner.current.lifecycle
-
-	DisposableEffect(lifecycle) {
-		val observer = LifecycleEventObserver { _ , event ->
-			when (event)
-			{
-				Lifecycle.Event.ON_STOP , Lifecycle.Event.ON_DESTROY , Lifecycle.Event.ON_PAUSE ->
-				{
-					mediaPlayer.release()
-				}
-
-				else ->
-				{
-				}
-			}
-		}
-
-		lifecycle.addObserver(observer)
-		onDispose {
-			lifecycle.removeObserver(observer)
-		}
-	}
 	if (loading)
 	{
 		//dumy list of 10 AYa
@@ -146,7 +123,6 @@ fun AyaListUI(
 			items(10) { index ->
 				AyaListItemUI(
 						aya = dummyList[index] ,
-						mediaPlayer = mediaPlayer ,
 						arabic_Font_size = arabicFontSize ,
 						arabic_Font = arabicFont ,
 						translation_Font_size = translationFontSize ,
@@ -231,7 +207,6 @@ fun AyaListUI(
 				AyaListItemUI(
 						aya = ayaList[index] ,
 						spacesFileRepository = spaceFilesRepository ,
-						mediaPlayer = mediaPlayer ,
 						arabic_Font_size = arabicFontSize ,
 						translation_Font_size = translationFontSize ,
 						arabic_Font = arabicFont ,
@@ -247,7 +222,6 @@ fun AyaListUI(
 fun AyaListItemUI(
 	aya : Aya ,
 	spacesFileRepository : SpacesFileRepository ,
-	mediaPlayer : MediaPlayer ,
 	arabic_Font_size : State<Float> ,
 	translation_Font_size : State<Float> ,
 	arabic_Font : State<String> ,
@@ -256,6 +230,36 @@ fun AyaListItemUI(
 				 )
 {
 	val context = LocalContext.current
+
+	//media player
+	val mediaPlayer = remember {
+		MediaPlayer()
+	}
+
+	//when we close or move to another screen, we want to clean the state o'f the AyaListItemUI so that we don't have any bugs such as dangling data
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+	DisposableEffect(lifecycle) {
+		val observer = LifecycleEventObserver { _ , event ->
+			when (event)
+			{
+				Lifecycle.Event.ON_STOP , Lifecycle.Event.ON_DESTROY , Lifecycle.Event.ON_PAUSE ->
+				{
+					mediaPlayer.release()
+				}
+
+				else ->
+				{
+				}
+			}
+		}
+
+		lifecycle.addObserver(observer)
+		onDispose {
+			lifecycle.removeObserver(observer)
+		}
+	}
+
 	val viewModel = viewModel(
 			key = QURAN_VIEWMODEL_KEY ,
 			initializer = { QuranViewModel(context) } ,
@@ -324,12 +328,17 @@ fun AyaListItemUI(
 	hasAudio.value = aya.audioFileLocation.isNotEmpty()
 	fileToBePlayed.value = File(aya.audioFileLocation)
 
+	val downloadInProgress = remember {
+		mutableStateOf(false)
+	}
+
 	//callback fro the download progress
 	//callback: (File?, Exception?, progress:Int, completed: Boolean) -> Unit)
 	val downloadCallback =
 		{ file : File? , exception : Exception? , progress : Int , completed : Boolean ->
 			if (exception != null)
 			{
+				downloadInProgress.value = false
 				isDownloaded.value = false
 				progressOfDownload.value = 0f
 				fileToBePlayed.value = null
@@ -337,6 +346,7 @@ fun AyaListItemUI(
 			}
 			if (completed)
 			{
+				downloadInProgress.value = false
 				isDownloaded.value = true
 				progressOfDownload.value = 100f
 				fileToBePlayed.value = file
@@ -350,7 +360,9 @@ fun AyaListItemUI(
 										)
 			} else
 			{
+				downloadInProgress.value = true
 				isDownloaded.value = false
+				Log.d("download" , "progress: $progress")
 				progressOfDownload.value = progress.toFloat()
 				fileToBePlayed.value = null
 			}
@@ -358,65 +370,87 @@ fun AyaListItemUI(
 
 	fun prepareMediaPlayer()
 	{
-		mediaPlayer.stop()
-		//reset the media player
-		mediaPlayer.reset()
-		val uri = Uri.fromFile(fileToBePlayed.value)
-		mediaPlayer.setAudioAttributes(
-				AudioAttributes.Builder()
-					.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-					.setUsage(AudioAttributes.USAGE_MEDIA)
-					.build()
-									  )
-		mediaPlayer.setDataSource(uri.toString())
-		mediaPlayer.prepare()
+		try{
+			mediaPlayer.stop()
+			//reset the media player
+			mediaPlayer.reset()
+			val uri = Uri.fromFile(fileToBePlayed.value)
+			mediaPlayer.setAudioAttributes(
+					AudioAttributes.Builder()
+						.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+						.setUsage(AudioAttributes.USAGE_MEDIA)
+						.build()
+										  )
+			mediaPlayer.setDataSource(uri.toString())
+			mediaPlayer.prepare()
+		}catch (e : Exception)
+		{
+			error.value = e.message.toString()
+		}
 	}
 
 	//play the file
 	fun playFile()
 	{
-		//if the file isnull and there is no audio playing then prepare the media player and play the file
-		//else just start the current file that is playing
-		if (! isPaused.value)
+		try
 		{
-			prepareMediaPlayer()
-			mediaPlayer.start()
-			duration.value = mediaPlayer.duration
-			isPlaying.value = true
-			isPaused.value = false
-			isStopped.value = false
-		} else
+			//if the file isnull and there is no audio playing then prepare the media player and play the file
+			//else just start the current file that is playing
+			if (! isPaused.value)
+			{
+				prepareMediaPlayer()
+				mediaPlayer.start()
+				duration.value = mediaPlayer.duration
+				isPlaying.value = true
+				isPaused.value = false
+				isStopped.value = false
+			} else
+			{
+				mediaPlayer.start()
+				duration.value = mediaPlayer.duration
+				isPlaying.value = true
+				isPaused.value = false
+				isStopped.value = false
+			}
+		} catch (e : Exception)
 		{
-			mediaPlayer.start()
-			duration.value = mediaPlayer.duration
-			isPlaying.value = true
-			isPaused.value = false
-			isStopped.value = false
+			error.value = e.message.toString()
 		}
 	}
 
 	//pause the file
 	fun pauseFile()
 	{
-		if (mediaPlayer.isPlaying)
+		try
 		{
-			mediaPlayer.pause()
-			isPlaying.value = false
-			isPaused.value = true
-			isStopped.value = false
+			if (mediaPlayer.isPlaying)
+			{
+				mediaPlayer.pause()
+				isPlaying.value = false
+				isPaused.value = true
+				isStopped.value = false
+			}
+		} catch (e : Exception)
+		{
+			error.value = e.message.toString()
 		}
 	}
 
 	//stop the file
 	fun stopFile()
 	{
-		if (! isStopped.value)
+		try{
+			if (! isStopped.value)
+			{
+				mediaPlayer.stop()
+				mediaPlayer.reset()
+				isPlaying.value = false
+				isPaused.value = false
+				isStopped.value = true
+			}
+		} catch (e : Exception)
 		{
-			mediaPlayer.stop()
-			mediaPlayer.reset()
-			isPlaying.value = false
-			isPaused.value = false
-			isStopped.value = true
+			error.value = e.message.toString()
 		}
 	}
 
@@ -439,12 +473,64 @@ fun AyaListItemUI(
 	{
 		MaterialTheme.colorScheme.surface
 	}
-	val cardTextColor = if (aya.ayaNumber == 0)
+
+	//a popup to show the error message
+	//it is displayed when there is an error in the audio player
+	//it should be displayed in the center of the screen on top of everything
+	if (error.value.isNotEmpty())
 	{
-		MaterialTheme.colorScheme.onSecondaryContainer
-	} else
+		Dialog(onDismissRequest ={
+			error.value = ""
+		}) {
+			BannerLarge(
+					title = "Error" ,
+					isOpen = remember {
+						mutableStateOf(true)
+					} ,
+					variant = BannerVariant.Error ,
+					showFor = BannerDuration.FOREVER.value ,
+					message = error.value ,
+					onDismiss = {
+						error.value = ""
+					}
+					   )
+		}
+	}
+
+	//dialog to show the download progress
+	if (downloadInProgress.value)
 	{
-		MaterialTheme.colorScheme.onSurface
+		AlertDialogNimaz(
+				icon = painterResource(id = R.drawable.download_icon) ,
+				topDivider = false ,
+				bottomDivider = false ,
+				contentHeight = 100.dp ,
+				contentDescription = "Downloading Audio" ,
+				title = "Downloading Audio" ,
+				contentToShow = {
+					Column(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(4.dp) ,
+							verticalArrangement = Arrangement.Center ,
+							horizontalAlignment = Alignment.CenterHorizontally
+						  )
+					{
+						CircularProgressIndicator(
+								modifier = Modifier.size(50.dp) ,
+												 )
+					}
+				} ,
+				onDismissRequest = {
+
+				} ,
+				showDismissButton = false ,
+				confirmButtonText = "Cancel" ,
+				showConfirmButton = false ,
+				onConfirm = {
+				} ,
+				onDismiss = {
+				})
 	}
 	ElevatedCard(
 			colors = CardDefaults.elevatedCardColors(
@@ -460,8 +546,6 @@ fun AyaListItemUI(
 					.fillMaxWidth()
 					.padding(8.dp)
 		   ) {
-
-
 			Column(
 					modifier = Modifier
 						.weight(0.90f)
@@ -640,43 +724,3 @@ fun AyaListItemUI(
 		}
 	}
 }
-
-////preview AyaListItemUI
-//@Preview(showBackground = true)
-//@Composable
-//fun AyaListItemUIPreview()
-//{
-//	NimazTheme {
-//		LocalDataStore.init(LocalContext.current)
-//		//create a dummy aya
-//		val aya = Aya(
-//				ayaNumber = 0 ,
-//				ayaNumberInQuran = 1 ,
-//				ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-//				ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-//				ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
-//				audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
-//				ayaNumberInSurah = 1 ,
-//				bookmark = true ,
-//				favorite = true ,
-//				note = "dsfhsdhsgdfhstghs" ,
-//				juzNumber = 1 ,
-//				suraNumber = 1 ,
-//				ruku = 1 ,
-//				sajda = true ,
-//				sajdaType = "Recommended" ,
-//					 )
-//
-//		AyaListItemUI(
-//				aya = aya ,
-//				spacesFileRepository = SpacesFileRepository(LocalContext.current) ,
-//				mediaPlayer = MediaPlayer() ,
-//				arabic_Font_size = remember { mutableStateOf(0.0f) } ,
-//				translation_Font_size = remember { mutableStateOf(0.0f) } ,
-//				arabic_Font = remember { mutableStateOf("Amiri") } ,
-//				translation = remember { mutableStateOf("English") } ,
-//				loading = false ,
-//					 )
-//	}
-//
-//}
