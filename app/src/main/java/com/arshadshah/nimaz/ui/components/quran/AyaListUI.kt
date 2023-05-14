@@ -5,7 +5,6 @@ import android.media.MediaPlayer
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,9 +20,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +31,6 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
 import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.viewModel.QuranViewModel
@@ -245,147 +241,6 @@ fun AyaListUI(
 			}
 		}
 	}
-}
-
-//surah header component
-@Composable
-fun SurahHeader(
-	surah : Surah ,
-	loading : Boolean ,
-			   )
-{
-	OutlinedCard(
-			colors = CardDefaults.elevatedCardColors(
-					containerColor = MaterialTheme.colorScheme.surface ,
-					contentColor = MaterialTheme.colorScheme.onSurface ,
-													) ,
-			modifier = Modifier
-				.padding(4.dp)
-				.fillMaxWidth() ,
-			shape = MaterialTheme.shapes.extraLarge ,
-				) {
-		Row(
-				modifier = Modifier
-					.padding(top = 8.dp)
-					.fillMaxWidth()
-					.background(MaterialTheme.colorScheme.surface) ,
-				horizontalArrangement = Arrangement.SpaceAround ,
-				verticalAlignment = Alignment.CenterVertically
-		   ) {
-			Text(
-					text = surah.revelationType ,
-					style = MaterialTheme.typography.titleSmall ,
-					textAlign = TextAlign.Center ,
-					modifier = Modifier
-						.padding(4.dp)
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
-				)
-			Column(
-					modifier = Modifier.padding(4.dp) ,
-					verticalArrangement = Arrangement.Center ,
-					horizontalAlignment = Alignment.CenterHorizontally
-				  ) {
-				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-					Text(
-							text = surah.name ,
-							style = MaterialTheme.typography.headlineLarge ,
-							fontFamily = utmaniQuranFont ,
-							fontWeight = FontWeight.Bold ,
-							textAlign = TextAlign.Center ,
-							modifier = Modifier
-								.placeholder(
-										visible = loading ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
-						)
-				}
-
-				Text(
-						text = surah.englishName ,
-						style = MaterialTheme.typography.titleLarge ,
-						textAlign = TextAlign.Center ,
-						modifier = Modifier
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										)
-					)
-				Text(
-						text = surah.englishNameTranslation ,
-						style = MaterialTheme.typography.titleMedium ,
-						textAlign = TextAlign.Center ,
-						modifier = Modifier
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										)
-					)
-			}
-
-			Text(
-					text = "${surah.numberOfAyahs} Verses" ,
-					style = MaterialTheme.typography.titleSmall ,
-					textAlign = TextAlign.Center ,
-					modifier = Modifier
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
-				)
-		}
-	}
-}
-
-@Preview
-@Composable
-fun SurahHeaderPreview()
-{
-	//al number: Int,
-	//    val numberOfAyahs: Int,
-	//    val startAya: Int,
-	//    val name: String,
-	//    val englishName: String,
-	//    val englishNameTranslation: String,
-	//    val revelationType: String,
-	//    val revelationOrder: Int,
-	//    val rukus:
-	SurahHeader(
-			surah = Surah(
-					1 ,
-					7 ,
-					1 ,
-					"الفاتحة" ,
-					"Al-Faatiha" ,
-					"The Opening" ,
-					"Meccan" ,
-					5 ,
-					1 ,
-						 ) ,
-			loading = false ,
-			   )
 }
 
 @Composable

@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlinx.coroutines.launch
@@ -227,32 +226,26 @@ fun DropdownMenuQuranSection(
 @Composable
 fun DropdownMenuSurahPreview()
 {
-	NimazTheme {
-		DropdownMenuQuranSection(
-				expanded = remember { mutableStateOf(false) } ,
-				list = (1 .. 114).toList() ,
-				translation = "english" ,
-				label = "Surah" ,
-				getAllAyats = { _ , _ -> } ,
-				setSelectedSurah = { }
-								)
-	}
+	DropdownMenuQuranSection(
+			expanded = remember { mutableStateOf(false) } ,
+			list = (1 .. 114).toList() ,
+			translation = "english" ,
+			label = "Surah" ,
+			getAllAyats = { _ , _ -> } ,
+			setSelectedSurah = { }
+							)
 }
 
 @Preview
 @Composable
 fun TopBarSurahMenuPreviewDark()
 {
-	NimazTheme(darkTheme = true) {
-		TopBarMenu(1 , isSurah = true)
-	}
+	TopBarMenu(1 , isSurah = true)
 }
 
 @Preview
 @Composable
 fun TopBarSurahMenuPreview()
 {
-	NimazTheme {
-		TopBarMenu(1 , isSurah = true)
-	}
+	TopBarMenu(1 , isSurah = true)
 }

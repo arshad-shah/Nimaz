@@ -19,7 +19,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
@@ -85,7 +84,5 @@ fun ShahadahScreen(paddingValues : PaddingValues)
 @Composable
 fun ShahadahScreenPreview()
 {
-	NimazTheme {
-		ShahadahScreen(paddingValues = PaddingValues(8.dp))
-	}
+	ShahadahScreen(paddingValues = PaddingValues(8.dp))
 }
