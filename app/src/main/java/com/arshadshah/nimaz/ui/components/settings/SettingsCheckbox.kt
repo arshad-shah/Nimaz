@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileAction
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileIcon
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 
 @Composable
@@ -71,7 +70,6 @@ fun SettingsCheckbox(
 @Composable
 internal fun SettingsCheckboxPreview()
 {
-	NimazTheme {
 		val storage = rememberBooleanSettingState(defaultValue = true)
 		SettingsCheckbox(
 				state = storage ,
@@ -80,5 +78,4 @@ internal fun SettingsCheckboxPreview()
 				subtitle = { Text(text = "This is a longer text") } ,
 				onCheckedChange = { }
 						)
-	}
 }

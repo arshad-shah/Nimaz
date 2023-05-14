@@ -42,12 +42,8 @@ fun SettingsMenuLink(
 					.fillMaxWidth()
 					.height(60.dp)
 					.clickable(onClick = onClick) ,
+				verticalAlignment = Alignment.CenterVertically ,
 		   ) {
-			Row(
-					modifier = Modifier
-						.weight(1f) ,
-					verticalAlignment = Alignment.CenterVertically ,
-			   ) {
 				if (icon != null)
 				{
 					SettingsTileIcon(icon = icon)
@@ -56,7 +52,6 @@ fun SettingsMenuLink(
 					Spacer(modifier = Modifier.width(24.dp).height(60.dp))
 				}
 				SettingsTileTexts(title = title , subtitle = subtitle)
-			}
 			if (action != null)
 			{
 				SettingsTileAction {
@@ -71,7 +66,6 @@ fun SettingsMenuLink(
 @Composable
 internal fun SettingsMenuLinkPreview()
 {
-
 		SettingsMenuLink(
 				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				title = { Text(text = "Hello") } ,
@@ -85,12 +79,10 @@ internal fun SettingsMenuLinkPreview()
 @Composable
 internal fun SettingsMenuLinkNoIconPreview()
 {
-
 		SettingsMenuLink(
 				title = { Text(text = "Hello") } ,
 				subtitle = { Text(text = "This is a longer text") } ,
 						) {
-
 		}
 }
 
@@ -99,7 +91,6 @@ internal fun SettingsMenuLinkNoIconPreview()
 internal fun SettingsMenuLinkActionPreview()
 {
 	var rememberCheckBoxState by remember { mutableStateOf(true) }
-
 		SettingsMenuLink(
 				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				title = { Text(text = "Hello") } ,
@@ -112,6 +103,5 @@ internal fun SettingsMenuLinkActionPreview()
 					}
 				} ,
 						) {
-
 		}
 }

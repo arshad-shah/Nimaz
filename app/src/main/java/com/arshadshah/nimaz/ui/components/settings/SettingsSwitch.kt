@@ -3,7 +3,10 @@ package com.arshadshah.nimaz.ui.components.settings
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -57,7 +60,7 @@ fun SettingsSwitch(
 					painter = painterResource(id = R.drawable.cross_icon) ,
 					contentDescription = null ,
 					modifier = Modifier
-						.size(10.dp)
+						.size(SwitchDefaults.IconSize).padding(2.dp)
 				)
 		}
 	}
@@ -68,6 +71,7 @@ fun SettingsSwitch(
 		Row(
 				modifier = modifier
 					.fillMaxWidth()
+					.height(60.dp)
 					.toggleable(
 							value = storageValue ,
 							role = Role.Switch ,
@@ -80,7 +84,7 @@ fun SettingsSwitch(
 				SettingsTileIcon(icon = icon)
 			} else
 			{
-				Spacer(modifier = Modifier.size(24.dp))
+				Spacer(modifier = Modifier.width(24.dp).height(60.dp))
 			}
 			SettingsTileTexts(title = title , subtitle = subtitle)
 			SettingsTileAction {
@@ -131,7 +135,6 @@ internal fun SettingsSwitchPreview3()
 		val storage = rememberBooleanSettingState(defaultValue = true)
 		SettingsSwitch(
 				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
 				title = { Text(text = "Hello") } ,
 				subtitle = { Text(text = "This is a longer text") } ,
 				onCheckedChange = { }
