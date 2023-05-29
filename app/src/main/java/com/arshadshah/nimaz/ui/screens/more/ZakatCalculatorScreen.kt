@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
@@ -69,7 +70,7 @@ fun ZakatCalculatorScreen(paddingValues : PaddingValues)
 
 	LazyColumn(
 			contentPadding = paddingValues ,
-			  ) {
+			){
 		item {
 			Category("Money" ,
 					 money.value ,
@@ -108,14 +109,14 @@ fun ZakatCalculatorScreen(paddingValues : PaddingValues)
 			//debt that you owe
 			Category("Payables" ,
 					 payables.value ,
-					 "If you have any debts that you owe, then you can deduct the total amount from your zakatable assets. However, you must have the intention to pay these debts within the next 12 months." ,
+					 "If you have any debts that you owe, then you can deduct the total amount from your zakatable assets." ,
 					 onPayablesChange)
 		}
 		item{
 			//debtor
 			Category("Debtor" ,
 					 others.value ,
-					 "If you have loaned money to someone and you are not sure if they will pay you back, then you can deduct the total amount from your zakatable assets. However, you must have the intention to pay these debts within the next 12 months." ,
+					 "If you have loaned money to someone and you are not sure if they will pay you back, then you can deduct the total amount from your zakatable assets." ,
 					 onOthersChange)
 		}
 		item{
@@ -146,6 +147,14 @@ fun ZakatCalculatorScreen(paddingValues : PaddingValues)
 					modifier = Modifier.padding(16.dp) ,
 					style = MaterialTheme.typography.bodyMedium
 				)
+		}
+		//result
+		item{
+				Text(
+						result.value ,
+						modifier = Modifier.padding(16.dp) ,
+						style = MaterialTheme.typography.titleLarge
+					)
 		}
 		item {
 			//Calculate Button
@@ -209,6 +218,7 @@ fun Category(
 			if (isPopupVisible.value)
 			{
 				Popup(
+						offset = IntOffset(-50 , 50) ,
 						onDismissRequest = {
 							isPopupVisible.value = false
 						} ,
@@ -216,7 +226,6 @@ fun Category(
 							Surface(
 									modifier = Modifier
 										.padding(16.dp) ,
-									shape = MaterialTheme.shapes.large ,
 									color = MaterialTheme.colorScheme.surface
 								   ) {
 								Text(
@@ -238,8 +247,7 @@ fun Category(
 				onValueChange = onValueChange ,
 				modifier = Modifier
 					//reduce size of the text field so that it accommodates the 100000,
-					.width(150.dp)
-					.padding(end = 8.dp) ,
+					.width(150.dp),
 				leadingIcon = {
 					Text(text = currencySymbol , style = MaterialTheme.typography.titleLarge)
 				} ,

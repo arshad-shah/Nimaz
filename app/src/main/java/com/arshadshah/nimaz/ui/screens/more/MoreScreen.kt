@@ -58,10 +58,10 @@ fun MoreScreen(
 					},
 					onClick = {
 						onNavigateToTasbihScreen(
-								"" ,
-								"" ,
-								"" ,
-								""
+								" " ,
+								" " ,
+								" " ,
+								" "
 												)
 					}
 						  )

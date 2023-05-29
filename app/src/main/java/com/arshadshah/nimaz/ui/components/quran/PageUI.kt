@@ -39,7 +39,6 @@ import com.arshadshah.nimaz.ui.theme.amiri
 import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
@@ -257,35 +256,6 @@ fun Verses(
 				}
 			}
 		  )
-}
-
-
-//preview of page
-@Preview(showBackground = true)
-@Composable
-fun PagePreview()
-{
-	val context = LocalContext.current
-	LocalDataStore.init(context)
-	val viewModel = viewModel(
-			key = AppConstants.QURAN_VIEWMODEL_KEY ,
-			initializer = { QuranViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity)
-	viewModel.getAllAyaForJuz(1 , "English")
-
-	val listOfAya = remember {
-		viewModel.ayaListState
-	}.collectAsState()
-
-	val loading = remember {
-		viewModel.loadingState
-	}.collectAsState()
-
-	Page(
-			AyaList = listOfAya.value ,
-			paddingValues = PaddingValues(16.dp) ,
-			loading = loading.value ,
-		)
 }
 
 //preview of verse
