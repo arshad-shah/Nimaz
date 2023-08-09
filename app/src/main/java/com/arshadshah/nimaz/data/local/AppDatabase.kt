@@ -253,7 +253,6 @@ abstract class AppDatabase : RoomDatabase()
 
 		override fun migrate(database : SupportSQLiteDatabase)
 		{
-			//remove the column duas from the table Chapter
 			database.execSQL("ALTER TABLE Chapter RENAME TO Chapter_old")
 			//create a new table
 			database.execSQL("CREATE TABLE IF NOT EXISTS `Chapter` (`id` INTEGER NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `category` TEXT NOT NULL, PRIMARY KEY(`id`))")

@@ -43,7 +43,7 @@ import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
-import com.arshadshah.nimaz.ui.screens.tracker.Calender
+import com.arshadshah.nimaz.ui.screens.tracker.CalenderScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -846,7 +846,7 @@ fun NavigationGraph(
 		}
 
 		composable(CALENDER_SCREEN_ROUTE) {
-			Calender(paddingValues)
+			CalenderScreen(paddingValues)
 		}
 
 		composable(QIBLA_SCREEN_ROUTE) {

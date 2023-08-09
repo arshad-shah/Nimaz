@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
@@ -68,7 +67,6 @@ fun SettingsNumberPickerDialog(
 	} else subtitle
 
 	SettingsMenuLink(
-			modifier = if (icon != null) modifier else modifier.padding(8.dp) ,
 			icon = icon ,
 			title = {
 				Text(

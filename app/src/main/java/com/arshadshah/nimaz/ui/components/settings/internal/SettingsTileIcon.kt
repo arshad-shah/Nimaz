@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 internal fun SettingsTileIcon(
@@ -33,20 +32,18 @@ internal fun SettingsTileIcon(
 @Composable
 fun SettingsIconPreview()
 {
-	NimazTheme {
+
 		SettingsTileIcon {
 			Icon(imageVector = Icons.Default.Clear , contentDescription = "")
 		}
-	}
 }
 
 @Preview
 @Composable
 fun SettingsIconPreviewEmpty()
 {
-	NimazTheme {
+
 		SettingsTileIcon(
 				icon = { } ,
 						)
-	}
 }

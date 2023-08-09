@@ -61,7 +61,6 @@ fun SettingsList(
 	} else subtitle
 
 	SettingsMenuLink(
-			modifier = if (icon != null) modifier else modifier.padding(8.dp) ,
 			icon = icon ,
 			title = {
 				Text(text = title)

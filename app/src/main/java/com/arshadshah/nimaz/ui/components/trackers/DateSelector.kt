@@ -60,8 +60,6 @@ fun DateSelector(
 				verticalAlignment = Alignment.CenterVertically
 		   ) {
 			FilledIconButton(
-					modifier = Modifier
-						.size(52.dp) ,
 					onClick = {
 						date.value = date.value.minusDays(1)
 						handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
@@ -159,8 +157,6 @@ fun DateSelector(
 					)
 			}
 			FilledIconButton(
-					modifier = Modifier
-						.size(52.dp) ,
 					onClick = {
 						date.value = date.value.plusDays(1)
 						handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))

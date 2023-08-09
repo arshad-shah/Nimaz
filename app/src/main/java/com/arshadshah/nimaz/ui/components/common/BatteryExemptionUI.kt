@@ -158,7 +158,7 @@ fun BatteryExemptionUI()
 	{
 		BannerSmall(
 				message = "Exempt Nimaz from battery optimization to receive Adhan notifications on time" ,
-				showFor = BannerShowFor.FOREVER.value
+				showFor = BannerDuration.FOREVER.value
 				   )
 	}
 }

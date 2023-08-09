@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,9 +12,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 
@@ -29,6 +34,7 @@ fun RadioButtonCustom(
 	Box(
 			modifier = modifier
 				.size(32.dp)
+				.clip(CircleShape)
 				.clickable(onClick = onClick) ,
 			contentAlignment = Alignment.Center ,
 	   ) {
@@ -46,7 +52,7 @@ fun RadioButtonCustom(
 		   ) {
 			Crossfade(
 					targetState = selected ,
-					animationSpec = tween(durationMillis = 200)
+					animationSpec = tween(durationMillis = 100, easing = LinearEasing)
 					 ) { selected ->
 				//the checkmark icon
 				if (selected)
@@ -65,10 +71,23 @@ fun RadioButtonCustom(
 							painter = painterResource(id = R.drawable.circle_open_icon) ,
 							contentDescription = "circle" ,
 							modifier = Modifier.size(24.dp) ,
-							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) ,
+							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) ,
 						)
 				}
 			}
 		}
 	}
+}
+
+//a preview
+@Preview(showBackground = true)
+@Composable
+fun RadioButtonCustomPreview()
+{
+	val selected = remember{
+		mutableStateOf(true)
+	}
+	RadioButtonCustom(selected = selected.value , onClick = {
+		selected.value = !selected.value
+	})
 }

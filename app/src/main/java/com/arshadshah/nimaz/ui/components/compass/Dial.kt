@@ -6,26 +6,18 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -89,7 +81,6 @@ fun Dial(
 	}
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
@@ -115,7 +106,7 @@ fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 	}
 
 	//if the user is facing the qibla, vibrate the phone and show a message to the user and stop the vibration after 1 second and stop animating the dial until the user turns away from the qibla
-	LaunchedEffect(key1 = target) {
+	LaunchedEffect(key1 = target, key2 = pointingToQibla) {
 		if (abs(target) < 5f)
 		{
 			//animate to 0f
@@ -127,9 +118,7 @@ fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 			//start the animation
 			rotateAnim.animateTo(target , tween(200))
 		}
-	}
 
-	LaunchedEffect(pointingToQibla) {
 		if (pointingToQibla)
 		{
 			//create a single shot vibration
@@ -139,42 +128,5 @@ fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 			vibrator.cancel()
 		}
 	}
-
-	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(16.dp) ,
-				) {
-
-		Text(
-				modifier = Modifier
-					.padding(16.dp)
-					.fillMaxWidth()
-					.align(Alignment.CenterHorizontally) ,
-				text = directionToTurn ,
-				style = MaterialTheme.typography.headlineMedium ,
-				textAlign = TextAlign.Center
-			)
-
-		Icon(
-				painter = painterResource(id = R.drawable.circle_close_icon) ,
-				contentDescription = "dot" ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(vertical = 8.dp)
-					.size(24.dp) ,
-				tint = if (pointingToQibla) MaterialTheme.colorScheme.inversePrimary else Color.Red
-			)
-		//the dial
-		Image(
-				painter = imageToDisplay ,
-				contentDescription = "Compass" ,
-				modifier = Modifier
-					.rotate(rotateAnim.value)
-					.fillMaxWidth()
-					.padding(16.dp) ,
-				alignment = Alignment.Center
-			 )
-	}
+	DialComponent(directionToTurn , pointingToQibla , imageToDisplay , rotateAnim)
 }

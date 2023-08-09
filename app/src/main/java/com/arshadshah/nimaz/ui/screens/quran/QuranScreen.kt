@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -95,7 +96,7 @@ fun QuranScreen(
 								.offset(x = indicatorStart)
 								.wrapContentSize(align = Alignment.BottomStart)
 								.width(indicatorEnd - indicatorStart)
-								.padding(2.dp)
+								.padding(4.dp)
 								.fillMaxSize()
 								.background(
 										color = MaterialTheme.colorScheme.secondaryContainer ,
@@ -120,7 +121,7 @@ fun QuranScreen(
 									) ,
 						selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer ,
 						unselectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
-								alpha = 0.4f
+								alpha = 0.6f
 																									) ,
 						selected = pagerState.currentPage == index ,
 						onClick = {
@@ -134,8 +135,10 @@ fun QuranScreen(
 									maxLines = 1 ,
 									overflow = TextOverflow.Ellipsis ,
 									style = MaterialTheme.typography.titleMedium ,
+									fontWeight = if (selected) FontWeight.ExtraBold
+									else FontWeight.Normal,
 									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
-									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 								)
 						}
 				   )
