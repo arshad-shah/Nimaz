@@ -6,6 +6,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferType
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.regions.Region
 import com.amazonaws.services.s3.AmazonS3Client
@@ -57,6 +58,9 @@ class SpacesFileRepository(context : Context)
 		transferUtility = TransferUtility.builder().s3Client(client).context(context).build()
 		appContext = context
 	}
+
+	//get all ayat for a surah
+
 
 	/**
 	 * Downloads example file from a DO Space
@@ -162,7 +166,7 @@ class SpacesFileRepository(context : Context)
 												 else ->
 												 {
 													 Log.d("S3 Download" , "Other")
-													 callback(null , Exception("Other") , 0 , false)
+													 callback(null , null , 0 , false)
 												 }
 											 }
 										 }
@@ -174,5 +178,11 @@ class SpacesFileRepository(context : Context)
 											 Toasty.error(appContext , ex.toString()).show()
 										 }
 									 })
+	}
+
+	//cancl all downloads
+	fun cancelAllDownloads()
+	{
+		transferUtility.cancelAllWithType(TransferType.DOWNLOAD)
 	}
 }

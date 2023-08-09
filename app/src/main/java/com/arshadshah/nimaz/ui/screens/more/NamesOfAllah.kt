@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NAMES_OF_ALLAH
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
@@ -144,9 +143,5 @@ fun NamesOfAllahRow(
 @Composable
 fun NamesOfAllahRowPreview()
 {
-	NimazTheme(
-			darkTheme = true
-			  ) {
-		NamesOfAllahRow(1 , "Al 'Aleem" , "العليم" , "The All Knowing")
-	}
+	NamesOfAllahRow(1 , "Al 'Aleem" , "العليم" , "The All Knowing")
 }

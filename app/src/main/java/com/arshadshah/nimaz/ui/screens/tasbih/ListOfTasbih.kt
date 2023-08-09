@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -118,7 +119,7 @@ fun ListOfTasbih(
 				modifier = Modifier
 					.padding(vertical = 4.dp , horizontal = 4.dp)
 					.clip(MaterialTheme.shapes.extraLarge) ,
-				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f) ,
+				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) ,
 				indicator = { tabPositions : List<TabPosition> ->
 					val transition = updateTransition(pagerState.currentPage , label = "")
 					val indicatorStart by transition.animateDp(
@@ -154,7 +155,7 @@ fun ListOfTasbih(
 								.offset(x = indicatorStart)
 								.wrapContentSize(align = Alignment.BottomStart)
 								.width(indicatorEnd - indicatorStart)
-								.padding(2.dp)
+								.padding(4.dp)
 								.fillMaxSize()
 								.background(
 										color = MaterialTheme.colorScheme.secondaryContainer ,
@@ -188,9 +189,11 @@ fun ListOfTasbih(
 									text = title ,
 									maxLines = 1 ,
 									overflow = TextOverflow.Ellipsis ,
+									fontWeight = if (selectedTabIndx) FontWeight.ExtraBold
+									else FontWeight.Normal ,
 									style = MaterialTheme.typography.titleMedium ,
 									color = if (selectedTabIndx) MaterialTheme.colorScheme.onSecondaryContainer
-									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 								)
 						}
 				   )

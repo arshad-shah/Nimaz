@@ -5,10 +5,9 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationResult
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.DecayAnimationSpec
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.core.exponentialDecay
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -16,8 +15,6 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -27,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,16 +97,6 @@ fun <T> Picker(
 	Log.d("Picker" , "indexOfElement: $indexOfElement")
 
 	var dividersWidth by remember { mutableStateOf(0.dp) }
-
-	val scaleUp = remember { Animatable(0.8f) }
-
-	//scale down the label a bit
-	val animatedScaleDown = remember { Animatable(1f) }
-
-	LaunchedEffect(indexOfElement) {
-		scaleUp.animateTo(1f , tween(500 , easing = FastOutSlowInEasing))
-		animatedScaleDown.animateTo(0.8f , tween(500 , easing = FastOutSlowInEasing))
-	}
 
 	//haptic feedback
 	val hapticFeedback = LocalHapticFeedback.current
@@ -189,7 +175,7 @@ fun <T> Picker(
 													 )
 											  )
 										//a bit smaller than the other labels
-										.scale(animatedScaleDown.value)
+										.scale(animateFloatAsState(0.8f).value)
 								 )
 						}
 						Label(
@@ -201,7 +187,7 @@ fun <T> Picker(
 													1 - abs(coercedAnimatedOffset) / halfNumbersColumnHeightPx
 												  ))
 										  )
-									.scale(scaleUp.value)
+									.scale(animateFloatAsState(1f).value)
 							 )
 						if (indexOfElement < list.count() - 1)
 						{
@@ -215,7 +201,7 @@ fun <T> Picker(
 														- coercedAnimatedOffset / halfNumbersColumnHeightPx
 													 )
 											  )
-										.scale(animatedScaleDown.value)
+										.scale(animateFloatAsState(0.8f).value)
 								 )
 						}
 					}
@@ -302,17 +288,12 @@ private suspend fun Animatable<Float , AnimationVector1D>.fling(
 	}
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun Preview()
 {
 	val list = listOf(1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10)
-	val selectedValue = remember { mutableStateOf(1) }
-	Column(
-			modifier = Modifier
-				.background(Color.White)
-				.fillMaxSize()
-		  ) {
+	val selectedValue = remember { mutableStateOf(5) }
 		Picker(
 				list = list ,
 				value = selectedValue.value ,
@@ -320,5 +301,4 @@ fun Preview()
 					selectedValue.value = it
 				}
 			  )
-	}
 }

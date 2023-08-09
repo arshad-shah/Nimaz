@@ -96,6 +96,6 @@ fun SliderWithIconsPreview()
 			contentDescription1 = "decrease font size" ,
 			contentDescription2 = "increase font size" ,
 			trailingIconSize = 24.dp ,
-			leadingIconSize = 24.dp ,
+			leadingIconSize = 16.dp ,
 				   )
 }

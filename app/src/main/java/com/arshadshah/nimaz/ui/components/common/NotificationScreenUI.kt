@@ -224,7 +224,7 @@ fun NotificationScreenUI()
 	{
 		BannerSmall(
 				message = "Please enable notifications to receive Adhan notifications" ,
-				showFor = BannerShowFor.FOREVER.value
+				showFor = BannerDuration.FOREVER.value
 				   )
 	}
 }
