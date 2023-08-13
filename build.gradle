@@ -2,62 +2,65 @@ buildscript {
     ext {
         compose_version = '1.4.0-beta01'
         nav_version = "2.5.3"
-        core_ktx_version = '1.10.0'
+        core_ktx_version = '1.10.1'
         app_compat_version = "1.6.1"
         constraint_layout_version = "2.1.4"
-        room_version = "2.5.1"
-        ktor_version = '2.2.4'
+        room_version = '2.5.2'
+        ktor_version = '2.3.3'
         material_version = "1.4.0-beta01"
         material3_version = "1.1.0-alpha06"
         lifecycle_runtime_ktx_version = "2.6.1"
         compose_activity_version = "1.6.1"
-        navigation_ui_ktx_version = "2.5.3"
+        navigation_ui_ktx_version = '2.6.0'
         preference_ktx_version = "1.2.0"
         datastore_core_version = "1.0.0"
-        core_splashscreen_version = "1.0.0"
+        core_splashscreen_version = '1.0.1'
 
         junit_version = "4.13.2"
         junit_jupiter_version = '5.9.2'
         espresso_version = "3.5.1"
         test_ext_version = "1.1.5"
-        mockito_version = '5.2.0'
+        mockito_version = '5.4.0'
         test_core_version = "1.5.0"
-        robolectric_version = "4.7.1"
+        robolectric_version = '4.10.3'
 
         play_services_location_version = "21.0.1"
         toasty_version = "1.5.2"
         kotlin_version = '1.8.0'
 
-        accompanist_permissions_version = '0.31.0-alpha'
-        accompanist_placeholder_material_version = '0.31.0-alpha'
-        accompanist_navigation_animation_version = '0.31.0-alpha'
+        accompanist_permissions_version = '0.33.0-alpha'
+        accompanist_placeholder_material_version = '0.33.0-alpha'
+        accompanist_navigation_animation_version = '0.33.0-alpha'
 
-        app_update_version = "2.0.1"
-        build_gradle_version = '8.0.1'
+        app_update_version = '2.1.0'
+        build_gradle_version = '8.0.2'
         google_services_version = "4.3.14"
         firebase_crashlytics_gradle_version = "2.9.2"
         firebase_crashlytics_version = "18.3.4"
         firebase_analytics_version = "21.2.0"
+        firebase_perf_plugin_version = "1.4.2"
 
         charts_version = "0.2.4-alpha"
 
-        navigation_testing_version = "2.5.3"
+        navigation_testing_version = '2.6.0'
 
         latestAboutLibsRelease = '10.6.2'
+
+        google_devtools_ksp_version = "1.8.10-1.0.9"
     }
 
     dependencies {
         classpath "com.android.tools.build:gradle:$build_gradle_version"
         classpath "com.google.gms:google-services:$google_services_version"
         classpath "com.google.firebase:firebase-crashlytics-gradle:$firebase_crashlytics_gradle_version"
-        classpath 'com.google.firebase:perf-plugin:1.4.2'
+        classpath "com.google.firebase:perf-plugin:$firebase_perf_plugin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.mockito:mockito-core:$mockito_version"
     }
 }// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    id 'com.android.application' version '8.0.1' apply false
-    id 'com.android.library' version '8.0.1' apply false
-    id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
-    id "com.google.devtools.ksp" version "1.8.10-1.0.9" apply false
+    id 'com.android.application' version "$build_gradle_version" apply false
+    id 'com.android.library' version "$build_gradle_version" apply false
+    id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
+    id "com.google.devtools.ksp" version "$google_devtools_ksp_version" apply false
 }
