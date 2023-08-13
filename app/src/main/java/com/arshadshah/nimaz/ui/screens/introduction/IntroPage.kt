@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -57,7 +58,10 @@ fun IntroPage1()
 			OnBoardingPage.Eighth ,
 					  )
 
-	val pagerState = rememberPagerState()
+	val pagerState = rememberPagerState (
+			0 ,
+			0F
+										) { pages.size }
 
 	val context = LocalContext.current
 	val sharedPref = PrivateSharedPreferences(context)
@@ -99,12 +103,12 @@ fun IntroPage1()
 		  ) {
 
 		HorizontalPager(
-				userScrollEnabled = false ,
 				modifier = Modifier
 					.weight(10f)
 					.testTag("introPager") ,
-				pageCount = pages.size ,
 				state = pagerState ,
+				userScrollEnabled = false,
+				pageSize = PageSize.Fill,
 				verticalAlignment = Alignment.Top
 					   ) { position ->
 			PagerScreen(onBoardingPage = pages[position] , position)

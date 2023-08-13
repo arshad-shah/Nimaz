@@ -13,7 +13,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +34,7 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	//a card that shows the time left for ramadan
 	//it should only show when 40 days are left for ramadan
 	//it should show the time left for ramadan in days, hours, minutes and seconds
-	val ramadanTimeLeft = remember { mutableStateOf(0L) }
+	val ramadanTimeLeft = remember { mutableLongStateOf(0L) }
 
 	val today = LocalDate.now()
 	val todayHijri = HijrahDate.from(today)
@@ -53,12 +54,12 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	{
 		if (todayHijri.isBefore(ramadanEnd))
 		{
-			ramadanTimeLeft.value = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
+			ramadanTimeLeft.longValue = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
 		}
 	} else
 	{
 		val diff = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
-		ramadanTimeLeft.value = diff
+		ramadanTimeLeft.longValue = diff
 	}
 
 	//list of images to pick from
@@ -74,10 +75,10 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	//pick a random image
 	val randomImage = imagesToShow.random()
 	//save the image to show in the card
-	val imageToShow = remember { mutableStateOf(randomImage) }
+	val imageToShow = remember { mutableIntStateOf(randomImage) }
 
 	//show card if its before month 10 and 40 days are left for ramadan
-	val showCard = todayHijri[ChronoField.MONTH_OF_YEAR] < 10 && ramadanTimeLeft.value < 40
+	val showCard = todayHijri[ChronoField.MONTH_OF_YEAR] < 10 && ramadanTimeLeft.longValue < 40
 
 	//is ramadan time left less than 40 days
 	//if yes then show the card
@@ -118,7 +119,7 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 								.size(80.dp)
 					   ) {
 						Image(
-								painter = painterResource(id = imageToShow.value) ,
+								painter = painterResource(id = imageToShow.intValue) ,
 								contentDescription = "Moon" ,
 								modifier = Modifier
 									.size(80.dp)
@@ -146,7 +147,7 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 						}
 						//if ramaadan time left is 1 then show that it ends today if its 2 then show that it ends tomorrow
 						Text(
-								text = if (ramadanTimeLeft.value == 0L) "Today" else if (ramadanTimeLeft.value == 1L) "Tomorrow" else "In ${ramadanTimeLeft.value} days" ,
+								text = if (ramadanTimeLeft.longValue == 0L) "Today" else if (ramadanTimeLeft.value == 1L) "Tomorrow" else "In ${ramadanTimeLeft.value} days" ,
 								style = MaterialTheme.typography.headlineMedium
 							)
 						if (isAfterRamadanStart)

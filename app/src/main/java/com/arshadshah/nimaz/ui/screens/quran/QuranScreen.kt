@@ -9,6 +9,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -47,7 +48,12 @@ fun QuranScreen(
 	viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
 
 	val titles = listOf("Sura" , "Juz" , "My Quran")
-	val pagerState = rememberPagerState()
+	val pagerState = rememberPagerState(
+			initialPage = 0 ,
+			initialPageOffsetFraction = 0F,
+									   ){
+		titles.size
+	}
 	val scope = rememberCoroutineScope()
 	Column(
 			modifier = Modifier
@@ -145,7 +151,7 @@ fun QuranScreen(
 			}
 		}
 		HorizontalPager(
-				pageCount = titles.size ,
+				pageSize = PageSize.Fill ,
 				state = pagerState ,
 					   ) { page ->
 			when (page)

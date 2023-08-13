@@ -148,8 +148,9 @@ fun DashboardRandomAyatCard(onNavigateToAyatScreen : (String , Boolean , String 
 										"Share Ramadan Times"
 													)
 											 )
-					} , modifier = Modifier.size(24.dp)) {
+					} , modifier = Modifier.size(32.dp)) {
 				Icon(
+						modifier = Modifier.size(24.dp) ,
 						painter = painterResource(id = R.drawable.share_icon) ,
 						contentDescription = "Share Ramadan Times" ,
 					)
