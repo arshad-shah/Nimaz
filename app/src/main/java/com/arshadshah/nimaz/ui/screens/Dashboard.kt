@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -133,6 +134,7 @@ fun Dashboard(
 					modifier = Modifier
 						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						.testTag(TEST_TAG_EVENTS_CARD)
+						.clip(shape = MaterialTheme.shapes.extraLarge)
 						.clickable {
 							onNavigateToCalender()
 						}

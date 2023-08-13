@@ -13,8 +13,8 @@ import kotlinx.coroutines.channels.Channel
 class SensorDataManager(context : Context) : SensorEventListener
 {
 
-	private lateinit var accelerometer : Sensor
-	private lateinit var magnetometer : Sensor
+	private var accelerometer : Sensor? = null
+	private var magnetometer : Sensor? = null
 	private val sensorManager by lazy {
 		context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 	}

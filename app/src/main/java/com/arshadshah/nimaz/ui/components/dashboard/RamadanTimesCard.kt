@@ -16,7 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +61,7 @@ fun RamadanTimesCard(isFasting : Boolean)
 	//a card that shows the time left for ramadan
 	//it should only show when 40 days are left for ramadan
 	//it should show the time left for ramadan in days, hours, minutes and seconds
-	val ramadanTimeLeft = remember { mutableStateOf(0L) }
+	val ramadanTimeLeft = remember { mutableLongStateOf(0L) }
 
 	val today = LocalDate.now()
 	val todayHijri = HijrahDate.from(today)
@@ -73,12 +73,12 @@ fun RamadanTimesCard(isFasting : Boolean)
 	{
 		if (todayHijri.isBefore(ramadanEnd))
 		{
-			ramadanTimeLeft.value = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
+			ramadanTimeLeft.longValue = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
 		}
 	} else
 	{
 		val diff = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
-		ramadanTimeLeft.value = diff
+		ramadanTimeLeft.longValue = diff
 	}
 
 	//show card if it is the month of ramadan
@@ -113,7 +113,9 @@ fun RamadanTimesCard(isFasting : Boolean)
 						horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
 					Text(text = "Fasting Times" , style = MaterialTheme.typography.titleMedium)
-					IconButton(onClick = {
+					IconButton(
+							modifier = Modifier.size(32.dp),
+							onClick = {
 						//share the aya
 						val shareIntent = Intent(Intent.ACTION_SEND)
 						shareIntent.type = "text/plain"
@@ -147,8 +149,9 @@ fun RamadanTimesCard(isFasting : Boolean)
 										"Share Ramadan Times"
 													)
 											 )
-					} , modifier = Modifier.size(24.dp)) {
+					}){
 						Icon(
+								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = R.drawable.share_icon) ,
 								contentDescription = "Share Ramadan Times" ,
 							)

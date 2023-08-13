@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterialApi::class , ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListOfTasbih(
 	paddingValues : PaddingValues ,
@@ -106,7 +106,12 @@ fun ListOfTasbih(
 	val translationNames = resources.getStringArray(R.array.tasbeehTranslation)
 
 	val titles = listOf("Tasbih List" , "My Tasbih")
-	val pagerState = rememberPagerState()
+	val pagerState = rememberPagerState(
+			initialPage = 0,
+			initialPageOffsetFraction = 0F,
+									   ){
+		titles.size
+	}
 	val scope = rememberCoroutineScope()
 	Column(
 			modifier = Modifier
@@ -201,7 +206,7 @@ fun ListOfTasbih(
 		}
 
 		HorizontalPager(
-				pageCount = titles.size ,
+				pageSize = PageSize.Fill ,
 				state = pagerState ,
 					   ) { page ->
 			when (page)
