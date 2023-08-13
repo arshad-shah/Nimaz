@@ -52,7 +52,7 @@ fun RadioButtonCustom(
 		   ) {
 			Crossfade(
 					targetState = selected ,
-					animationSpec = tween(durationMillis = 100, easing = LinearEasing)
+					animationSpec = tween(durationMillis = 100 , easing = LinearEasing)
 					 ) { selected ->
 				//the checkmark icon
 				if (selected)
@@ -84,10 +84,10 @@ fun RadioButtonCustom(
 @Composable
 fun RadioButtonCustomPreview()
 {
-	val selected = remember{
+	val selected = remember {
 		mutableStateOf(true)
 	}
 	RadioButtonCustom(selected = selected.value , onClick = {
-		selected.value = !selected.value
+		selected.value = ! selected.value
 	})
 }

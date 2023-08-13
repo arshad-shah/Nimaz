@@ -115,13 +115,14 @@ fun PrayerTrackerGrid()
 
 											else ->
 											{
-												if (isHighlighted && !isMenstrauting)
+												if (isHighlighted && ! isMenstrauting)
 												{
 													MaterialTheme.colorScheme.primary
-												} else if(isMenstrauting){
+												} else if (isMenstrauting)
+												{
 													//pink
 													Color(0xFFE91E63)
-												}else
+												} else
 												{
 													Color.Gray
 												}
@@ -138,10 +139,11 @@ fun PrayerTrackerGrid()
 												if (isHighlighted)
 												{
 													MaterialTheme.colorScheme.primary
-												} else if(isMenstrauting){
+												} else if (isMenstrauting)
+												{
 													//pink
 													Color(0xFFE91E63)
-												}else
+												} else
 												{
 													Color.Gray
 												}
@@ -152,7 +154,8 @@ fun PrayerTrackerGrid()
 												if (isHighlighted)
 												{
 													MaterialTheme.colorScheme.primary
-												} else if(isMenstrauting){
+												} else if (isMenstrauting)
+												{
 													//pink
 													Color(
 															0xFFE91E63
@@ -168,10 +171,11 @@ fun PrayerTrackerGrid()
 												if (isHighlighted)
 												{
 													MaterialTheme.colorScheme.primary
-												} else if(isMenstrauting){
+												} else if (isMenstrauting)
+												{
 													//pink
 													Color(0xFFE91E63)
-												}else
+												} else
 												{
 													Color.Gray
 												}

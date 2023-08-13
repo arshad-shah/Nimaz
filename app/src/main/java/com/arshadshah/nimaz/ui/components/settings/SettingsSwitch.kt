@@ -60,7 +60,8 @@ fun SettingsSwitch(
 					painter = painterResource(id = R.drawable.cross_icon) ,
 					contentDescription = null ,
 					modifier = Modifier
-						.size(SwitchDefaults.IconSize).padding(2.dp)
+						.size(SwitchDefaults.IconSize)
+						.padding(2.dp)
 				)
 		}
 	}
@@ -84,7 +85,9 @@ fun SettingsSwitch(
 				SettingsTileIcon(icon = icon)
 			} else
 			{
-				Spacer(modifier = Modifier.width(24.dp).height(60.dp))
+				Spacer(modifier = Modifier
+					.width(24.dp)
+					.height(60.dp))
 			}
 			SettingsTileTexts(title = title , subtitle = subtitle)
 			SettingsTileAction {
@@ -102,14 +105,14 @@ fun SettingsSwitch(
 @Composable
 internal fun SettingsSwitchPreview()
 {
-		val storage = rememberBooleanSettingState(defaultValue = true)
-		SettingsSwitch(
-				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-					  )
+	val storage = rememberBooleanSettingState(defaultValue = true)
+	SettingsSwitch(
+			state = storage ,
+			icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			title = { Text(text = "Hello") } ,
+			subtitle = { Text(text = "This is a longer text") } ,
+			onCheckedChange = { }
+				  )
 }
 
 //preview with checked state as false
@@ -117,14 +120,14 @@ internal fun SettingsSwitchPreview()
 @Composable
 internal fun SettingsSwitchPreview2()
 {
-		val storage = rememberBooleanSettingState(defaultValue = false)
-		SettingsSwitch(
-				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-					  )
+	val storage = rememberBooleanSettingState(defaultValue = false)
+	SettingsSwitch(
+			state = storage ,
+			icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			title = { Text(text = "Hello") } ,
+			subtitle = { Text(text = "This is a longer text") } ,
+			onCheckedChange = { }
+				  )
 }
 
 //preview of checked state as true in dark theme
@@ -132,11 +135,11 @@ internal fun SettingsSwitchPreview2()
 @Composable
 internal fun SettingsSwitchPreview3()
 {
-		val storage = rememberBooleanSettingState(defaultValue = true)
-		SettingsSwitch(
-				state = storage ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-					  )
+	val storage = rememberBooleanSettingState(defaultValue = true)
+	SettingsSwitch(
+			state = storage ,
+			title = { Text(text = "Hello") } ,
+			subtitle = { Text(text = "This is a longer text") } ,
+			onCheckedChange = { }
+				  )
 }

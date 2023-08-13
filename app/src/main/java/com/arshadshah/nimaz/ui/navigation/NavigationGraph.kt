@@ -1045,13 +1045,14 @@ fun NavigationGraph(
 											)
 											  )
 					} ,
-						  )
+					   )
 		}
 
-		composable(CHAPTER_SCREEN_ROUTE){
+		composable(CHAPTER_SCREEN_ROUTE) {
 			DuaList(
 					chapterId = it.arguments?.getString("chapterId") !! ,
-					paddingValues = paddingValues)
+					paddingValues = paddingValues
+				   )
 		}
 
 		composable(SHAHADAH_SCREEN_ROUTE) {
@@ -1098,7 +1099,8 @@ fun NavigationGraph(
 						 )
 		}
 		composable(ABOUT_SCREEN_ROUTE) {
-			About(paddingValues
+			About(
+					paddingValues
 				 )
 			//navigate to the debug screen
 			{
@@ -1111,7 +1113,7 @@ fun NavigationGraph(
 		composable(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
 			PrayerTimesCustomizations(paddingValues)
 		}
-		
+
 		composable(DEBUG_MODE) {
 			DebugScreen(paddingValues)
 		}

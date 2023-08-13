@@ -47,6 +47,7 @@ buildscript {
         latestAboutLibsRelease = '10.6.2'
 
         google_devtools_ksp_version = "1.8.10-1.0.9"
+        balloon_version = "1.5.4"
     }
 
     dependencies {

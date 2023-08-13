@@ -370,7 +370,8 @@ fun AyaListItemUI(
 
 	fun prepareMediaPlayer()
 	{
-		try{
+		try
+		{
 			mediaPlayer.stop()
 			//reset the media player
 			mediaPlayer.reset()
@@ -383,7 +384,7 @@ fun AyaListItemUI(
 										  )
 			mediaPlayer.setDataSource(uri.toString())
 			mediaPlayer.prepare()
-		}catch (e : Exception)
+		} catch (e : Exception)
 		{
 			error.value = e.message.toString()
 		}
@@ -439,7 +440,8 @@ fun AyaListItemUI(
 	//stop the file
 	fun stopFile()
 	{
-		try{
+		try
+		{
 			if (! isStopped.value)
 			{
 				mediaPlayer.stop()
@@ -479,7 +481,7 @@ fun AyaListItemUI(
 	//it should be displayed in the center of the screen on top of everything
 	if (error.value.isNotEmpty())
 	{
-		Dialog(onDismissRequest ={
+		Dialog(onDismissRequest = {
 			error.value = ""
 		}) {
 			BannerLarge(

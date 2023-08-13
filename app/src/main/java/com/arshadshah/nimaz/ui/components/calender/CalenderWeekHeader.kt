@@ -17,11 +17,11 @@ import java.time.DayOfWeek
 
 @Composable
 fun CalenderWeekHeader(
-	weekState : List<DayOfWeek>
+	weekState : List<DayOfWeek> ,
 					  )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.small,
+			shape = MaterialTheme.shapes.small ,
 			modifier = Modifier.padding(top = 4.dp)
 				) {
 		Row(
@@ -57,5 +57,15 @@ fun CalenderWeekHeader(
 @Composable
 fun CalenderWeekHeaderPreview()
 {
-	CalenderWeekHeader(weekState = listOf(DayOfWeek.MONDAY , DayOfWeek.TUESDAY , DayOfWeek.WEDNESDAY , DayOfWeek.THURSDAY , DayOfWeek.FRIDAY , DayOfWeek.SATURDAY , DayOfWeek.SUNDAY))
+	CalenderWeekHeader(
+			weekState = listOf(
+					DayOfWeek.MONDAY ,
+					DayOfWeek.TUESDAY ,
+					DayOfWeek.WEDNESDAY ,
+					DayOfWeek.THURSDAY ,
+					DayOfWeek.FRIDAY ,
+					DayOfWeek.SATURDAY ,
+					DayOfWeek.SUNDAY
+							  )
+					  )
 }

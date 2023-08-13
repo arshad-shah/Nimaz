@@ -65,7 +65,7 @@ fun PrayerTrackerListItems(
 			}
 			//the toggleable item
 			ToggleableItemColumn(
-					enabled = !isMenstrauting.value ,
+					enabled = ! isMenstrauting.value ,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)

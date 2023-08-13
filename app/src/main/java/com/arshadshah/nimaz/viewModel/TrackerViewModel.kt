@@ -181,9 +181,10 @@ class TrackerViewModel : ViewModel()
 					event.day ,
 					event.progress
 																		   )
+
 			is TrackerEvent.UPDATE_MENSTRAUTING_STATE -> updateMenstrautingState(
 					event.isMenstrauting
-																				 )
+																				)
 
 		}
 	}
@@ -194,21 +195,23 @@ class TrackerViewModel : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			updateTracker(
 					PrayerTracker(
-					date = _dateState.value ,
-					progress = _progressState.value ,
-					isMenstruating = menstrauting,
-					fajr = _fajrState.value,
-					dhuhr = _zuhrState.value,
-					asr = _asrState.value,
-					maghrib = _maghribState.value,
-					isha = _ishaState.value
-								 ))
+							date = _dateState.value ,
+							progress = _progressState.value ,
+							isMenstruating = menstrauting ,
+							fajr = _fajrState.value ,
+							dhuhr = _zuhrState.value ,
+							asr = _asrState.value ,
+							maghrib = _maghribState.value ,
+							isha = _ishaState.value
+								 )
+						 )
 			updateFastTracker(
 					FastTracker(
-					date = _dateState.value ,
-					isFasting = _isFasting.value ,
-					isMenstruating = menstrauting
-							 ))
+							date = _dateState.value ,
+							isFasting = _isFasting.value ,
+							isMenstruating = menstrauting
+							   )
+							 )
 
 			//get the monthly trackers
 			getProgressForMonth(_dateState.value)
@@ -294,15 +297,17 @@ class TrackerViewModel : ViewModel()
 		}
 	}
 
-	private val _trackersForWeek = MutableStateFlow(listOf(
-			PrayerTracker() ,
-			PrayerTracker() ,
-			PrayerTracker() ,
-			PrayerTracker() ,
-			PrayerTracker() ,
-			PrayerTracker() ,
-			PrayerTracker()
-																			   ))
+	private val _trackersForWeek = MutableStateFlow(
+			listOf(
+					PrayerTracker() ,
+					PrayerTracker() ,
+					PrayerTracker() ,
+					PrayerTracker() ,
+					PrayerTracker() ,
+					PrayerTracker() ,
+					PrayerTracker()
+				  )
+												   )
 	val trackersForWeek : StateFlow<List<PrayerTracker>> = _trackersForWeek
 
 	private fun getProgressForWeek(date : String)

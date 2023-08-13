@@ -23,7 +23,7 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 fun ChapterList(
 	paddingValues : PaddingValues ,
 	onNavigateToChapter : (Int) -> Unit ,
-	category : String
+	category : String ,
 			   )
 {
 	val context = LocalContext.current
@@ -34,7 +34,7 @@ fun ChapterList(
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
-	LaunchedEffect(Unit){
+	LaunchedEffect(Unit) {
 		viewModel.getChapters(category)
 	}
 
@@ -62,19 +62,19 @@ fun ChapterList(
 		}
 	}
 
-			LazyColumn(
-					modifier = Modifier.testTag(TEST_TAG_CHAPTERS) ,
-					contentPadding = paddingValues ,
-					state = listState
-					  )
-			{
-				items(chapterState.value.size)
-				{
-					ChapterListItem(
-							chapter = chapterState.value[it] ,
-							onNavigateToChapter = onNavigateToChapter ,
-							loading = false
-								   )
-				}
-			}
+	LazyColumn(
+			modifier = Modifier.testTag(TEST_TAG_CHAPTERS) ,
+			contentPadding = paddingValues ,
+			state = listState
+			  )
+	{
+		items(chapterState.value.size)
+		{
+			ChapterListItem(
+					chapter = chapterState.value[it] ,
+					onNavigateToChapter = onNavigateToChapter ,
+					loading = false
+						   )
+		}
+	}
 }

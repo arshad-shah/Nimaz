@@ -58,10 +58,10 @@ fun IntroPage1()
 			OnBoardingPage.Eighth ,
 					  )
 
-	val pagerState = rememberPagerState (
+	val pagerState = rememberPagerState(
 			0 ,
 			0F
-										) { pages.size }
+									   ) { pages.size }
 
 	val context = LocalContext.current
 	val sharedPref = PrivateSharedPreferences(context)
@@ -107,8 +107,8 @@ fun IntroPage1()
 					.weight(10f)
 					.testTag("introPager") ,
 				state = pagerState ,
-				userScrollEnabled = false,
-				pageSize = PageSize.Fill,
+				userScrollEnabled = false ,
+				pageSize = PageSize.Fill ,
 				verticalAlignment = Alignment.Top
 					   ) { position ->
 			PagerScreen(onBoardingPage = pages[position] , position)
@@ -188,9 +188,10 @@ fun IntroPage1()
 	}
 }
 
-@Preview(showBackground = true , showSystemUi = true ,
-		 uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL ,
-		 device = "id:S20 Fe"
+@Preview(
+		showBackground = true , showSystemUi = true ,
+		uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL ,
+		device = "id:S20 Fe"
 		)
 @Composable
 fun IntroPage1Preview()

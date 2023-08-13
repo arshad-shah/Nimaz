@@ -39,14 +39,15 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 			viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
-	LaunchedEffect(Unit){
+	LaunchedEffect(Unit) {
 		viewModel.getCategories()
 	}
 
 	val categories = remember { viewModel.categories }.collectAsState()
 
 	//if the categories are not null, and not empty, then show them
-	if(categories.value!!.isNotEmpty()){
+	if (categories.value.isNotEmpty())
+	{
 		val uniqueCategories = categories.value.distinctBy { it.keys }
 		//get the titles of the categories
 		//List<Map<String, ArrayList<Chapter>>>
@@ -60,7 +61,8 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 				newCategoryTitles.add("All Chapters")
 				//remove the empty string
 				newCategoryTitles.remove("")
-			}else{
+			} else
+			{
 				newCategoryTitles.add(it)
 			}
 		}
@@ -71,8 +73,11 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 		//sort the categories alphabetically
 		newCategoryTitles.sort()
 
-		LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp), contentPadding = paddingValues) {
-			items(newCategoryTitles.size){
+		LazyVerticalGrid(
+				columns = GridCells.Adaptive(minSize = 128.dp) ,
+				contentPadding = paddingValues
+						) {
+			items(newCategoryTitles.size) {
 				//if the title is All Chapters, then return the amount of chapters in the list
 				//else return the amount of chapters in each category
 				if (newCategoryTitles[it] == "All Chapters")
@@ -80,19 +85,20 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 					Category(
 							title = newCategoryTitles[it] ,
 							//return the amount of chapters in the list
-							amount = chaptersInEachCategory[it].size,
+							amount = chaptersInEachCategory[it].size ,
 							onClicked = {
 								onNavigateToChapterListScreen(newCategoryTitles[it])
 							}
-						   )
-				}else{
+							)
+				} else
+				{
 					Category(
 							title = newCategoryTitles[it] ,
 							//return the amount of chapters in each category
 							//where the title is the same as chaptersInEachCategory[0][0].category
 							amount = chaptersInEachCategory[it].count { chapter ->
 								chapter.category == newCategoryTitles[it]
-							},
+							} ,
 							onClicked = {
 								onNavigateToChapterListScreen(newCategoryTitles[it])
 							}
@@ -106,11 +112,11 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 //one category
 @Composable
 fun Category(
-		title : String ,
-		icon : Int? = null ,
-		description : String = "" ,
-		amount : Int ,
-		onClicked : () -> Unit = {}
+	title : String ,
+	icon : Int? = null ,
+	description : String = "" ,
+	amount : Int ,
+	onClicked : () -> Unit = {} ,
 			)
 {
 	ElevatedCard(
@@ -124,19 +130,24 @@ fun Category(
 				}
 				) {
 		Row(
-				modifier = Modifier.padding(8.dp).fillMaxWidth(),
-				verticalAlignment = Alignment.CenterVertically,
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth() ,
+				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 			Column(
-					modifier = Modifier.padding(8.dp).fillMaxWidth() ,
+					modifier = Modifier
+						.padding(8.dp)
+						.fillMaxWidth() ,
 					verticalArrangement = Arrangement.SpaceAround ,
 					horizontalAlignment = Alignment.Start
-				  ){
-				Text(text = title, style = MaterialTheme.typography.titleMedium)
+				  ) {
+				Text(text = title , style = MaterialTheme.typography.titleMedium)
 				Text(text = "$amount Chapters" , style = MaterialTheme.typography.bodySmall)
 			}
-			if (icon != null){
+			if (icon != null)
+			{
 				Image(
 						painter = painterResource(id = icon) ,
 						contentDescription = description ,

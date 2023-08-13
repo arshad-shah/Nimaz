@@ -33,9 +33,9 @@ internal fun SettingsTileIcon(
 fun SettingsIconPreview()
 {
 
-		SettingsTileIcon {
-			Icon(imageVector = Icons.Default.Clear , contentDescription = "")
-		}
+	SettingsTileIcon {
+		Icon(imageVector = Icons.Default.Clear , contentDescription = "")
+	}
 }
 
 @Preview
@@ -43,7 +43,7 @@ fun SettingsIconPreview()
 fun SettingsIconPreviewEmpty()
 {
 
-		SettingsTileIcon(
-				icon = { } ,
-						)
+	SettingsTileIcon(
+			icon = { } ,
+					)
 }

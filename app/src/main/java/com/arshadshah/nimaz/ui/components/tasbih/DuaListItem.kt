@@ -49,21 +49,22 @@ fun DuaListItem(dua : Dua , loading : Boolean)
 							)
 			}
 
-			MarkdownText(markdown = dua.english_translation ,
-						 modifier = Modifier
-							 .padding(4.dp)
-							 .fillMaxWidth()
-							 .placeholder(
-									 visible = loading ,
-									 color = MaterialTheme.colorScheme.outline ,
-									 shape = RoundedCornerShape(4.dp) ,
-									 highlight = PlaceholderHighlight.shimmer(
-											 highlightColor = Color.White ,
-																			 )
-												 ) ,
-						 fontSize = 18.sp ,
-						 fontResource = R.font.nunito ,
-						 )
+			MarkdownText(
+					markdown = dua.english_translation ,
+					modifier = Modifier
+						.padding(4.dp)
+						.fillMaxWidth()
+						.placeholder(
+								visible = loading ,
+								color = MaterialTheme.colorScheme.outline ,
+								shape = RoundedCornerShape(4.dp) ,
+								highlight = PlaceholderHighlight.shimmer(
+										highlightColor = Color.White ,
+																		)
+									) ,
+					fontSize = 18.sp ,
+					fontResource = R.font.nunito ,
+						)
 			Row {
 				Text(
 						text = "Reference: ${dua.english_reference}" ,

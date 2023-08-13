@@ -280,7 +280,10 @@ fun SettingsScreen(
 															 )
 							} ,
 							icon = {
-								Crossfade(targetState = stateDarkMode.value) { darkMode ->
+								Crossfade(
+										targetState = stateDarkMode.value ,
+										label = "themeModeChange"
+										 ) { darkMode ->
 									if (darkMode)
 									{
 										Icon(
@@ -623,18 +626,25 @@ fun SettingsScreen(
 							val manager = ReviewManagerFactory.create(context)
 							val request = manager.requestReviewFlow()
 							request.addOnCompleteListener { task ->
-								if (task.isSuccessful) {
+								if (task.isSuccessful)
+								{
 									// We got the ReviewInfo object
 									val reviewInfo = task.result
-									val flow = manager.launchReviewFlow(context as Activity , reviewInfo)
+									val flow =
+										manager.launchReviewFlow(context as Activity , reviewInfo)
 									flow.addOnCompleteListener { _ ->
 										// The flow has finished. The API does not indicate whether the user
 										// reviewed or not, or even whether the review dialog was shown. Thus, no
 										// matter the result, we continue our app flow.
 									}
-								} else {
+								} else
+								{
 									// There was some problem, log or handle the error code.
-									Toasty.error(context , task.exception?.message ?: "Error" , Toast.LENGTH_SHORT)
+									Toasty.error(
+											context ,
+											task.exception?.message ?: "Error" ,
+											Toast.LENGTH_SHORT
+												)
 										.show()
 								}
 							}
@@ -730,7 +740,8 @@ fun SettingsScreen(
 								)
 			}
 
-			if(isDebugMode){
+			if (isDebugMode)
+			{
 				ElevatedCard(
 						shape = MaterialTheme.shapes.extraLarge ,
 						modifier = Modifier
@@ -741,7 +752,7 @@ fun SettingsScreen(
 					SettingsMenuLink(
 							title = { Text(text = "Debug Tools") } ,
 							//version of the app
-							subtitle = { Text(text = "For testing purposes only")} ,
+							subtitle = { Text(text = "For testing purposes only") } ,
 							onClick = {
 								onNavigateToDebugScreen()
 							} ,

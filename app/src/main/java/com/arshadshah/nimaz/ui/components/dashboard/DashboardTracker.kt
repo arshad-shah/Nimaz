@@ -99,8 +99,7 @@ fun DashboardPrayerTracker()
 	val ishaChecked = remember { mutableStateOf(false) }
 	val progress = remember { mutableStateOf(0f) }
 
-	Box(
-	   ) {
+	Box {
 		when (stateOfTrackerForToday.value)
 		{
 			is TrackerViewModel.TrackerState.Loading ->
@@ -137,7 +136,7 @@ fun DashboardPrayerTracker()
 						ishaChecked = ishaChecked ,
 						handleEvent = viewModel::onEvent ,
 						dateState = dateState ,
-						progress = progress,
+						progress = progress ,
 						isMenstrating = isMenstrating
 										 )
 			}
@@ -193,7 +192,7 @@ fun PrayerTrackerListItemsRow(
 			items.forEachIndexed { index , item ->
 				//the toggleable item
 				ToggleableItemRow(
-						enabled = !isMenstrating.value ,
+						enabled = ! isMenstrating.value ,
 						text = item ,
 						checked = when (item)
 						{

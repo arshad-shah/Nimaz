@@ -34,7 +34,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun CalenderHeader(
 	monthState : MonthState ,
-	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit>
+	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
 				  )
 {
 	val currentMonth = monthState.currentMonth

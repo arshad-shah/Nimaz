@@ -286,7 +286,8 @@ class DataStore(db : AppDatabase)
 	suspend fun getAllChapters() = duaDao.getAllChapters().map { it.toChapter() }
 
 	//get duas of a chapter by chapter id
-	suspend fun getDuasOfChapter(chapterId : Int) = duaDao.getDuasOfChapter(chapterId).map { it.toDua() }
+	suspend fun getDuasOfChapter(chapterId : Int) =
+		duaDao.getDuasOfChapter(chapterId).map { it.toDua() }
 
 	//count
 	suspend fun countChapters() = duaDao.countChapters()

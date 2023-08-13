@@ -107,9 +107,9 @@ fun ListOfTasbih(
 
 	val titles = listOf("Tasbih List" , "My Tasbih")
 	val pagerState = rememberPagerState(
-			initialPage = 0,
-			initialPageOffsetFraction = 0F,
-									   ){
+			initialPage = 0 ,
+			initialPageOffsetFraction = 0F ,
+									   ) {
 		titles.size
 	}
 	val scope = rememberCoroutineScope()
