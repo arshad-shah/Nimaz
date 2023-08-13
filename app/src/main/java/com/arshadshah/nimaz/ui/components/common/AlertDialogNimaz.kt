@@ -1,9 +1,26 @@
 package com.arshadshah.nimaz.ui.components.common
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,28 +37,51 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arshadshah.nimaz.R
 
-//custom AlertDialog
+/**
+ * A custom Alert dialog for the app, it is very flexible and allows usage in many different ways
+ * it accepts booleans flags to show or hide certain elements of the dialog.
+ * @param modifier Modifier to apply to the dialog
+ * @param icon Icon to show in the dialog
+ * @param action The action shown to right of title in the dialog
+ * @param title The title of the dialog
+ * @param contentDescription The content description for the dialog icon
+ * @param description The description of the dialog
+ * @param contentToShow The content to show in the dialog
+ * @param contentHeight The height of the content to show in the dialog
+ * @param cardContent Whether to show the content in a card or not
+ * @param onDismissRequest The callback to be called when the dialog is dismissed
+ * @param properties The properties of the dialog
+ * @param topDivider Whether to show a top divider or not
+ * @param bottomDivider Whether to show a bottom divider or not
+ * @param showConfirmButton Whether to show the confirm button or not
+ * @param showDismissButton Whether to show the dismiss button or not
+ * @param onConfirm The callback to be called when the confirm button is clicked
+ * @param confirmButtonText The text to show on the confirm button
+ * @param onDismiss The callback to be called when the dismiss button is clicked
+ * @param dismissButtonText The text to show on the dismiss button
+ * @sample com.arshadshah.nimaz.ui.components.common.AlertDialogNimazPreviewWithAction
+ * */
 @Composable
 fun AlertDialogNimaz(
 	modifier : Modifier = Modifier ,
 	icon : Painter? = null ,
 	action : @Composable (() -> Unit)? = null ,
-	contentDescription : String ,
 	title : String ,
+	contentDescription : String ,
 	description : String? = null ,
 	contentToShow : @Composable () -> Unit ,
 	contentHeight : Dp = 300.dp ,
+	cardContent : Boolean = true ,
 	onDismissRequest : () -> Unit ,
 	properties : DialogProperties = DialogProperties() ,
 	topDivider : Boolean = true ,
 	bottomDivider : Boolean = true ,
+	showConfirmButton : Boolean = true ,
+	showDismissButton : Boolean = true ,
 	onConfirm : () -> Unit ,
 	confirmButtonText : String = "Done" ,
 	onDismiss : () -> Unit ,
 	dismissButtonText : String = "Cancel" ,
-	showConfirmButton : Boolean = true ,
-	showDismissButton : Boolean = true ,
-	cardContent : Boolean = true ,
 					)
 {
 	//state of the scrollable column
@@ -175,7 +215,7 @@ fun AlertDialogNimaz(
 						modifier = Modifier
 							.fillMaxWidth()
 							.wrapContentHeight()
-							.padding(top = 8.dp , end = 8.dp , bottom = 8.dp) ,
+							.padding(top = 8.dp , end = 8.dp , bottom = 0.dp) ,
 						horizontalArrangement = Arrangement.End
 				   ) {
 					if (showDismissButton)
@@ -258,7 +298,6 @@ fun AlertDialogNimazPreviewWithAction()
 }
 
 //with a oulinedTextField
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun AlertDialogNimazPreviewWithOutlinedTextField()
@@ -267,8 +306,8 @@ fun AlertDialogNimazPreviewWithOutlinedTextField()
 	AlertDialogNimaz(
 			title = "Hello" ,
 			contentDescription = "Add" ,
-			topDivider = true ,
-			bottomDivider = true ,
+			topDivider = false ,
+			bottomDivider = false ,
 			contentToShow = {
 				OutlinedTextField(
 						label = { Text(text = "Enter your name") } ,
@@ -283,6 +322,7 @@ fun AlertDialogNimazPreviewWithOutlinedTextField()
 							.fillMaxHeight()
 								 )
 			} ,
+			cardContent = false,
 			contentHeight = 100.dp ,
 			onDismissRequest = { } ,
 			onConfirm = { } ,
