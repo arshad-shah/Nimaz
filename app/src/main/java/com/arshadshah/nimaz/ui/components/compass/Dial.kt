@@ -106,7 +106,7 @@ fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 	}
 
 	//if the user is facing the qibla, vibrate the phone and show a message to the user and stop the vibration after 1 second and stop animating the dial until the user turns away from the qibla
-	LaunchedEffect(key1 = target, key2 = pointingToQibla) {
+	LaunchedEffect(key1 = target , key2 = pointingToQibla) {
 		if (abs(target) < 5f)
 		{
 			//animate to 0f

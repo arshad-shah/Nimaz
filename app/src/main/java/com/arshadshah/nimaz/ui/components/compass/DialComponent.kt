@@ -31,7 +31,8 @@ fun DialComponent(
 	pointingToQibla : Boolean ,
 	imageToDisplay : Painter ,
 	rotateAnim : Animatable<Float , AnimationVector1D> ,
-				 ){
+				 )
+{
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
 			modifier = Modifier

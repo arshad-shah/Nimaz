@@ -7,6 +7,6 @@ data class Dua(
 	val arabic_dua : String ,
 	val english_translation : String ,
 	val english_reference : String ,
-	val category : String,
-	val isFavourite : Boolean = false
+	val category : String ,
+	val isFavourite : Boolean = false ,
 			  )

@@ -215,7 +215,7 @@ class PrayerTimesViewModel : ViewModel()
 				views.setTextViewText(
 						R.id.Ishaa_time , newIshaTime?.format(
 						DateTimeFormatter.ofPattern("hh:mm a")
-																	   )
+															 )
 									 )
 				// Update the widget
 				appWidgetManager.updateAppWidget(widgetId , views)
@@ -281,7 +281,7 @@ class PrayerTimesViewModel : ViewModel()
 					{
 						response.data.isha
 					}
-					_ishaTimeState.value = newIshaTime!!
+					_ishaTimeState.value = newIshaTime !!
 					Log.d(
 							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
 							"UpdatePrayerTimes: ${response.data}"
@@ -362,7 +362,7 @@ class PrayerTimesViewModel : ViewModel()
 					{
 						response.data.isha
 					}
-					_ishaTimeState.value = newIshaTime!!
+					_ishaTimeState.value = newIshaTime !!
 
 					_isLoading.value = false
 					_isRefreshing.value = false

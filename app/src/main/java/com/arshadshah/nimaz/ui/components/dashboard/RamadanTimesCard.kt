@@ -114,42 +114,42 @@ fun RamadanTimesCard(isFasting : Boolean)
 				   ) {
 					Text(text = "Fasting Times" , style = MaterialTheme.typography.titleMedium)
 					IconButton(
-							modifier = Modifier.size(32.dp),
+							modifier = Modifier.size(32.dp) ,
 							onClick = {
-						//share the aya
-						val shareIntent = Intent(Intent.ACTION_SEND)
-						shareIntent.type = "text/plain"
-						//create the share message
-						//with the aya text, aya translation
-						//the sura number followed by the aya number
-						shareIntent.putExtra(
-								Intent.EXTRA_TEXT ,
-								"Ramadan Fasting Times for ${location.value} \n${
-									DateTimeFormatter.ofPattern(
-											"EEEE, d MMMM yyyy"
-															   ).format(today)
-								} \n" +
-										"Imsak (Fajr): ${
-											DateTimeFormatter.ofPattern("hh:mm a")
-												.format(fajrPrayerTime.value)
+								//share the aya
+								val shareIntent = Intent(Intent.ACTION_SEND)
+								shareIntent.type = "text/plain"
+								//create the share message
+								//with the aya text, aya translation
+								//the sura number followed by the aya number
+								shareIntent.putExtra(
+										Intent.EXTRA_TEXT ,
+										"Ramadan Fasting Times for ${location.value} \n${
+											DateTimeFormatter.ofPattern(
+													"EEEE, d MMMM yyyy"
+																	   ).format(today)
 										} \n" +
-										"Iftar (Maghrib): ${
-											DateTimeFormatter.ofPattern("hh:mm a")
-												.format(maghribPrayerTime.value)
-										} \n" +
-										"Times are Provided by Nimaz : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
-											)
-						shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Ramadan Times")
-						shareIntent.putExtra(Intent.EXTRA_TITLE , "Ramadan Times")
-
-						//start the share intent
-						context.startActivity(
-								Intent.createChooser(
-										shareIntent ,
-										"Share Ramadan Times"
+												"Imsak (Fajr): ${
+													DateTimeFormatter.ofPattern("hh:mm a")
+														.format(fajrPrayerTime.value)
+												} \n" +
+												"Iftar (Maghrib): ${
+													DateTimeFormatter.ofPattern("hh:mm a")
+														.format(maghribPrayerTime.value)
+												} \n" +
+												"Times are Provided by Nimaz : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
 													)
-											 )
-					}){
+								shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Ramadan Times")
+								shareIntent.putExtra(Intent.EXTRA_TITLE , "Ramadan Times")
+
+								//start the share intent
+								context.startActivity(
+										Intent.createChooser(
+												shareIntent ,
+												"Share Ramadan Times"
+															)
+													 )
+							}) {
 						Icon(
 								modifier = Modifier.size(24.dp) ,
 								painter = painterResource(id = R.drawable.share_icon) ,

@@ -16,14 +16,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,14 +29,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
 import com.arshadshah.nimaz.ui.components.common.CalculationMethodUI
+import com.arshadshah.nimaz.ui.components.common.ToolTip
 import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
@@ -162,10 +158,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		settingViewModel.ishaOffset
 	}.collectAsState()
 
-	val isLoading = remember {
-		settingViewModel.isLoading
-	}.collectAsState()
-
 	madhabState.value = madhab.value
 	highLatitudeRuleState.value = highLatitudeRule.value
 	fajrAngleState.value = fajrAngle.value
@@ -186,47 +178,16 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		  ) {
 
 		SettingsGroup(title = {
-			val openPopUp = remember { mutableStateOf(false) }
 			Row(
 					modifier = Modifier.fillMaxWidth() ,
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
 				Text(text = "Prayer Parameters")
-				Spacer(modifier = Modifier.width(8.dp))
-				IconButton(onClick = {
-					openPopUp.value = ! openPopUp.value
-				}) {
-					Icon(
-							modifier = Modifier.size(24.dp) ,
-							painter = painterResource(id = R.drawable.info_icon) ,
-							contentDescription = "Info" ,
-							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-						)
-				}
-			}
-			if (openPopUp.value)
-			{
-				Popup(
-						onDismissRequest = {
-							openPopUp.value = ! openPopUp.value
-						} ,
-						alignment = Alignment.BottomEnd ,
-						offset = IntOffset(0 , 150) ,
-					 ) {
-					ElevatedCard(
-							shape = MaterialTheme.shapes.extraLarge ,
-							modifier = Modifier
-								.padding(8.dp) ,
-								) {
-						Text(
-								text = "Prayer times are calculated using the parameters you set here. " +
-										"Please refer to the Help documentation for more information." ,
-								modifier = Modifier.padding(8.dp) ,
-								style = MaterialTheme.typography.bodySmall
-							)
-					}
-				}
+				ToolTip(
+						icon = painterResource(id = R.drawable.info_icon) ,
+						tipText = "Prayer times Calculation Parameters" ,
+					   )
 			}
 		}) {
 			CalculationMethodUI()
@@ -307,47 +268,16 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		}
 
 		SettingsGroup(title = {
-			val openPopUp = remember { mutableStateOf(false) }
 			Row(
 					modifier = Modifier.fillMaxWidth() ,
 					verticalAlignment = Alignment.CenterVertically ,
 					horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
 				Text(text = "Prayer Angles")
-				Spacer(modifier = Modifier.width(8.dp))
-				IconButton(onClick = {
-					openPopUp.value = ! openPopUp.value
-				}) {
-					Icon(
-							modifier = Modifier.size(24.dp) ,
-							painter = painterResource(id = R.drawable.info_icon) ,
-							contentDescription = "Info" ,
-							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-						)
-				}
-			}
-			if (openPopUp.value)
-			{
-				Popup(
-						onDismissRequest = {
-							openPopUp.value = ! openPopUp.value
-						} ,
-						alignment = Alignment.BottomEnd ,
-						offset = IntOffset(0 , 150) ,
-					 ) {
-					ElevatedCard(
-							shape = MaterialTheme.shapes.extraLarge ,
-							modifier = Modifier
-								.padding(8.dp) ,
-								) {
-						Text(
-								text = "Fajr and isha prayer times are calculated using the angles you set here. " +
-										"Please refer to the Help documentation for more information." ,
-								modifier = Modifier.padding(8.dp) ,
-								style = MaterialTheme.typography.bodySmall
-							)
-					}
-				}
+				ToolTip(
+						icon = painterResource(id = R.drawable.info_icon) ,
+						tipText = "Angles of the sun used to calculate Fair and Isha prayer times" ,
+					   )
 			}
 		}) {
 
@@ -455,7 +385,6 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 
 		SettingsGroup(
 				title = {
-					val openPopUp = remember { mutableStateOf(false) }
 					Row(
 							modifier = Modifier.fillMaxWidth() ,
 							verticalAlignment = Alignment.CenterVertically ,
@@ -463,39 +392,10 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 					   ) {
 						Text(text = "Prayer Time")
 						Spacer(modifier = Modifier.width(8.dp))
-						IconButton(onClick = {
-							openPopUp.value = ! openPopUp.value
-						}) {
-							Icon(
-									modifier = Modifier.size(24.dp) ,
-									painter = painterResource(id = R.drawable.info_icon) ,
-									contentDescription = "Info" ,
-									tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-								)
-						}
-					}
-					if (openPopUp.value)
-					{
-						Popup(
-								onDismissRequest = {
-									openPopUp.value = ! openPopUp.value
-								} ,
-								alignment = Alignment.BottomEnd ,
-								offset = IntOffset(0 , 150) ,
-							 ) {
-							ElevatedCard(
-									shape = MaterialTheme.shapes.extraLarge ,
-									modifier = Modifier
-										.padding(8.dp) ,
-										) {
-								Text(
-										text = "Each prayer times can be adjusted individually using the settings below. " +
-												"Please refer to the Help documentation for more information." ,
-										modifier = Modifier.padding(8.dp) ,
-										style = MaterialTheme.typography.bodySmall
-									)
-							}
-						}
+						ToolTip(
+								icon = painterResource(id = R.drawable.info_icon) ,
+								tipText = "Manual adjustment of prayer times" ,
+							   )
 					}
 				} ,
 				content = {

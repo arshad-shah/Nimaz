@@ -25,6 +25,7 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -175,7 +176,13 @@ fun <T> Picker(
 													 )
 											  )
 										//a bit smaller than the other labels
-										.scale(animateFloatAsState(0.8f).value)
+										//scale from 1.2 to 0.8
+										.scale(
+												animateFloatAsState(
+														0.8f ,
+														label = "topUnselectedNumber"
+																   ).value
+											  )
 								 )
 						}
 						Label(
@@ -187,7 +194,12 @@ fun <T> Picker(
 													1 - abs(coercedAnimatedOffset) / halfNumbersColumnHeightPx
 												  ))
 										  )
-									.scale(animateFloatAsState(1f).value)
+									.scale(
+											animateFloatAsState(
+													1.2f ,
+													label = "selectedNumber"
+															   ).value
+										  )
 							 )
 						if (indexOfElement < list.count() - 1)
 						{
@@ -201,7 +213,12 @@ fun <T> Picker(
 														- coercedAnimatedOffset / halfNumbersColumnHeightPx
 													 )
 											  )
-										.scale(animateFloatAsState(0.8f).value)
+										.scale(
+												animateFloatAsState(
+														0.8f ,
+														label = "bottomUnselectedNumber"
+																   ).value
+											  )
 								 )
 						}
 					}
@@ -252,10 +269,11 @@ fun <T> Picker(
 @Composable
 private fun Label(text : String , modifier : Modifier)
 {
+	val interactionSource = remember { MutableInteractionSource() }
 	Text(
 			modifier = modifier.indication(
 					indication = null ,
-					interactionSource = MutableInteractionSource()
+					interactionSource = interactionSource
 										  ) ,
 			text = text ,
 			textAlign = TextAlign.Center ,
@@ -293,12 +311,12 @@ private suspend fun Animatable<Float , AnimationVector1D>.fling(
 fun Preview()
 {
 	val list = listOf(1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10)
-	val selectedValue = remember { mutableStateOf(5) }
-		Picker(
-				list = list ,
-				value = selectedValue.value ,
-				onValueChange = {
-					selectedValue.value = it
-				}
-			  )
+	val selectedValue = remember { mutableIntStateOf(5) }
+	Picker(
+			list = list ,
+			value = selectedValue.intValue ,
+			onValueChange = {
+				selectedValue.intValue = it
+			}
+		  )
 }

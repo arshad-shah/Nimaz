@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
@@ -57,7 +58,6 @@ import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -210,7 +210,7 @@ class MainActivity : ComponentActivity()
 					dynamicColor = dynamicTheme.value ,
 					ThemeName = themeName.value
 					  ) {
-				val navController = rememberAnimatedNavController()
+				val navController = rememberNavController()
 				val route =
 					remember(navController) { mutableStateOf(navController.currentDestination?.route) }
 				navController.addOnDestinationChangedListener { _ , destination , _ ->
@@ -257,7 +257,7 @@ class MainActivity : ComponentActivity()
 				val viewModelTracker = viewModel(
 						key = AppConstants.TRACKING_VIEWMODEL_KEY ,
 						initializer = { TrackerViewModel() } ,
-						viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+						viewModelStoreOwner = LocalContext.current as ComponentActivity
 												)
 
 				val isMenstruatingState = remember {
@@ -524,21 +524,23 @@ class MainActivity : ComponentActivity()
 														}
 //
 //														//trackers screen
-														PRAYER_TRACKER_SCREEN_ROUTE,
-														CALENDER_SCREEN_ROUTE
+														PRAYER_TRACKER_SCREEN_ROUTE ,
+														CALENDER_SCREEN_ROUTE ,
 														->
 														{
 															IconButton(onClick = {
-																viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
-																		! isMenstruatingState.value
-																																				))
+																viewModelTracker.onEvent(
+																		TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
+																				! isMenstruatingState.value
+																															   )
+																						)
 															}) {
 																Icon(
 																		modifier = Modifier.size(24.dp) ,
 																		painter = painterResource(id = R.drawable.menstruation_icon) ,
-																		contentDescription = "Menstruation",
-																	//color it pink
-																	tint = Color(0xFFE91E63)
+																		contentDescription = "Menstruation" ,
+																		//color it pink
+																		tint = Color(0xFFE91E63)
 																	)
 															}
 														}
@@ -671,8 +673,8 @@ class MainActivity : ComponentActivity()
 				AppConstants.TASBIH_LIST_SCREEN ,
 				MY_QURAN_SCREEN_ROUTE ,
 				WEB_VIEW_SCREEN_ROUTE ,
-				LICENCES_SCREEN_ROUTE,
-				AppConstants.DEBUG_MODE,
+				LICENCES_SCREEN_ROUTE ,
+				AppConstants.DEBUG_MODE ,
 				CATEGORY_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true

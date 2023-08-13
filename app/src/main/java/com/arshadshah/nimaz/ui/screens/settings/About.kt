@@ -56,13 +56,14 @@ fun About(paddingValues : PaddingValues , onImageClicked : () -> Unit)
 fun AppDetails(onImageClicked : () -> Unit)
 {
 	val context = LocalContext.current
-	val sharedPref = PrivateSharedPreferences( LocalContext.current )
+	val sharedPref = PrivateSharedPreferences(LocalContext.current)
 	//multiple click count
-	val clickCount = remember{
+	val clickCount = remember {
 		mutableStateOf(0)
 	}
 	val updateClickCount = {
-		Toasty.info( context , "Click ${clickCount.value + 1} more times to enable debug mode" ).show()
+		Toasty.info(context , "Click ${clickCount.value + 1} more times to enable debug mode")
+			.show()
 		clickCount.value = clickCount.value + 1
 	}
 	ElevatedCard(
@@ -85,18 +86,23 @@ fun AppDetails(onImageClicked : () -> Unit)
 								.size(100.dp)
 								.combinedClickable(
 										onClick = {
-											if ( clickCount.value == 5 ) {
-												Toasty.success( context , "Debug Mode Enabled" ).show()
-												sharedPref.saveDataBoolean( "debug" , true)
+											if (clickCount.value == 5)
+											{
+												Toasty
+													.success(context , "Debug Mode Enabled")
+													.show()
+												sharedPref.saveDataBoolean("debug" , true)
 												onImageClicked()
-											}
-											else {
+											} else
+											{
 												updateClickCount()
 											}
 										} ,
 										onLongClick = {
-											Toasty.info( context , "Debug Mode Disabled" ).show()
-											sharedPref.saveDataBoolean( "debug" , false)
+											Toasty
+												.info(context , "Debug Mode Disabled")
+												.show()
+											sharedPref.saveDataBoolean("debug" , false)
 											clickCount.value = 0
 										}
 												  )

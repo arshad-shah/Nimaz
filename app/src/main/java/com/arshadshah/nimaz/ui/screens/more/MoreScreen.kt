@@ -45,17 +45,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.counter_icon) ,
 								contentDescription = "Tasbih" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Tasbih page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Tasbih page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToTasbihScreen(
 								" " ,
@@ -74,17 +76,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.tasbih) ,
 								contentDescription = "Tasbih List" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Tasbih List page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Tasbih List page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToTasbihListScreen()
 					}
@@ -98,17 +102,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.qibla) ,
 								contentDescription = "Qibla" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Qibla page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Qibla page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToQibla()
 					}
@@ -122,17 +128,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.names_of_allah) ,
 								contentDescription = "Names of Allah" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Names of Allah page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Names of Allah page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToNames()
 					}
@@ -146,17 +154,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.dua) ,
 								contentDescription = "Duas" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Duas page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Duas page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToListOfTasbeeh()
 					}
@@ -170,17 +180,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.tracker_icon) ,
 								contentDescription = "Trackers" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Trackers page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Trackers page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToPrayerTracker()
 					}
@@ -194,17 +206,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.calendar_icon) ,
 								contentDescription = "Calender" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Calender page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Calender page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToCalender()
 					}
@@ -218,17 +232,19 @@ fun MoreScreen(
 						Image(
 								painter = painterResource(id = R.drawable.shahadah) ,
 								contentDescription = "Shahadah" ,
-								modifier = Modifier.size(48.dp).padding(4.dp)
+								modifier = Modifier
+									.size(48.dp)
+									.padding(4.dp)
 							 )
-					},
+					} ,
 					action = {
 						Icon(
 								modifier = Modifier
-									.size(24.dp),
-								painter = painterResource(id = R.drawable.angle_small_right_icon),
-							 contentDescription = "Shahadah page",
+									.size(24.dp) ,
+								painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+								contentDescription = "Shahadah page" ,
 							)
-					},
+					} ,
 					onClick = {
 						onNavigateToShadah()
 					}
@@ -241,11 +257,12 @@ fun MoreScreen(
 //component to display the link to avoid code duplication
 @Composable
 fun MoreScreenLink(
-		title: String ,
-		icon: @Composable () -> Unit ,
-		action: @Composable () -> Unit ,
-		onClick: () -> Unit ,
-		) {
+	title : String ,
+	icon : @Composable () -> Unit ,
+	action : @Composable () -> Unit ,
+	onClick : () -> Unit ,
+				  )
+{
 	//Shahadah link
 	ElevatedCard(
 			shape = MaterialTheme.shapes.extraLarge ,
@@ -259,10 +276,10 @@ fun MoreScreenLink(
 					Text(
 							text = title ,
 						)
-				},
+				} ,
 				icon = {
 					icon()
-				},
+				} ,
 				action = {
 					action()
 				}
@@ -274,7 +291,8 @@ fun MoreScreenLink(
 
 @Preview
 @Composable
-fun MoreScreenPreview() {
+fun MoreScreenPreview()
+{
 	MoreScreen(
 			paddingValues = PaddingValues(0.dp) ,
 			onNavigateToTasbihScreen = { s1 , s2 , s3 , s4 -> } ,
@@ -286,5 +304,5 @@ fun MoreScreenPreview() {
 			onNavigateToCalender = { } ,
 			onNavigateToQibla = { } ,
 			onNavigateToTasbihListScreen = { } ,
-		)
+			  )
 }

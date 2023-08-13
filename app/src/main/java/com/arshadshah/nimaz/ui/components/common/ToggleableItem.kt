@@ -39,9 +39,9 @@ fun ToggleableItemRow(
 
 		Column(
 				modifier = modifier
-					.clickable (
+					.clickable(
 							enabled = enabled ,
-							){
+							  ) {
 						onCheckedChange(! targetState)
 					} ,
 				verticalArrangement = Arrangement.Center ,
@@ -69,7 +69,9 @@ fun ToggleableItemRow(
 					Icon(
 							painter = painterResource(id = R.drawable.cross_icon) ,
 							contentDescription = "Uncheck" ,
-							modifier = Modifier.padding(10.dp).alpha(0.6f)
+							modifier = Modifier
+								.padding(10.dp)
+								.alpha(0.6f)
 						)
 				} else
 				{
@@ -96,8 +98,10 @@ fun ToggleableItemRow(
 									bottom = 8.dp
 													   ) ,
 							text = text ,
-							style = MaterialTheme.typography.bodySmall,
-							color = if(enabled) MaterialTheme.colorScheme.onSurface else Color(0xFFE91E63)
+							style = MaterialTheme.typography.bodySmall ,
+							color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
+									0xFFE91E63
+																							   )
 						)
 				} else
 				{
@@ -110,7 +114,9 @@ fun ToggleableItemRow(
 													   ) ,
 							text = text ,
 							style = MaterialTheme.typography.bodySmall ,
-							color = if(enabled) MaterialTheme.colorScheme.primary else Color(0xFFE91E63)
+							color = if (enabled) MaterialTheme.colorScheme.primary else Color(
+									0xFFE91E63
+																							 )
 						)
 				}
 			}
@@ -168,7 +174,9 @@ fun ToggleableItemColumn(
 					Icon(
 							painter = painterResource(id = R.drawable.cross_icon) ,
 							contentDescription = "Close" ,
-							modifier = Modifier.padding(10.dp).alpha(0.6f)
+							modifier = Modifier
+								.padding(10.dp)
+								.alpha(0.6f)
 						)
 				} else
 				{
@@ -194,8 +202,10 @@ fun ToggleableItemColumn(
 									bottom = 8.dp
 													   ) ,
 							text = text ,
-							style = MaterialTheme.typography.bodyLarge,
-							color = if(enabled) MaterialTheme.colorScheme.onSurface else Color(0xFFE91E63)
+							style = MaterialTheme.typography.bodyLarge ,
+							color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
+									0xFFE91E63
+																							   )
 						)
 				} else
 				{
@@ -208,7 +218,9 @@ fun ToggleableItemColumn(
 													   ) ,
 							text = selectedText ?: text ,
 							style = MaterialTheme.typography.bodyLarge ,
-							color = if(enabled) MaterialTheme.colorScheme.primary else Color(0xFFE91E63)
+							color = if (enabled) MaterialTheme.colorScheme.primary else Color(
+									0xFFE91E63
+																							 )
 						)
 				}
 			}
@@ -224,39 +236,39 @@ fun ToggleableItemRowPreview()
 	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
 
 	var isChecked by remember { mutableStateOf(false) }
-		ElevatedCard(
+	ElevatedCard(
+			modifier = Modifier
+				.padding(16.dp)
+				.fillMaxWidth()
+				) {
+		Row(
 				modifier = Modifier
-					.padding(16.dp)
-					.fillMaxWidth()
-					) {
-			Row(
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth() ,
-					horizontalArrangement = Arrangement.SpaceBetween ,
-					verticalAlignment = Alignment.CenterVertically
-			   ) {
-				items.forEachIndexed { index , item ->
-					ToggleableItemRow(
-							text = item ,
-							checked = isChecked ,
-							onCheckedChange = {
-								Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
-								isChecked = it
-							} ,
-							modifier = Modifier
-								.placeholder(
-										visible = false ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											) ,
-									 )
-				}
+					.padding(8.dp)
+					.fillMaxWidth() ,
+				horizontalArrangement = Arrangement.SpaceBetween ,
+				verticalAlignment = Alignment.CenterVertically
+		   ) {
+			items.forEachIndexed { index , item ->
+				ToggleableItemRow(
+						text = item ,
+						checked = isChecked ,
+						onCheckedChange = {
+							Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
+							isChecked = it
+						} ,
+						modifier = Modifier
+							.placeholder(
+									visible = false ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										) ,
+								 )
 			}
 		}
+	}
 }
 
 @Preview
@@ -266,36 +278,36 @@ fun ToggleableItemColumnPreview()
 	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
 
 	var isChecked by remember { mutableStateOf(false) }
-		ElevatedCard(
+	ElevatedCard(
+			modifier = Modifier
+				.fillMaxWidth()
+				) {
+		Column(
 				modifier = Modifier
 					.fillMaxWidth()
-					) {
-			Column(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(8.dp) ,
-					horizontalAlignment = Alignment.Start ,
-					verticalArrangement = Arrangement.Center
-				  ) {
-				items.forEachIndexed { index , item ->
-					ToggleableItemColumn(
-							text = item ,
-							checked = isChecked ,
-							onCheckedChange = {
-								Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
-								isChecked = it
-							} ,
-							modifier = Modifier
-								.placeholder(
-										visible = false ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											) ,
-										)
-				}
+					.padding(8.dp) ,
+				horizontalAlignment = Alignment.Start ,
+				verticalArrangement = Arrangement.Center
+			  ) {
+			items.forEachIndexed { index , item ->
+				ToggleableItemColumn(
+						text = item ,
+						checked = isChecked ,
+						onCheckedChange = {
+							Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
+							isChecked = it
+						} ,
+						modifier = Modifier
+							.placeholder(
+									visible = false ,
+									color = MaterialTheme.colorScheme.outline ,
+									shape = RoundedCornerShape(4.dp) ,
+									highlight = PlaceholderHighlight.shimmer(
+											highlightColor = Color.White ,
+																			)
+										) ,
+									)
 			}
 		}
+	}
 }

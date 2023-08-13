@@ -50,8 +50,8 @@ fun QuranScreen(
 	val titles = listOf("Sura" , "Juz" , "My Quran")
 	val pagerState = rememberPagerState(
 			initialPage = 0 ,
-			initialPageOffsetFraction = 0F,
-									   ){
+			initialPageOffsetFraction = 0F ,
+									   ) {
 		titles.size
 	}
 	val scope = rememberCoroutineScope()
@@ -142,7 +142,7 @@ fun QuranScreen(
 									overflow = TextOverflow.Ellipsis ,
 									style = MaterialTheme.typography.titleMedium ,
 									fontWeight = if (selected) FontWeight.ExtraBold
-									else FontWeight.Normal,
+									else FontWeight.Normal ,
 									color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
 									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 								)

@@ -70,12 +70,12 @@ fun SettingsCheckbox(
 @Composable
 internal fun SettingsCheckboxPreview()
 {
-		val storage = rememberBooleanSettingState(defaultValue = true)
-		SettingsCheckbox(
-				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-						)
+	val storage = rememberBooleanSettingState(defaultValue = true)
+	SettingsCheckbox(
+			state = storage ,
+			icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			title = { Text(text = "Hello") } ,
+			subtitle = { Text(text = "This is a longer text") } ,
+			onCheckedChange = { }
+					)
 }

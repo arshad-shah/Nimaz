@@ -14,7 +14,7 @@ class DuaViewModel : ViewModel()
 {
 
 	//categories
-	private val _categories = MutableStateFlow(ArrayList<Map<String, ArrayList<Chapter>>>())
+	private val _categories = MutableStateFlow(ArrayList<Map<String , ArrayList<Chapter>>>())
 	val categories = _categories.asStateFlow()
 
 	//chapters for a category
@@ -26,14 +26,14 @@ class DuaViewModel : ViewModel()
 	val duas = _duas.asStateFlow()
 
 	//get the categories
-	fun getCategories(){
+	fun getCategories()
+	{
 		viewModelScope.launch {
 			val response = DuaRepository.getChaptersByCategories()
 			if (response.data != null)
 			{
 				_categories.value = response.data
-			}
-			else
+			} else
 			{
 				Log.e("DuaViewModel" , "getCategories: ${response.message}")
 			}
@@ -41,9 +41,10 @@ class DuaViewModel : ViewModel()
 	}
 
 	//get the chapters of a category
-	fun getChapters(category : String){
+	fun getChapters(category : String)
+	{
 		viewModelScope.launch {
-			if(category == "All Chapters")
+			if (category == "All Chapters")
 			{
 				val response = DuaRepository.getAllChapters()
 				_chapters.value = response
@@ -55,7 +56,8 @@ class DuaViewModel : ViewModel()
 	}
 
 	//get the duas of a chapter
-	fun getDuas(chapterId : Int){
+	fun getDuas(chapterId : Int)
+	{
 		viewModelScope.launch {
 			val response = DuaRepository.getDuasOfChapter(chapterId)
 			_duas.value = response

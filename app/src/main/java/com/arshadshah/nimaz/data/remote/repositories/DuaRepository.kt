@@ -12,13 +12,13 @@ object DuaRepository
 {
 
 	//get chaptesr by categories
-	suspend fun getChaptersByCategories() : ApiResponse<ArrayList<Map<String, ArrayList<Chapter>>>>
+	suspend fun getChaptersByCategories() : ApiResponse<ArrayList<Map<String , ArrayList<Chapter>>>>
 	{
 		return try
 		{
 			val dataStore = LocalDataStore.getDataStore()
 			val chaptersCount = dataStore.countChapters()
-			val categories = ArrayList<Map<String, ArrayList<Chapter>>>()
+			val categories = ArrayList<Map<String , ArrayList<Chapter>>>()
 			if (chaptersCount == 0)
 			{
 				val response = NimazServicesImpl.getChapters()
@@ -37,8 +37,8 @@ object DuaRepository
 										duaResponse.favourite ,
 										duaResponse.arabicDua ,
 										duaResponse.englishTranslation ,
-										duaResponse.englishReference,
-										getCategoriesName(duaResponse.chapterId),
+										duaResponse.englishReference ,
+										getCategoriesName(duaResponse.chapterId) ,
 								   )
 								)
 					}
@@ -61,7 +61,8 @@ object DuaRepository
 					categories.add(category)
 
 				}
-			}else{
+			} else
+			{
 				//get the chapters from the database
 				val chapters = dataStore.getAllChapters()
 				for (chapter in chapters)
@@ -84,7 +85,7 @@ object DuaRepository
 		}
 	}
 
-	suspend fun getChaptersByCategory(category : String)  :ArrayList<Chapter>
+	suspend fun getChaptersByCategory(category : String) : ArrayList<Chapter>
 	{
 		val dataStore = LocalDataStore.getDataStore()
 		return dataStore.getAllChapters().filter { it.category == category } as ArrayList<Chapter>

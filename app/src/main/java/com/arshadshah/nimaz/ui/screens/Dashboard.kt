@@ -81,8 +81,7 @@ fun Dashboard(
 	LazyColumn(
 			state = stateScroll ,
 			modifier = Modifier
-				.testTag(TEST_TAG_HOME)
-			,
+				.testTag(TEST_TAG_HOME) ,
 			contentPadding = paddingValues
 			  ) {
 		item {

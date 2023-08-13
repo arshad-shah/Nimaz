@@ -64,7 +64,7 @@ class BootReciever : BroadcastReceiver()
 								repository.data.dhuhr !! ,
 								repository.data.asr !! ,
 								repository.data.maghrib !! ,
-								newIshaTime!!
+								newIshaTime !!
 											)
 						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 					}

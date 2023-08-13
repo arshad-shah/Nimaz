@@ -47,14 +47,21 @@ fun DebugScreen(paddingValues : PaddingValues)
 @Composable
 fun ShowSharedPrefsData()
 {
-	val sharedPreferences = PrivateSharedPreferences( LocalContext.current )
+	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 	val allDataSaved = sharedPreferences.getAllData()
 
 	ElevatedCard(
 			modifier = Modifier.padding(8.dp) ,
 				) {
-		Text(text = "Shared Preferences Data" , style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp).fillMaxWidth(), textAlign = TextAlign.Center)
-		LazyColumn{
+		Text(
+				text = "Shared Preferences Data" ,
+				style = MaterialTheme.typography.titleMedium ,
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth() ,
+				textAlign = TextAlign.Center
+			)
+		LazyColumn {
 			allDataSaved.forEach {
 				item {
 					val currentItem = rememberUpdatedState(newValue = it)
@@ -64,7 +71,7 @@ fun ShowSharedPrefsData()
 								{
 									sharedPreferences.removeData(currentItem.value.key)
 									true
-								}else if (it == DismissValue.DismissedToEnd)
+								} else if (it == DismissValue.DismissedToEnd)
 								{
 									sharedPreferences.removeData(currentItem.value.key)
 									true
@@ -105,9 +112,26 @@ fun ShowSharedPrefsDataItem(key : String , value : String)
 					.fillMaxWidth() ,
 				verticalAlignment = Alignment.CenterVertically ,
 				horizontalArrangement = Arrangement.SpaceBetween
-		   ){
-			Text(text = key, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp).weight(0.5f), overflow = TextOverflow.Ellipsis, maxLines = 1)
-			Text(text = value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp).weight(0.5f), overflow = TextOverflow.Ellipsis, maxLines = 1, textAlign = TextAlign.End)
+		   ) {
+			Text(
+					text = key ,
+					style = MaterialTheme.typography.titleMedium ,
+					modifier = Modifier
+						.padding(8.dp)
+						.weight(0.5f) ,
+					overflow = TextOverflow.Ellipsis ,
+					maxLines = 1
+				)
+			Text(
+					text = value ,
+					style = MaterialTheme.typography.bodyMedium ,
+					modifier = Modifier
+						.padding(8.dp)
+						.weight(0.5f) ,
+					overflow = TextOverflow.Ellipsis ,
+					maxLines = 1 ,
+					textAlign = TextAlign.End
+				)
 		}
 	}
 }

@@ -131,14 +131,14 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 						ishaState.value ,
 						showDateSelector ,
 						dateState ,
-						progressState,
+						progressState ,
 						isMenstrauting
 								 )
 				Fasting(
 						viewModel::onEvent ,
 						dateState ,
 						isFasting.value ,
-						fastingState.value,
+						fastingState.value ,
 						isMenstrauting
 					   )
 			}
@@ -263,7 +263,7 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForMonday.value == 0 && !weeklyTrackers.value[0].isMenstruating) Color.Gray
+					labelColor = if (progressForMonday.value == 0 && ! weeklyTrackers.value[0].isMenstruating) Color.Gray
 					else if (weeklyTrackers.value[0].isMenstruating) Color(0xFFE91E63)
 					else MaterialTheme.colorScheme.primary
 							 )
@@ -276,7 +276,7 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForTuesday.value == 0 && !weeklyTrackers.value[1].isMenstruating) Color.Gray
+					labelColor = if (progressForTuesday.value == 0 && ! weeklyTrackers.value[1].isMenstruating) Color.Gray
 					else if (weeklyTrackers.value[1].isMenstruating) Color(0xFFE91E63)
 					else MaterialTheme.colorScheme.primary
 							 )
@@ -289,7 +289,7 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForWednesday.value == 0 && !weeklyTrackers.value[2].isMenstruating) Color.Gray
+					labelColor = if (progressForWednesday.value == 0 && ! weeklyTrackers.value[2].isMenstruating) Color.Gray
 					else if (weeklyTrackers.value[2].isMenstruating) Color(0xFFE91E63)
 					else MaterialTheme.colorScheme.primary
 							 )
@@ -303,7 +303,7 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForThursday.value == 0 && !weeklyTrackers.value[3].isMenstruating) Color.Gray
+					labelColor = if (progressForThursday.value == 0 && ! weeklyTrackers.value[3].isMenstruating) Color.Gray
 					else if (weeklyTrackers.value[3].isMenstruating) Color(0xFFE91E63)
 					else MaterialTheme.colorScheme.primary
 							 )
@@ -317,7 +317,7 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForFriday.value == 0 && !weeklyTrackers.value[4].isMenstruating) Color.Gray
+					labelColor = if (progressForFriday.value == 0 && ! weeklyTrackers.value[4].isMenstruating) Color.Gray
 					else if (weeklyTrackers.value[4].isMenstruating) Color(0xFFE91E63)
 					else MaterialTheme.colorScheme.primary
 							 )
@@ -331,7 +331,9 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForSaturday.value == 0 && !weeklyTrackers.value[5].isMenstruating) Color.Gray else if (weeklyTrackers.value[5].isMenstruating) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForSaturday.value == 0 && ! weeklyTrackers.value[5].isMenstruating) Color.Gray else if (weeklyTrackers.value[5].isMenstruating) Color(
+							0xFFE91E63
+																																												  ) else MaterialTheme.colorScheme.primary
 							 )
 
 			//sunday
@@ -343,7 +345,9 @@ fun SevenDayTrend()
 					strokeWidth = 6.dp ,
 					strokeBackgroundWidth = 3.dp ,
 					startDelay = 0 ,
-					labelColor = if (progressForSunday.value == 0 && !weeklyTrackers.value[6].isMenstruating) Color.Gray else if (weeklyTrackers.value[6].isMenstruating) Color(0xFFE91E63) else MaterialTheme.colorScheme.primary
+					labelColor = if (progressForSunday.value == 0 && ! weeklyTrackers.value[6].isMenstruating) Color.Gray else if (weeklyTrackers.value[6].isMenstruating) Color(
+							0xFFE91E63
+																																												) else MaterialTheme.colorScheme.primary
 							 )
 		}
 	}
@@ -382,7 +386,7 @@ fun Fasting(
 			FastTrackerCard(
 					handleEvent = handleEvent ,
 					dateState = dateState ,
-					isFastingToday = isFastingToday,
+					isFastingToday = isFastingToday ,
 					isMenstrauting = isMenstrauting
 						   )
 
@@ -450,7 +454,7 @@ fun PrayerTrackerList(
 					handleEvent = handleEvent ,
 					showDateSelector = showDateSelector ,
 					dateState = dateState ,
-					progress = progress,
+					progress = progress ,
 					isMenstrauting = isMenstrauting
 								  )
 		}
