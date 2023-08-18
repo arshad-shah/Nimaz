@@ -16,8 +16,8 @@ object NimazServicesImpl : NimazService
 	override suspend fun login(username : String , password : String) : LoginResponse
 	{
 		val mapOfLogin = mapOf(
-				"username" to username ,
-				"password" to password
+				 "username" to username ,
+				 "password" to password
 							  )
 		val response : LoginResponse = httpClient.request(AppConstants.LOGIN_URL) {
 			method = HttpMethod.Post
@@ -130,8 +130,8 @@ object NimazServicesImpl : NimazService
 
 		//combine the two responses
 		val mapOfResponses = mapOf(
-				"english" to responseEnglish ,
-				"urdu" to responseUrdu
+				 "english" to responseEnglish ,
+				 "urdu" to responseUrdu
 								  )
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForSurah: $mapOfResponses")
 
@@ -162,8 +162,8 @@ object NimazServicesImpl : NimazService
 
 		//combine the two responses
 		val mapOfResponses = mapOf(
-				"english" to response ,
-				"urdu" to responseUrdu
+				 "english" to response ,
+				 "urdu" to responseUrdu
 								  )
 
 

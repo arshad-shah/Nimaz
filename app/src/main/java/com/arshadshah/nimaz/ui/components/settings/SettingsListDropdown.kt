@@ -45,8 +45,8 @@ fun SettingsListDropdown(
 
 	Surface {
 		Row(
-				modifier = modifier.fillMaxWidth() ,
-				verticalAlignment = Alignment.CenterVertically
+				 modifier = modifier.fillMaxWidth() ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			if (icon != null)
 			{
@@ -56,8 +56,8 @@ fun SettingsListDropdown(
 				Spacer(modifier = Modifier.size(24.dp))
 			}
 			SettingsTileTexts(
-					title = title ,
-					subtitle = subtitle
+					 title = title ,
+					 subtitle = subtitle
 							 )
 
 			var isDropdownExpanded by remember {
@@ -65,41 +65,41 @@ fun SettingsListDropdown(
 			}
 
 			Column(
-					modifier = Modifier.padding(end = 8.dp)
+					 modifier = Modifier.padding(end = 8.dp)
 				  ) {
 				Row(
-						modifier = Modifier
-							.clickable { isDropdownExpanded = true }
-							.padding(vertical = 5.dp) ,
-						verticalAlignment = Alignment.CenterVertically
+						 modifier = Modifier
+							 .clickable { isDropdownExpanded = true }
+							 .padding(vertical = 5.dp) ,
+						 verticalAlignment = Alignment.CenterVertically
 				   ) {
 					Text(text = items[state.value])
 					Icon(
-							modifier = Modifier.padding(start = 8.dp) ,
-							imageVector = Icons.Outlined.ArrowDropDown ,
-							contentDescription = null
+							 modifier = Modifier.padding(start = 8.dp) ,
+							 imageVector = Icons.Outlined.ArrowDropDown ,
+							 contentDescription = null
 						)
 				}
 
 				DropdownMenu(
-						expanded = isDropdownExpanded ,
-						onDismissRequest = { isDropdownExpanded = false }
+						 expanded = isDropdownExpanded ,
+						 onDismissRequest = { isDropdownExpanded = false }
 							) {
 					items.forEachIndexed { index , text ->
 						DropdownMenuItem(
-								text = {
-									if (menuItem != null)
-									{
-										menuItem(index , text)
-									} else
-									{
-										Text(text = text)
-									}
-								} ,
-								onClick = {
-									state.value = index
-									isDropdownExpanded = false
-								}
+								 text = {
+									 if (menuItem != null)
+									 {
+										 menuItem(index , text)
+									 } else
+									 {
+										 Text(text = text)
+									 }
+								 } ,
+								 onClick = {
+									 state.value = index
+									 isDropdownExpanded = false
+								 }
 										)
 					}
 				}
@@ -114,15 +114,15 @@ internal fun SettingsListDropdownPreview()
 {
 	NimazTheme {
 		SettingsListDropdown(
-				title = { Text(text = "Title") } ,
-				items = listOf("Item 1" , "Item 2" , "Item 3") ,
-				icon = {
-					Icon(
-							imageVector = Icons.Outlined.ArrowDropDown ,
-							contentDescription = null
-						)
-				} ,
-				subtitle = { Text(text = "Subtitle") }
+				 title = { Text(text = "Title") } ,
+				 items = listOf("Item 1" , "Item 2" , "Item 3") ,
+				 icon = {
+					 Icon(
+							  imageVector = Icons.Outlined.ArrowDropDown ,
+							  contentDescription = null
+						 )
+				 } ,
+				 subtitle = { Text(text = "Subtitle") }
 							)
 	}
 }

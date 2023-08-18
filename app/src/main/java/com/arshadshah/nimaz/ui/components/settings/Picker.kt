@@ -85,7 +85,7 @@ fun <T> Picker(
 			val index = list.indexOf(value)
 			val offsetRange = remember(value , list) {
 				- ((list.count() - 1) - index) * halfNumbersColumnHeightPx to
-						index * halfNumbersColumnHeightPx
+						 index * halfNumbersColumnHeightPx
 			}
 			updateBounds(offsetRange.first , offsetRange.second)
 		}
@@ -103,133 +103,134 @@ fun <T> Picker(
 	val hapticFeedback = LocalHapticFeedback.current
 
 	Layout(
-			modifier = modifier
-				.draggable(
-						orientation = Orientation.Vertical ,
-						state = rememberDraggableState { deltaY ->
-							coroutineScope.launch {
-								animatedOffset.snapTo(animatedOffset.value + deltaY)
-							}
-						} ,
-						onDragStopped = { velocity ->
-							coroutineScope.launch {
-								val endValue = animatedOffset.fling(
-										initialVelocity = velocity ,
-										animationSpec = exponentialDecay(frictionMultiplier = 20f) ,
-										adjustTarget = { target ->
-											val coercedTarget = target % halfNumbersColumnHeightPx
-											val coercedAnchors =
-												listOf(
-														- halfNumbersColumnHeightPx ,
-														0f ,
-														halfNumbersColumnHeightPx
-													  )
-											val coercedPoint =
-												coercedAnchors.minByOrNull { abs(it - coercedTarget) } !!
-											val base =
-												halfNumbersColumnHeightPx * (target / halfNumbersColumnHeightPx).toInt()
-											coercedPoint + base
-										}
-																   ).endState.value
+			 modifier = modifier
+				 .draggable(
+						  orientation = Orientation.Vertical ,
+						  state = rememberDraggableState { deltaY ->
+							  coroutineScope.launch {
+								  animatedOffset.snapTo(animatedOffset.value + deltaY)
+							  }
+						  } ,
+						  onDragStopped = { velocity ->
+							  coroutineScope.launch {
+								  val endValue = animatedOffset.fling(
+										   initialVelocity = velocity ,
+										   animationSpec = exponentialDecay(frictionMultiplier = 20f) ,
+										   adjustTarget = { target ->
+											   val coercedTarget =
+												   target % halfNumbersColumnHeightPx
+											   val coercedAnchors =
+												   listOf(
+															- halfNumbersColumnHeightPx ,
+															0f ,
+															halfNumbersColumnHeightPx
+														 )
+											   val coercedPoint =
+												   coercedAnchors.minByOrNull { abs(it - coercedTarget) } !!
+											   val base =
+												   halfNumbersColumnHeightPx * (target / halfNumbersColumnHeightPx).toInt()
+											   coercedPoint + base
+										   }
+																	 ).endState.value
 
-								val result = list.elementAt(
-										getItemIndexForOffset(
-												list ,
-												value ,
-												endValue ,
-												halfNumbersColumnHeightPx
+								  val result = list.elementAt(
+										   getItemIndexForOffset(
+													list ,
+													value ,
+													endValue ,
+													halfNumbersColumnHeightPx
+																)
 															 )
-														   )
-								onValueChange(result)
-								animatedOffset.snapTo(0f)
-								hapticFeedback.performHapticFeedback(
-										hapticFeedbackType = HapticFeedbackType.LongPress
-																	)
-							}
-						}
-						  )
-				.padding(vertical = numbersColumnHeight / 3 + verticalMargin * 2) ,
-			content = {
-				Box(
-						modifier
-							.width(dividersWidth)
-							.height(1.dp)
-							.background(color = dividersColor)
-				   )
-				Box(
-						contentAlignment = Alignment.Center ,
-						modifier = Modifier
-							.padding(vertical = verticalMargin , horizontal = 20.dp)
-							.offset { IntOffset(x = 0 , y = coercedAnimatedOffset.roundToInt()) }
-				   ) {
-					ProvideTextStyle(textStyle) {
-						if (indexOfElement > 0)
-						{
-							Label(
-									text = label(list.elementAt(indexOfElement - 1)) ,
-									modifier = Modifier
-										.offset(y = - halfNumbersColumnHeight)
-										.alpha(
-												maxOf(
+								  onValueChange(result)
+								  animatedOffset.snapTo(0f)
+								  hapticFeedback.performHapticFeedback(
+										   hapticFeedbackType = HapticFeedbackType.LongPress
+																	  )
+							  }
+						  }
+						   )
+				 .padding(vertical = numbersColumnHeight / 3 + verticalMargin * 2) ,
+			 content = {
+				 Box(
+						  modifier
+							  .width(dividersWidth)
+							  .height(1.dp)
+							  .background(color = dividersColor)
+					)
+				 Box(
+						  contentAlignment = Alignment.Center ,
+						  modifier = Modifier
+							  .padding(vertical = verticalMargin , horizontal = 20.dp)
+							  .offset { IntOffset(x = 0 , y = coercedAnimatedOffset.roundToInt()) }
+					) {
+					 ProvideTextStyle(textStyle) {
+						 if (indexOfElement > 0)
+						 {
+							 Label(
+									  text = label(list.elementAt(indexOfElement - 1)) ,
+									  modifier = Modifier
+										  .offset(y = - halfNumbersColumnHeight)
+										  .alpha(
+												   maxOf(
+															minimumAlpha ,
+															coercedAnimatedOffset / halfNumbersColumnHeightPx
+														)
+												)
+										  //a bit smaller than the other labels
+										  //scale from 1.2 to 0.8
+										  .scale(
+												   animateFloatAsState(
+															0.8f ,
+															label = "topUnselectedNumber"
+																	  ).value
+												)
+								  )
+						 }
+						 Label(
+								  text = label(list.elementAt(indexOfElement)) ,
+								  modifier = Modifier
+									  .alpha(
+											   (maxOf(
 														minimumAlpha ,
-														coercedAnimatedOffset / halfNumbersColumnHeightPx
-													 )
-											  )
-										//a bit smaller than the other labels
-										//scale from 1.2 to 0.8
-										.scale(
-												animateFloatAsState(
-														0.8f ,
-														label = "topUnselectedNumber"
-																   ).value
-											  )
-								 )
-						}
-						Label(
-								text = label(list.elementAt(indexOfElement)) ,
-								modifier = Modifier
-									.alpha(
-											(maxOf(
-													minimumAlpha ,
-													1 - abs(coercedAnimatedOffset) / halfNumbersColumnHeightPx
-												  ))
-										  )
-									.scale(
-											animateFloatAsState(
-													1.2f ,
-													label = "selectedNumber"
-															   ).value
-										  )
-							 )
-						if (indexOfElement < list.count() - 1)
-						{
-							Label(
-									text = label(list.elementAt(indexOfElement + 1)) ,
-									modifier = Modifier
-										.offset(y = halfNumbersColumnHeight)
-										.alpha(
-												maxOf(
-														minimumAlpha ,
-														- coercedAnimatedOffset / halfNumbersColumnHeightPx
-													 )
-											  )
-										.scale(
-												animateFloatAsState(
-														0.8f ,
-														label = "bottomUnselectedNumber"
-																   ).value
-											  )
-								 )
-						}
-					}
-				}
-				Box(
-						modifier
-							.width(dividersWidth)
-							.height(1.dp)
-							.background(color = dividersColor)
-				   )
-			}
+														1 - abs(coercedAnimatedOffset) / halfNumbersColumnHeightPx
+													 ))
+											)
+									  .scale(
+											   animateFloatAsState(
+														1.2f ,
+														label = "selectedNumber"
+																  ).value
+											)
+							  )
+						 if (indexOfElement < list.count() - 1)
+						 {
+							 Label(
+									  text = label(list.elementAt(indexOfElement + 1)) ,
+									  modifier = Modifier
+										  .offset(y = halfNumbersColumnHeight)
+										  .alpha(
+												   maxOf(
+															minimumAlpha ,
+															- coercedAnimatedOffset / halfNumbersColumnHeightPx
+														)
+												)
+										  .scale(
+												   animateFloatAsState(
+															0.8f ,
+															label = "bottomUnselectedNumber"
+																	  ).value
+												)
+								  )
+						 }
+					 }
+				 }
+				 Box(
+						  modifier
+							  .width(dividersWidth)
+							  .height(1.dp)
+							  .background(color = dividersColor)
+					)
+			 }
 		  ) { measurables , constraints ->
 		// Don't constrain child views further, measure them with given constraints
 		// List of measured children
@@ -271,12 +272,12 @@ private fun Label(text : String , modifier : Modifier)
 {
 	val interactionSource = remember { MutableInteractionSource() }
 	Text(
-			modifier = modifier.indication(
-					indication = null ,
-					interactionSource = interactionSource
-										  ) ,
-			text = text ,
-			textAlign = TextAlign.Center ,
+			 modifier = modifier.indication(
+					  indication = null ,
+					  interactionSource = interactionSource
+										   ) ,
+			 text = text ,
+			 textAlign = TextAlign.Center ,
 		)
 }
 
@@ -292,16 +293,16 @@ private suspend fun Animatable<Float , AnimationVector1D>.fling(
 	return if (adjustedTarget != null)
 	{
 		animateTo(
-				targetValue = adjustedTarget ,
-				initialVelocity = initialVelocity ,
-				block = block
+				 targetValue = adjustedTarget ,
+				 initialVelocity = initialVelocity ,
+				 block = block
 				 )
 	} else
 	{
 		animateDecay(
-				initialVelocity = initialVelocity ,
-				animationSpec = animationSpec ,
-				block = block ,
+				 initialVelocity = initialVelocity ,
+				 animationSpec = animationSpec ,
+				 block = block ,
 					)
 	}
 }
@@ -313,10 +314,10 @@ fun Preview()
 	val list = listOf(1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10)
 	val selectedValue = remember { mutableIntStateOf(5) }
 	Picker(
-			list = list ,
-			value = selectedValue.intValue ,
-			onValueChange = {
-				selectedValue.intValue = it
-			}
+			 list = list ,
+			 value = selectedValue.intValue ,
+			 onValueChange = {
+				 selectedValue.intValue = it
+			 }
 		  )
 }

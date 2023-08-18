@@ -17,23 +17,23 @@ fun SurahList(
 	if (loading)
 	{
 		SurahListUI(
-				surahs = ArrayList(114) ,
-				onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				loading = true
+				 surahs = ArrayList(114) ,
+				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				 loading = true
 				   )
 	} else if (error.isNotEmpty())
 	{
 		SurahListUI(
-				surahs = ArrayList(114) ,
-				onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				loading = false
+				 surahs = ArrayList(114) ,
+				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				 loading = false
 				   )
 	} else
 	{
 		SurahListUI(
-				surahs = state.value ,
-				onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				loading = false
+				 surahs = state.value ,
+				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				 loading = false
 				   )
 	}
 }

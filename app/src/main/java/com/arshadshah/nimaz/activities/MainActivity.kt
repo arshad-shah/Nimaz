@@ -89,10 +89,10 @@ class MainActivity : ComponentActivity()
 			{
 				Log.d(MAIN_ACTIVITY_TAG , "onResume:  update is installed")
 				appUpdateManager.startUpdateFlowForResult(
-						appUpdateInfo ,
-						AppUpdateType.IMMEDIATE ,
-						this ,
-						APP_UPDATE_REQUEST_CODE
+						 appUpdateInfo ,
+						 AppUpdateType.IMMEDIATE ,
+						 this ,
+						 APP_UPDATE_REQUEST_CODE
 														 )
 			}
 		}
@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity()
 	}
 
 	@OptIn(
-			ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class
+			 ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class
 		  )
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
@@ -146,9 +146,9 @@ class MainActivity : ComponentActivity()
 		setContent {
 
 			val viewModelSettings = viewModel(
-					key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-					initializer = { SettingsViewModel(this@MainActivity) } ,
-					viewModelStoreOwner = this as ComponentActivity
+					 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+					 initializer = { SettingsViewModel(this@MainActivity) } ,
+					 viewModelStoreOwner = this as ComponentActivity
 											 )
 			val themeState = remember {
 				viewModelSettings.theme
@@ -206,9 +206,9 @@ class MainActivity : ComponentActivity()
 			}
 
 			NimazTheme(
-					darkTheme = darkTheme.value ,
-					dynamicColor = dynamicTheme.value ,
-					ThemeName = themeName.value
+					 darkTheme = darkTheme.value ,
+					 dynamicColor = dynamicTheme.value ,
+					 ThemeName = themeName.value
 					  ) {
 				val navController = rememberNavController()
 				val route =
@@ -235,29 +235,29 @@ class MainActivity : ComponentActivity()
 					{
 						scope.launch {
 							snackbarHostState.showSnackbar(
-									"No internet connection" ,
-									duration = SnackbarDuration.Indefinite ,
-									withDismissAction = true
+									 "No internet connection" ,
+									 duration = SnackbarDuration.Indefinite ,
+									 withDismissAction = true
 														  )
 						}
 					}
 				}
 
 				val viewModelTasbih = viewModel(
-						key = TASBIH_VIEWMODEL_KEY ,
-						initializer = { TasbihViewModel(this@MainActivity) } ,
-						viewModelStoreOwner = LocalContext.current as ComponentActivity
+						 key = TASBIH_VIEWMODEL_KEY ,
+						 initializer = { TasbihViewModel(this@MainActivity) } ,
+						 viewModelStoreOwner = LocalContext.current as ComponentActivity
 											   )
 				val viewModelNames = viewModel(
-						key = NAMES_OF_ALLAH_VIEWMODEL_KEY ,
-						initializer = { NamesOfAllahViewModel() } ,
-						viewModelStoreOwner = LocalContext.current as ComponentActivity
+						 key = NAMES_OF_ALLAH_VIEWMODEL_KEY ,
+						 initializer = { NamesOfAllahViewModel() } ,
+						 viewModelStoreOwner = LocalContext.current as ComponentActivity
 											  )
 
 				val viewModelTracker = viewModel(
-						key = AppConstants.TRACKING_VIEWMODEL_KEY ,
-						initializer = { TrackerViewModel() } ,
-						viewModelStoreOwner = LocalContext.current as ComponentActivity
+						 key = AppConstants.TRACKING_VIEWMODEL_KEY ,
+						 initializer = { TrackerViewModel() } ,
+						 viewModelStoreOwner = LocalContext.current as ComponentActivity
 												)
 
 				val isMenstruatingState = remember {
@@ -284,282 +284,306 @@ class MainActivity : ComponentActivity()
 					mutableStateOf(false)
 				}
 				LaunchedEffect(
-						key1 = isPlaying.value ,
-						key2 = isPaused.value ,
-						key3 = isStopped.value
+						 key1 = isPlaying.value ,
+						 key2 = isPaused.value ,
+						 key3 = isStopped.value
 							  ) {
 					Log.d(
-							MAIN_ACTIVITY_TAG ,
-							"onCreate: isPlaying: ${isPlaying.value} isPaused: ${isPaused.value} isStopped: ${isStopped.value}"
+							 MAIN_ACTIVITY_TAG ,
+							 "onCreate: isPlaying: ${isPlaying.value} isPaused: ${isPaused.value} isStopped: ${isStopped.value}"
 						 )
 					isPlayingState.value = isPlaying.value
 					isPausedState.value = isPaused.value
 					isStoppedState.value = isStopped.value
 				}
 				Scaffold(
-						modifier = Modifier.testTag("mainActivity") ,
-						snackbarHost = { SnackbarHost(snackbarHostState) } ,
-						topBar = {
-							AnimatedVisibility(
-									visible = checkRoute(route.value.toString()) ,
-									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
-									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
-									content = {
-										TopAppBar(
-												modifier = Modifier
-													.testTag("topAppBar") ,
-												title = {
-													if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
-													{
-														val isSurah =
-															navController.currentBackStackEntry?.arguments?.getString(
-																	"isSurah"
-																													 )
-																.toBoolean()
-														val number =
-															navController.currentBackStackEntry?.arguments?.getString(
-																	"number"
-																													 )
-														TopBarMenu(
-																number = number !!.toInt() ,
-																isSurah = isSurah
-																  )
-													} else
-													{
-														Text(
+						 modifier = Modifier.testTag("mainActivity") ,
+						 snackbarHost = { SnackbarHost(snackbarHostState) } ,
+						 topBar = {
+							 AnimatedVisibility(
+									  visible = checkRoute(route.value.toString()) ,
+									  enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
+									  exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
+									  content = {
+										  TopAppBar(
+												   modifier = Modifier
+													   .testTag("topAppBar") ,
+												   title = {
+													   if (route.value == MY_QURAN_SCREEN_ROUTE || route.value == QURAN_AYA_SCREEN_ROUTE)
+													   {
+														   val isSurah =
+															   navController.currentBackStackEntry?.arguments?.getString(
+																		"isSurah"
+																														)
+																   .toBoolean()
+														   val number =
+															   navController.currentBackStackEntry?.arguments?.getString(
+																		"number"
+																														)
+														   TopBarMenu(
+																	number = number !!.toInt() ,
+																	isSurah = isSurah
+																	 )
+													   } else
+													   {
+														   Text(
+																	modifier = Modifier
+																		.testTag("topAppBarText")
+																		.padding(start = 8.dp) ,
+																	text = processPageTitle(
+																			 route.value.toString() ,
+																			 navController
+																						   ) ,
+																	style = MaterialTheme.typography.titleLarge
+															   )
+													   }
+												   } ,
+												   navigationIcon = {
+													   OutlinedIconButton(
 																modifier = Modifier
-																	.testTag("topAppBarText")
+																	.testTag("backButton")
 																	.padding(start = 8.dp) ,
-																text = processPageTitle(
-																		route.value.toString() ,
-																		navController
-																					   ) ,
-																style = MaterialTheme.typography.titleLarge
-															)
-													}
-												} ,
-												navigationIcon = {
-													OutlinedIconButton(
-															modifier = Modifier
-																.testTag("backButton")
-																.padding(start = 8.dp) ,
-															onClick = {
-																Log.d(
-																		MAIN_ACTIVITY_TAG ,
-																		"onCreate:  back button pressed"
-																	 )
-																Log.d(
-																		MAIN_ACTIVITY_TAG ,
-																		"onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
-																	 )
-																navController.navigateUp()
-															}) {
-														Icon(
-																modifier = Modifier.size(24.dp) ,
-																painter = painterResource(id = R.drawable.back_icon) ,
-																contentDescription = "Back"
-															)
-													}
-												} ,
-												actions = {
-													//only show the menu button if the title is Quran
-													when (route.value)
-													{
-														QURAN_AYA_SCREEN_ROUTE ,
-														MY_QURAN_SCREEN_ROUTE ,
-														->
-														{
-															//open the menu
-															IconButton(onClick = { setMenuOpen(true) }) {
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = painterResource(id = R.drawable.settings_sliders_icon) ,
-																		contentDescription = "Menu"
-																	)
-															}
-															MoreMenu(
-																	menuOpen = menuOpen ,
-																	setMenuOpen = setMenuOpen ,
-																	)
-														}
-
-														QURAN_SCREEN_ROUTE ->
-														{
-															IconButton(onClick = {
-																setMenuOpen2(true)
-															}) {
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = painterResource(id = R.drawable.settings_sliders_icon) ,
-																		contentDescription = "Menu"
-																	)
-															}
-															MoreMenuMain(
-																	menuOpen = menuOpen2 ,
-																	setMenuOpen = setMenuOpen2 ,
-																		)
-														}
-
-														NAMESOFALLAH_SCREEN_ROUTE ->
-														{
-															if (! isStoppedState.value)
-															{
-																IconButton(onClick = {
-																	viewModelNames.handleAudioEvent(
-																			NamesOfAllahViewModel.AudioEvent.Stop
-																								   )
-																}
-																		  ) {
-																	Icon(
+																onClick = {
+																	Log.d(
+																			 MAIN_ACTIVITY_TAG ,
+																			 "onCreate:  back button pressed"
+																		 )
+																	Log.d(
+																			 MAIN_ACTIVITY_TAG ,
+																			 "onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
+																		 )
+																	navController.navigateUp()
+																}) {
+														   Icon(
+																	modifier = Modifier.size(24.dp) ,
+																	painter = painterResource(id = R.drawable.back_icon) ,
+																	contentDescription = "Back"
+															   )
+													   }
+												   } ,
+												   actions = {
+													   //only show the menu button if the title is Quran
+													   when (route.value)
+													   {
+														   QURAN_AYA_SCREEN_ROUTE ,
+														   MY_QURAN_SCREEN_ROUTE ,
+														   ->
+														   {
+															   //open the menu
+															   IconButton(onClick = {
+																   setMenuOpen(
+																			true
+																			  )
+															   }) {
+																   Icon(
 																			modifier = Modifier.size(
-																					24.dp
+																					 24.dp
 																									) ,
 																			painter = painterResource(
-																					id = R.drawable.stop_icon
+																					 id = R.drawable.settings_sliders_icon
 																									 ) ,
-																			contentDescription = "Stop playing"
-																		)
-																}
-															}
-															IconButton(onClick = {
-																if (isPlayingState.value.not())
-																{
-																	viewModelNames.handleAudioEvent(
-																			NamesOfAllahViewModel.AudioEvent.Play(
-																					this@MainActivity
-																												 )
-																								   )
-																} else
-																{
-																	viewModelNames.handleAudioEvent(
-																			NamesOfAllahViewModel.AudioEvent.Pause
-																								   )
-																}
-															}
-																	  ) {
-																if (isPlayingState.value)
-																{
-																	Icon(
+																			contentDescription = "Menu"
+																	   )
+															   }
+															   MoreMenu(
+																		menuOpen = menuOpen ,
+																		setMenuOpen = setMenuOpen ,
+																	   )
+														   }
+
+														   QURAN_SCREEN_ROUTE ->
+														   {
+															   IconButton(onClick = {
+																   setMenuOpen2(true)
+															   }) {
+																   Icon(
 																			modifier = Modifier.size(
-																					24.dp
+																					 24.dp
 																									) ,
 																			painter = painterResource(
-																					id = R.drawable.pause_icon
+																					 id = R.drawable.settings_sliders_icon
 																									 ) ,
-																			contentDescription = "Pause playing"
-																		)
-																} else
-																{
-																	Icon(
+																			contentDescription = "Menu"
+																	   )
+															   }
+															   MoreMenuMain(
+																		menuOpen = menuOpen2 ,
+																		setMenuOpen = setMenuOpen2 ,
+																		   )
+														   }
+
+														   NAMESOFALLAH_SCREEN_ROUTE ->
+														   {
+															   if (! isStoppedState.value)
+															   {
+																   IconButton(onClick = {
+																	   viewModelNames.handleAudioEvent(
+																				NamesOfAllahViewModel.AudioEvent.Stop
+																									  )
+																   }
+																			 ) {
+																	   Icon(
+																				modifier = Modifier.size(
+																						 24.dp
+																										) ,
+																				painter = painterResource(
+																						 id = R.drawable.stop_icon
+																										 ) ,
+																				contentDescription = "Stop playing"
+																		   )
+																   }
+															   }
+															   IconButton(onClick = {
+																   if (isPlayingState.value.not())
+																   {
+																	   viewModelNames.handleAudioEvent(
+																				NamesOfAllahViewModel.AudioEvent.Play(
+																						 this@MainActivity
+																													 )
+																									  )
+																   } else
+																   {
+																	   viewModelNames.handleAudioEvent(
+																				NamesOfAllahViewModel.AudioEvent.Pause
+																									  )
+																   }
+															   }
+																		 ) {
+																   if (isPlayingState.value)
+																   {
+																	   Icon(
+																				modifier = Modifier.size(
+																						 24.dp
+																										) ,
+																				painter = painterResource(
+																						 id = R.drawable.pause_icon
+																										 ) ,
+																				contentDescription = "Pause playing"
+																		   )
+																   } else
+																   {
+																	   Icon(
+																				modifier = Modifier.size(
+																						 24.dp
+																										) ,
+																				painter = painterResource(
+																						 id = R.drawable.play_icon
+																										 ) ,
+																				contentDescription = "Play"
+																		   )
+																   }
+															   }
+
+														   }
+
+														   TASBIH_SCREEN_ROUTE ->
+														   {
+															   //icon button to change the position of the button for right or left
+															   IconButton(onClick = {
+																   rOrl.value = ! rOrl.value
+																   viewModelTasbih.handleEvent(
+																			TasbihViewModel.TasbihEvent.UpdateOrientationButtonState(
+																					 rOrl.value
+																																	)
+																							  )
+															   }) {
+																   Icon(
 																			modifier = Modifier.size(
-																					24.dp
+																					 24.dp
 																									) ,
-																			painter = painterResource(
-																					id = R.drawable.play_icon
-																									 ) ,
-																			contentDescription = "Play"
-																		)
-																}
-															}
+																			painter = if (rOrl.value)
+																				painterResource(
+																						 id = R.drawable.corner_right_down_icon
+																							   )
+																			else painterResource(id = R.drawable.corner_left_down_icon) ,
+																			contentDescription = "Change the position of the button"
+																	   )
+															   }
+															   //vibration toggle button for tasbih to provide feedback
+															   IconButton(onClick = {
+																   vibrationAllowed.value =
+																	   ! vibrationAllowed.value
+																   viewModelTasbih.handleEvent(
+																			TasbihViewModel.TasbihEvent.UpdateVibrationButtonState(
+																					 vibrationAllowed.value
+																																  )
+																							  )
+															   }) {
+																   Icon(
+																			modifier = Modifier.size(
+																					 24.dp
+																									) ,
+																			painter = if (vibrationAllowed.value) painterResource(
+																					 id = R.drawable.phone_vibration_off_icon
+																																 )
+																			else painterResource(
+																					 id = R.drawable.phone_vibration_on_icon
+																								) ,
+																			contentDescription = "Vibration"
+																	   )
+															   }
 
-														}
-
-														TASBIH_SCREEN_ROUTE ->
-														{
-															//icon button to change the position of the button for right or left
-															IconButton(onClick = {
-																rOrl.value = ! rOrl.value
-																viewModelTasbih.handleEvent(
-																		TasbihViewModel.TasbihEvent.UpdateOrientationButtonState(
-																				rOrl.value
-																																)
-																						   )
-															}) {
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = if (rOrl.value)
-																			painterResource(
-																					id = R.drawable.corner_right_down_icon
-																						   )
-																		else painterResource(id = R.drawable.corner_left_down_icon) ,
-																		contentDescription = "Change the position of the button"
-																	)
-															}
-															//vibration toggle button for tasbih to provide feedback
-															IconButton(onClick = {
-																vibrationAllowed.value =
-																	! vibrationAllowed.value
-																viewModelTasbih.handleEvent(
-																		TasbihViewModel.TasbihEvent.UpdateVibrationButtonState(
-																				vibrationAllowed.value
+															   //a reset button to reset the count
+															   IconButton(onClick = {
+																   viewModelTasbih.handleEvent(
+																			TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+																					 true
 																															  )
-																						   )
-															}) {
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = if (vibrationAllowed.value) painterResource(
-																				id = R.drawable.phone_vibration_off_icon
-																															 )
-																		else painterResource(
-																				id = R.drawable.phone_vibration_on_icon
-																							) ,
-																		contentDescription = "Vibration"
-																	)
-															}
-
-															//a reset button to reset the count
-															IconButton(onClick = {
-																viewModelTasbih.handleEvent(
-																		TasbihViewModel.TasbihEvent.UpdateResetButtonState(
-																				true
-																														  )
-																						   )
-															}) {
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = painterResource(id = R.drawable.refresh_icon) ,
-																		contentDescription = "Reset" ,
-																	)
-															}
-														}
+																							  )
+															   }) {
+																   Icon(
+																			modifier = Modifier.size(
+																					 24.dp
+																									) ,
+																			painter = painterResource(
+																					 id = R.drawable.refresh_icon
+																									 ) ,
+																			contentDescription = "Reset" ,
+																	   )
+															   }
+														   }
 //
 //														//trackers screen
-														PRAYER_TRACKER_SCREEN_ROUTE ,
-														CALENDER_SCREEN_ROUTE ,
-														->
-														{
-															IconButton(onClick = {
-																viewModelTracker.onEvent(
-																		TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
-																				! isMenstruatingState.value
-																															   )
-																						)
-															}) {
-																Icon(
-																		modifier = Modifier.size(24.dp) ,
-																		painter = painterResource(id = R.drawable.menstruation_icon) ,
-																		contentDescription = "Menstruation" ,
-																		//color it pink
-																		tint = Color(0xFFE91E63)
-																	)
-															}
-														}
-													}
-												}
-												 )
-									}
-											  )
-						} ,
-						bottomBar = {
-							AnimatedVisibility(
-									visible = ! checkRoute(route.value.toString()) ,
-									enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
-									exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
-									content = {
-										BottomNavigationBar(navController = navController)
-									})
+														   PRAYER_TRACKER_SCREEN_ROUTE ,
+														   CALENDER_SCREEN_ROUTE ,
+														   ->
+														   {
+															   IconButton(onClick = {
+																   viewModelTracker.onEvent(
+																			TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
+																					 ! isMenstruatingState.value
+																																   )
+																						   )
+															   }) {
+																   Icon(
+																			modifier = Modifier.size(
+																					 24.dp
+																									) ,
+																			painter = painterResource(
+																					 id = R.drawable.menstruation_icon
+																									 ) ,
+																			contentDescription = "Menstruation" ,
+																			//color it pink
+																			tint = Color(0xFFE91E63)
+																	   )
+															   }
+														   }
+													   }
+												   }
+												   )
+									  }
+											   )
+						 } ,
+						 bottomBar = {
+							 AnimatedVisibility(
+									  visible = ! checkRoute(route.value.toString()) ,
+									  enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION) ,
+									  exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit) ,
+									  content = {
+										  BottomNavigationBar(navController = navController)
+									  })
 
-						}
+						 }
 						) { it ->
 					NavigationGraph(navController = navController , it)
 				}
@@ -657,25 +681,25 @@ class MainActivity : ComponentActivity()
 	private fun checkRoute(route : String) : Boolean
 	{
 		val routeToCheck = listOf(
-				SETTINGS_SCREEN_ROUTE ,
-				ABOUT_SCREEN_ROUTE ,
-				PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ,
-				QURAN_SCREEN_ROUTE ,
-				QURAN_AYA_SCREEN_ROUTE ,
-				SHAHADAH_SCREEN_ROUTE ,
-				CHAPTERS_SCREEN_ROUTE ,
-				CHAPTER_SCREEN_ROUTE ,
-				TASBIH_SCREEN_ROUTE ,
-				NAMESOFALLAH_SCREEN_ROUTE ,
-				PRAYER_TRACKER_SCREEN_ROUTE ,
-				CALENDER_SCREEN_ROUTE ,
-				QIBLA_SCREEN_ROUTE ,
-				AppConstants.TASBIH_LIST_SCREEN ,
-				MY_QURAN_SCREEN_ROUTE ,
-				WEB_VIEW_SCREEN_ROUTE ,
-				LICENCES_SCREEN_ROUTE ,
-				AppConstants.DEBUG_MODE ,
-				CATEGORY_SCREEN_ROUTE
+				 SETTINGS_SCREEN_ROUTE ,
+				 ABOUT_SCREEN_ROUTE ,
+				 PRAYER_TIMES_SETTINGS_SCREEN_ROUTE ,
+				 QURAN_SCREEN_ROUTE ,
+				 QURAN_AYA_SCREEN_ROUTE ,
+				 SHAHADAH_SCREEN_ROUTE ,
+				 CHAPTERS_SCREEN_ROUTE ,
+				 CHAPTER_SCREEN_ROUTE ,
+				 TASBIH_SCREEN_ROUTE ,
+				 NAMESOFALLAH_SCREEN_ROUTE ,
+				 PRAYER_TRACKER_SCREEN_ROUTE ,
+				 CALENDER_SCREEN_ROUTE ,
+				 QIBLA_SCREEN_ROUTE ,
+				 AppConstants.TASBIH_LIST_SCREEN ,
+				 MY_QURAN_SCREEN_ROUTE ,
+				 WEB_VIEW_SCREEN_ROUTE ,
+				 LICENCES_SCREEN_ROUTE ,
+				 AppConstants.DEBUG_MODE ,
+				 CATEGORY_SCREEN_ROUTE
 								 )
 		//if the route is in the list then return true
 		return routeToCheck.contains(route)
@@ -687,25 +711,25 @@ class CustomAnimation
 
 	fun fadeIn(duration : Int) : EnterTransition =
 		expandVertically(
-				expandFrom = Alignment.Top ,
-				animationSpec = tween(durationMillis = duration)
+				 expandFrom = Alignment.Top ,
+				 animationSpec = tween(durationMillis = duration)
 						)
 
 	fun fadeOut(duration : Int) : ExitTransition =
 		shrinkVertically(
-				shrinkTowards = Alignment.Top ,
-				animationSpec = tween(durationMillis = duration)
+				 shrinkTowards = Alignment.Top ,
+				 animationSpec = tween(durationMillis = duration)
 						)
 
 	fun expandHorizontally(duration : Int) : EnterTransition =
 		expandHorizontally(
-				expandFrom = Alignment.CenterHorizontally ,
-				animationSpec = tween(durationMillis = duration)
+				 expandFrom = Alignment.CenterHorizontally ,
+				 animationSpec = tween(durationMillis = duration)
 						  )
 
 	fun shrinkHorizontally(duration : Int) : ExitTransition =
 		shrinkHorizontally(
-				shrinkTowards = Alignment.CenterHorizontally ,
-				animationSpec = tween(durationMillis = duration)
+				 shrinkTowards = Alignment.CenterHorizontally ,
+				 animationSpec = tween(durationMillis = duration)
 						  )
 }

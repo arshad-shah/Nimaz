@@ -36,18 +36,18 @@ fun AnimatableIcon(
 {
 	// Animation params
 	val animatedScale : Float by animateFloatAsState(
-			targetValue = scale ,
+			 targetValue = scale ,
 													)
 	val animatedColor by animateColorAsState(
-			targetValue = color ,
+			 targetValue = color ,
 											)
 	Icon(
-			painter = painter ,
-			contentDescription = contentDescription ,
-			tint = animatedColor ,
-			modifier = modifier
-				.scale(animatedScale)
-				.size(iconSize) ,
+			 painter = painter ,
+			 contentDescription = contentDescription ,
+			 tint = animatedColor ,
+			 modifier = modifier
+				 .scale(animatedScale)
+				 .size(iconSize) ,
 		)
 
 }
@@ -64,18 +64,18 @@ fun AnimatedText(
 {
 	// Animation params
 	val animatedScale : Float by animateFloatAsState(
-			targetValue = scale ,
+			 targetValue = scale ,
 													)
 	val animatedColor by animateColorAsState(
-			targetValue = color ,
+			 targetValue = color ,
 											)
 
 	Text(
-			text = text ,
-			color = animatedColor ,
-			textAlign = textAlign ,
-			modifier = modifier
-				.scale(animatedScale) ,
+			 text = text ,
+			 color = animatedColor ,
+			 textAlign = textAlign ,
+			 modifier = modifier
+				 .scale(animatedScale) ,
 		)
 
 
@@ -86,9 +86,9 @@ fun AnimatedText(
 fun PreviewIcon()
 {
 	Surface(
-			modifier = Modifier
-				.fillMaxWidth()
-				.size(100.dp) ,
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .size(100.dp) ,
 		   ) {
 
 		var selected by remember {
@@ -96,13 +96,13 @@ fun PreviewIcon()
 		}
 
 		AnimatableIcon(
-				painter = if (selected) painterResource(id = R.drawable.dashboard_icon) else painterResource(
-						id = R.drawable.dashboard_icon_empty
-																											) ,
-				scale = if (selected) 1.5f else 1f ,
-				color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
-						alpha = 0.5f
-																												   ) ,
+				 painter = if (selected) painterResource(id = R.drawable.dashboard_icon) else painterResource(
+						  id = R.drawable.dashboard_icon_empty
+																											 ) ,
+				 scale = if (selected) 1.5f else 1f ,
+				 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
+						  alpha = 0.5f
+																													) ,
 					  )
 	}
 }
@@ -113,9 +113,9 @@ fun PreviewIcon()
 fun PreviewAnimatedText()
 {
 	Surface(
-			modifier = Modifier
-				.fillMaxWidth()
-				.size(100.dp) ,
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .size(100.dp) ,
 		   ) {
 
 		var selected by remember {
@@ -123,11 +123,11 @@ fun PreviewAnimatedText()
 		}
 
 		AnimatedText(
-				text = if (selected) "Selected" else "Not Selected" ,
-				scale = if (selected) 1.5f else 1f ,
-				color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
-						alpha = 0.5f
-																												   ) ,
+				 text = if (selected) "Selected" else "Not Selected" ,
+				 scale = if (selected) 1.5f else 1f ,
+				 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
+						  alpha = 0.5f
+																													) ,
 					)
 	}
 }

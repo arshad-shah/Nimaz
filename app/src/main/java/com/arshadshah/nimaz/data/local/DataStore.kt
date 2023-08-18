@@ -305,88 +305,88 @@ class DataStore(db : AppDatabase)
 }
 
 private fun Aya.toLocalAya() = LocalAya(
-		ayaNumberInQuran = ayaNumberInQuran ,
-		ayaNumber = ayaNumber ,
-		ayaArabic = ayaArabic ,
-		translationEnglish = ayaTranslationEnglish ,
-		translationUrdu = ayaTranslationUrdu ,
-		suraNumber = suraNumber ,
-		ayaNumberInSurah = ayaNumberInSurah ,
-		bookmark = bookmark ,
-		favorite = favorite ,
-		note = note ,
-		audioFileLocation = audioFileLocation ,
-		sajda = sajda ,
-		sajdaType = sajdaType ,
-		ruku = ruku ,
-		juzNumber = juzNumber ,
+		 ayaNumberInQuran = ayaNumberInQuran ,
+		 ayaNumber = ayaNumber ,
+		 ayaArabic = ayaArabic ,
+		 translationEnglish = ayaTranslationEnglish ,
+		 translationUrdu = ayaTranslationUrdu ,
+		 suraNumber = suraNumber ,
+		 ayaNumberInSurah = ayaNumberInSurah ,
+		 bookmark = bookmark ,
+		 favorite = favorite ,
+		 note = note ,
+		 audioFileLocation = audioFileLocation ,
+		 sajda = sajda ,
+		 sajdaType = sajdaType ,
+		 ruku = ruku ,
+		 juzNumber = juzNumber ,
 									   )
 
 private fun LocalAya.toAya() = Aya(
-		ayaNumberInQuran = ayaNumberInQuran ,
-		ayaNumber = ayaNumber ,
-		ayaArabic = ayaArabic ,
-		ayaTranslationEnglish = translationEnglish ,
-		ayaTranslationUrdu = translationUrdu ,
-		suraNumber = suraNumber ,
-		ayaNumberInSurah = ayaNumberInSurah ,
-		bookmark = bookmark ,
-		favorite = favorite ,
-		note = note ,
-		audioFileLocation = audioFileLocation ,
-		sajda = sajda ,
-		sajdaType = sajdaType ,
-		ruku = ruku ,
-		juzNumber = juzNumber ,
+		 ayaNumberInQuran = ayaNumberInQuran ,
+		 ayaNumber = ayaNumber ,
+		 ayaArabic = ayaArabic ,
+		 ayaTranslationEnglish = translationEnglish ,
+		 ayaTranslationUrdu = translationUrdu ,
+		 suraNumber = suraNumber ,
+		 ayaNumberInSurah = ayaNumberInSurah ,
+		 bookmark = bookmark ,
+		 favorite = favorite ,
+		 note = note ,
+		 audioFileLocation = audioFileLocation ,
+		 sajda = sajda ,
+		 sajdaType = sajdaType ,
+		 ruku = ruku ,
+		 juzNumber = juzNumber ,
 								  )
 
 
 private fun Juz.toLocalJuz() = LocalJuz(
-		number = number ,
-		name = name ,
-		tname = tname ,
-		juzStartAyaInQuran = juzStartAyaInQuran ,
+		 number = number ,
+		 name = name ,
+		 tname = tname ,
+		 juzStartAyaInQuran = juzStartAyaInQuran ,
 									   )
 
 private fun LocalJuz.toJuz() = Juz(
-		number = number ,
-		name = name ,
-		tname = tname ,
-		juzStartAyaInQuran = juzStartAyaInQuran ,
+		 number = number ,
+		 name = name ,
+		 tname = tname ,
+		 juzStartAyaInQuran = juzStartAyaInQuran ,
 								  )
 
 private fun Surah.toLocalSurah() = LocalSurah(
-		number = number ,
-		numberOfAyahs = numberOfAyahs ,
-		startAya = startAya ,
-		name = name ,
-		englishName = englishName ,
-		englishNameTranslation = englishNameTranslation ,
-		revelationType = revelationType ,
-		revelationOrder = revelationOrder ,
-		rukus = rukus ,
+		 number = number ,
+		 numberOfAyahs = numberOfAyahs ,
+		 startAya = startAya ,
+		 name = name ,
+		 englishName = englishName ,
+		 englishNameTranslation = englishNameTranslation ,
+		 revelationType = revelationType ,
+		 revelationOrder = revelationOrder ,
+		 rukus = rukus ,
 											 )
 
 private fun LocalSurah.toSurah() = Surah(
-		number = number ,
-		numberOfAyahs = numberOfAyahs ,
-		startAya = startAya ,
-		name = name ,
-		englishName = englishName ,
-		englishNameTranslation = englishNameTranslation ,
-		revelationType = revelationType ,
-		revelationOrder = revelationOrder ,
-		rukus = rukus ,
+		 number = number ,
+		 numberOfAyahs = numberOfAyahs ,
+		 startAya = startAya ,
+		 name = name ,
+		 englishName = englishName ,
+		 englishNameTranslation = englishNameTranslation ,
+		 revelationType = revelationType ,
+		 revelationOrder = revelationOrder ,
+		 rukus = rukus ,
 										)
 
 private fun PrayerTimes.toLocalPrayerTimes() = LocalPrayerTimes(
-		date = date.toString() ,
-		fajr = fajr.toString() ,
-		sunrise = sunrise.toString() ,
-		dhuhr = dhuhr.toString() ,
-		asr = asr.toString() ,
-		maghrib = maghrib.toString() ,
-		isha = isha.toString() ,
+		 date = date.toString() ,
+		 fajr = fajr.toString() ,
+		 sunrise = sunrise.toString() ,
+		 dhuhr = dhuhr.toString() ,
+		 asr = asr.toString() ,
+		 maghrib = maghrib.toString() ,
+		 isha = isha.toString() ,
 															   )
 
 private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes?
@@ -395,13 +395,13 @@ private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes?
 	return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null && date != null)
 	{
 		PrayerTimes(
-				date = date ,
-				fajr = LocalDateTime.parse(fajr) ,
-				sunrise = LocalDateTime.parse(sunrise) ,
-				dhuhr = LocalDateTime.parse(dhuhr) ,
-				asr = LocalDateTime.parse(asr) ,
-				maghrib = LocalDateTime.parse(maghrib) ,
-				isha = LocalDateTime.parse(isha) ,
+				 date = date ,
+				 fajr = LocalDateTime.parse(fajr) ,
+				 sunrise = LocalDateTime.parse(sunrise) ,
+				 dhuhr = LocalDateTime.parse(dhuhr) ,
+				 asr = LocalDateTime.parse(asr) ,
+				 maghrib = LocalDateTime.parse(maghrib) ,
+				 isha = LocalDateTime.parse(isha) ,
 				   )
 	} else
 	{
@@ -412,93 +412,93 @@ private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes?
 
 //duas
 private fun Dua.toLocalDua() = LocalDua(
-		_id = _id ,
-		chapter_id = chapter_id ,
-		favourite = favourite ,
-		arabic_dua = arabic_dua ,
-		english_translation = english_translation ,
-		english_reference = english_reference ,
-		category = category ,
-		isFavourite = isFavourite ,
+		 _id = _id ,
+		 chapter_id = chapter_id ,
+		 favourite = favourite ,
+		 arabic_dua = arabic_dua ,
+		 english_translation = english_translation ,
+		 english_reference = english_reference ,
+		 category = category ,
+		 isFavourite = isFavourite ,
 									   )
 
 private fun LocalDua.toDua() = Dua(
-		_id = _id ,
-		chapter_id = chapter_id ,
-		favourite = favourite ,
-		arabic_dua = arabic_dua ,
-		english_translation = english_translation ,
-		english_reference = english_reference ,
-		category = category ,
-		isFavourite = isFavourite ,
+		 _id = _id ,
+		 chapter_id = chapter_id ,
+		 favourite = favourite ,
+		 arabic_dua = arabic_dua ,
+		 english_translation = english_translation ,
+		 english_reference = english_reference ,
+		 category = category ,
+		 isFavourite = isFavourite ,
 								  )
 
 
 private fun Chapter.toLocalChapter() = LocalChapter(
-		_id = _id ,
-		arabic_title = arabic_title ,
-		english_title = english_title ,
-		category = category ,
+		 _id = _id ,
+		 arabic_title = arabic_title ,
+		 english_title = english_title ,
+		 category = category ,
 												   )
 
 private fun LocalChapter.toChapter() = Chapter(
-		_id = _id ,
-		arabic_title = arabic_title ,
-		english_title = english_title ,
-		category = category ,
+		 _id = _id ,
+		 arabic_title = arabic_title ,
+		 english_title = english_title ,
+		 category = category ,
 											  )
 
 private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
-		date = date ,
-		fajr = fajr ,
-		dhuhr = dhuhr ,
-		asr = asr ,
-		maghrib = maghrib ,
-		isha = isha ,
-		progress = progress ,
-		isMenstruating = isMenstruating ,
+		 date = date ,
+		 fajr = fajr ,
+		 dhuhr = dhuhr ,
+		 asr = asr ,
+		 maghrib = maghrib ,
+		 isha = isha ,
+		 progress = progress ,
+		 isMenstruating = isMenstruating ,
 																	   )
 
 private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
-		date = date ,
-		fajr = fajr ,
-		dhuhr = dhuhr ,
-		asr = asr ,
-		maghrib = maghrib ,
-		isha = isha ,
-		progress = progress ,
-		isMenstruating = isMenstruating ,
+		 date = date ,
+		 fajr = fajr ,
+		 dhuhr = dhuhr ,
+		 asr = asr ,
+		 maghrib = maghrib ,
+		 isha = isha ,
+		 progress = progress ,
+		 isMenstruating = isMenstruating ,
 																 )
 
 //fasting
 private fun FastTracker.toLocalFastTracker() = LocalFastTracker(
-		date = date ,
-		isFasting = isFasting ,
-		isMenstruating = isMenstruating ,
+		 date = date ,
+		 isFasting = isFasting ,
+		 isMenstruating = isMenstruating ,
 															   )
 
 private fun LocalFastTracker.toFastTracker() = FastTracker(
-		date = date ,
-		isFasting = isFasting ,
-		isMenstruating = isMenstruating ,
+		 date = date ,
+		 isFasting = isFasting ,
+		 isMenstruating = isMenstruating ,
 														  )
 
 private fun Tasbih.toLocalTasbih() = LocalTasbih(
-		id = id ,
-		date = date ,
-		arabicName = arabicName ,
-		englishName = englishName ,
-		translationName = translationName ,
-		goal = goal ,
-		count = count ,
+		 id = id ,
+		 date = date ,
+		 arabicName = arabicName ,
+		 englishName = englishName ,
+		 translationName = translationName ,
+		 goal = goal ,
+		 count = count ,
 												)
 
 private fun LocalTasbih.toTasbih() = Tasbih(
-		id = id ,
-		date = date ,
-		arabicName = arabicName ,
-		englishName = englishName ,
-		translationName = translationName ,
-		goal = goal ,
-		count = count ,
+		 id = id ,
+		 date = date ,
+		 arabicName = arabicName ,
+		 englishName = englishName ,
+		 translationName = translationName ,
+		 goal = goal ,
+		 count = count ,
 										   )

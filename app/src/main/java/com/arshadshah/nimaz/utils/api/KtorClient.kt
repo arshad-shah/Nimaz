@@ -14,12 +14,12 @@ object KtorClient
 		//install json serializer
 		install(ContentNegotiation) {
 			json(
-					json = Json {
-						ignoreUnknownKeys = true
-						isLenient = true
-						allowSpecialFloatingPointValues = true
-						useArrayPolymorphism = true
-					}
+					 json = Json {
+						 ignoreUnknownKeys = true
+						 isLenient = true
+						 allowSpecialFloatingPointValues = true
+						 useArrayPolymorphism = true
+					 }
 				)
 		}
 	}

@@ -26,53 +26,53 @@ fun ShahadahScreen(paddingValues : PaddingValues)
 {
 
 	Column(
-			modifier = Modifier
-				.padding(paddingValues)
-				.fillMaxSize() ,
-			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Center
+			 modifier = Modifier
+				 .padding(paddingValues)
+				 .fillMaxSize() ,
+			 horizontalAlignment = Alignment.CenterHorizontally ,
+			 verticalArrangement = Arrangement.Center
 		  ) {
 
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.padding(8.dp) ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier
+					 .padding(8.dp) ,
 					) {
 
 			//Shadaah in arabic with diacritics
 			CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 				Text(
-						text = "أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ ٱللَّٰهِ" ,
-						style = MaterialTheme.typography.headlineLarge ,
-						fontFamily = utmaniQuranFont ,
-						textAlign = TextAlign.Center ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						color = MaterialTheme.colorScheme.onSurface ,
-						fontWeight = FontWeight.SemiBold
+						 text = "أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ ٱللَّٰهِ" ,
+						 style = MaterialTheme.typography.headlineLarge ,
+						 fontFamily = utmaniQuranFont ,
+						 textAlign = TextAlign.Center ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .fillMaxWidth() ,
+						 color = MaterialTheme.colorScheme.onSurface ,
+						 fontWeight = FontWeight.SemiBold
 					)
 			}
 			//Shadaah transliteration
 			Text(
-					text = "Ash-hadu an la ilaha illa Allah wa ash-hadu anna Muhammadan Rasulullah" ,
-					style = MaterialTheme.typography.titleLarge ,
-					textAlign = TextAlign.Left ,
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth() ,
-					color = MaterialTheme.colorScheme.onSurface ,
+					 text = "Ash-hadu an la ilaha illa Allah wa ash-hadu anna Muhammadan Rasulullah" ,
+					 style = MaterialTheme.typography.titleLarge ,
+					 textAlign = TextAlign.Left ,
+					 modifier = Modifier
+						 .padding(8.dp)
+						 .fillMaxWidth() ,
+					 color = MaterialTheme.colorScheme.onSurface ,
 				)
 
 			//Shadaah in english
 			Text(
-					text = "I bear witness that there is no god but Allah and I bear witness that Muhammad is the messenger of Allah" ,
-					style = MaterialTheme.typography.titleLarge ,
-					textAlign = TextAlign.Left ,
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth() ,
-					color = MaterialTheme.colorScheme.onSurface ,
+					 text = "I bear witness that there is no god but Allah and I bear witness that Muhammad is the messenger of Allah" ,
+					 style = MaterialTheme.typography.titleLarge ,
+					 textAlign = TextAlign.Left ,
+					 modifier = Modifier
+						 .padding(8.dp)
+						 .fillMaxWidth() ,
+					 color = MaterialTheme.colorScheme.onSurface ,
 				)
 
 		}

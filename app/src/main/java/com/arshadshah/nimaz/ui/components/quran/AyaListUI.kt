@@ -61,9 +61,9 @@ fun AyaListUI(
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = QURAN_VIEWMODEL_KEY ,
-			initializer = { QuranViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity)
+			 key = QURAN_VIEWMODEL_KEY ,
+			 initializer = { QuranViewModel(context) } ,
+			 viewModelStoreOwner = context as ComponentActivity)
 	val spaceFilesRepository = SpacesFileRepository(context)
 	val surah = remember {
 		viewModel.surahState
@@ -96,39 +96,39 @@ fun AyaListUI(
 		for (i in 0 .. 9)
 		{
 			dummyList.add(
-					Aya(
-							ayaNumber = i ,
-							ayaNumberInQuran = 1 ,
-							ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-							ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-							ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
-							audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
-							ayaNumberInSurah = 1 ,
-							bookmark = true ,
-							favorite = true ,
-							note = "dsfhsdhsgdfhstghs" ,
-							juzNumber = 1 ,
-							suraNumber = 1 ,
-							ruku = 1 ,
-							sajda = false ,
-							sajdaType = "" ,
-					   )
+					 Aya(
+							  ayaNumber = i ,
+							  ayaNumberInQuran = 1 ,
+							  ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
+							  ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+							  ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے" ,
+							  audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3" ,
+							  ayaNumberInSurah = 1 ,
+							  bookmark = true ,
+							  favorite = true ,
+							  note = "dsfhsdhsgdfhstghs" ,
+							  juzNumber = 1 ,
+							  suraNumber = 1 ,
+							  ruku = 1 ,
+							  sajda = false ,
+							  sajdaType = "" ,
+						)
 						 )
 		}
 		LazyColumn(
-				contentPadding = paddingValues ,
-				state = state ,
-				userScrollEnabled = false ,
+				 contentPadding = paddingValues ,
+				 state = state ,
+				 userScrollEnabled = false ,
 				  ) {
 			items(10) { index ->
 				AyaListItemUI(
-						aya = dummyList[index] ,
-						arabic_Font_size = arabicFontSize ,
-						arabic_Font = arabicFont ,
-						translation_Font_size = translationFontSize ,
-						translation = translation ,
-						spacesFileRepository = spaceFilesRepository ,
-						loading = true ,
+						 aya = dummyList[index] ,
+						 arabic_Font_size = arabicFontSize ,
+						 arabic_Font = arabicFont ,
+						 translation_Font_size = translationFontSize ,
+						 translation = translation ,
+						 spacesFileRepository = spaceFilesRepository ,
+						 loading = true ,
 							 )
 			}
 		}
@@ -139,10 +139,10 @@ fun AyaListUI(
 		val visibleItemIndex =
 			remember {
 				mutableStateOf(
-						sharedPref.getInt(
-								"visibleItemIndex-${type}-${number}" ,
-								- 1
-										 )
+						 sharedPref.getInt(
+								  "visibleItemIndex-${type}-${number}" ,
+								  - 1
+										  )
 							  )
 			}
 
@@ -176,8 +176,8 @@ fun AyaListUI(
 			{
 				val index = ayaList.indexOfFirst {
 					it.ayaNumberInQuran == scrollToVerse.value?.ayaNumberInQuran &&
-							it.suraNumber == scrollToVerse.value?.suraNumber &&
-							it.juzNumber == scrollToVerse.value?.juzNumber
+							 it.suraNumber == scrollToVerse.value?.suraNumber &&
+							 it.juzNumber == scrollToVerse.value?.juzNumber
 				}
 				state.animateScrollToItem(index)
 				viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Scroll_To_Aya(null))
@@ -185,10 +185,10 @@ fun AyaListUI(
 		}
 
 		LazyColumn(
-				modifier = Modifier.testTag(TEST_TAG_AYA) ,
-				userScrollEnabled = true ,
-				contentPadding = paddingValues ,
-				state = state
+				 modifier = Modifier.testTag(TEST_TAG_AYA) ,
+				 userScrollEnabled = true ,
+				 contentPadding = paddingValues ,
+				 state = state
 				  ) {
 			items(ayaList.size) { index ->
 				if (
@@ -200,18 +200,18 @@ fun AyaListUI(
 				{
 					viewModel.getSurahById(ayaList[index + 1].suraNumber)
 					SurahHeader(
-							surah = surah.value ,
-							loading = loading ,
+							 surah = surah.value ,
+							 loading = loading ,
 							   )
 				}
 				AyaListItemUI(
-						aya = ayaList[index] ,
-						spacesFileRepository = spaceFilesRepository ,
-						arabic_Font_size = arabicFontSize ,
-						translation_Font_size = translationFontSize ,
-						arabic_Font = arabicFont ,
-						translation = translation ,
-						loading = false ,
+						 aya = ayaList[index] ,
+						 spacesFileRepository = spaceFilesRepository ,
+						 arabic_Font_size = arabicFontSize ,
+						 translation_Font_size = translationFontSize ,
+						 arabic_Font = arabicFont ,
+						 translation = translation ,
+						 loading = false ,
 							 )
 			}
 		}
@@ -261,9 +261,9 @@ fun AyaListItemUI(
 	}
 
 	val viewModel = viewModel(
-			key = QURAN_VIEWMODEL_KEY ,
-			initializer = { QuranViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity)
+			 key = QURAN_VIEWMODEL_KEY ,
+			 initializer = { QuranViewModel(context) } ,
+			 viewModelStoreOwner = context as ComponentActivity)
 
 	val error = remember {
 		mutableStateOf("")
@@ -352,11 +352,11 @@ fun AyaListItemUI(
 				fileToBePlayed.value = file
 				aya.audioFileLocation = file?.absolutePath.toString()
 				viewModel.handleAyaEvent(
-						QuranViewModel.AyaEvent.addAudioToAya(
-								aya.suraNumber ,
-								aya.ayaNumberInSurah ,
-								aya.audioFileLocation
-															 )
+						 QuranViewModel.AyaEvent.addAudioToAya(
+								  aya.suraNumber ,
+								  aya.ayaNumberInSurah ,
+								  aya.audioFileLocation
+															  )
 										)
 			} else
 			{
@@ -377,10 +377,10 @@ fun AyaListItemUI(
 			mediaPlayer.reset()
 			val uri = Uri.fromFile(fileToBePlayed.value)
 			mediaPlayer.setAudioAttributes(
-					AudioAttributes.Builder()
-						.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-						.setUsage(AudioAttributes.USAGE_MEDIA)
-						.build()
+					 AudioAttributes.Builder()
+						 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+						 .setUsage(AudioAttributes.USAGE_MEDIA)
+						 .build()
 										  )
 			mediaPlayer.setDataSource(uri.toString())
 			mediaPlayer.prepare()
@@ -462,9 +462,9 @@ fun AyaListItemUI(
 		isDownloaded.value = false
 		fileToBePlayed.value = null
 		spacesFileRepository.downloadAyaFile(
-				aya.suraNumber ,
-				aya.ayaNumberInSurah ,
-				downloadCallback
+				 aya.suraNumber ,
+				 aya.ayaNumberInSurah ,
+				 downloadCallback
 											)
 	}
 
@@ -485,16 +485,16 @@ fun AyaListItemUI(
 			error.value = ""
 		}) {
 			BannerLarge(
-					title = "Error" ,
-					isOpen = remember {
-						mutableStateOf(true)
-					} ,
-					variant = BannerVariant.Error ,
-					showFor = BannerDuration.FOREVER.value ,
-					message = error.value ,
-					onDismiss = {
-						error.value = ""
-					}
+					 title = "Error" ,
+					 isOpen = remember {
+						 mutableStateOf(true)
+					 } ,
+					 variant = BannerVariant.Error ,
+					 showFor = BannerDuration.FOREVER.value ,
+					 message = error.value ,
+					 onDismiss = {
+						 error.value = ""
+					 }
 					   )
 		}
 	}
@@ -503,105 +503,105 @@ fun AyaListItemUI(
 	if (downloadInProgress.value)
 	{
 		AlertDialogNimaz(
-				icon = painterResource(id = R.drawable.download_icon) ,
-				topDivider = false ,
-				bottomDivider = false ,
-				contentHeight = 100.dp ,
-				contentDescription = "Downloading Audio" ,
-				title = "Downloading Audio" ,
-				contentToShow = {
-					Column(
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(4.dp) ,
-							verticalArrangement = Arrangement.Center ,
-							horizontalAlignment = Alignment.CenterHorizontally
-						  )
-					{
-						CircularProgressIndicator(
-								modifier = Modifier.size(50.dp) ,
-												 )
-					}
-				} ,
-				onDismissRequest = {
+				 icon = painterResource(id = R.drawable.download_icon) ,
+				 topDivider = false ,
+				 bottomDivider = false ,
+				 contentHeight = 100.dp ,
+				 contentDescription = "Downloading Audio" ,
+				 title = "Downloading Audio" ,
+				 contentToShow = {
+					 Column(
+							  modifier = Modifier
+								  .fillMaxWidth()
+								  .padding(4.dp) ,
+							  verticalArrangement = Arrangement.Center ,
+							  horizontalAlignment = Alignment.CenterHorizontally
+						   )
+					 {
+						 CircularProgressIndicator(
+								  modifier = Modifier.size(50.dp) ,
+												  )
+					 }
+				 } ,
+				 onDismissRequest = {
 
-				} ,
-				showDismissButton = false ,
-				confirmButtonText = "Cancel" ,
-				showConfirmButton = false ,
-				onConfirm = {
-				} ,
-				onDismiss = {
-				})
+				 } ,
+				 showDismissButton = false ,
+				 confirmButtonText = "Cancel" ,
+				 showConfirmButton = false ,
+				 onConfirm = {
+				 } ,
+				 onDismiss = {
+				 })
 	}
 	ElevatedCard(
-			colors = CardDefaults.elevatedCardColors(
-					containerColor = cardBackgroundColor ,
-													) ,
-			modifier = Modifier
-				.padding(4.dp)
-				.fillMaxWidth() ,
-			shape = MaterialTheme.shapes.extraLarge ,
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = cardBackgroundColor ,
+													 ) ,
+			 modifier = Modifier
+				 .padding(4.dp)
+				 .fillMaxWidth() ,
+			 shape = MaterialTheme.shapes.extraLarge ,
 				) {
 		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp)
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp)
 		   ) {
 			Column(
-					modifier = Modifier
-						.weight(0.90f)
+					 modifier = Modifier
+						 .weight(0.90f)
 				  ) {
 				SelectionContainer {
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
-								text = aya.ayaArabic ,
-								style = MaterialTheme.typography.titleLarge ,
-								fontSize = if (arabic_Font_size.value == 0.0f) 24.sp else arabic_Font_size.value.sp ,
-								fontFamily = when (arabic_Font.value)
-								{
-									"Default" ->
-									{
-										utmaniQuranFont
-									}
+								 text = aya.ayaArabic ,
+								 style = MaterialTheme.typography.titleLarge ,
+								 fontSize = if (arabic_Font_size.value == 0.0f) 24.sp else arabic_Font_size.value.sp ,
+								 fontFamily = when (arabic_Font.value)
+								 {
+									 "Default" ->
+									 {
+										 utmaniQuranFont
+									 }
 
-									"Quranme" ->
-									{
-										quranFont
-									}
+									 "Quranme" ->
+									 {
+										 quranFont
+									 }
 
-									"Hidayat" ->
-									{
-										hidayat
-									}
+									 "Hidayat" ->
+									 {
+										 hidayat
+									 }
 
-									"Amiri" ->
-									{
-										amiri
-									}
+									 "Amiri" ->
+									 {
+										 amiri
+									 }
 
-									"IndoPak" ->
-									{
-										almajeed
-									}
+									 "IndoPak" ->
+									 {
+										 almajeed
+									 }
 
-									else ->
-									{
-										utmaniQuranFont
-									}
-								} ,
-								textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(4.dp)
-									.placeholder(
-											visible = loading ,
-											color = MaterialTheme.colorScheme.outline ,
-											shape = RoundedCornerShape(4.dp) ,
-											highlight = PlaceholderHighlight.shimmer(
-													highlightColor = Color.White ,
-																					)
-												)
+									 else ->
+									 {
+										 utmaniQuranFont
+									 }
+								 } ,
+								 textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
+								 modifier = Modifier
+									 .fillMaxWidth()
+									 .padding(4.dp)
+									 .placeholder(
+											  visible = loading ,
+											  color = MaterialTheme.colorScheme.outline ,
+											  shape = RoundedCornerShape(4.dp) ,
+											  highlight = PlaceholderHighlight.shimmer(
+													   highlightColor = Color.White ,
+																					  )
+												 )
 							)
 					}
 				}
@@ -610,86 +610,86 @@ fun AyaListItemUI(
 				{
 					CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 						Text(
-								text = "${aya.ayaTranslationUrdu} ۔" ,
-								style = MaterialTheme.typography.titleSmall ,
-								fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp ,
-								fontFamily = urduFont ,
-								textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(horizontal = 4.dp)
-									.placeholder(
-											visible = loading ,
-											color = MaterialTheme.colorScheme.outline ,
-											shape = RoundedCornerShape(4.dp) ,
-											highlight = PlaceholderHighlight.shimmer(
-													highlightColor = Color.White ,
-																					)
-												)
+								 text = "${aya.ayaTranslationUrdu} ۔" ,
+								 style = MaterialTheme.typography.titleSmall ,
+								 fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp ,
+								 fontFamily = urduFont ,
+								 textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
+								 modifier = Modifier
+									 .fillMaxWidth()
+									 .padding(horizontal = 4.dp)
+									 .placeholder(
+											  visible = loading ,
+											  color = MaterialTheme.colorScheme.outline ,
+											  shape = RoundedCornerShape(4.dp) ,
+											  highlight = PlaceholderHighlight.shimmer(
+													   highlightColor = Color.White ,
+																					  )
+												 )
 							)
 					}
 				}
 				if (translation.value == "English")
 				{
 					Text(
-							text = aya.ayaTranslationEnglish ,
-							style = MaterialTheme.typography.bodySmall ,
-							fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp ,
-							textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(horizontal = 4.dp)
-								.placeholder(
-										visible = loading ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
+							 text = aya.ayaTranslationEnglish ,
+							 style = MaterialTheme.typography.bodySmall ,
+							 fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp ,
+							 textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center ,
+							 modifier = Modifier
+								 .fillMaxWidth()
+								 .padding(horizontal = 4.dp)
+								 .placeholder(
+										  visible = loading ,
+										  color = MaterialTheme.colorScheme.outline ,
+										  shape = RoundedCornerShape(4.dp) ,
+										  highlight = PlaceholderHighlight.shimmer(
+												   highlightColor = Color.White ,
+																				  )
+											 )
 						)
 				}
 
 				Row(
-						modifier = Modifier.fillMaxWidth() ,
-						horizontalArrangement = Arrangement.SpaceBetween ,
-						verticalAlignment = Alignment.CenterVertically
+						 modifier = Modifier.fillMaxWidth() ,
+						 horizontalArrangement = Arrangement.SpaceBetween ,
+						 verticalAlignment = Alignment.CenterVertically
 				   ) {
 					AyatFeatures(
-							isBookMarkedVerse = isBookMarkedVerse ,
-							isFavouredVerse = isFavoured ,
-							hasNote = hasNote ,
-							handleEvents = viewModel::handleAyaEvent ,
-							aya = aya ,
-							showNoteDialog = showNoteDialog ,
-							noteContent = noteContent ,
-							isLoading = loading ,
+							 isBookMarkedVerse = isBookMarkedVerse ,
+							 isFavouredVerse = isFavoured ,
+							 hasNote = hasNote ,
+							 handleEvents = viewModel::handleAyaEvent ,
+							 aya = aya ,
+							 showNoteDialog = showNoteDialog ,
+							 noteContent = noteContent ,
+							 isLoading = loading ,
 								)
 					//more menu button that opens a popup menu
 					if (aya.ayaNumberInQuran != 0)
 					{
 						//a button that opens a popup menu
 						IconButton(
-								onClick = {
-									popUpOpen.value = ! popUpOpen.value
-								} ,
-								enabled = ! loading ,
+								 onClick = {
+									 popUpOpen.value = ! popUpOpen.value
+								 } ,
+								 enabled = ! loading ,
 								  ) {
 							Icon(
-									modifier = Modifier
-										.size(36.dp)
-										.padding(end = 8.dp)
-										.placeholder(
-												visible = loading ,
-												color = MaterialTheme.colorScheme.outline ,
-												shape = RoundedCornerShape(4.dp) ,
-												highlight = PlaceholderHighlight.shimmer(
-														highlightColor = Color.White ,
-																						)
-													) ,
-									painter = painterResource(id = R.drawable.more_menu_icon) ,
-									tint = MaterialTheme.colorScheme.primary ,
-									contentDescription = "More Menu for Ayat ${aya.ayaNumberInSurah}" ,
+									 modifier = Modifier
+										 .size(36.dp)
+										 .padding(end = 8.dp)
+										 .placeholder(
+												  visible = loading ,
+												  color = MaterialTheme.colorScheme.outline ,
+												  shape = RoundedCornerShape(4.dp) ,
+												  highlight = PlaceholderHighlight.shimmer(
+														   highlightColor = Color.White ,
+																						  )
+													 ) ,
+									 painter = painterResource(id = R.drawable.more_menu_icon) ,
+									 tint = MaterialTheme.colorScheme.primary ,
+									 contentDescription = "More Menu for Ayat ${aya.ayaNumberInSurah}" ,
 								)
 						}
 					}
@@ -698,29 +698,29 @@ fun AyaListItemUI(
 				if (popUpOpen.value)
 				{
 					AyatFeaturesPopUpMenu(
-							aya = aya ,
-							isBookMarkedVerse = isBookMarkedVerse ,
-							isFavouredVerse = isFavoured ,
-							hasNote = hasNote ,
-							handleEvents = viewModel::handleAyaEvent ,
-							showNoteDialog = showNoteDialog ,
-							noteContent = noteContent ,
-							popUpOpen = popUpOpen ,
-							onDownloadClicked = { downloadFile() }
+							 aya = aya ,
+							 isBookMarkedVerse = isBookMarkedVerse ,
+							 isFavouredVerse = isFavoured ,
+							 hasNote = hasNote ,
+							 handleEvents = viewModel::handleAyaEvent ,
+							 showNoteDialog = showNoteDialog ,
+							 noteContent = noteContent ,
+							 popUpOpen = popUpOpen ,
+							 onDownloadClicked = { downloadFile() }
 										 )
 				}
 
 				PlayerForAyat(
-						isPlaying = isPlaying ,
-						isPaused = isPaused ,
-						isStopped = isStopped ,
-						duration = duration ,
-						isDownloaded = isDownloaded ,
-						hasAudio = hasAudio ,
-						onPlayClicked = { playFile() } ,
-						onPauseClicked = { pauseFile() } ,
-						onStopClicked = { stopFile() } ,
-						isLoading = loading ,
+						 isPlaying = isPlaying ,
+						 isPaused = isPaused ,
+						 isStopped = isStopped ,
+						 duration = duration ,
+						 isDownloaded = isDownloaded ,
+						 hasAudio = hasAudio ,
+						 onPlayClicked = { playFile() } ,
+						 onPauseClicked = { pauseFile() } ,
+						 onStopClicked = { stopFile() } ,
+						 isLoading = loading ,
 							 )
 			}
 		}

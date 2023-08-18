@@ -47,21 +47,21 @@ fun SettingsSwitch(
 	{
 		{
 			Icon(
-					painter = painterResource(id = R.drawable.check_icon) ,
-					contentDescription = null ,
-					modifier = Modifier
-						.size(SwitchDefaults.IconSize)
+					 painter = painterResource(id = R.drawable.check_icon) ,
+					 contentDescription = null ,
+					 modifier = Modifier
+						 .size(SwitchDefaults.IconSize)
 				)
 		}
 	} else
 	{
 		{
 			Icon(
-					painter = painterResource(id = R.drawable.cross_icon) ,
-					contentDescription = null ,
-					modifier = Modifier
-						.size(SwitchDefaults.IconSize)
-						.padding(2.dp)
+					 painter = painterResource(id = R.drawable.cross_icon) ,
+					 contentDescription = null ,
+					 modifier = Modifier
+						 .size(SwitchDefaults.IconSize)
+						 .padding(2.dp)
 				)
 		}
 	}
@@ -70,31 +70,33 @@ fun SettingsSwitch(
 
 	Surface {
 		Row(
-				modifier = modifier
-					.fillMaxWidth()
-					.height(60.dp)
-					.toggleable(
-							value = storageValue ,
-							role = Role.Switch ,
-							onValueChange = { update(! storageValue) }
-							   ) ,
-				verticalAlignment = Alignment.CenterVertically ,
+				 modifier = modifier
+					 .fillMaxWidth()
+					 .height(60.dp)
+					 .toggleable(
+							  value = storageValue ,
+							  role = Role.Switch ,
+							  onValueChange = { update(! storageValue) }
+								) ,
+				 verticalAlignment = Alignment.CenterVertically ,
 		   ) {
 			if (icon != null)
 			{
 				SettingsTileIcon(icon = icon)
 			} else
 			{
-				Spacer(modifier = Modifier
-					.width(24.dp)
-					.height(60.dp))
+				Spacer(
+						 modifier = Modifier
+							 .width(24.dp)
+							 .height(60.dp)
+					  )
 			}
 			SettingsTileTexts(title = title , subtitle = subtitle)
 			SettingsTileAction {
 				Switch(
-						checked = storageValue ,
-						onCheckedChange = update ,
-						thumbContent = iconForSwitch ,
+						 checked = storageValue ,
+						 onCheckedChange = update ,
+						 thumbContent = iconForSwitch ,
 					  )
 			}
 		}
@@ -107,11 +109,11 @@ internal fun SettingsSwitchPreview()
 {
 	val storage = rememberBooleanSettingState(defaultValue = true)
 	SettingsSwitch(
-			state = storage ,
-			icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-			title = { Text(text = "Hello") } ,
-			subtitle = { Text(text = "This is a longer text") } ,
-			onCheckedChange = { }
+			 state = storage ,
+			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 onCheckedChange = { }
 				  )
 }
 
@@ -122,11 +124,11 @@ internal fun SettingsSwitchPreview2()
 {
 	val storage = rememberBooleanSettingState(defaultValue = false)
 	SettingsSwitch(
-			state = storage ,
-			icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-			title = { Text(text = "Hello") } ,
-			subtitle = { Text(text = "This is a longer text") } ,
-			onCheckedChange = { }
+			 state = storage ,
+			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 onCheckedChange = { }
 				  )
 }
 
@@ -137,9 +139,9 @@ internal fun SettingsSwitchPreview3()
 {
 	val storage = rememberBooleanSettingState(defaultValue = true)
 	SettingsSwitch(
-			state = storage ,
-			title = { Text(text = "Hello") } ,
-			subtitle = { Text(text = "This is a longer text") } ,
-			onCheckedChange = { }
+			 state = storage ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 onCheckedChange = { }
 				  )
 }

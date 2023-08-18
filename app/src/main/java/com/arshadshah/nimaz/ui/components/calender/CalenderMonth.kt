@@ -13,12 +13,12 @@ fun CalenderMonth(
 				 )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge.copy(
-					topStart = CornerSize(8.dp) ,
-					topEnd = CornerSize(8.dp) ,
-					bottomStart = CornerSize(0.dp) ,
-					bottomEnd = CornerSize(0.dp)
-														) ,
+			 shape = MaterialTheme.shapes.extraLarge.copy(
+					  topStart = CornerSize(8.dp) ,
+					  topEnd = CornerSize(8.dp) ,
+					  bottomStart = CornerSize(0.dp) ,
+					  bottomEnd = CornerSize(0.dp)
+														 ) ,
 				) {
 		monthState(PaddingValues(0.dp))
 	}

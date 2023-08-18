@@ -32,46 +32,46 @@ fun RadioButtonCustom(
 {
 	//a circle which gets filled and a checkmark icon is shown when selected else just an empty circle
 	Box(
-			modifier = modifier
-				.size(32.dp)
-				.clip(CircleShape)
-				.clickable(onClick = onClick) ,
-			contentAlignment = Alignment.Center ,
+			 modifier = modifier
+				 .size(32.dp)
+				 .clip(CircleShape)
+				 .clickable(onClick = onClick) ,
+			 contentAlignment = Alignment.Center ,
 	   ) {
 		//the circle
 		Box(
-				modifier = Modifier
-					.size(28.dp)
-					.background(
-							color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-									alpha = 0.2f
-																																 ) ,
-							shape = CircleShape
-							   ) ,
-				contentAlignment = Alignment.Center ,
+				 modifier = Modifier
+					 .size(28.dp)
+					 .background(
+							  color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+									   alpha = 0.2f
+																																   ) ,
+							  shape = CircleShape
+								) ,
+				 contentAlignment = Alignment.Center ,
 		   ) {
 			Crossfade(
-					targetState = selected ,
-					animationSpec = tween(durationMillis = 100 , easing = LinearEasing)
+					 targetState = selected ,
+					 animationSpec = tween(durationMillis = 100 , easing = LinearEasing)
 					 ) { selected ->
 				//the checkmark icon
 				if (selected)
 				{
 					Icon(
-							painter = painterResource(id = R.drawable.check_icon) ,
-							contentDescription = "checkmark" ,
-							modifier = Modifier
-								.size(24.dp)
-								.padding(2.dp) ,
-							tint = MaterialTheme.colorScheme.onPrimary ,
+							 painter = painterResource(id = R.drawable.check_icon) ,
+							 contentDescription = "checkmark" ,
+							 modifier = Modifier
+								 .size(24.dp)
+								 .padding(2.dp) ,
+							 tint = MaterialTheme.colorScheme.onPrimary ,
 						)
 				} else
 				{
 					Icon(
-							painter = painterResource(id = R.drawable.circle_open_icon) ,
-							contentDescription = "circle" ,
-							modifier = Modifier.size(24.dp) ,
-							tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) ,
+							 painter = painterResource(id = R.drawable.circle_open_icon) ,
+							 contentDescription = "circle" ,
+							 modifier = Modifier.size(24.dp) ,
+							 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) ,
 						)
 				}
 			}

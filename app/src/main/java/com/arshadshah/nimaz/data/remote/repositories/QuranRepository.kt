@@ -20,15 +20,15 @@ object QuranRepository
 			for (surahResponse in response)
 			{
 				val surah = Surah(
-						surahResponse.number ,
-						surahResponse.numberOfAyahs ,
-						surahResponse.startAya ,
-						surahResponse.name ,
-						surahResponse.englishName ,
-						surahResponse.englishNameTranslation ,
-						surahResponse.revelationType ,
-						surahResponse.revelationOrder ,
-						surahResponse.rukus
+						 surahResponse.number ,
+						 surahResponse.numberOfAyahs ,
+						 surahResponse.startAya ,
+						 surahResponse.name ,
+						 surahResponse.englishName ,
+						 surahResponse.englishNameTranslation ,
+						 surahResponse.revelationType ,
+						 surahResponse.revelationOrder ,
+						 surahResponse.rukus
 								 )
 				surahs.add(surah)
 			}
@@ -53,10 +53,10 @@ object QuranRepository
 			for (juzResponse in response)
 			{
 				val juz = Juz(
-						juzResponse.number ,
-						juzResponse.name ,
-						juzResponse.tname ,
-						juzResponse.juzStartAyaInQuran ,
+						 juzResponse.number ,
+						 juzResponse.name ,
+						 juzResponse.tname ,
+						 juzResponse.juzStartAyaInQuran ,
 							 )
 				Juzs.add(juz)
 			}
@@ -91,21 +91,21 @@ object QuranRepository
 				val indexOfAyaInUrdu =
 					responseUrdu.indexOfFirst { it.ayaNumberInQuran == ayaResponse.ayaNumberInQuran }
 				val aya = Aya(
-						ayaResponse.ayaNumberInQuran ,
-						ayaResponse.number ,
-						ayaResponse.arabic ,
-						ayaResponse.translation ,
-						responseUrdu[indexOfAyaInUrdu].translation ,
-						ayaResponse.surahNumber ,
-						ayaResponse.ayaNumberInSurah ,
-						bookmark = false ,
-						favorite = false ,
-						note = ayaResponse.note ,
-						audioFileLocation = ayaResponse.audioFileLocation ,
-						sajda = ayaResponse.sajda ,
-						sajdaType = ayaResponse.sajdaType ,
-						ruku = ayaResponse.ruku ,
-						juzNumber = ayaResponse.juzNumber ,
+						 ayaResponse.ayaNumberInQuran ,
+						 ayaResponse.number ,
+						 ayaResponse.arabic ,
+						 ayaResponse.translation ,
+						 responseUrdu[indexOfAyaInUrdu].translation ,
+						 ayaResponse.surahNumber ,
+						 ayaResponse.ayaNumberInSurah ,
+						 bookmark = false ,
+						 favorite = false ,
+						 note = ayaResponse.note ,
+						 audioFileLocation = ayaResponse.audioFileLocation ,
+						 sajda = ayaResponse.sajda ,
+						 sajdaType = ayaResponse.sajdaType ,
+						 ruku = ayaResponse.ruku ,
+						 juzNumber = ayaResponse.juzNumber ,
 							 )
 				ayas.add(aya)
 			}
@@ -137,21 +137,21 @@ object QuranRepository
 				val indexOfAyaInUrdu =
 					responseUrdu.indexOfFirst { it.ayaNumberInQuran == ayaResponse.ayaNumberInQuran }
 				val aya = Aya(
-						ayaResponse.ayaNumberInQuran ,
-						ayaResponse.number ,
-						ayaResponse.arabic ,
-						ayaResponse.translation ,
-						responseUrdu[indexOfAyaInUrdu].translation ,
-						ayaResponse.surahNumber ,
-						ayaResponse.ayaNumberInSurah ,
-						false ,
-						false ,
-						ayaResponse.note ,
-						ayaResponse.audioFileLocation ,
-						ayaResponse.sajda ,
-						ayaResponse.sajdaType ,
-						ayaResponse.ruku ,
-						ayaResponse.juzNumber ,
+						 ayaResponse.ayaNumberInQuran ,
+						 ayaResponse.number ,
+						 ayaResponse.arabic ,
+						 ayaResponse.translation ,
+						 responseUrdu[indexOfAyaInUrdu].translation ,
+						 ayaResponse.surahNumber ,
+						 ayaResponse.ayaNumberInSurah ,
+						 false ,
+						 false ,
+						 ayaResponse.note ,
+						 ayaResponse.audioFileLocation ,
+						 ayaResponse.sajda ,
+						 ayaResponse.sajdaType ,
+						 ayaResponse.ruku ,
+						 ayaResponse.juzNumber ,
 							 )
 				ayas.add(aya)
 			}

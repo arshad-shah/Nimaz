@@ -31,23 +31,23 @@ object DuaRepository
 					for (duaResponse in chapterResponse.duas)
 					{
 						duas.add(
-								Dua(
-										duaResponse.id ,
-										duaResponse.chapterId ,
-										duaResponse.favourite ,
-										duaResponse.arabicDua ,
-										duaResponse.englishTranslation ,
-										duaResponse.englishReference ,
-										getCategoriesName(duaResponse.chapterId) ,
-								   )
+								 Dua(
+										  duaResponse.id ,
+										  duaResponse.chapterId ,
+										  duaResponse.favourite ,
+										  duaResponse.arabicDua ,
+										  duaResponse.englishTranslation ,
+										  duaResponse.englishReference ,
+										  getCategoriesName(duaResponse.chapterId) ,
+									)
 								)
 					}
 					//add the chapter to the list
 					val chapter = Chapter(
-							chapterResponse.id ,
-							getCategoriesName(chapterResponse.id) ,
-							chapterResponse.arabicTitle ,
-							chapterResponse.englishTitle ,
+							 chapterResponse.id ,
+							 getCategoriesName(chapterResponse.id) ,
+							 chapterResponse.arabicTitle ,
+							 chapterResponse.englishTitle ,
 										 )
 					chapters.add(chapter)
 					//save the duas

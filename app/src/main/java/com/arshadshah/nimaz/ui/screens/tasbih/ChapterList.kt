@@ -29,9 +29,9 @@ fun ChapterList(
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			initializer = { DuaViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
+			 initializer = { DuaViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
 	LaunchedEffect(Unit) {
@@ -63,17 +63,17 @@ fun ChapterList(
 	}
 
 	LazyColumn(
-			modifier = Modifier.testTag(TEST_TAG_CHAPTERS) ,
-			contentPadding = paddingValues ,
-			state = listState
+			 modifier = Modifier.testTag(TEST_TAG_CHAPTERS) ,
+			 contentPadding = paddingValues ,
+			 state = listState
 			  )
 	{
 		items(chapterState.value.size)
 		{
 			ChapterListItem(
-					chapter = chapterState.value[it] ,
-					onNavigateToChapter = onNavigateToChapter ,
-					loading = false
+					 chapter = chapterState.value[it] ,
+					 onNavigateToChapter = onNavigateToChapter ,
+					 loading = false
 						   )
 		}
 	}

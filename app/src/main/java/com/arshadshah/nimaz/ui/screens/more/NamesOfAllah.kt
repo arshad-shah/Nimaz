@@ -48,20 +48,20 @@ fun NamesOfAllah(paddingValues : PaddingValues)
 	//the names are in the same order in all three arrays
 	//so the first name in English is the same as the first name in Arabic and the first name in translation
 	LazyColumn(
-			//assign a tag to the column
-			//this is used for testing
-			//the tag is used to find the column in the hierarchy
-			modifier = Modifier
-				.fillMaxSize()
-				.testTag(TEST_TAG_NAMES_OF_ALLAH) ,
-			contentPadding = paddingValues
+			 //assign a tag to the column
+			 //this is used for testing
+			 //the tag is used to find the column in the hierarchy
+			 modifier = Modifier
+				 .fillMaxSize()
+				 .testTag(TEST_TAG_NAMES_OF_ALLAH) ,
+			 contentPadding = paddingValues
 			  ) {
 		items(englishNames.size) { index ->
 			NamesOfAllahRow(
-					index ,
-					englishNames[index] ,
-					arabicNames[index] ,
-					translationNames[index]
+					 index ,
+					 englishNames[index] ,
+					 arabicNames[index] ,
+					 translationNames[index]
 						   )
 		}
 	}
@@ -78,61 +78,61 @@ fun NamesOfAllahRow(
 {
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp) ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp) ,
 				) {
 		Row(
-				verticalAlignment = Alignment.CenterVertically ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp) ,
+				 verticalAlignment = Alignment.CenterVertically ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp) ,
 		   ) {
 			Text(
-					modifier = Modifier
-						.padding(start = 8.dp)
-						.fillMaxWidth()
-						.weight(0.15f) ,
-					text = "${index + 1}." ,
-					style = MaterialTheme.typography.titleLarge ,
-					textAlign = TextAlign.Center ,
-					color = MaterialTheme.colorScheme.onSurface ,
+					 modifier = Modifier
+						 .padding(start = 8.dp)
+						 .fillMaxWidth()
+						 .weight(0.15f) ,
+					 text = "${index + 1}." ,
+					 style = MaterialTheme.typography.titleLarge ,
+					 textAlign = TextAlign.Center ,
+					 color = MaterialTheme.colorScheme.onSurface ,
 				)
 			Column(
-					modifier = Modifier
-						.padding(horizontal = 0.dp , vertical = 8.dp)
-						.fillMaxWidth()
-						.weight(0.85f) ,
+					 modifier = Modifier
+						 .padding(horizontal = 0.dp , vertical = 8.dp)
+						 .fillMaxWidth()
+						 .weight(0.85f) ,
 				  ) {
 				Text(
-						textAlign = TextAlign.Center ,
-						modifier = Modifier
-							.padding(4.dp)
-							.fillMaxWidth() ,
-						text = englishName ,
-						style = MaterialTheme.typography.titleMedium ,
-						color = MaterialTheme.colorScheme.onSurface ,
+						 textAlign = TextAlign.Center ,
+						 modifier = Modifier
+							 .padding(4.dp)
+							 .fillMaxWidth() ,
+						 text = englishName ,
+						 style = MaterialTheme.typography.titleMedium ,
+						 color = MaterialTheme.colorScheme.onSurface ,
 					)
 				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 					Text(
-							text = arabicName ,
-							style = MaterialTheme.typography.headlineLarge ,
-							fontFamily = utmaniQuranFont ,
-							fontWeight = FontWeight.SemiBold ,
-							textAlign = TextAlign.Center ,
-							modifier = Modifier
-								.fillMaxWidth() ,
-							color = MaterialTheme.colorScheme.onSurface ,
+							 text = arabicName ,
+							 style = MaterialTheme.typography.headlineLarge ,
+							 fontFamily = utmaniQuranFont ,
+							 fontWeight = FontWeight.SemiBold ,
+							 textAlign = TextAlign.Center ,
+							 modifier = Modifier
+								 .fillMaxWidth() ,
+							 color = MaterialTheme.colorScheme.onSurface ,
 						)
 				}
 				Text(
-						textAlign = TextAlign.Center ,
-						modifier = Modifier
-							.padding(4.dp)
-							.fillMaxWidth() ,
-						text = translationName ,
-						style = MaterialTheme.typography.titleLarge ,
-						color = MaterialTheme.colorScheme.onSurface ,
+						 textAlign = TextAlign.Center ,
+						 modifier = Modifier
+							 .padding(4.dp)
+							 .fillMaxWidth() ,
+						 text = translationName ,
+						 style = MaterialTheme.typography.titleLarge ,
+						 color = MaterialTheme.colorScheme.onSurface ,
 					)
 			}
 		}

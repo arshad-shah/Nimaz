@@ -61,18 +61,18 @@ fun SettingsList(
 	} else subtitle
 
 	SettingsMenuLink(
-			icon = icon ,
-			title = {
-				Text(text = title)
-			} ,
-			subtitle = {
-				if (safeSubtitle != null)
-				{
-					Text(text = safeSubtitle)
-				}
-			} ,
-			action = action ,
-			onClick = { showDialog = true } ,
+			 icon = icon ,
+			 title = {
+				 Text(text = title)
+			 } ,
+			 subtitle = {
+				 if (safeSubtitle != null)
+				 {
+					 Text(text = safeSubtitle)
+				 }
+			 } ,
+			 action = action ,
+			 onClick = { showDialog = true } ,
 					)
 
 	if (! showDialog) return
@@ -86,64 +86,64 @@ fun SettingsList(
 		}
 	}
 	AlertDialogNimaz(
-			topDivider = false ,
-			bottomDivider = false ,
-			description = description ,
-			contentDescription = iconDescription ?: "" ,
-			icon = iconPainter ,
-			title = title ,
-			contentHeight = height ,
-			contentToShow = {
-				items.forEach { (s , s2) ->
-					val isSelected by rememberUpdatedState(newValue = s == valueState.value)
-					//if valuestate.value has a value, then set the state.value to the index of the valuestate.value
-					if (isSelected)
-					{
-						state.value = items.keys.indexOf(s)
-					}
-					Row(
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(vertical = 4.dp , horizontal = 8.dp)
-								.height(52.dp)
-								.selectable(
-										role = Role.RadioButton ,
-										selected = isSelected ,
-										onClick = {
-											if (! isSelected) onSelected(
-													items.keys.indexOf(
-															s
-																	  )
-																		)
-										}
-										   ) ,
-							verticalAlignment = Alignment.CenterVertically
-					   ) {
-						RadioButtonCustom(
-								selected = isSelected ,
-								onClick = {
-									if (! isSelected) onSelected(items.keys.indexOf(s))
-								} ,
-								modifier = Modifier.padding(start = 16.dp) ,
-										 )
-						Text(
-								text = s2 ,
-								style = MaterialTheme.typography.titleMedium ,
-								modifier = Modifier.padding(start = 16.dp) ,
-								overflow = TextOverflow.Ellipsis ,
-								maxLines = 1
-							)
-					}
-				}
+			 topDivider = false ,
+			 bottomDivider = false ,
+			 description = description ,
+			 contentDescription = iconDescription ?: "" ,
+			 icon = iconPainter ,
+			 title = title ,
+			 contentHeight = height ,
+			 contentToShow = {
+				 items.forEach { (s , s2) ->
+					 val isSelected by rememberUpdatedState(newValue = s == valueState.value)
+					 //if valuestate.value has a value, then set the state.value to the index of the valuestate.value
+					 if (isSelected)
+					 {
+						 state.value = items.keys.indexOf(s)
+					 }
+					 Row(
+							  modifier = Modifier
+								  .fillMaxWidth()
+								  .padding(vertical = 4.dp , horizontal = 8.dp)
+								  .height(52.dp)
+								  .selectable(
+										   role = Role.RadioButton ,
+										   selected = isSelected ,
+										   onClick = {
+											   if (! isSelected) onSelected(
+														items.keys.indexOf(
+																 s
+																		  )
+																		   )
+										   }
+											 ) ,
+							  verticalAlignment = Alignment.CenterVertically
+						) {
+						 RadioButtonCustom(
+								  selected = isSelected ,
+								  onClick = {
+									  if (! isSelected) onSelected(items.keys.indexOf(s))
+								  } ,
+								  modifier = Modifier.padding(start = 16.dp) ,
+										  )
+						 Text(
+								  text = s2 ,
+								  style = MaterialTheme.typography.titleMedium ,
+								  modifier = Modifier.padding(start = 16.dp) ,
+								  overflow = TextOverflow.Ellipsis ,
+								  maxLines = 1
+							 )
+					 }
+				 }
 
-			} ,
-			onDismissRequest = {
-				showDialog = false
-			} ,
-			onConfirm = {
-				showDialog = false
-			} ,
-			onDismiss = {
-				showDialog = false
-			})
+			 } ,
+			 onDismissRequest = {
+				 showDialog = false
+			 } ,
+			 onConfirm = {
+				 showDialog = false
+			 } ,
+			 onDismiss = {
+				 showDialog = false
+			 })
 }

@@ -43,9 +43,9 @@ import java.time.LocalDate
 fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false)
 {
 	val viewModel = viewModel(
-			key = TRACKING_VIEWMODEL_KEY ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+			 key = TRACKING_VIEWMODEL_KEY ,
+			 initializer = { TrackerViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 							 )
 
 	val dateState = remember {
@@ -103,85 +103,85 @@ fun PrayerTracker(paddingValues : PaddingValues , isIntegrated : Boolean = false
 	}.collectAsState()
 
 	Column(
-			modifier = Modifier
-				.padding(paddingValues)
-				.fillMaxSize()
-				.verticalScroll(rememberScrollState())
-				.testTag(TEST_TAG_PRAYER_TRACKER) ,
-			horizontalAlignment = Alignment.CenterHorizontally
+			 modifier = Modifier
+				 .padding(paddingValues)
+				 .fillMaxSize()
+				 .verticalScroll(rememberScrollState())
+				 .testTag(TEST_TAG_PRAYER_TRACKER) ,
+			 horizontalAlignment = Alignment.CenterHorizontally
 		  ) {
 
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier.padding(
-						top = 4.dp ,
-						bottom = 8.dp ,
-						start = 0.dp ,
-						end = 0.dp
-										   ) ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier.padding(
+						  top = 4.dp ,
+						  bottom = 8.dp ,
+						  start = 0.dp ,
+						  end = 0.dp
+											) ,
 					) {
 			Column {
 				PrayerTrackerList(
-						viewModel::onEvent ,
-						stateOfTrackerForToday.value ,
-						fajrState.value ,
-						zuhrState.value ,
-						asrState.value ,
-						maghribState.value ,
-						ishaState.value ,
-						showDateSelector ,
-						dateState ,
-						progressState ,
-						isMenstrauting
+						 viewModel::onEvent ,
+						 stateOfTrackerForToday.value ,
+						 fajrState.value ,
+						 zuhrState.value ,
+						 asrState.value ,
+						 maghribState.value ,
+						 ishaState.value ,
+						 showDateSelector ,
+						 dateState ,
+						 progressState ,
+						 isMenstrauting
 								 )
 				Fasting(
-						viewModel::onEvent ,
-						dateState ,
-						isFasting.value ,
-						fastingState.value ,
-						isMenstrauting
+						 viewModel::onEvent ,
+						 dateState ,
+						 isFasting.value ,
+						 fastingState.value ,
+						 isMenstrauting
 					   )
 			}
 		}
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier.padding(
-						top = 4.dp ,
-						bottom = 8.dp ,
-						start = 0.dp ,
-						end = 0.dp
-										   ) ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier.padding(
+						  top = 4.dp ,
+						  bottom = 8.dp ,
+						  start = 0.dp ,
+						  end = 0.dp
+											) ,
 					) {
 			Column {
 				Text(
-						text = "7 Day Trend" ,
-						style = MaterialTheme.typography.bodyMedium ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center
+						 text = "7 Day Trend" ,
+						 style = MaterialTheme.typography.bodyMedium ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center
 					)
 				//the data
 				SevenDayTrend()
 			}
 		}
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier.padding(
-						top = 4.dp ,
-						bottom = 8.dp ,
-						start = 0.dp ,
-						end = 0.dp
-										   ) ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier.padding(
+						  top = 4.dp ,
+						  bottom = 8.dp ,
+						  start = 0.dp ,
+						  end = 0.dp
+											) ,
 					) {
 			Column {
 				Text(
-						text = "Monthly Progress" ,
-						style = MaterialTheme.typography.bodyMedium ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center
+						 text = "Monthly Progress" ,
+						 style = MaterialTheme.typography.bodyMedium ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center
 					)
 				PrayerTrackerGrid()
 			}
@@ -195,15 +195,15 @@ fun SevenDayTrend()
 {
 
 	val viewModelTracker = viewModel(
-			key = TRACKING_VIEWMODEL_KEY ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+			 key = TRACKING_VIEWMODEL_KEY ,
+			 initializer = { TrackerViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 									)
 	LaunchedEffect(Unit) {
 		viewModelTracker.onEvent(
-				TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(
-						LocalDate.now().toString()
-																   )
+				 TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(
+						  LocalDate.now().toString()
+																	)
 								)
 	}
 	val progressForMonday = remember {
@@ -241,113 +241,113 @@ fun SevenDayTrend()
 	Log.d("SevenDayTrend" , "SevenDayTrend: ${weeklyTrackers.value[0]}")
 
 	Column(
-			modifier = Modifier.padding(
-					vertical = 8.dp ,
-					horizontal = 4.dp
-									   ) ,
+			 modifier = Modifier.padding(
+					  vertical = 8.dp ,
+					  horizontal = 4.dp
+										) ,
 		  ) {
 		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp) ,
-				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp) ,
+				 horizontalArrangement = Arrangement.SpaceEvenly ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			//monday
 			ProgressBarCustom(
-					progress = progressForMonday.value.toFloat() ,
-					//if menstrauting then show pink else show primary
-					progressColor = MaterialTheme.colorScheme.primary ,
-					radius = 20.dp ,
-					label = "M" ,
-					strokeWidth = 6.dp ,
-					strokeBackgroundWidth = 3.dp ,
-					startDelay = 0 ,
-					labelColor = if (progressForMonday.value == 0 && ! weeklyTrackers.value[0].isMenstruating) Color.Gray
-					else if (weeklyTrackers.value[0].isMenstruating) Color(0xFFE91E63)
-					else MaterialTheme.colorScheme.primary
+					 progress = progressForMonday.value.toFloat() ,
+					 //if menstrauting then show pink else show primary
+					 progressColor = MaterialTheme.colorScheme.primary ,
+					 radius = 20.dp ,
+					 label = "M" ,
+					 strokeWidth = 6.dp ,
+					 strokeBackgroundWidth = 3.dp ,
+					 startDelay = 0 ,
+					 labelColor = if (progressForMonday.value == 0 && ! weeklyTrackers.value[0].isMenstruating) Color.Gray
+					 else if (weeklyTrackers.value[0].isMenstruating) Color(0xFFE91E63)
+					 else MaterialTheme.colorScheme.primary
 							 )
 			//tuesday
 			ProgressBarCustom(
-					progress = progressForTuesday.value.toFloat() ,
-					progressColor = MaterialTheme.colorScheme.primary ,
-					radius = 20.dp ,
-					label = "T" ,
-					strokeWidth = 6.dp ,
-					strokeBackgroundWidth = 3.dp ,
-					startDelay = 0 ,
-					labelColor = if (progressForTuesday.value == 0 && ! weeklyTrackers.value[1].isMenstruating) Color.Gray
-					else if (weeklyTrackers.value[1].isMenstruating) Color(0xFFE91E63)
-					else MaterialTheme.colorScheme.primary
+					 progress = progressForTuesday.value.toFloat() ,
+					 progressColor = MaterialTheme.colorScheme.primary ,
+					 radius = 20.dp ,
+					 label = "T" ,
+					 strokeWidth = 6.dp ,
+					 strokeBackgroundWidth = 3.dp ,
+					 startDelay = 0 ,
+					 labelColor = if (progressForTuesday.value == 0 && ! weeklyTrackers.value[1].isMenstruating) Color.Gray
+					 else if (weeklyTrackers.value[1].isMenstruating) Color(0xFFE91E63)
+					 else MaterialTheme.colorScheme.primary
 							 )
 			//wednesday
 			ProgressBarCustom(
-					progress = progressForWednesday.value.toFloat() ,
-					progressColor = MaterialTheme.colorScheme.primary ,
-					radius = 20.dp ,
-					label = "W" ,
-					strokeWidth = 6.dp ,
-					strokeBackgroundWidth = 3.dp ,
-					startDelay = 0 ,
-					labelColor = if (progressForWednesday.value == 0 && ! weeklyTrackers.value[2].isMenstruating) Color.Gray
-					else if (weeklyTrackers.value[2].isMenstruating) Color(0xFFE91E63)
-					else MaterialTheme.colorScheme.primary
+					 progress = progressForWednesday.value.toFloat() ,
+					 progressColor = MaterialTheme.colorScheme.primary ,
+					 radius = 20.dp ,
+					 label = "W" ,
+					 strokeWidth = 6.dp ,
+					 strokeBackgroundWidth = 3.dp ,
+					 startDelay = 0 ,
+					 labelColor = if (progressForWednesday.value == 0 && ! weeklyTrackers.value[2].isMenstruating) Color.Gray
+					 else if (weeklyTrackers.value[2].isMenstruating) Color(0xFFE91E63)
+					 else MaterialTheme.colorScheme.primary
 							 )
 
 			//thursday
 			ProgressBarCustom(
-					progress = progressForThursday.value.toFloat() ,
-					progressColor = MaterialTheme.colorScheme.primary ,
-					radius = 20.dp ,
-					label = "T" ,
-					strokeWidth = 6.dp ,
-					strokeBackgroundWidth = 3.dp ,
-					startDelay = 0 ,
-					labelColor = if (progressForThursday.value == 0 && ! weeklyTrackers.value[3].isMenstruating) Color.Gray
-					else if (weeklyTrackers.value[3].isMenstruating) Color(0xFFE91E63)
-					else MaterialTheme.colorScheme.primary
+					 progress = progressForThursday.value.toFloat() ,
+					 progressColor = MaterialTheme.colorScheme.primary ,
+					 radius = 20.dp ,
+					 label = "T" ,
+					 strokeWidth = 6.dp ,
+					 strokeBackgroundWidth = 3.dp ,
+					 startDelay = 0 ,
+					 labelColor = if (progressForThursday.value == 0 && ! weeklyTrackers.value[3].isMenstruating) Color.Gray
+					 else if (weeklyTrackers.value[3].isMenstruating) Color(0xFFE91E63)
+					 else MaterialTheme.colorScheme.primary
 							 )
 
 			//friday
 			ProgressBarCustom(
-					progress = progressForFriday.value.toFloat() ,
-					progressColor = MaterialTheme.colorScheme.primary ,
-					radius = 20.dp ,
-					label = "F" ,
-					strokeWidth = 6.dp ,
-					strokeBackgroundWidth = 3.dp ,
-					startDelay = 0 ,
-					labelColor = if (progressForFriday.value == 0 && ! weeklyTrackers.value[4].isMenstruating) Color.Gray
-					else if (weeklyTrackers.value[4].isMenstruating) Color(0xFFE91E63)
-					else MaterialTheme.colorScheme.primary
+					 progress = progressForFriday.value.toFloat() ,
+					 progressColor = MaterialTheme.colorScheme.primary ,
+					 radius = 20.dp ,
+					 label = "F" ,
+					 strokeWidth = 6.dp ,
+					 strokeBackgroundWidth = 3.dp ,
+					 startDelay = 0 ,
+					 labelColor = if (progressForFriday.value == 0 && ! weeklyTrackers.value[4].isMenstruating) Color.Gray
+					 else if (weeklyTrackers.value[4].isMenstruating) Color(0xFFE91E63)
+					 else MaterialTheme.colorScheme.primary
 							 )
 
 			//saturday
 			ProgressBarCustom(
-					progress = progressForSaturday.value.toFloat() ,
-					progressColor = MaterialTheme.colorScheme.primary ,
-					radius = 20.dp ,
-					label = "S" ,
-					strokeWidth = 6.dp ,
-					strokeBackgroundWidth = 3.dp ,
-					startDelay = 0 ,
-					labelColor = if (progressForSaturday.value == 0 && ! weeklyTrackers.value[5].isMenstruating) Color.Gray else if (weeklyTrackers.value[5].isMenstruating) Color(
-							0xFFE91E63
-																																												  ) else MaterialTheme.colorScheme.primary
+					 progress = progressForSaturday.value.toFloat() ,
+					 progressColor = MaterialTheme.colorScheme.primary ,
+					 radius = 20.dp ,
+					 label = "S" ,
+					 strokeWidth = 6.dp ,
+					 strokeBackgroundWidth = 3.dp ,
+					 startDelay = 0 ,
+					 labelColor = if (progressForSaturday.value == 0 && ! weeklyTrackers.value[5].isMenstruating) Color.Gray else if (weeklyTrackers.value[5].isMenstruating) Color(
+							  0xFFE91E63
+																																												   ) else MaterialTheme.colorScheme.primary
 							 )
 
 			//sunday
 			ProgressBarCustom(
-					progress = progressForSunday.value.toFloat() ,
-					progressColor = MaterialTheme.colorScheme.primary ,
-					radius = 20.dp ,
-					label = "S" ,
-					strokeWidth = 6.dp ,
-					strokeBackgroundWidth = 3.dp ,
-					startDelay = 0 ,
-					labelColor = if (progressForSunday.value == 0 && ! weeklyTrackers.value[6].isMenstruating) Color.Gray else if (weeklyTrackers.value[6].isMenstruating) Color(
-							0xFFE91E63
-																																												) else MaterialTheme.colorScheme.primary
+					 progress = progressForSunday.value.toFloat() ,
+					 progressColor = MaterialTheme.colorScheme.primary ,
+					 radius = 20.dp ,
+					 label = "S" ,
+					 strokeWidth = 6.dp ,
+					 strokeBackgroundWidth = 3.dp ,
+					 startDelay = 0 ,
+					 labelColor = if (progressForSunday.value == 0 && ! weeklyTrackers.value[6].isMenstruating) Color.Gray else if (weeklyTrackers.value[6].isMenstruating) Color(
+							  0xFFE91E63
+																																												 ) else MaterialTheme.colorScheme.primary
 							 )
 		}
 	}
@@ -370,11 +370,11 @@ fun Fasting(
 		is TrackerViewModel.FastTrackerState.Loading ->
 		{
 			Column(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
-					horizontalAlignment = Alignment.CenterHorizontally ,
-					verticalArrangement = Arrangement.Center
+					 modifier = Modifier
+						 .fillMaxWidth()
+						 .padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
+					 horizontalAlignment = Alignment.CenterHorizontally ,
+					 verticalArrangement = Arrangement.Center
 				  ) {
 				CircularProgressIndicator()
 			}
@@ -384,10 +384,10 @@ fun Fasting(
 		{
 			isFastingToday.value = isFasting
 			FastTrackerCard(
-					handleEvent = handleEvent ,
-					dateState = dateState ,
-					isFastingToday = isFastingToday ,
-					isMenstrauting = isMenstrauting
+					 handleEvent = handleEvent ,
+					 dateState = dateState ,
+					 isFastingToday = isFastingToday ,
+					 isMenstrauting = isMenstrauting
 						   )
 
 		}
@@ -395,11 +395,11 @@ fun Fasting(
 		is TrackerViewModel.FastTrackerState.Error ->
 		{
 			Column(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
-					horizontalAlignment = Alignment.CenterHorizontally ,
-					verticalArrangement = Arrangement.Center
+					 modifier = Modifier
+						 .fillMaxWidth()
+						 .padding(start = 6.dp , end = 6.dp , top = 4.dp , bottom = 4.dp) ,
+					 horizontalAlignment = Alignment.CenterHorizontally ,
+					 verticalArrangement = Arrangement.Center
 				  ) {
 				Text(text = "Error" , style = MaterialTheme.typography.titleMedium)
 			}
@@ -444,18 +444,18 @@ fun PrayerTrackerList(
 		{
 			Log.d("Tracker" , "Loading")
 			PrayerTrackerListItems(
-					items = items ,
-					loading = true ,
-					fajrChecked = fajrChecked ,
-					zuhrChecked = zuhrChecked ,
-					asrChecked = asrChecked ,
-					maghribChecked = maghribChecked ,
-					ishaChecked = ishaChecked ,
-					handleEvent = handleEvent ,
-					showDateSelector = showDateSelector ,
-					dateState = dateState ,
-					progress = progress ,
-					isMenstrauting = isMenstrauting
+					 items = items ,
+					 loading = true ,
+					 fajrChecked = fajrChecked ,
+					 zuhrChecked = zuhrChecked ,
+					 asrChecked = asrChecked ,
+					 maghribChecked = maghribChecked ,
+					 ishaChecked = ishaChecked ,
+					 handleEvent = handleEvent ,
+					 showDateSelector = showDateSelector ,
+					 dateState = dateState ,
+					 progress = progress ,
+					 isMenstrauting = isMenstrauting
 								  )
 		}
 
@@ -469,28 +469,28 @@ fun PrayerTrackerList(
 			progress.value = progressState.value.toFloat()
 			Log.d("Tracker" , "Loaded")
 			PrayerTrackerListItems(
-					items = items ,
-					loading = false ,
-					fajrChecked = fajrChecked ,
-					zuhrChecked = zuhrChecked ,
-					asrChecked = asrChecked ,
-					maghribChecked = maghribChecked ,
-					ishaChecked = ishaChecked ,
-					handleEvent = handleEvent ,
-					showDateSelector = showDateSelector ,
-					dateState = dateState ,
-					progress = progress ,
-					isMenstrauting = isMenstrauting
+					 items = items ,
+					 loading = false ,
+					 fajrChecked = fajrChecked ,
+					 zuhrChecked = zuhrChecked ,
+					 asrChecked = asrChecked ,
+					 maghribChecked = maghribChecked ,
+					 ishaChecked = ishaChecked ,
+					 handleEvent = handleEvent ,
+					 showDateSelector = showDateSelector ,
+					 dateState = dateState ,
+					 progress = progress ,
+					 isMenstrauting = isMenstrauting
 								  )
 		}
 
 		is TrackerViewModel.TrackerState.Error ->
 		{
 			Toasty.error(
-					context ,
-					state.message ,
-					Toast.LENGTH_SHORT ,
-					true
+					 context ,
+					 state.message ,
+					 Toast.LENGTH_SHORT ,
+					 true
 						).show()
 		}
 

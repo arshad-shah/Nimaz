@@ -29,15 +29,15 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.QURAN_VIEWMODEL_KEY ,
-			initializer = { QuranViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = AppConstants.QURAN_VIEWMODEL_KEY ,
+			 initializer = { QuranViewModel(context) } ,
+			 viewModelStoreOwner = context as ComponentActivity
 							 )
 
 	val translationType =
 		PrivateSharedPreferences(LocalContext.current).getData(
-				key = AppConstants.TRANSLATION_LANGUAGE ,
-				s = "English"
+				 key = AppConstants.TRANSLATION_LANGUAGE ,
+				 s = "English"
 															  )
 	val translation = when (translationType)
 	{
@@ -51,7 +51,7 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	//so we use remember to create the list only once
 	val surahList = remember { mutableListOf<Int>() }
 	val juzList = remember { mutableListOf<Int>() }
-	val (selectedSurah , setSelectedSurah) = remember { mutableStateOf(number) }
+	val (selectedSurah , setSelectedSurah) = remember { mutableIntStateOf(number) }
 
 	//create the list using a coroutine
 	val coroutineScope = rememberCoroutineScope()
@@ -88,87 +88,87 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	val expanded = remember { mutableStateOf(false) }
 	//size of the main button that opens the dropdown
 	ElevatedCard(
-			modifier = Modifier
-				.width(150.dp)
-				.padding(start = 8.dp)
+			 modifier = Modifier
+				 .width(150.dp)
+				 .padding(start = 8.dp)
 				) {
 		//an elevation card that shows the text and icon
 		ElevatedCard(
-				modifier = Modifier
-					.fillMaxWidth()
-					.clickable {
-						expanded.value = ! expanded.value
-					} ,
-				shape = MaterialTheme.shapes.medium ,
-				content = {
-					Row(
-							modifier = Modifier.fillMaxWidth() ,
-							verticalAlignment = Alignment.CenterVertically ,
-							horizontalArrangement = Arrangement.SpaceBetween
-					   ) {
-						Row(
-								modifier = Modifier.padding(horizontal = 4.dp) ,
-								verticalAlignment = Alignment.CenterVertically ,
-								horizontalArrangement = Arrangement.Start
-						   ) {
-							//the text
-							Text(
-									modifier = Modifier
-										.padding(8.dp) ,
-									text = label ,
-									textAlign = TextAlign.Start ,
-									maxLines = 2 ,
-									overflow = TextOverflow.Ellipsis ,
-									style = MaterialTheme.typography.bodyLarge
-								)
-							Badge(
-									containerColor = MaterialTheme.colorScheme.primary ,
-									contentColor = MaterialTheme.colorScheme.onPrimary ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .clickable {
+						 expanded.value = ! expanded.value
+					 } ,
+				 shape = MaterialTheme.shapes.medium ,
+				 content = {
+					 Row(
+							  modifier = Modifier.fillMaxWidth() ,
+							  verticalAlignment = Alignment.CenterVertically ,
+							  horizontalArrangement = Arrangement.SpaceBetween
+						) {
+						 Row(
+								  modifier = Modifier.padding(horizontal = 4.dp) ,
+								  verticalAlignment = Alignment.CenterVertically ,
+								  horizontalArrangement = Arrangement.Start
+							) {
+							 //the text
+							 Text(
+									  modifier = Modifier
+										  .padding(8.dp) ,
+									  text = label ,
+									  textAlign = TextAlign.Start ,
+									  maxLines = 2 ,
+									  overflow = TextOverflow.Ellipsis ,
+									  style = MaterialTheme.typography.bodyLarge
 								 )
-							{
-								Text(
-										text = selectedSurah.toString() ,
-										style = MaterialTheme.typography.bodyMedium ,
-										textAlign = TextAlign.Center ,
-									)
-							}
-						}
-						Crossfade(
-								targetState = expanded.value ,
-								animationSpec = tween(durationMillis = 300)
-								 ) { expanded ->
-							if (expanded)
-							{
-								Icon(
-										painter = painterResource(id = R.drawable.arrow_up_icon) ,
-										contentDescription = "dropdown icon" ,
-										modifier = Modifier
-											.padding(horizontal = 8.dp)
-											.size(18.dp)
-									)
-							} else
-							{
-								Icon(
-										painter = painterResource(id = R.drawable.arrow_down_icon) ,
-										contentDescription = "dropdown icon" ,
-										modifier = Modifier
-											.padding(horizontal = 8.dp)
-											.size(18.dp)
-									)
-							}
-						}
-					}
-				} ,
+							 Badge(
+									  containerColor = MaterialTheme.colorScheme.primary ,
+									  contentColor = MaterialTheme.colorScheme.onPrimary ,
+								  )
+							 {
+								 Text(
+										  text = selectedSurah.toString() ,
+										  style = MaterialTheme.typography.bodyMedium ,
+										  textAlign = TextAlign.Center ,
+									 )
+							 }
+						 }
+						 Crossfade(
+								  targetState = expanded.value ,
+								  animationSpec = tween(durationMillis = 300)
+								  ) { expanded ->
+							 if (expanded)
+							 {
+								 Icon(
+										  painter = painterResource(id = R.drawable.arrow_up_icon) ,
+										  contentDescription = "dropdown icon" ,
+										  modifier = Modifier
+											  .padding(horizontal = 8.dp)
+											  .size(18.dp)
+									 )
+							 } else
+							 {
+								 Icon(
+										  painter = painterResource(id = R.drawable.arrow_down_icon) ,
+										  contentDescription = "dropdown icon" ,
+										  modifier = Modifier
+											  .padding(horizontal = 8.dp)
+											  .size(18.dp)
+									 )
+							 }
+						 }
+					 }
+				 } ,
 					)
 
 
 		DropdownMenuQuranSection(
-				getAllAyats = if (isSurah) viewModel::getAllAyaForSurah else viewModel::getAllAyaForJuz ,
-				setSelectedSurah = setSelectedSurah ,
-				expanded = expanded ,
-				list = list ,
-				translation = translation ,
-				label = label
+				 getAllAyats = if (isSurah) viewModel::getAllAyaForSurah else viewModel::getAllAyaForJuz ,
+				 setSelectedSurah = setSelectedSurah ,
+				 expanded = expanded ,
+				 list = list ,
+				 translation = translation ,
+				 label = label
 								)
 	}
 }
@@ -194,29 +194,29 @@ fun DropdownMenuQuranSection(
 		}
 	}
 	DropdownMenu(
-			modifier = Modifier
-				.width(120.dp)
-				.height(300.dp) ,
-			expanded = expanded.value ,
-			onDismissRequest = {
-				expanded.value = false
-			}) {
+			 modifier = Modifier
+				 .width(120.dp)
+				 .height(300.dp) ,
+			 expanded = expanded.value ,
+			 onDismissRequest = {
+				 expanded.value = false
+			 }) {
 		//the list of numbers in a dropdown menu
 		list.forEach { surah ->
 			DropdownMenuItem(
-					modifier = Modifier
-						.fillMaxWidth()
-						.height(48.dp) ,
-					onClick = {
-						onSelected(surah)
-					} ,
-					text = {
-						Text(
-								text = "$label $surah" ,
-								style = MaterialTheme.typography.bodyLarge ,
-								textAlign = TextAlign.Center ,
-							)
-					} ,
+					 modifier = Modifier
+						 .fillMaxWidth()
+						 .height(48.dp) ,
+					 onClick = {
+						 onSelected(surah)
+					 } ,
+					 text = {
+						 Text(
+								  text = "$label $surah" ,
+								  style = MaterialTheme.typography.bodyLarge ,
+								  textAlign = TextAlign.Center ,
+							 )
+					 } ,
 							)
 		}
 	}
@@ -227,12 +227,12 @@ fun DropdownMenuQuranSection(
 fun DropdownMenuSurahPreview()
 {
 	DropdownMenuQuranSection(
-			expanded = remember { mutableStateOf(false) } ,
-			list = (1 .. 114).toList() ,
-			translation = "english" ,
-			label = "Surah" ,
-			getAllAyats = { _ , _ -> } ,
-			setSelectedSurah = { }
+			 expanded = remember { mutableStateOf(false) } ,
+			 list = (1 .. 114).toList() ,
+			 translation = "english" ,
+			 label = "Surah" ,
+			 getAllAyats = { _ , _ -> } ,
+			 setSelectedSurah = { }
 							)
 }
 

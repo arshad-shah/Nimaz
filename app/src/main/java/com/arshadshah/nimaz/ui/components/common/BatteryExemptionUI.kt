@@ -36,9 +36,9 @@ fun BatteryExemptionUI()
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+			 initializer = { SettingsViewModel(context) } ,
+			 viewModelStoreOwner = context as ComponentActivity
 							 )
 	val isBatteryExempt = remember {
 		viewModel.isBatteryExempt
@@ -53,8 +53,8 @@ fun BatteryExemptionUI()
 
 	//the state of the switch
 	val state = rememberPreferenceBooleanSettingState(
-			AppConstants.BATTERY_OPTIMIZATION ,
-			isChecked.value
+			 AppConstants.BATTERY_OPTIMIZATION ,
+			 isChecked.value
 													 )
 
 	DisposableEffect(lifecycle) {
@@ -64,11 +64,11 @@ fun BatteryExemptionUI()
 				Lifecycle.Event.ON_RESUME ->
 				{
 					viewModel.handleEvent(
-							SettingsViewModel.SettingsEvent.BatteryExempt(
-									powerManager.isIgnoringBatteryOptimizations(
-											context.packageName
-																			   )
-																		 )
+							 SettingsViewModel.SettingsEvent.BatteryExempt(
+									  powerManager.isIgnoringBatteryOptimizations(
+											   context.packageName
+																				 )
+																		  )
 										 )
 					state.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
 					isChecked.value =
@@ -90,75 +90,75 @@ fun BatteryExemptionUI()
 
 
 	SettingsSwitch(
-			modifier = Modifier.testTag("BatteryExemptionSwitch") ,
-			state = state ,
-			onCheckedChange = {
-				if (it)
-				{
-					val intent = Intent()
-					intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-					intent.data = Uri.parse("package:" + context.packageName)
-					context.startActivity(intent)
-				} else
-				{
-					//navigate to the battery optimization settings
-					val intent = Intent()
-					intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-					context.startActivity(intent)
-				}
-			} ,
-			title = {
-				Text(
-						text = "Battery Optimization" ,
-					)
-			} ,
-			subtitle = {
-				//if the permission is granted, show a checkmark and text saying "Allowed"
-				if (isBatteryExempt.value)
-				{
-					Row(
-							verticalAlignment = Alignment.CenterVertically
-					   ) {
-						Icon(
-								modifier = Modifier
-									.size(18.dp)
-									.padding(end = 4.dp) ,
-								painter = painterResource(id = R.drawable.checkbox_icon) ,
-								contentDescription = "Battery Exemption Allowed"
-							)
-						Text(text = "Exempt")
-					}
-				} else
-				{
-					//if the permission is not granted, show a notification icon and text saying "Not Allowed"
-					Row(
-							verticalAlignment = Alignment.CenterVertically
-					   ) {
-						Icon(
-								modifier = Modifier
-									.size(18.dp)
-									.padding(end = 4.dp) ,
-								painter = painterResource(id = R.drawable.cross_circle_icon) ,
-								contentDescription = "Battery Exemption Not Allowed"
-							)
-						Text(text = "Optimizing")
-					}
-				}
-			} ,
-			icon = {
-				Icon(
-						modifier = Modifier.size(24.dp) ,
-						painter = painterResource(id = R.drawable.battery) ,
-						contentDescription = "Battery Optimization"
-					)
-			}
+			 modifier = Modifier.testTag("BatteryExemptionSwitch") ,
+			 state = state ,
+			 onCheckedChange = {
+				 if (it)
+				 {
+					 val intent = Intent()
+					 intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+					 intent.data = Uri.parse("package:" + context.packageName)
+					 context.startActivity(intent)
+				 } else
+				 {
+					 //navigate to the battery optimization settings
+					 val intent = Intent()
+					 intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+					 context.startActivity(intent)
+				 }
+			 } ,
+			 title = {
+				 Text(
+						  text = "Battery Optimization" ,
+					 )
+			 } ,
+			 subtitle = {
+				 //if the permission is granted, show a checkmark and text saying "Allowed"
+				 if (isBatteryExempt.value)
+				 {
+					 Row(
+							  verticalAlignment = Alignment.CenterVertically
+						) {
+						 Icon(
+								  modifier = Modifier
+									  .size(18.dp)
+									  .padding(end = 4.dp) ,
+								  painter = painterResource(id = R.drawable.checkbox_icon) ,
+								  contentDescription = "Battery Exemption Allowed"
+							 )
+						 Text(text = "Exempt")
+					 }
+				 } else
+				 {
+					 //if the permission is not granted, show a notification icon and text saying "Not Allowed"
+					 Row(
+							  verticalAlignment = Alignment.CenterVertically
+						) {
+						 Icon(
+								  modifier = Modifier
+									  .size(18.dp)
+									  .padding(end = 4.dp) ,
+								  painter = painterResource(id = R.drawable.cross_circle_icon) ,
+								  contentDescription = "Battery Exemption Not Allowed"
+							 )
+						 Text(text = "Optimizing")
+					 }
+				 }
+			 } ,
+			 icon = {
+				 Icon(
+						  modifier = Modifier.size(24.dp) ,
+						  painter = painterResource(id = R.drawable.battery) ,
+						  contentDescription = "Battery Optimization"
+					 )
+			 }
 				  )
 
 	if (! isBatteryExempt.value)
 	{
 		BannerSmall(
-				message = "Exempt Nimaz from battery optimization to receive Adhan notifications on time" ,
-				showFor = BannerDuration.FOREVER.value
+				 message = "Exempt Nimaz from battery optimization to receive Adhan notifications on time" ,
+				 showFor = BannerDuration.FOREVER.value
 				   )
 	}
 }

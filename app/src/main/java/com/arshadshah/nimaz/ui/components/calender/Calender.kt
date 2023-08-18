@@ -23,35 +23,35 @@ fun Calender(
 			)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge.copy(
-					bottomStart = CornerSize(0.dp) ,
-					bottomEnd = CornerSize(0.dp) ,
-														) ,
-			modifier = Modifier
-				.fillMaxWidth()
+			 shape = MaterialTheme.shapes.extraLarge.copy(
+					  bottomStart = CornerSize(0.dp) ,
+					  bottomEnd = CornerSize(0.dp) ,
+														 ) ,
+			 modifier = Modifier
+				 .fillMaxWidth()
 				) {
 		SelectableCalendar(
-				horizontalSwipeEnabled = false ,
-				dayContent = {
-					CalenderDay(
-							dayState = it ,
-							handleEvents = handleEvents ,
-							progressForMonth ,
-							fastProgressForMonth
-							   )
-				} ,
-				daysOfWeekHeader = { weekState ->
-					CalenderWeekHeader(
-							weekState = weekState ,
-									  )
-				} ,
-				monthContainer = {
-					CalenderMonth(monthState = it)
-				} ,
-				monthHeader = { monthState ->
-					CalenderHeader(monthState = monthState , handleEvents = handleEvents)
-				} ,
-				calendarState = rememberSelectableCalendarState()
+				 horizontalSwipeEnabled = false ,
+				 dayContent = {
+					 CalenderDay(
+							  dayState = it ,
+							  handleEvents = handleEvents ,
+							  progressForMonth ,
+							  fastProgressForMonth
+								)
+				 } ,
+				 daysOfWeekHeader = { weekState ->
+					 CalenderWeekHeader(
+							  weekState = weekState ,
+									   )
+				 } ,
+				 monthContainer = {
+					 CalenderMonth(monthState = it)
+				 } ,
+				 monthHeader = { monthState ->
+					 CalenderHeader(monthState = monthState , handleEvents = handleEvents)
+				 } ,
+				 calendarState = rememberSelectableCalendarState()
 						  )
 	}
 }

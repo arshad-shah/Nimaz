@@ -44,24 +44,24 @@ fun ToolTip(icon : Painter , tipText : String)
 	}
 
 	Balloon(
-			builder = builder ,
-			balloonContent = {
-				Text(
-						text = tipText ,
-						style = MaterialTheme.typography.bodySmall
-					)
-			}
+			 builder = builder ,
+			 balloonContent = {
+				 Text(
+						  text = tipText ,
+						  style = MaterialTheme.typography.bodySmall
+					 )
+			 }
 		   ) { balloonWindow ->
 		Icon(
-				modifier = Modifier
-					.size(24.dp)
-					.clip(CircleShape)
-					.clickable {
-						balloonWindow.showAlignBottom()
-					} ,
-				painter = icon ,
-				contentDescription = "Info" ,
-				tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+				 modifier = Modifier
+					 .size(24.dp)
+					 .clip(CircleShape)
+					 .clickable {
+						 balloonWindow.showAlignBottom()
+					 } ,
+				 painter = icon ,
+				 contentDescription = "Info" ,
+				 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 			)
 	}
 }
