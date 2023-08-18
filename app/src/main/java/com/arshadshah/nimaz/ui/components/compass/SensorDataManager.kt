@@ -24,7 +24,7 @@ class SensorDataManager(context : Context) : SensorEventListener
 		val packageManager = context.packageManager
 		//check if device has sensors
 		if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && packageManager.hasSystemFeature(
-					PackageManager.FEATURE_SENSOR_COMPASS
+					 PackageManager.FEATURE_SENSOR_COMPASS
 																														   )
 		)
 		{
@@ -72,11 +72,11 @@ class SensorDataManager(context : Context) : SensorEventListener
 				SensorManager.getOrientation(r , orientation)
 
 				data.trySend(
-						SensorData(
-								roll = orientation[2] ,
-								pitch = orientation[1] ,
-								yaw = orientation[0] ,
-								  )
+						 SensorData(
+								  roll = orientation[2] ,
+								  pitch = orientation[1] ,
+								  yaw = orientation[0] ,
+								   )
 							)
 
 			} // inner if

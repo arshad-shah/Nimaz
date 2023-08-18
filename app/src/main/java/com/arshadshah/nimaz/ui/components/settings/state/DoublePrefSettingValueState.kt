@@ -18,9 +18,9 @@ fun rememberPreferenceDoubleSettingState(
 {
 	return remember {
 		DoublePreferenceSettingValueState(
-				key = key ,
-				preferences = preferences ,
-				defaultValue = defaultValue
+				 key = key ,
+				 preferences = preferences ,
+				 defaultValue = defaultValue
 										 )
 	}
 }

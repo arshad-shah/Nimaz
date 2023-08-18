@@ -38,20 +38,22 @@ fun SettingsMenuLink(
 {
 	Surface {
 		Row(
-				modifier = modifier
-					.fillMaxWidth()
-					.height(60.dp)
-					.clickable(onClick = onClick) ,
-				verticalAlignment = Alignment.CenterVertically ,
+				 modifier = modifier
+					 .fillMaxWidth()
+					 .height(60.dp)
+					 .clickable(onClick = onClick) ,
+				 verticalAlignment = Alignment.CenterVertically ,
 		   ) {
 			if (icon != null)
 			{
 				SettingsTileIcon(icon = icon)
 			} else
 			{
-				Spacer(modifier = Modifier
-					.width(24.dp)
-					.height(60.dp))
+				Spacer(
+						 modifier = Modifier
+							 .width(24.dp)
+							 .height(60.dp)
+					  )
 			}
 			SettingsTileTexts(title = title , subtitle = subtitle)
 			if (action != null)
@@ -69,9 +71,9 @@ fun SettingsMenuLink(
 internal fun SettingsMenuLinkPreview()
 {
 	SettingsMenuLink(
-			icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-			title = { Text(text = "Hello") } ,
-			subtitle = { Text(text = "This is a longer text") } ,
+			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
 					) {
 
 	}
@@ -82,8 +84,8 @@ internal fun SettingsMenuLinkPreview()
 internal fun SettingsMenuLinkNoIconPreview()
 {
 	SettingsMenuLink(
-			title = { Text(text = "Hello") } ,
-			subtitle = { Text(text = "This is a longer text") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
 					) {
 	}
 }
@@ -94,16 +96,16 @@ internal fun SettingsMenuLinkActionPreview()
 {
 	var rememberCheckBoxState by remember { mutableStateOf(true) }
 	SettingsMenuLink(
-			icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-			title = { Text(text = "Hello") } ,
-			subtitle = { Text(text = "This is a longer text") } ,
-			action = {
-				Button(
-						onClick = { rememberCheckBoxState = ! rememberCheckBoxState } ,
-					  ) {
-					Text(text = "Action")
-				}
-			} ,
+			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 action = {
+				 Button(
+						  onClick = { rememberCheckBoxState = ! rememberCheckBoxState } ,
+					   ) {
+					 Text(text = "Action")
+				 }
+			 } ,
 					) {
 	}
 }

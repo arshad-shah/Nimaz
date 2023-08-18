@@ -63,11 +63,11 @@ class AdhanReciever : BroadcastReceiver()
 				}
 			}
 			NotificationHelper().createNotification(
-					context ,
-					CHANNEL_ID ,
-					title ,
-					Notify_Id ,
-					Time_of_alarm
+					 context ,
+					 CHANNEL_ID ,
+					 title ,
+					 Notify_Id ,
+					 Time_of_alarm
 												   )
 			Toasty.info(context , "Time to pray $title").show()
 
@@ -76,8 +76,8 @@ class AdhanReciever : BroadcastReceiver()
 		else
 		{
 			Log.d(
-					AppConstants.ADHAN_RECEIVER_TAG ,
-					"Notification for $title is not executed! The time has passed"
+					 AppConstants.ADHAN_RECEIVER_TAG ,
+					 "Notification for $title is not executed! The time has passed"
 				 )
 		}
 
@@ -89,8 +89,8 @@ class AdhanReciever : BroadcastReceiver()
 				try
 				{
 					val repository = PrayerTimesRepository.getPrayerTimes(
-							context ,
-							LocalDate.now().plusDays(1).toString()
+							 context ,
+							 LocalDate.now().plusDays(1).toString()
 																		 )
 					//check if the isha time is past 11 pm
 					//if it is set the isha time to 30 mins after maghrib
@@ -108,13 +108,13 @@ class AdhanReciever : BroadcastReceiver()
 					if (! alarmLock)
 					{
 						CreateAlarms().exact(
-								context ,
-								repository.data.fajr !! ,
-								repository.data.sunrise !! ,
-								repository.data.dhuhr !! ,
-								repository.data.asr !! ,
-								repository.data.maghrib !! ,
-								newIshaTime !!
+								 context ,
+								 repository.data.fajr !! ,
+								 repository.data.sunrise !! ,
+								 repository.data.dhuhr !! ,
+								 repository.data.asr !! ,
+								 repository.data.maghrib !! ,
+								 newIshaTime !!
 											)
 						sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 					}
@@ -122,7 +122,7 @@ class AdhanReciever : BroadcastReceiver()
 				{
 					Log.e(AppConstants.ADHAN_RECEIVER_TAG , "Error in AdhanReciever: ${e.message}")
 					val mapForLoggingError = mapOf(
-							"Error" to "Error in AdhanReciever: ${e.message}"
+							 "Error" to "Error in AdhanReciever: ${e.message}"
 												  )
 					FirebaseLogger.logEvent(AppConstants.ADHAN_RECEIVER_TAG , mapForLoggingError)
 				}

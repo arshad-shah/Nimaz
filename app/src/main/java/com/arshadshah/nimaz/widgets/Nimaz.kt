@@ -35,10 +35,10 @@ class Nimaz : AppWidgetProvider()
 			val views = RemoteViews(context.packageName , R.layout.nimaz)
 			val intent = Intent(context , RoutingActivity::class.java)
 			val pendingIntent = PendingIntent.getActivity(
-					context ,
-					WIDGET_PENDING_INTENT_REQUEST_CODE ,
-					intent ,
-					FLAG_IMMUTABLE
+					 context ,
+					 WIDGET_PENDING_INTENT_REQUEST_CODE ,
+					 intent ,
+					 FLAG_IMMUTABLE
 														 )
 
 			Log.d("Nimaz: Widget" , "onUpdate: Setting prayer times")
@@ -46,20 +46,20 @@ class Nimaz : AppWidgetProvider()
 			runBlocking {
 				val repository = PrayerTimesRepository.getPrayerTimes(context)
 				views.setTextViewText(
-						R.id.Fajr_time ,
-						repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+						 R.id.Fajr_time ,
+						 repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
 				views.setTextViewText(
-						R.id.Zuhar_time ,
-						repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+						 R.id.Zuhar_time ,
+						 repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
 				views.setTextViewText(
-						R.id.Asar_time ,
-						repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+						 R.id.Asar_time ,
+						 repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
 				views.setTextViewText(
-						R.id.Maghrib_time ,
-						repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+						 R.id.Maghrib_time ,
+						 repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
 				val ishaTime = repository.data?.isha?.toLocalTime()?.hour
 				val newIshaTime = if (ishaTime !! >= 22)
@@ -70,9 +70,9 @@ class Nimaz : AppWidgetProvider()
 					repository.data.isha
 				}
 				views.setTextViewText(
-						R.id.Ishaa_time , newIshaTime?.format(
-						DateTimeFormatter.ofPattern("hh:mm a")
-															 )
+						 R.id.Ishaa_time , newIshaTime?.format(
+						 DateTimeFormatter.ofPattern("hh:mm a")
+															  )
 									 )
 			}
 			Log.d("Nimaz: Widget" , "onUpdate: Setting click listener")
@@ -106,10 +106,10 @@ internal fun updateAppWidget(
 
 	val intent = Intent(context , RoutingActivity::class.java)
 	val pendingIntent = PendingIntent.getActivity(
-			context ,
-			WIDGET_PENDING_INTENT_REQUEST_CODE ,
-			intent ,
-			FLAG_IMMUTABLE
+			 context ,
+			 WIDGET_PENDING_INTENT_REQUEST_CODE ,
+			 intent ,
+			 FLAG_IMMUTABLE
 												 )
 
 	val views = RemoteViews(context.packageName , R.layout.nimaz)
@@ -123,20 +123,20 @@ internal fun updateAppWidget(
 
 	Log.d("Nimaz: Widget" , "Setting Prayer Times!")
 	views.setTextViewText(
-			R.id.Fajr_time ,
-			repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+			 R.id.Fajr_time ,
+			 repository.data?.fajr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 						 )
 	views.setTextViewText(
-			R.id.Zuhar_time ,
-			repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+			 R.id.Zuhar_time ,
+			 repository.data?.dhuhr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 						 )
 	views.setTextViewText(
-			R.id.Asar_time ,
-			repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+			 R.id.Asar_time ,
+			 repository.data?.asr?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 						 )
 	views.setTextViewText(
-			R.id.Maghrib_time ,
-			repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+			 R.id.Maghrib_time ,
+			 repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 						 )
 	val ishaTime = repository.data?.isha?.toLocalTime()?.hour
 	val newIshaTime = if (ishaTime !! >= 22)
@@ -147,9 +147,9 @@ internal fun updateAppWidget(
 		repository.data?.isha
 	}
 	views.setTextViewText(
-			R.id.Ishaa_time , newIshaTime?.format(
-			DateTimeFormatter.ofPattern("hh:mm a")
-												 )
+			 R.id.Ishaa_time , newIshaTime?.format(
+			 DateTimeFormatter.ofPattern("hh:mm a")
+												  )
 						 )
 
 	views.setOnClickPendingIntent(R.id.widget , pendingIntent)

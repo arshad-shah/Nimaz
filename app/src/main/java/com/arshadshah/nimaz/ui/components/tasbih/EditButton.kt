@@ -29,39 +29,39 @@ fun Editbutton(
 			  )
 {
 	Row(
-			modifier = Modifier.fillMaxWidth() ,
-			horizontalArrangement = Arrangement.SpaceBetween ,
-			verticalAlignment = Alignment.CenterVertically
+			 modifier = Modifier.fillMaxWidth() ,
+			 horizontalArrangement = Arrangement.SpaceBetween ,
+			 verticalAlignment = Alignment.CenterVertically
 	   ) {
 		ElevatedButton(
-				onClick = {
-					//if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
-					if (count.value > 0)
-					{
-						Toasty.info(
-								context ,
-								"Objective can only be changed when the tasbih count is 0" ,
-								Toasty.LENGTH_SHORT
-								   ).show()
-					} else
-					{
-						showObjectiveDialog.value = true
-					}
-				}) {
+				 onClick = {
+					 //if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
+					 if (count.value > 0)
+					 {
+						 Toasty.info(
+								  context ,
+								  "Objective can only be changed when the tasbih count is 0" ,
+								  Toasty.LENGTH_SHORT
+									).show()
+					 } else
+					 {
+						 showObjectiveDialog.value = true
+					 }
+				 }) {
 			Row(
-					horizontalArrangement = Arrangement.Start ,
-					verticalAlignment = Alignment.CenterVertically
+					 horizontalArrangement = Arrangement.Start ,
+					 verticalAlignment = Alignment.CenterVertically
 			   ) {
 				Text(
-						modifier = Modifier.padding(8.dp) ,
-						text = objective.value ,
-						style = MaterialTheme.typography.titleLarge ,
-						fontSize = 26.sp
+						 modifier = Modifier.padding(8.dp) ,
+						 text = objective.value ,
+						 style = MaterialTheme.typography.titleLarge ,
+						 fontSize = 26.sp
 					)
 				Icon(
-						modifier = Modifier.size(24.dp) ,
-						painter = painterResource(id = R.drawable.edit_icon) ,
-						contentDescription = "Edit"
+						 modifier = Modifier.size(24.dp) ,
+						 painter = painterResource(id = R.drawable.edit_icon) ,
+						 contentDescription = "Edit"
 					)
 			}
 		}

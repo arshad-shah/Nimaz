@@ -34,9 +34,9 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (String) -> Unit)
 {
 	val viewModel = viewModel(
-			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			initializer = { DuaViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
+			 initializer = { DuaViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
 	LaunchedEffect(Unit) {
@@ -74,8 +74,8 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 		newCategoryTitles.sort()
 
 		LazyVerticalGrid(
-				columns = GridCells.Adaptive(minSize = 128.dp) ,
-				contentPadding = paddingValues
+				 columns = GridCells.Adaptive(minSize = 128.dp) ,
+				 contentPadding = paddingValues
 						) {
 			items(newCategoryTitles.size) {
 				//if the title is All Chapters, then return the amount of chapters in the list
@@ -83,25 +83,25 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 				if (newCategoryTitles[it] == "All Chapters")
 				{
 					Category(
-							title = newCategoryTitles[it] ,
-							//return the amount of chapters in the list
-							amount = chaptersInEachCategory[it].size ,
-							onClicked = {
-								onNavigateToChapterListScreen(newCategoryTitles[it])
-							}
+							 title = newCategoryTitles[it] ,
+							 //return the amount of chapters in the list
+							 amount = chaptersInEachCategory[it].size ,
+							 onClicked = {
+								 onNavigateToChapterListScreen(newCategoryTitles[it])
+							 }
 							)
 				} else
 				{
 					Category(
-							title = newCategoryTitles[it] ,
-							//return the amount of chapters in each category
-							//where the title is the same as chaptersInEachCategory[0][0].category
-							amount = chaptersInEachCategory[it].count { chapter ->
-								chapter.category == newCategoryTitles[it]
-							} ,
-							onClicked = {
-								onNavigateToChapterListScreen(newCategoryTitles[it])
-							}
+							 title = newCategoryTitles[it] ,
+							 //return the amount of chapters in each category
+							 //where the title is the same as chaptersInEachCategory[0][0].category
+							 amount = chaptersInEachCategory[it].count { chapter ->
+								 chapter.category == newCategoryTitles[it]
+							 } ,
+							 onClicked = {
+								 onNavigateToChapterListScreen(newCategoryTitles[it])
+							 }
 							)
 				}
 			}
@@ -120,28 +120,28 @@ fun Category(
 			)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.large ,
-			modifier = Modifier
-				.padding(8.dp)
-				.fillMaxWidth()
-				.fillMaxHeight()
-				.clickable {
-					onClicked()
-				}
+			 shape = MaterialTheme.shapes.large ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .fillMaxWidth()
+				 .fillMaxHeight()
+				 .clickable {
+					 onClicked()
+				 }
 				) {
 		Row(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth() ,
-				verticalAlignment = Alignment.CenterVertically ,
-				horizontalArrangement = Arrangement.SpaceBetween
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .fillMaxWidth() ,
+				 verticalAlignment = Alignment.CenterVertically ,
+				 horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 			Column(
-					modifier = Modifier
-						.padding(8.dp)
-						.fillMaxWidth() ,
-					verticalArrangement = Arrangement.SpaceAround ,
-					horizontalAlignment = Alignment.Start
+					 modifier = Modifier
+						 .padding(8.dp)
+						 .fillMaxWidth() ,
+					 verticalArrangement = Arrangement.SpaceAround ,
+					 horizontalAlignment = Alignment.Start
 				  ) {
 				Text(text = title , style = MaterialTheme.typography.titleMedium)
 				Text(text = "$amount Chapters" , style = MaterialTheme.typography.bodySmall)
@@ -149,11 +149,11 @@ fun Category(
 			if (icon != null)
 			{
 				Image(
-						painter = painterResource(id = icon) ,
-						contentDescription = description ,
-						modifier = Modifier
-							.padding(8.dp)
-							.size(32.dp)
+						 painter = painterResource(id = icon) ,
+						 contentDescription = description ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .size(32.dp)
 					 )
 			}
 		}

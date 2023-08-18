@@ -44,10 +44,10 @@ class MoonCalc @JvmOverloads constructor(
 		h += astroRefraction(h) // altitude correction for refraction
 
 		return MoonPosition(
-				h ,
-				azimuth(H , phi , c.dec) ,
-				c.dist ,
-				pa
+				 h ,
+				 azimuth(H , phi , c.dec) ,
+				 c.dist ,
+				 pa
 						   )
 	}
 
@@ -150,11 +150,11 @@ class MoonCalc @JvmOverloads constructor(
 		}
 
 		return MoonPhaseInfo(
-				fraction ,
-				phaseValue ,
-				moonCalculations.angle ,
-				phaseName ,
-				imageToShow
+				 fraction ,
+				 phaseValue ,
+				 moonCalculations.angle ,
+				 phaseName ,
+				 imageToShow
 							)
 	}
 
@@ -169,8 +169,8 @@ class MoonCalc @JvmOverloads constructor(
 		val phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra))
 		val inc = atan2(sdist * sin(phi) , m.dist - sdist * cos(phi))
 		val angle = atan2(
-				cos(s.dec) * sin(s.ra - m.ra) , sin(s.dec) * cos(m.dec) -
-				cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra)
+				 cos(s.dec) * sin(s.ra - m.ra) , sin(s.dec) * cos(m.dec) -
+				 cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra)
 						 )
 
 		return MoonCalculations(phi , inc , angle)
@@ -316,10 +316,10 @@ class MoonCalc @JvmOverloads constructor(
 		val alwaysDown = (rise != 0.0 && set != 0.0 && ye <= 0.0)
 
 		return MoonTime(
-				if (rise != 0.0) MathUtils.hoursLater(date , rise.toInt()) else date ,
-				if (set != 0.0) MathUtils.hoursLater(date , set.toInt()) else date ,
-				alwaysUp ,
-				alwaysDown
+				 if (rise != 0.0) MathUtils.hoursLater(date , rise.toInt()) else date ,
+				 if (set != 0.0) MathUtils.hoursLater(date , set.toInt()) else date ,
+				 alwaysUp ,
+				 alwaysDown
 					   )
 	}
 

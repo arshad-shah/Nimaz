@@ -24,13 +24,13 @@ import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 
 @TypeConverters(
-		TimestampTypeConvertor::class ,
-		TypeConvertorForListOfDuas::class
+		 TimestampTypeConvertor::class ,
+		 TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
-		version = 13 ,
-		exportSchema = false
+		 entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
+		 version = 13 ,
+		 exportSchema = false
 		 )
 abstract class AppDatabase : RoomDatabase()
 {

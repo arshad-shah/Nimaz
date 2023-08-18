@@ -178,12 +178,12 @@ class TrackerViewModel : ViewModel()
 			is TrackerEvent.GET_PROGRESS_FOR_MONTH -> getProgressForMonth(event.date)
 			is TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH -> getFastProgressForMonth(event.date)
 			is TrackerEvent.UPDATE_PROGRESS_FOR_DAY -> updateProgressForDay(
-					event.day ,
-					event.progress
+					 event.day ,
+					 event.progress
 																		   )
 
 			is TrackerEvent.UPDATE_MENSTRAUTING_STATE -> updateMenstrautingState(
-					event.isMenstrauting
+					 event.isMenstrauting
 																				)
 
 		}
@@ -194,23 +194,23 @@ class TrackerViewModel : ViewModel()
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			updateTracker(
-					PrayerTracker(
-							date = _dateState.value ,
-							progress = _progressState.value ,
-							isMenstruating = menstrauting ,
-							fajr = _fajrState.value ,
-							dhuhr = _zuhrState.value ,
-							asr = _asrState.value ,
-							maghrib = _maghribState.value ,
-							isha = _ishaState.value
-								 )
+					 PrayerTracker(
+							  date = _dateState.value ,
+							  progress = _progressState.value ,
+							  isMenstruating = menstrauting ,
+							  fajr = _fajrState.value ,
+							  dhuhr = _zuhrState.value ,
+							  asr = _asrState.value ,
+							  maghrib = _maghribState.value ,
+							  isha = _ishaState.value
+								  )
 						 )
 			updateFastTracker(
-					FastTracker(
-							date = _dateState.value ,
-							isFasting = _isFasting.value ,
-							isMenstruating = menstrauting
-							   )
+					 FastTracker(
+							  date = _dateState.value ,
+							  isFasting = _isFasting.value ,
+							  isMenstruating = menstrauting
+								)
 							 )
 
 			//get the monthly trackers
@@ -298,15 +298,15 @@ class TrackerViewModel : ViewModel()
 	}
 
 	private val _trackersForWeek = MutableStateFlow(
-			listOf(
-					PrayerTracker() ,
-					PrayerTracker() ,
-					PrayerTracker() ,
-					PrayerTracker() ,
-					PrayerTracker() ,
-					PrayerTracker() ,
-					PrayerTracker()
-				  )
+			 listOf(
+					  PrayerTracker() ,
+					  PrayerTracker() ,
+					  PrayerTracker() ,
+					  PrayerTracker() ,
+					  PrayerTracker() ,
+					  PrayerTracker() ,
+					  PrayerTracker()
+				   )
 												   )
 	val trackersForWeek : StateFlow<List<PrayerTracker>> = _trackersForWeek
 

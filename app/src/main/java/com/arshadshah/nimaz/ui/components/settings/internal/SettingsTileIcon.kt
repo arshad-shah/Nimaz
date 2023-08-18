@@ -20,9 +20,9 @@ internal fun SettingsTileIcon(
 	//the circle
 	Box(
 
-			modifier = modifier
-				.size(60.dp) ,
-			contentAlignment = Alignment.Center
+			 modifier = modifier
+				 .size(60.dp) ,
+			 contentAlignment = Alignment.Center
 	   ) {
 		icon()
 	}
@@ -44,6 +44,6 @@ fun SettingsIconPreviewEmpty()
 {
 
 	SettingsTileIcon(
-			icon = { } ,
+			 icon = { } ,
 					)
 }

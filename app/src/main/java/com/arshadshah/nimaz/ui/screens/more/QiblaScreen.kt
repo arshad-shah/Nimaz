@@ -37,9 +37,9 @@ fun QiblaScreen(paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = QIBLA_VIEWMODEL_KEY ,
-			initializer = { QiblaViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = QIBLA_VIEWMODEL_KEY ,
+			 initializer = { QiblaViewModel(context) } ,
+			 viewModelStoreOwner = context as ComponentActivity
 							 )
 
 	LaunchedEffect(Unit) {
@@ -55,12 +55,12 @@ fun QiblaScreen(paddingValues : PaddingValues)
 	val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
 
 	val imagesMapped = mapOf(
-			0 to painterResource(id = R.drawable.qibla1) ,
-			1 to painterResource(id = R.drawable.qibla2) ,
-			2 to painterResource(id = R.drawable.qibla3) ,
-			3 to painterResource(id = R.drawable.qibla4) ,
-			4 to painterResource(id = R.drawable.qibla5) ,
-			5 to painterResource(id = R.drawable.qibla6) ,
+			 0 to painterResource(id = R.drawable.qibla1) ,
+			 1 to painterResource(id = R.drawable.qibla2) ,
+			 2 to painterResource(id = R.drawable.qibla3) ,
+			 3 to painterResource(id = R.drawable.qibla4) ,
+			 4 to painterResource(id = R.drawable.qibla5) ,
+			 5 to painterResource(id = R.drawable.qibla6) ,
 							)
 	//create a mu	 that will be used to switch between the images
 	var imageToDisplay by remember { mutableStateOf(imagesMapped[imageIndexFromStorage]) }
@@ -74,20 +74,20 @@ fun QiblaScreen(paddingValues : PaddingValues)
 
 
 	Column(
-			modifier = Modifier
-				.padding(paddingValues)
-				.fillMaxSize()
-				.verticalScroll(rememberScrollState())
-				.testTag(TEST_TAG_QIBLA) ,
-			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Top
+			 modifier = Modifier
+				 .padding(paddingValues)
+				 .fillMaxSize()
+				 .verticalScroll(rememberScrollState())
+				 .testTag(TEST_TAG_QIBLA) ,
+			 horizontalAlignment = Alignment.CenterHorizontally ,
+			 verticalArrangement = Arrangement.Top
 		  ) {
 		BearingAndLocationContainer(state , isLoading , errorMessage)
 		Dial(
-				state = state ,
-				imageToDisplay = imageToDisplay !! ,
-				isLoading = isLoading.value ,
-				errorMessage = errorMessage.value
+				 state = state ,
+				 imageToDisplay = imageToDisplay !! ,
+				 isLoading = isLoading.value ,
+				 errorMessage = errorMessage.value
 			)
 		ImageSwitcherCard(changeImageIndex = changeImageIndex)
 	}

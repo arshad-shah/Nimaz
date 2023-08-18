@@ -23,9 +23,9 @@ fun DuaList(chapterId : String , paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			initializer = { DuaViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
+			 initializer = { DuaViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
 	LaunchedEffect(Unit) {
@@ -60,16 +60,16 @@ fun DuaList(chapterId : String , paddingValues : PaddingValues)
 		}
 	}
 	LazyColumn(
-			modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER) ,
-			contentPadding = paddingValues ,
-			state = listState ,
-			content = {
-				items(duaState.value.size)
-				{
-					DuaListItem(
-							dua = duaState.value[it] ,
-							loading = false
-							   )
-				}
-			})
+			 modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER) ,
+			 contentPadding = paddingValues ,
+			 state = listState ,
+			 content = {
+				 items(duaState.value.size)
+				 {
+					 DuaListItem(
+							  dua = duaState.value[it] ,
+							  loading = false
+								)
+				 }
+			 })
 }

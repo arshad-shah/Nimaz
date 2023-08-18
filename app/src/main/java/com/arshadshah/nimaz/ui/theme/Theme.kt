@@ -74,10 +74,10 @@ fun NimazTheme(
 
 	ProvideDimens(dimensions) {
 		MaterialTheme(
-				colorScheme = colorScheme ,
-				shapes = nimazCardShapes() ,
-				typography = typography ,
-				content = content ,
+				 colorScheme = colorScheme ,
+				 shapes = nimazCardShapes() ,
+				 typography = typography ,
+				 content = content ,
 					 )
 	}
 }

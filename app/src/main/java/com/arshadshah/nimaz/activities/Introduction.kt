@@ -15,9 +15,9 @@ class Introduction : ComponentActivity()
 		super.onCreate(savedInstanceState)
 		setContent {
 			NimazTheme(
-					darkTheme = isSystemInDarkTheme() ,
-					dynamicColor = true ,
-					ThemeName = "DEFAULT"
+					 darkTheme = isSystemInDarkTheme() ,
+					 dynamicColor = true ,
+					 ThemeName = "DEFAULT"
 					  ) {
 				IntroPage1()
 			}

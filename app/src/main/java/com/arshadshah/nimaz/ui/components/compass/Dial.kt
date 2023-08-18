@@ -62,17 +62,17 @@ fun Dial(
 	} else if (errorMessage != "")
 	{
 		ElevatedCard(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(16.dp) ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(16.dp) ,
 					)
 		{
 			Text(
-					text = errorMessage ,
-					style = MaterialTheme.typography.titleMedium ,
-					color = Color.Red ,
-					textAlign = TextAlign.Center ,
-					modifier = Modifier.padding(16.dp)
+					 text = errorMessage ,
+					 style = MaterialTheme.typography.titleMedium ,
+					 color = Color.Red ,
+					 textAlign = TextAlign.Center ,
+					 modifier = Modifier.padding(16.dp)
 				)
 		}
 	} else

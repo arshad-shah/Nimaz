@@ -86,47 +86,47 @@ fun CalenderHeader(
 			{
 				monthState.currentMonth = currentYearMonth
 				handleEvents(
-						TrackerViewModel.TrackerEvent.SET_DATE(
-								LocalDate.now().toString()
-															  )
+						 TrackerViewModel.TrackerEvent.SET_DATE(
+								  LocalDate.now().toString()
+															   )
 							)
 				handleEvents(
-						TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-								LocalDate.now().toString()
-																		  )
+						 TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+								  LocalDate.now().toString()
+																		   )
 							)
 				handleEvents(
-						TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-								LocalDate.now().toString()
-																			   )
+						 TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+								  LocalDate.now().toString()
+																				)
 							)
 				handleEvents(
-						TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-								LocalDate.now().toString()
-																			)
+						 TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+								  LocalDate.now().toString()
+																			 )
 							)
 				handleEvents(
-						TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-								LocalDate.now().toString()
-																				 )
+						 TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+								  LocalDate.now().toString()
+																				  )
 							)
 
 			} else
 			{
 				handleEvents(
-						TrackerViewModel.TrackerEvent.SET_DATE(
-								LocalDate.now().toString()
-															  )
+						 TrackerViewModel.TrackerEvent.SET_DATE(
+								  LocalDate.now().toString()
+															   )
 							)
 				handleEvents(
-						TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-								LocalDate.now().toString()
-																		  )
+						 TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+								  LocalDate.now().toString()
+																		   )
 							)
 				handleEvents(
-						TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-								LocalDate.now().toString()
-																			   )
+						 TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+								  LocalDate.now().toString()
+																				)
 							)
 			}
 			showCurrentMonth.value = false
@@ -135,132 +135,132 @@ fun CalenderHeader(
 	}
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
+			 shape = MaterialTheme.shapes.extraLarge ,
 				) {
 		Row(
-				modifier = Modifier
-					.padding(horizontal = 12.dp)
-					.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceBetween ,
-				verticalAlignment = Alignment.CenterVertically
+				 modifier = Modifier
+					 .padding(horizontal = 12.dp)
+					 .fillMaxWidth() ,
+				 horizontalArrangement = Arrangement.SpaceBetween ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			//left arrow
 			FilledIconButton(
-					onClick = {
-						monthState.currentMonth = monthState.currentMonth.minusMonths(1)
-						//get a date in the new month
-						val date = monthState.currentMonth.atDay(1)
-						handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
-						handleEvents(
-								TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-										date.toString()
-																						 )
-									)
-						inCurrentMonth.value = false
-					} ,
+					 onClick = {
+						 monthState.currentMonth = monthState.currentMonth.minusMonths(1)
+						 //get a date in the new month
+						 val date = monthState.currentMonth.atDay(1)
+						 handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
+						 handleEvents(
+								  TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+										   date.toString()
+																						   )
+									 )
+						 inCurrentMonth.value = false
+					 } ,
 							) {
 				Icon(
-						modifier = Modifier.size(24.dp) ,
-						painter = painterResource(id = R.drawable.angle_left_icon) ,
-						contentDescription = "Previous Month"
+						 modifier = Modifier.size(24.dp) ,
+						 painter = painterResource(id = R.drawable.angle_left_icon) ,
+						 contentDescription = "Previous Month"
 					)
 			}
 			Column(
-					modifier = Modifier
-						.clickable {
-							showCurrentMonth.value = true
-						} ,
-					horizontalAlignment = Alignment.CenterHorizontally ,
-					verticalArrangement = Arrangement.Center
+					 modifier = Modifier
+						 .clickable {
+							 showCurrentMonth.value = true
+						 } ,
+					 horizontalAlignment = Alignment.CenterHorizontally ,
+					 verticalArrangement = Arrangement.Center
 				  ) {
 				//if its today show today else show the today dimmed with a symbol to show which way to go to get to today
 				if (monthState.currentMonth == YearMonth.now())
 				{
 					Text(
-							modifier = Modifier
-								.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
-							text = "Today" ,
-							style = MaterialTheme.typography.titleSmall
+							 modifier = Modifier
+								 .padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
+							 text = "Today" ,
+							 style = MaterialTheme.typography.titleSmall
 						)
 				} else
 				{
 					Row(
-							modifier = Modifier
-								.background(
-										color = MaterialTheme.colorScheme.primary ,
-										shape = MaterialTheme.shapes.small
-										   )
-								.padding(horizontal = 8.dp) ,
-							horizontalArrangement = Arrangement.Center ,
-							verticalAlignment = Alignment.CenterVertically
+							 modifier = Modifier
+								 .background(
+										  color = MaterialTheme.colorScheme.primary ,
+										  shape = MaterialTheme.shapes.small
+											)
+								 .padding(horizontal = 8.dp) ,
+							 horizontalArrangement = Arrangement.Center ,
+							 verticalAlignment = Alignment.CenterVertically
 					   ) {
 						if (monthState.currentMonth.isAfter(YearMonth.now()))
 						{
 							Icon(
-									modifier = Modifier.size(16.dp) ,
-									painter = painterResource(id = R.drawable.angle_small_left_icon) ,
-									contentDescription = "Previous Day" ,
-									tint = MaterialTheme.colorScheme.onPrimary
+									 modifier = Modifier.size(16.dp) ,
+									 painter = painterResource(id = R.drawable.angle_small_left_icon) ,
+									 contentDescription = "Previous Day" ,
+									 tint = MaterialTheme.colorScheme.onPrimary
 								)
 							Text(
-									text = "Today" ,
-									style = MaterialTheme.typography.titleSmall ,
-									modifier = Modifier
-										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
-									color = MaterialTheme.colorScheme.onPrimary
+									 text = "Today" ,
+									 style = MaterialTheme.typography.titleSmall ,
+									 modifier = Modifier
+										 .padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
+									 color = MaterialTheme.colorScheme.onPrimary
 								)
 						} else
 						{
 							Text(
-									text = "Today" ,
-									style = MaterialTheme.typography.titleSmall ,
-									modifier = Modifier
-										.padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
-									color = MaterialTheme.colorScheme.onPrimary
+									 text = "Today" ,
+									 style = MaterialTheme.typography.titleSmall ,
+									 modifier = Modifier
+										 .padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
+									 color = MaterialTheme.colorScheme.onPrimary
 								)
 							Icon(
-									modifier = Modifier.size(16.dp) ,
-									painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-									contentDescription = "Next Day" ,
-									tint = MaterialTheme.colorScheme.onPrimary
+									 modifier = Modifier.size(16.dp) ,
+									 painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+									 contentDescription = "Next Day" ,
+									 tint = MaterialTheme.colorScheme.onPrimary
 								)
 						}
 					}
 				}
 				Text(
-						text = currentMonthYear ,
-						style = MaterialTheme.typography.titleLarge ,
-						maxLines = 1 ,
-						modifier = Modifier.padding(4.dp)
+						 text = currentMonthYear ,
+						 style = MaterialTheme.typography.titleLarge ,
+						 maxLines = 1 ,
+						 modifier = Modifier.padding(4.dp)
 					)
 
 				Text(
-						text = hijriFormated ,
-						style = MaterialTheme.typography.bodySmall ,
-						maxLines = 1 ,
-						modifier = Modifier.padding(4.dp)
+						 text = hijriFormated ,
+						 style = MaterialTheme.typography.bodySmall ,
+						 maxLines = 1 ,
+						 modifier = Modifier.padding(4.dp)
 					)
 			}
 
 			//right arrow
 			FilledIconButton(
-					onClick = {
-						monthState.currentMonth = monthState.currentMonth.plusMonths(1)
-						//get a date in the new month
-						val date = monthState.currentMonth.atDay(1)
-						handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
-						handleEvents(
-								TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-										date.toString()
-																						 )
-									)
-						inCurrentMonth.value = false
-					} ,
+					 onClick = {
+						 monthState.currentMonth = monthState.currentMonth.plusMonths(1)
+						 //get a date in the new month
+						 val date = monthState.currentMonth.atDay(1)
+						 handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
+						 handleEvents(
+								  TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+										   date.toString()
+																						   )
+									 )
+						 inCurrentMonth.value = false
+					 } ,
 							) {
 				Icon(
-						modifier = Modifier.size(24.dp) ,
-						painter = painterResource(id = R.drawable.angle_right_icon) ,
-						contentDescription = "Next Month"
+						 modifier = Modifier.size(24.dp) ,
+						 painter = painterResource(id = R.drawable.angle_right_icon) ,
+						 contentDescription = "Next Month"
 					)
 			}
 		}

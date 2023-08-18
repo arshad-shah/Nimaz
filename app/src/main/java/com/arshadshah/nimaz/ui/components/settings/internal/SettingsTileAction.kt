@@ -21,10 +21,10 @@ import com.arshadshah.nimaz.R
 internal fun SettingsTileAction(content : @Composable () -> Unit)
 {
 	Box(
-			modifier = Modifier
-				.height(64.dp)
-				.padding(horizontal = 8.dp) ,
-			contentAlignment = Alignment.Center ,
+			 modifier = Modifier
+				 .height(64.dp)
+				 .padding(horizontal = 8.dp) ,
+			 contentAlignment = Alignment.Center ,
 	   ) {
 		content()
 	}
@@ -36,8 +36,8 @@ internal fun SettingsTileActionPreview()
 {
 	SettingsTileAction {
 		Button(
-				onClick = {
-				} ,
+				 onClick = {
+				 } ,
 			  ) {
 			Text(text = "Update")
 		}
@@ -56,10 +56,10 @@ internal fun SettingsTileActionPreview2()
 	{
 		{
 			Icon(
-					painter = painterResource(id = R.drawable.check_icon) ,
-					contentDescription = null ,
-					modifier = Modifier
-						.size(SwitchDefaults.IconSize)
+					 painter = painterResource(id = R.drawable.check_icon) ,
+					 contentDescription = null ,
+					 modifier = Modifier
+						 .size(SwitchDefaults.IconSize)
 				)
 		}
 	} else
@@ -68,9 +68,9 @@ internal fun SettingsTileActionPreview2()
 	}
 	SettingsTileAction {
 		Switch(
-				checked = true ,
-				onCheckedChange = update ,
-				thumbContent = iconForSwitch ,
+				 checked = true ,
+				 onCheckedChange = update ,
+				 thumbContent = iconForSwitch ,
 			  )
 	}
 }
@@ -82,10 +82,10 @@ internal fun SettingsTileActionPreview3()
 {
 	SettingsTileAction {
 		Icon(
-				painter = painterResource(id = R.drawable.angle_right_icon) ,
-				contentDescription = null ,
-				modifier = Modifier
-					.size(24.dp)
+				 painter = painterResource(id = R.drawable.angle_right_icon) ,
+				 contentDescription = null ,
+				 modifier = Modifier
+					 .size(24.dp)
 			)
 	}
 }

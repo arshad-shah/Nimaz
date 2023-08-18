@@ -48,19 +48,19 @@ import java.util.concurrent.*
 fun IntroPage1()
 {
 	val pages = listOf(
-			OnBoardingPage.First ,
-			OnBoardingPage.Second ,
-			OnBoardingPage.Third ,
-			OnBoardingPage.Fourth ,
-			OnBoardingPage.Fifth ,
-			OnBoardingPage.Sixth ,
-			OnBoardingPage.Seventh ,
-			OnBoardingPage.Eighth ,
+			 OnBoardingPage.First ,
+			 OnBoardingPage.Second ,
+			 OnBoardingPage.Third ,
+			 OnBoardingPage.Fourth ,
+			 OnBoardingPage.Fifth ,
+			 OnBoardingPage.Sixth ,
+			 OnBoardingPage.Seventh ,
+			 OnBoardingPage.Eighth ,
 					  )
 
 	val pagerState = rememberPagerState(
-			0 ,
-			0F
+			 0 ,
+			 0F
 									   ) { pages.size }
 
 	val context = LocalContext.current
@@ -68,27 +68,27 @@ fun IntroPage1()
 	val scope = rememberCoroutineScope()
 
 	val party = Party(
-			speed = 20f ,
-			maxSpeed = 40f ,
-			damping = 0.9f ,
-			angle = Angle.RIGHT - 45 ,
-			spread = 45 ,
-			size = listOf(
-					Size.SMALL ,
-					Size.MEDIUM ,
-					Size.LARGE ,
-						 ) ,
-			colors = listOf(
-					0xfce18a ,
-					0xff726d ,
-					0xf4306d ,
-					0xb48def ,
-					0x6a4c93 ,
-					0x3f2c6f ,
-					0x1d1b3d
-						   ) ,
-			emitter = Emitter(duration = 150 , TimeUnit.MILLISECONDS).max(150) ,
-			position = Position.Relative(0.0 , 0.5)
+			 speed = 20f ,
+			 maxSpeed = 40f ,
+			 damping = 0.9f ,
+			 angle = Angle.RIGHT - 45 ,
+			 spread = 45 ,
+			 size = listOf(
+					  Size.SMALL ,
+					  Size.MEDIUM ,
+					  Size.LARGE ,
+						  ) ,
+			 colors = listOf(
+					  0xfce18a ,
+					  0xff726d ,
+					  0xf4306d ,
+					  0xb48def ,
+					  0x6a4c93 ,
+					  0x3f2c6f ,
+					  0x1d1b3d
+							) ,
+			 emitter = Emitter(duration = 150 , TimeUnit.MILLISECONDS).max(150) ,
+			 position = Position.Relative(0.0 , 0.5)
 					 )
 
 	val startParty = remember {
@@ -96,88 +96,88 @@ fun IntroPage1()
 	}
 
 	Column(
-			modifier = Modifier
-				.background(color = MaterialTheme.colorScheme.background)
-				.padding(bottom = 20.dp)
-				.fillMaxSize()
+			 modifier = Modifier
+				 .background(color = MaterialTheme.colorScheme.background)
+				 .padding(bottom = 20.dp)
+				 .fillMaxSize()
 		  ) {
 
 		HorizontalPager(
-				modifier = Modifier
-					.weight(10f)
-					.testTag("introPager") ,
-				state = pagerState ,
-				userScrollEnabled = false ,
-				pageSize = PageSize.Fill ,
-				verticalAlignment = Alignment.Top
+				 modifier = Modifier
+					 .weight(10f)
+					 .testTag("introPager") ,
+				 state = pagerState ,
+				 userScrollEnabled = false ,
+				 pageSize = PageSize.Fill ,
+				 verticalAlignment = Alignment.Top
 					   ) { position ->
 			PagerScreen(onBoardingPage = pages[position] , position)
 			if (startParty.value)
 			{
 				KonfettiView(
-						modifier = Modifier
-							.fillMaxSize()
-							.zIndex(2f) ,
-						parties = listOf(
-								party ,
-								party.copy(
-										angle = party.angle - 90 , // flip angle from right to left
-										position = Position.Relative(1.0 , 0.5)
-										  )
-										) ,
-						updateListener = object : OnParticleSystemUpdateListener
-						{
-							override fun onParticleSystemEnded(
-								system : PartySystem ,
-								activeSystems : Int ,
-															  )
-							{
-								if (activeSystems == 0)
-								{
-									startParty.value = false
-									sharedPref.saveDataBoolean(
-											AppConstants.IS_FIRST_INSTALL ,
-											false
-															  )
-									context.startActivity(
-											Intent(
-													context ,
-													MainActivity::class.java
-												  )
-														 )
-									//remove the activity from the back stack
-									(context as Introduction).finish()
-								}
-							}
-						}
+						 modifier = Modifier
+							 .fillMaxSize()
+							 .zIndex(2f) ,
+						 parties = listOf(
+								  party ,
+								  party.copy(
+										   angle = party.angle - 90 , // flip angle from right to left
+										   position = Position.Relative(1.0 , 0.5)
+											)
+										 ) ,
+						 updateListener = object : OnParticleSystemUpdateListener
+						 {
+							 override fun onParticleSystemEnded(
+								 system : PartySystem ,
+								 activeSystems : Int ,
+															   )
+							 {
+								 if (activeSystems == 0)
+								 {
+									 startParty.value = false
+									 sharedPref.saveDataBoolean(
+											  AppConstants.IS_FIRST_INSTALL ,
+											  false
+															   )
+									 context.startActivity(
+											  Intent(
+													   context ,
+													   MainActivity::class.java
+													)
+														  )
+									 //remove the activity from the back stack
+									 (context as Introduction).finish()
+								 }
+							 }
+						 }
 							)
 			}
 		}
 
 
 		Row(
-				modifier = Modifier
-					.padding(horizontal = 16.dp)
-					.background(color = MaterialTheme.colorScheme.background)
-					.fillMaxWidth()
-					.testTag("introButtons") ,
-				//if we are on firts or last page than use space between else use end for page 1 and start for last page
-				horizontalArrangement = Arrangement.Center ,
-				verticalAlignment = Alignment.CenterVertically ,
+				 modifier = Modifier
+					 .padding(horizontal = 16.dp)
+					 .background(color = MaterialTheme.colorScheme.background)
+					 .fillMaxWidth()
+					 .testTag("introButtons") ,
+				 //if we are on firts or last page than use space between else use end for page 1 and start for last page
+				 horizontalArrangement = Arrangement.Center ,
+				 verticalAlignment = Alignment.CenterVertically ,
 		   ) {
 			if (pagerState.currentPage == pages.size - 1)
 			{
 				FinishButton(
-						modifier = Modifier.fillMaxWidth() ,
-						pagerState = pagerState ,
+						 modifier = Modifier.fillMaxWidth() ,
+						 pagerState = pagerState ,
 							) {
 					startParty.value = true
 				}
 			} else
 			{
 				NextButton(
-						modifier = Modifier.fillMaxWidth() ,
-						pagerState = pagerState ,
+						 modifier = Modifier.fillMaxWidth() ,
+						 pagerState = pagerState ,
 						  ) {
 					scope.launch {
 						pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -189,9 +189,9 @@ fun IntroPage1()
 }
 
 @Preview(
-		showBackground = true , showSystemUi = true ,
-		uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL ,
-		device = "id:S20 Fe"
+		 showBackground = true , showSystemUi = true ,
+		 uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL ,
+		 device = "id:S20 Fe"
 		)
 @Composable
 fun IntroPage1Preview()

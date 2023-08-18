@@ -36,49 +36,49 @@ fun SliderWithIcons(
 				   )
 {
 	ElevatedCard(
-			modifier = modifier
-				.padding(vertical = 8.dp)
-				.fillMaxWidth()
-				.wrapContentHeight() ,
-			content = {
-				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.wrapContentHeight() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
-				   ) {
-					Icon(
-							modifier = Modifier
-								.padding(start = 4.dp)
-								.size(leadingIconSize)
-								.weight(0.1f)
-								.clickable {
-									onValueChange(value - 1)
-								} ,
-							painter = leadingIcon ,
-							contentDescription = contentDescription1
-						)
-					Slider(
-							value = value ,
-							onValueChange = onValueChange ,
-							valueRange = valueRange ,
-							modifier = Modifier.weight(0.8f)
-						  )
-					//click on this icon increses the font size
-					Icon(
-							modifier = Modifier
-								.padding(end = 4.dp)
-								.size(trailingIconSize)
-								.weight(0.1f)
-								.clickable {
-									onValueChange(value + 1)
-								} ,
-							painter = trailaingIcon ,
-							contentDescription = contentDescription2
-						)
-				}
-			}
+			 modifier = modifier
+				 .padding(vertical = 8.dp)
+				 .fillMaxWidth()
+				 .wrapContentHeight() ,
+			 content = {
+				 Row(
+						  modifier = Modifier
+							  .fillMaxWidth()
+							  .wrapContentHeight() ,
+						  verticalAlignment = Alignment.CenterVertically ,
+						  horizontalArrangement = Arrangement.SpaceBetween
+					) {
+					 Icon(
+							  modifier = Modifier
+								  .padding(start = 4.dp)
+								  .size(leadingIconSize)
+								  .weight(0.1f)
+								  .clickable {
+									  onValueChange(value - 1)
+								  } ,
+							  painter = leadingIcon ,
+							  contentDescription = contentDescription1
+						 )
+					 Slider(
+							  value = value ,
+							  onValueChange = onValueChange ,
+							  valueRange = valueRange ,
+							  modifier = Modifier.weight(0.8f)
+						   )
+					 //click on this icon increses the font size
+					 Icon(
+							  modifier = Modifier
+								  .padding(end = 4.dp)
+								  .size(trailingIconSize)
+								  .weight(0.1f)
+								  .clickable {
+									  onValueChange(value + 1)
+								  } ,
+							  painter = trailaingIcon ,
+							  contentDescription = contentDescription2
+						 )
+				 }
+			 }
 				)
 }
 
@@ -88,14 +88,14 @@ fun SliderWithIcons(
 fun SliderWithIconsPreview()
 {
 	SliderWithIcons(
-			value = 1f ,
-			onValueChange = { } ,
-			valueRange = 0f .. 10f ,
-			leadingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
-			trailaingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
-			contentDescription1 = "decrease font size" ,
-			contentDescription2 = "increase font size" ,
-			trailingIconSize = 24.dp ,
-			leadingIconSize = 16.dp ,
+			 value = 1f ,
+			 onValueChange = { } ,
+			 valueRange = 0f .. 10f ,
+			 leadingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
+			 trailaingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
+			 contentDescription1 = "decrease font size" ,
+			 contentDescription2 = "increase font size" ,
+			 trailingIconSize = 24.dp ,
+			 leadingIconSize = 16.dp ,
 				   )
 }

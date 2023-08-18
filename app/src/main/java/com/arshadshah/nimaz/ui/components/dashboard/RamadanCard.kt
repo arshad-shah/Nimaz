@@ -66,11 +66,11 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	//we will pick a random image from the list
 	val imagesToShow =
 		listOf(
-				R.drawable.ramadan ,
-				R.drawable.ramadan2 ,
-				R.drawable.ramadan3 ,
-				R.drawable.ramadan4 ,
-				R.drawable.ramadan5
+				 R.drawable.ramadan ,
+				 R.drawable.ramadan2 ,
+				 R.drawable.ramadan3 ,
+				 R.drawable.ramadan4 ,
+				 R.drawable.ramadan5
 			  )
 	//pick a random image
 	val randomImage = imagesToShow.random()
@@ -86,16 +86,16 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 	{
 		//show the card
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp)
-					.clickable { onNavigateToCalender() } ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp)
+					 .clickable { onNavigateToCalender() } ,
 					) {
 			Column(
-					modifier = Modifier.padding(16.dp) ,
-					verticalArrangement = Arrangement.Center ,
-					horizontalAlignment = Alignment.CenterHorizontally
+					 modifier = Modifier.padding(16.dp) ,
+					 verticalArrangement = Arrangement.Center ,
+					 horizontalAlignment = Alignment.CenterHorizontally
 				  ) {
 
 				if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 && todayHijri[ChronoField.MONTH_OF_YEAR] == 9)
@@ -107,62 +107,62 @@ fun RamadanCard(onNavigateToCalender : () -> Unit)
 				}
 
 				Row(
-						modifier = Modifier
-							.fillMaxWidth() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
+						 modifier = Modifier
+							 .fillMaxWidth() ,
+						 verticalAlignment = Alignment.CenterVertically ,
+						 horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
 					Box(
-							modifier = Modifier
-								.clip(MaterialTheme.shapes.extraLarge)
-								.padding(8.dp)
-								.size(80.dp)
+							 modifier = Modifier
+								 .clip(MaterialTheme.shapes.extraLarge)
+								 .padding(8.dp)
+								 .size(80.dp)
 					   ) {
 						Image(
-								painter = painterResource(id = imageToShow.intValue) ,
-								contentDescription = "Moon" ,
-								modifier = Modifier
-									.size(80.dp)
+								 painter = painterResource(id = imageToShow.intValue) ,
+								 contentDescription = "Moon" ,
+								 modifier = Modifier
+									 .size(80.dp)
 							 )
 					}
 					Column(
-							modifier = Modifier.fillMaxWidth() ,
-							verticalArrangement = Arrangement.Center ,
-							horizontalAlignment = Alignment.CenterHorizontally
+							 modifier = Modifier.fillMaxWidth() ,
+							 verticalArrangement = Arrangement.Center ,
+							 horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
 						if (isAfterRamadanStart)
 						{
 							//estimated end
 							Text(
-									text = "Estimated end" ,
-									style = MaterialTheme.typography.titleSmall
+									 text = "Estimated end" ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						} else
 						{
 							//estimated start
 							Text(
-									text = "Estimated start" ,
-									style = MaterialTheme.typography.titleSmall
+									 text = "Estimated start" ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						}
 						//if ramaadan time left is 1 then show that it ends today if its 2 then show that it ends tomorrow
 						Text(
-								text = if (ramadanTimeLeft.longValue == 0L) "Today" else if (ramadanTimeLeft.value == 1L) "Tomorrow" else "In ${ramadanTimeLeft.value} days" ,
-								style = MaterialTheme.typography.headlineMedium
+								 text = if (ramadanTimeLeft.longValue == 0L) "Today" else if (ramadanTimeLeft.value == 1L) "Tomorrow" else "In ${ramadanTimeLeft.value} days" ,
+								 style = MaterialTheme.typography.headlineMedium
 							)
 						if (isAfterRamadanStart)
 						{
 							//estimated end
 							Text(
-									text = ramadanEndFormatted.toString() ,
-									style = MaterialTheme.typography.titleSmall
+									 text = ramadanEndFormatted.toString() ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						} else
 						{
 							//estimated start
 							Text(
-									text = ramadanStartFormatted.toString() ,
-									style = MaterialTheme.typography.titleSmall
+									 text = ramadanStartFormatted.toString() ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						}
 					}

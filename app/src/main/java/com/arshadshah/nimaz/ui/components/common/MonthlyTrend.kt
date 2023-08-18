@@ -46,16 +46,16 @@ fun MonthlyTrend()
 		}
 		Column {
 			LazyHorizontalGrid(
-					rows = GridCells.Fixed(5) ,
-					content = {
-						items(daysInMonth) { day ->
-							Box(
-									modifier = Modifier
-										.size(10.dp)
-										.background(Color.Gray)
-							   )
-						}
-					}
+					 rows = GridCells.Fixed(5) ,
+					 content = {
+						 items(daysInMonth) { day ->
+							 Box(
+									  modifier = Modifier
+										  .size(10.dp)
+										  .background(Color.Gray)
+								)
+						 }
+					 }
 							  )
 		}
 	}

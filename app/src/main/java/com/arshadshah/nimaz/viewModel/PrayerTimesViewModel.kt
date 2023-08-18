@@ -156,13 +156,13 @@ class PrayerTimesViewModel : ViewModel()
 	{
 		loadPrayerTimes(context)
 		CreateAlarms().exact(
-				context ,
-				fajrTime.value !! ,
-				sunriseTime.value !! ,
-				dhuhrTime.value !! ,
-				asrTime.value !! ,
-				maghribTime.value !! ,
-				ishaTime.value !! ,
+				 context ,
+				 fajrTime.value !! ,
+				 sunriseTime.value !! ,
+				 dhuhrTime.value !! ,
+				 asrTime.value !! ,
+				 maghribTime.value !! ,
+				 ishaTime.value !! ,
 							)
 	}
 
@@ -171,38 +171,38 @@ class PrayerTimesViewModel : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			val appWidgetManager = AppWidgetManager.getInstance(context)
 			val widgetIds = appWidgetManager.getAppWidgetIds(
-					ComponentName(context , Nimaz::class.java)
+					 ComponentName(context , Nimaz::class.java)
 															)
 			Log.d("Nimaz: Widget Update viewmodel" , "Updating widget")
 			widgetIds.forEach { widgetId ->
 				val views = RemoteViews(context.packageName , R.layout.nimaz)
 				val intent = Intent(context , RoutingActivity::class.java)
 				val pendingIntent = PendingIntent.getActivity(
-						context ,
-						AppConstants.WIDGET_PENDING_INTENT_REQUEST_CODE ,
-						intent ,
-						PendingIntent.FLAG_IMMUTABLE
+						 context ,
+						 AppConstants.WIDGET_PENDING_INTENT_REQUEST_CODE ,
+						 intent ,
+						 PendingIntent.FLAG_IMMUTABLE
 															 )
 				views.setOnClickPendingIntent(R.id.widget , pendingIntent)
 				val repository = PrayerTimesRepository.getPrayerTimes(context)
 				views.setTextViewText(
-						R.id.Fajr_time , repository.data?.fajr?.format(
-						DateTimeFormatter.ofPattern("hh:mm a")
+						 R.id.Fajr_time , repository.data?.fajr?.format(
+						 DateTimeFormatter.ofPattern("hh:mm a")
+																	   )
+									 )
+				views.setTextViewText(
+						 R.id.Zuhar_time , repository.data?.dhuhr?.format(
+						 DateTimeFormatter.ofPattern("hh:mm a")
+																		 )
+									 )
+				views.setTextViewText(
+						 R.id.Asar_time , repository.data?.asr?.format(
+						 DateTimeFormatter.ofPattern("hh:mm a")
 																	  )
 									 )
 				views.setTextViewText(
-						R.id.Zuhar_time , repository.data?.dhuhr?.format(
-						DateTimeFormatter.ofPattern("hh:mm a")
-																		)
-									 )
-				views.setTextViewText(
-						R.id.Asar_time , repository.data?.asr?.format(
-						DateTimeFormatter.ofPattern("hh:mm a")
-																	 )
-									 )
-				views.setTextViewText(
-						R.id.Maghrib_time ,
-						repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
+						 R.id.Maghrib_time ,
+						 repository.data?.maghrib?.format(DateTimeFormatter.ofPattern("hh:mm a"))
 									 )
 				val ishaTime = repository.data?.isha?.toLocalTime()?.hour
 				val newIshaTime = if (ishaTime !! >= 22)
@@ -213,9 +213,9 @@ class PrayerTimesViewModel : ViewModel()
 					repository.data.isha
 				}
 				views.setTextViewText(
-						R.id.Ishaa_time , newIshaTime?.format(
-						DateTimeFormatter.ofPattern("hh:mm a")
-															 )
+						 R.id.Ishaa_time , newIshaTime?.format(
+						 DateTimeFormatter.ofPattern("hh:mm a")
+															  )
 									 )
 				// Update the widget
 				appWidgetManager.updateAppWidget(widgetId , views)
@@ -236,12 +236,12 @@ class PrayerTimesViewModel : ViewModel()
 				if (response.data != null)
 				{
 					val mapOfPrayerTimes = mapOf(
-							"fajr" to response.data.fajr ,
-							"sunrise" to response.data.sunrise ,
-							"dhuhr" to response.data.dhuhr ,
-							"asr" to response.data.asr ,
-							"maghrib" to response.data.maghrib ,
-							"isha" to response.data.isha
+							 "fajr" to response.data.fajr ,
+							 "sunrise" to response.data.sunrise ,
+							 "dhuhr" to response.data.dhuhr ,
+							 "asr" to response.data.asr ,
+							 "maghrib" to response.data.maghrib ,
+							 "isha" to response.data.isha
 												)
 
 					val currentPrayerName =
@@ -283,8 +283,8 @@ class PrayerTimesViewModel : ViewModel()
 					}
 					_ishaTimeState.value = newIshaTime !!
 					Log.d(
-							AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-							"UpdatePrayerTimes: ${response.data}"
+							 AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+							 "UpdatePrayerTimes: ${response.data}"
 						 )
 					_isLoading.value = false
 					_isRefreshing.value = false
@@ -297,8 +297,8 @@ class PrayerTimesViewModel : ViewModel()
 			} catch (e : Exception)
 			{
 				Log.d(
-						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-						"loadPrayerTimes: ${e.message}"
+						 AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						 "loadPrayerTimes: ${e.message}"
 					 )
 				_error.value = e.message.toString()
 				_isLoading.value = false
@@ -318,12 +318,12 @@ class PrayerTimesViewModel : ViewModel()
 				if (response.data != null)
 				{
 					val mapOfPrayerTimes = mapOf(
-							"fajr" to response.data.fajr ,
-							"sunrise" to response.data.sunrise ,
-							"dhuhr" to response.data.dhuhr ,
-							"asr" to response.data.asr ,
-							"maghrib" to response.data.maghrib ,
-							"isha" to response.data.isha
+							 "fajr" to response.data.fajr ,
+							 "sunrise" to response.data.sunrise ,
+							 "dhuhr" to response.data.dhuhr ,
+							 "asr" to response.data.asr ,
+							 "maghrib" to response.data.maghrib ,
+							 "isha" to response.data.isha
 												)
 					val currentDate = LocalDateTime.now()
 					val currentPrayerName = currentPrayer(currentDate , mapOfPrayerTimes).first
@@ -376,8 +376,8 @@ class PrayerTimesViewModel : ViewModel()
 			} catch (e : Exception)
 			{
 				Log.d(
-						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-						"loadPrayerTimes: ${e.message}"
+						 AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						 "loadPrayerTimes: ${e.message}"
 					 )
 				_error.value = e.message.toString()
 				_isLoading.value = false

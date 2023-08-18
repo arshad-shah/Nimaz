@@ -107,13 +107,13 @@ class CreateAlarms
 			val ishaaTime = ishaa.atZone(timeZone).toInstant().toEpochMilli()
 
 			scheduleAlarms(
-					context ,
-					fajrTime ,
-					sunriseTime ,
-					dhuhrTime ,
-					asrTime ,
-					maghribTime ,
-					ishaaTime
+					 context ,
+					 fajrTime ,
+					 sunriseTime ,
+					 dhuhrTime ,
+					 asrTime ,
+					 maghribTime ,
+					 ishaaTime
 						  )
 		}
 	}
@@ -134,10 +134,10 @@ class CreateAlarms
 			putExtra("channelid" , channelid)
 		}
 		return PendingIntent.getBroadcast(
-				context ,
-				requestCode ,
-				intent ,
-				PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+				 context ,
+				 requestCode ,
+				 intent ,
+				 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 										 )
 	}
 
@@ -154,52 +154,52 @@ class CreateAlarms
 
 		// Set up the pending intents for each alarm
 		val pendingIntent1 = createPendingIntent(
-				context ,
-				FAJR_PI_REQUEST_CODE ,
-				FAJR_NOTIFY_ID ,
-				fajr ,
-				CHANNEL_FAJR ,
-				FAJR_CHANNEL_ID
+				 context ,
+				 FAJR_PI_REQUEST_CODE ,
+				 FAJR_NOTIFY_ID ,
+				 fajr ,
+				 CHANNEL_FAJR ,
+				 FAJR_CHANNEL_ID
 												)
 		val pendingIntent2 = createPendingIntent(
-				context ,
-				SUNRISE_PI_REQUEST_CODE ,
-				SUNRISE_NOTIFY_ID ,
-				sunrise ,
-				CHANNEL_SUNRISE ,
-				SUNRISE_CHANNEL_ID
+				 context ,
+				 SUNRISE_PI_REQUEST_CODE ,
+				 SUNRISE_NOTIFY_ID ,
+				 sunrise ,
+				 CHANNEL_SUNRISE ,
+				 SUNRISE_CHANNEL_ID
 												)
 		val pendingIntent3 = createPendingIntent(
-				context ,
-				DHUHR_PI_REQUEST_CODE ,
-				DHUHR_NOTIFY_ID ,
-				dhuhr ,
-				CHANNEL_ZUHAR ,
-				DHUHR_CHANNEL_ID
+				 context ,
+				 DHUHR_PI_REQUEST_CODE ,
+				 DHUHR_NOTIFY_ID ,
+				 dhuhr ,
+				 CHANNEL_ZUHAR ,
+				 DHUHR_CHANNEL_ID
 												)
 		val pendingIntent4 = createPendingIntent(
-				context ,
-				ASR_PI_REQUEST_CODE ,
-				ASR_NOTIFY_ID ,
-				asr ,
-				CHANNEL_ASAR ,
-				ASR_CHANNEL_ID
+				 context ,
+				 ASR_PI_REQUEST_CODE ,
+				 ASR_NOTIFY_ID ,
+				 asr ,
+				 CHANNEL_ASAR ,
+				 ASR_CHANNEL_ID
 												)
 		val pendingIntent5 = createPendingIntent(
-				context ,
-				MAGHRIB_PI_REQUEST_CODE ,
-				MAGHRIB_NOTIFY_ID ,
-				maghrib ,
-				CHANNEL_MAGHRIB ,
-				MAGHRIB_CHANNEL_ID
+				 context ,
+				 MAGHRIB_PI_REQUEST_CODE ,
+				 MAGHRIB_NOTIFY_ID ,
+				 maghrib ,
+				 CHANNEL_MAGHRIB ,
+				 MAGHRIB_CHANNEL_ID
 												)
 		val pendingIntent6 = createPendingIntent(
-				context ,
-				ISHA_PI_REQUEST_CODE ,
-				ISHA_NOTIFY_ID ,
-				ishaa ,
-				CHANNEL_ISHAA ,
-				ISHA_CHANNEL_ID
+				 context ,
+				 ISHA_PI_REQUEST_CODE ,
+				 ISHA_NOTIFY_ID ,
+				 ishaa ,
+				 CHANNEL_ISHAA ,
+				 ISHA_CHANNEL_ID
 												)
 
 
@@ -216,10 +216,10 @@ class CreateAlarms
 		//recreate all alarms
 		val prayerCompletedIntent = Intent(context , MissedPrayerReciever::class.java)
 		val prayerCompletedPendingIntent = PendingIntent.getBroadcast(
-				context ,
-				PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE ,
-				prayerCompletedIntent ,
-				PendingIntent.FLAG_IMMUTABLE
+				 context ,
+				 PRAYER_COMPLETED_PENDING_INTENT_REQUEST_CODE ,
+				 prayerCompletedIntent ,
+				 PendingIntent.FLAG_IMMUTABLE
 																	 )
 		val calendarPrayerCompleted = Calendar.getInstance()
 		if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 23)
@@ -232,9 +232,9 @@ class CreateAlarms
 
 
 		Alarms().setExactAlarm(
-				context ,
-				calendarPrayerCompleted.timeInMillis ,
-				prayerCompletedPendingIntent ,
+				 context ,
+				 calendarPrayerCompleted.timeInMillis ,
+				 prayerCompletedPendingIntent ,
 							  )
 	}
 
@@ -249,73 +249,73 @@ class CreateAlarms
 		val notificationHelper = NotificationHelper()
 		//fajr
 		notificationHelper.createNotificationChannel(
-				context ,
-				NotificationManager.IMPORTANCE_MAX ,
-				true ,
-				CHANNEL_FAJR ,
-				CHANNEL_DESC_FAJR ,
-				FAJR_CHANNEL_ID ,
-				fajrAdhan
+				 context ,
+				 NotificationManager.IMPORTANCE_MAX ,
+				 true ,
+				 CHANNEL_FAJR ,
+				 CHANNEL_DESC_FAJR ,
+				 FAJR_CHANNEL_ID ,
+				 fajrAdhan
 													)
 		//sunrise
 		notificationHelper.notificationChannelSilent(
-				context ,
-				NotificationManager.IMPORTANCE_DEFAULT ,
-				false ,
-				CHANNEL_SUNRISE ,
-				CHANNEL_DESC_SUNRISE ,
-				SUNRISE_CHANNEL_ID
+				 context ,
+				 NotificationManager.IMPORTANCE_DEFAULT ,
+				 false ,
+				 CHANNEL_SUNRISE ,
+				 CHANNEL_DESC_SUNRISE ,
+				 SUNRISE_CHANNEL_ID
 													)
 		//zuhar
 		notificationHelper.createNotificationChannel(
-				context ,
-				NotificationManager.IMPORTANCE_MAX ,
-				true ,
-				CHANNEL_ZUHAR ,
-				CHANNEL_DESC_ZUHAR ,
-				DHUHR_CHANNEL_ID ,
-				zuharAdhan
+				 context ,
+				 NotificationManager.IMPORTANCE_MAX ,
+				 true ,
+				 CHANNEL_ZUHAR ,
+				 CHANNEL_DESC_ZUHAR ,
+				 DHUHR_CHANNEL_ID ,
+				 zuharAdhan
 													)
 		//asar
 		notificationHelper.createNotificationChannel(
-				context ,
-				NotificationManager.IMPORTANCE_MAX ,
-				true ,
-				CHANNEL_ASAR ,
-				CHANNEL_DESC_ASAR ,
-				ASR_CHANNEL_ID ,
-				asarAdhan
+				 context ,
+				 NotificationManager.IMPORTANCE_MAX ,
+				 true ,
+				 CHANNEL_ASAR ,
+				 CHANNEL_DESC_ASAR ,
+				 ASR_CHANNEL_ID ,
+				 asarAdhan
 													)
 		//maghrib
 		notificationHelper.createNotificationChannel(
-				context ,
-				NotificationManager.IMPORTANCE_MAX ,
-				true ,
-				CHANNEL_MAGHRIB ,
-				CHANNEL_DESC_MAGHRIB ,
-				MAGHRIB_CHANNEL_ID ,
-				maghribAdhan
+				 context ,
+				 NotificationManager.IMPORTANCE_MAX ,
+				 true ,
+				 CHANNEL_MAGHRIB ,
+				 CHANNEL_DESC_MAGHRIB ,
+				 MAGHRIB_CHANNEL_ID ,
+				 maghribAdhan
 													)
 		//ishaa
 		notificationHelper.createNotificationChannel(
-				context ,
-				NotificationManager.IMPORTANCE_MAX ,
-				true ,
-				CHANNEL_ISHAA ,
-				CHANNEL_DESC_ISHAA ,
-				ISHA_CHANNEL_ID ,
-				ishaaAdhan
+				 context ,
+				 NotificationManager.IMPORTANCE_MAX ,
+				 true ,
+				 CHANNEL_ISHAA ,
+				 CHANNEL_DESC_ISHAA ,
+				 ISHA_CHANNEL_ID ,
+				 ishaaAdhan
 													)
 
 		//work for the missed prayer alarms
 		//missed Prayer
 		notificationHelper.notificationChannelSilent(
-				context ,
-				NotificationManager.IMPORTANCE_MAX ,
-				true ,
-				CHANNEL_MISSED_PRAYER ,
-				CHANNEL_DESC_MISSED_PRAYER ,
-				CHANNEL_MISSED_PRAYER_ID
+				 context ,
+				 NotificationManager.IMPORTANCE_MAX ,
+				 true ,
+				 CHANNEL_MISSED_PRAYER ,
+				 CHANNEL_DESC_MISSED_PRAYER ,
+				 CHANNEL_MISSED_PRAYER_ID
 													)
 
 	}

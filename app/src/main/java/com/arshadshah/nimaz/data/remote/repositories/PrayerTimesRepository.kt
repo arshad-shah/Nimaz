@@ -246,13 +246,13 @@ object PrayerTimesRepository
 	private fun mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse : PrayerTimeResponse) : PrayerTimes
 	{
 		return PrayerTimes(
-				date = LocalDate.parse(prayerTimesResponse.date) ,
-				LocalDateTime.parse(prayerTimesResponse.fajr) ,
-				LocalDateTime.parse(prayerTimesResponse.sunrise) ,
-				LocalDateTime.parse(prayerTimesResponse.dhuhr) ,
-				LocalDateTime.parse(prayerTimesResponse.asr) ,
-				LocalDateTime.parse(prayerTimesResponse.maghrib) ,
-				LocalDateTime.parse(prayerTimesResponse.isha) ,
+				 date = LocalDate.parse(prayerTimesResponse.date) ,
+				 LocalDateTime.parse(prayerTimesResponse.fajr) ,
+				 LocalDateTime.parse(prayerTimesResponse.sunrise) ,
+				 LocalDateTime.parse(prayerTimesResponse.dhuhr) ,
+				 LocalDateTime.parse(prayerTimesResponse.asr) ,
+				 LocalDateTime.parse(prayerTimesResponse.maghrib) ,
+				 LocalDateTime.parse(prayerTimesResponse.isha) ,
 						  )
 	}
 }
