@@ -3,17 +3,13 @@ package com.arshadshah.nimaz.data.remote.repositories
 import android.content.Context
 import com.apollographql.apollo3.api.ApolloResponse
 import com.arshadshah.nimaz.GetPrayerTimesForMonthQuery
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
-import com.arshadshah.nimaz.type.HighLatitudeRule
-import com.arshadshah.nimaz.type.Madhab
-import com.arshadshah.nimaz.type.Method
 import com.arshadshah.nimaz.type.Parameters
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.api.ApiResponse
 import com.arshadshah.nimaz.utils.api.NimazServicesImpl
+import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper.getParams
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDate
@@ -42,46 +38,6 @@ object PrayerTimesRepository
 			LocalDataStore.init(context)
 		}
 		val dataStore = LocalDataStore.getDataStore()
-		val sharedPreferences = PrivateSharedPreferences(context)
-		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)
-		val fajrAngle : String =
-			sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
-		val ishaAngle : String =
-			sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
-		val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
-		val calculationMethod : String =
-			sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
-		val madhab : String = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
-		val highLatitudeRule : String =
-			sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
-		val fajrAdjustment : String = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
-		val sunriseAdjustment : String =
-			sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
-		val dhuhrAdjustment : String =
-			sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
-		val asrAdjustment : String = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT , "0")
-		val maghribAdjustment : String =
-			sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
-		val ishaAdjustment : String = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
-
-		val parameters = Parameters(
-				 			 latitude ,
-							  longitude ,
-							  date = LocalDateTime.of(LocalDate.parse(dateForTimes) , LocalDateTime.now().toLocalTime()).toString() ,
-							  fajrAngle = fajrAngle.toDouble() ,
-							  ishaAngle = ishaAngle.toDouble() ,
-							  method = Method.valueOf(calculationMethod) ,
-							  madhab = Madhab.valueOf(madhab) ,
-							  highLatitudeRule = HighLatitudeRule.valueOf(highLatitudeRule) ,
-							  fajrAdjustment = fajrAdjustment.toInt() ,
-							  sunriseAdjustment = sunriseAdjustment.toInt() ,
-							  dhuhrAdjustment = dhuhrAdjustment.toInt() ,
-							  asrAdjustment = asrAdjustment.toInt() ,
-							  maghribAdjustment = maghribAdjustment.toInt() ,
-							  ishaAdjustment = ishaAdjustment.toInt() ,
-							  ishaInterval = ishaInterval.toInt() ,
-								   )
 
 		return try
 		{
@@ -100,7 +56,7 @@ object PrayerTimesRepository
 				if (dateMonth != currentMonth || dateYear != currentYear)
 				{
 					val prayerTimesResponse =
-						NimazServicesImpl.getPrayerTimesMonthlyCustom(parameters)
+						NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
 					val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
 					return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
 				}
@@ -109,7 +65,7 @@ object PrayerTimesRepository
 			} else
 			{
 				val prayerTimesResponse =
-					NimazServicesImpl.getPrayerTimesMonthlyCustom(parameters)
+					NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
 				val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
 				return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
 			}
@@ -136,7 +92,6 @@ object PrayerTimesRepository
 										  ) : MutableList<PrayerTimes>
 	{
 		val prayerTimesList = mutableListOf<PrayerTimes>()
-		dataStore.deleteAllPrayerTimes()
 		prayerTimesResponse.data!!.getPrayerTimesForMonthCustom?.map { prayerTimes ->
 			val prayerTime = PrayerTimes(
 					 date = LocalDate.parse(prayerTimes!!.date) ,

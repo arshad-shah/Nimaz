@@ -409,11 +409,10 @@ private fun PrayerTimes.toLocalPrayerTimes() = LocalPrayerTimes(
 
 private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes?
 {
-	val date = LocalDate.parse(date)
 	return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null && date != null)
 	{
 		PrayerTimes(
-				 date = date ,
+				 date = LocalDate.parse(date) ,
 				 fajr = LocalDateTime.parse(fajr) ,
 				 sunrise = LocalDateTime.parse(sunrise) ,
 				 dhuhr = LocalDateTime.parse(dhuhr) ,

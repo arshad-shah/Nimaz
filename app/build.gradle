@@ -164,4 +164,14 @@ dependencies {
     implementation "com.github.skydoves:balloon-compose:$balloon_version"
 
     implementation("com.apollographql.apollo3:apollo-runtime:4.0.0-alpha.3")
+
+    implementation "androidx.glance:glance-appwidget:1.0.0"
+
+    implementation "androidx.glance:glance-material3:1.0.0"
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
+    //kotlinx date time
+    implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.3.0'
+
 }
