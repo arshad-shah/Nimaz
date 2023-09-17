@@ -1,0 +1,17 @@
+query getChaptersByCategory($id:Int!){
+    getChaptersByCategory(id: $id){
+        id
+        arabicTitle
+        englishTitle
+        category{
+            name
+        }
+        duas{
+            id
+            arabicDua
+            englishTranslation
+            englishReference
+            favourite
+        }
+    }
+}

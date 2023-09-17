@@ -8,14 +8,12 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -46,6 +44,7 @@ import com.arshadshah.nimaz.constants.AppConstants.SETTINGS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
+import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.components.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
@@ -53,9 +52,9 @@ import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.ui.theme.ThemeChoser
 import com.arshadshah.nimaz.utils.*
 import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -119,7 +118,7 @@ class MainActivity : ComponentActivity()
 	}
 
 	@OptIn(
-			 ExperimentalMaterial3Api::class , ExperimentalAnimationApi::class
+			 ExperimentalMaterial3Api::class
 		  )
 	@RequiresApi(Build.VERSION_CODES.S)
 	override fun onCreate(savedInstanceState : Bundle?)
@@ -145,17 +144,22 @@ class MainActivity : ComponentActivity()
 		//this is used to show the full activity on the screen
 		setContent {
 
-			val viewModelSettings = viewModel(
-					 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-					 initializer = { SettingsViewModel(this@MainActivity) } ,
+			val viewModelTasbih = viewModel(
+					 key = TASBIH_VIEWMODEL_KEY ,
+					 initializer = { TasbihViewModel(this@MainActivity) } ,
 					 viewModelStoreOwner = this as ComponentActivity
-											 )
-			val themeState = remember {
-				viewModelSettings.theme
-			}.collectAsState()
-			val isDarkTheme = remember {
-				viewModelSettings.isDarkMode
-			}.collectAsState()
+										   )
+			val viewModelNames = viewModel(
+					 key = NAMES_OF_ALLAH_VIEWMODEL_KEY ,
+					 initializer = { NamesOfAllahViewModel() } ,
+					 viewModelStoreOwner = this as ComponentActivity
+										  )
+
+			val viewModelTracker = viewModel(
+					 key = AppConstants.TRACKING_VIEWMODEL_KEY ,
+					 initializer = { TrackerViewModel() } ,
+					 viewModelStoreOwner = this as ComponentActivity
+											)
 
 			val darkTheme = remember {
 				mutableStateOf(false)
@@ -164,51 +168,19 @@ class MainActivity : ComponentActivity()
 				mutableStateOf(false)
 			}
 			val themeName = remember {
-				mutableStateOf("Default")
+				mutableStateOf(THEME_DEFAULT)
 			}
 
-			when (themeState.value)
-			{
-				"SYSTEM" ->
-				{
-					dynamicTheme.value = true
-					darkTheme.value = isSystemInDarkTheme()
-					themeName.value = "Default"
-				}
-
-				"DEFAULT" ->
-				{
-					dynamicTheme.value = false
-					darkTheme.value = isDarkTheme.value
-					themeName.value = "Default"
-				}
-
-				"Raisin_Black" ->
-				{
-					dynamicTheme.value = false
-					darkTheme.value = isDarkTheme.value
-					themeName.value = "Raisin_Black"
-				}
-
-				"Dark_Red" ->
-				{
-					dynamicTheme.value = false
-					darkTheme.value = isDarkTheme.value
-					themeName.value = "Dark_Red"
-				}
-
-				"Rustic_brown" ->
-				{
-					dynamicTheme.value = false
-					darkTheme.value = isDarkTheme.value
-					themeName.value = "Rustic_brown"
-				}
-			}
+			ThemeChoser(
+					 darkTheme,
+					 dynamicTheme,
+					 themeName
+										 )
 
 			NimazTheme(
 					 darkTheme = darkTheme.value ,
 					 dynamicColor = dynamicTheme.value ,
-					 ThemeName = themeName.value
+					 themeName = themeName.value
 					  ) {
 				val navController = rememberNavController()
 				val route =
@@ -242,23 +214,6 @@ class MainActivity : ComponentActivity()
 						}
 					}
 				}
-
-				val viewModelTasbih = viewModel(
-						 key = TASBIH_VIEWMODEL_KEY ,
-						 initializer = { TasbihViewModel(this@MainActivity) } ,
-						 viewModelStoreOwner = LocalContext.current as ComponentActivity
-											   )
-				val viewModelNames = viewModel(
-						 key = NAMES_OF_ALLAH_VIEWMODEL_KEY ,
-						 initializer = { NamesOfAllahViewModel() } ,
-						 viewModelStoreOwner = LocalContext.current as ComponentActivity
-											  )
-
-				val viewModelTracker = viewModel(
-						 key = AppConstants.TRACKING_VIEWMODEL_KEY ,
-						 initializer = { TrackerViewModel() } ,
-						 viewModelStoreOwner = LocalContext.current as ComponentActivity
-												)
 
 				val isMenstruatingState = remember {
 					viewModelTracker.isMenstrauting

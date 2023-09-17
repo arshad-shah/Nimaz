@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,8 +22,8 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 @Composable
 fun ChapterList(
 	paddingValues : PaddingValues ,
-	onNavigateToChapter : (Int) -> Unit ,
-	category : String ,
+	onNavigateToChapter : (Int,String) -> Unit ,
+	categoryId : String ,
 			   )
 {
 	val context = LocalContext.current
@@ -35,7 +35,7 @@ fun ChapterList(
 							 )
 
 	LaunchedEffect(Unit) {
-		viewModel.getChapters(category)
+		viewModel.getChapters(categoryId.toInt())
 	}
 
 	val chapterState = remember { viewModel.chapters }.collectAsState()
@@ -43,7 +43,7 @@ fun ChapterList(
 	//if a new item is viewed, then scroll to that item
 	val sharedPref = context.getSharedPreferences("dua" , 0)
 	val listState = rememberLazyListState()
-	val visibleItemIndex = remember { mutableStateOf(sharedPref.getInt("visibleItemIndex" , - 1)) }
+	val visibleItemIndex = remember { mutableIntStateOf(sharedPref.getInt("visibleItemIndex" , - 1)) }
 
 	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
 	LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })

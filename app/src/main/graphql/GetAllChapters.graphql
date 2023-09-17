@@ -1,0 +1,7 @@
+query getAllChapters{
+    getChapters{
+        id
+        arabicTitle
+        englishTitle
+    }
+}

@@ -1,187 +1,113 @@
 package com.arshadshah.nimaz.utils.api
 
 import android.util.Log
+import com.apollographql.apollo3.api.ApolloResponse
+import com.arshadshah.nimaz.GetAllAyaForJuzQuery
+import com.arshadshah.nimaz.GetAllAyaForSuraQuery
+import com.arshadshah.nimaz.GetAllCategoriesQuery
+import com.arshadshah.nimaz.GetAllChaptersQuery
+import com.arshadshah.nimaz.GetAllJuzQuery
+import com.arshadshah.nimaz.GetAllSurahQuery
+import com.arshadshah.nimaz.GetChapterByIdQuery
+import com.arshadshah.nimaz.GetChaptersByCategoryQuery
+import com.arshadshah.nimaz.GetPrayerTimesForMonthQuery
 import com.arshadshah.nimaz.constants.AppConstants
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import com.arshadshah.nimaz.type.Parameters
 
 object NimazServicesImpl : NimazService
 {
 
-	private val httpClient by lazy {
-		KtorClient.getInstance
-	}
-
-	override suspend fun login(username : String , password : String) : LoginResponse
-	{
-		val mapOfLogin = mapOf(
-				 "username" to username ,
-				 "password" to password
-							  )
-		val response : LoginResponse = httpClient.request(AppConstants.LOGIN_URL) {
-			method = HttpMethod.Post
-			setBody(mapOfLogin)
-			header("Content-Type" , "application/json")
-		}.body() !!
-
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "login: $response")
-		return response
-	}
-
-	override suspend fun getPrayerTimes(
-		mapOfParams : Map<String , String> ,
-									   ) : PrayerTimeResponse
-	{
-		//create a post request with stuff in body and return the response
-		val response : PrayerTimeResponse = httpClient.request(AppConstants.PRAYER_TIMES_URL) {
-			method = HttpMethod.Post
-			setBody(mapOfParams)
-			header("Content-Type" , "application/json")
-		}.body() !!
-
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getPrayerTimes: $response")
-
-		return response
-	}
-
-	override suspend fun getPrayerTimesMonthly(
-		mapOfParams : Map<String , String> ,
-											  ) : List<PrayerTimeResponse>
-	{
-		//create a post request with stuff in body and return the response
-		val response : List<PrayerTimeResponse> =
-			httpClient.request(AppConstants.PRAYER_TIMES_MONTHLY_URL) {
-				method = HttpMethod.Post
-				setBody(mapOfParams)
-				header("Content-Type" , "application/json")
-			}.body() !!
-
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getPrayerTimes: $response")
-
-		return response
+	private val apolloClient by lazy {
+		ApolloClientUtil.getApolloClient()
 	}
 
 	override suspend fun getPrayerTimesMonthlyCustom(
-		mapOfParams : Map<String , String> ,
-													) : List<PrayerTimeResponse>
+		parameters : Parameters ,
+													) : ApolloResponse<GetPrayerTimesForMonthQuery.Data>
 	{
 		//create a post request with stuff in body and return the response
-		val response : List<PrayerTimeResponse> =
-			httpClient.request(AppConstants.PRAYER_TIMES_MONTHLY_CUSTOM_URL) {
-				method = HttpMethod.Post
-				setBody(mapOfParams)
-				header("Content-Type" , "application/json")
-			}.body() !!
+		val response : ApolloResponse<GetPrayerTimesForMonthQuery.Data> = apolloClient!!.query(
+			 GetPrayerTimesForMonthQuery(parameters)
+																							  ).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getPrayerTimes: $response")
 
 		return response
 	}
 
-	override suspend fun getSurahs() : ArrayList<SurahResponse>
+	override suspend fun getSurahs() : ApolloResponse<GetAllSurahQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ArrayList<SurahResponse> = httpClient.request(AppConstants.QURAN_SURAH_URL) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : ApolloResponse<GetAllSurahQuery.Data> = apolloClient!!.query(GetAllSurahQuery()).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getSurahs: $response")
 
 		return response
 	}
 
-	override suspend fun getJuzs() : ArrayList<JuzResponse>
+	override suspend fun getJuzs() : ApolloResponse<GetAllJuzQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ArrayList<JuzResponse> = httpClient.request(AppConstants.QURAN_JUZ_URL) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : ApolloResponse<GetAllJuzQuery.Data> = apolloClient!!.query(GetAllJuzQuery()).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getJuzs: $response")
 
 		return response
 	}
 
+
 	override suspend fun getAyaForSurah(
 		surahNumber : Int ,
-									   ) : Map<String , ArrayList<AyaResponse>>
+									   ) : ApolloResponse<GetAllAyaForSuraQuery.Data>
 	{
-		val urlEnglish =
-			AppConstants.QURAN_SURAH_AYAT_URL.replace("{surahNumber}" , surahNumber.toString())
-				.replace("{translationLanguage}" , "ENGLISH")
-		//create a get request and return the response
-		val responseEnglish : ArrayList<AyaResponse> = httpClient.request(urlEnglish) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : ApolloResponse<GetAllAyaForSuraQuery.Data> = apolloClient!!.query(
+			 GetAllAyaForSuraQuery(surahNumber)
+																						).execute()
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForSurah: $response")
 
-		//make second request for urdu translation
-		val urlUrdu =
-			AppConstants.QURAN_SURAH_AYAT_URL.replace("{surahNumber}" , surahNumber.toString())
-				.replace("{translationLanguage}" , "URDU")
-		//create a get request and return the response
-		val responseUrdu : ArrayList<AyaResponse> = httpClient.request(urlUrdu) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
-
-		//combine the two responses
-		val mapOfResponses = mapOf(
-				 "english" to responseEnglish ,
-				 "urdu" to responseUrdu
-								  )
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForSurah: $mapOfResponses")
-
-		return mapOfResponses
+		return response
 	}
 
 	override suspend fun getAyaForJuz(
 		juzNumber : Int ,
-									 ) : Map<String , ArrayList<AyaResponse>>
+									 ) : ApolloResponse<GetAllAyaForJuzQuery.Data>
 	{
-		val urlEnglish =
-			AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
-				.replace("{translationLanguage}" , "ENGLISH")
-		//create a get request and return the response
-		val response : ArrayList<AyaResponse> = httpClient.request(urlEnglish) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : ApolloResponse<GetAllAyaForJuzQuery.Data> = apolloClient!!.query(
+			 GetAllAyaForJuzQuery(juzNumber)
+																					   ).execute()
 
-		//make second request for urdu translation
-		val urlUrdu = AppConstants.QURAN_JUZ_AYAT_URL.replace("{juzNumber}" , juzNumber.toString())
-			.replace("{translationLanguage}" , "URDU")
-		//create a get request and return the response
-		val responseUrdu : ArrayList<AyaResponse> = httpClient.request(urlUrdu) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForJuz: $response")
 
-		//combine the two responses
-		val mapOfResponses = mapOf(
-				 "english" to response ,
-				 "urdu" to responseUrdu
-								  )
-
-
-
-		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForJuz: $mapOfResponses")
-
-		return mapOfResponses
+		return response
 	}
 
-	//get all the chapters for duas from api
-	override suspend fun getChapters() : ArrayList<ChaptersResponse>
+	override suspend fun getCategories() : ApolloResponse<GetAllCategoriesQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ArrayList<ChaptersResponse> =
-			httpClient.request(AppConstants.DUA_CHAPTERS_URL) {
-				method = HttpMethod.Get
-				header("Content-Type" , "application/json")
-			}.body() !!
+		val response : ApolloResponse<GetAllCategoriesQuery.Data> = apolloClient!!.query(GetAllCategoriesQuery()).execute()
+
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getCategories: $response")
+
+		return response
+	}
+
+	override suspend fun getChaptersByCategory(id: Int) : ApolloResponse<GetChaptersByCategoryQuery.Data>
+	{
+		//create a get request and return the response
+		val response : ApolloResponse<GetChaptersByCategoryQuery.Data> = apolloClient!!.query(GetChaptersByCategoryQuery(id)).execute()
+
+		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getChaptersByCategory: $response")
+
+		return response
+	}
+
+
+
+	//get all the chapters for duas from api
+	override suspend fun getChapters() : ApolloResponse<GetAllChaptersQuery.Data>
+	{
+		//create a get request and return the response
+		val response : ApolloResponse<GetAllChaptersQuery.Data> = apolloClient!!.query(GetAllChaptersQuery()).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getChapters: $response")
 
@@ -190,14 +116,12 @@ object NimazServicesImpl : NimazService
 
 	override suspend fun getDuasForChapter(
 		chapterId : Int ,
-										  ) : ChaptersResponse
+										  ) : ApolloResponse<GetChapterByIdQuery.Data>
 	{
-		val url = AppConstants.DUA_CHAPTER_URL.replace("{chapterId}" , chapterId.toString())
 		//create a get request and return the response
-		val response : ChaptersResponse = httpClient.request(url) {
-			method = HttpMethod.Get
-			header("Content-Type" , "application/json")
-		}.body() !!
+		val response : ApolloResponse<GetChapterByIdQuery.Data> = apolloClient!!.query(
+			 GetChapterByIdQuery(chapterId)
+																					  ).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getDuasForChapter: $response")
 

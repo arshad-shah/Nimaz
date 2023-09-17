@@ -16,7 +16,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +31,6 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT_PAGE
 import com.arshadshah.nimaz.ui.components.settings.AuthorDetails
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
-import io.ktor.utils.io.concurrent.*
 
 @Composable
 fun About(paddingValues : PaddingValues , onImageClicked : () -> Unit)
@@ -59,7 +58,7 @@ fun AppDetails(onImageClicked : () -> Unit)
 	val sharedPref = PrivateSharedPreferences(LocalContext.current)
 	//multiple click count
 	val clickCount = remember {
-		mutableStateOf(0)
+		mutableIntStateOf(0)
 	}
 	val updateClickCount = {
 		Toasty.info(context , "Click ${clickCount.value + 1} more times to enable debug mode")
