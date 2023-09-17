@@ -47,9 +47,15 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_PI_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
+import com.arshadshah.nimaz.constants.AppConstants.THEME_DARK_RED
+import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
+import com.arshadshah.nimaz.constants.AppConstants.THEME_RAISIN_BLACK
+import com.arshadshah.nimaz.constants.AppConstants.THEME_RUSTIC_BROWN
+import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
 import com.arshadshah.nimaz.ui.components.common.BatteryExemptionUI
 import com.arshadshah.nimaz.ui.components.common.NotificationScreenUI
 import com.arshadshah.nimaz.ui.components.settings.LocationSettings
+import com.arshadshah.nimaz.ui.components.settings.Option
 import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
 import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
@@ -159,9 +165,9 @@ fun SettingsScreen(
 		mutableStateOf(
 				 ThemeOption(
 						  themeName = "App Default" ,
-						  themeKey = "DEFAULT" ,
+						  themeKey = THEME_DEFAULT ,
 						  themeColor = if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary ,
-						  isSelected = themeState.value == "DEFAULT"
+						  isSelected = themeState.value == THEME_DEFAULT
 							)
 					  )
 	}
@@ -171,31 +177,31 @@ fun SettingsScreen(
 		listOf(
 				 ThemeOption(
 						  themeName = "Forest Green" ,
-						  themeKey = "DEFAULT" ,
+						  themeKey = THEME_DEFAULT ,
 						  themeColor = if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary ,
-						  isSelected = themeState.value == "DEFAULT"
+						  isSelected = themeState.value == THEME_DEFAULT
 							) ,
 				 ThemeOption(
 						  themeName = "Raisin Black" ,
-						  themeKey = "Raisin_Black" ,
+						  themeKey = THEME_RAISIN_BLACK ,
 						  themeColor = if (isDarkMode.value) raison_black_md_theme_light_primary else raison_black_md_theme_dark_primary ,
-						  isSelected = themeState.value == "Raisin_Black"
+						  isSelected = themeState.value == THEME_RAISIN_BLACK
 							) ,
 				 ThemeOption(
 						  themeName = "Burgundy" ,
-						  themeKey = "Dark_Red" ,
+						  themeKey = THEME_DARK_RED ,
 						  themeColor = if (isDarkMode.value) Dark_Red_md_theme_dark_primary else Dark_Red_md_theme_light_primary ,
-						  isSelected = themeState.value == "Dark_Red"
+						  isSelected = themeState.value == THEME_DARK_RED
 							) ,
 				 ThemeOption(
 						  themeName = "Rustic Brown" ,
-						  themeKey = "Rustic_brown" ,
+						  themeKey = THEME_RUSTIC_BROWN ,
 						  themeColor = if (isDarkMode.value) rustic_md_theme_dark_primary else rustic_md_theme_light_primary ,
-						  isSelected = themeState.value == "Rustic_brown"
+						  isSelected = themeState.value == THEME_RUSTIC_BROWN
 							) ,
 				 ThemeOption(
 						  themeName = "System" ,
-						  themeKey = "SYSTEM" ,
+						  themeKey = THEME_SYSTEM ,
 						  themeColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 						  {
 							  if (isDarkMode.value) dynamicDarkColorScheme(context).primary else dynamicLightColorScheme(
@@ -205,7 +211,7 @@ fun SettingsScreen(
 						  {
 							  if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary
 						  } ,
-						  isSelected = themeState.value == "SYSTEM"
+						  isSelected = themeState.value == THEME_SYSTEM
 							) ,
 			  )
 
@@ -545,235 +551,122 @@ fun SettingsScreen(
 			}
 		}
 		SettingsGroup(title = { Text(text = "Other") }) {
-			ElevatedCard(
-					 shape = MaterialTheme.shapes.extraLarge ,
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth()
-						) {
-				SettingsMenuLink(
-						 title = { Text(text = "Help") } ,
-						 onClick = {
-							 onNavigateToWebViewScreen("help")
-						 } ,
-						 icon = {
-							 Icon(
-									  modifier = Modifier.size(24.dp) ,
-									  painter = painterResource(id = R.drawable.help_icon) ,
-									  contentDescription = "Help documentation"
-								 )
-						 } ,
-						 action = {
-							 Icon(
-									  modifier = Modifier
-										  .size(24.dp)
-										  .padding(2.dp) ,
-									  painter = painterResource(id = R.drawable.angle_right_icon) ,
-									  contentDescription = "Update Available"
-								 )
-						 }
-								)
+			Option(title = { Text(text = "Help") } , onClick = {
+				onNavigateToWebViewScreen("help")
+			} , icon = painterResource(id = R.drawable.help_icon) , iconDescription =  "Help documentation", testTag = TEST_TAG_ABOUT) {
+				Icon(
+						 modifier = Modifier
+							 .size(24.dp)
+							 .padding(2.dp) ,
+						 painter = painterResource(id = R.drawable.angle_right_icon) ,
+						 contentDescription = "Update Available"
+					)
 			}
 
-			ElevatedCard(
-					 shape = MaterialTheme.shapes.extraLarge ,
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth()
-						) {
-				SettingsMenuLink(
-						 title = {
-							 Text(
-									  text = "License & Acknowledgements" ,
-									  maxLines = 1 ,
-									  overflow = TextOverflow.Ellipsis
-								 )
-						 } ,
-						 //version of the app
-						 subtitle = { Text(text = "Open source libraries") } ,
-						 onClick = {
-							 onNavigateToLicencesScreen()
-						 } ,
-						 icon = {
-							 Icon(
-									  modifier = Modifier.size(24.dp) ,
-									  painter = painterResource(id = R.drawable.license_icon) ,
-									  contentDescription = "License & Acknowledgements"
-								 )
-						 } ,
-						 action = {
-							 Icon(
-									  modifier = Modifier
-										  .size(24.dp)
-										  .padding(2.dp) ,
-									  painter = painterResource(id = R.drawable.angle_right_icon) ,
-									  contentDescription = "Update Available"
-								 )
-						 }
-								)
+			Option(title = { Text(
+					 text = "License & Acknowledgements" ,
+					 maxLines = 1 ,
+					 overflow = TextOverflow.Ellipsis
+								 )}, subtitle = { Text(text = "Open source libraries") } , onClick = { onNavigateToLicencesScreen() } , icon = painterResource(id = R.drawable.license_icon) , iconDescription ="License & Acknowledgements", testTag = TEST_TAG_ABOUT ) {
+					Icon(
+							 modifier = Modifier
+								 .size(24.dp)
+								 .padding(2.dp) ,
+							 painter = painterResource(id = R.drawable.angle_right_icon) ,
+							 contentDescription = "Update Available"
+						)
 			}
 
-			ElevatedCard(
-					 shape = MaterialTheme.shapes.extraLarge ,
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth()
-						 .testTag(TEST_TAG_ABOUT)
-						) {
-				SettingsMenuLink(
-						 title = { Text(text = "Rate Nimaz") } ,
-						 onClick = {
-							 val manager = ReviewManagerFactory.create(context)
-							 val request = manager.requestReviewFlow()
-							 request.addOnCompleteListener { task ->
-								 if (task.isSuccessful)
-								 {
-									 // We got the ReviewInfo object
-									 val reviewInfo = task.result
-									 val flow =
-										 manager.launchReviewFlow(context as Activity , reviewInfo)
-									 flow.addOnCompleteListener { _ ->
-										 // The flow has finished. The API does not indicate whether the user
-										 // reviewed or not, or even whether the review dialog was shown. Thus, no
-										 // matter the result, we continue our app flow.
-									 }
-								 } else
-								 {
-									 // There was some problem, log or handle the error code.
-									 Toasty.error(
-											  context ,
-											  task.exception?.message ?: "Error" ,
-											  Toast.LENGTH_SHORT
-												 )
-										 .show()
-								 }
-							 }
-						 } ,
-						 icon = {
-							 Icon(
-									  modifier = Modifier.size(24.dp) ,
-									  painter = painterResource(id = R.drawable.rating_icon) ,
-									  contentDescription = "Rate Nimaz"
-								 )
-						 } ,
-								)
-			}
+			Option(title = { Text(text = "Rate Nimaz") } , onClick = {
+				val manager = ReviewManagerFactory.create(context)
+				val request = manager.requestReviewFlow()
+				request.addOnCompleteListener { task ->
+					if (task.isSuccessful)
+					{
+						manager.launchReviewFlow(context as Activity , task.result).addOnCompleteListener { _ ->
 
-			ElevatedCard(
-					 shape = MaterialTheme.shapes.extraLarge ,
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth()
-						 .testTag(TEST_TAG_ABOUT)
-						) {
-				SettingsMenuLink(
-						 title = { Text(text = "Share Nimaz") } ,
-						 onClick = {
-							 val shareIntent = Intent(Intent.ACTION_SEND)
-							 shareIntent.type = "text/plain"
-							 shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Nimaz")
-							 var shareMessage = "\nCheck out this app\n\n"
-							 shareMessage = """
+						}
+					} else
+					{
+						// There was some problem, log or handle the error code.
+						Toasty.error(
+								 context ,
+								 task.exception?.message ?: "Error" ,
+								 Toast.LENGTH_SHORT
+									)
+							.show()
+					}
+				}
+			} , icon = painterResource(id = R.drawable.rating_icon) , iconDescription = "Rate Nimaz", testTag = TEST_TAG_ABOUT)
+
+			Option(
+					 title = { Text(text = "Share Nimaz")} ,
+				   onClick = {
+				val shareIntent = Intent(Intent.ACTION_SEND)
+				shareIntent.type = "text/plain"
+				shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Nimaz")
+				var shareMessage = "\nCheck out this app\n\n"
+				shareMessage = """
 								${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
 								
 								""".trimIndent()
-							 shareIntent.putExtra(Intent.EXTRA_TEXT , shareMessage)
-							 context.startActivity(Intent.createChooser(shareIntent , "choose one"))
-						 } ,
-						 icon = {
-							 Icon(
-									  modifier = Modifier.size(24.dp) ,
-									  painter = painterResource(id = R.drawable.share_icon) ,
-									  contentDescription = "Share Nimaz"
-								 )
-						 } ,
-								)
-			}
+				shareIntent.putExtra(Intent.EXTRA_TEXT , shareMessage)
+				context.startActivity(Intent.createChooser(shareIntent , "choose one"))
+			} , icon = painterResource(id = R.drawable.share_icon) , iconDescription = "Share Nimaz", testTag = TEST_TAG_ABOUT)
 
-			ElevatedCard(
-					 shape = MaterialTheme.shapes.extraLarge ,
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth()
-						 .testTag(TEST_TAG_ABOUT)
-						) {
-				SettingsMenuLink(
-						 title = { Text(text = "About") } ,
-						 //version of the app
-						 subtitle = { Text(text = updateAvailableText) } ,
-						 onClick = {
-							 onNavigateToAboutScreen()
-						 } ,
-						 icon = {
-							 Icon(
-									  modifier = Modifier.size(24.dp) ,
-									  painter = painterResource(id = R.drawable.info_icon) ,
-									  contentDescription = "About"
-								 )
-						 } ,
-						 action = {
-							 if (updateAvailabile.value)
-							 {
-								 Button(
-										  onClick = {
-											  viewModelSettings.handleEvent(
-													   SettingsViewModel.SettingsEvent.CheckUpdate(
-																context ,
-																true
-																								  )
-																		   )
-										  } ,
-									   ) {
-									 Text(text = "Update")
-								 }
-							 } else
-							 {
-								 Icon(
-										  modifier = Modifier
-											  .size(24.dp)
-											  .padding(2.dp) ,
-										  painter = painterResource(id = R.drawable.angle_right_icon) ,
-										  contentDescription = "Update Available"
-									 )
-							 }
-						 }
-								)
+			Option(
+					 title = { Text(text = "About") } ,
+					 subtitle = { Text(text = updateAvailableText) } ,
+					 onClick = { onNavigateToAboutScreen() } ,
+					 icon = painterResource(id = R.drawable.info_icon) ,
+					 iconDescription = "About",
+					 testTag = TEST_TAG_ABOUT
+				  ){
+				if (updateAvailabile.value)
+				{
+					Button(
+							 onClick = {
+								 viewModelSettings.handleEvent(
+										  SettingsViewModel.SettingsEvent.CheckUpdate(
+												   context ,
+												   true
+																					 )
+															  )
+							 } ,
+						  ) {
+						Text(text = "Update")
+					}
+				} else
+				{
+					Icon(
+							 modifier = Modifier
+								 .size(24.dp)
+								 .padding(2.dp) ,
+							 painter = painterResource(id = R.drawable.angle_right_icon) ,
+							 contentDescription = "Update Available"
+						)
+				}
 			}
 
 			if (isDebugMode)
 			{
-				ElevatedCard(
-						 shape = MaterialTheme.shapes.extraLarge ,
-						 modifier = Modifier
-							 .padding(8.dp)
-							 .fillMaxWidth()
-							 .testTag(TEST_TAG_ABOUT)
-							) {
-					SettingsMenuLink(
-							 title = { Text(text = "Debug Tools") } ,
-							 //version of the app
-							 subtitle = { Text(text = "For testing purposes only") } ,
-							 onClick = {
-								 onNavigateToDebugScreen()
-							 } ,
-							 icon = {
-								 Icon(
-										  modifier = Modifier.size(24.dp) ,
-										  painter = painterResource(id = R.drawable.debug_icon) ,
-										  contentDescription = "Debug Tools"
-									 )
-							 } ,
-							 action = {
-								 Icon(
-										  modifier = Modifier
-											  .size(24.dp)
-											  .padding(2.dp) ,
-										  painter = painterResource(id = R.drawable.angle_right_icon) ,
-										  contentDescription = "Go to Debug Tools"
-									 )
-							 }
-									)
-				}
+				Option(
+						 title = { Text(text = "Debug Tools") } ,
+						 subtitle = { Text(text = "For testing purposes only") },
+						 onClick = { onNavigateToDebugScreen() } ,
+						 icon =  painterResource(id = R.drawable.debug_icon),
+						 iconDescription = "Debug Tools" ,
+						 testTag = TEST_TAG_ABOUT,
+						 action = {
+							 Icon(
+									  modifier = Modifier
+										  .size(24.dp)
+										  .padding(2.dp) ,
+									  painter = painterResource(id = R.drawable.angle_right_icon) ,
+									  contentDescription = "Go to Debug Tools"
+								 )
+						 }
+					  )
 			}
 		}
 

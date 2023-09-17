@@ -3,26 +3,29 @@ package com.arshadshah.nimaz.ui.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import com.arshadshah.nimaz.constants.AppConstants.THEME_DARK_RED
+import com.arshadshah.nimaz.constants.AppConstants.THEME_RAISIN_BLACK
+import com.arshadshah.nimaz.constants.AppConstants.THEME_RUSTIC_BROWN
 
 object CustomThemes
 {
 
 	//function to get the theme from the name of the theme
-	fun getTheme(ThemeName : String , darkTheme : Boolean) : ColorScheme
+	fun getTheme(themeName : String , darkTheme : Boolean) : ColorScheme
 	{
-		return when (ThemeName)
+		return when (themeName)
 		{
-			"Raisin_Black" ->
+			THEME_RAISIN_BLACK ->
 			{
 				if (darkTheme) DarkColorsRaisinBlack else LightColorsRaisinBlack
 			}
 
-			"Dark_Red" ->
+			THEME_DARK_RED ->
 			{
 				if (darkTheme) DarkColorsDarkRed else LightColorsDarkRed
 			}
 
-			"Rustic_brown" ->
+			THEME_RUSTIC_BROWN ->
 			{
 				if (darkTheme) DarkColorsRusticBrown else LightColorsRusticBrown
 			}

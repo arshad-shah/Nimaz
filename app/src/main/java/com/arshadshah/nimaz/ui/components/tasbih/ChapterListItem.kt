@@ -25,7 +25,11 @@ import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 
 @Composable
-fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , loading : Boolean)
+fun ChapterListItem(
+	chapter : Chapter ,
+	onNavigateToChapter : (Int,String) -> Unit ,
+	loading : Boolean ,
+				   )
 {
 	ElevatedCard(
 			 shape = MaterialTheme.shapes.extraLarge ,
@@ -33,7 +37,7 @@ fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , lo
 				 .fillMaxWidth()
 				 .padding(8.dp)
 				 .clickable {
-					 onNavigateToChapter(chapter._id)
+					 onNavigateToChapter(chapter._id, chapter.category)
 				 }
 				) {
 		Row(

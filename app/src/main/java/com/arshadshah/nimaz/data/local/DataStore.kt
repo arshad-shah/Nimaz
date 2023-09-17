@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.local
 
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalCategory
 import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
@@ -10,6 +11,7 @@ import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.remote.models.Category
 import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.data.remote.models.FastTracker
@@ -37,6 +39,22 @@ class DataStore(db : AppDatabase)
 	//tasbihTracker
 	private val tasbihTrackerDao = db.tasbihTracker
 
+	private val categoryDao = db.category
+
+	suspend fun getAllCategories() = categoryDao.getAllCategories().map { it.toCategory() }
+
+	suspend fun countCategories() = categoryDao.countCategories()
+
+	suspend fun getCategory(id : Int) = categoryDao.getCategory(id).toCategory()
+
+	suspend fun getCategory(name : String) = categoryDao.getCategory(name).toCategory()
+	//getAllDuas
+	suspend fun getAllDuas() = duaDao.getAllDuas().map { it.toDua() }
+
+	//save list of categories
+	suspend fun saveAllCategories(categories : ArrayList<Category>) =
+		categoryDao.saveAllCategories(categories.map { it.toLocalCategory() })
+
 
 	//update tasbih
 	suspend fun updateTasbih(tasbih : Tasbih) =
@@ -47,7 +65,7 @@ class DataStore(db : AppDatabase)
 		tasbihTrackerDao.updateTasbihGoal(tasbih.id , tasbih.goal)
 
 	//save a tasbih to the database
-	suspend fun saveTasbih(tasbih : Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
+	fun saveTasbih(tasbih : Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
 
 	//getTasbihById
 	suspend fun getTasbihById(id : Int) = tasbihTrackerDao.getTasbihById(id).toTasbih()
@@ -502,3 +520,13 @@ private fun LocalTasbih.toTasbih() = Tasbih(
 		 goal = goal ,
 		 count = count ,
 										   )
+
+private fun Category.toLocalCategory() = LocalCategory(
+		 id = id ,
+		 name = name ,
+													 )
+
+private fun LocalCategory.toCategory() = Category(
+		 id = id ,
+		 name = name ,
+												  )

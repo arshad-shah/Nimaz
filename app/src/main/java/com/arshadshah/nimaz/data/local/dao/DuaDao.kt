@@ -27,6 +27,10 @@ interface DuaDao
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	suspend fun saveDuas(duas : List<LocalDua>)
 
+	//get all duas
+	@Query("SELECT * FROM Dua")
+	suspend fun getAllDuas() : List<LocalDua>
+
 	//count
 	@Query("SELECT COUNT(*) FROM Chapter")
 	suspend fun countChapters() : Int

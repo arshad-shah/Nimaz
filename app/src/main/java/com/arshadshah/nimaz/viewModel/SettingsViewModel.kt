@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
+import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
 import com.arshadshah.nimaz.utils.AutoLocationUtils
 import com.arshadshah.nimaz.utils.NetworkChecker
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -32,7 +33,7 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 	//theme state
 	//it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
-	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , "SYSTEM"))
+	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , THEME_SYSTEM))
 	val theme = _theme.asStateFlow()
 
 	//dark mode state

@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.type.Parameters
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.Nimaz
 import kotlinx.coroutines.Dispatchers
@@ -97,7 +98,7 @@ class PrayerTimesViewModel : ViewModel()
 		object RELOAD : PrayerTimesEvent()
 
 		//get updated prayertimes if parameters change in settings
-		class UPDATE_PRAYERTIMES(val mapOfParameters : Map<String , String>) : PrayerTimesEvent()
+		class UPDATE_PRAYERTIMES(val mapOfParameters : Parameters) : PrayerTimesEvent()
 
 		class UPDATE_WIDGET(val context : Context) : PrayerTimesEvent()
 
@@ -225,14 +226,14 @@ class PrayerTimesViewModel : ViewModel()
 	}
 
 	//function to update the prayer times
-	private fun updatePrayerTimes(mapOfParameters : Map<String , String>)
+	private fun updatePrayerTimes(parameters : Parameters)
 	{
 		viewModelScope.launch(Dispatchers.IO) {
 			_isLoading.value = true
 			_error.value = ""
 			try
 			{
-				val response = PrayerTimesRepository.updatePrayerTimes(mapOfParameters)
+				val response = PrayerTimesRepository.updatePrayerTimes(parameters)
 				if (response.data != null)
 				{
 					val mapOfPrayerTimes = mapOf(

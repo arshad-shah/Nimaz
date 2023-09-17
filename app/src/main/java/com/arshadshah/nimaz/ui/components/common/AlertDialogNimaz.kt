@@ -98,7 +98,7 @@ fun AlertDialogNimaz(
 					) {
 			Column(
 					 modifier = Modifier
-						 .padding(16.dp)
+						 .padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
 						 .fillMaxWidth()
 						 .wrapContentHeight()
 				  ) {
@@ -215,7 +215,7 @@ fun AlertDialogNimaz(
 						 modifier = Modifier
 							 .fillMaxWidth()
 							 .wrapContentHeight()
-							 .padding(top = 8.dp , end = 8.dp , bottom = 0.dp) ,
+							 .padding(top = 16.dp , end = 8.dp , bottom = 0.dp) ,
 						 horizontalArrangement = Arrangement.End
 				   ) {
 					if (showDismissButton)
@@ -234,7 +234,7 @@ fun AlertDialogNimaz(
 					if (showConfirmButton)
 					{
 						Button(
-								 modifier = Modifier.padding(end = 8.dp) ,
+								 modifier = Modifier.padding(start = 8.dp) ,
 								 onClick = { onConfirm() } ,
 								 content = {
 									 Text(

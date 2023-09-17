@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.*
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
@@ -45,10 +47,7 @@ import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.ui.screens.tracker.CalenderScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
 
-@OptIn(ExperimentalAnimationApi::class)
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun NavigationGraph(
@@ -57,7 +56,7 @@ fun NavigationGraph(
 				   )
 {
 
-	AnimatedNavHost(
+	NavHost(
 			 navController = navController as NavHostController ,
 			 startDestination = BottomNavItem.Dashboard.screen_route ,
 			 enterTransition = {
@@ -1020,7 +1019,7 @@ fun NavigationGraph(
 					 paddingValues = paddingValues ,
 					  )
 			//pass the category name to the next screen
-			{ category : String ->
+			{ category : String, id: Int ->
 				Log.d("Category" , category)
 				navController.navigate(
 						 CHAPTERS_SCREEN_ROUTE
@@ -1028,20 +1027,25 @@ fun NavigationGraph(
 									  "{title}" ,
 									  category
 									 )
+							 .replace("{id}", id.toString())
 									  )
 			}
 		}
 
 		composable(CHAPTERS_SCREEN_ROUTE) {
 			ChapterList(
-					 category = it.arguments?.getString("title") !! ,
+					 categoryId = it.arguments?.getString("id") !! ,
 					 paddingValues = paddingValues ,
-					 onNavigateToChapter = { chapterId : Int ->
+					 onNavigateToChapter = { chapterId : Int, categoryName: String ->
 						 navController.navigate(
 								  CHAPTER_SCREEN_ROUTE
 									  .replace(
 											   "{chapterId}" ,
 											   chapterId.toString()
+											  )
+									  .replace(
+											   "{categoryName}" ,
+											   categoryName
 											  )
 											   )
 					 } ,
