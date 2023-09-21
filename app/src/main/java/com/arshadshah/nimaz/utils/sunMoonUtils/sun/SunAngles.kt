@@ -136,12 +136,12 @@ object SunAngles
 	 * dawn	黎明（早晨航海黄昏结束，早晨民间黄昏开始）
 	 */
 	var times : MutableList<*> = Lists.newArrayList(
-			Lists.newArrayList(- 0.833 , "sunrise" , "sunset") ,
-			Lists.newArrayList(- 0.3 , "sunriseEnd" , "sunsetStart") ,
-			Lists.newArrayList(- 6.0 , "dawn" , "dusk") ,
-			Lists.newArrayList(- 12.0 , "nauticalDawn" , "nauticalDusk") ,
-			Lists.newArrayList(- 18.0 , "nightEnd" , "night") ,
-			Lists.newArrayList(6.0 , "goldenHourEnd" , "goldenHour")
+			 Lists.newArrayList(- 0.833 , "sunrise" , "sunset") ,
+			 Lists.newArrayList(- 0.3 , "sunriseEnd" , "sunsetStart") ,
+			 Lists.newArrayList(- 6.0 , "dawn" , "dusk") ,
+			 Lists.newArrayList(- 12.0 , "nauticalDawn" , "nauticalDusk") ,
+			 Lists.newArrayList(- 18.0 , "nightEnd" , "night") ,
+			 Lists.newArrayList(6.0 , "goldenHourEnd" , "goldenHour")
 												   )
 
 	/**
@@ -224,13 +224,13 @@ object SunAngles
 		{
 			val time = times[i] as List<*>
 			val jSet = getSetJ(
-					java.lang.Double.valueOf(time[0].toString()) * rad ,
-					lw ,
-					phi ,
-					dec ,
-					n ,
-					M ,
-					L
+					 java.lang.Double.valueOf(time[0].toString()) * rad ,
+					 lw ,
+					 phi ,
+					 dec ,
+					 n ,
+					 M ,
+					 L
 							  )
 			val jRise = jNoon - (jSet - jNoon)
 			result[time[1] as String] = fromJulian(jRise)

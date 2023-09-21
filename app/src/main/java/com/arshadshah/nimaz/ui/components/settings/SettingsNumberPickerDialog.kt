@@ -58,24 +58,24 @@ fun SettingsNumberPickerDialog(
 	{
 		{
 			Text(
-					text = if (items.size == 51)
-						if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Degree " else if (valueState.value.toInt() != - 1) "${valueState.value} Degrees" else "${valueState.value} Degree"
-					else
-						if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Minute " else if (valueState.value.toInt() != - 1) "${valueState.value} Minutes" else "${valueState.value} Minute"
+					 text = if (items.size == 51)
+						 if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Degree " else if (valueState.value.toInt() != - 1) "${valueState.value} Degrees" else "${valueState.value} Degree"
+					 else
+						 if (valueState.value.toInt() < 2 && valueState.value.toInt() > - 1) "${valueState.value} Minute " else if (valueState.value.toInt() != - 1) "${valueState.value} Minutes" else "${valueState.value} Minute"
 				)
 		}
 	} else subtitle
 
 	SettingsMenuLink(
-			icon = icon ,
-			title = {
-				Text(
-						text = title
-					)
-			} ,
-			subtitle = safeSubtitle ,
-			action = action ,
-			onClick = { showDialog = true } ,
+			 icon = icon ,
+			 title = {
+				 Text(
+						  text = title
+					 )
+			 } ,
+			 subtitle = safeSubtitle ,
+			 action = action ,
+			 onClick = { showDialog = true } ,
 					)
 
 	if (! showDialog) return
@@ -91,48 +91,48 @@ fun SettingsNumberPickerDialog(
 		}
 	}
 	AlertDialogNimaz(
-			topDivider = false ,
-			bottomDivider = false ,
-			contentDescription = title ,
-			description = description ,
-			contentHeight = height ,
-			title = title ,
-			contentToShow = {
-				Card(
-						modifier = Modifier.fillMaxWidth() ,
-					) {
-					Row(
-							modifier = Modifier.fillMaxWidth() ,
-							horizontalArrangement = Arrangement.Center ,
-							verticalAlignment = Alignment.CenterVertically ,
-					   ) {
-						Picker(
-								modifier = modifier ,
-								value = if (items.size == 51) valueState.value.toDouble()
-									.toInt() else valueState.value.toInt() ,
-								onValueChange = onSelected ,
-								list = items ,
-								dividersColor = MaterialTheme.colorScheme.outline ,
-								textStyle = MaterialTheme.typography.titleLarge ,
-								label = {
-									if (items.size == 51)
-										if (it < 2 && it > - 1) "$it Degree " else if (it != - 1) "$it Degrees" else "$it Degree"
-									else
-										if (it < 2 && it > - 1) "$it Minute " else if (it != - 1) "$it Minutes" else "$it Minute"
-								} ,
-							  )
-					}
-				}
-			} ,
-			onDismissRequest = {
-				showDialog = false
-			} ,
-			onConfirm = {
-				showDialog = false
-			} ,
-			onDismiss = {
-				showDialog = false
-			}
+			 topDivider = false ,
+			 bottomDivider = false ,
+			 contentDescription = title ,
+			 description = description ,
+			 contentHeight = height ,
+			 title = title ,
+			 contentToShow = {
+				 Card(
+						  modifier = Modifier.fillMaxWidth() ,
+					 ) {
+					 Row(
+							  modifier = Modifier.fillMaxWidth() ,
+							  horizontalArrangement = Arrangement.Center ,
+							  verticalAlignment = Alignment.CenterVertically ,
+						) {
+						 Picker(
+								  modifier = modifier ,
+								  value = if (items.size == 51) valueState.value.toDouble()
+									  .toInt() else valueState.value.toInt() ,
+								  onValueChange = onSelected ,
+								  list = items ,
+								  dividersColor = MaterialTheme.colorScheme.outline ,
+								  textStyle = MaterialTheme.typography.titleLarge ,
+								  label = {
+									  if (items.size == 51)
+										  if (it < 2 && it > - 1) "$it Degree " else if (it != - 1) "$it Degrees" else "$it Degree"
+									  else
+										  if (it < 2 && it > - 1) "$it Minute " else if (it != - 1) "$it Minutes" else "$it Minute"
+								  } ,
+							   )
+					 }
+				 }
+			 } ,
+			 onDismissRequest = {
+				 showDialog = false
+			 } ,
+			 onConfirm = {
+				 showDialog = false
+			 } ,
+			 onDismiss = {
+				 showDialog = false
+			 }
 					)
 }
 
@@ -143,18 +143,18 @@ fun SettingsNumberPickerDialog(
 fun SettingsNumberPickerDialogPreview()
 {
 	val storage = rememberPreferenceStringSettingState(
-			key = "test" ,
-			defaultValue = "0"
+			 key = "test" ,
+			 defaultValue = "0"
 													  )
 	NimazTheme {
 		SettingsNumberPickerDialog(
-				title = "Title" ,
-				description = "Description" ,
-				items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
-				icon = { Icon(imageVector = Icons.Filled.Clear , contentDescription = "Clear") } ,
-				subtitle = { Text(text = "Subtitle") } ,
-				valueState = storage ,
-				height = 100.dp ,
+				 title = "Title" ,
+				 description = "Description" ,
+				 items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
+				 icon = { Icon(imageVector = Icons.Filled.Clear , contentDescription = "Clear") } ,
+				 subtitle = { Text(text = "Subtitle") } ,
+				 valueState = storage ,
+				 height = 100.dp ,
 								  )
 	}
 }
@@ -164,17 +164,17 @@ fun SettingsNumberPickerDialogPreview()
 fun SettingsNumberPickerDialogNoIconPreview()
 {
 	val storage = rememberPreferenceStringSettingState(
-			key = "test" ,
-			defaultValue = "0"
+			 key = "test" ,
+			 defaultValue = "0"
 													  )
 	NimazTheme {
 		SettingsNumberPickerDialog(
-				title = "Title" ,
-				description = "Description" ,
-				items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
-				subtitle = { Text(text = "Subtitle") } ,
-				valueState = storage ,
-				height = 100.dp ,
+				 title = "Title" ,
+				 description = "Description" ,
+				 items = listOf(0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10) ,
+				 subtitle = { Text(text = "Subtitle") } ,
+				 valueState = storage ,
+				 height = 100.dp ,
 								  )
 	}
 }

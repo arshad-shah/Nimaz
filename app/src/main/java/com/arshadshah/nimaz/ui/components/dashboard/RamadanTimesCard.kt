@@ -16,7 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,14 +40,14 @@ fun RamadanTimesCard(isFasting : Boolean)
 
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			initializer = { PrayerTimesViewModel() } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
+			 initializer = { PrayerTimesViewModel() } ,
+			 viewModelStoreOwner = context as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = context
+			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+			 initializer = { SettingsViewModel(context) } ,
+			 viewModelStoreOwner = context
 									)
 	val fajrPrayerTime = remember {
 		viewModel.fajrTime
@@ -61,7 +61,7 @@ fun RamadanTimesCard(isFasting : Boolean)
 	//a card that shows the time left for ramadan
 	//it should only show when 40 days are left for ramadan
 	//it should show the time left for ramadan in days, hours, minutes and seconds
-	val ramadanTimeLeft = remember { mutableStateOf(0L) }
+	val ramadanTimeLeft = remember { mutableLongStateOf(0L) }
 
 	val today = LocalDate.now()
 	val todayHijri = HijrahDate.from(today)
@@ -73,12 +73,12 @@ fun RamadanTimesCard(isFasting : Boolean)
 	{
 		if (todayHijri.isBefore(ramadanEnd))
 		{
-			ramadanTimeLeft.value = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
+			ramadanTimeLeft.longValue = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
 		}
 	} else
 	{
 		val diff = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
-		ramadanTimeLeft.value = diff
+		ramadanTimeLeft.longValue = diff
 	}
 
 	//show card if it is the month of ramadan
@@ -91,66 +91,69 @@ fun RamadanTimesCard(isFasting : Boolean)
 	{
 		//show the card
 		ElevatedCard(
-				colors = CardDefaults.elevatedCardColors(
-						containerColor = MaterialTheme.colorScheme.secondaryContainer ,
-						contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-														) ,
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.secondaryContainer ,
+						  contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+														 ) ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
 					) {
 			Column(
-					modifier = Modifier.padding(16.dp) ,
-					verticalArrangement = Arrangement.Center ,
-					horizontalAlignment = Alignment.CenterHorizontally
+					 modifier = Modifier.padding(16.dp) ,
+					 verticalArrangement = Arrangement.Center ,
+					 horizontalAlignment = Alignment.CenterHorizontally
 				  ) {
 				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(8.dp) ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
+						 modifier = Modifier
+							 .fillMaxWidth()
+							 .padding(8.dp) ,
+						 verticalAlignment = Alignment.CenterVertically ,
+						 horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
 					Text(text = "Fasting Times" , style = MaterialTheme.typography.titleMedium)
-					IconButton(onClick = {
-						//share the aya
-						val shareIntent = Intent(Intent.ACTION_SEND)
-						shareIntent.type = "text/plain"
-						//create the share message
-						//with the aya text, aya translation
-						//the sura number followed by the aya number
-						shareIntent.putExtra(
-								Intent.EXTRA_TEXT ,
-								"Ramadan Fasting Times for ${location.value} \n${
-									DateTimeFormatter.ofPattern(
-											"EEEE, d MMMM yyyy"
-															   ).format(today)
-								} \n" +
-										"Imsak (Fajr): ${
-											DateTimeFormatter.ofPattern("hh:mm a")
-												.format(fajrPrayerTime.value)
-										} \n" +
-										"Iftar (Maghrib): ${
-											DateTimeFormatter.ofPattern("hh:mm a")
-												.format(maghribPrayerTime.value)
-										} \n" +
-										"Times are Provided by Nimaz : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
-											)
-						shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Ramadan Times")
-						shareIntent.putExtra(Intent.EXTRA_TITLE , "Ramadan Times")
+					IconButton(
+							 modifier = Modifier.size(32.dp) ,
+							 onClick = {
+								 //share the aya
+								 val shareIntent = Intent(Intent.ACTION_SEND)
+								 shareIntent.type = "text/plain"
+								 //create the share message
+								 //with the aya text, aya translation
+								 //the sura number followed by the aya number
+								 shareIntent.putExtra(
+										  Intent.EXTRA_TEXT ,
+										  "Ramadan Fasting Times for ${location.value} \n${
+											  DateTimeFormatter.ofPattern(
+													   "EEEE, d MMMM yyyy"
+																		 ).format(today)
+										  } \n" +
+												   "Imsak (Fajr): ${
+													   DateTimeFormatter.ofPattern("hh:mm a")
+														   .format(fajrPrayerTime.value)
+												   } \n" +
+												   "Iftar (Maghrib): ${
+													   DateTimeFormatter.ofPattern("hh:mm a")
+														   .format(maghribPrayerTime.value)
+												   } \n" +
+												   "Times are Provided by Nimaz : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
+													 )
+								 shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Ramadan Times")
+								 shareIntent.putExtra(Intent.EXTRA_TITLE , "Ramadan Times")
 
-						//start the share intent
-						context.startActivity(
-								Intent.createChooser(
-										shareIntent ,
-										"Share Ramadan Times"
-													)
-											 )
-					} , modifier = Modifier.size(24.dp)) {
+								 //start the share intent
+								 context.startActivity(
+										  Intent.createChooser(
+												   shareIntent ,
+												   "Share Ramadan Times"
+															  )
+													  )
+							 }) {
 						Icon(
-								painter = painterResource(id = R.drawable.share_icon) ,
-								contentDescription = "Share Ramadan Times" ,
+								 modifier = Modifier.size(24.dp) ,
+								 painter = painterResource(id = R.drawable.share_icon) ,
+								 contentDescription = "Share Ramadan Times" ,
 							)
 					}
 				}
@@ -167,23 +170,23 @@ fun RamadanTimesCard(isFasting : Boolean)
 				}
 
 				Row(
-						modifier = Modifier
-							.fillMaxWidth() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
+						 modifier = Modifier
+							 .fillMaxWidth() ,
+						 verticalAlignment = Alignment.CenterVertically ,
+						 horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
 					Column(
-							modifier = Modifier.fillMaxWidth() ,
-							verticalArrangement = Arrangement.Center ,
-							horizontalAlignment = Alignment.CenterHorizontally
+							 modifier = Modifier.fillMaxWidth() ,
+							 verticalArrangement = Arrangement.Center ,
+							 horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
 						TimeComponent(
-								title = "Imsak (Fajr)" ,
-								fajrPrayerTime = formatter.format(fajrPrayerTime.value)
+								 title = "Imsak (Fajr)" ,
+								 fajrPrayerTime = formatter.format(fajrPrayerTime.value)
 									 )
 						TimeComponent(
-								title = "Iftar (Maghrib)" ,
-								fajrPrayerTime = formatter.format(maghribPrayerTime.value)
+								 title = "Iftar (Maghrib)" ,
+								 fajrPrayerTime = formatter.format(maghribPrayerTime.value)
 									 )
 					}
 				}
@@ -197,11 +200,11 @@ fun RamadanTimesCard(isFasting : Boolean)
 fun TimeComponent(title : String = "Suhoor Time" , fajrPrayerTime : String)
 {
 	Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(8.dp) ,
-			verticalAlignment = Alignment.CenterVertically ,
-			horizontalArrangement = Arrangement.SpaceBetween
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .padding(8.dp) ,
+			 verticalAlignment = Alignment.CenterVertically ,
+			 horizontalArrangement = Arrangement.SpaceBetween
 	   ) {
 		Text(text = title , style = MaterialTheme.typography.titleLarge)
 		Text(text = fajrPrayerTime , style = MaterialTheme.typography.titleLarge)

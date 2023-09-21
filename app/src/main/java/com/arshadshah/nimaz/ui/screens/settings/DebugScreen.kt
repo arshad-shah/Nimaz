@@ -32,11 +32,11 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 fun DebugScreen(paddingValues : PaddingValues)
 {
 	Column(
-			modifier = Modifier
-				.padding(paddingValues)
-				.fillMaxWidth() ,
-			verticalArrangement = Arrangement.Center ,
-			horizontalAlignment = Alignment.CenterHorizontally
+			 modifier = Modifier
+				 .padding(paddingValues)
+				 .fillMaxWidth() ,
+			 verticalArrangement = Arrangement.Center ,
+			 horizontalAlignment = Alignment.CenterHorizontally
 		  ) {
 		ShowSharedPrefsData()
 	}
@@ -47,40 +47,47 @@ fun DebugScreen(paddingValues : PaddingValues)
 @Composable
 fun ShowSharedPrefsData()
 {
-	val sharedPreferences = PrivateSharedPreferences( LocalContext.current )
+	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
 	val allDataSaved = sharedPreferences.getAllData()
 
 	ElevatedCard(
-			modifier = Modifier.padding(8.dp) ,
+			 modifier = Modifier.padding(8.dp) ,
 				) {
-		Text(text = "Shared Preferences Data" , style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp).fillMaxWidth(), textAlign = TextAlign.Center)
-		LazyColumn{
+		Text(
+				 text = "Shared Preferences Data" ,
+				 style = MaterialTheme.typography.titleMedium ,
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .fillMaxWidth() ,
+				 textAlign = TextAlign.Center
+			)
+		LazyColumn {
 			allDataSaved.forEach {
 				item {
 					val currentItem = rememberUpdatedState(newValue = it)
 					val dismissState = rememberDismissState(
-							confirmStateChange = {
-								if (it == DismissValue.DismissedToStart)
-								{
-									sharedPreferences.removeData(currentItem.value.key)
-									true
-								}else if (it == DismissValue.DismissedToEnd)
-								{
-									sharedPreferences.removeData(currentItem.value.key)
-									true
-								}
-								false
-							}
+							 confirmStateChange = {
+								 if (it == DismissValue.DismissedToStart)
+								 {
+									 sharedPreferences.removeData(currentItem.value.key)
+									 true
+								 } else if (it == DismissValue.DismissedToEnd)
+								 {
+									 sharedPreferences.removeData(currentItem.value.key)
+									 true
+								 }
+								 false
+							 }
 														   )
 					SwipeToDismiss(
-							directions = setOf(DismissDirection.EndToStart) ,
-							state = dismissState ,
-							background = {
-								SwipeBackground(dismissState = dismissState)
-							} ,
-							dismissContent = {
-								ShowSharedPrefsDataItem(it.key , it.value.toString())
-							}
+							 directions = setOf(DismissDirection.EndToStart) ,
+							 state = dismissState ,
+							 background = {
+								 SwipeBackground(dismissState = dismissState)
+							 } ,
+							 dismissContent = {
+								 ShowSharedPrefsDataItem(it.key , it.value.toString())
+							 }
 								  )
 				}
 			}
@@ -95,19 +102,36 @@ fun ShowSharedPrefsData()
 fun ShowSharedPrefsDataItem(key : String , value : String)
 {
 	Card(
-			modifier = Modifier
-				.padding(4.dp)
-				.fillMaxWidth() ,
+			 modifier = Modifier
+				 .padding(4.dp)
+				 .fillMaxWidth() ,
 		) {
 		Row(
-				modifier = Modifier
-					.padding(4.dp)
-					.fillMaxWidth() ,
-				verticalAlignment = Alignment.CenterVertically ,
-				horizontalArrangement = Arrangement.SpaceBetween
-		   ){
-			Text(text = key, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp).weight(0.5f), overflow = TextOverflow.Ellipsis, maxLines = 1)
-			Text(text = value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp).weight(0.5f), overflow = TextOverflow.Ellipsis, maxLines = 1, textAlign = TextAlign.End)
+				 modifier = Modifier
+					 .padding(4.dp)
+					 .fillMaxWidth() ,
+				 verticalAlignment = Alignment.CenterVertically ,
+				 horizontalArrangement = Arrangement.SpaceBetween
+		   ) {
+			Text(
+					 text = key ,
+					 style = MaterialTheme.typography.titleMedium ,
+					 modifier = Modifier
+						 .padding(8.dp)
+						 .weight(0.5f) ,
+					 overflow = TextOverflow.Ellipsis ,
+					 maxLines = 1
+				)
+			Text(
+					 text = value ,
+					 style = MaterialTheme.typography.bodyMedium ,
+					 modifier = Modifier
+						 .padding(8.dp)
+						 .weight(0.5f) ,
+					 overflow = TextOverflow.Ellipsis ,
+					 maxLines = 1 ,
+					 textAlign = TextAlign.End
+				)
 		}
 	}
 }

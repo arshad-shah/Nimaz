@@ -18,9 +18,9 @@ fun rememberPreferenceStringSettingState(
 {
 	return remember {
 		StringPreferenceSettingValueState(
-				key = key ,
-				preferences = preferences ,
-				defaultValue = defaultValue
+				 key = key ,
+				 preferences = preferences ,
+				 defaultValue = defaultValue
 										 )
 	}
 }

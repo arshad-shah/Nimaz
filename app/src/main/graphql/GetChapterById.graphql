@@ -1,0 +1,10 @@
+query getChapterById($chapter: Int!) {
+    getChapterById(id: $chapter) {
+        id
+        arabicDua
+        englishTranslation
+        englishReference
+        favourite
+    }
+    getCategoryNameForAChapter(id: $chapter)
+}

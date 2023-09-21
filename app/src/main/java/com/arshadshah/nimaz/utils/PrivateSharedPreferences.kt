@@ -7,8 +7,8 @@ class PrivateSharedPreferences(context : Context)
 {
 
 	private val sharedPreferences = context.getSharedPreferences(
-			AppConstants.PREFERENCES_FILE_NAME ,
-			Context.MODE_PRIVATE
+			 AppConstants.PREFERENCES_FILE_NAME ,
+			 Context.MODE_PRIVATE
 																)
 	private val editor = sharedPreferences.edit()
 

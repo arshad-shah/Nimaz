@@ -31,73 +31,43 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.viewModel.DuaViewModel
 
 @Composable
-fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (String) -> Unit)
+fun Categories(
+	paddingValues : PaddingValues ,
+	onNavigateToChapterListScreen : (String , Int) -> Unit ,
+			  )
 {
 	val viewModel = viewModel(
-			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			initializer = { DuaViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
+			 initializer = { DuaViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
-	LaunchedEffect(Unit){
+	LaunchedEffect(Unit) {
 		viewModel.getCategories()
 	}
 
 	val categories = remember { viewModel.categories }.collectAsState()
 
 	//if the categories are not null, and not empty, then show them
-	if(categories.value!!.isNotEmpty()){
-		val uniqueCategories = categories.value.distinctBy { it.keys }
-		//get the titles of the categories
-		//List<Map<String, ArrayList<Chapter>>>
-		val categoryTitles = uniqueCategories.map { it.keys }.flatten()
-		//empty list
-		val newCategoryTitles = ArrayList<String>()
-		//find the empty string and change it to "All Chapters"
-		categoryTitles.forEach {
-			if (it == "")
-			{
-				newCategoryTitles.add("All Chapters")
-				//remove the empty string
-				newCategoryTitles.remove("")
-			}else{
-				newCategoryTitles.add(it)
-			}
-		}
-
-		//return the amount of chapters in each category
-		val chaptersInEachCategory = uniqueCategories.map { it.values }.flatten()
-
+	if (categories.value.isNotEmpty())
+	{
 		//sort the categories alphabetically
-		newCategoryTitles.sort()
+		categories.value.sortBy { it.name }
 
-		LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp), contentPadding = paddingValues) {
-			items(newCategoryTitles.size){
-				//if the title is All Chapters, then return the amount of chapters in the list
-				//else return the amount of chapters in each category
-				if (newCategoryTitles[it] == "All Chapters")
-				{
-					Category(
-							title = newCategoryTitles[it] ,
-							//return the amount of chapters in the list
-							amount = chaptersInEachCategory[it].size,
-							onClicked = {
-								onNavigateToChapterListScreen(newCategoryTitles[it])
-							}
-						   )
-				}else{
-					Category(
-							title = newCategoryTitles[it] ,
-							//return the amount of chapters in each category
-							//where the title is the same as chaptersInEachCategory[0][0].category
-							amount = chaptersInEachCategory[it].count { chapter ->
-								chapter.category == newCategoryTitles[it]
-							},
-							onClicked = {
-								onNavigateToChapterListScreen(newCategoryTitles[it])
-							}
-							)
-				}
+		LazyVerticalGrid(
+				 columns = GridCells.Adaptive(minSize = 128.dp) ,
+				 contentPadding = paddingValues
+						) {
+			items(categories.value.size) {
+				Category(
+						 title = categories.value[it].name ,
+						 onClicked = {
+							 onNavigateToChapterListScreen(
+									  categories.value[it].name ,
+									  categories.value[it].id
+														  )
+						 }
+						)
 			}
 		}
 	}
@@ -106,43 +76,46 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 //one category
 @Composable
 fun Category(
-		title : String ,
-		icon : Int? = null ,
-		description : String = "" ,
-		amount : Int ,
-		onClicked : () -> Unit = {}
+	title : String ,
+	icon : Int? = null ,
+	description : String = "" ,
+	onClicked : () -> Unit = {} ,
 			)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.large ,
-			modifier = Modifier
-				.padding(8.dp)
-				.fillMaxWidth()
-				.fillMaxHeight()
-				.clickable {
-					onClicked()
-				}
+			 shape = MaterialTheme.shapes.large ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .fillMaxWidth()
+				 .fillMaxHeight()
+				 .clickable {
+					 onClicked()
+				 }
 				) {
 		Row(
-				modifier = Modifier.padding(8.dp).fillMaxWidth(),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .fillMaxWidth() ,
+				 verticalAlignment = Alignment.CenterVertically ,
+				 horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 			Column(
-					modifier = Modifier.padding(8.dp).fillMaxWidth() ,
-					verticalArrangement = Arrangement.SpaceAround ,
-					horizontalAlignment = Alignment.Start
-				  ){
-				Text(text = title, style = MaterialTheme.typography.titleMedium)
-				Text(text = "$amount Chapters" , style = MaterialTheme.typography.bodySmall)
+					 modifier = Modifier
+						 .padding(8.dp)
+						 .fillMaxWidth() ,
+					 verticalArrangement = Arrangement.SpaceAround ,
+					 horizontalAlignment = Alignment.Start
+				  ) {
+				Text(text = title , style = MaterialTheme.typography.titleMedium)
 			}
-			if (icon != null){
+			if (icon != null)
+			{
 				Image(
-						painter = painterResource(id = icon) ,
-						contentDescription = description ,
-						modifier = Modifier
-							.padding(8.dp)
-							.size(32.dp)
+						 painter = painterResource(id = icon) ,
+						 contentDescription = description ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .size(32.dp)
 					 )
 			}
 		}
@@ -153,5 +126,5 @@ fun Category(
 @Composable
 fun PreviewCategory()
 {
-	Category(title = "Subhanallah" , amount = 0)
+	Category(title = "Subhanallah")
 }

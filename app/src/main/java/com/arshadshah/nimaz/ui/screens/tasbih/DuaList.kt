@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,12 +23,12 @@ fun DuaList(chapterId : String , paddingValues : PaddingValues)
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			initializer = { DuaViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
+			 initializer = { DuaViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
-	LaunchedEffect(Unit){
+	LaunchedEffect(Unit) {
 		viewModel.getDuas(chapterId.toInt())
 	}
 
@@ -40,7 +40,7 @@ fun DuaList(chapterId : String , paddingValues : PaddingValues)
 	val sharedPref = context.getSharedPreferences("dua" , 0)
 	val listState = rememberLazyListState()
 	val visibleItemIndex =
-		remember { mutableStateOf(sharedPref.getInt("visibleItemIndexDua-${chapterId}" , - 1)) }
+		remember { mutableIntStateOf(sharedPref.getInt("visibleItemIndexDua-${chapterId}" , - 1)) }
 
 	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
 	LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })
@@ -59,15 +59,17 @@ fun DuaList(chapterId : String , paddingValues : PaddingValues)
 			visibleItemIndex.value = - 1
 		}
 	}
-			LazyColumn(
-					modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER) ,
-					contentPadding = paddingValues ,
-					state = listState ,
-					content = {
-						items(duaState.value.size)
-						{
-							DuaListItem(dua = duaState.value[it] ,
-										loading = false)
-						}
-					})
+	LazyColumn(
+			 modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER) ,
+			 contentPadding = paddingValues ,
+			 state = listState ,
+			 content = {
+				 items(duaState.value.size)
+				 {
+					 DuaListItem(
+							  dua = duaState.value[it] ,
+							  loading = false
+								)
+				 }
+			 })
 }

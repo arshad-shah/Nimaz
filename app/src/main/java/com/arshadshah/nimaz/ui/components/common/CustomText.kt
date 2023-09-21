@@ -31,17 +31,17 @@ fun CustomText(
 	val processedText = if (text.length > 10) text.substring(0 , 10) + "..." else text
 	Column(modifier = modifier , horizontalAlignment = Alignment.CenterHorizontally) {
 		Text(
-				modifier = headingModifier ,
-				text = heading ,
-				textAlign = TextAlign.Center ,
-				style = MaterialTheme.typography.titleSmall
+				 modifier = headingModifier ,
+				 text = heading ,
+				 textAlign = TextAlign.Center ,
+				 style = MaterialTheme.typography.titleSmall
 			)
 		Spacer(modifier = Modifier.padding(4.dp))
 		Text(
-				modifier = textModifier ,
-				text = processedText ,
-				textAlign = TextAlign.Center ,
-				style = MaterialTheme.typography.titleMedium ,
+				 modifier = textModifier ,
+				 text = processedText ,
+				 textAlign = TextAlign.Center ,
+				 style = MaterialTheme.typography.titleMedium ,
 			)
 	}
 }
@@ -51,8 +51,8 @@ fun CustomText(
 fun CustomTextPreview()
 {
 	CustomText(
-			modifier = Modifier.padding(8.dp) ,
-			heading = "Heading" ,
-			text = "Long piece of text"
+			 modifier = Modifier.padding(8.dp) ,
+			 heading = "Heading" ,
+			 text = "Long piece of text"
 			  )
 }

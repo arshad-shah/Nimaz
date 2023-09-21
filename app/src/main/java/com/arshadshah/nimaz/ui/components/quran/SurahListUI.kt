@@ -47,21 +47,21 @@ fun SurahListUI(
 {
 	val state = rememberLazyListState()
 	LazyColumn(
-			state = state ,
-			userScrollEnabled = ! loading ,
-			modifier = Modifier.testTag(AppConstants.TEST_TAG_QURAN_SURAH)
+			 state = state ,
+			 userScrollEnabled = ! loading ,
+			 modifier = Modifier.testTag(AppConstants.TEST_TAG_QURAN_SURAH)
 			  ) {
 		items(surahs.size) { index ->
 			SurahListItemUI(
-					loading = loading ,
-					surahNumber = surahs[index].number.toString() ,
-					surahAyaAmount = surahs[index].numberOfAyahs.toString() ,
-					surahName = surahs[index].name ,
-					englishName = surahs[index].englishName ,
-					englishNameTranslation = surahs[index].englishNameTranslation ,
-					type = surahs[index].revelationType ,
-					rukus = surahs[index].rukus.toString() ,
-					onNavigateToAyatScreen = onNavigateToAyatScreen
+					 loading = loading ,
+					 surahNumber = surahs[index].number.toString() ,
+					 surahAyaAmount = surahs[index].numberOfAyahs.toString() ,
+					 surahName = surahs[index].name ,
+					 englishName = surahs[index].englishName ,
+					 englishNameTranslation = surahs[index].englishNameTranslation ,
+					 type = surahs[index].revelationType ,
+					 rukus = surahs[index].rukus.toString() ,
+					 onNavigateToAyatScreen = onNavigateToAyatScreen
 						   )
 		}
 	}
@@ -82,16 +82,16 @@ fun SurahListItemUI(
 				   )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(vertical = 4.dp , horizontal = 8.dp)
-				.fillMaxWidth()
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(vertical = 4.dp , horizontal = 8.dp)
+				 .fillMaxWidth()
 				) {
 		//get the translation type from shared preferences
 		val translationType =
 			PrivateSharedPreferences(context).getData(
-					key = AppConstants.TRANSLATION_LANGUAGE ,
-					s = "English"
+					 key = AppConstants.TRANSLATION_LANGUAGE ,
+					 s = "English"
 													 )
 		val language = when (translationType)
 		{
@@ -100,127 +100,127 @@ fun SurahListItemUI(
 			else -> "english"
 		}
 		Row(
-				modifier = Modifier
-					.padding(8.dp)
-					.testTag(TEST_TAG_SURAH_ITEM + surahNumber)
-					.clickable(
-							enabled = ! loading ,
-							onClick = {
-								onNavigateToAyatScreen(surahNumber , true , language , null)
-							}
-							  )
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .testTag(TEST_TAG_SURAH_ITEM + surahNumber)
+					 .clickable(
+							  enabled = ! loading ,
+							  onClick = {
+								  onNavigateToAyatScreen(surahNumber , true , language , null)
+							  }
+							   )
 		   ) {
 			Text(
-					modifier = Modifier
-						.align(Alignment.CenterVertically)
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									) ,
-					text = "$surahNumber." ,
-					style = MaterialTheme.typography.bodyLarge ,
-					textAlign = TextAlign.Center
+					 modifier = Modifier
+						 .align(Alignment.CenterVertically)
+						 .placeholder(
+								  visible = loading ,
+								  color = MaterialTheme.colorScheme.outline ,
+								  shape = RoundedCornerShape(4.dp) ,
+								  highlight = PlaceholderHighlight.shimmer(
+										   highlightColor = Color.White ,
+																		  )
+									 ) ,
+					 text = "$surahNumber." ,
+					 style = MaterialTheme.typography.bodyLarge ,
+					 textAlign = TextAlign.Center
 				)
 
 			Column(
-					modifier = Modifier
-						.weight(0.4f)
-						.align(Alignment.CenterVertically)
+					 modifier = Modifier
+						 .weight(0.4f)
+						 .align(Alignment.CenterVertically)
 				  ) {
 				Text(
-						text = englishName ,
-						style = MaterialTheme.typography.titleSmall ,
-						modifier = Modifier
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center
+						 text = englishName ,
+						 style = MaterialTheme.typography.titleSmall ,
+						 modifier = Modifier
+							 .placeholder(
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 )
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center
 					)
 				//apply quran font
 				Text(
-						text = surahName ,
-						style = MaterialTheme.typography.titleLarge ,
-						fontFamily = utmaniQuranFont ,
-						fontSize = 28.sp ,
-						fontWeight = FontWeight.SemiBold ,
-						modifier = Modifier
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center
+						 text = surahName ,
+						 style = MaterialTheme.typography.titleLarge ,
+						 fontFamily = utmaniQuranFont ,
+						 fontSize = 28.sp ,
+						 fontWeight = FontWeight.SemiBold ,
+						 modifier = Modifier
+							 .placeholder(
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 )
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center
 					)
 				Text(
-						text = englishNameTranslation ,
-						style = MaterialTheme.typography.titleSmall ,
-						modifier = Modifier
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center
+						 text = englishNameTranslation ,
+						 style = MaterialTheme.typography.titleSmall ,
+						 modifier = Modifier
+							 .placeholder(
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 )
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center
 					)
 			}
 
 			Column(
-					modifier = Modifier
-						.weight(0.3f)
-						.align(Alignment.CenterVertically)
-						.fillMaxWidth()
+					 modifier = Modifier
+						 .weight(0.3f)
+						 .align(Alignment.CenterVertically)
+						 .fillMaxWidth()
 				  ) {
 				MetadataTextUI(
-						heading = "Type" ,
-						value = type ,
-						loading = loading
+						 heading = "Type" ,
+						 value = type ,
+						 loading = loading
 							  )
 				MetadataTextUI(
-						heading = "Ayat" ,
-						value = surahAyaAmount ,
-						loading = loading
+						 heading = "Ayat" ,
+						 value = surahAyaAmount ,
+						 loading = loading
 							  )
 
 				MetadataTextUI(
-						heading = "Ruku" ,
-						value = rukus ,
-						loading = loading
+						 heading = "Ruku" ,
+						 value = rukus ,
+						 loading = loading
 							  )
 			}
 			//an arrow right icon
 			Icon(
-					painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-					contentDescription = "Clear" ,
-					modifier = Modifier
-						.align(Alignment.CenterVertically)
-						.size(24.dp)
-						.fillMaxWidth()
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
+					 painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+					 contentDescription = "Clear" ,
+					 modifier = Modifier
+						 .align(Alignment.CenterVertically)
+						 .size(24.dp)
+						 .fillMaxWidth()
+						 .placeholder(
+								  visible = loading ,
+								  color = MaterialTheme.colorScheme.outline ,
+								  shape = RoundedCornerShape(4.dp) ,
+								  highlight = PlaceholderHighlight.shimmer(
+										   highlightColor = Color.White ,
+																		  )
+									 )
 				)
 		}
 	}
@@ -235,42 +235,42 @@ fun SurahListItemUI(
 fun MetadataTextUI(heading : String , value : String , loading : Boolean)
 {
 	Row(
-			modifier = Modifier ,
-			verticalAlignment = Alignment.CenterVertically ,
-			horizontalArrangement = Arrangement.SpaceBetween
+			 modifier = Modifier ,
+			 verticalAlignment = Alignment.CenterVertically ,
+			 horizontalArrangement = Arrangement.SpaceBetween
 	   ) {
 		//heading text
 		Text(
-				text = "$heading: " ,
-				style = MaterialTheme.typography.titleSmall ,
-				modifier = Modifier
-					.padding(4.dp)
-					.placeholder(
-							visible = loading ,
-							color = MaterialTheme.colorScheme.outline ,
-							shape = RoundedCornerShape(4.dp) ,
-							highlight = PlaceholderHighlight.shimmer(
-									highlightColor = Color.White ,
-																	)
-								) ,
-				textAlign = TextAlign.Center
+				 text = "$heading: " ,
+				 style = MaterialTheme.typography.titleSmall ,
+				 modifier = Modifier
+					 .padding(4.dp)
+					 .placeholder(
+							  visible = loading ,
+							  color = MaterialTheme.colorScheme.outline ,
+							  shape = RoundedCornerShape(4.dp) ,
+							  highlight = PlaceholderHighlight.shimmer(
+									   highlightColor = Color.White ,
+																	  )
+								 ) ,
+				 textAlign = TextAlign.Center
 			)
 		//value text
 		Text(
-				text = value ,
-				style = MaterialTheme.typography.titleSmall ,
-				modifier = Modifier
-					.padding(4.dp)
-					.fillMaxWidth()
-					.placeholder(
-							visible = loading ,
-							color = MaterialTheme.colorScheme.outline ,
-							shape = RoundedCornerShape(4.dp) ,
-							highlight = PlaceholderHighlight.shimmer(
-									highlightColor = Color.White ,
-																	)
-								) ,
-				textAlign = TextAlign.Center
+				 text = value ,
+				 style = MaterialTheme.typography.titleSmall ,
+				 modifier = Modifier
+					 .padding(4.dp)
+					 .fillMaxWidth()
+					 .placeholder(
+							  visible = loading ,
+							  color = MaterialTheme.colorScheme.outline ,
+							  shape = RoundedCornerShape(4.dp) ,
+							  highlight = PlaceholderHighlight.shimmer(
+									   highlightColor = Color.White ,
+																	  )
+								 ) ,
+				 textAlign = TextAlign.Center
 			)
 	}
 }
@@ -284,15 +284,15 @@ fun SurahListItemUIPreview()
 	//set the theme
 	NimazTheme {
 		SurahListItemUI(
-				surahNumber = "1" ,
-				surahAyaAmount = "7" ,
-				surahName = "الفاتحة" ,
-				englishName = "Al-Faatiha" ,
-				englishNameTranslation = "The Opening" ,
-				type = "Meccan" ,
-				rukus = "1" ,
-				onNavigateToAyatScreen = { surahNumber , isSurah , language , ayahNumber -> } ,
-				loading = false
+				 surahNumber = "1" ,
+				 surahAyaAmount = "7" ,
+				 surahName = "الفاتحة" ,
+				 englishName = "Al-Faatiha" ,
+				 englishNameTranslation = "The Opening" ,
+				 type = "Meccan" ,
+				 rukus = "1" ,
+				 onNavigateToAyatScreen = { surahNumber , isSurah , language , ayahNumber -> } ,
+				 loading = false
 					   )
 	}
 }
@@ -305,15 +305,15 @@ fun SurahListItemUIPreview2()
 	//set the theme
 	NimazTheme {
 		SurahListItemUI(
-				surahNumber = "114" ,
-				surahAyaAmount = "182" ,
-				surahName = "المعارج" ,
-				englishName = "As-Saaffaat" ,
-				englishNameTranslation = "Those drawn up in Ranks" ,
-				type = "Medinan" ,
-				rukus = "1" ,
-				onNavigateToAyatScreen = { surahNumber , isSurah , language , ayahNumber -> } ,
-				loading = false
+				 surahNumber = "114" ,
+				 surahAyaAmount = "182" ,
+				 surahName = "المعارج" ,
+				 englishName = "As-Saaffaat" ,
+				 englishNameTranslation = "Those drawn up in Ranks" ,
+				 type = "Medinan" ,
+				 rukus = "1" ,
+				 onNavigateToAyatScreen = { surahNumber , isSurah , language , ayahNumber -> } ,
+				 loading = false
 					   )
 	}
 }

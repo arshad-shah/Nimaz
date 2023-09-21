@@ -17,36 +17,36 @@ import java.time.DayOfWeek
 
 @Composable
 fun CalenderWeekHeader(
-	weekState : List<DayOfWeek>
+	weekState : List<DayOfWeek> ,
 					  )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.small,
-			modifier = Modifier.padding(top = 4.dp)
+			 shape = MaterialTheme.shapes.small ,
+			 modifier = Modifier.padding(top = 4.dp)
 				) {
 		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 4.dp , vertical = 4.dp) ,
-				horizontalArrangement = Arrangement.Center
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(horizontal = 4.dp , vertical = 4.dp) ,
+				 horizontalArrangement = Arrangement.Center
 		   ) {
 			weekState.forEach { dayOfWeek ->
 				Text(
-						text = dayOfWeek.name.substring(0 , 3) ,
-						style = MaterialTheme.typography.titleMedium ,
-						color = if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY)
-						{
-							MaterialTheme.colorScheme.error
-						} else
-						{
-							MaterialTheme.colorScheme.onSurface
-						} ,
-						maxLines = 1 ,
-						overflow = TextOverflow.Ellipsis ,
-						textAlign = TextAlign.Center ,
-						modifier = Modifier
-							.weight(1f)
-							.padding(4.dp)
+						 text = dayOfWeek.name.substring(0 , 3) ,
+						 style = MaterialTheme.typography.titleMedium ,
+						 color = if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY)
+						 {
+							 MaterialTheme.colorScheme.error
+						 } else
+						 {
+							 MaterialTheme.colorScheme.onSurface
+						 } ,
+						 maxLines = 1 ,
+						 overflow = TextOverflow.Ellipsis ,
+						 textAlign = TextAlign.Center ,
+						 modifier = Modifier
+							 .weight(1f)
+							 .padding(4.dp)
 					)
 			}
 		}
@@ -57,5 +57,15 @@ fun CalenderWeekHeader(
 @Composable
 fun CalenderWeekHeaderPreview()
 {
-	CalenderWeekHeader(weekState = listOf(DayOfWeek.MONDAY , DayOfWeek.TUESDAY , DayOfWeek.WEDNESDAY , DayOfWeek.THURSDAY , DayOfWeek.FRIDAY , DayOfWeek.SATURDAY , DayOfWeek.SUNDAY))
+	CalenderWeekHeader(
+			 weekState = listOf(
+					  DayOfWeek.MONDAY ,
+					  DayOfWeek.TUESDAY ,
+					  DayOfWeek.WEDNESDAY ,
+					  DayOfWeek.THURSDAY ,
+					  DayOfWeek.FRIDAY ,
+					  DayOfWeek.SATURDAY ,
+					  DayOfWeek.SUNDAY
+							   )
+					  )
 }

@@ -33,30 +33,30 @@ fun CalculationMethodUI()
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			initializer = { PrayerTimesViewModel() } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
+			 initializer = { PrayerTimesViewModel() } ,
+			 viewModelStoreOwner = context as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = context
+			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+			 initializer = { SettingsViewModel(context) } ,
+			 viewModelStoreOwner = context
 									)
 	val autoParams = remember {
 		settingViewModel.autoParams
 	}.collectAsState()
 	val state =
 		rememberPreferenceBooleanSettingState(
-				AUTO_PARAMETERS ,
-				false
+				 AUTO_PARAMETERS ,
+				 false
 											 )
 	state.value = autoParams.value
 
 	val mapOfMethods = AppConstants.getMethods()
 	val calculationMethodState =
 		rememberPreferenceStringSettingState(
-				AppConstants.CALCULATION_METHOD ,
-				"MWL"
+				 AppConstants.CALCULATION_METHOD ,
+				 "MWL"
 											)
 	val latitude = remember {
 		settingViewModel.latitude
@@ -65,139 +65,139 @@ fun CalculationMethodUI()
 		settingViewModel.longitude
 	}.collectAsState()
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
-				.fillMaxWidth()
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .fillMaxWidth()
 				) {
 		SettingsSwitch(
-				state = state ,
-				title = {
-					if (state.value)
-					{
-						Text(text = "Auto Calculation")
-					} else
-					{
-						Text(text = "Manual Calculation")
-					}
-				} ,
-				subtitle = {
-					Text(text = "Auto angles are Experimental")
-				} ,
-				onCheckedChange = {
-					if (it)
-					{
-						settingViewModel.handleEvent(
-								SettingsViewModel.SettingsEvent.AutoParameters(
-										true
-																			  )
-													)
-					} else
-					{
-						settingViewModel.handleEvent(
-								SettingsViewModel.SettingsEvent.AutoParameters(
-										false
-																			  )
-													)
-					}
+				 state = state ,
+				 title = {
+					 if (state.value)
+					 {
+						 Text(text = "Auto Calculation")
+					 } else
+					 {
+						 Text(text = "Manual Calculation")
+					 }
+				 } ,
+				 subtitle = {
+					 Text(text = "Auto angles are Experimental")
+				 } ,
+				 onCheckedChange = {
+					 if (it)
+					 {
+						 settingViewModel.handleEvent(
+								  SettingsViewModel.SettingsEvent.AutoParameters(
+										   true
+																				)
+													 )
+					 } else
+					 {
+						 settingViewModel.handleEvent(
+								  SettingsViewModel.SettingsEvent.AutoParameters(
+										   false
+																				)
+													 )
+					 }
 
-					//set method to other
-					settingViewModel.handleEvent(
-							SettingsViewModel.SettingsEvent.CalculationMethod(
-									"OTHER"
-																			 )
-												)
-					//set fajr angle
-					settingViewModel.handleEvent(
-							SettingsViewModel.SettingsEvent.FajrAngle(
-									AutoAnglesCalc().calculateFajrAngle(
-											context ,
-											latitude.value ,
-											longitude.value
-																	   ).toString()
-																	 )
-												)
-					//set ishaa angle
-					settingViewModel.handleEvent(
-							SettingsViewModel.SettingsEvent.IshaAngle(
-									AutoAnglesCalc().calculateIshaaAngle(
-											context ,
-											latitude.value ,
-											longitude.value
-																		).toString()
-																	 )
-												)
-					//set high latitude method
-					settingViewModel.handleEvent(
-							SettingsViewModel.SettingsEvent.HighLatitude(
-									"TWILIGHT_ANGLE"
-																		)
-												)
-					viewModel.handleEvent(
-							context ,
-							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-									PrayerTimesParamMapper.getParams(context)
-																					)
-										 )
-					viewModel.handleEvent(
-							context ,
-							PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-									context
+					 //set method to other
+					 settingViewModel.handleEvent(
+							  SettingsViewModel.SettingsEvent.CalculationMethod(
+									   "OTHER"
 																			   )
-										 )
-					PrivateSharedPreferences(context).saveDataBoolean(
-							AppConstants.ALARM_LOCK ,
-							false
-																	 )
-				}
+												 )
+					 //set fajr angle
+					 settingViewModel.handleEvent(
+							  SettingsViewModel.SettingsEvent.FajrAngle(
+									   AutoAnglesCalc().calculateFajrAngle(
+												context ,
+												latitude.value ,
+												longitude.value
+																		  ).toString()
+																	   )
+												 )
+					 //set ishaa angle
+					 settingViewModel.handleEvent(
+							  SettingsViewModel.SettingsEvent.IshaAngle(
+									   AutoAnglesCalc().calculateIshaaAngle(
+												context ,
+												latitude.value ,
+												longitude.value
+																		   ).toString()
+																	   )
+												 )
+					 //set high latitude method
+					 settingViewModel.handleEvent(
+							  SettingsViewModel.SettingsEvent.HighLatitude(
+									   "TWILIGHT_ANGLE"
+																		  )
+												 )
+					 viewModel.handleEvent(
+							  context ,
+							  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+									   PrayerTimesParamMapper.getParams(context)
+																					  )
+										  )
+					 viewModel.handleEvent(
+							  context ,
+							  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+									   context
+																				 )
+										  )
+					 PrivateSharedPreferences(context).saveDataBoolean(
+							  AppConstants.ALARM_LOCK ,
+							  false
+																	  )
+				 }
 					  )
 	}
 	AnimatedVisibility(
-			visible = ! state.value ,
-			enter = expandVertically() ,
-			exit = shrinkVertically()
+			 visible = ! state.value ,
+			 enter = expandVertically() ,
+			 exit = shrinkVertically()
 					  ) {
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth()
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .fillMaxWidth()
 					) {
 			SettingsList(
-					title = "Calculation Method" ,
-					subtitle = calculationMethodState.value ,
-					description = "The method used to calculate the prayer times." ,
-					items = mapOfMethods ,
-					valueState = calculationMethodState ,
-					onChange = { method : String ->
-						settingViewModel.handleEvent(
-								SettingsViewModel.SettingsEvent.CalculationMethod(
-										method
-																				 )
-													)
-						settingViewModel.handleEvent(
-								SettingsViewModel.SettingsEvent.UpdateSettings(
-										method
-																			  )
-													)
-						viewModel.handleEvent(
-								context ,
-								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-										PrayerTimesParamMapper.getParams(context)
-																						)
-											 )
-						viewModel.handleEvent(
-								context ,
-								PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-										context
+					 title = "Calculation Method" ,
+					 subtitle = calculationMethodState.value ,
+					 description = "The method used to calculate the prayer times." ,
+					 items = mapOfMethods ,
+					 valueState = calculationMethodState ,
+					 onChange = { method : String ->
+						 settingViewModel.handleEvent(
+								  SettingsViewModel.SettingsEvent.CalculationMethod(
+										   method
 																				   )
-											 )
-						PrivateSharedPreferences(context).saveDataBoolean(
-								AppConstants.ALARM_LOCK ,
-								false
-																		 )
-					} ,
-					height = 300.dp
+													 )
+						 settingViewModel.handleEvent(
+								  SettingsViewModel.SettingsEvent.UpdateSettings(
+										   method
+																				)
+													 )
+						 viewModel.handleEvent(
+								  context ,
+								  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+										   PrayerTimesParamMapper.getParams(context)
+																						  )
+											  )
+						 viewModel.handleEvent(
+								  context ,
+								  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+										   context
+																					 )
+											  )
+						 PrivateSharedPreferences(context).saveDataBoolean(
+								  AppConstants.ALARM_LOCK ,
+								  false
+																		  )
+					 } ,
+					 height = 300.dp
 						)
 		}
 	}

@@ -40,72 +40,72 @@ fun ThemeGrid(
 			 )
 {
 	Column(
-			modifier = Modifier
-				.fillMaxWidth()
+			 modifier = Modifier
+				 .fillMaxWidth()
 		  ) {
 		//name of current theme
 		Row(
-				modifier = Modifier
-					.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceBetween
+				 modifier = Modifier
+					 .fillMaxWidth() ,
+				 horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 			Row(
-					modifier = Modifier ,
-					verticalAlignment = Alignment.CenterVertically
+					 modifier = Modifier ,
+					 verticalAlignment = Alignment.CenterVertically
 			   ) {
 
 				SettingsTileIcon(icon = {
 					Icon(
-							modifier = Modifier
-								.size(24.dp) ,
-							painter = painterResource(id = R.drawable.theme_icon) ,
-							contentDescription = "Color"
+							 modifier = Modifier
+								 .size(24.dp) ,
+							 painter = painterResource(id = R.drawable.theme_icon) ,
+							 contentDescription = "Color"
 						)
 				})
 				SettingsTileTexts(title = {
 					Text(
-							text = "Color" ,
+							 text = "Color" ,
 						)
 				} ,
 								  subtitle = {
 									  Text(
-											  text = themeOptions.find { it.isSelected }?.themeName
-												  ?: "" ,
+											   text = themeOptions.find { it.isSelected }?.themeName
+												   ?: "" ,
 										  )
 								  })
 			}
 		}
 		//the row
 		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp) ,
-				horizontalArrangement = Arrangement.SpaceBetween
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp) ,
+				 horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 			themeOptions.forEachIndexed { index , themeOption ->
 				//the theme item
 				ToggleableCustomThemeItem(
-						checked = themeOption.isSelected ,
-						onCheckedChange = {
-							onThemeOptionSelected(themeOption)
-						} ,
-						color = themeOption.themeColor ,
-						//if the thtme key is SYSTEM then show the system icon
-						icon = if (themeOption.themeKey == "SYSTEM")
-						{
+						 checked = themeOption.isSelected ,
+						 onCheckedChange = {
+							 onThemeOptionSelected(themeOption)
+						 } ,
+						 color = themeOption.themeColor ,
+						 //if the thtme key is SYSTEM then show the system icon
+						 icon = if (themeOption.themeKey == "SYSTEM")
+						 {
 
-							@Composable {
-								Icon(
-										modifier = Modifier.size(24.dp) ,
-										painter = painterResource(id = R.drawable.system_icon) ,
-										contentDescription = "System" ,
-										tint = MaterialTheme.colorScheme.surface
-									)
-							}
-						} else
-						{
-							null
-						}
+							 @Composable {
+								 Icon(
+										  modifier = Modifier.size(24.dp) ,
+										  painter = painterResource(id = R.drawable.system_icon) ,
+										  contentDescription = "System" ,
+										  tint = MaterialTheme.colorScheme.surface
+									 )
+							 }
+						 } else
+						 {
+							 null
+						 }
 										 )
 			}
 		}
@@ -123,29 +123,29 @@ fun ToggleableCustomThemeItem(
 							 )
 {
 	Box(
-			modifier = modifier
-				.border(
-						width = 2.dp ,
-						color = if (checked) Color.Gray else Color.Transparent ,
-						shape = CircleShape
-					   ) ,
-			contentAlignment = Alignment.Center ,
+			 modifier = modifier
+				 .border(
+						  width = 2.dp ,
+						  color = if (checked) Color.Gray else Color.Transparent ,
+						  shape = CircleShape
+						) ,
+			 contentAlignment = Alignment.Center ,
 	   ) {
 		//the circle
 		Box(
 
-				modifier = modifier
-					.padding(6.dp)
-					.size(48.dp)
-					.clip(CircleShape)
-					.clickable {
-						onCheckedChange(! checked)
-					}
-					.background(
-							color = color ,
-							shape = CircleShape
-							   ) ,
-				contentAlignment = Alignment.Center
+				 modifier = modifier
+					 .padding(6.dp)
+					 .size(48.dp)
+					 .clip(CircleShape)
+					 .clickable {
+						 onCheckedChange(! checked)
+					 }
+					 .background(
+							  color = color ,
+							  shape = CircleShape
+								) ,
+				 contentAlignment = Alignment.Center
 		   ) {
 			//the icon
 			icon?.invoke()
@@ -160,14 +160,14 @@ fun ToggleableCustomThemeItem(
 fun ThemeGridPreview()
 {
 	ThemeGrid(
-			themeOptions = listOf(
-					ThemeOption("Light" , "light" , Color.White , true) ,
-					ThemeOption("Dark" , "dark" , Color.Black , false) ,
-					ThemeOption("Red" , "red" , Color.Red , false) ,
-					ThemeOption("Green" , "green" , Color.Green , false) ,
-					ThemeOption("Blue" , "blue" , Color.Blue , false) ,
-								 ) ,
-			onThemeOptionSelected = {}
+			 themeOptions = listOf(
+					  ThemeOption("Light" , "light" , Color.White , true) ,
+					  ThemeOption("Dark" , "dark" , Color.Black , false) ,
+					  ThemeOption("Red" , "red" , Color.Red , false) ,
+					  ThemeOption("Green" , "green" , Color.Green , false) ,
+					  ThemeOption("Blue" , "blue" , Color.Blue , false) ,
+								  ) ,
+			 onThemeOptionSelected = {}
 			 )
 }
 
@@ -177,17 +177,17 @@ fun ThemeGridPreview()
 fun ToggleableItemRowPreview()
 {
 	ToggleableCustomThemeItem(
-			checked = true ,
-			onCheckedChange = {} ,
-			color = Color.Red ,
-			icon = {
-				Icon(
-						modifier = Modifier
-							.size(24.dp) ,
-						painter = painterResource(id = R.drawable.settings_icon) ,
-						contentDescription = "Selected"
-					)
-			}
+			 checked = true ,
+			 onCheckedChange = {} ,
+			 color = Color.Red ,
+			 icon = {
+				 Icon(
+						  modifier = Modifier
+							  .size(24.dp) ,
+						  painter = painterResource(id = R.drawable.settings_icon) ,
+						  contentDescription = "Selected"
+					 )
+			 }
 							 )
 }
 
@@ -196,8 +196,8 @@ fun ToggleableItemRowPreview()
 fun ToggleableItemRowPreview2()
 {
 	ToggleableCustomThemeItem(
-			checked = false ,
-			onCheckedChange = {} ,
-			color = Color.Red
+			 checked = false ,
+			 onCheckedChange = {} ,
+			 color = Color.Red
 							 )
 }

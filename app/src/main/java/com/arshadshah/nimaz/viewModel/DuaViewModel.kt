@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.data.remote.models.Category
 import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.data.remote.repositories.DuaRepository
@@ -14,7 +15,7 @@ class DuaViewModel : ViewModel()
 {
 
 	//categories
-	private val _categories = MutableStateFlow(ArrayList<Map<String, ArrayList<Chapter>>>())
+	private val _categories = MutableStateFlow(ArrayList<Category>())
 	val categories = _categories.asStateFlow()
 
 	//chapters for a category
@@ -26,14 +27,14 @@ class DuaViewModel : ViewModel()
 	val duas = _duas.asStateFlow()
 
 	//get the categories
-	fun getCategories(){
+	fun getCategories()
+	{
 		viewModelScope.launch {
-			val response = DuaRepository.getChaptersByCategories()
+			val response = DuaRepository.getCategories()
 			if (response.data != null)
 			{
 				_categories.value = response.data
-			}
-			else
+			} else
 			{
 				Log.e("DuaViewModel" , "getCategories: ${response.message}")
 			}
@@ -41,24 +42,20 @@ class DuaViewModel : ViewModel()
 	}
 
 	//get the chapters of a category
-	fun getChapters(category : String){
+	fun getChapters(id : Int)
+	{
 		viewModelScope.launch {
-			if(category == "All Chapters")
-			{
-				val response = DuaRepository.getAllChapters()
-				_chapters.value = response
-				return@launch
-			}
-			val response = DuaRepository.getChaptersByCategory(category)
-			_chapters.value = response
+			val response = DuaRepository.getChaptersByCategory(id)
+			_chapters.value = response.data !!
 		}
 	}
 
 	//get the duas of a chapter
-	fun getDuas(chapterId : Int){
+	fun getDuas(chapterId : Int)
+	{
 		viewModelScope.launch {
 			val response = DuaRepository.getDuasOfChapter(chapterId)
-			_duas.value = response
+			_duas.value = response.data !!
 		}
 	}
 

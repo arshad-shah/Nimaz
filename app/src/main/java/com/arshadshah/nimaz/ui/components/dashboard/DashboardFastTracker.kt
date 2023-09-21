@@ -19,9 +19,9 @@ fun DashboardFastTracker()
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
 	val viewModelTracker = viewModel(
-			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.TRACKING_VIEWMODEL_KEY ,
+			 initializer = { TrackerViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 									)
 	LaunchedEffect(key1 = "getTrackerForDate") {
 		viewModelTracker.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(false))
@@ -41,9 +41,9 @@ fun DashboardFastTracker()
 
 	isFastingToday.value = isFasting.value
 	FastTrackerCard(
-			handleEvent = viewModelTracker::onEvent ,
-			dateState = dateState ,
-			isFastingToday = isFastingToday ,
-			isMenstrauting = isMenstrauting
+			 handleEvent = viewModelTracker::onEvent ,
+			 dateState = dateState ,
+			 isFastingToday = isFastingToday ,
+			 isMenstrauting = isMenstrauting
 				   )
 }

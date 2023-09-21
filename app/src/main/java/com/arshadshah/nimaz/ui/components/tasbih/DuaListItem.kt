@@ -28,57 +28,58 @@ import com.google.accompanist.placeholder.shimmer
 fun DuaListItem(dua : Dua , loading : Boolean)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(8.dp)
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .padding(8.dp)
 				) {
 		Column(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp)
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp)
 			  ) {
 			CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 				MarkdownText(
-						markdown = dua.arabic_dua ,
-						modifier = Modifier
-							.padding(4.dp)
-							.fillMaxWidth() ,
-						fontSize = 28.sp ,
-						fontResource = R.font.uthman ,
+						 markdown = dua.arabic_dua ,
+						 modifier = Modifier
+							 .padding(4.dp)
+							 .fillMaxWidth() ,
+						 fontSize = 28.sp ,
+						 fontResource = R.font.uthman ,
 							)
 			}
 
-			MarkdownText(markdown = dua.english_translation ,
+			MarkdownText(
+					 markdown = dua.english_translation ,
+					 modifier = Modifier
+						 .padding(4.dp)
+						 .fillMaxWidth()
+						 .placeholder(
+								  visible = loading ,
+								  color = MaterialTheme.colorScheme.outline ,
+								  shape = RoundedCornerShape(4.dp) ,
+								  highlight = PlaceholderHighlight.shimmer(
+										   highlightColor = Color.White ,
+																		  )
+									 ) ,
+					 fontSize = 18.sp ,
+					 fontResource = R.font.nunito ,
+						)
+			Row {
+				Text(
+						 text = "Reference: ${dua.english_reference}" ,
+						 style = MaterialTheme.typography.titleSmall ,
 						 modifier = Modifier
 							 .padding(4.dp)
 							 .fillMaxWidth()
 							 .placeholder(
-									 visible = loading ,
-									 color = MaterialTheme.colorScheme.outline ,
-									 shape = RoundedCornerShape(4.dp) ,
-									 highlight = PlaceholderHighlight.shimmer(
-											 highlightColor = Color.White ,
-																			 )
-												 ) ,
-						 fontSize = 18.sp ,
-						 fontResource = R.font.nunito ,
-						 )
-			Row {
-				Text(
-						text = "Reference: ${dua.english_reference}" ,
-						style = MaterialTheme.typography.titleSmall ,
-						modifier = Modifier
-							.padding(4.dp)
-							.fillMaxWidth()
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 ) ,
 					)
 			}
 		}
@@ -91,13 +92,13 @@ fun DuaListItem(dua : Dua , loading : Boolean)
 fun DuaListItemPreview()
 {
 	val dua = Dua(
-			1 ,
-			1 ,
-			0 ,
-			"اللهم صل على محمد وآل محمد" ,
-			"O Allah, <small>send</small> blessings on Muhammad and the family of Muhammad" ,
-			"O Allah, send blessings on Muhammad and the family of Muhammad" ,
-			category = "Salawat" ,
+			 1 ,
+			 1 ,
+			 0 ,
+			 "اللهم صل على محمد وآل محمد" ,
+			 "O Allah, <small>send</small> blessings on Muhammad and the family of Muhammad" ,
+			 "O Allah, send blessings on Muhammad and the family of Muhammad" ,
+			 category = "Salawat" ,
 				 )
 	DuaListItem(dua , false)
 }

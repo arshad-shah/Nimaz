@@ -5,7 +5,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.arshadshah.nimaz.constants.AppConstants.DATABASE_VERSION
 import com.arshadshah.nimaz.data.local.dao.AyaDao
+import com.arshadshah.nimaz.data.local.dao.CategoryDao
 import com.arshadshah.nimaz.data.local.dao.DuaDao
 import com.arshadshah.nimaz.data.local.dao.FastTrackerDao
 import com.arshadshah.nimaz.data.local.dao.JuzDao
@@ -14,6 +16,7 @@ import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.dao.TasbihTrackerDao
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalCategory
 import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
@@ -24,13 +27,13 @@ import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 
 @TypeConverters(
-		TimestampTypeConvertor::class ,
-		TypeConvertorForListOfDuas::class
+		 TimestampTypeConvertor::class ,
+		 TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
-		version = 13 ,
-		exportSchema = false
+		 entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class , LocalCategory::class] ,
+		 version = DATABASE_VERSION ,
+		 exportSchema = true ,
 		 )
 abstract class AppDatabase : RoomDatabase()
 {
@@ -43,6 +46,7 @@ abstract class AppDatabase : RoomDatabase()
 	abstract val prayersTracker : PrayerTrackerDao
 	abstract val fastTracker : FastTrackerDao
 	abstract val tasbihTracker : TasbihTrackerDao
+	abstract val category : CategoryDao
 
 	class Migration1To2 : Migration(1 , 2)
 	{

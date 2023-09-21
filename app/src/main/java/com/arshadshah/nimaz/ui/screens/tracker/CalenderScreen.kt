@@ -36,9 +36,9 @@ fun CalenderScreen(paddingValues : PaddingValues)
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
 	val viewModel = viewModel(
-			key = TRACKING_VIEWMODEL_KEY ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = TRACKING_VIEWMODEL_KEY ,
+			 initializer = { TrackerViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	//call this effect only once
 	LaunchedEffect(Unit) {
@@ -61,28 +61,28 @@ fun CalenderScreen(paddingValues : PaddingValues)
 	}.collectAsState()
 
 	LazyColumn(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(paddingValues)
-				.testTag(TEST_TAG_CALENDER) ,
-			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Top
+			 modifier = Modifier
+				 .fillMaxSize()
+				 .padding(paddingValues)
+				 .testTag(TEST_TAG_CALENDER) ,
+			 horizontalAlignment = Alignment.CenterHorizontally ,
+			 verticalArrangement = Arrangement.Top
 			  ) {
 		item {
 			Calender(
-					handleEvents = viewModel::onEvent ,
-					progressForMonth = progressForMonth ,
-					fastProgressForMonth = fastProgressForMonth
+					 handleEvents = viewModel::onEvent ,
+					 progressForMonth = progressForMonth ,
+					 fastProgressForMonth = fastProgressForMonth
 					)
 		}
 		item {
 			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge.copy(
-							topStart = CornerSize(0.dp) ,
-							topEnd = CornerSize(0.dp) ,
-																) ,
-					modifier = Modifier
-						.fillMaxWidth()
+					 shape = MaterialTheme.shapes.extraLarge.copy(
+							  topStart = CornerSize(0.dp) ,
+							  topEnd = CornerSize(0.dp) ,
+																 ) ,
+					 modifier = Modifier
+						 .fillMaxWidth()
 						) {
 				DashboardPrayerTracker()
 

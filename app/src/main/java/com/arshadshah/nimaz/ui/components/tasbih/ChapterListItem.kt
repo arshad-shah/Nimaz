@@ -25,61 +25,65 @@ import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 
 @Composable
-fun ChapterListItem(chapter : Chapter , onNavigateToChapter : (Int) -> Unit , loading : Boolean)
+fun ChapterListItem(
+	chapter : Chapter ,
+	onNavigateToChapter : (Int , String) -> Unit ,
+	loading : Boolean ,
+				   )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(8.dp)
-				.clickable {
-					onNavigateToChapter(chapter._id)
-				}
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .padding(8.dp)
+				 .clickable {
+					 onNavigateToChapter(chapter._id , chapter.category)
+				 }
 				) {
 		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp) ,
-				horizontalArrangement = Arrangement.SpaceBetween ,
-				verticalAlignment = Alignment.CenterVertically
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp) ,
+				 horizontalArrangement = Arrangement.SpaceBetween ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			Column(
-					modifier = Modifier
-						.weight(1f)
-						.padding(end = 8.dp) ,
+					 modifier = Modifier
+						 .weight(1f)
+						 .padding(end = 8.dp) ,
 				  ) {
 				Text(
-						text = chapter.english_title ,
-						style = MaterialTheme.typography.titleMedium ,
-						modifier = Modifier
-							.padding(4.dp)
-							.fillMaxWidth()
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
+						 text = chapter.english_title ,
+						 style = MaterialTheme.typography.titleMedium ,
+						 modifier = Modifier
+							 .padding(4.dp)
+							 .fillMaxWidth()
+							 .placeholder(
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 ) ,
 					)
 			}
 			//arrow icon to navigate to chapter
 			Icon(
-					painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-					contentDescription = "Navigate to chapter" ,
-					modifier = Modifier
-						.align(Alignment.CenterVertically)
-						.size(24.dp)
-						.fillMaxWidth()
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
+					 painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+					 contentDescription = "Navigate to chapter" ,
+					 modifier = Modifier
+						 .align(Alignment.CenterVertically)
+						 .size(24.dp)
+						 .fillMaxWidth()
+						 .placeholder(
+								  visible = loading ,
+								  color = MaterialTheme.colorScheme.outline ,
+								  shape = RoundedCornerShape(4.dp) ,
+								  highlight = PlaceholderHighlight.shimmer(
+										   highlightColor = Color.White ,
+																		  )
+									 )
 				)
 		}
 	}
