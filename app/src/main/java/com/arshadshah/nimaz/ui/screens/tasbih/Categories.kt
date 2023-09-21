@@ -31,7 +31,10 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.viewModel.DuaViewModel
 
 @Composable
-fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (String, Int) -> Unit)
+fun Categories(
+	paddingValues : PaddingValues ,
+	onNavigateToChapterListScreen : (String , Int) -> Unit ,
+			  )
 {
 	val viewModel = viewModel(
 			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
@@ -56,12 +59,15 @@ fun Categories(paddingValues : PaddingValues , onNavigateToChapterListScreen : (
 				 contentPadding = paddingValues
 						) {
 			items(categories.value.size) {
-					Category(
-							 title = categories.value[it].name ,
-							 onClicked = {
-								 onNavigateToChapterListScreen(categories.value[it].name, categories.value[it].id)
-							 }
-							)
+				Category(
+						 title = categories.value[it].name ,
+						 onClicked = {
+							 onNavigateToChapterListScreen(
+									  categories.value[it].name ,
+									  categories.value[it].id
+														  )
+						 }
+						)
 			}
 		}
 	}

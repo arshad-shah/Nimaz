@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.widgets.components
+package com.arshadshah.nimaz.widgets.prayertimesthin.components
 
 import androidx.compose.runtime.Composable
 import androidx.glance.GlanceModifier
@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun WidgetPrayerTimeRowList(data : PrayerTimes)
 {
-	val newIshaTime = if (data.isha!!.hour >= 22)
+	val newIshaTime = if (data.isha !!.hour >= 22)
 	{
 		data.maghrib?.plusMinutes(60)
 	} else
@@ -24,30 +24,35 @@ fun WidgetPrayerTimeRowList(data : PrayerTimes)
 		data.isha
 	}
 	Row(
-			 modifier = GlanceModifier.fillMaxSize().appWidgetBackground().background(GlanceTheme.colors.background).clickable(
+			 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
+				 .background(GlanceTheme.colors.background).clickable(
 					  onClick = actionStartActivity<MainActivity>()
-																															   )
+																	 )
 	   ) {
 		val modifier = GlanceModifier.defaultWeight()
-		WidgetPrayerTimeColumn(name = "Fajr" , time = data.fajr!!.format(DateTimeFormatter.ofPattern("hh:mm")),modifier)
+		WidgetPrayerTimeColumn(
+				 name = "Fajr" ,
+				 time = data.fajr !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
+				 modifier
+							  )
 		WidgetPrayerTimeColumn(
 				 name = "Dhuhr" ,
-				 time = data.dhuhr!!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
+				 time = data.dhuhr !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
 				 modifier = modifier
 							  )
 		WidgetPrayerTimeColumn(
 				 name = "Asr" ,
-				 time = data.asr!!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
+				 time = data.asr !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
 				 modifier = modifier
 							  )
 		WidgetPrayerTimeColumn(
 				 name = "Maghrib" ,
-				 time = data.maghrib!!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
+				 time = data.maghrib !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
 				 modifier = modifier
 							  )
 		WidgetPrayerTimeColumn(
 				 name = "Isha" ,
-				 time = newIshaTime!!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
+				 time = newIshaTime !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
 				 modifier = modifier
 							  )
 	}

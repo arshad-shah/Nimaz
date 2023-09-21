@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.data.remote.repositories.PrayerTrackerRepository
 import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -442,9 +443,7 @@ class TrackerViewModel : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val dataStore = LocalDataStore.getDataStore()
-				val trackers = dataStore.getAllTrackers()
-				_allTrackers.value = trackers
+				_allTrackers.value = PrayerTrackerRepository.getAllTrackers()
 			} catch (e : Exception)
 			{
 				_trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
@@ -458,9 +457,7 @@ class TrackerViewModel : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val dataStore = LocalDataStore.getDataStore()
-				val trackerExists = dataStore.checkIfTrackerExists(date)
-				if (! trackerExists)
+				if (! PrayerTrackerRepository.trackerExistsForDate(date))
 				{
 					//chyeck if the date is inthe future
 					val today = LocalDate.now()
@@ -480,7 +477,7 @@ class TrackerViewModel : ViewModel()
 					} else
 					{
 						val tracker = PrayerTracker(date)
-						dataStore.saveTracker(tracker)
+						PrayerTrackerRepository.saveTrackerForDate(tracker)
 						_trackerState.value = TrackerState.Tracker(tracker)
 						_dateState.value = date
 						_fajrState.value = false
@@ -493,7 +490,7 @@ class TrackerViewModel : ViewModel()
 					}
 				} else
 				{
-					val tracker = dataStore.getTrackerForDate(date)
+					val tracker = PrayerTrackerRepository.getTrackerForDate(date)
 					_dateState.value = date
 					_fajrState.value = tracker.fajr
 					_zuhrState.value = tracker.dhuhr
@@ -517,14 +514,9 @@ class TrackerViewModel : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val dataStore = LocalDataStore.getDataStore()
-				//check if the tracker exists
-				val trackerExists = dataStore.checkIfTrackerExists(tracker.date)
-				if (trackerExists)
+				if (PrayerTrackerRepository.trackerExistsForDate(tracker.date))
 				{
-					dataStore.updateTracker(tracker)
-					//get the updated tracker
-					val updatedTracker = dataStore.getTrackerForDate(tracker.date)
+					val updatedTracker = PrayerTrackerRepository.updateTracker(tracker)
 					_trackerState.value = TrackerState.Tracker(updatedTracker)
 					_dateState.value = tracker.date
 					_fajrState.value = tracker.fajr
@@ -536,9 +528,8 @@ class TrackerViewModel : ViewModel()
 					_isMenstrauting.value = tracker.isMenstruating
 				} else
 				{
-					dataStore.saveTracker(tracker)
 					//get the updated tracker
-					val updatedTracker = dataStore.getTrackerForDate(tracker.date)
+					val updatedTracker = PrayerTrackerRepository.updateTracker(tracker)
 					_trackerState.value = TrackerState.Tracker(updatedTracker)
 					_dateState.value = tracker.date
 					_fajrState.value = tracker.fajr
@@ -562,10 +553,7 @@ class TrackerViewModel : ViewModel()
 		viewModelScope.launch(Dispatchers.IO) {
 			try
 			{
-				val dataStore = LocalDataStore.getDataStore()
-				dataStore.saveTracker(tracker)
-				//get the updated tracker
-				val updatedTracker = dataStore.getTrackerForDate(tracker.date)
+				val updatedTracker = PrayerTrackerRepository.saveTrackerForDate(tracker)
 				_dateState.value = tracker.date
 				_fajrState.value = tracker.fajr
 				_zuhrState.value = tracker.dhuhr

@@ -776,7 +776,7 @@ fun NavigationGraph(
 					 else -> ExitTransition.None
 				 }
 			 }
-				   ) {
+		   ) {
 
 		composable(BottomNavItem.Dashboard.screen_route) {
 			Dashboard(
@@ -1019,7 +1019,7 @@ fun NavigationGraph(
 					 paddingValues = paddingValues ,
 					  )
 			//pass the category name to the next screen
-			{ category : String, id: Int ->
+			{ category : String , id : Int ->
 				Log.d("Category" , category)
 				navController.navigate(
 						 CHAPTERS_SCREEN_ROUTE
@@ -1027,7 +1027,7 @@ fun NavigationGraph(
 									  "{title}" ,
 									  category
 									 )
-							 .replace("{id}", id.toString())
+							 .replace("{id}" , id.toString())
 									  )
 			}
 		}
@@ -1036,7 +1036,7 @@ fun NavigationGraph(
 			ChapterList(
 					 categoryId = it.arguments?.getString("id") !! ,
 					 paddingValues = paddingValues ,
-					 onNavigateToChapter = { chapterId : Int, categoryName: String ->
+					 onNavigateToChapter = { chapterId : Int , categoryName : String ->
 						 navController.navigate(
 								  CHAPTER_SCREEN_ROUTE
 									  .replace(

@@ -5,8 +5,10 @@ import com.arshadshah.nimaz.constants.AppConstants
 
 object ApolloClientUtil
 {
+
 	private val apolloClient : ApolloClient = ApolloClient.Builder()
-			.serverUrl(AppConstants.BASE_URL)
-			.build()
+		.serverUrl(AppConstants.BASE_URL)
+		.build()
+
 	fun getApolloClient() : ApolloClient = apolloClient
 }

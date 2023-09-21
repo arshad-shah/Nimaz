@@ -11,7 +11,7 @@ import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.type.Parameters
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import com.arshadshah.nimaz.widgets.PrayerTimeWorker
+import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

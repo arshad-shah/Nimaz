@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.widgets
+package com.arshadshah.nimaz.widgets.prayertimesthin
 
 import android.content.Context
 import android.util.Log
@@ -14,35 +14,39 @@ import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import java.time.Duration
 
-class PrayerTimeWorker(private val context: Context , workerParams: WorkerParameters) : CoroutineWorker(context , workerParams)
+class PrayerTimeWorker(private val context : Context , workerParams : WorkerParameters) :
+	CoroutineWorker(context , workerParams)
 {
-	companion object{
+
+	companion object
+	{
 
 		private val uniqueWorkName = PrayerTimeWorker::class.java.simpleName
 
-		fun enqueue(context: Context, force: Boolean = false)
+		fun enqueue(context : Context , force : Boolean = false)
 		{
 			val manager = WorkManager.getInstance(context)
 			val requestBuilder = PeriodicWorkRequestBuilder<PrayerTimeWorker>(
 					 Duration.ofMinutes(30)
-																		  )
+																			 )
 			var workPolicy = ExistingPeriodicWorkPolicy.KEEP
 
 			// Replace any enqueued work and expedite the request
-			if (force) {
-				workPolicy = ExistingPeriodicWorkPolicy.UPDATE
+			if (force)
+			{
+				workPolicy = ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
 			}
 
 			manager.enqueueUniquePeriodicWork(
-					 uniqueWorkName,
-					 workPolicy,
+					 uniqueWorkName ,
+					 workPolicy ,
 					 requestBuilder.build()
 											 )
 
 			Log.d("PrayerTimeWorker" , "enqueue: PrayerTimeWorker enqueued")
 		}
 
-		fun cancel(context: Context)
+		fun cancel(context : Context)
 		{
 			WorkManager.getInstance(context).cancelUniqueWork(uniqueWorkName)
 
@@ -50,12 +54,13 @@ class PrayerTimeWorker(private val context: Context , workerParams: WorkerParame
 		}
 	}
 
-	private suspend fun setWidgetState(glanceIds: List<GlanceId> , newState: PrayerTimesWidget) {
+	private suspend fun setWidgetState(glanceIds : List<GlanceId> , newState : PrayerTimesWidget)
+	{
 		glanceIds.forEach { glanceId ->
 			updateAppWidgetState(
-					 context = context,
-					 definition = PrayerTimesStateDefinition,
-					 glanceId = glanceId,
+					 context = context ,
+					 definition = PrayerTimesStateDefinition ,
+					 glanceId = glanceId ,
 					 updateState = { newState }
 								)
 		}
@@ -63,24 +68,31 @@ class PrayerTimeWorker(private val context: Context , workerParams: WorkerParame
 	}
 
 
-	override suspend fun doWork(): Result
+	override suspend fun doWork() : Result
 	{
 		val manager = GlanceAppWidgetManager(context)
 		val glanceIds = manager.getGlanceIds(NimazWidget::class.java)
-		return try {
+		return try
+		{
 			// Update state to indicate loading
-			setWidgetState(glanceIds, PrayerTimesWidget.Loading)
+			setWidgetState(glanceIds , PrayerTimesWidget.Loading)
 			// Update state with new data
-			setWidgetState(glanceIds, PrayerTimesWidget.Success(PrayerTimesRepository.getPrayerTimes(context).data!!))
+			setWidgetState(
+					 glanceIds ,
+					 PrayerTimesWidget.Success(PrayerTimesRepository.getPrayerTimes(context).data !!)
+						  )
 
 			Result.success()
-		} catch (e: Exception) {
-			setWidgetState(glanceIds, PrayerTimesWidget.Error(e.message.orEmpty()))
-			if (runAttemptCount < 20) {
+		} catch (e : Exception)
+		{
+			setWidgetState(glanceIds , PrayerTimesWidget.Error(e.message.orEmpty()))
+			if (runAttemptCount < 20)
+			{
 				// Exponential backoff strategy will avoid the request to repeat
 				// too fast in case of failures.
 				Result.retry()
-			} else {
+			} else
+			{
 				Result.failure()
 			}
 		}

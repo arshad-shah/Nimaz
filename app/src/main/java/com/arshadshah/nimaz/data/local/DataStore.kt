@@ -48,6 +48,7 @@ class DataStore(db : AppDatabase)
 	suspend fun getCategory(id : Int) = categoryDao.getCategory(id).toCategory()
 
 	suspend fun getCategory(name : String) = categoryDao.getCategory(name).toCategory()
+
 	//getAllDuas
 	suspend fun getAllDuas() = duaDao.getAllDuas().map { it.toDua() }
 
@@ -523,9 +524,9 @@ private fun LocalTasbih.toTasbih() = Tasbih(
 private fun Category.toLocalCategory() = LocalCategory(
 		 id = id ,
 		 name = name ,
-													 )
+													  )
 
 private fun LocalCategory.toCategory() = Category(
 		 id = id ,
 		 name = name ,
-												  )
+												 )

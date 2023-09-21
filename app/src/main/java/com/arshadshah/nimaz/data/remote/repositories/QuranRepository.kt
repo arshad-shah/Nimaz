@@ -18,11 +18,11 @@ object QuranRepository
 			val surahs = ArrayList<Surah>()
 			response.data?.getAllSura?.map { it ->
 				val surah = Surah(
-						 it!!.id ,
+						 it !!.id ,
 						 it.ayaAmount ,
 						 it.start ,
 						 it.name ,
-						 it.ename,
+						 it.ename ,
 						 it.tname ,
 						 it.type ,
 						 it.order ,
@@ -31,7 +31,7 @@ object QuranRepository
 				surahs.add(surah)
 			}
 			ApiResponse.Success(surahs)
-		}catch (e : Exception)
+		} catch (e : Exception)
 		{
 			throw Exception(e.message)
 		}
@@ -46,7 +46,7 @@ object QuranRepository
 			val Juzs = ArrayList<Juz>()
 			response.data?.getAllJuz?.map { it ->
 				val juz = Juz(
-						 it!!.id ,
+						 it !!.id ,
 						 it.name ,
 						 it.tname ,
 						 it.juzStartAyaInQuran ,
@@ -54,7 +54,7 @@ object QuranRepository
 				Juzs.add(juz)
 			}
 			ApiResponse.Success(Juzs)
-		}catch (e : Exception)
+		} catch (e : Exception)
 		{
 			throw Exception(e.message)
 		}
@@ -73,7 +73,7 @@ object QuranRepository
 			val ayas = ArrayList<Aya>()
 			responses.data?.getListAyaForSura?.map { it ->
 				val aya = Aya(
-						 it!!.id ,
+						 it !!.id ,
 						 // TODO: Possible issue here
 						 it.ayaNumberInSura ,
 						 it.arabic ,
@@ -93,7 +93,7 @@ object QuranRepository
 				ayas.add(aya)
 			}
 			ApiResponse.Success(ayas)
-		}catch (e : Exception)
+		} catch (e : Exception)
 		{
 			throw Exception(e.message)
 		}
@@ -110,7 +110,7 @@ object QuranRepository
 			val ayas = ArrayList<Aya>()
 			responses.data?.getListAyaForJuz?.map { it ->
 				val aya = Aya(
-						 it!!.id ,
+						 it !!.id ,
 						 it.ayaNumberInSura ,
 						 it.arabic ,
 						 it.english ,
@@ -129,7 +129,7 @@ object QuranRepository
 				ayas.add(aya)
 			}
 			ApiResponse.Success(ayas)
-		}catch (e : Exception)
+		} catch (e : Exception)
 		{
 			throw Exception(e.message)
 		}

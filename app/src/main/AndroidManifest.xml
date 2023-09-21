@@ -43,7 +43,7 @@
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
             android:enabled="true" />
 
-        <receiver android:name=".widgets.NimazWidgetReciever"
+        <receiver android:name=".widgets.prayertimesthin.NimazWidgetReciever"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -51,6 +51,16 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/nimaz_app_widget_info" />
+        </receiver>
+
+        <receiver android:name=".widgets.prayertimestrackerthin.NimazWidgetPrayerReciever"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/nimaz_app_tracker_widget_info" />
         </receiver>
         <receiver
             android:name=".utils.recievers.BootReciever"
