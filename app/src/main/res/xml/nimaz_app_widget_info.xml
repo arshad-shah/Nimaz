@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/glance_default_loading_layout"
+    android:initialLayout="@layout/nimaz"
     android:description="@string/app_widget_description"
     android:initialKeyguardLayout="@layout/nimaz"
     android:previewImage="@layout/nimaz"
+    android:previewLayout="@layout/nimaz"
     android:resizeMode="horizontal"
     android:minWidth="350dp"
     android:updatePeriodMillis="7200000"
