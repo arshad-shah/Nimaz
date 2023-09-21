@@ -26,14 +26,14 @@ class Alarms
 		// get alarm manager
 		val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
 		alarmManager.setAlarmClock(
-				AlarmManager.AlarmClockInfo(timeToNotify , pendingIntent) ,
-				pendingIntent
+				 AlarmManager.AlarmClockInfo(timeToNotify , pendingIntent) ,
+				 pendingIntent
 								  )
 
 		//format time by converting to LocalDateTime
 		val time = LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(timeToNotify) ,
-				ZoneId.systemDefault()
+				 Instant.ofEpochMilli(timeToNotify) ,
+				 ZoneId.systemDefault()
 										  )
 			.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
 		//logs

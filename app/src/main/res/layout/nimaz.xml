@@ -43,7 +43,7 @@
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
-            tools:text="3:46 AM" />
+            tools:text="03:46" />
     </LinearLayout>
 
     <LinearLayout
@@ -81,7 +81,7 @@
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
-            tools:text="3:46 AM" />
+            tools:text="03:46" />
     </LinearLayout>
 
     <LinearLayout
@@ -119,7 +119,7 @@
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
-            tools:text="3:46 AM" />
+            tools:text="03:46" />
     </LinearLayout>
 
     <LinearLayout
@@ -157,7 +157,7 @@
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
-            tools:text="3:46 AM" />
+            tools:text="03:46" />
 
     </LinearLayout>
 
@@ -196,7 +196,7 @@
             android:textAlignment="center"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
-            tools:text="10:46 AM" />
+            tools:text="03:46" />
     </LinearLayout>
 
 </LinearLayout>

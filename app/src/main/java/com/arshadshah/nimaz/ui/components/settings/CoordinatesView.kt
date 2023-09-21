@@ -30,39 +30,39 @@ fun CoordinatesView(latitudeState : State<Double> , longitudeState : State<Doubl
 	val longitudeRounded = String.format("%.4f" , longitudeState.value)
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
-				.height(IntrinsicSize.Max)
-				.fillMaxWidth()
-				.testTag("coordinatesView")
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .height(IntrinsicSize.Max)
+				 .fillMaxWidth()
+				 .testTag("coordinatesView")
 				) {
 		Row(
-				horizontalArrangement = Arrangement.Center ,
-				modifier = Modifier.fillMaxWidth() ,
-				verticalAlignment = Alignment.CenterVertically
+				 horizontalArrangement = Arrangement.Center ,
+				 modifier = Modifier.fillMaxWidth() ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			CustomText(
-					modifier = Modifier
-						.weight(0.5f)
-						.padding(8.dp) ,
-					textModifier = Modifier.testTag("latitudeText") ,
-					text = latitudeRounded ,
-					heading = "Latitude"
+					 modifier = Modifier
+						 .weight(0.5f)
+						 .padding(8.dp) ,
+					 textModifier = Modifier.testTag("latitudeText") ,
+					 text = latitudeRounded ,
+					 heading = "Latitude"
 					  )
 			Divider(
-					modifier = Modifier
-						.fillMaxHeight()
-						.width(1.dp) ,
-					color = MaterialTheme.colorScheme.outline
+					 modifier = Modifier
+						 .fillMaxHeight()
+						 .width(1.dp) ,
+					 color = MaterialTheme.colorScheme.outline
 				   )
 			CustomText(
-					modifier = Modifier
-						.weight(0.5f)
-						.padding(8.dp) ,
-					textModifier = Modifier.testTag("longitudeText") ,
-					text = longitudeRounded ,
-					heading = "Longitude"
+					 modifier = Modifier
+						 .weight(0.5f)
+						 .padding(8.dp) ,
+					 textModifier = Modifier.testTag("longitudeText") ,
+					 text = longitudeRounded ,
+					 heading = "Longitude"
 					  )
 		}
 	}

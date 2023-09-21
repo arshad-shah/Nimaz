@@ -1,0 +1,225 @@
+# This file was generated. Do not edit manually.
+
+schema {
+    query: Query
+}
+
+type Category {
+    id: Int!
+    name: String!
+}
+
+type Chapter {
+    arabicTitle: String
+    category: Category
+    duas: [Dua]
+    englishTitle: String
+    id: Int!
+}
+
+type Dua {
+    arabicDua: String!
+    englishReference: String!
+    englishTranslation: String!
+    favourite: Int!
+    id: Int!
+}
+
+type Juz {
+    id: Int!
+    juzStartAyaInQuran: Int!
+    name: String!
+    tname: String!
+}
+
+# method enum
+enum Method {
+    MWL,
+    EGYPTIAN,
+    KARACHI,
+    MAKKAH,
+    DUBAI,
+    ISNA,
+    KUWAIT,
+    TEHRAN,
+    SHIA,
+    GULF,
+    QATAR,
+    SINGAPORE,
+    FRANCE,
+    TURKEY,
+    RUSSIA,
+    MOONSIGHTING,
+    IRELAND,
+    OTHER
+}
+
+# Madhab enum
+enum Madhab {
+    HANAFI,
+    SHAFI
+}
+
+# HighLatitudeRule enum
+enum HighLatitudeRule {
+    MIDDLE_OF_THE_NIGHT,
+    SEVENTH_OF_THE_NIGHT,
+    TWILIGHT_ANGLE
+}
+
+# Adjustments
+type Adjustments {
+    fajr: Int!
+    sunrise: Int!
+    dhuhr: Int!
+    asr: Int!
+    maghrib: Int!
+    isha: Int!
+}
+
+# coordinates
+type Coordinates {
+    latitude: Float!
+    longitude: Float!
+}
+
+# CalculationParameters
+type CalculationParameters {
+    fajrAngle: Float!
+    ishaAngle: Float!
+    ishaInterval: Int!
+    method: Method!
+    madhab: Madhab!
+    highLatitudeRule: HighLatitudeRule!
+    adjustments: Adjustments!
+    coordinates: Coordinates!
+}
+input Parameters {
+    latitude: Float!
+    longitude: Float!
+    date: String!
+    fajrAngle: Float!
+    ishaAngle: Float!
+    method: Method!
+    madhab: Madhab!
+    highLatitudeRule: HighLatitudeRule!
+    fajrAdjustment: Int!
+    sunriseAdjustment: Int!
+    dhuhrAdjustment: Int!
+    asrAdjustment: Int!
+    maghribAdjustment: Int!
+    ishaAdjustment: Int!
+    ishaInterval: Int!
+}
+
+type PrayerTime {
+    time: String!
+    name: String!
+}
+
+type PrayerTimes {
+    fajr: String!
+    sunrise: String!
+    dhuhr: String!
+    asr: String!
+    maghrib: String!
+    isha: String!
+    nextPrayer: PrayerTime!
+    currentPrayer: PrayerTime!
+}
+
+type Bearing {
+    bearing: Float!
+}
+
+type PrayerTimesDayOfMonth{
+    date: String!
+    fajr: String!
+    sunrise: String!
+    dhuhr: String!
+    asr: String!
+    maghrib: String!
+    isha: String!
+}
+
+
+"Query root"
+type Query {
+    getAllCategories: [Category]
+    getChaptersByCategory(id: Int!): [Chapter]
+    getCategoryNameForAChapter(id: Int!): String
+
+    getAllJuz: [Juz]
+    getAllSura: [Sura]
+    getChapterById(id: Int!): [Dua]
+    getChapters: [Chapter]
+    getListAyaForJuz(juzNumber: Int!): [QuranText]
+    getListAyaForSura(suraNumber: Int!): [QuranText]
+
+    getMethods: [CalculationParameters]
+    getMethod(name: String!): CalculationParameters
+    getPrayerTimes(parameters: Parameters!): PrayerTimes
+    getPrayerTimesByMethod(
+        method: Method!
+        latitude: Float!
+        longitude: Float!
+        date: String!
+    ): PrayerTimes
+
+    getNextPrayerTime(
+        method: Method!
+        latitude: Float!
+        longitude: Float!
+        date: String!
+    ): PrayerTime
+
+    getCurrentPrayerTime(
+        method: Method!
+        latitude: Float!
+        longitude: Float!
+        date: String!
+    ): PrayerTime
+
+    getQiblaDirection(
+        latitude: Float!,
+        longitude: Float!
+    ) : Bearing
+
+    getPrayerTimesForMonth(
+        method: Method!
+        latitude: Float!
+        longitude: Float!
+        date: String!
+    ): [PrayerTimesDayOfMonth]
+
+    getPrayerTimesForMonthCustom(parameters: Parameters!): [PrayerTimesDayOfMonth]
+}
+
+type QuranText {
+    arabic: String!
+    audioFileLocation: String!
+    ayaNumberInSura: Int!
+    bookmark: Boolean!
+    english: String!
+    favorite: Boolean!
+    id: Int!
+    juzNumber: Int!
+    note: String!
+    ruku: Int!
+    sajda: Boolean!
+    sajdaType: String!
+    suraNumber: Int!
+    urdu: String!
+}
+
+type Sura {
+    ayaAmount: Int!
+    ename: String!
+    id: Int!
+    name: String!
+    order: Int!
+    rukus: Int!
+    start: Int!
+    tname: String!
+    type: String!
+}

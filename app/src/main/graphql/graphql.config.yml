@@ -1,0 +1,6 @@
+schema: schema.graphqls
+documents: '**/*.graphqls'
+extensions:
+  endpoints:
+    default:
+      url: https://nimazapi.arshadshah.com/gui

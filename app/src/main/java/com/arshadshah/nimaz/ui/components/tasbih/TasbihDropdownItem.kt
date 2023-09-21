@@ -56,106 +56,106 @@ fun TasbihDropdownItem(
 {
 	val currentItem = rememberUpdatedState(newValue = item)
 	val dismissState = rememberDismissState(
-			confirmStateChange = {
-				if (it == DismissValue.DismissedToEnd)
-				{
-					onEdit(currentItem.value)
-				} else if (it == DismissValue.DismissedToStart)
-				{
-					onDelete(currentItem.value)
-				}
-				false
-			}
+			 confirmStateChange = {
+				 if (it == DismissValue.DismissedToEnd)
+				 {
+					 onEdit(currentItem.value)
+				 } else if (it == DismissValue.DismissedToStart)
+				 {
+					 onDelete(currentItem.value)
+				 }
+				 false
+			 }
 										   )
 
 	SwipeToDismiss(
-			state = dismissState ,
-			background = {
-				SwipeBackground(dismissState = dismissState)
-			} ,
-			dismissContent = {
-				ElevatedCard(
-						shape = MaterialTheme.shapes.extraLarge ,
-						elevation = CardDefaults.elevatedCardElevation(
-								defaultElevation = 4.dp ,
-																	  ) ,
-						modifier = Modifier
-							.padding(8.dp)
-							.clickable { onClick(currentItem.value) }
-							) {
+			 state = dismissState ,
+			 background = {
+				 SwipeBackground(dismissState = dismissState)
+			 } ,
+			 dismissContent = {
+				 ElevatedCard(
+						  shape = MaterialTheme.shapes.extraLarge ,
+						  elevation = CardDefaults.elevatedCardElevation(
+								   defaultElevation = 4.dp ,
+																		) ,
+						  modifier = Modifier
+							  .padding(8.dp)
+							  .clickable { onClick(currentItem.value) }
+							 ) {
 
-					//a row to contain the tasbih name, goal and count and the delete button
-					Row(
-							modifier = Modifier
-								.padding(8.dp)
-								.fillMaxWidth() ,
-							verticalAlignment = Alignment.CenterVertically
-					   ) {
-						if (currentItem.value.count == currentItem.value.goal)
-						{
-							Icon(
-									imageVector = Icons.Default.CheckCircle ,
-									contentDescription = "Completed" ,
-									modifier = Modifier
-										.size(24.dp)
+					 //a row to contain the tasbih name, goal and count and the delete button
+					 Row(
+							  modifier = Modifier
+								  .padding(8.dp)
+								  .fillMaxWidth() ,
+							  verticalAlignment = Alignment.CenterVertically
+						) {
+						 if (currentItem.value.count == currentItem.value.goal)
+						 {
+							 Icon(
+									  imageVector = Icons.Default.CheckCircle ,
+									  contentDescription = "Completed" ,
+									  modifier = Modifier
+										  .size(24.dp)
+								 )
+						 }
+						 //name
+						 Text(
+								  modifier = Modifier
+									  .weight(1f)
+									  .padding(8.dp) ,
+								  text = currentItem.value.englishName ,
+								  textAlign = TextAlign.Center ,
+								  maxLines = 1 ,
+								  overflow = TextOverflow.Ellipsis ,
+								  style = MaterialTheme.typography.bodyMedium
+							 )
+						 //divider
+						 Divider(
+								  modifier = Modifier
+									  .width(1.dp)
+									  .height(24.dp) ,
+								  color = MaterialTheme.colorScheme.onSurface.copy(
+										   alpha = 0.08f
+																				  ) ,
+								  thickness = 1.dp ,
 								)
-						}
-						//name
-						Text(
-								modifier = Modifier
-									.weight(1f)
-									.padding(8.dp) ,
-								text = currentItem.value.englishName ,
-								textAlign = TextAlign.Center ,
-								maxLines = 1 ,
-								overflow = TextOverflow.Ellipsis ,
-								style = MaterialTheme.typography.bodyMedium
-							)
-						//divider
-						Divider(
-								modifier = Modifier
-									.width(1.dp)
-									.height(24.dp) ,
-								color = MaterialTheme.colorScheme.onSurface.copy(
-										alpha = 0.08f
-																				) ,
-								thickness = 1.dp ,
-							   )
-						//goal
-						Text(
-								modifier = Modifier
-									.weight(1f)
-									.padding(8.dp) ,
-								text = currentItem.value.goal.toString() ,
-								textAlign = TextAlign.Center ,
-								maxLines = 2 ,
-								overflow = TextOverflow.Ellipsis ,
-								style = MaterialTheme.typography.bodySmall
-							)
-						//divider
-						Divider(
-								modifier = Modifier
-									.width(1.dp)
-									.height(24.dp) ,
-								color = MaterialTheme.colorScheme.onSurface.copy(
-										alpha = 0.08f
-																				) ,
-								thickness = 1.dp ,
-							   )
-						//count
-						Text(
-								modifier = Modifier
-									.weight(1f)
-									.padding(8.dp) ,
-								text = currentItem.value.count.toString() ,
-								textAlign = TextAlign.Center ,
-								maxLines = 2 ,
-								overflow = TextOverflow.Ellipsis ,
-								style = MaterialTheme.typography.bodySmall
-							)
-					}
-				}
-			})
+						 //goal
+						 Text(
+								  modifier = Modifier
+									  .weight(1f)
+									  .padding(8.dp) ,
+								  text = currentItem.value.goal.toString() ,
+								  textAlign = TextAlign.Center ,
+								  maxLines = 2 ,
+								  overflow = TextOverflow.Ellipsis ,
+								  style = MaterialTheme.typography.bodySmall
+							 )
+						 //divider
+						 Divider(
+								  modifier = Modifier
+									  .width(1.dp)
+									  .height(24.dp) ,
+								  color = MaterialTheme.colorScheme.onSurface.copy(
+										   alpha = 0.08f
+																				  ) ,
+								  thickness = 1.dp ,
+								)
+						 //count
+						 Text(
+								  modifier = Modifier
+									  .weight(1f)
+									  .padding(8.dp) ,
+								  text = currentItem.value.count.toString() ,
+								  textAlign = TextAlign.Center ,
+								  maxLines = 2 ,
+								  overflow = TextOverflow.Ellipsis ,
+								  style = MaterialTheme.typography.bodySmall
+							 )
+					 }
+				 }
+			 })
 }
 
 @Composable
@@ -165,20 +165,20 @@ fun SwipeBackground(dismissState : DismissState)
 	val direction = dismissState.dismissDirection ?: return
 
 	val color by animateColorAsState(
-			when (dismissState.targetValue)
-			{
-				DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
-				DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
-				DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
-			}
+			 when (dismissState.targetValue)
+			 {
+				 DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
+				 DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
+				 DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
+			 }
 									)
 	val iconTintColor by animateColorAsState(
-			when (dismissState.targetValue)
-			{
-				DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
-				DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.onPrimary
-				DismissValue.DismissedToStart -> MaterialTheme.colorScheme.onErrorContainer
-			}
+			 when (dismissState.targetValue)
+			 {
+				 DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
+				 DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.onPrimary
+				 DismissValue.DismissedToStart -> MaterialTheme.colorScheme.onErrorContainer
+			 }
 											)
 	val alignment = when (direction)
 	{
@@ -191,7 +191,7 @@ fun SwipeBackground(dismissState : DismissState)
 		DismissDirection.EndToStart -> painterResource(id = com.arshadshah.nimaz.R.drawable.delete_icon)
 	}
 	val scale by animateFloatAsState(
-			if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+			 if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
 									)
 
 	val haptic = LocalHapticFeedback.current
@@ -203,26 +203,26 @@ fun SwipeBackground(dismissState : DismissState)
 	})
 
 	Box(
-			Modifier
-				.fillMaxSize()
-				.background(color)
-				.padding(horizontal = 20.dp) ,
-			contentAlignment = alignment
+			 Modifier
+				 .fillMaxSize()
+				 .background(color)
+				 .padding(horizontal = 20.dp) ,
+			 contentAlignment = alignment
 	   ) {
 		Icon(
-				painter = icon ,
-				contentDescription = "Localized description" ,
-				modifier = Modifier
-					.scale(scale)
-					.size(24.dp) ,
-				tint = iconTintColor
+				 painter = icon ,
+				 contentDescription = "Localized description" ,
+				 modifier = Modifier
+					 .scale(scale)
+					 .size(24.dp) ,
+				 tint = iconTintColor
 			)
 	}
 }
 
 
 @Preview(
-		showBackground = true
+		 showBackground = true
 		)
 @Composable
 //MyTasbihDropDownItem
@@ -237,20 +237,20 @@ fun TasbihDropDownItemPreview()
 	//    val goal: Int = 0,
 	//    val count: Int =
 	val tasbih = Tasbih(
-			arabicName = "الله أكبر" ,
-			englishName = "Allahu Akbar" ,
-			translationName = "God is the greatest" ,
-			goal = 33 ,
-			count = 0
+			 arabicName = "الله أكبر" ,
+			 englishName = "Allahu Akbar" ,
+			 translationName = "God is the greatest" ,
+			 goal = 33 ,
+			 count = 0
 					   )
 	TasbihDropdownItem(
-			item = tasbih ,
-			onClick = { } ,
-			onDelete = { tasbih ->
+			 item = tasbih ,
+			 onClick = { } ,
+			 onDelete = { tasbih ->
 
-			} ,
-			onEdit = { tasbih ->
+			 } ,
+			 onEdit = { tasbih ->
 
-			} ,
+			 } ,
 					  )
 }

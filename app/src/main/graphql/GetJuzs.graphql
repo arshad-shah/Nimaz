@@ -1,0 +1,8 @@
+query GetAllJuz{
+    getAllJuz{
+        id
+        juzStartAyaInQuran
+        name
+        tname
+    }
+}

@@ -19,10 +19,10 @@ fun rememberPreferenceIntSetSettingState(
 {
 	return remember {
 		IntSetPreferenceSettingValueState(
-				key = key ,
-				preferences = preferences ,
-				defaultValue = defaultValue ,
-				delimiter = delimiter ,
+				 key = key ,
+				 preferences = preferences ,
+				 defaultValue = defaultValue ,
+				 delimiter = delimiter ,
 										 )
 	}
 }
@@ -36,12 +36,12 @@ class IntSetPreferenceSettingValueState(
 {
 
 	private var _value by mutableStateOf(
-			preferences.getIntSet(key , defaultValue.toPrefString(delimiter))
-				.orEmpty()
-				.split(delimiter)
-				.filter { it.isNotEmpty() }
-				.map { it.toInt() }
-				.toMutableSet()
+			 preferences.getIntSet(key , defaultValue.toPrefString(delimiter))
+				 .orEmpty()
+				 .split(delimiter)
+				 .filter { it.isNotEmpty() }
+				 .map { it.toInt() }
+				 .toMutableSet()
 										)
 
 	override var value : Set<Int>

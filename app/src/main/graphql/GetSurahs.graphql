@@ -1,0 +1,13 @@
+query GetAllSurah{
+    getAllSura{
+        id
+        start
+        ayaAmount
+        name
+        ename
+        order
+        rukus
+        tname
+        type
+    }
+}

@@ -32,106 +32,106 @@ fun AuthorLinks()
 	val context = LocalContext.current
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
-				.height(64.dp) ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .height(64.dp) ,
 				) {
 		Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.fillMaxHeight() ,
-				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .fillMaxHeight() ,
+				 horizontalArrangement = Arrangement.SpaceEvenly ,
+				 verticalAlignment = Alignment.CenterVertically ,
 		   ) {
 			//website link
 			FilledIconButton(
-					modifier = Modifier.size(48.dp) ,
-					shape = CircleShape ,
-					colors = IconButtonDefaults.filledIconButtonColors(
-							containerColor = MaterialTheme.colorScheme.primary ,
-							contentColor = MaterialTheme.colorScheme.onPrimary ,
-																	  ) ,
-					onClick = {
-						val intent =
-							Intent(Intent.ACTION_VIEW , Uri.parse("https://arshadshah.com"))
-						context.startActivity(intent)
-					} ,
-					content = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.external_link_icon) ,
-								contentDescription = "Portfolio Website Link" ,
-							)
-					}
+					 modifier = Modifier.size(48.dp) ,
+					 shape = CircleShape ,
+					 colors = IconButtonDefaults.filledIconButtonColors(
+							  containerColor = MaterialTheme.colorScheme.primary ,
+							  contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	   ) ,
+					 onClick = {
+						 val intent =
+							 Intent(Intent.ACTION_VIEW , Uri.parse("https://arshadshah.com"))
+						 context.startActivity(intent)
+					 } ,
+					 content = {
+						 Icon(
+								  modifier = Modifier.size(24.dp) ,
+								  painter = painterResource(id = R.drawable.external_link_icon) ,
+								  contentDescription = "Portfolio Website Link" ,
+							 )
+					 }
 							)
 
 			//linkedIn link
 			FilledIconButton(
-					modifier = Modifier.size(48.dp) ,
-					shape = CircleShape ,
-					colors = IconButtonDefaults.filledIconButtonColors(
-							containerColor = MaterialTheme.colorScheme.primary ,
-							contentColor = MaterialTheme.colorScheme.onPrimary ,
-																	  ) ,
-					onClick = {
-						val intent = Intent(
-								Intent.ACTION_VIEW ,
-								Uri.parse("https://www.linkedin.com/in/arshadshah")
-										   )
-						context.startActivity(intent)
-					} ,
-					content = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.linkedin_icon) ,
-								contentDescription = "LinkedIn Link" ,
-							)
-					}
+					 modifier = Modifier.size(48.dp) ,
+					 shape = CircleShape ,
+					 colors = IconButtonDefaults.filledIconButtonColors(
+							  containerColor = MaterialTheme.colorScheme.primary ,
+							  contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	   ) ,
+					 onClick = {
+						 val intent = Intent(
+								  Intent.ACTION_VIEW ,
+								  Uri.parse("https://www.linkedin.com/in/arshadshah")
+											)
+						 context.startActivity(intent)
+					 } ,
+					 content = {
+						 Icon(
+								  modifier = Modifier.size(24.dp) ,
+								  painter = painterResource(id = R.drawable.linkedin_icon) ,
+								  contentDescription = "LinkedIn Link" ,
+							 )
+					 }
 							)
 			//email link
 			FilledIconButton(
-					modifier = Modifier.size(48.dp) ,
-					shape = CircleShape ,
-					colors = IconButtonDefaults.filledIconButtonColors(
-							containerColor = MaterialTheme.colorScheme.primary ,
-							contentColor = MaterialTheme.colorScheme.onPrimary ,
-																	  ) ,
-					content = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.mail_icon) ,
-								contentDescription = "Email Link" ,
-							)
-					} ,
-					onClick = {
-						val intent =
-							Intent(Intent.ACTION_SENDTO , Uri.parse("mailto: info@arshadshah.com"))
-						context.startActivity(intent)
-					}
+					 modifier = Modifier.size(48.dp) ,
+					 shape = CircleShape ,
+					 colors = IconButtonDefaults.filledIconButtonColors(
+							  containerColor = MaterialTheme.colorScheme.primary ,
+							  contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	   ) ,
+					 content = {
+						 Icon(
+								  modifier = Modifier.size(24.dp) ,
+								  painter = painterResource(id = R.drawable.mail_icon) ,
+								  contentDescription = "Email Link" ,
+							 )
+					 } ,
+					 onClick = {
+						 val intent =
+							 Intent(Intent.ACTION_SENDTO , Uri.parse("mailto: info@arshadshah.com"))
+						 context.startActivity(intent)
+					 }
 							)
 			FilledIconButton(
-					modifier = Modifier.size(48.dp) ,
-					shape = CircleShape ,
-					colors = IconButtonDefaults.filledIconButtonColors(
-							containerColor = MaterialTheme.colorScheme.primary ,
-							contentColor = MaterialTheme.colorScheme.onPrimary ,
-																	  ) ,
-					content = {
-						Icon(
-								modifier = Modifier.size(24.dp) ,
-								painter = painterResource(id = R.drawable.github_icon) ,
-								contentDescription = "Github"
-							)
-					} ,
-					onClick = {
-						//open github link
-						val urlIntent = Intent(
-								Intent.ACTION_VIEW ,
-								Uri.parse("https://github.com/arshad-shah")
-											  )
-						context.startActivity(urlIntent)
-					}
+					 modifier = Modifier.size(48.dp) ,
+					 shape = CircleShape ,
+					 colors = IconButtonDefaults.filledIconButtonColors(
+							  containerColor = MaterialTheme.colorScheme.primary ,
+							  contentColor = MaterialTheme.colorScheme.onPrimary ,
+																	   ) ,
+					 content = {
+						 Icon(
+								  modifier = Modifier.size(24.dp) ,
+								  painter = painterResource(id = R.drawable.github_icon) ,
+								  contentDescription = "Github"
+							 )
+					 } ,
+					 onClick = {
+						 //open github link
+						 val urlIntent = Intent(
+								  Intent.ACTION_VIEW ,
+								  Uri.parse("https://github.com/arshad-shah")
+											   )
+						 context.startActivity(urlIntent)
+					 }
 							)
 
 		}

@@ -25,9 +25,9 @@ fun AyatScreen(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.QURAN_VIEWMODEL_KEY ,
-			initializer = { QuranViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = AppConstants.QURAN_VIEWMODEL_KEY ,
+			 initializer = { QuranViewModel(context) } ,
+			 viewModelStoreOwner = context as ComponentActivity
 							 )
 	val pageMode = remember { viewModel.display_Mode }.collectAsState()
 
@@ -46,14 +46,14 @@ fun AyatScreen(
 		val loadingAyatSurah = remember { viewModel.loadingState }.collectAsState()
 		val errorAyatSurah = remember { viewModel.errorState }.collectAsState()
 		AyaSurahList(
-				number = number.toInt() , language = language ,
-				paddingValues = paddingValues ,
-				state = ayatSurah ,
-				pageMode = pageMode ,
-				type = "surah" ,
-				loading = loadingAyatSurah.value ,
-				error = errorAyatSurah.value ,
-				scrollToAya = scrollToAya ,
+				 number = number.toInt() , language = language ,
+				 paddingValues = paddingValues ,
+				 state = ayatSurah ,
+				 pageMode = pageMode ,
+				 type = "surah" ,
+				 loading = loadingAyatSurah.value ,
+				 error = errorAyatSurah.value ,
+				 scrollToAya = scrollToAya ,
 					)
 
 	} else
@@ -68,15 +68,15 @@ fun AyatScreen(
 		val loadingAyatJuz = remember { viewModel.loadingState }.collectAsState()
 		val errorAyatJuz = remember { viewModel.errorState }.collectAsState()
 		AyaJuzList(
-				number = number.toInt() ,
-				language = language ,
-				paddingValues = paddingValues ,
-				state = ayatJuz ,
-				type = "juz" ,
-				pageMode = pageMode ,
-				loading = loadingAyatJuz.value ,
-				error = errorAyatJuz.value ,
-				scrollToAya = scrollToAya ,
+				 number = number.toInt() ,
+				 language = language ,
+				 paddingValues = paddingValues ,
+				 state = ayatJuz ,
+				 type = "juz" ,
+				 pageMode = pageMode ,
+				 loading = loadingAyatJuz.value ,
+				 error = errorAyatJuz.value ,
+				 scrollToAya = scrollToAya ,
 				  )
 	}
 }

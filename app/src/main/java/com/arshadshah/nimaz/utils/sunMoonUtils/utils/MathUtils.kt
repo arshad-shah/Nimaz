@@ -29,8 +29,8 @@ internal object MathUtils
 
 	fun fromJulian(julian : Double) : LocalDateTime =
 		LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(((julian + 0.50 - J1970) * dayMs).toLong()) ,
-				ZoneId.systemDefault()
+				 Instant.ofEpochMilli(((julian + 0.50 - J1970) * dayMs).toLong()) ,
+				 ZoneId.systemDefault()
 							   )
 
 	fun toDays(date : LocalDateTime) : Double =
@@ -104,9 +104,9 @@ internal object MathUtils
 		val dt = 385001 - 20905 * cos(M)  // distance to the moon in km
 
 		return MoonCords(
-				rightAscension(l , b) ,
-				declination(l , b) ,
-				dt
+				 rightAscension(l , b) ,
+				 declination(l , b) ,
+				 dt
 						)
 	}
 

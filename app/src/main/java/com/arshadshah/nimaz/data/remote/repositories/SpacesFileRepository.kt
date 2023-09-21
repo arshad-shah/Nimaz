@@ -6,6 +6,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferType
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.regions.Region
 import com.amazonaws.services.s3.AmazonS3Client
@@ -58,6 +59,9 @@ class SpacesFileRepository(context : Context)
 		appContext = context
 	}
 
+	//get all ayat for a surah
+
+
 	/**
 	 * Downloads example file from a DO Space
 	 */
@@ -87,9 +91,9 @@ class SpacesFileRepository(context : Context)
 		//Download the file from DO Space
 		//mishary/quran-surah-001-verse-001.mp3
 		val listener = transferUtility.download(
-				spacename ,
-				"mishary/quran-surah-$surahNumber-verse-$ayahNumber.$filetype" ,
-				file
+				 spacename ,
+				 "mishary/quran-surah-$surahNumber-verse-$ayahNumber.$filetype" ,
+				 file
 											   )
 
 		//Listen to the progress of the download, and call the callback when the download is complete
@@ -102,14 +106,14 @@ class SpacesFileRepository(context : Context)
 																	   )
 										 {
 											 Log.d(
-													 "S3 Download" ,
-													 "Progress ${((bytesCurrent / bytesTotal) * 100)}"
+													  "S3 Download" ,
+													  "Progress ${((bytesCurrent / bytesTotal) * 100)}"
 												  )
 											 callback(
-													 null ,
-													 null ,
-													 ((bytesCurrent / bytesTotal) * 100).toInt() ,
-													 false
+													  null ,
+													  null ,
+													  ((bytesCurrent / bytesTotal) * 100).toInt() ,
+													  false
 													 )
 										 }
 
@@ -136,14 +140,14 @@ class SpacesFileRepository(context : Context)
 												 {
 													 Log.d("S3 Download" , "Failed")
 													 callback(
-															 null ,
-															 Exception("Failed to download file") ,
-															 0 ,
-															 false
+															  null ,
+															  Exception("Failed to download file") ,
+															  0 ,
+															  false
 															 )
 													 Toasty.error(
-															 appContext ,
-															 "Failed to download file"
+															  appContext ,
+															  "Failed to download file"
 																 ).show()
 												 }
 
@@ -151,10 +155,10 @@ class SpacesFileRepository(context : Context)
 												 {
 													 Log.d("S3 Download" , "Canceled")
 													 callback(
-															 null ,
-															 Exception("Canceled") ,
-															 0 ,
-															 false
+															  null ,
+															  Exception("Canceled") ,
+															  0 ,
+															  false
 															 )
 													 Toasty.error(appContext , "Canceled").show()
 												 }
@@ -162,7 +166,7 @@ class SpacesFileRepository(context : Context)
 												 else ->
 												 {
 													 Log.d("S3 Download" , "Other")
-													 callback(null , Exception("Other") , 0 , false)
+													 callback(null , null , 0 , false)
 												 }
 											 }
 										 }
@@ -174,5 +178,11 @@ class SpacesFileRepository(context : Context)
 											 Toasty.error(appContext , ex.toString()).show()
 										 }
 									 })
+	}
+
+	//cancl all downloads
+	fun cancelAllDownloads()
+	{
+		transferUtility.cancelAllWithType(TransferType.DOWNLOAD)
 	}
 }

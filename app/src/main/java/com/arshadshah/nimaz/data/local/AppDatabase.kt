@@ -5,7 +5,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.arshadshah.nimaz.constants.AppConstants.DATABASE_VERSION
 import com.arshadshah.nimaz.data.local.dao.AyaDao
+import com.arshadshah.nimaz.data.local.dao.CategoryDao
 import com.arshadshah.nimaz.data.local.dao.DuaDao
 import com.arshadshah.nimaz.data.local.dao.FastTrackerDao
 import com.arshadshah.nimaz.data.local.dao.JuzDao
@@ -14,6 +16,7 @@ import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.dao.TasbihTrackerDao
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalCategory
 import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
@@ -24,13 +27,13 @@ import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 
 @TypeConverters(
-		TimestampTypeConvertor::class ,
-		TypeConvertorForListOfDuas::class
+		 TimestampTypeConvertor::class ,
+		 TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class] ,
-		version = 12 ,
-		exportSchema = false
+		 entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class , LocalCategory::class] ,
+		 version = DATABASE_VERSION ,
+		 exportSchema = true ,
 		 )
 abstract class AppDatabase : RoomDatabase()
 {
@@ -43,6 +46,7 @@ abstract class AppDatabase : RoomDatabase()
 	abstract val prayersTracker : PrayerTrackerDao
 	abstract val fastTracker : FastTrackerDao
 	abstract val tasbihTracker : TasbihTrackerDao
+	abstract val category : CategoryDao
 
 	class Migration1To2 : Migration(1 , 2)
 	{
@@ -242,6 +246,30 @@ abstract class AppDatabase : RoomDatabase()
 			database.execSQL("ALTER TABLE PrayersTracker ADD COLUMN isMenstruating INTEGER NOT NULL DEFAULT 0")
 			//add a new column to the table FastTracker
 			database.execSQL("ALTER TABLE FastTracker ADD COLUMN isMenstruating INTEGER NOT NULL DEFAULT 0")
+		}
+	}
+
+	//migration from version 12 to 13
+	//add a column in table Chapter called category
+	//add a column in table Dua called category, isFavorite
+	class Migration12To13 : Migration(12 , 13)
+	{
+
+		override fun migrate(database : SupportSQLiteDatabase)
+		{
+			database.execSQL("ALTER TABLE Chapter RENAME TO Chapter_old")
+			//create a new table
+			database.execSQL("CREATE TABLE IF NOT EXISTS `Chapter` (`id` INTEGER NOT NULL, `arabicName` TEXT NOT NULL, `englishName` TEXT NOT NULL, `translationName` TEXT NOT NULL, `category` TEXT NOT NULL, PRIMARY KEY(`id`))")
+			//copy the data
+			database.execSQL("INSERT INTO Chapter SELECT id, arabicName, englishName, translationName, '' FROM Chapter_old")
+			//remove the old table
+			database.execSQL("DROP TABLE Chapter_old")
+
+			//add a new column to the table Dua
+			database.execSQL("ALTER TABLE Dua ADD COLUMN category TEXT NOT NULL DEFAULT ''")
+			//add a new column to the table Dua
+			database.execSQL("ALTER TABLE Dua ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0")
+
 		}
 	}
 }

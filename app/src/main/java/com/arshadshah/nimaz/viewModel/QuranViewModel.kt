@@ -63,23 +63,23 @@ class QuranViewModel(context : Context) : ViewModel()
 
 	//random aya state a map of aya, surah, juz data
 	private val _randomAyaState = MutableStateFlow(
-			Aya(
-					0 ,
-					0 ,
-					"" ,
-					"" ,
-					"" ,
-					0 ,
-					0 ,
-					bookmark = false ,
-					favorite = false ,
-					note = "" ,
-					audioFileLocation = "" ,
-					sajda = false ,
-					sajdaType = "" ,
-					ruku = 0 ,
-					juzNumber = 0
-			   )
+			 Aya(
+					  0 ,
+					  0 ,
+					  "" ,
+					  "" ,
+					  "" ,
+					  0 ,
+					  0 ,
+					  bookmark = false ,
+					  favorite = false ,
+					  note = "" ,
+					  audioFileLocation = "" ,
+					  sajda = false ,
+					  sajdaType = "" ,
+					  ruku = 0 ,
+					  juzNumber = 0
+				)
 												  )
 	val randomAyaState = _randomAyaState.asStateFlow()
 	private val _randomAyaSurahState =
@@ -89,12 +89,12 @@ class QuranViewModel(context : Context) : ViewModel()
 	val randomAyaJuzState = _randomAyaJuzState.asStateFlow()
 
 	private val _surahState = MutableStateFlow(
-			Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0)
+			 Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0)
 											  )
 	val surahState = _surahState.asStateFlow()
 
 	private val _surahStateForScroll = MutableStateFlow(
-			Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0)
+			 Surah(0 , 0 , 0 , "" , "" , "" , "" , 0 , 0)
 													   )
 	val surahStateForScroll = _surahStateForScroll.asStateFlow()
 
@@ -510,40 +510,40 @@ class QuranViewModel(context : Context) : ViewModel()
 		if (languageConverted == "ENGLISH")
 		{
 			aya = Aya(
-					0 ,
-					ayaNumberOfBismillah ,
-					ayaArabicOfBismillah ,
-					ayaOfBismillah ,
-					"" ,
-					surahNumber ,
-					1 ,
-					false ,
-					false ,
-					"" ,
-					"" ,
-					false ,
-					"" ,
-					0 ,
-					0 ,
+					 0 ,
+					 ayaNumberOfBismillah ,
+					 ayaArabicOfBismillah ,
+					 ayaOfBismillah ,
+					 "" ,
+					 surahNumber ,
+					 1 ,
+					 false ,
+					 false ,
+					 "" ,
+					 "" ,
+					 false ,
+					 "" ,
+					 0 ,
+					 0 ,
 					 )
 		} else
 		{
 			aya = Aya(
-					0 ,
-					ayaNumberOfBismillah ,
-					ayaArabicOfBismillah ,
-					"" ,
-					ayaOfBismillah ,
-					surahNumber ,
-					1 ,
-					false ,
-					false ,
-					"" ,
-					"" ,
-					false ,
-					"" ,
-					0 ,
-					0 ,
+					 0 ,
+					 ayaNumberOfBismillah ,
+					 ayaArabicOfBismillah ,
+					 "" ,
+					 ayaOfBismillah ,
+					 surahNumber ,
+					 1 ,
+					 false ,
+					 false ,
+					 "" ,
+					 "" ,
+					 false ,
+					 "" ,
+					 0 ,
+					 0 ,
 					 )
 		}
 		//first check if an object like this is already in the list
@@ -652,40 +652,40 @@ class QuranViewModel(context : Context) : ViewModel()
 						if (languageConverted == "ENGLISH")
 						{
 							aya = Aya(
-									0 ,
-									ayaNumberOfBismillah ,
-									ayaArabicOfBismillah ,
-									ayaOfBismillah ,
-									"" ,
-									listOfJuzAyat[index].suraNumber ,
-									1 ,
-									false ,
-									false ,
-									"" ,
-									"" ,
-									false ,
-									"" ,
-									0 ,
-									0 ,
+									 0 ,
+									 ayaNumberOfBismillah ,
+									 ayaArabicOfBismillah ,
+									 ayaOfBismillah ,
+									 "" ,
+									 listOfJuzAyat[index].suraNumber ,
+									 1 ,
+									 false ,
+									 false ,
+									 "" ,
+									 "" ,
+									 false ,
+									 "" ,
+									 0 ,
+									 0 ,
 									 )
 						} else
 						{
 							aya = Aya(
-									0 ,
-									ayaNumberOfBismillah ,
-									ayaArabicOfBismillah ,
-									"" ,
-									ayaOfBismillah ,
-									listOfJuzAyat[index].suraNumber ,
-									1 ,
-									false ,
-									false ,
-									"" ,
-									"" ,
-									false ,
-									"" ,
-									0 ,
-									0 ,
+									 0 ,
+									 ayaNumberOfBismillah ,
+									 ayaArabicOfBismillah ,
+									 "" ,
+									 ayaOfBismillah ,
+									 listOfJuzAyat[index].suraNumber ,
+									 1 ,
+									 false ,
+									 false ,
+									 "" ,
+									 "" ,
+									 false ,
+									 "" ,
+									 0 ,
+									 0 ,
 									 )
 						}
 						//add the map of bismillah to ayaList at the current index
@@ -778,30 +778,30 @@ class QuranViewModel(context : Context) : ViewModel()
 			is AyaEvent.BookmarkAya ->
 			{
 				bookmarkAya(
-						ayaEvent.ayaNumber ,
-						ayaEvent.surahNumber ,
-						ayaEvent.ayaNumberInSurah ,
-						ayaEvent.bookmark
+						 ayaEvent.ayaNumber ,
+						 ayaEvent.surahNumber ,
+						 ayaEvent.ayaNumberInSurah ,
+						 ayaEvent.bookmark
 						   )
 			}
 
 			is AyaEvent.FavoriteAya ->
 			{
 				favoriteAya(
-						ayaEvent.ayaNumber ,
-						ayaEvent.surahNumber ,
-						ayaEvent.ayaNumberInSurah ,
-						ayaEvent.favorite
+						 ayaEvent.ayaNumber ,
+						 ayaEvent.surahNumber ,
+						 ayaEvent.ayaNumberInSurah ,
+						 ayaEvent.favorite
 						   )
 			}
 
 			is AyaEvent.AddNoteToAya ->
 			{
 				addNoteToAya(
-						ayaEvent.ayaNumber ,
-						ayaEvent.surahNumber ,
-						ayaEvent.ayaNumberInSurah ,
-						ayaEvent.note
+						 ayaEvent.ayaNumber ,
+						 ayaEvent.surahNumber ,
+						 ayaEvent.ayaNumberInSurah ,
+						 ayaEvent.note
 							)
 			}
 
@@ -828,36 +828,36 @@ class QuranViewModel(context : Context) : ViewModel()
 			is AyaEvent.addAudioToAya ->
 			{
 				addAudioToAya(
-						ayaEvent.surahNumber ,
-						ayaEvent.ayaNumberInSurah ,
-						ayaEvent.audio
+						 ayaEvent.surahNumber ,
+						 ayaEvent.ayaNumberInSurah ,
+						 ayaEvent.audio
 							 )
 			}
 
 			is AyaEvent.deleteNoteFromAya ->
 			{
 				deleteNoteFromAya(
-						ayaEvent.ayaNumber ,
-						ayaEvent.surahNumber ,
-						ayaEvent.ayaNumberInSurah
+						 ayaEvent.ayaNumber ,
+						 ayaEvent.surahNumber ,
+						 ayaEvent.ayaNumberInSurah
 								 )
 			}
 
 			is AyaEvent.deleteBookmarkFromAya ->
 			{
 				deleteBookmarkFromAya(
-						ayaEvent.ayaNumber ,
-						ayaEvent.surahNumber ,
-						ayaEvent.ayaNumberInSurah
+						 ayaEvent.ayaNumber ,
+						 ayaEvent.surahNumber ,
+						 ayaEvent.ayaNumberInSurah
 									 )
 			}
 
 			is AyaEvent.deleteFavoriteFromAya ->
 			{
 				deleteFavoriteFromAya(
-						ayaEvent.ayaNumber ,
-						ayaEvent.surahNumber ,
-						ayaEvent.ayaNumberInSurah
+						 ayaEvent.ayaNumber ,
+						 ayaEvent.surahNumber ,
+						 ayaEvent.ayaNumberInSurah
 									 )
 			}
 		}
@@ -1124,8 +1124,8 @@ class QuranViewModel(context : Context) : ViewModel()
 					_randomAyaSurahState.value = surahOfTheAya
 					_randomAyaJuzState.value = juzOfTheAya
 					sharedPreferences.saveDataInt(
-							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED ,
-							randomAya.ayaNumberInSurah
+							 AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED ,
+							 randomAya.ayaNumberInSurah
 												 )
 
 				} else
@@ -1145,8 +1145,8 @@ class QuranViewModel(context : Context) : ViewModel()
 					_randomAyaSurahState.value = surahOfTheAya
 					_randomAyaJuzState.value = juzOfTheAya
 					sharedPreferences.saveDataInt(
-							AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED ,
-							randomAya.ayaNumberInSurah
+							 AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED ,
+							 randomAya.ayaNumberInSurah
 												 )
 				}
 			} catch (e : Exception)
@@ -1170,7 +1170,7 @@ class QuranViewModel(context : Context) : ViewModel()
 				_randomAyaJuzState.value = juzOfTheAya
 				_randomAyaState.value = ayat
 				sharedPreferences.saveDataInt(
-						AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , ayaNumberInSurah
+						 AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED , ayaNumberInSurah
 											 )
 			} catch (e : Exception)
 			{

@@ -29,63 +29,63 @@ fun Decrementbutton(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = TASBIH_VIEWMODEL_KEY ,
-			initializer = { TasbihViewModel(context) } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = TASBIH_VIEWMODEL_KEY ,
+			 initializer = { TasbihViewModel(context) } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	val vibrationAllowed = remember {
 		viewModel.vibrationButtonState
 	}.collectAsState()
 	val vibrator = viewModel.vibrator
 	ElevatedButton(
-			contentPadding = PaddingValues(24.dp) ,
-			onClick = {
-				//count should not go below 0
-				if (count.value > 0)
-				{
-					if (vibrationAllowed.value)
-					{
-						vibrator.vibrate(
-								VibrationEffect.createOneShot(
-										200 ,
-										VibrationEffect.DEFAULT_AMPLITUDE
-															 )
-										)
-					} else
-					{
-						//can't vibrate
-						vibrator.cancel()
-					}
-					count.value = count.value - 1
-					if (count.value == objective.value.toInt())
-					{
-						if (vibrationAllowed.value)
-						{
-							vibrator.vibrate(
-									VibrationEffect.createOneShot(
-											200 ,
-											VibrationEffect.DEFAULT_AMPLITUDE
-																 )
-											)
-						} else
-						{
-							//can't vibrate
-							vibrator.cancel()
-						}
-						lap.value --
-					}
-				}
-				//if count is 0 then set all values to default
-				if (count.value == 0)
-				{
-					lap.value = 0
-					lapCountCounter.value = 0
-				}
-			}) {
+			 contentPadding = PaddingValues(24.dp) ,
+			 onClick = {
+				 //count should not go below 0
+				 if (count.value > 0)
+				 {
+					 if (vibrationAllowed.value)
+					 {
+						 vibrator.vibrate(
+								  VibrationEffect.createOneShot(
+										   200 ,
+										   VibrationEffect.DEFAULT_AMPLITUDE
+															   )
+										 )
+					 } else
+					 {
+						 //can't vibrate
+						 vibrator.cancel()
+					 }
+					 count.value = count.value - 1
+					 if (count.value == objective.value.toInt())
+					 {
+						 if (vibrationAllowed.value)
+						 {
+							 vibrator.vibrate(
+									  VibrationEffect.createOneShot(
+											   200 ,
+											   VibrationEffect.DEFAULT_AMPLITUDE
+																   )
+											 )
+						 } else
+						 {
+							 //can't vibrate
+							 vibrator.cancel()
+						 }
+						 lap.value --
+					 }
+				 }
+				 //if count is 0 then set all values to default
+				 if (count.value == 0)
+				 {
+					 lap.value = 0
+					 lapCountCounter.value = 0
+				 }
+			 }) {
 		Icon(
-				modifier = Modifier.size(24.dp) ,
-				painter = painterResource(id = R.drawable.minus_icon) ,
-				contentDescription = "Delete"
+				 modifier = Modifier.size(24.dp) ,
+				 painter = painterResource(id = R.drawable.minus_icon) ,
+				 contentDescription = "Delete"
 			)
 	}
 

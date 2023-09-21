@@ -16,8 +16,8 @@ internal fun RowScope.SettingsTileTexts(
 									   )
 {
 	Column(
-			modifier = Modifier.Companion.weight(1f) ,
-			verticalArrangement = Arrangement.Center ,
+			 modifier = Modifier.Companion.weight(1f) ,
+			 verticalArrangement = Arrangement.Center ,
 		  ) {
 		SettingsTileTitle(title)
 		if (subtitle != null)

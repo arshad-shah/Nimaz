@@ -5,9 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayertimesCard
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
@@ -27,27 +25,16 @@ class DashboardPrayertimesCardKtTest
 	@Test
 	fun dashboardPrayerTimesCard_rendersWithoutCrashing() {
 		composeTestRule.setContent {
-			DashboardPrayertimesCard(onNavigateToPrayerTimes = {})
+			DashboardPrayertimesCard()
 		}
 	}
-
-	@Test
-	fun dashboardPrayerTimesCard_clickCallsOnNavigateToPrayerTimes() {
-		var isCalled = false
-		composeTestRule.setContent {
-			DashboardPrayertimesCard(onNavigateToPrayerTimes = { isCalled = true })
-		}
-		composeTestRule.onNodeWithTag(TEST_TAG_HOME_PRAYER_TIMES_CARD).performClick()
-		assert(isCalled)
-	}
-
 	@Test
 	fun dashboardPrayerTimesCard_displaysNextPrayerInfo() {
 		val context = InstrumentationRegistry.getInstrumentation().targetContext
 		val viewModel = PrayerTimesViewModel()
 		viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
 		composeTestRule.setContent {
-			DashboardPrayertimesCard(onNavigateToPrayerTimes = {})
+			DashboardPrayertimesCard()
 		}
 		val nextPrayerName = viewModel.nextPrayerName.value
 		val nextPrayerTime = viewModel.nextPrayerTime.value
@@ -63,7 +50,7 @@ class DashboardPrayertimesCardKtTest
 	@Test
 	fun dashboardPrayerTimesCard_displaysDates() {
 		composeTestRule.setContent {
-			DashboardPrayertimesCard(onNavigateToPrayerTimes = {})
+			DashboardPrayertimesCard()
 		}
 		composeTestRule.onNodeWithText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))).assertIsDisplayed()
 		composeTestRule.onNodeWithText(HijrahDate.from(LocalDate.now()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))).assertIsDisplayed()
@@ -73,7 +60,7 @@ class DashboardPrayertimesCardKtTest
 	@Test
 	fun dashboardPrayerTimesCard_displaysNextPrayerIcon() {
 		composeTestRule.setContent {
-			DashboardPrayertimesCard(onNavigateToPrayerTimes = {})
+			DashboardPrayertimesCard()
 		}
 
 		composeTestRule.onNodeWithTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD, useUnmergedTree = true).assertIsDisplayed()
@@ -83,7 +70,7 @@ class DashboardPrayertimesCardKtTest
 	@Test
 	fun dashboardPrayerTimesCard_displaysMoonIcon() {
 		composeTestRule.setContent {
-			DashboardPrayertimesCard(onNavigateToPrayerTimes = {})
+			DashboardPrayertimesCard()
 		}
 
 		composeTestRule.onNodeWithTag("moon_phase", useUnmergedTree = true).assertIsDisplayed()

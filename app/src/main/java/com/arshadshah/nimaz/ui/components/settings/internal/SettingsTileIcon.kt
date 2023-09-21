@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 internal fun SettingsTileIcon(
@@ -21,9 +20,9 @@ internal fun SettingsTileIcon(
 	//the circle
 	Box(
 
-			modifier = modifier
-				.size(60.dp) ,
-			contentAlignment = Alignment.Center
+			 modifier = modifier
+				 .size(60.dp) ,
+			 contentAlignment = Alignment.Center
 	   ) {
 		icon()
 	}
@@ -33,10 +32,9 @@ internal fun SettingsTileIcon(
 @Composable
 fun SettingsIconPreview()
 {
-	NimazTheme {
-		SettingsTileIcon {
-			Icon(imageVector = Icons.Default.Clear , contentDescription = "")
-		}
+
+	SettingsTileIcon {
+		Icon(imageVector = Icons.Default.Clear , contentDescription = "")
 	}
 }
 
@@ -44,9 +42,8 @@ fun SettingsIconPreview()
 @Composable
 fun SettingsIconPreviewEmpty()
 {
-	NimazTheme {
-		SettingsTileIcon(
-				icon = { } ,
-						)
-	}
+
+	SettingsTileIcon(
+			 icon = { } ,
+					)
 }

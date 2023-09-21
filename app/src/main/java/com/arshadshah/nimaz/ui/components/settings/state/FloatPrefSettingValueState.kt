@@ -18,9 +18,9 @@ fun rememberPreferenceFloatSettingState(
 {
 	return remember {
 		FloatPreferenceSettingValueState(
-				key = key ,
-				preferences = preferences ,
-				defaultValue = defaultValue
+				 key = key ,
+				 preferences = preferences ,
+				 defaultValue = defaultValue
 										)
 	}
 }

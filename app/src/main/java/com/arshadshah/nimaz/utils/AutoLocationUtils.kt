@@ -8,9 +8,9 @@ import android.util.Log
 import com.google.android.gms.location.*
 
 @Suppress(
-		"BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
-		"BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
-		"BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted"
+		 "BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
+		 "BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted" ,
+		 "BooleanMethodIsAlwaysInverted" , "BooleanMethodIsAlwaysInverted"
 		 )
 object AutoLocationUtils
 {
@@ -46,8 +46,8 @@ object AutoLocationUtils
 			{
 				setLocationData(location)
 				Log.d(
-						"Nimaz: Location Auto" ,
-						"Latitude: ${location.latitude} Longitude: ${location.longitude}"
+						 "Nimaz: Location Auto" ,
+						 "Latitude: ${location.latitude} Longitude: ${location.longitude}"
 					 )
 			}
 		}
@@ -66,9 +66,9 @@ object AutoLocationUtils
 	fun startLocationUpdates()
 	{
 		fusedLocationProviderClient?.requestLocationUpdates(
-				locationRequest ,
-				locationCallback ,
-				Looper.getMainLooper()
+				 locationRequest ,
+				 locationCallback ,
+				 Looper.getMainLooper()
 														   )
 		Log.w("Nimaz: Location" , "Location Updates Started")
 	}
@@ -83,8 +83,8 @@ object AutoLocationUtils
 			{
 				setLocationData(it)
 				Log.d(
-						"Nimaz: Location Auto" ,
-						"Latitude: ${it.latitude} Longitude: ${it.longitude}"
+						 "Nimaz: Location Auto" ,
+						 "Latitude: ${it.latitude} Longitude: ${it.longitude}"
 					 )
 			}
 		}
@@ -93,7 +93,7 @@ object AutoLocationUtils
 	fun stopLocationUpdates()
 	{
 		fusedLocationProviderClient?.removeLocationUpdates(
-				locationCallback
+				 locationCallback
 														  )?.addOnCompleteListener {
 			Log.w("Nimaz: Location" , "Location Updates Stopped")
 		}

@@ -71,9 +71,9 @@ fun PlayerForAyat(
 						{
 							isPlaying.value = false
 							cancel(
-									cause = CancellationException(
-											"Audio finished playing"
-																 )
+									 cause = CancellationException(
+											  "Audio finished playing"
+																  )
 								  )
 						}
 					}
@@ -83,11 +83,11 @@ fun PlayerForAyat(
 		//log the current progress
 		Log.d("AyaListItemUI" , "current progress is ${currentProgress.value / seconds}")
 		LinearProgressIndicator(
-				progress = currentProgress.value / seconds ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(4.dp)
-					.height(8.dp) ,
+				 progress = currentProgress.value / seconds ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(4.dp)
+					 .height(8.dp) ,
 							   )
 	}
 
@@ -96,36 +96,36 @@ fun PlayerForAyat(
 	{
 		//a row to show th play button and the audio player
 		Row(
-				horizontalArrangement = Arrangement.Center ,
-				verticalAlignment = Alignment.CenterVertically ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(vertical = 4.dp)
+				 horizontalArrangement = Arrangement.Center ,
+				 verticalAlignment = Alignment.CenterVertically ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(vertical = 4.dp)
 		   ) {
 			if (isPaused.value || isStopped.value || ! isPlaying.value)
 			{
 				//play and pause button
 				IconButton(
-						onClick = { onPlayClicked() } ,
-						enabled = ! isLoading ,
-						modifier = Modifier
-							.align(Alignment.CenterVertically)
+						 onClick = { onPlayClicked() } ,
+						 enabled = ! isLoading ,
+						 modifier = Modifier
+							 .align(Alignment.CenterVertically)
 						  ) {
 					Icon(
-							painter = painterResource(id = R.drawable.play_icon) ,
-							contentDescription = "Play" ,
-							tint = MaterialTheme.colorScheme.primary ,
-							modifier = Modifier
-								.size(24.dp)
-								.padding(horizontal = 4.dp)
-								.placeholder(
-										visible = isLoading ,
-										color = MaterialTheme.colorScheme.outline ,
-										shape = RoundedCornerShape(4.dp) ,
-										highlight = PlaceholderHighlight.shimmer(
-												highlightColor = Color.White ,
-																				)
-											)
+							 painter = painterResource(id = R.drawable.play_icon) ,
+							 contentDescription = "Play" ,
+							 tint = MaterialTheme.colorScheme.primary ,
+							 modifier = Modifier
+								 .size(24.dp)
+								 .padding(horizontal = 4.dp)
+								 .placeholder(
+										  visible = isLoading ,
+										  color = MaterialTheme.colorScheme.outline ,
+										  shape = RoundedCornerShape(4.dp) ,
+										  highlight = PlaceholderHighlight.shimmer(
+												   highlightColor = Color.White ,
+																				  )
+											 )
 						)
 				}
 			}
@@ -134,18 +134,18 @@ fun PlayerForAyat(
 			{
 				//play and puase button
 				IconButton(
-						onClick = { onPauseClicked() } ,
-						enabled = true ,
-						modifier = Modifier
-							.align(Alignment.CenterVertically)
+						 onClick = { onPauseClicked() } ,
+						 enabled = true ,
+						 modifier = Modifier
+							 .align(Alignment.CenterVertically)
 						  ) {
 					Icon(
-							painter = painterResource(id = R.drawable.pause_icon) ,
-							contentDescription = "Pause" ,
-							tint = MaterialTheme.colorScheme.primary ,
-							modifier = Modifier
-								.size(24.dp)
-								.padding(horizontal = 4.dp)
+							 painter = painterResource(id = R.drawable.pause_icon) ,
+							 contentDescription = "Pause" ,
+							 tint = MaterialTheme.colorScheme.primary ,
+							 modifier = Modifier
+								 .size(24.dp)
+								 .padding(horizontal = 4.dp)
 						)
 				}
 			}
@@ -154,18 +154,18 @@ fun PlayerForAyat(
 			{
 				//stop button
 				IconButton(
-						onClick = { onStopClicked() } ,
-						enabled = true ,
-						modifier = Modifier
-							.align(Alignment.CenterVertically)
+						 onClick = { onStopClicked() } ,
+						 enabled = true ,
+						 modifier = Modifier
+							 .align(Alignment.CenterVertically)
 						  ) {
 					Icon(
-							painter = painterResource(id = R.drawable.stop_icon) ,
-							contentDescription = "Stop" ,
-							tint = MaterialTheme.colorScheme.primary ,
-							modifier = Modifier
-								.size(24.dp)
-								.padding(horizontal = 4.dp)
+							 painter = painterResource(id = R.drawable.stop_icon) ,
+							 contentDescription = "Stop" ,
+							 tint = MaterialTheme.colorScheme.primary ,
+							 modifier = Modifier
+								 .size(24.dp)
+								 .padding(horizontal = 4.dp)
 						)
 				}
 			}
@@ -179,15 +179,15 @@ fun PlayerForAyat(
 fun PlayerForAyatPreview()
 {
 	PlayerForAyat(
-			duration = remember { mutableStateOf(5) } ,
-			isPlaying = remember { mutableStateOf(true) } ,
-			isPaused = remember { mutableStateOf(true) } ,
-			isStopped = remember { mutableStateOf(true) } ,
-			isDownloaded = remember { mutableStateOf(true) } ,
-			hasAudio = remember { mutableStateOf(true) } ,
-			onPlayClicked = { } ,
-			onPauseClicked = { } ,
-			onStopClicked = { } ,
-			isLoading = false ,
+			 duration = remember { mutableStateOf(5) } ,
+			 isPlaying = remember { mutableStateOf(true) } ,
+			 isPaused = remember { mutableStateOf(true) } ,
+			 isStopped = remember { mutableStateOf(true) } ,
+			 isDownloaded = remember { mutableStateOf(true) } ,
+			 hasAudio = remember { mutableStateOf(true) } ,
+			 onPlayClicked = { } ,
+			 onPauseClicked = { } ,
+			 onStopClicked = { } ,
+			 isLoading = false ,
 				 )
 }

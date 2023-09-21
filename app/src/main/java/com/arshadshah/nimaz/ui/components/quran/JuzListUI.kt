@@ -48,17 +48,17 @@ fun JuzListUI(
 {
 	val state = rememberLazyListState()
 	LazyColumn(
-			state = state ,
-			userScrollEnabled = ! loading ,
-			modifier = Modifier.testTag(TEST_TAG_QURAN_JUZ)
+			 state = state ,
+			 userScrollEnabled = ! loading ,
+			 modifier = Modifier.testTag(TEST_TAG_QURAN_JUZ)
 			  ) {
 		items(juz.size) { index ->
 			JuzListItemUI(
-					loading = loading ,
-					juzNumber = juz[index].number.toString() ,
-					name = juz[index].name ,
-					tname = juz[index].tname ,
-					onNavigateToAyatScreen = onNavigateToAyatScreen
+					 loading = loading ,
+					 juzNumber = juz[index].number.toString() ,
+					 name = juz[index].name ,
+					 tname = juz[index].tname ,
+					 onNavigateToAyatScreen = onNavigateToAyatScreen
 						 )
 		}
 	}
@@ -75,16 +75,16 @@ fun JuzListItemUI(
 				 )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(vertical = 4.dp , horizontal = 8.dp)
-				.fillMaxWidth()
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(vertical = 4.dp , horizontal = 8.dp)
+				 .fillMaxWidth()
 				) {
 		//get the translation type from shared preferences
 		val translationType =
 			PrivateSharedPreferences(context).getData(
-					key = AppConstants.TRANSLATION_LANGUAGE ,
-					s = "English"
+					 key = AppConstants.TRANSLATION_LANGUAGE ,
+					 s = "English"
 													 )
 		val translation = when (translationType)
 		{
@@ -93,96 +93,96 @@ fun JuzListItemUI(
 			else -> "english"
 		}
 		Row(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth()
-					.testTag(TEST_TAG_JUZ_ITEM)
-					.clickable(
-							enabled = ! loading ,
-							  ) {
-						onNavigateToAyatScreen(juzNumber , false , translation , null)
-					} ,
-				verticalAlignment = Alignment.CenterVertically ,
-				horizontalArrangement = Arrangement.SpaceBetween
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .fillMaxWidth()
+					 .testTag(TEST_TAG_JUZ_ITEM)
+					 .clickable(
+							  enabled = ! loading ,
+							   ) {
+						 onNavigateToAyatScreen(juzNumber , false , translation , null)
+					 } ,
+				 verticalAlignment = Alignment.CenterVertically ,
+				 horizontalArrangement = Arrangement.SpaceBetween
 		   ) {
 
 			Text(
-					modifier = Modifier
-						.align(Alignment.CenterVertically)
-						.weight(0.10f)
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									) ,
-					text = "$juzNumber." ,
-					style = MaterialTheme.typography.bodyLarge ,
-					textAlign = TextAlign.Center
+					 modifier = Modifier
+						 .align(Alignment.CenterVertically)
+						 .weight(0.10f)
+						 .placeholder(
+								  visible = loading ,
+								  color = MaterialTheme.colorScheme.outline ,
+								  shape = RoundedCornerShape(4.dp) ,
+								  highlight = PlaceholderHighlight.shimmer(
+										   highlightColor = Color.White ,
+																		  )
+									 ) ,
+					 text = "$juzNumber." ,
+					 style = MaterialTheme.typography.bodyLarge ,
+					 textAlign = TextAlign.Center
 				)
 
 			Column(
-					modifier = Modifier
-						.padding(16.dp , 0.dp)
-						.align(Alignment.CenterVertically)
-						.weight(0.80f)
-						.fillMaxWidth()
+					 modifier = Modifier
+						 .padding(16.dp , 0.dp)
+						 .align(Alignment.CenterVertically)
+						 .weight(0.80f)
+						 .fillMaxWidth()
 				  ) {
 				//apply quran font
 				Text(
-						text = name ,
-						style = MaterialTheme.typography.titleLarge ,
-						fontFamily = utmaniQuranFont ,
-						fontWeight = FontWeight.SemiBold ,
-						fontSize = 32.sp ,
-						modifier = Modifier
-							.padding(vertical = 4.dp)
-							.fillMaxWidth()
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
-						textAlign = TextAlign.Center
+						 text = name ,
+						 style = MaterialTheme.typography.titleLarge ,
+						 fontFamily = utmaniQuranFont ,
+						 fontWeight = FontWeight.SemiBold ,
+						 fontSize = 32.sp ,
+						 modifier = Modifier
+							 .padding(vertical = 4.dp)
+							 .fillMaxWidth()
+							 .placeholder(
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 ) ,
+						 textAlign = TextAlign.Center
 					)
 				Text(
-						text = tname ,
-						style = MaterialTheme.typography.titleSmall ,
-						modifier = Modifier
-							.fillMaxWidth()
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
-						textAlign = TextAlign.Center
+						 text = tname ,
+						 style = MaterialTheme.typography.titleSmall ,
+						 modifier = Modifier
+							 .fillMaxWidth()
+							 .placeholder(
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 ) ,
+						 textAlign = TextAlign.Center
 					)
 			}
 			//an arrow right icon
 			Icon(
-					painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-					contentDescription = "Clear" ,
-					modifier = Modifier
-						.align(Alignment.CenterVertically)
-						.weight(0.10f)
-						.size(24.dp)
-						.fillMaxWidth()
-						.placeholder(
-								visible = loading ,
-								color = MaterialTheme.colorScheme.outline ,
-								shape = RoundedCornerShape(4.dp) ,
-								highlight = PlaceholderHighlight.shimmer(
-										highlightColor = Color.White ,
-																		)
-									)
+					 painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+					 contentDescription = "Clear" ,
+					 modifier = Modifier
+						 .align(Alignment.CenterVertically)
+						 .weight(0.10f)
+						 .size(24.dp)
+						 .fillMaxWidth()
+						 .placeholder(
+								  visible = loading ,
+								  color = MaterialTheme.colorScheme.outline ,
+								  shape = RoundedCornerShape(4.dp) ,
+								  highlight = PlaceholderHighlight.shimmer(
+										   highlightColor = Color.White ,
+																		  )
+									 )
 				)
 		}
 	}
@@ -195,11 +195,11 @@ fun JuzListItemUIPreview()
 {
 	NimazTheme {
 		JuzListItemUI(
-				juzNumber = "1" ,
-				name = "الفاتحة" ,
-				tname = "Al-Faatiha" ,
-				onNavigateToAyatScreen = { _ , _ , _ , _ -> } ,
-				loading = false ,
+				 juzNumber = "1" ,
+				 name = "الفاتحة" ,
+				 tname = "Al-Faatiha" ,
+				 onNavigateToAyatScreen = { _ , _ , _ , _ -> } ,
+				 loading = false ,
 					 )
 	}
 }

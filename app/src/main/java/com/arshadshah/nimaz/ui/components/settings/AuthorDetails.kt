@@ -26,48 +26,48 @@ fun AuthorDetails()
 	//it is created as part of my final year project for my BSc in Computer Science.
 	//it is a free and open source project that I hope will be useful to many people. I hope you enjoy it.
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
-				.fillMaxWidth() ,
-			content = {
-				Column(
-						modifier = Modifier
-							.padding(16.dp)
-							.fillMaxWidth() ,
-					  ) {
-					Text(
-							modifier = Modifier
-								.padding(8.dp)
-								.fillMaxWidth() ,
-							text = "Designed and Developed By" ,
-							style = MaterialTheme.typography.bodyMedium ,
-							textAlign = TextAlign.Center
-						)
-					Text(
-							modifier = Modifier
-								.padding(8.dp)
-								.fillMaxWidth() ,
-							text = "Arshad Shah" ,
-							style = MaterialTheme.typography.titleLarge ,
-							textAlign = TextAlign.Center
-						)
-					Text(
-							modifier = Modifier
-								.padding(8.dp)
-								.fillMaxWidth() ,
-							text = "Associate Software Engineer" ,
-							style = MaterialTheme.typography.bodyMedium ,
-							textAlign = TextAlign.Center
-						)
-					Divider(
-							modifier = Modifier.padding(8.dp) ,
-							color = MaterialTheme.colorScheme.outline ,
-							thickness = 1.dp
-						   )
-					AuthorLinks()
-				}
-			} ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .fillMaxWidth() ,
+			 content = {
+				 Column(
+						  modifier = Modifier
+							  .padding(16.dp)
+							  .fillMaxWidth() ,
+					   ) {
+					 Text(
+							  modifier = Modifier
+								  .padding(8.dp)
+								  .fillMaxWidth() ,
+							  text = "Designed and Developed By" ,
+							  style = MaterialTheme.typography.bodyMedium ,
+							  textAlign = TextAlign.Center
+						 )
+					 Text(
+							  modifier = Modifier
+								  .padding(8.dp)
+								  .fillMaxWidth() ,
+							  text = "Arshad Shah" ,
+							  style = MaterialTheme.typography.titleLarge ,
+							  textAlign = TextAlign.Center
+						 )
+					 Text(
+							  modifier = Modifier
+								  .padding(8.dp)
+								  .fillMaxWidth() ,
+							  text = "Associate Software Engineer" ,
+							  style = MaterialTheme.typography.bodyMedium ,
+							  textAlign = TextAlign.Center
+						 )
+					 Divider(
+							  modifier = Modifier.padding(8.dp) ,
+							  color = MaterialTheme.colorScheme.outline ,
+							  thickness = 1.dp
+							)
+					 AuthorLinks()
+				 }
+			 } ,
 				)
 }
 

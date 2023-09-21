@@ -37,14 +37,14 @@ fun PrayerTimesScreen(
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			initializer = { PrayerTimesViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
+			 initializer = { PrayerTimesViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = SETTINGS_VIEWMODEL_KEY ,
-			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
+			 key = SETTINGS_VIEWMODEL_KEY ,
+			 initializer = { SettingsViewModel(context) } ,
+			 viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
 									)
 
 	//reload the data when the screen is resumed
@@ -66,15 +66,15 @@ fun PrayerTimesScreen(
 	LaunchedEffect(locationState.value , latitude.value , longitude.value) {
 		//update the prayer times
 		viewModel.handleEvent(
-				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-				PrayerTimesParamMapper.getParams(context)
-																				  )
+				 context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				 PrayerTimesParamMapper.getParams(context)
+																				   )
 							 )
 		viewModel.handleEvent(
-				context ,
-				PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-						context
-																   )
+				 context ,
+				 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+						  context
+																	)
 							 )
 	}
 	val currentPrayerName = remember {
@@ -87,20 +87,20 @@ fun PrayerTimesScreen(
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "currentPrayerName: $currentPrayerName")
 
 	LazyColumn(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(paddingValues)
-				.testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
-			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Center
+			 modifier = Modifier
+				 .fillMaxSize()
+				 .padding(paddingValues)
+				 .testTag(AppConstants.TEST_TAG_PRAYER_TIMES) ,
+			 horizontalAlignment = Alignment.CenterHorizontally ,
+			 verticalArrangement = Arrangement.Center
 			  ) {
 		item {
 			// Calling the LocationTimeContainer composable
 			LocationTimeContainer(
-					currentPrayerName = currentPrayerName ,
-					locationState = locationState ,
-					handleEvent = settingViewModel::handleEvent ,
-					isLoading = isLoading
+					 currentPrayerName = currentPrayerName ,
+					 locationState = locationState ,
+					 handleEvent = settingViewModel::handleEvent ,
+					 isLoading = isLoading
 								 )
 			DatesContainer(onNavigateToTracker = onNavigateToTracker)
 

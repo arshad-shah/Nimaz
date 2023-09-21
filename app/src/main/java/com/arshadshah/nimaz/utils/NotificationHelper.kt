@@ -52,15 +52,15 @@ class NotificationHelper
 	{
 		val notificationManager : NotificationManager =
 			context.getSystemService(NOTIFICATION_SERVICE) as
-					NotificationManager
+					 NotificationManager
 
 		val Adhan : Uri = Uri.parse(sound)
 
 		val attributes =
 			AudioAttributes.Builder()
 				.setContentType(
-						AudioAttributes
-							.CONTENT_TYPE_SONIFICATION
+						 AudioAttributes
+							 .CONTENT_TYPE_SONIFICATION
 							   )
 				.setUsage(AudioAttributes.USAGE_NOTIFICATION)
 				.build()
@@ -103,7 +103,7 @@ class NotificationHelper
 	{
 		val notificationManager : NotificationManager =
 			context.getSystemService(NOTIFICATION_SERVICE) as
-					NotificationManager
+					 NotificationManager
 		// 1
 		// 2
 		val channel = NotificationChannel(channel_id , name , importance)
@@ -143,15 +143,15 @@ class NotificationHelper
 			Intent(context , RoutingActivity::class.java).apply {
 				flags =
 					Intent.FLAG_ACTIVITY_NEW_TASK or
-							Intent
-								.FLAG_ACTIVITY_CLEAR_TASK
+							 Intent
+								 .FLAG_ACTIVITY_CLEAR_TASK
 			}
 		val notificationPendingIntent : PendingIntent =
 			PendingIntent.getActivity(
-					context ,
-					NOTIFICATION_PENDING_INTENT_REQUEST_CODE ,
-					notificationIntent ,
-					FLAG_IMMUTABLE
+					 context ,
+					 NOTIFICATION_PENDING_INTENT_REQUEST_CODE ,
+					 notificationIntent ,
+					 FLAG_IMMUTABLE
 									 )
 
 		val time = Date(Time_of_alarm)
@@ -204,15 +204,15 @@ class NotificationHelper
 			Intent(context , RoutingActivity::class.java).apply {
 				flags =
 					Intent.FLAG_ACTIVITY_NEW_TASK or
-							Intent
-								.FLAG_ACTIVITY_CLEAR_TASK
+							 Intent
+								 .FLAG_ACTIVITY_CLEAR_TASK
 			}
 		val notificationPendingIntent : PendingIntent =
 			PendingIntent.getActivity(
-					context ,
-					NOTIFICATION_PENDING_INTENT_REQUEST_CODE ,
-					notificationIntent ,
-					FLAG_IMMUTABLE
+					 context ,
+					 NOTIFICATION_PENDING_INTENT_REQUEST_CODE ,
+					 notificationIntent ,
+					 FLAG_IMMUTABLE
 									 )
 		val builder =
 			NotificationCompat.Builder(context , channel_id).apply {

@@ -36,15 +36,15 @@ private val LocalAppDimens = staticCompositionLocalOf {
 fun NimazTheme(
 	darkTheme : Boolean = false ,
 	dynamicColor : Boolean = false ,
-	ThemeName : String = "Default" ,
+	themeName : String = "Default" ,
 	content : @Composable () -> Unit ,
 			  )
 {
 	val colorScheme = when
 	{
 		//if the name of the theme is not default then use the custom theme
-		ThemeName != "Default" && ! dynamicColor ->
-			CustomThemes.getTheme(ThemeName , darkTheme)
+		themeName != "Default" && ! dynamicColor ->
+			CustomThemes.getTheme(themeName , darkTheme)
 
 		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
 		{
@@ -74,10 +74,10 @@ fun NimazTheme(
 
 	ProvideDimens(dimensions) {
 		MaterialTheme(
-				colorScheme = colorScheme ,
-				shapes = nimazCardShapes() ,
-				typography = typography ,
-				content = content ,
+				 colorScheme = colorScheme ,
+				 shapes = nimazCardShapes() ,
+				 typography = typography ,
+				 content = content ,
 					 )
 	}
 }

@@ -34,54 +34,54 @@ fun FastTrackerCard(
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(8.dp) ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .padding(8.dp) ,
 				) {
 		ToggleableItemColumn(
-				enabled = ! isMenstrauting.value ,
-				text = if (dateForTracker.isBefore(LocalDate.now())) "Did not fast"
-				else "Not Fasting" ,
-				//if date state is in the fast then shoow the date
-				// like this:
-				// Fasted on 2021-09-01
-				selectedText = if (dateForTracker.isBefore(LocalDate.now())) "Fasted on ${dateState.value}" else "Fasting Today" ,
-				checked = isFastingToday.value ,
-				onCheckedChange = {
-					//if the date is after today then don't allow the user to change the value
-					if (isAfterToday)
-					{
-						Toasty.info(
-								context ,
-								"Oops! you cant update the tracker for a date in the future" ,
-								Toasty.LENGTH_SHORT ,
-								true
-								   ).show()
-						return@ToggleableItemColumn
-					}
-					isFastingToday.value = ! isFastingToday.value
-					handleEvent(
-							TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-									FastTracker(
-											date = dateState.value ,
-											isFasting = isFastingToday.value
-											   )
-																			 )
-							   )
-					handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(dateState.value))
-				} ,
-				modifier = Modifier
-					.padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
-					.fillMaxWidth()
-					.placeholder(
-							visible = false ,
-							color = MaterialTheme.colorScheme.outline ,
-							shape = RoundedCornerShape(4.dp) ,
-							highlight = PlaceholderHighlight.shimmer(
-									highlightColor = Color.White ,
-																	)
-								) ,
+				 enabled = ! isMenstrauting.value ,
+				 text = if (dateForTracker.isBefore(LocalDate.now())) "Did not fast"
+				 else "Not Fasting" ,
+				 //if date state is in the fast then shoow the date
+				 // like this:
+				 // Fasted on 2021-09-01
+				 selectedText = if (dateForTracker.isBefore(LocalDate.now())) "Fasted on ${dateState.value}" else "Fasting Today" ,
+				 checked = isFastingToday.value ,
+				 onCheckedChange = {
+					 //if the date is after today then don't allow the user to change the value
+					 if (isAfterToday)
+					 {
+						 Toasty.info(
+								  context ,
+								  "Oops! you cant update the tracker for a date in the future" ,
+								  Toasty.LENGTH_SHORT ,
+								  true
+									).show()
+						 return@ToggleableItemColumn
+					 }
+					 isFastingToday.value = ! isFastingToday.value
+					 handleEvent(
+							  TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
+									   FastTracker(
+												date = dateState.value ,
+												isFasting = isFastingToday.value
+												  )
+																			   )
+								)
+					 handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(dateState.value))
+				 } ,
+				 modifier = Modifier
+					 .padding(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
+					 .fillMaxWidth()
+					 .placeholder(
+							  visible = false ,
+							  color = MaterialTheme.colorScheme.outline ,
+							  shape = RoundedCornerShape(4.dp) ,
+							  highlight = PlaceholderHighlight.shimmer(
+									   highlightColor = Color.White ,
+																	  )
+								 ) ,
 							)
 	}
 }

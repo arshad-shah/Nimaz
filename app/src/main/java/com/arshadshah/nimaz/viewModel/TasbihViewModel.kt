@@ -27,22 +27,22 @@ class TasbihViewModel(context : Context) : ViewModel()
 	val tasbihError = _tasbihError.asStateFlow()
 
 	private var _tasbihCreated = MutableStateFlow(
-			Tasbih(
-					id = 0 ,
-					arabicName = "" ,
-					englishName = "" ,
-					translationName = "" ,
-					count = 0 ,
-					date = "" ,
-					goal = 0
-				  )
+			 Tasbih(
+					  id = 0 ,
+					  arabicName = "" ,
+					  englishName = "" ,
+					  translationName = "" ,
+					  count = 0 ,
+					  date = "" ,
+					  goal = 0
+				   )
 												 )
 
 	val tasbihCreated = _tasbihCreated.asStateFlow()
 
 	//list of tasbih for today
 	private var _tasbihList = MutableStateFlow(
-			listOf<Tasbih>()
+			 listOf<Tasbih>()
 											  )
 	val tasbihList = _tasbihList.asStateFlow()
 
@@ -199,13 +199,13 @@ class TasbihViewModel(context : Context) : ViewModel()
 							}
 						}
 						val newTasbih = Tasbih(
-								id = 0 ,
-								arabicName = tasbih.arabicName ,
-								englishName = tasbih.englishName ,
-								translationName = tasbih.translationName ,
-								count = 0 ,
-								date = date ,
-								goal = tasbih.goal
+								 id = 0 ,
+								 arabicName = tasbih.arabicName ,
+								 englishName = tasbih.englishName ,
+								 translationName = tasbih.translationName ,
+								 count = 0 ,
+								 date = date ,
+								 goal = tasbih.goal
 											  )
 						datastore.saveTasbih(newTasbih)
 					}
@@ -231,13 +231,13 @@ class TasbihViewModel(context : Context) : ViewModel()
 				_tasbihLoading.value = true
 				_tasbihError.value = ""
 				_tasbihCreated.value = Tasbih(
-						id = 0 ,
-						arabicName = "" ,
-						englishName = "" ,
-						translationName = "" ,
-						count = 0 ,
-						date = "" ,
-						goal = 0
+						 id = 0 ,
+						 arabicName = "" ,
+						 englishName = "" ,
+						 translationName = "" ,
+						 count = 0 ,
+						 date = "" ,
+						 goal = 0
 											 )
 				val datastore = LocalDataStore.getDataStore()
 				datastore.deleteTasbih(tasbih)

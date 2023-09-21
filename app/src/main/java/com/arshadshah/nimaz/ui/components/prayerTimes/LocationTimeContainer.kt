@@ -34,9 +34,9 @@ fun LocationTimeContainer(
 	if (isLoading.value)
 	{
 		ContainerUI(
-				currentPrayerNameSentenceCase = "Loading..." ,
-				location = locationState ,
-				handleEvent = handleEvent
+				 currentPrayerNameSentenceCase = "Loading..." ,
+				 location = locationState ,
+				 handleEvent = handleEvent
 				   )
 	} else
 	{
@@ -46,9 +46,9 @@ fun LocationTimeContainer(
 			.substring(1).lowercase(Locale.ROOT)
 
 		ContainerUI(
-				currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
-				location = locationState ,
-				handleEvent = handleEvent
+				 currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
+				 location = locationState ,
+				 handleEvent = handleEvent
 				   )
 	}
 }
@@ -62,39 +62,39 @@ fun ContainerUI(
 {
 	val context = LocalContext.current
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(vertical = 8.dp , horizontal = 8.dp)
-				.height(IntrinsicSize.Max)
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(vertical = 8.dp , horizontal = 8.dp)
+				 .height(IntrinsicSize.Max)
 				) {
 		Row(
-				horizontalArrangement = Arrangement.Center ,
-				modifier = Modifier.fillMaxWidth() ,
-				verticalAlignment = Alignment.CenterVertically
+				 horizontalArrangement = Arrangement.Center ,
+				 modifier = Modifier.fillMaxWidth() ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			CustomText(
-					modifier = Modifier
-						.weight(0.5f)
-						.padding(8.dp)
-						.clickable {
-							handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
-						} ,
-					heading = "Location" , text = location.value
+					 modifier = Modifier
+						 .weight(0.5f)
+						 .padding(8.dp)
+						 .clickable {
+							 handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
+						 } ,
+					 heading = "Location" , text = location.value
 					  )
 			//vertical divider line
 			Divider(
-					modifier = Modifier
-						.fillMaxHeight()
-						.width(1.dp) ,
-					color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
+					 modifier = Modifier
+						 .fillMaxHeight()
+						 .width(1.dp) ,
+					 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
 				   )
 			CustomText(
-					modifier = Modifier
-						.weight(0.5f)
-						.padding(8.dp) ,
-					heading = "Current Prayer" ,
-					//fix the name to be sentence case,
-					text = currentPrayerNameSentenceCase
+					 modifier = Modifier
+						 .weight(0.5f)
+						 .padding(8.dp) ,
+					 heading = "Current Prayer" ,
+					 //fix the name to be sentence case,
+					 text = currentPrayerNameSentenceCase
 					  )
 		}
 	}

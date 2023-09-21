@@ -27,72 +27,72 @@ fun IncrementDecrement(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
-			initializer = { TasbihViewModel(context) } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.TASBIH_VIEWMODEL_KEY ,
+			 initializer = { TasbihViewModel(context) } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	val rOrl = remember {
 		viewModel.orientationButtonState
 	}.collectAsState()
 
 	AnimatedContent(
-			transitionSpec = {
-				ContentTransform(
-						fadeIn() +
-								slideInHorizontally(
-										animationSpec = tween(500)
-												   ) ,
-						fadeOut() + slideOutHorizontally(
-								animationSpec = tween(500)
-														)
-								)
-			} ,
-			targetState = rOrl.value
+			 transitionSpec = {
+				 ContentTransform(
+						  fadeIn() +
+								   slideInHorizontally(
+											animationSpec = tween(500)
+													  ) ,
+						  fadeOut() + slideOutHorizontally(
+								   animationSpec = tween(500)
+														  )
+								 )
+			 } ,
+			 targetState = rOrl.value
 				   ) { rorl ->
 		if (rorl)
 		{
 			Row(
-					modifier = Modifier.fillMaxWidth() ,
-					horizontalArrangement = Arrangement.SpaceEvenly ,
-					verticalAlignment = Alignment.CenterVertically
+					 modifier = Modifier.fillMaxWidth() ,
+					 horizontalArrangement = Arrangement.SpaceEvenly ,
+					 verticalAlignment = Alignment.CenterVertically
 			   ) {
 
 				Decrementbutton(
-						count = count ,
-						lap = lap ,
-						lapCountCounter = lapCountCounter ,
-						objective = objective ,
+						 count = count ,
+						 lap = lap ,
+						 lapCountCounter = lapCountCounter ,
+						 objective = objective ,
 							   )
 
 				Spacer(modifier = Modifier.width(16.dp))
 				IncrementButton(
-						count = count ,
-						lap = lap ,
-						lapCountCounter = lapCountCounter ,
-						objective = objective ,
-						context = context
+						 count = count ,
+						 lap = lap ,
+						 lapCountCounter = lapCountCounter ,
+						 objective = objective ,
+						 context = context
 							   )
 			}
 		} else
 		{
 			Row(
-					modifier = Modifier.fillMaxWidth() ,
-					horizontalArrangement = Arrangement.SpaceEvenly ,
-					verticalAlignment = Alignment.CenterVertically
+					 modifier = Modifier.fillMaxWidth() ,
+					 horizontalArrangement = Arrangement.SpaceEvenly ,
+					 verticalAlignment = Alignment.CenterVertically
 			   ) {
 				IncrementButton(
-						count = count ,
-						lap = lap ,
-						lapCountCounter = lapCountCounter ,
-						objective = objective ,
-						context = context
+						 count = count ,
+						 lap = lap ,
+						 lapCountCounter = lapCountCounter ,
+						 objective = objective ,
+						 context = context
 							   )
 				Spacer(modifier = Modifier.width(16.dp))
 				Decrementbutton(
-						count = count ,
-						lap = lap ,
-						lapCountCounter = lapCountCounter ,
-						objective = objective ,
+						 count = count ,
+						 lap = lap ,
+						 lapCountCounter = lapCountCounter ,
+						 objective = objective ,
 							   )
 
 			}

@@ -18,9 +18,9 @@ fun rememberPreferenceIntSettingState(
 {
 	return remember {
 		IntPreferenceSettingValueState(
-				key = key ,
-				preferences = preferences ,
-				defaultValue = defaultValue
+				 key = key ,
+				 preferences = preferences ,
+				 defaultValue = defaultValue
 									  )
 	}
 }

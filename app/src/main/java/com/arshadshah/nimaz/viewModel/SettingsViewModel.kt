@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
+import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
 import com.arshadshah.nimaz.utils.AutoLocationUtils
 import com.arshadshah.nimaz.utils.NetworkChecker
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -32,7 +33,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 	//theme state
 	//it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
-	private var _theme = MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , "SYSTEM"))
+	private var _theme =
+		MutableStateFlow(sharedPreferences.getData(AppConstants.THEME , THEME_SYSTEM))
 	val theme = _theme.asStateFlow()
 
 	//dark mode state
@@ -74,19 +76,19 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 	//battery exempt state
 	private var _isBatteryExempt = MutableStateFlow(
-			sharedPreferences.getDataBoolean(
-					AppConstants.BATTERY_OPTIMIZATION ,
-					false
-											)
+			 sharedPreferences.getDataBoolean(
+					  AppConstants.BATTERY_OPTIMIZATION ,
+					  false
+											 )
 												   )
 	val isBatteryExempt = _isBatteryExempt.asStateFlow()
 
 	//_areNotificationsAllowed
 	private var _areNotificationsAllowed = MutableStateFlow(
-			sharedPreferences.getDataBoolean(
-					AppConstants.NOTIFICATION_ALLOWED ,
-					false
-											)
+			 sharedPreferences.getDataBoolean(
+					  AppConstants.NOTIFICATION_ALLOWED ,
+					  false
+											 )
 														   )
 	val areNotificationsAllowed = _areNotificationsAllowed.asStateFlow()
 
@@ -102,18 +104,18 @@ class SettingsViewModel(context : Context) : ViewModel()
 
 	//high latitude state
 	private var _highLatitude = MutableStateFlow(
-			sharedPreferences.getData(
-					AppConstants.HIGH_LATITUDE_RULE ,
-					"MIDDLE_OF_THE_NIGHT"
-									 )
+			 sharedPreferences.getData(
+					  AppConstants.HIGH_LATITUDE_RULE ,
+					  "MIDDLE_OF_THE_NIGHT"
+									  )
 												)
 	val highLatitude = _highLatitude.asStateFlow()
 
 	private val _autoParams = MutableStateFlow(
-			sharedPreferences.getDataBoolean(
-					AppConstants.AUTO_PARAMETERS ,
-					false
-											)
+			 sharedPreferences.getDataBoolean(
+					  AppConstants.AUTO_PARAMETERS ,
+					  false
+											 )
 											  )
 	val autoParams = _autoParams.asStateFlow()
 
@@ -377,8 +379,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 				_madhab.value = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
 				_highLatitude.value =
 					sharedPreferences.getData(
-							AppConstants.HIGH_LATITUDE_RULE ,
-							"MIDDLE_OF_THE_NIGHT"
+							 AppConstants.HIGH_LATITUDE_RULE ,
+							 "MIDDLE_OF_THE_NIGHT"
 											 )
 				_fajrAngle.value = sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
 				_ishaAngle.value = sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
@@ -436,44 +438,44 @@ class SettingsViewModel(context : Context) : ViewModel()
 				sharedPreferences.saveData(AppConstants.CALCULATION_METHOD , event.method)
 				sharedPreferences.saveData(AppConstants.MADHAB , defaultsForMethod["madhab"] !!)
 				sharedPreferences.saveData(
-						AppConstants.HIGH_LATITUDE_RULE ,
-						defaultsForMethod["highLatitudeRule"] !!
+						 AppConstants.HIGH_LATITUDE_RULE ,
+						 defaultsForMethod["highLatitudeRule"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.FAJR_ANGLE ,
-						defaultsForMethod["fajrAngle"] !!
+						 AppConstants.FAJR_ANGLE ,
+						 defaultsForMethod["fajrAngle"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.ISHA_ANGLE ,
-						defaultsForMethod["ishaAngle"] !!
+						 AppConstants.ISHA_ANGLE ,
+						 defaultsForMethod["ishaAngle"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.ISHA_INTERVAL ,
-						defaultsForMethod["ishaInterval"] !!
+						 AppConstants.ISHA_INTERVAL ,
+						 defaultsForMethod["ishaInterval"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.FAJR_ADJUSTMENT ,
-						defaultsForMethod["fajrAdjustment"] !!
+						 AppConstants.FAJR_ADJUSTMENT ,
+						 defaultsForMethod["fajrAdjustment"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.SUNRISE_ADJUSTMENT ,
-						defaultsForMethod["sunriseAdjustment"] !!
+						 AppConstants.SUNRISE_ADJUSTMENT ,
+						 defaultsForMethod["sunriseAdjustment"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.DHUHR_ADJUSTMENT ,
-						defaultsForMethod["dhuhrAdjustment"] !!
+						 AppConstants.DHUHR_ADJUSTMENT ,
+						 defaultsForMethod["dhuhrAdjustment"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.ASR_ADJUSTMENT ,
-						defaultsForMethod["asrAdjustment"] !!
+						 AppConstants.ASR_ADJUSTMENT ,
+						 defaultsForMethod["asrAdjustment"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.MAGHRIB_ADJUSTMENT ,
-						defaultsForMethod["maghribAdjustment"] !!
+						 AppConstants.MAGHRIB_ADJUSTMENT ,
+						 defaultsForMethod["maghribAdjustment"] !!
 										  )
 				sharedPreferences.saveData(
-						AppConstants.ISHA_ADJUSTMENT ,
-						defaultsForMethod["ishaAdjustment"] !!
+						 AppConstants.ISHA_ADJUSTMENT ,
+						 defaultsForMethod["ishaAdjustment"] !!
 										  )
 				Log.d("Nimaz: SettingsViewModel" , "Settings updated")
 
@@ -495,14 +497,14 @@ class SettingsViewModel(context : Context) : ViewModel()
 					if (event.doUpdate)
 					{
 						Log.d(
-								"Nimaz: SettingsViewModel" , "Update available : ${
+								 "Nimaz: SettingsViewModel" , "Update available : ${
 							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-									AppUpdateType.IMMEDIATE
+									 AppUpdateType.IMMEDIATE
 																																		  )
 						}"
 							 )
 						if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-									AppUpdateType.IMMEDIATE
+									 AppUpdateType.IMMEDIATE
 																																		  )
 						)
 						{
@@ -510,10 +512,10 @@ class SettingsViewModel(context : Context) : ViewModel()
 							{
 								Log.d("Nimaz: SettingsViewModel" , "Starting update")
 								appUpdateManager.startUpdateFlowForResult(
-										appUpdateInfo ,
-										AppUpdateType.IMMEDIATE ,
-										event.context as Activity ,
-										APP_UPDATE_REQUEST_CODE
+										 appUpdateInfo ,
+										 AppUpdateType.IMMEDIATE ,
+										 event.context as Activity ,
+										 APP_UPDATE_REQUEST_CODE
 																		 )
 							} catch (e : IntentSender.SendIntentException)
 							{
@@ -523,15 +525,15 @@ class SettingsViewModel(context : Context) : ViewModel()
 					} else
 					{
 						Log.d(
-								"Nimaz: SettingsViewModel" , "Update available : ${
+								 "Nimaz: SettingsViewModel" , "Update available : ${
 							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-									AppUpdateType.IMMEDIATE
+									 AppUpdateType.IMMEDIATE
 																																		  )
 						}"
 							 )
 						_isUpdateAvailable.value =
 							appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-									AppUpdateType.IMMEDIATE
+									 AppUpdateType.IMMEDIATE
 																																		  )
 					}
 				}
@@ -559,16 +561,16 @@ class SettingsViewModel(context : Context) : ViewModel()
 						AutoLocationUtils.setLocationDataCallback { location ->
 							Log.d("Nimaz: SettingsViewModel" , "Location : $location")
 							sharedPreferences.saveData(
-									AppConstants.LATITUDE ,
-									location.latitude.toString()
+									 AppConstants.LATITUDE ,
+									 location.latitude.toString()
 													  )
 							sharedPreferences.saveData(
-									AppConstants.LONGITUDE ,
-									location.longitude.toString()
+									 AppConstants.LONGITUDE ,
+									 location.longitude.toString()
 													  )
 							Log.d(
-									"Nimaz: SettingsViewModel" ,
-									"Location saved : ${location.latitude} , ${location.longitude}"
+									 "Nimaz: SettingsViewModel" ,
+									 "Location saved : ${location.latitude} , ${location.longitude}"
 								 )
 							reverseGeocode(location.latitude , location.longitude)
 						}
@@ -591,8 +593,8 @@ class SettingsViewModel(context : Context) : ViewModel()
 			} catch (e : Exception)
 			{
 				Log.d(
-						AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
-						"loadLocation: ${e.message}"
+						 AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel" ,
+						 "loadLocation: ${e.message}"
 					 )
 				_isLoading.value = false
 				_isError.value = e.message.toString()

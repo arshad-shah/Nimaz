@@ -18,9 +18,9 @@ fun rememberPreferenceBooleanSettingState(
 {
 	return remember {
 		BooleanPreferenceSettingValueState(
-				preferences = preferences ,
-				key = key ,
-				defaultValue = defaultValue
+				 preferences = preferences ,
+				 key = key ,
+				 defaultValue = defaultValue
 										  )
 	}
 }

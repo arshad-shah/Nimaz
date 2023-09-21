@@ -27,9 +27,9 @@ fun Counter(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
-			initializer = { TasbihViewModel(context) } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.TASBIH_VIEWMODEL_KEY ,
+			 initializer = { TasbihViewModel(context) } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
 	val resetTasbih = remember {
@@ -38,13 +38,13 @@ fun Counter(
 
 	val count = remember {
 		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
+				 context.getSharedPreferences("tasbih" , 0).getInt("count" , 0)
 					  )
 	}
 
 	val objective = remember {
 		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getString("objective" , "33") !!
+				 context.getSharedPreferences("tasbih" , 0).getString("objective" , "33") !!
 					  )
 	}
 
@@ -54,12 +54,12 @@ fun Counter(
 	val lap =
 		remember {
 			mutableStateOf(
-					context.getSharedPreferences("tasbih" , 0).getInt("lap" , 1)
+					 context.getSharedPreferences("tasbih" , 0).getInt("lap" , 1)
 						  )
 		}
 	val lapCountCounter = remember {
 		mutableStateOf(
-				context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)
+				 context.getSharedPreferences("tasbih" , 0).getInt("lapCountCounter" , 0)
 					  )
 	}
 
@@ -79,173 +79,173 @@ fun Counter(
 	}
 
 	Column(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(16.dp)
-				.padding(paddingValues) ,
-			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Top
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .padding(16.dp)
+				 .padding(paddingValues) ,
+			 horizontalAlignment = Alignment.CenterHorizontally ,
+			 verticalArrangement = Arrangement.Top
 		  ) {
 		//lap text
 		Text(
-				modifier = Modifier
-					.align(Alignment.CenterHorizontally) ,
-				text = "Loop ${lap.value}" ,
-				style = MaterialTheme.typography.bodyMedium ,
-				color = MaterialTheme.colorScheme.onSurface
+				 modifier = Modifier
+					 .align(Alignment.CenterHorizontally) ,
+				 text = "Loop ${lap.value}" ,
+				 style = MaterialTheme.typography.bodyMedium ,
+				 color = MaterialTheme.colorScheme.onSurface
 			)
 		//large count text
 		Text(
-				modifier = Modifier
-					.align(Alignment.CenterHorizontally) ,
-				text = count.value.toString() ,
-				style = MaterialTheme.typography.displayMedium ,
-				fontSize = 100.sp ,
-				color = MaterialTheme.colorScheme.onSurface
+				 modifier = Modifier
+					 .align(Alignment.CenterHorizontally) ,
+				 text = count.value.toString() ,
+				 style = MaterialTheme.typography.displayMedium ,
+				 fontSize = 100.sp ,
+				 color = MaterialTheme.colorScheme.onSurface
 			)
 		Editbutton(
-				count = count ,
-				context = LocalContext.current ,
-				showObjectiveDialog = showObjectiveDialog ,
-				objective = objective ,
+				 count = count ,
+				 context = LocalContext.current ,
+				 showObjectiveDialog = showObjectiveDialog ,
+				 objective = objective ,
 				  )
 
 		Spacer(modifier = Modifier.height(32.dp))
 		IncrementDecrement(
-				count = count ,
-				lap = lap ,
-				lapCountCounter = lapCountCounter ,
-				objective = objective ,
+				 count = count ,
+				 lap = lap ,
+				 lapCountCounter = lapCountCounter ,
+				 objective = objective ,
 						  )
 	}
 
 	if (resetTasbih.value)
 	{
 		AlertDialogNimaz(
-				bottomDivider = false ,
-				topDivider = false ,
-				contentHeight = 100.dp ,
-				contentDescription = "Reset Counter" ,
-				title = "Reset Counter" ,
-				confirmButtonText = "Yes" ,
-				dismissButtonText = "No, Cancel" ,
-				contentToShow = {
-					Text(
-							text = "Are you sure you want to reset the counter?" ,
-							style = MaterialTheme.typography.bodyMedium ,
-							modifier = Modifier.padding(8.dp)
-						)
-				} ,
-				onDismissRequest = {
-					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
-				} ,
-				onConfirm = {
-					count.value = 0
-					lap.value = 1
-					lapCountCounter.value = 0
-					viewModel.handleEvent(
-							TasbihViewModel.TasbihEvent.UpdateResetButtonState(
-									false
-																			  )
-										 )
-				} ,
-				onDismiss = {
-					viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
-				})
+				 bottomDivider = false ,
+				 topDivider = false ,
+				 contentHeight = 100.dp ,
+				 contentDescription = "Reset Counter" ,
+				 title = "Reset Counter" ,
+				 confirmButtonText = "Yes" ,
+				 dismissButtonText = "No, Cancel" ,
+				 contentToShow = {
+					 Text(
+							  text = "Are you sure you want to reset the counter?" ,
+							  style = MaterialTheme.typography.bodyMedium ,
+							  modifier = Modifier.padding(8.dp)
+						 )
+				 } ,
+				 onDismissRequest = {
+					 viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+				 } ,
+				 onConfirm = {
+					 count.value = 0
+					 lap.value = 1
+					 lapCountCounter.value = 0
+					 viewModel.handleEvent(
+							  TasbihViewModel.TasbihEvent.UpdateResetButtonState(
+									   false
+																				)
+										  )
+				 } ,
+				 onDismiss = {
+					 viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+				 })
 	}
 
 	if (showObjectiveDialog.value)
 	{
 		AlertDialogNimaz(
-				cardContent = false ,
-				bottomDivider = false ,
-				topDivider = false ,
-				contentHeight = 100.dp ,
-				contentDescription = "Set Tasbih Objective" ,
-				title = "Set Tasbih Objective" ,
-				contentToShow = {
-					OutlinedTextField(
-							shape = MaterialTheme.shapes.extraLarge ,
-							textStyle = MaterialTheme.typography.titleLarge ,
-							value = objective.value ,
-							onValueChange = { objective.value = it } ,
-							singleLine = true ,
-							keyboardOptions = KeyboardOptions(
-									keyboardType = KeyboardType.Number ,
-									imeAction = ImeAction.Done ,
-															 ) ,
-							label = {
-								Text(
-										text = "Objective" ,
-									)
-							} ,
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(horizontal = 16.dp) ,
-							keyboardActions = KeyboardActions(
-									onDone = {
-										val isInt = objective.value.toIntOrNull()
-										if (isInt != null)
-										{
-											if (objective.value != "" || isInt != 0)
-											{
-												showObjectiveDialog.value = false
-											} else
-											{
-												Toasty
-													.error(
+				 cardContent = false ,
+				 bottomDivider = false ,
+				 topDivider = false ,
+				 contentHeight = 100.dp ,
+				 contentDescription = "Set Tasbih Objective" ,
+				 title = "Set Tasbih Objective" ,
+				 contentToShow = {
+					 OutlinedTextField(
+							  shape = MaterialTheme.shapes.extraLarge ,
+							  textStyle = MaterialTheme.typography.titleLarge ,
+							  value = objective.value ,
+							  onValueChange = { objective.value = it } ,
+							  singleLine = true ,
+							  keyboardOptions = KeyboardOptions(
+									   keyboardType = KeyboardType.Number ,
+									   imeAction = ImeAction.Done ,
+															   ) ,
+							  label = {
+								  Text(
+										   text = "Objective" ,
+									  )
+							  } ,
+							  modifier = Modifier
+								  .fillMaxWidth()
+								  .padding(horizontal = 16.dp) ,
+							  keyboardActions = KeyboardActions(
+									   onDone = {
+										   val isInt = objective.value.toIntOrNull()
+										   if (isInt != null)
+										   {
+											   if (objective.value != "" || isInt != 0)
+											   {
+												   showObjectiveDialog.value = false
+											   } else
+											   {
+												   Toasty
+													   .error(
+																context ,
+																"Objective must be greater than 0" ,
+																Toasty.LENGTH_SHORT
+															 )
+													   .show()
+											   }
+										   } else
+										   {
+											   Toasty
+												   .error(
 															context ,
 															"Objective must be greater than 0" ,
 															Toasty.LENGTH_SHORT
-														  )
-													.show()
-											}
-										} else
-										{
-											Toasty
-												.error(
-														context ,
-														"Objective must be greater than 0" ,
-														Toasty.LENGTH_SHORT
-													  )
-												.show()
-										}
-									})
-									 )
-				} ,
-				onDismissRequest = {
-					showObjectiveDialog.value = false
-				} ,
-				onConfirm = {
-					val isInt = objective.value.toIntOrNull()
-					if (isInt != null)
-					{
-						if (objective.value != "" || isInt != 0)
-						{
-							showObjectiveDialog.value = false
-						} else
-						{
-							Toasty
-								.error(
-										context ,
-										"Objective must be greater than 0" ,
-										Toasty.LENGTH_SHORT
+														 )
+												   .show()
+										   }
+									   })
 									  )
-								.show()
-						}
-					} else
-					{
-						Toasty
-							.error(
-									context ,
-									"Objective must be greater than 0" ,
-									Toasty.LENGTH_SHORT
-								  )
-							.show()
-					}
-				} ,
-				onDismiss = {
-					showObjectiveDialog.value = false
-				})
+				 } ,
+				 onDismissRequest = {
+					 showObjectiveDialog.value = false
+				 } ,
+				 onConfirm = {
+					 val isInt = objective.value.toIntOrNull()
+					 if (isInt != null)
+					 {
+						 if (objective.value != "" || isInt != 0)
+						 {
+							 showObjectiveDialog.value = false
+						 } else
+						 {
+							 Toasty
+								 .error(
+										  context ,
+										  "Objective must be greater than 0" ,
+										  Toasty.LENGTH_SHORT
+									   )
+								 .show()
+						 }
+					 } else
+					 {
+						 Toasty
+							 .error(
+									  context ,
+									  "Objective must be greater than 0" ,
+									  Toasty.LENGTH_SHORT
+								   )
+							 .show()
+					 }
+				 } ,
+				 onDismiss = {
+					 showObjectiveDialog.value = false
+				 })
 	}
 }

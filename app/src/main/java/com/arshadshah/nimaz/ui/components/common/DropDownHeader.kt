@@ -26,58 +26,58 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 	//Name - Goal - Count
 
 	Row(
-			modifier = Modifier
-				.fillMaxWidth() ,
-			verticalAlignment = Alignment.CenterVertically
+			 modifier = Modifier
+				 .fillMaxWidth() ,
+			 verticalAlignment = Alignment.CenterVertically
 	   ) {
 		//name
 		Text(
-				modifier = Modifier
-					.weight(1f)
-					.padding(8.dp) ,
-				text = headerLeft ,
-				textAlign = TextAlign.Center ,
-				maxLines = 2 ,
-				overflow = TextOverflow.Ellipsis ,
-				style = MaterialTheme.typography.bodyLarge
+				 modifier = Modifier
+					 .weight(1f)
+					 .padding(8.dp) ,
+				 text = headerLeft ,
+				 textAlign = TextAlign.Center ,
+				 maxLines = 2 ,
+				 overflow = TextOverflow.Ellipsis ,
+				 style = MaterialTheme.typography.bodyLarge
 			)
 		//divider
 		Divider(
-				modifier = Modifier
-					.width(1.dp)
-					.height(24.dp) ,
-				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
-				thickness = 1.dp ,
+				 modifier = Modifier
+					 .width(1.dp)
+					 .height(24.dp) ,
+				 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
+				 thickness = 1.dp ,
 			   )
 		//goal
 		Text(
-				modifier = Modifier
-					.weight(1f)
-					.padding(8.dp) ,
-				text = headerMiddle ,
-				textAlign = TextAlign.Center ,
-				maxLines = 2 ,
-				overflow = TextOverflow.Ellipsis ,
-				style = MaterialTheme.typography.bodyLarge
+				 modifier = Modifier
+					 .weight(1f)
+					 .padding(8.dp) ,
+				 text = headerMiddle ,
+				 textAlign = TextAlign.Center ,
+				 maxLines = 2 ,
+				 overflow = TextOverflow.Ellipsis ,
+				 style = MaterialTheme.typography.bodyLarge
 			)
 		//divider
 		Divider(
-				modifier = Modifier
-					.width(1.dp)
-					.height(24.dp) ,
-				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
-				thickness = 1.dp ,
+				 modifier = Modifier
+					 .width(1.dp)
+					 .height(24.dp) ,
+				 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
+				 thickness = 1.dp ,
 			   )
 		//count
 		Text(
-				modifier = Modifier
-					.weight(1f)
-					.padding(8.dp) ,
-				text = headerRight ,
-				textAlign = TextAlign.Center ,
-				maxLines = 2 ,
-				overflow = TextOverflow.Ellipsis ,
-				style = MaterialTheme.typography.bodyLarge
+				 modifier = Modifier
+					 .weight(1f)
+					 .padding(8.dp) ,
+				 text = headerRight ,
+				 textAlign = TextAlign.Center ,
+				 maxLines = 2 ,
+				 overflow = TextOverflow.Ellipsis ,
+				 style = MaterialTheme.typography.bodyLarge
 			)
 	}
 }

@@ -28,8 +28,8 @@ class RoutingActivity : ComponentActivity()
 		{
 			LocalDataStore.init(this)
 			Log.d(
-					"Nimaz: Introduction Activity" ,
-					"onCreate:  called and local data store initialized"
+					 "Nimaz: Introduction Activity" ,
+					 "onCreate:  called and local data store initialized"
 				 )
 		}
 
@@ -37,8 +37,8 @@ class RoutingActivity : ComponentActivity()
 		{
 			FirebaseLogger.init()
 			Log.d(
-					"Nimaz: Introduction Activity" ,
-					"onCreate:  called and firebase logger initialized"
+					 "Nimaz: Introduction Activity" ,
+					 "onCreate:  called and firebase logger initialized"
 				 )
 		}
 
@@ -48,8 +48,8 @@ class RoutingActivity : ComponentActivity()
 		if (firstTime)
 		{
 			Log.d(
-					AppConstants.SPLASH_SCREEN_TAG ,
-					"First time install launching setup activity"
+					 AppConstants.SPLASH_SCREEN_TAG ,
+					 "First time install launching setup activity"
 				 )
 			val intent = Intent(this.applicationContext , Introduction::class.java)
 			startActivity(intent)

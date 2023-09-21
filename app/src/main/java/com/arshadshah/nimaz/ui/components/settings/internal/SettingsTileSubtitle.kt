@@ -12,8 +12,8 @@ internal fun SettingsTileSubtitle(subtitle : @Composable () -> Unit)
 {
 	ProvideTextStyle(value = MaterialTheme.typography.titleSmall) {
 		CompositionLocalProvider(
-				LocalContentColor provides LocalContentColor.current.copy(alpha = 0.8f) ,
-				content = subtitle
+				 LocalContentColor provides LocalContentColor.current.copy(alpha = 0.8f) ,
+				 content = subtitle
 								)
 	}
 }

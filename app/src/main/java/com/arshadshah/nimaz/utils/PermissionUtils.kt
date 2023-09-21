@@ -46,29 +46,29 @@ fun FeatureThatRequiresLocationPermission(
 		//permission not granted
 		//show dialog
 		AlertDialog(
-				onDismissRequest = {
-					showDialog.value = false
-				} ,
-				title = { Text(text = "Location Permission Required") } ,
-				text = { Text(text = descToShow.value) } ,
-				confirmButton = {
-					Button(onClick = {
-						showDialog.value = false
-						locationPermissionState.launchMultiplePermissionRequest()
-					}) {
-						Text(
-								text = "Grant Permission" ,
-								style = MaterialTheme.typography.titleMedium
-							)
-					}
-				} ,
-				dismissButton = {
-					Button(onClick = {
-						showDialog.value = false
-					}) {
-						Text(text = "Close" , style = MaterialTheme.typography.titleMedium)
-					}
-				}
+				 onDismissRequest = {
+					 showDialog.value = false
+				 } ,
+				 title = { Text(text = "Location Permission Required") } ,
+				 text = { Text(text = descToShow.value) } ,
+				 confirmButton = {
+					 Button(onClick = {
+						 showDialog.value = false
+						 locationPermissionState.launchMultiplePermissionRequest()
+					 }) {
+						 Text(
+								  text = "Grant Permission" ,
+								  style = MaterialTheme.typography.titleMedium
+							 )
+					 }
+				 } ,
+				 dismissButton = {
+					 Button(onClick = {
+						 showDialog.value = false
+					 }) {
+						 Text(text = "Close" , style = MaterialTheme.typography.titleMedium)
+					 }
+				 }
 				   )
 	}
 }
@@ -109,21 +109,21 @@ fun FeatureThatRequiresNotificationPermission(
 		//permission not granted
 		//show dialog
 		AlertDialog(
-				onDismissRequest = {
-					showRationale.value = false
-				} ,
-				title = { Text(text = "Notification Permission Required") } ,
-				text = { Text(text = descToShow.value) } ,
-				confirmButton = {
-					Button(onClick = { notificationPermissionState.launchPermissionRequest() }) {
-						Text(text = "Allow" , style = MaterialTheme.typography.titleMedium)
-					}
-				} ,
-				dismissButton = {
-					Button(onClick = { showRationale.value = false }) {
-						Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
-					}
-				}
+				 onDismissRequest = {
+					 showRationale.value = false
+				 } ,
+				 title = { Text(text = "Notification Permission Required") } ,
+				 text = { Text(text = descToShow.value) } ,
+				 confirmButton = {
+					 Button(onClick = { notificationPermissionState.launchPermissionRequest() }) {
+						 Text(text = "Allow" , style = MaterialTheme.typography.titleMedium)
+					 }
+				 } ,
+				 dismissButton = {
+					 Button(onClick = { showRationale.value = false }) {
+						 Text(text = "Cancel" , style = MaterialTheme.typography.titleMedium)
+					 }
+				 }
 				   )
 	}
 

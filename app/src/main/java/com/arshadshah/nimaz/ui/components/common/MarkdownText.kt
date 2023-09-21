@@ -44,8 +44,8 @@ fun MarkdownText(
 	style : TextStyle = LocalTextStyle.current ,
 	@IdRes viewId : Int? = null ,
 	onClick : (() -> Unit)? = null ,
-		// this option will disable all clicks on links, inside the markdown text
-		// it also enable the parent view to receive the click event
+		 // this option will disable all clicks on links, inside the markdown text
+		 // it also enable the parent view to receive the click event
 	disableLinkMovementMethod : Boolean = false ,
 	onTextLayout : ((numLines : Int) -> Unit)? = null ,
 	onLinkClicked : ((String) -> Unit)? = null ,
@@ -55,35 +55,35 @@ fun MarkdownText(
 	val context : Context = LocalContext.current
 	val markdownRender : Markwon = remember { createMarkdownRender(context , onLinkClicked) }
 	AndroidView(
-			modifier = modifier ,
-			factory = { ctx ->
-				createTextView(
-						context = ctx ,
-						color = color ,
-						defaultColor = defaultColor ,
-						fontSize = fontSize ,
-						fontResource = fontResource ,
-						maxLines = maxLines ,
-						style = style ,
-						textAlign = textAlign ,
-						viewId = viewId ,
-						onClick = onClick ,
-							  )
-			} ,
-			update = { textView ->
-				markdownRender.setMarkdown(textView , markdown)
-				if (disableLinkMovementMethod)
-				{
-					textView.movementMethod = null
-				}
-				if (onTextLayout != null)
-				{
-					textView.post {
-						onTextLayout(textView.lineCount)
-					}
-				}
-				textView.maxLines = maxLines
-			}
+			 modifier = modifier ,
+			 factory = { ctx ->
+				 createTextView(
+						  context = ctx ,
+						  color = color ,
+						  defaultColor = defaultColor ,
+						  fontSize = fontSize ,
+						  fontResource = fontResource ,
+						  maxLines = maxLines ,
+						  style = style ,
+						  textAlign = textAlign ,
+						  viewId = viewId ,
+						  onClick = onClick ,
+							   )
+			 } ,
+			 update = { textView ->
+				 markdownRender.setMarkdown(textView , markdown)
+				 if (disableLinkMovementMethod)
+				 {
+					 textView.movementMethod = null
+				 }
+				 if (onTextLayout != null)
+				 {
+					 textView.post {
+						 onTextLayout(textView.lineCount)
+					 }
+				 }
+				 textView.maxLines = maxLines
+			 }
 			   )
 }
 
@@ -103,11 +103,11 @@ private fun createTextView(
 
 	val textColor = color.takeOrElse { style.color.takeOrElse { defaultColor } }
 	val mergedStyle = style.merge(
-			TextStyle(
-					color = textColor ,
-					fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize ,
-					textAlign = textAlign ,
-					 )
+			 TextStyle(
+					  color = textColor ,
+					  fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize ,
+					  textAlign = textAlign ,
+					  )
 								 )
 	return TextView(context).apply {
 		onClick?.let { setOnClickListener { onClick() } }

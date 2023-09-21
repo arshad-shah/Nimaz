@@ -63,11 +63,11 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 	//we will pick a random image from the list
 	val imagesToShow =
 		listOf(
-				R.drawable.eid ,
-				R.drawable.eid2 ,
-				R.drawable.eid3 ,
-				R.drawable.eid4 ,
-				R.drawable.eid5 ,
+				 R.drawable.eid ,
+				 R.drawable.eid2 ,
+				 R.drawable.eid3 ,
+				 R.drawable.eid4 ,
+				 R.drawable.eid5 ,
 			  )
 	//pick a random image
 	val randomImage = imagesToShow.random()
@@ -90,16 +90,16 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 	{
 		//show the card
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp)
-					.clickable { onNavigateToCalender() } ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp)
+					 .clickable { onNavigateToCalender() } ,
 					) {
 			Column(
-					modifier = Modifier.padding(16.dp) ,
-					verticalArrangement = Arrangement.Center ,
-					horizontalAlignment = Alignment.CenterHorizontally
+					 modifier = Modifier.padding(16.dp) ,
+					 verticalArrangement = Arrangement.Center ,
+					 horizontalAlignment = Alignment.CenterHorizontally
 				  ) {
 				if (isAfterEidUlFitrStart || eidUlFitrTimeLeft.value == 0L)
 				{
@@ -110,55 +110,55 @@ fun EidUlFitrCard(onNavigateToCalender : () -> Unit)
 				}
 
 				Row(
-						modifier = Modifier
-							.fillMaxWidth() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
+						 modifier = Modifier
+							 .fillMaxWidth() ,
+						 verticalAlignment = Alignment.CenterVertically ,
+						 horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
 					Box(
-							modifier = Modifier
-								.clip(MaterialTheme.shapes.extraLarge)
-								.padding(8.dp)
-								.size(80.dp)
+							 modifier = Modifier
+								 .clip(MaterialTheme.shapes.extraLarge)
+								 .padding(8.dp)
+								 .size(80.dp)
 					   ) {
 						Image(
-								painter = painterResource(id = imageToShow.value) ,
-								contentDescription = "Moon" ,
-								modifier = Modifier
-									.size(80.dp)
+								 painter = painterResource(id = imageToShow.value) ,
+								 contentDescription = "Moon" ,
+								 modifier = Modifier
+									 .size(80.dp)
 							 )
 					}
 					Column(
-							modifier = Modifier.fillMaxWidth() ,
-							verticalArrangement = Arrangement.Center ,
-							horizontalAlignment = Alignment.CenterHorizontally
+							 modifier = Modifier.fillMaxWidth() ,
+							 verticalArrangement = Arrangement.Center ,
+							 horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
 						if (! isAfterEidUlFitrStart || eidUlFitrTimeLeft.value == 0L)
 						{
 							//estimated start
 							Text(
-									text = "Estimated start" ,
-									style = MaterialTheme.typography.titleSmall
+									 text = "Estimated start" ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						}
 						//if its 0 then show today if its 1 then show tomorrow else show the days left
 						Text(
-								text = if (eidUlFitrTimeLeft.value == 0L) "Today" else if (eidUlFitrTimeLeft.value == 1L) "Tomorrow" else "In ${eidUlFitrTimeLeft.value} days" ,
-								style = MaterialTheme.typography.headlineMedium
+								 text = if (eidUlFitrTimeLeft.value == 0L) "Today" else if (eidUlFitrTimeLeft.value == 1L) "Tomorrow" else "In ${eidUlFitrTimeLeft.value} days" ,
+								 style = MaterialTheme.typography.headlineMedium
 							)
 						if (isAfterEidUlFitrStart)
 						{
 							//estimated end
 							Text(
-									text = eidUlFitrEndFormatted.toString() ,
-									style = MaterialTheme.typography.titleSmall
+									 text = eidUlFitrEndFormatted.toString() ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						} else
 						{
 							//estimated start
 							Text(
-									text = eidUlFitrStartFormatted.toString() ,
-									style = MaterialTheme.typography.titleSmall
+									 text = eidUlFitrStartFormatted.toString() ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						}
 					}

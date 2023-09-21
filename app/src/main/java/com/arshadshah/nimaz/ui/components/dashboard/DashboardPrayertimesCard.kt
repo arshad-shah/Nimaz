@@ -61,14 +61,14 @@ fun DashboardPrayertimesCard()
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = PRAYER_TIMES_VIEWMODEL_KEY ,
-			initializer = { PrayerTimesViewModel() } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = PRAYER_TIMES_VIEWMODEL_KEY ,
+			 initializer = { PrayerTimesViewModel() } ,
+			 viewModelStoreOwner = context as ComponentActivity
 							 )
 	val settingViewModel = viewModel(
-			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = context
+			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+			 initializer = { SettingsViewModel(context) } ,
+			 viewModelStoreOwner = context
 									)
 	val sharedPreferences = remember { PrivateSharedPreferences(context) }
 	LaunchedEffect(key1 = Unit) {
@@ -79,8 +79,8 @@ fun DashboardPrayertimesCard()
 		if (! alarmLock)
 		{
 			viewModel.handleEvent(
-					context ,
-					PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context)
+					 context ,
+					 PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context)
 								 )
 			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
 		}
@@ -117,21 +117,21 @@ fun DashboardPrayertimesCard()
 	LaunchedEffect(locationName.value) {
 		//update the prayer times
 		viewModel.handleEvent(
-				context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-				PrayerTimesParamMapper.getParams(context)
-																				  )
+				 context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+				 PrayerTimesParamMapper.getParams(context)
+																				   )
 							 )
 		viewModel.handleEvent(
-				context ,
-				PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-						context
-																   )
+				 context ,
+				 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+						  context
+																	)
 							 )
 	}
 
 	val phaseOfMoon = MoonCalc(
-			latitude = latitude.value ,
-			longitude = longitude.value
+			 latitude = latitude.value ,
+			 longitude = longitude.value
 							  ).getMoonPhase()
 
 
@@ -157,50 +157,50 @@ fun DashboardPrayertimesCard()
 
 
 	viewModel.handleEvent(
-			context ,
-			PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
+			 context ,
+			 PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
 						 )
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-				.fillMaxWidth()
-				.testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD) ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
+				 .fillMaxWidth()
+				 .testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD) ,
 				) {
 		Column(
-				modifier = Modifier
-					.padding(8.dp) ,
-				verticalArrangement = Arrangement.SpaceBetween ,
-				horizontalAlignment = Alignment.CenterHorizontally
+				 modifier = Modifier
+					 .padding(8.dp) ,
+				 verticalArrangement = Arrangement.SpaceBetween ,
+				 horizontalAlignment = Alignment.CenterHorizontally
 			  ) {
 			Row(
-					modifier = Modifier
-						.padding(horizontal = 8.dp)
-						.fillMaxWidth() ,
-					verticalAlignment = Alignment.CenterVertically ,
-					horizontalArrangement = Arrangement.SpaceBetween
+					 modifier = Modifier
+						 .padding(horizontal = 8.dp)
+						 .fillMaxWidth() ,
+					 verticalAlignment = Alignment.CenterVertically ,
+					 horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
 				Column(
-						modifier = Modifier.padding(4.dp) ,
-						verticalArrangement = Arrangement.SpaceBetween ,
-						horizontalAlignment = Alignment.CenterHorizontally
+						 modifier = Modifier.padding(4.dp) ,
+						 verticalArrangement = Arrangement.SpaceBetween ,
+						 horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
 					Text(
-							modifier = Modifier
-								.padding(4.dp) ,
-							textAlign = TextAlign.Start ,
-							text = LocalDate.now()
-								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							style = MaterialTheme.typography.titleMedium
+							 modifier = Modifier
+								 .padding(4.dp) ,
+							 textAlign = TextAlign.Start ,
+							 text = LocalDate.now()
+								 .format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							 style = MaterialTheme.typography.titleMedium
 						)
 					Text(
-							modifier = Modifier
-								.padding(4.dp) ,
-							textAlign = TextAlign.Start ,
-							text = HijrahDate.from(LocalDate.now())
-								.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							style = MaterialTheme.typography.titleSmall
+							 modifier = Modifier
+								 .padding(4.dp) ,
+							 textAlign = TextAlign.Start ,
+							 text = HijrahDate.from(LocalDate.now())
+								 .format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
+							 style = MaterialTheme.typography.titleSmall
 						)
 				}
 				if (isLoading.value)
@@ -209,96 +209,96 @@ fun DashboardPrayertimesCard()
 				} else
 				{
 					Text(
-							text = locationName.value ,
-							style = MaterialTheme.typography.titleMedium ,
-							maxLines = 1 ,
-							overflow = TextOverflow.Ellipsis
+							 text = locationName.value ,
+							 style = MaterialTheme.typography.titleMedium ,
+							 maxLines = 1 ,
+							 overflow = TextOverflow.Ellipsis
 						)
 				}
 
 				MoonPhaseImage(
-						image = phaseOfMoon.phaseSvg
+						 image = phaseOfMoon.phaseSvg
 							  )
 			}
 			Row(
-					modifier = Modifier
-						.fillMaxWidth() ,
-					verticalAlignment = Alignment.CenterVertically ,
-					horizontalArrangement = Arrangement.SpaceBetween
+					 modifier = Modifier
+						 .fillMaxWidth() ,
+					 verticalAlignment = Alignment.CenterVertically ,
+					 horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
 				Box(
-						modifier = Modifier
-							.clip(MaterialTheme.shapes.extraLarge)
-							.size(100.dp)
+						 modifier = Modifier
+							 .clip(MaterialTheme.shapes.extraLarge)
+							 .size(100.dp)
 				   ) {
 					Image(
-							modifier = Modifier
-								.size(100.dp)
-								.testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD) ,
-							painter = when (nextPrayerName.value)
-							{
-								"sunrise" ->
-								{
-									painterResource(id = R.drawable.sunrise_icon)
-								}
+							 modifier = Modifier
+								 .size(100.dp)
+								 .testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD) ,
+							 painter = when (nextPrayerName.value)
+							 {
+								 "sunrise" ->
+								 {
+									 painterResource(id = R.drawable.sunrise_icon)
+								 }
 
-								"fajr" ->
-								{
-									painterResource(id = R.drawable.fajr_icon)
-								}
+								 "fajr" ->
+								 {
+									 painterResource(id = R.drawable.fajr_icon)
+								 }
 
-								"dhuhr" ->
-								{
-									painterResource(id = R.drawable.dhuhr_icon)
-								}
+								 "dhuhr" ->
+								 {
+									 painterResource(id = R.drawable.dhuhr_icon)
+								 }
 
-								"asr" ->
-								{
-									painterResource(id = R.drawable.asr_icon)
-								}
+								 "asr" ->
+								 {
+									 painterResource(id = R.drawable.asr_icon)
+								 }
 
-								"maghrib" ->
-								{
-									painterResource(id = R.drawable.maghrib_icon)
-								}
+								 "maghrib" ->
+								 {
+									 painterResource(id = R.drawable.maghrib_icon)
+								 }
 
-								"isha" ->
-								{
-									painterResource(id = R.drawable.isha_icon)
-								}
+								 "isha" ->
+								 {
+									 painterResource(id = R.drawable.isha_icon)
+								 }
 
-								else ->
-								{
-									painterResource(id = R.drawable.sunrise_icon)
-								}
-							} ,
-							contentDescription = "Next Prayer Icon"
+								 else ->
+								 {
+									 painterResource(id = R.drawable.sunrise_icon)
+								 }
+							 } ,
+							 contentDescription = "Next Prayer Icon"
 						 )
 				}
 				Column(
-						modifier = Modifier.fillMaxWidth() ,
-						verticalArrangement = Arrangement.Center ,
-						horizontalAlignment = Alignment.CenterHorizontally
+						 modifier = Modifier.fillMaxWidth() ,
+						 verticalArrangement = Arrangement.Center ,
+						 horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
 					Text(
-							text = nextPrayerName.value.first()
-								.uppercase() + nextPrayerName.value.substring(1)
-								.lowercase(
-										Locale.ROOT
-										  ) ,
-							style = MaterialTheme.typography.titleLarge
+							 text = nextPrayerName.value.first()
+								 .uppercase() + nextPrayerName.value.substring(1)
+								 .lowercase(
+										  Locale.ROOT
+										   ) ,
+							 style = MaterialTheme.typography.titleLarge
 						)
 					Text(
-							text = nextPrayerTime.value.format(formatter) ,
-							style = MaterialTheme.typography.titleLarge
+							 text = nextPrayerTime.value.format(formatter) ,
+							 style = MaterialTheme.typography.titleLarge
 						)
 					Text(
-							text = getTimerText(timer.value) ,
-							style = MaterialTheme.typography.titleMedium ,
-							textAlign = TextAlign.Center ,
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(8.dp)
+							 text = getTimerText(timer.value) ,
+							 style = MaterialTheme.typography.titleMedium ,
+							 textAlign = TextAlign.Center ,
+							 modifier = Modifier
+								 .fillMaxWidth()
+								 .padding(8.dp)
 						)
 				}
 			}
@@ -407,22 +407,22 @@ fun MoonPhaseImage(image : Int)
 	//with a white background
 	//and a black border
 	Box(
-			modifier = Modifier
-				.size(40.dp)
-				.border(
-						width = 1.dp ,
-						color = MaterialTheme.colorScheme.outline ,
-						shape = CircleShape
-					   )
-				.clip(shape = CircleShape)
+			 modifier = Modifier
+				 .size(40.dp)
+				 .border(
+						  width = 1.dp ,
+						  color = MaterialTheme.colorScheme.outline ,
+						  shape = CircleShape
+						)
+				 .clip(shape = CircleShape)
 	   ) {
 		Image(
-				painter = painterResource(id = image) ,
-				contentDescription = "Moon Phase Image" ,
-				modifier = Modifier
-					.size(40.dp)
-					.background(color = Color.White.copy(alpha = 0.8f))
-					.clip(shape = CircleShape)
+				 painter = painterResource(id = image) ,
+				 contentDescription = "Moon Phase Image" ,
+				 modifier = Modifier
+					 .size(40.dp)
+					 .background(color = Color.White.copy(alpha = 0.8f))
+					 .clip(shape = CircleShape)
 			 )
 	}
 }
@@ -434,14 +434,14 @@ fun MoonPhaseImagePreview()
 	val fraction = remember { mutableStateOf(0.0) }
 	//list of phases
 	val phases = listOf(
-			MoonPhase.NEW_MOON ,
-			MoonPhase.WAXING_CRESCENT ,
-			MoonPhase.FIRST_QUARTER ,
-			MoonPhase.WAXING_GIBBOUS ,
-			MoonPhase.FULL_MOON ,
-			MoonPhase.WANING_GIBBOUS ,
-			MoonPhase.LAST_QUARTER ,
-			MoonPhase.WANING_CRESCENT
+			 MoonPhase.NEW_MOON ,
+			 MoonPhase.WAXING_CRESCENT ,
+			 MoonPhase.FIRST_QUARTER ,
+			 MoonPhase.WAXING_GIBBOUS ,
+			 MoonPhase.FULL_MOON ,
+			 MoonPhase.WANING_GIBBOUS ,
+			 MoonPhase.LAST_QUARTER ,
+			 MoonPhase.WANING_CRESCENT
 					   )
 	val currentPhase = remember { mutableStateOf(phases[0]) }
 	val percentage = (fraction.value * 100).toInt()
@@ -530,24 +530,24 @@ fun MoonPhaseImagePreview()
 	//get one hundred dates
 	val dates = remember {
 		mutableStateOf(
-				(0 .. hundredDays).map {
-					LocalDateTime.now().plusDays(it.toLong())
-				}
+				 (0 .. hundredDays).map {
+					 LocalDateTime.now().plusDays(it.toLong())
+				 }
 					  )
 	}
 	//get a list of moon phases
 	val moonPhases = dates.value.map {
 		MoonCalc(
-				latitude = 53.7 ,
-				longitude = - 7.35
+				 latitude = 53.7 ,
+				 longitude = - 7.35
 				).getMoonPhase(it)
 	}
 	//a slider to change date so that the moon phase changes
 	//and we can see the different moon phases
 	Column(
-			modifier = Modifier.fillMaxSize() ,
-			horizontalAlignment = Alignment.CenterHorizontally ,
-			verticalArrangement = Arrangement.Center
+			 modifier = Modifier.fillMaxSize() ,
+			 horizontalAlignment = Alignment.CenterHorizontally ,
+			 verticalArrangement = Arrangement.Center
 		  ) {
 
 		//loop through the list of moon phases and get the fraction and phase

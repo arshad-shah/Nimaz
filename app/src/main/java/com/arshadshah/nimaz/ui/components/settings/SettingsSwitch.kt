@@ -3,7 +3,10 @@ package com.arshadshah.nimaz.ui.components.settings
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -23,7 +26,6 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileAction
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileIcon
 import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun SettingsSwitch(
@@ -41,47 +43,60 @@ fun SettingsSwitch(
 		onCheckedChange(storageValue)
 	}
 
-	val iconForSwitch : (@Composable () -> Unit)? = if (state.value)
+	val iconForSwitch : (@Composable () -> Unit) = if (state.value)
 	{
 		{
 			Icon(
-					painter = painterResource(id = R.drawable.check_icon) ,
-					contentDescription = null ,
-					modifier = Modifier
-						.size(SwitchDefaults.IconSize)
+					 painter = painterResource(id = R.drawable.check_icon) ,
+					 contentDescription = null ,
+					 modifier = Modifier
+						 .size(SwitchDefaults.IconSize)
 				)
 		}
 	} else
 	{
-		null
+		{
+			Icon(
+					 painter = painterResource(id = R.drawable.cross_icon) ,
+					 contentDescription = null ,
+					 modifier = Modifier
+						 .size(SwitchDefaults.IconSize)
+						 .padding(2.dp)
+				)
+		}
 	}
 
 
 
 	Surface {
 		Row(
-				modifier = modifier
-					.fillMaxWidth()
-					.toggleable(
-							value = storageValue ,
-							role = Role.Switch ,
-							onValueChange = { update(! storageValue) }
-							   ) ,
-				verticalAlignment = Alignment.CenterVertically ,
+				 modifier = modifier
+					 .fillMaxWidth()
+					 .height(60.dp)
+					 .toggleable(
+							  value = storageValue ,
+							  role = Role.Switch ,
+							  onValueChange = { update(! storageValue) }
+								) ,
+				 verticalAlignment = Alignment.CenterVertically ,
 		   ) {
 			if (icon != null)
 			{
 				SettingsTileIcon(icon = icon)
 			} else
 			{
-				Spacer(modifier = Modifier.size(24.dp))
+				Spacer(
+						 modifier = Modifier
+							 .width(24.dp)
+							 .height(60.dp)
+					  )
 			}
 			SettingsTileTexts(title = title , subtitle = subtitle)
 			SettingsTileAction {
 				Switch(
-						checked = storageValue ,
-						onCheckedChange = update ,
-						thumbContent = iconForSwitch ,
+						 checked = storageValue ,
+						 onCheckedChange = update ,
+						 thumbContent = iconForSwitch ,
 					  )
 			}
 		}
@@ -92,16 +107,14 @@ fun SettingsSwitch(
 @Composable
 internal fun SettingsSwitchPreview()
 {
-	NimazTheme {
-		val storage = rememberBooleanSettingState(defaultValue = true)
-		SettingsSwitch(
-				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-					  )
-	}
+	val storage = rememberBooleanSettingState(defaultValue = true)
+	SettingsSwitch(
+			 state = storage ,
+			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 onCheckedChange = { }
+				  )
 }
 
 //preview with checked state as false
@@ -109,16 +122,14 @@ internal fun SettingsSwitchPreview()
 @Composable
 internal fun SettingsSwitchPreview2()
 {
-	NimazTheme {
-		val storage = rememberBooleanSettingState(defaultValue = false)
-		SettingsSwitch(
-				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-					  )
-	}
+	val storage = rememberBooleanSettingState(defaultValue = false)
+	SettingsSwitch(
+			 state = storage ,
+			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 onCheckedChange = { }
+				  )
 }
 
 //preview of checked state as true in dark theme
@@ -126,14 +137,11 @@ internal fun SettingsSwitchPreview2()
 @Composable
 internal fun SettingsSwitchPreview3()
 {
-	NimazTheme(darkTheme = true) {
-		val storage = rememberBooleanSettingState(defaultValue = true)
-		SettingsSwitch(
-				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-					  )
-	}
+	val storage = rememberBooleanSettingState(defaultValue = true)
+	SettingsSwitch(
+			 state = storage ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 onCheckedChange = { }
+				  )
 }

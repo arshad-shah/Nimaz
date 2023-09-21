@@ -1,0 +1,11 @@
+query getPrayerTimesForMonth($parameter: Parameters!){
+    getPrayerTimesForMonthCustom(parameters: $parameter){
+        date
+        fajr
+        sunrise
+        dhuhr
+        asr
+        maghrib
+        isha
+    }
+}

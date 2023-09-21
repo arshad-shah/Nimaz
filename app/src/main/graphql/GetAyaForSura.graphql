@@ -1,0 +1,18 @@
+query getAllAyaForSura($sura:Int!){
+    getListAyaForSura(suraNumber:$sura){
+        id
+        arabic
+        english
+        urdu
+        suraNumber
+        juzNumber
+        ruku
+        sajda
+        sajdaType
+        ayaNumberInSura
+        favorite
+        bookmark
+        audioFileLocation
+        note
+    }
+}

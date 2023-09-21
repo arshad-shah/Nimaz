@@ -40,71 +40,71 @@ fun <T> FeaturesDropDown(
 	}
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
 				) {
 
 		//an elevation card that shows the text and icon
 		ElevatedCard(
-				modifier = Modifier
-					.fillMaxWidth()
-					.clickable {
-						isExpanded.value = ! isExpanded.value
-					} ,
-				shape = MaterialTheme.shapes.medium ,
-				content = {
-					Row(
-							modifier = Modifier
-								.padding(8.dp)
-								.fillMaxWidth() ,
-							verticalAlignment = Alignment.CenterVertically ,
-							horizontalArrangement = Arrangement.SpaceBetween
-					   ) {
-						Row(
-								modifier = Modifier
-									.fillMaxWidth(0.9f) ,
-								verticalAlignment = Alignment.CenterVertically ,
-								horizontalArrangement = Arrangement.Start
-						   ) {
-							//the text
-							Text(
-									modifier = Modifier
-										.padding(8.dp) ,
-									text = label ,
-									textAlign = TextAlign.Start ,
-									maxLines = 2 ,
-									overflow = TextOverflow.Ellipsis ,
-									style = MaterialTheme.typography.bodyLarge
-								)
-							//a bubble that shows the number of features
-							//if the list is empty then the bubble is not shown
-							if (items.isNotEmpty())
-							{
-								Badge(
-										containerColor = MaterialTheme.colorScheme.primary ,
-										contentColor = MaterialTheme.colorScheme.onPrimary ,
-									 )
-								{
-									Text(
-											text = items.size.toString() ,
-											style = MaterialTheme.typography.bodyMedium ,
-											textAlign = TextAlign.Center ,
-										)
-								}
-							}
-						}
-						//the icon
-						Icon(
-								painter = icon ,
-								contentDescription = "dropdown icon" ,
-								modifier = Modifier
-									.padding(8.dp)
-									.size(24.dp)
-							)
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .clickable {
+						 isExpanded.value = ! isExpanded.value
+					 } ,
+				 shape = MaterialTheme.shapes.medium ,
+				 content = {
+					 Row(
+							  modifier = Modifier
+								  .padding(8.dp)
+								  .fillMaxWidth() ,
+							  verticalAlignment = Alignment.CenterVertically ,
+							  horizontalArrangement = Arrangement.SpaceBetween
+						) {
+						 Row(
+								  modifier = Modifier
+									  .fillMaxWidth(0.9f) ,
+								  verticalAlignment = Alignment.CenterVertically ,
+								  horizontalArrangement = Arrangement.Start
+							) {
+							 //the text
+							 Text(
+									  modifier = Modifier
+										  .padding(8.dp) ,
+									  text = label ,
+									  textAlign = TextAlign.Start ,
+									  maxLines = 2 ,
+									  overflow = TextOverflow.Ellipsis ,
+									  style = MaterialTheme.typography.bodyLarge
+								 )
+							 //a bubble that shows the number of features
+							 //if the list is empty then the bubble is not shown
+							 if (items.isNotEmpty())
+							 {
+								 Badge(
+										  containerColor = MaterialTheme.colorScheme.primary ,
+										  contentColor = MaterialTheme.colorScheme.onPrimary ,
+									  )
+								 {
+									 Text(
+											  text = items.size.toString() ,
+											  style = MaterialTheme.typography.bodyMedium ,
+											  textAlign = TextAlign.Center ,
+										 )
+								 }
+							 }
+						 }
+						 //the icon
+						 Icon(
+								  painter = icon ,
+								  contentDescription = "dropdown icon" ,
+								  modifier = Modifier
+									  .padding(8.dp)
+									  .size(24.dp)
+							 )
 
-					}
-				}
+					 }
+				 }
 					)
 
 		//when the card is clicked show the dropdown menu
@@ -112,9 +112,9 @@ fun <T> FeaturesDropDown(
 		//when a bookmark is clicked it navigates to the ayat screen
 		//the bookmark is highlighted
 		AnimatedVisibility(
-				visible = isExpanded.value ,
-				enter = expandVertically() + fadeIn() ,
-				exit = shrinkVertically() + fadeOut()
+				 visible = isExpanded.value ,
+				 enter = expandVertically() + fadeIn() ,
+				 exit = shrinkVertically() + fadeOut()
 						  ) {
 			if (items.isEmpty())
 			{
@@ -122,8 +122,8 @@ fun <T> FeaturesDropDown(
 			} else
 			{
 				Column(
-						modifier = Modifier
-							.fillMaxWidth()
+						 modifier = Modifier
+							 .fillMaxWidth()
 					  ) {
 					if (header != null)
 					{
@@ -146,37 +146,37 @@ fun <T> FeatureDropdownItem(
 						   )
 {
 	ElevatedCard(
-			modifier = Modifier
-				.padding(
-						bottom = 4.dp ,
-						start = 8.dp ,
-						end = 8.dp ,
-						top = 4.dp
-						)
-				.fillMaxWidth()
-				.clickable {
-					onClick(item)
-				} ,
-			shape = MaterialTheme.shapes.extraLarge ,
-			content = {
-				Row(
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
-				   ) {
-					itemContent(item)
-					//the icon
-					Icon(
-							painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-							contentDescription = "Navigate" ,
-							modifier = Modifier
-								.padding(8.dp)
-								.size(24.dp)
-						)
-				}
-			}
+			 modifier = Modifier
+				 .padding(
+						  bottom = 4.dp ,
+						  start = 8.dp ,
+						  end = 8.dp ,
+						  top = 4.dp
+						 )
+				 .fillMaxWidth()
+				 .clickable {
+					 onClick(item)
+				 } ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 content = {
+				 Row(
+						  modifier = Modifier
+							  .padding(8.dp)
+							  .fillMaxWidth() ,
+						  verticalAlignment = Alignment.CenterVertically ,
+						  horizontalArrangement = Arrangement.SpaceBetween
+					) {
+					 itemContent(item)
+					 //the icon
+					 Icon(
+							  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
+							  contentDescription = "Navigate" ,
+							  modifier = Modifier
+								  .padding(8.dp)
+								  .size(24.dp)
+						 )
+				 }
+			 }
 				)
 }
 
@@ -203,48 +203,48 @@ fun FeaturesDropDownPreview()
 	//    val ruku: Int,
 	//    val juzNumber: Int,
 	val ayas = listOf(
-			Aya(
-					ayaNumberInQuran = 1 ,
-					ayaNumber = 1 ,
-					ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-					ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-					ayaTranslationUrdu = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-					suraNumber = 1 ,
-					ayaNumberInSurah = 1 ,
-					bookmark = false ,
-					favorite = false ,
-					note = "" ,
-					audioFileLocation = "" ,
-					sajda = false ,
-					sajdaType = "" ,
-					ruku = 1 ,
-					juzNumber = 1
-			   ) ,
+			 Aya(
+					  ayaNumberInQuran = 1 ,
+					  ayaNumber = 1 ,
+					  ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
+					  ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
+					  ayaTranslationUrdu = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
+					  suraNumber = 1 ,
+					  ayaNumberInSurah = 1 ,
+					  bookmark = false ,
+					  favorite = false ,
+					  note = "" ,
+					  audioFileLocation = "" ,
+					  sajda = false ,
+					  sajdaType = "" ,
+					  ruku = 1 ,
+					  juzNumber = 1
+				) ,
 					 )
 	NimazTheme {
 		FeaturesDropDown(
-				items = ayas ,
-				label = "Bookmarks" ,
-				dropDownItem = {
-					FeatureDropdownItem(
-							item = it ,
-							onClick = { aya ->
-								//do nothing
-							} ,
-							itemContent = { aya ->
-								//the text
-								Text(
-										modifier = Modifier
-											.padding(8.dp) ,
-										text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-										textAlign = TextAlign.Start ,
-										maxLines = 2 ,
-										overflow = TextOverflow.Ellipsis ,
-										style = MaterialTheme.typography.bodyLarge
-									)
-							} ,
-									   )
-				}
+				 items = ayas ,
+				 label = "Bookmarks" ,
+				 dropDownItem = {
+					 FeatureDropdownItem(
+							  item = it ,
+							  onClick = { aya ->
+								  //do nothing
+							  } ,
+							  itemContent = { aya ->
+								  //the text
+								  Text(
+										   modifier = Modifier
+											   .padding(8.dp) ,
+										   text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
+										   textAlign = TextAlign.Start ,
+										   maxLines = 2 ,
+										   overflow = TextOverflow.Ellipsis ,
+										   style = MaterialTheme.typography.bodyLarge
+									  )
+							  } ,
+										)
+				 }
 						) {
 		}
 	}

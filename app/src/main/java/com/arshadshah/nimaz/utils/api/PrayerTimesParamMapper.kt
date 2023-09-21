@@ -3,13 +3,17 @@ package com.arshadshah.nimaz.utils.api
 import android.content.Context
 import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.type.HighLatitudeRule
+import com.arshadshah.nimaz.type.Madhab
+import com.arshadshah.nimaz.type.Method
+import com.arshadshah.nimaz.type.Parameters
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import java.time.LocalDateTime
 
 object PrayerTimesParamMapper
 {
 
-	fun getParams(context : Context) : MutableMap<String , String>
+	fun getParams(context : Context) : Parameters
 	{
 		val sharedPreferences = PrivateSharedPreferences(context)
 		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
@@ -41,23 +45,22 @@ object PrayerTimesParamMapper
 		Log.d("Nimaz: PrayerTimesParamMapper" , "ishaAdjustment: $ishaAdjustment")
 
 
-		val mapOfParams = mutableMapOf<String , String>()
-		mapOfParams["latitude"] = latitude.toString()
-		mapOfParams["longitude"] = longitude.toString()
-		mapOfParams["date"] = LocalDateTime.now().toString()
-		mapOfParams["fajrAngle"] = fajrAngle
-		mapOfParams["ishaAngle"] = ishaAngle
-		mapOfParams["ishaInterval"] = ishaInterval
-		mapOfParams["method"] = calculationMethod
-		mapOfParams["madhab"] = madhab
-		mapOfParams["highLatitudeRule"] = highLatitudeRule
-		mapOfParams["fajrAdjustment"] = fajrAdjustment
-		mapOfParams["sunriseAdjustment"] = sunriseAdjustment
-		mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment
-		mapOfParams["asrAdjustment"] = asrAdjustment
-		mapOfParams["maghribAdjustment"] = maghribAdjustment
-		mapOfParams["ishaAdjustment"] = ishaAdjustment
-
-		return mapOfParams
+		return Parameters(
+				 latitude ,
+				 longitude ,
+				 date = LocalDateTime.now().toString() ,
+				 fajrAngle = fajrAngle.toDouble() ,
+				 ishaAngle = ishaAngle.toDouble() ,
+				 method = Method.valueOf(calculationMethod) ,
+				 madhab = Madhab.valueOf(madhab) ,
+				 highLatitudeRule = HighLatitudeRule.valueOf(highLatitudeRule) ,
+				 fajrAdjustment = fajrAdjustment.toInt() ,
+				 sunriseAdjustment = sunriseAdjustment.toInt() ,
+				 dhuhrAdjustment = dhuhrAdjustment.toInt() ,
+				 asrAdjustment = asrAdjustment.toInt() ,
+				 maghribAdjustment = maghribAdjustment.toInt() ,
+				 ishaAdjustment = ishaAdjustment.toInt() ,
+				 ishaInterval = ishaInterval.toInt() ,
+						 )
 	}
 }

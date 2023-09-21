@@ -24,13 +24,13 @@ fun AyaJuzList(
 		if (pageMode.value == "List")
 		{
 			AyaListUI(
-					ayaList = state.value ,
-					paddingValues = paddingValues ,
-					language = language ,
-					loading = true ,
-					type = type ,
-					number = number ,
-					scrollToAya = scrollToAya ,
+					 ayaList = state.value ,
+					 paddingValues = paddingValues ,
+					 language = language ,
+					 loading = true ,
+					 type = type ,
+					 number = number ,
+					 scrollToAya = scrollToAya ,
 					 )
 		} else
 		{
@@ -41,13 +41,13 @@ fun AyaJuzList(
 		if (pageMode.value == "List")
 		{
 			AyaListUI(
-					ayaList = state.value ,
-					paddingValues = paddingValues ,
-					language = language ,
-					loading = false ,
-					type = type ,
-					number = number ,
-					scrollToAya = scrollToAya ,
+					 ayaList = state.value ,
+					 paddingValues = paddingValues ,
+					 language = language ,
+					 loading = false ,
+					 type = type ,
+					 number = number ,
+					 scrollToAya = scrollToAya ,
 					 )
 		} else
 		{
@@ -58,13 +58,13 @@ fun AyaJuzList(
 		if (pageMode.value == "List")
 		{
 			AyaListUI(
-					ayaList = state.value ,
-					paddingValues = paddingValues ,
-					language = language ,
-					loading = false ,
-					type = type ,
-					number = number ,
-					scrollToAya = scrollToAya ,
+					 ayaList = state.value ,
+					 paddingValues = paddingValues ,
+					 language = language ,
+					 loading = false ,
+					 type = type ,
+					 number = number ,
+					 scrollToAya = scrollToAya ,
 					 )
 		} else
 		{

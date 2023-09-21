@@ -59,89 +59,89 @@ fun Licences(paddingValues : PaddingValues)
 	//remove duplicates
 	val uniqueLibs = libs?.distinctBy { it.name }
 	LazyColumn(
-			contentPadding = paddingValues ,
-			state = stateOfLazyList ,
-			modifier = Modifier ,
-			content = {
-				//show the libraries
-				items(uniqueLibs?.size ?: 0) { index ->
-					uniqueLibs?.get(index)?.let {
-						LibraryItem(
-								library = it ,
-								showAuthor = true ,
-								showVersion = true ,
-								showLicenseBadges = true ,
-								onClick = {
-									libraryToShow.value = uniqueLibs[index]
-									openDialog.value = true
-								} ,
-								   )
-					}
-				}
-			}
+			 contentPadding = paddingValues ,
+			 state = stateOfLazyList ,
+			 modifier = Modifier ,
+			 content = {
+				 //show the libraries
+				 items(uniqueLibs?.size ?: 0) { index ->
+					 uniqueLibs?.get(index)?.let {
+						 LibraryItem(
+								  library = it ,
+								  showAuthor = true ,
+								  showVersion = true ,
+								  showLicenseBadges = true ,
+								  onClick = {
+									  libraryToShow.value = uniqueLibs[index]
+									  openDialog.value = true
+								  } ,
+									)
+					 }
+				 }
+			 }
 			  )
 
 	if (openDialog.value)
 	{
 		AlertDialogNimaz(
-				topDivider = false ,
-				bottomDivider = false ,
-				action = {
-					val website = libraryToShow.value?.website
-					if (website != null)
-					{
-						if (website.isNotBlank())
-						{
-							FilledIconButton(
-									colors = IconButtonDefaults.filledIconButtonColors(
-											containerColor = MaterialTheme.colorScheme.primary ,
-											contentColor = MaterialTheme.colorScheme.onPrimary ,
-																					  ) ,
-									onClick = {
-										val intent =
-											Intent(Intent.ACTION_VIEW , Uri.parse(website))
-										context.startActivity(intent)
-									} ,
-									content = {
-										Icon(
-												modifier = Modifier.size(24.dp) ,
-												painter = painterResource(id = R.drawable.external_link_icon) ,
-												contentDescription = "Portfolio Website Link" ,
-											)
-									}
-											)
-						}
-					}
-				} ,
-				contentHeight = 400.dp ,
-				contentDescription = libraryToShow.value?.name ?: "Library" ,
-				title = libraryToShow.value?.name ?: "Library" ,
-				contentToShow = {
-					val isLicenseEmpty =
-						libraryToShow.value?.licenses?.firstOrNull()?.htmlReadyLicenseContent.isNullOrEmpty()
-					HtmlText(
-							html = if (isLicenseEmpty) "No license found" else libraryToShow.value?.licenses?.firstOrNull()?.htmlReadyLicenseContent
-								?: "No license found" ,
-							color = MaterialTheme.colorScheme.onSurface ,
-							modifier = Modifier
-								.fillMaxWidth()
-								.padding(8.dp)
-							)
-				} ,
-				onDismissRequest = {
-					openDialog.value = false
-					libraryToShow.value = null
-				} ,
-				onConfirm = {
-					openDialog.value = false
-					libraryToShow.value = null
-				} ,
-				onDismiss = {
-					openDialog.value = false
-					libraryToShow.value = null
-				} ,
-				showDismissButton = false ,
-				confirmButtonText = "OK")
+				 topDivider = false ,
+				 bottomDivider = false ,
+				 action = {
+					 val website = libraryToShow.value?.website
+					 if (website != null)
+					 {
+						 if (website.isNotBlank())
+						 {
+							 FilledIconButton(
+									  colors = IconButtonDefaults.filledIconButtonColors(
+											   containerColor = MaterialTheme.colorScheme.primary ,
+											   contentColor = MaterialTheme.colorScheme.onPrimary ,
+																						) ,
+									  onClick = {
+										  val intent =
+											  Intent(Intent.ACTION_VIEW , Uri.parse(website))
+										  context.startActivity(intent)
+									  } ,
+									  content = {
+										  Icon(
+												   modifier = Modifier.size(24.dp) ,
+												   painter = painterResource(id = R.drawable.external_link_icon) ,
+												   contentDescription = "Portfolio Website Link" ,
+											  )
+									  }
+											 )
+						 }
+					 }
+				 } ,
+				 contentHeight = 400.dp ,
+				 contentDescription = libraryToShow.value?.name ?: "Library" ,
+				 title = libraryToShow.value?.name ?: "Library" ,
+				 contentToShow = {
+					 val isLicenseEmpty =
+						 libraryToShow.value?.licenses?.firstOrNull()?.htmlReadyLicenseContent.isNullOrEmpty()
+					 HtmlText(
+							  html = if (isLicenseEmpty) "No license found" else libraryToShow.value?.licenses?.firstOrNull()?.htmlReadyLicenseContent
+								  ?: "No license found" ,
+							  color = MaterialTheme.colorScheme.onSurface ,
+							  modifier = Modifier
+								  .fillMaxWidth()
+								  .padding(8.dp)
+							 )
+				 } ,
+				 onDismissRequest = {
+					 openDialog.value = false
+					 libraryToShow.value = null
+				 } ,
+				 onConfirm = {
+					 openDialog.value = false
+					 libraryToShow.value = null
+				 } ,
+				 onDismiss = {
+					 openDialog.value = false
+					 libraryToShow.value = null
+				 } ,
+				 showDismissButton = false ,
+				 confirmButtonText = "OK")
 	}
 
 }
@@ -173,39 +173,39 @@ fun LibraryItem(
 
 	val context = LocalContext.current
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
-				.clickable { onClick.invoke() }
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .clickable { onClick.invoke() }
 				) {
 		Column(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth()
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .fillMaxWidth()
 			  ) {
 			Row(
-					modifier = Modifier.padding(8.dp) ,
-					verticalAlignment = Alignment.CenterVertically ,
-					horizontalArrangement = Arrangement.SpaceBetween
+					 modifier = Modifier.padding(8.dp) ,
+					 verticalAlignment = Alignment.CenterVertically ,
+					 horizontalArrangement = Arrangement.SpaceBetween
 			   ) {
 				Text(
-						text = library.name ,
-						modifier = Modifier
-							.weight(1f) ,
-						style = MaterialTheme.typography.titleMedium ,
-						maxLines = 1 ,
-						overflow = TextOverflow.Ellipsis ,
-						color = MaterialTheme.colorScheme.onSurface ,
+						 text = library.name ,
+						 modifier = Modifier
+							 .weight(1f) ,
+						 style = MaterialTheme.typography.titleMedium ,
+						 maxLines = 1 ,
+						 overflow = TextOverflow.Ellipsis ,
+						 color = MaterialTheme.colorScheme.onSurface ,
 					)
 				Spacer(modifier = Modifier.width(8.dp))
 				val version = library.artifactVersion
 				if (version != null && showVersion)
 				{
 					Text(
-							version ,
-							style = MaterialTheme.typography.bodySmall ,
-							textAlign = TextAlign.Center ,
-							color = MaterialTheme.colorScheme.onSurface ,
+							 version ,
+							 style = MaterialTheme.typography.bodySmall ,
+							 textAlign = TextAlign.Center ,
+							 color = MaterialTheme.colorScheme.onSurface ,
 						)
 				}
 			}
@@ -213,10 +213,10 @@ fun LibraryItem(
 			if (showAuthor && author.isNotBlank())
 			{
 				Text(
-						modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
-						text = author ,
-						style = MaterialTheme.typography.bodySmall ,
-						color = MaterialTheme.colorScheme.onSurface ,
+						 modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
+						 text = author ,
+						 style = MaterialTheme.typography.bodySmall ,
+						 color = MaterialTheme.colorScheme.onSurface ,
 					)
 			}
 			val description = library.description
@@ -225,28 +225,28 @@ fun LibraryItem(
 				if (description.isNotBlank())
 				{
 					Text(
-							modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
-							text = description ,
-							style = MaterialTheme.typography.bodySmall ,
-							color = MaterialTheme.colorScheme.onSurface ,
+							 modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
+							 text = description ,
+							 style = MaterialTheme.typography.bodySmall ,
+							 color = MaterialTheme.colorScheme.onSurface ,
 						)
 				}
 			}
 			if (showLicenseBadges && library.licenses.isNotEmpty())
 			{
 				Row(
-						modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
+						 modifier = Modifier.padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
+						 verticalAlignment = Alignment.CenterVertically ,
+						 horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
 					library.licenses.forEach {
 						Badge(
-								contentColor = MaterialTheme.colorScheme.onPrimary ,
-								backgroundColor = MaterialTheme.colorScheme.primary ,
+								 contentColor = MaterialTheme.colorScheme.onPrimary ,
+								 backgroundColor = MaterialTheme.colorScheme.primary ,
 							 ) {
 							Text(
-									modifier = Modifier.padding(4.dp) ,
-									text = it.name
+									 modifier = Modifier.padding(4.dp) ,
+									 text = it.name
 								)
 						}
 					}
@@ -259,7 +259,7 @@ fun LibraryItem(
 
 internal val fakeData : Libs
 	get() = Libs.Builder().withJson(
-			"""
+			 """
             {
               "libraries": [
                 {
@@ -466,19 +466,19 @@ internal val fakeData : Libs
 								   ).build()
 
 @Preview(
-		device = "id:S20 Fe" , showBackground = true ,
-		uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
+		 device = "id:S20 Fe" , showBackground = true ,
+		 uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
 		)
 @Composable
 fun LibraryItemPreview()
 {
 	NimazTheme {
 		LibraryItem(
-				library = fakeData.libraries.first() ,
-				showAuthor = true ,
-				showVersion = true ,
-				showLicenseBadges = true ,
-				onClick = { }
+				 library = fakeData.libraries.first() ,
+				 showAuthor = true ,
+				 showVersion = true ,
+				 showLicenseBadges = true ,
+				 onClick = { }
 				   )
 	}
 }
