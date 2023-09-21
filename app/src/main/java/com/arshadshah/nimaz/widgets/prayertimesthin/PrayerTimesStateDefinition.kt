@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.widgets
+package com.arshadshah.nimaz.widgets.prayertimesthin
 
 import android.content.Context
 import androidx.datastore.core.CorruptionException
@@ -18,7 +18,7 @@ object PrayerTimesStateDefinition : GlanceStateDefinition<PrayerTimesWidget>
 
 	private const val DATA_STORE_FILENAME = "prayerTimes"
 
-	private val Context.datastore by dataStore(DATA_STORE_FILENAME, PrayerTimesWidgetSerializer)
+	private val Context.datastore by dataStore(DATA_STORE_FILENAME , PrayerTimesWidgetSerializer)
 
 	object PrayerTimesWidgetSerializer : Serializer<PrayerTimesWidget>
 	{
@@ -26,17 +26,21 @@ object PrayerTimesStateDefinition : GlanceStateDefinition<PrayerTimesWidget>
 		override val defaultValue : PrayerTimesWidget = PrayerTimesWidget.Error("No data found")
 
 		override suspend fun readFrom(input : InputStream) : PrayerTimesWidget = try
-			{
-				Json.decodeFromString(PrayerTimesWidget.serializer(), input.readBytes().decodeToString())
-			}catch (e: SerializationException){
-				throw CorruptionException("Could not read PrayerTimes data: ${e.message}")
-			}
+		{
+			Json.decodeFromString(
+					 PrayerTimesWidget.serializer() ,
+					 input.readBytes().decodeToString()
+								 )
+		} catch (e : SerializationException)
+		{
+			throw CorruptionException("Could not read PrayerTimes data: ${e.message}")
+		}
 
 		override suspend fun writeTo(t : PrayerTimesWidget , output : OutputStream)
 		{
 			output.use {
 				it.write(
-					Json.encodeToString(PrayerTimesWidget.serializer(), t).toByteArray()
+						 Json.encodeToString(PrayerTimesWidget.serializer() , t).toByteArray()
 						)
 			}
 		}

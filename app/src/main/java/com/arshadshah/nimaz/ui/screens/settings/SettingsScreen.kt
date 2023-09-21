@@ -551,9 +551,13 @@ fun SettingsScreen(
 			}
 		}
 		SettingsGroup(title = { Text(text = "Other") }) {
-			Option(title = { Text(text = "Help") } , onClick = {
-				onNavigateToWebViewScreen("help")
-			} , icon = painterResource(id = R.drawable.help_icon) , iconDescription =  "Help documentation", testTag = TEST_TAG_ABOUT) {
+			Option(title = { Text(text = "Help") } ,
+				   onClick = {
+					   onNavigateToWebViewScreen("help")
+				   } ,
+				   icon = painterResource(id = R.drawable.help_icon) ,
+				   iconDescription = "Help documentation" ,
+				   testTag = TEST_TAG_ABOUT) {
 				Icon(
 						 modifier = Modifier
 							 .size(24.dp)
@@ -563,65 +567,81 @@ fun SettingsScreen(
 					)
 			}
 
-			Option(title = { Text(
-					 text = "License & Acknowledgements" ,
-					 maxLines = 1 ,
-					 overflow = TextOverflow.Ellipsis
-								 )}, subtitle = { Text(text = "Open source libraries") } , onClick = { onNavigateToLicencesScreen() } , icon = painterResource(id = R.drawable.license_icon) , iconDescription ="License & Acknowledgements", testTag = TEST_TAG_ABOUT ) {
-					Icon(
-							 modifier = Modifier
-								 .size(24.dp)
-								 .padding(2.dp) ,
-							 painter = painterResource(id = R.drawable.angle_right_icon) ,
-							 contentDescription = "Update Available"
-						)
+			Option(
+					 title = {
+						 Text(
+								  text = "License & Acknowledgements" ,
+								  maxLines = 1 ,
+								  overflow = TextOverflow.Ellipsis
+							 )
+					 } ,
+					 subtitle = { Text(text = "Open source libraries") } ,
+					 onClick = { onNavigateToLicencesScreen() } ,
+					 icon = painterResource(id = R.drawable.license_icon) ,
+					 iconDescription = "License & Acknowledgements" ,
+					 testTag = TEST_TAG_ABOUT) {
+				Icon(
+						 modifier = Modifier
+							 .size(24.dp)
+							 .padding(2.dp) ,
+						 painter = painterResource(id = R.drawable.angle_right_icon) ,
+						 contentDescription = "Update Available"
+					)
 			}
 
-			Option(title = { Text(text = "Rate Nimaz") } , onClick = {
-				val manager = ReviewManagerFactory.create(context)
-				val request = manager.requestReviewFlow()
-				request.addOnCompleteListener { task ->
-					if (task.isSuccessful)
-					{
-						manager.launchReviewFlow(context as Activity , task.result).addOnCompleteListener { _ ->
+			Option(title = { Text(text = "Rate Nimaz") } ,
+				   onClick = {
+					   val manager = ReviewManagerFactory.create(context)
+					   val request = manager.requestReviewFlow()
+					   request.addOnCompleteListener { task ->
+						   if (task.isSuccessful)
+						   {
+							   manager.launchReviewFlow(context as Activity , task.result)
+								   .addOnCompleteListener { _ ->
 
-						}
-					} else
-					{
-						// There was some problem, log or handle the error code.
-						Toasty.error(
-								 context ,
-								 task.exception?.message ?: "Error" ,
-								 Toast.LENGTH_SHORT
-									)
-							.show()
-					}
-				}
-			} , icon = painterResource(id = R.drawable.rating_icon) , iconDescription = "Rate Nimaz", testTag = TEST_TAG_ABOUT)
+								   }
+						   } else
+						   {
+							   // There was some problem, log or handle the error code.
+							   Toasty.error(
+										context ,
+										task.exception?.message ?: "Error" ,
+										Toast.LENGTH_SHORT
+										   )
+								   .show()
+						   }
+					   }
+				   } ,
+				   icon = painterResource(id = R.drawable.rating_icon) ,
+				   iconDescription = "Rate Nimaz" ,
+				   testTag = TEST_TAG_ABOUT)
 
 			Option(
-					 title = { Text(text = "Share Nimaz")} ,
-				   onClick = {
-				val shareIntent = Intent(Intent.ACTION_SEND)
-				shareIntent.type = "text/plain"
-				shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Nimaz")
-				var shareMessage = "\nCheck out this app\n\n"
-				shareMessage = """
+					 title = { Text(text = "Share Nimaz") } ,
+					 onClick = {
+						 val shareIntent = Intent(Intent.ACTION_SEND)
+						 shareIntent.type = "text/plain"
+						 shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Nimaz")
+						 var shareMessage = "\nCheck out this app\n\n"
+						 shareMessage = """
 								${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
 								
 								""".trimIndent()
-				shareIntent.putExtra(Intent.EXTRA_TEXT , shareMessage)
-				context.startActivity(Intent.createChooser(shareIntent , "choose one"))
-			} , icon = painterResource(id = R.drawable.share_icon) , iconDescription = "Share Nimaz", testTag = TEST_TAG_ABOUT)
+						 shareIntent.putExtra(Intent.EXTRA_TEXT , shareMessage)
+						 context.startActivity(Intent.createChooser(shareIntent , "choose one"))
+					 } ,
+					 icon = painterResource(id = R.drawable.share_icon) ,
+					 iconDescription = "Share Nimaz" ,
+					 testTag = TEST_TAG_ABOUT)
 
 			Option(
 					 title = { Text(text = "About") } ,
 					 subtitle = { Text(text = updateAvailableText) } ,
 					 onClick = { onNavigateToAboutScreen() } ,
 					 icon = painterResource(id = R.drawable.info_icon) ,
-					 iconDescription = "About",
+					 iconDescription = "About" ,
 					 testTag = TEST_TAG_ABOUT
-				  ){
+				  ) {
 				if (updateAvailabile.value)
 				{
 					Button(
@@ -652,11 +672,11 @@ fun SettingsScreen(
 			{
 				Option(
 						 title = { Text(text = "Debug Tools") } ,
-						 subtitle = { Text(text = "For testing purposes only") },
+						 subtitle = { Text(text = "For testing purposes only") } ,
 						 onClick = { onNavigateToDebugScreen() } ,
-						 icon =  painterResource(id = R.drawable.debug_icon),
+						 icon = painterResource(id = R.drawable.debug_icon) ,
 						 iconDescription = "Debug Tools" ,
-						 testTag = TEST_TAG_ABOUT,
+						 testTag = TEST_TAG_ABOUT ,
 						 action = {
 							 Icon(
 									  modifier = Modifier

@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -16,10 +17,12 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.ui.components.common.ToggleableItemColumn
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -42,6 +45,12 @@ fun PrayerTrackerListItems(
 	val context = LocalContext.current
 	val dateForTracker = LocalDate.parse(dateState.value)
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
+	val scope = rememberCoroutineScope()
+	val updateWidgetTracker = {
+		scope.launch {
+			PrayerTimesTrackerWorker.enqueue(context , force = true)
+		}
+	}
 	if (showDateSelector.value)
 	{
 		DateSelector(
@@ -149,6 +158,7 @@ fun PrayerTrackerListItems(
 										   LocalDate.now().toString()
 																					  )
 									)
+						 updateWidgetTracker()
 					 } ,
 								)
 		}

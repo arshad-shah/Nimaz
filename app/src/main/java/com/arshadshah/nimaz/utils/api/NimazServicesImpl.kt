@@ -26,9 +26,10 @@ object NimazServicesImpl : NimazService
 													) : ApolloResponse<GetPrayerTimesForMonthQuery.Data>
 	{
 		//create a post request with stuff in body and return the response
-		val response : ApolloResponse<GetPrayerTimesForMonthQuery.Data> = apolloClient!!.query(
-			 GetPrayerTimesForMonthQuery(parameters)
-																							  ).execute()
+		val response : ApolloResponse<GetPrayerTimesForMonthQuery.Data> = apolloClient.query(
+				 GetPrayerTimesForMonthQuery(parameters)
+																							)
+			.execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getPrayerTimes: $response")
 
@@ -38,7 +39,8 @@ object NimazServicesImpl : NimazService
 	override suspend fun getSurahs() : ApolloResponse<GetAllSurahQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ApolloResponse<GetAllSurahQuery.Data> = apolloClient!!.query(GetAllSurahQuery()).execute()
+		val response : ApolloResponse<GetAllSurahQuery.Data> =
+			apolloClient.query(GetAllSurahQuery()).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getSurahs: $response")
 
@@ -48,7 +50,8 @@ object NimazServicesImpl : NimazService
 	override suspend fun getJuzs() : ApolloResponse<GetAllJuzQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ApolloResponse<GetAllJuzQuery.Data> = apolloClient!!.query(GetAllJuzQuery()).execute()
+		val response : ApolloResponse<GetAllJuzQuery.Data> =
+			apolloClient.query(GetAllJuzQuery()).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getJuzs: $response")
 
@@ -60,9 +63,9 @@ object NimazServicesImpl : NimazService
 		surahNumber : Int ,
 									   ) : ApolloResponse<GetAllAyaForSuraQuery.Data>
 	{
-		val response : ApolloResponse<GetAllAyaForSuraQuery.Data> = apolloClient!!.query(
-			 GetAllAyaForSuraQuery(surahNumber)
-																						).execute()
+		val response : ApolloResponse<GetAllAyaForSuraQuery.Data> = apolloClient.query(
+				 GetAllAyaForSuraQuery(surahNumber)
+																					  ).execute()
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForSurah: $response")
 
 		return response
@@ -72,9 +75,9 @@ object NimazServicesImpl : NimazService
 		juzNumber : Int ,
 									 ) : ApolloResponse<GetAllAyaForJuzQuery.Data>
 	{
-		val response : ApolloResponse<GetAllAyaForJuzQuery.Data> = apolloClient!!.query(
-			 GetAllAyaForJuzQuery(juzNumber)
-																					   ).execute()
+		val response : ApolloResponse<GetAllAyaForJuzQuery.Data> = apolloClient.query(
+				 GetAllAyaForJuzQuery(juzNumber)
+																					 ).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getAyaForJuz: $response")
 
@@ -84,17 +87,19 @@ object NimazServicesImpl : NimazService
 	override suspend fun getCategories() : ApolloResponse<GetAllCategoriesQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ApolloResponse<GetAllCategoriesQuery.Data> = apolloClient!!.query(GetAllCategoriesQuery()).execute()
+		val response : ApolloResponse<GetAllCategoriesQuery.Data> =
+			apolloClient.query(GetAllCategoriesQuery()).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getCategories: $response")
 
 		return response
 	}
 
-	override suspend fun getChaptersByCategory(id: Int) : ApolloResponse<GetChaptersByCategoryQuery.Data>
+	override suspend fun getChaptersByCategory(id : Int) : ApolloResponse<GetChaptersByCategoryQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ApolloResponse<GetChaptersByCategoryQuery.Data> = apolloClient!!.query(GetChaptersByCategoryQuery(id)).execute()
+		val response : ApolloResponse<GetChaptersByCategoryQuery.Data> =
+			apolloClient.query(GetChaptersByCategoryQuery(id)).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getChaptersByCategory: $response")
 
@@ -102,12 +107,12 @@ object NimazServicesImpl : NimazService
 	}
 
 
-
 	//get all the chapters for duas from api
 	override suspend fun getChapters() : ApolloResponse<GetAllChaptersQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ApolloResponse<GetAllChaptersQuery.Data> = apolloClient!!.query(GetAllChaptersQuery()).execute()
+		val response : ApolloResponse<GetAllChaptersQuery.Data> =
+			apolloClient.query(GetAllChaptersQuery()).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getChapters: $response")
 
@@ -119,9 +124,9 @@ object NimazServicesImpl : NimazService
 										  ) : ApolloResponse<GetChapterByIdQuery.Data>
 	{
 		//create a get request and return the response
-		val response : ApolloResponse<GetChapterByIdQuery.Data> = apolloClient!!.query(
-			 GetChapterByIdQuery(chapterId)
-																					  ).execute()
+		val response : ApolloResponse<GetChapterByIdQuery.Data> = apolloClient.query(
+				 GetChapterByIdQuery(chapterId)
+																					).execute()
 
 		Log.d(AppConstants.NIMAZ_SERVICES_IMPL_TAG , "getDuasForChapter: $response")
 

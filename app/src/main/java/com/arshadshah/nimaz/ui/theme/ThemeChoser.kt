@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.viewModel.SettingsViewModel
 fun ThemeChoser(
 	darkTheme : MutableState<Boolean> ,
 	dynamicTheme : MutableState<Boolean> ,
-	themeName : MutableState<String>
+	themeName : MutableState<String> ,
 			   )
 {
 	val context = LocalContext.current
@@ -52,7 +52,7 @@ fun ThemeChoser(
 			themeName.value = THEME_DEFAULT
 		}
 
-		THEME_RAISIN_BLACK->
+		THEME_RAISIN_BLACK ->
 		{
 			dynamicTheme.value = false
 			darkTheme.value = isDarkTheme.value

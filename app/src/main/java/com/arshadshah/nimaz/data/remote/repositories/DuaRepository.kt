@@ -10,6 +10,7 @@ import java.io.IOException
 
 object DuaRepository
 {
+
 	//get chaptesr by categories
 	suspend fun getCategories() : ApiResponse<ArrayList<Category>>
 	{
@@ -18,15 +19,15 @@ object DuaRepository
 			val dataStore = LocalDataStore.getDataStore()
 			val categoryCount = dataStore.countCategories()
 			val categories = ArrayList<Category>()
-			if(categoryCount == 0)
+			if (categoryCount == 0)
 			{
 				//get the categories from the api
 				val response = NimazServicesImpl.getCategories()
 				response.data?.getAllCategories?.map { category ->
 					val category = Category(
-							 category!!.id ,
+							 category !!.id ,
 							 category.name ,
-					)
+										   )
 					categories.add(category)
 				}
 				//save the categories to the database
@@ -35,7 +36,7 @@ object DuaRepository
 			}
 			//result
 			ApiResponse.Success(dataStore.getAllCategories() as ArrayList<Category>)
-		}catch (e : IOException)
+		} catch (e : IOException)
 		{
 			ApiResponse.Error(e.message !! , null)
 		}
@@ -49,17 +50,17 @@ object DuaRepository
 			val chapterCount = dataStore.countChapters()
 			val chapters = ArrayList<Chapter>()
 			val duas = ArrayList<Dua>()
-			if(chapterCount == 0)
+			if (chapterCount == 0)
 			{
 				//get the categories from the api
 				val response = NimazServicesImpl.getChaptersByCategory(id)
 				response.data?.getChaptersByCategory?.map { chapter ->
 					val category = Chapter(
-							 chapter!!.id ,
-							 chapter.category!!.name ,
+							 chapter !!.id ,
+							 chapter.category !!.name ,
 							 chapter.arabicTitle.toString() ,
 							 chapter.englishTitle.toString()
-					)
+										  )
 					chapters.add(category)
 
 					chapter.duas?.map { dua ->
@@ -82,7 +83,7 @@ object DuaRepository
 			}
 			//result
 			ApiResponse.Success(dataStore.getAllChapters() as ArrayList<Chapter>)
-		}catch (e : IOException)
+		} catch (e : IOException)
 		{
 			ApiResponse.Error(e.message !! , null)
 		}
@@ -91,11 +92,12 @@ object DuaRepository
 	//get duas of a chapter by chapter id
 	suspend fun getDuasOfChapter(chapterId : Int) : ApiResponse<ArrayList<Dua>>
 	{
-		return try {
+		return try
+		{
 			val dataStore = LocalDataStore.getDataStore()
 			val duas = ArrayList<Dua>()
 			val duaCount = dataStore.countDuas()
-			if(duaCount == 0)
+			if (duaCount == 0)
 			{
 				//get the duas from the api
 				val response = NimazServicesImpl.getDuasForChapter(chapterId)
@@ -115,8 +117,7 @@ object DuaRepository
 				dataStore.saveAllDuas(duas)
 				//get the duas from the database
 				duas.addAll(dataStore.getDuasOfChapter(chapterId))
-			}
-			else
+			} else
 			{
 				//get the duas from the database
 				duas.addAll(dataStore.getDuasOfChapter(chapterId))

@@ -97,10 +97,10 @@ class AdhanReciever : BroadcastReceiver()
 					val ishaTime = repository.data?.isha?.toLocalTime()?.hour
 					val newIshaTime = if (ishaTime !! >= 22)
 					{
-						repository.data!!.maghrib?.plusMinutes(30)
+						repository.data.maghrib?.plusMinutes(30)
 					} else
 					{
-						repository.data!!.isha
+						repository.data.isha
 					}
 					sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , false)
 					val alarmLock =
@@ -109,8 +109,8 @@ class AdhanReciever : BroadcastReceiver()
 					{
 						CreateAlarms().exact(
 								 context ,
-								 repository.data!!.fajr !! ,
-								 repository.data.sunrise !!,
+								 repository.data.fajr !! ,
+								 repository.data.sunrise !! ,
 								 repository.data.dhuhr !! ,
 								 repository.data.asr !! ,
 								 repository.data.maghrib !! ,

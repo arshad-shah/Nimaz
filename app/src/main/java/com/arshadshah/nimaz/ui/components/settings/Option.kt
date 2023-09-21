@@ -17,10 +17,10 @@ fun Option(
 	title : @Composable () -> Unit ,
 	subtitle : @Composable (() -> Unit)? = null ,
 	onClick : () -> Unit ,
-	icon: Painter,
-	iconDescription: String,
-	testTag: String,
-	action : @Composable (() -> Unit)? = null
+	icon : Painter ,
+	iconDescription : String ,
+	testTag : String ,
+	action : @Composable (() -> Unit)? = null ,
 		  )
 {
 	ElevatedCard(
@@ -34,7 +34,7 @@ fun Option(
 				 title = title ,
 				 subtitle = subtitle ,
 				 onClick = {
-						   					 onClick()
+					 onClick()
 				 } ,
 				 icon = {
 					 Icon(

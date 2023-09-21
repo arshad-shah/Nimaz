@@ -57,7 +57,7 @@ object PrayerTimesRepository
 				{
 					val prayerTimesResponse =
 						NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
-					val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
+					val prayerTimesList = processPrayerTimes(dataStore , prayerTimesResponse)
 					return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
 				}
 
@@ -66,10 +66,10 @@ object PrayerTimesRepository
 			{
 				val prayerTimesResponse =
 					NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
-				val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
+				val prayerTimesList = processPrayerTimes(dataStore , prayerTimesResponse)
 				return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
 			}
-		}catch (e : IOException)
+		} catch (e : IOException)
 		{
 			ApiResponse.Error(e.message !! , null)
 		}
@@ -81,20 +81,20 @@ object PrayerTimesRepository
 		val dataStore = LocalDataStore.getDataStore()
 		val prayerTimesResponse =
 			NimazServicesImpl.getPrayerTimesMonthlyCustom(parameters)
-		val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
+		val prayerTimesList = processPrayerTimes(dataStore , prayerTimesResponse)
 		return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
 	}
 
 
 	private suspend fun processPrayerTimes(
 		dataStore : DataStore ,
-		prayerTimesResponse : ApolloResponse<GetPrayerTimesForMonthQuery.Data>
+		prayerTimesResponse : ApolloResponse<GetPrayerTimesForMonthQuery.Data> ,
 										  ) : MutableList<PrayerTimes>
 	{
 		val prayerTimesList = mutableListOf<PrayerTimes>()
-		prayerTimesResponse.data!!.getPrayerTimesForMonthCustom?.map { prayerTimes ->
+		prayerTimesResponse.data !!.getPrayerTimesForMonthCustom?.map { prayerTimes ->
 			val prayerTime = PrayerTimes(
-					 date = LocalDate.parse(prayerTimes!!.date) ,
+					 date = LocalDate.parse(prayerTimes !!.date) ,
 					 LocalDateTime.parse(prayerTimes.fajr) ,
 					 LocalDateTime.parse(prayerTimes.sunrise) ,
 					 LocalDateTime.parse(prayerTimes.dhuhr) ,

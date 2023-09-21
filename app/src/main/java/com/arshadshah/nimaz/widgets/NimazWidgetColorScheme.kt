@@ -5,8 +5,9 @@ import com.arshadshah.nimaz.ui.theme.CustomThemes
 
 object NimazWidgetColorScheme
 {
+
 	val colors = ColorProviders(
-			 light = CustomThemes.LightColorsDefault,
-			 dark = CustomThemes.DarkColorsDefault,
+			 light = CustomThemes.LightColorsDefault ,
+			 dark = CustomThemes.DarkColorsDefault ,
 							   )
 }

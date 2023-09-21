@@ -172,10 +172,10 @@ class MainActivity : ComponentActivity()
 			}
 
 			ThemeChoser(
-					 darkTheme,
-					 dynamicTheme,
+					 darkTheme ,
+					 dynamicTheme ,
 					 themeName
-										 )
+					   )
 
 			NimazTheme(
 					 darkTheme = darkTheme.value ,

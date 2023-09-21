@@ -27,7 +27,7 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun ChapterListItem(
 	chapter : Chapter ,
-	onNavigateToChapter : (Int,String) -> Unit ,
+	onNavigateToChapter : (Int , String) -> Unit ,
 	loading : Boolean ,
 				   )
 {
@@ -37,7 +37,7 @@ fun ChapterListItem(
 				 .fillMaxWidth()
 				 .padding(8.dp)
 				 .clickable {
-					 onNavigateToChapter(chapter._id, chapter.category)
+					 onNavigateToChapter(chapter._id , chapter.category)
 				 }
 				) {
 		Row(

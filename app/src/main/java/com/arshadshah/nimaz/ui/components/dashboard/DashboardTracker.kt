@@ -18,6 +18,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,10 +29,12 @@ import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.ui.components.common.ToggleableItemRow
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
@@ -175,6 +178,13 @@ fun PrayerTrackerListItemsRow(
 	val dateForTracker = LocalDate.parse(dateState.value)
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 
+	val scope = rememberCoroutineScope()
+	val updateWidgetTracker = {
+		scope.launch {
+			PrayerTimesTrackerWorker.enqueue(context , force = true)
+		}
+	}
+
 	ElevatedCard(
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
@@ -254,6 +264,7 @@ fun PrayerTrackerListItemsRow(
 											   dateState.value
 																						  )
 										)
+							 updateWidgetTracker()
 						 } ,
 						 modifier = Modifier
 							 .placeholder(

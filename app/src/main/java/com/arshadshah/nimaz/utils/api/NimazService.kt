@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.type.Parameters
 
 interface NimazService
 {
+
 	suspend fun getPrayerTimesMonthlyCustom(
 		parameters : Parameters ,
 										   ) : ApolloResponse<GetPrayerTimesForMonthQuery.Data>
@@ -25,7 +26,7 @@ interface NimazService
 
 	suspend fun getAyaForSurah(
 		surahNumber : Int ,
-							  ) :  ApolloResponse<GetAllAyaForSuraQuery.Data>
+							  ) : ApolloResponse<GetAllAyaForSuraQuery.Data>
 
 	suspend fun getAyaForJuz(
 		juzNumber : Int ,
@@ -35,7 +36,7 @@ interface NimazService
 	suspend fun getChapters() : ApolloResponse<GetAllChaptersQuery.Data>
 
 	suspend fun getCategories() : ApolloResponse<GetAllCategoriesQuery.Data>
-	suspend fun getChaptersByCategory(id: Int) : ApolloResponse<GetChaptersByCategoryQuery.Data>
+	suspend fun getChaptersByCategory(id : Int) : ApolloResponse<GetChaptersByCategoryQuery.Data>
 
 	//get duas for chapter
 	suspend fun getDuasForChapter(

@@ -22,6 +22,6 @@ interface CategoryDao
 	@Query("SELECT * FROM Category WHERE name = :name")
 	suspend fun getCategory(name : String) : LocalCategory
 
-	@Insert(entity = LocalCategory::class, onConflict = OnConflictStrategy.REPLACE)
+	@Insert(entity = LocalCategory::class , onConflict = OnConflictStrategy.REPLACE)
 	suspend fun saveAllCategories(categories : List<LocalCategory>)
 }

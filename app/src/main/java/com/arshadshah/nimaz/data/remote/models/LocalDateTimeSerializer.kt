@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 @Serializer(forClass = java.time.LocalDateTime::class)
 object LocalDateTimeSerializer
 {
+
 	override fun serialize(encoder : Encoder , value : LocalDateTime)
 	{
 		encoder.encodeString(value.toString())

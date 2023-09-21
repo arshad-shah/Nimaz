@@ -31,9 +31,9 @@ import com.arshadshah.nimaz.data.local.models.LocalTasbih
 		 TypeConvertorForListOfDuas::class
 			   )
 @Database(
-		 entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class, LocalCategory::class] ,
+		 entities = [LocalAya::class , LocalJuz::class , LocalSurah::class , LocalPrayerTimes::class , LocalDua::class , LocalChapter::class , LocalPrayersTracker::class , LocalFastTracker::class , LocalTasbih::class , LocalCategory::class] ,
 		 version = DATABASE_VERSION ,
-		 exportSchema = true,
+		 exportSchema = true ,
 		 )
 abstract class AppDatabase : RoomDatabase()
 {
