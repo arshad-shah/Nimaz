@@ -7,20 +7,27 @@ plugins {
     id 'com.google.firebase.firebase-perf'
     id "com.google.devtools.ksp"
     id "com.mikepenz.aboutlibraries.plugin" version "10.6.2"
+    id("com.apollographql.apollo3") version "4.0.0-alpha.3"
 }
 
 apply plugin: 'com.mikepenz.aboutlibraries.plugin'
 
+apollo {
+    service("service") {
+        packageName.set("com.arshadshah.nimaz")
+    }
+}
+
 android {
     namespace 'com.arshadshah.nimaz'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 144
-        versionName '1.5.71'
+        versionCode 146
+        versionName '1.6.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -71,20 +78,13 @@ dependencies {
     implementation "androidx.datastore:datastore-core:$datastore_core_version"
     implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
 
-    //ktor
-    implementation "io.ktor:ktor-client-core:$ktor_version"
-    implementation "io.ktor:ktor-client-android:$ktor_version"
-    implementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
-    implementation "io.ktor:ktor-client-serialization:$ktor_version"
-    implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
-
-    implementation platform("com.google.firebase:firebase-bom:31.4.0")
+    implementation platform('com.google.firebase:firebase-bom:32.2.2')
     implementation "com.google.firebase:firebase-crashlytics-ktx"
     implementation "com.google.firebase:firebase-analytics-ktx"
     implementation 'com.google.firebase:firebase-perf-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.9.5'
+    implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.9.9'
 
-    implementation platform('androidx.compose:compose-bom:2023.04.00')
+    implementation platform('androidx.compose:compose-bom:2023.08.00')
     implementation "androidx.activity:activity-compose"
     implementation "androidx.compose.ui:ui"
     implementation "androidx.compose.ui:ui-tooling-preview"
@@ -94,7 +94,7 @@ dependencies {
 
     debugImplementation "androidx.compose.ui:ui-tooling"
     debugImplementation "androidx.compose.ui:ui-test-manifest"
-    androidTestImplementation('androidx.compose.ui:ui-test-junit4:1.4.1')
+    androidTestImplementation('androidx.compose.ui:ui-test-junit4:1.5.1')
 
 
     implementation 'androidx.test:monitor:1.6.1'
@@ -126,8 +126,8 @@ dependencies {
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
     implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_placeholder_material_version"
-    //accompanion navigation animation
-    implementation "com.google.accompanist:accompanist-navigation-animation:$accompanist_navigation_animation_version"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
 
     implementation "com.google.android.play:app-update:$app_update_version"
     implementation "com.google.android.play:app-update-ktx:$app_update_version"
@@ -138,11 +138,11 @@ dependencies {
     implementation 'io.github.boguszpawlowski.composecalendar:composecalendar:1.1.1'
 
     //Add AWS S3 SDK
-    implementation 'com.amazonaws:aws-android-sdk-s3:2.65.0'
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.73.0'
 
     // Open Source Libraries Screen.
-    implementation "com.mikepenz:aboutlibraries-core:10.6.2"
-    implementation "com.mikepenz:aboutlibraries-compose:10.6.2"
+    implementation 'com.mikepenz:aboutlibraries-core:10.8.3'
+    implementation 'com.mikepenz:aboutlibraries-compose:10.8.3'
 
     //markdown
     final def markwon_version = '4.6.2'
@@ -154,10 +154,22 @@ dependencies {
     implementation "io.noties.markwon:linkify:$markwon_version"
 
     //org.slf4j.impl.StaticLoggerBinder
-    implementation 'org.slf4j:slf4j-android:1.7.30'
-
-    implementation 'nl.dionsegijn:konfetti-compose:2.0.2'
+    implementation 'org.slf4j:slf4j-android:1.7.36'
 
     implementation("com.google.android.play:review:2.0.1")
     implementation("com.google.android.play:review-ktx:2.0.1")
+
+    implementation "com.github.skydoves:balloon-compose:$balloon_version"
+
+    implementation("com.apollographql.apollo3:apollo-runtime:4.0.0-alpha.3")
+
+    implementation "androidx.glance:glance-appwidget:1.0.0"
+
+    implementation "androidx.glance:glance-material3:1.0.0"
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
+    //kotlinx date time
+    implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.3.0'
+
 }

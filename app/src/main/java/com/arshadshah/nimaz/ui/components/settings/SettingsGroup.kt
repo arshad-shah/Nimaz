@@ -26,19 +26,19 @@ fun SettingsGroup(
 				 )
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = modifier
-				.padding(8.dp)
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = modifier
+				 .padding(8.dp)
 				) {
 		Column(
-				modifier = modifier.fillMaxWidth() ,
+				 modifier = modifier.fillMaxWidth() ,
 			  ) {
 			if (title != null)
 			{
 				SettingsGroupTitle(title)
 				Divider(
-						modifier = Modifier.fillMaxWidth() ,
-						color = MaterialTheme.colorScheme.outline
+						 modifier = Modifier.fillMaxWidth() ,
+						 color = MaterialTheme.colorScheme.outline
 					   )
 			}
 			content()
@@ -50,11 +50,11 @@ fun SettingsGroup(
 internal fun SettingsGroupTitle(title : @Composable () -> Unit)
 {
 	Box(
-			modifier = Modifier
-				.fillMaxWidth()
-				.height(64.dp)
-				.padding(start = 24.dp , end = 16.dp) ,
-			contentAlignment = Alignment.CenterStart
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .height(64.dp)
+				 .padding(start = 24.dp , end = 16.dp) ,
+			 contentAlignment = Alignment.CenterStart
 	   ) {
 		val primary = MaterialTheme.colorScheme.secondary
 		val titleStyle = MaterialTheme.typography.titleLarge.copy(color = primary)
@@ -68,13 +68,13 @@ internal fun SettingsGroupPreview()
 {
 	NimazTheme {
 		SettingsGroup(
-				title = { Text(text = "Title") }
+				 title = { Text(text = "Title") }
 					 ) {
 			Box(
-					modifier = Modifier
-						.height(64.dp)
-						.fillMaxWidth() ,
-					contentAlignment = Alignment.Center ,
+					 modifier = Modifier
+						 .height(64.dp)
+						 .fillMaxWidth() ,
+					 contentAlignment = Alignment.Center ,
 			   ) {
 				Text(text = "Settings group")
 			}

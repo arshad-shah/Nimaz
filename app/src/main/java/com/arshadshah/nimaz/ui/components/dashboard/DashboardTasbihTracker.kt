@@ -28,16 +28,16 @@ fun DashboardTasbihTracker(
 {
 	val context = LocalContext.current
 	val viewModel = viewModel(
-			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
-			initializer = { TasbihViewModel(context) } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.TASBIH_VIEWMODEL_KEY ,
+			 initializer = { TasbihViewModel(context) } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	//run only once
 	LaunchedEffect(key1 = true) {
 		viewModel.handleEvent(
-				TasbihViewModel.TasbihEvent.RecreateTasbih(
-						LocalDate.now().toString()
-														  )
+				 TasbihViewModel.TasbihEvent.RecreateTasbih(
+						  LocalDate.now().toString()
+														   )
 							 )
 	}
 	val listOfTasbih = remember {
@@ -47,9 +47,9 @@ fun DashboardTasbihTracker(
 	if (listOfTasbih.value.isEmpty())
 	{
 		Box(
-				modifier = Modifier.clickable {
-					onNavigateToTasbihListScreen()
-				}
+				 modifier = Modifier.clickable {
+					 onNavigateToTasbihListScreen()
+				 }
 		   ) {
 			Placeholder(nameOfDropdown = "Tasbih")
 		}
@@ -63,51 +63,51 @@ fun DashboardTasbihTracker(
 		}
 		val tasbihToEdit = remember {
 			mutableStateOf(
-					Tasbih(
-							0 ,
-							"" ,
-							"" ,
-							"" ,
-							"" ,
-							0 ,
-							0 ,
-						  )
+					 Tasbih(
+							  0 ,
+							  "" ,
+							  "" ,
+							  "" ,
+							  "" ,
+							  0 ,
+							  0 ,
+						   )
 						  )
 		}
 
 		FeaturesDropDown(
-				header = {
-					DropDownHeader(
-							headerLeft = "Name" ,
-							headerRight = "Count" ,
-							headerMiddle = "Goal"
-								  )
-				} ,
-				//the list of tasbih for the date at the index
-				items = listOfTasbih.value ,
-				label = "Tasbih" ,
-				dropDownItem = {
-					TasbihDropdownItem(
-							it ,
-							onClick = { tasbih ->
-								onNavigateToTasbihScreen(
-										tasbih.id.toString() ,
-										tasbih.arabicName ,
-										tasbih.englishName ,
-										tasbih.translationName
-														)
-							} ,
-							onDelete = { tasbih ->
-								showDeleteDialog.value = true
-								tasbihToEdit.value = tasbih
-							} ,
-							onEdit = { tasbih ->
-								showTasbihDialog.value =
-									true
-								tasbihToEdit.value =
-									tasbih
-							})
-				}
+				 header = {
+					 DropDownHeader(
+							  headerLeft = "Name" ,
+							  headerRight = "Count" ,
+							  headerMiddle = "Goal"
+								   )
+				 } ,
+				 //the list of tasbih for the date at the index
+				 items = listOfTasbih.value ,
+				 label = "Tasbih" ,
+				 dropDownItem = {
+					 TasbihDropdownItem(
+							  it ,
+							  onClick = { tasbih ->
+								  onNavigateToTasbihScreen(
+										   tasbih.id.toString() ,
+										   tasbih.arabicName ,
+										   tasbih.englishName ,
+										   tasbih.translationName
+														  )
+							  } ,
+							  onDelete = { tasbih ->
+								  showDeleteDialog.value = true
+								  tasbihToEdit.value = tasbih
+							  } ,
+							  onEdit = { tasbih ->
+								  showTasbihDialog.value =
+									  true
+								  tasbihToEdit.value =
+									  tasbih
+							  })
+				 }
 
 						)
 

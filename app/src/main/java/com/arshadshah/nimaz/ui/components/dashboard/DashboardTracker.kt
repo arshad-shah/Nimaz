@@ -18,6 +18,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,10 +29,12 @@ import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.ui.components.common.ToggleableItemRow
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
@@ -40,9 +43,9 @@ fun DashboardPrayerTracker()
 {
 
 	val viewModel = viewModel(
-			key = TRACKING_VIEWMODEL_KEY ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = TRACKING_VIEWMODEL_KEY ,
+			 initializer = { TrackerViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 
 	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
@@ -99,24 +102,23 @@ fun DashboardPrayerTracker()
 	val ishaChecked = remember { mutableStateOf(false) }
 	val progress = remember { mutableStateOf(0f) }
 
-	Box(
-	   ) {
+	Box {
 		when (stateOfTrackerForToday.value)
 		{
 			is TrackerViewModel.TrackerState.Loading ->
 			{
 				Log.d("Tracker" , "Loading")
 				PrayerTrackerListItemsRow(
-						loading = true ,
-						fajrChecked = fajrChecked ,
-						zuhrChecked = zuhrChecked ,
-						asrChecked = asrChecked ,
-						maghribChecked = maghribChecked ,
-						ishaChecked = ishaChecked ,
-						handleEvent = viewModel::onEvent ,
-						dateState = dateState ,
-						progress = progress ,
-						isMenstrating = isMenstrating
+						 loading = true ,
+						 fajrChecked = fajrChecked ,
+						 zuhrChecked = zuhrChecked ,
+						 asrChecked = asrChecked ,
+						 maghribChecked = maghribChecked ,
+						 ishaChecked = ishaChecked ,
+						 handleEvent = viewModel::onEvent ,
+						 dateState = dateState ,
+						 progress = progress ,
+						 isMenstrating = isMenstrating
 										 )
 			}
 
@@ -129,26 +131,26 @@ fun DashboardPrayerTracker()
 				ishaChecked.value = ishaState.value
 				progress.value = progressState.value.toFloat()
 				PrayerTrackerListItemsRow(
-						loading = false ,
-						fajrChecked = fajrChecked ,
-						zuhrChecked = zuhrChecked ,
-						asrChecked = asrChecked ,
-						maghribChecked = maghribChecked ,
-						ishaChecked = ishaChecked ,
-						handleEvent = viewModel::onEvent ,
-						dateState = dateState ,
-						progress = progress,
-						isMenstrating = isMenstrating
+						 loading = false ,
+						 fajrChecked = fajrChecked ,
+						 zuhrChecked = zuhrChecked ,
+						 asrChecked = asrChecked ,
+						 maghribChecked = maghribChecked ,
+						 ishaChecked = ishaChecked ,
+						 handleEvent = viewModel::onEvent ,
+						 dateState = dateState ,
+						 progress = progress ,
+						 isMenstrating = isMenstrating
 										 )
 			}
 
 			is TrackerViewModel.TrackerState.Error ->
 			{
 				Toasty.error(
-						context ,
-						(stateOfTrackerForToday.value as TrackerViewModel.TrackerState.Error).message ,
-						Toast.LENGTH_SHORT ,
-						true
+						 context ,
+						 (stateOfTrackerForToday.value as TrackerViewModel.TrackerState.Error).message ,
+						 Toast.LENGTH_SHORT ,
+						 true
 							).show()
 			}
 
@@ -176,95 +178,103 @@ fun PrayerTrackerListItemsRow(
 	val dateForTracker = LocalDate.parse(dateState.value)
 	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 
+	val scope = rememberCoroutineScope()
+	val updateWidgetTracker = {
+		scope.launch {
+			PrayerTimesTrackerWorker.enqueue(context , force = true)
+		}
+	}
+
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
-				.fillMaxWidth()
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .fillMaxWidth()
 				) {
 		//if not then show the items
 		Row(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth() ,
-				horizontalArrangement = Arrangement.SpaceEvenly ,
-				verticalAlignment = Alignment.CenterVertically
+				 modifier = Modifier
+					 .padding(8.dp)
+					 .fillMaxWidth() ,
+				 horizontalArrangement = Arrangement.SpaceEvenly ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			items.forEachIndexed { index , item ->
 				//the toggleable item
 				ToggleableItemRow(
-						enabled = !isMenstrating.value ,
-						text = item ,
-						checked = when (item)
-						{
-							//if the date is after today then disable the toggle
-							"Fajr" -> if (isAfterToday) false else fajrChecked.value
-							"Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
-							"Asr" -> if (isAfterToday) false else asrChecked.value
-							"Maghrib" -> if (isAfterToday) false else maghribChecked.value
-							"Isha" -> if (isAfterToday) false else ishaChecked.value
-							else -> false
-						} ,
-						onCheckedChange = {
-							if (isAfterToday)
-							{
-								Toasty.info(
-										context ,
-										"Oops! you cant update the tracker for a date in the future" ,
-										Toasty.LENGTH_SHORT ,
-										true
-										   ).show()
-								return@ToggleableItemRow
-							}
-							when (item)
-							{
-								//if the date is after today then disable the toggle
-								"Fajr" -> fajrChecked.value = it
-								"Dhuhr" -> zuhrChecked.value = it
-								"Asr" -> asrChecked.value = it
-								"Maghrib" -> maghribChecked.value = it
-								"Isha" -> ishaChecked.value = it
-							}
+						 enabled = ! isMenstrating.value ,
+						 text = item ,
+						 checked = when (item)
+						 {
+							 //if the date is after today then disable the toggle
+							 "Fajr" -> if (isAfterToday) false else fajrChecked.value
+							 "Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
+							 "Asr" -> if (isAfterToday) false else asrChecked.value
+							 "Maghrib" -> if (isAfterToday) false else maghribChecked.value
+							 "Isha" -> if (isAfterToday) false else ishaChecked.value
+							 else -> false
+						 } ,
+						 onCheckedChange = {
+							 if (isAfterToday)
+							 {
+								 Toasty.info(
+										  context ,
+										  "Oops! you cant update the tracker for a date in the future" ,
+										  Toasty.LENGTH_SHORT ,
+										  true
+											).show()
+								 return@ToggleableItemRow
+							 }
+							 when (item)
+							 {
+								 //if the date is after today then disable the toggle
+								 "Fajr" -> fajrChecked.value = it
+								 "Dhuhr" -> zuhrChecked.value = it
+								 "Asr" -> asrChecked.value = it
+								 "Maghrib" -> maghribChecked.value = it
+								 "Isha" -> ishaChecked.value = it
+							 }
 
-							//for each of the checked items add 20 to the progress any unchecked item subtracts 20
-							progress.value = when (item)
-							{
-								"Fajr" -> if (it) progress.value + 20 else progress.value - 20
-								"Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
-								"Asr" -> if (it) progress.value + 20 else progress.value - 20
-								"Maghrib" -> if (it) progress.value + 20 else progress.value - 20
-								"Isha" -> if (it) progress.value + 20 else progress.value - 20
-								else -> 0f
-							}
+							 //for each of the checked items add 20 to the progress any unchecked item subtracts 20
+							 progress.value = when (item)
+							 {
+								 "Fajr" -> if (it) progress.value + 20 else progress.value - 20
+								 "Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
+								 "Asr" -> if (it) progress.value + 20 else progress.value - 20
+								 "Maghrib" -> if (it) progress.value + 20 else progress.value - 20
+								 "Isha" -> if (it) progress.value + 20 else progress.value - 20
+								 else -> 0f
+							 }
 
-							handleEvent(
-									TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
-											PrayerTracker(
-													fajr = fajrChecked.value ,
-													dhuhr = zuhrChecked.value ,
-													asr = asrChecked.value ,
-													maghrib = maghribChecked.value ,
-													isha = ishaChecked.value ,
-													date = dateState.value ,
-													progress = progress.value.toInt()
-														 )
-																				)
-									   )
-							handleEvent(
-									TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-											dateState.value
-																						)
-									   )
-						} ,
-						modifier = Modifier
-							.placeholder(
-									visible = loading ,
-									color = MaterialTheme.colorScheme.outline ,
-									shape = RoundedCornerShape(4.dp) ,
-									highlight = PlaceholderHighlight.shimmer(
-											highlightColor = Color.White ,
-																			)
-										) ,
+							 handleEvent(
+									  TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
+											   PrayerTracker(
+														fajr = fajrChecked.value ,
+														dhuhr = zuhrChecked.value ,
+														asr = asrChecked.value ,
+														maghrib = maghribChecked.value ,
+														isha = ishaChecked.value ,
+														date = dateState.value ,
+														progress = progress.value.toInt()
+															)
+																				  )
+										)
+							 handleEvent(
+									  TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+											   dateState.value
+																						  )
+										)
+							 updateWidgetTracker()
+						 } ,
+						 modifier = Modifier
+							 .placeholder(
+									  visible = loading ,
+									  color = MaterialTheme.colorScheme.outline ,
+									  shape = RoundedCornerShape(4.dp) ,
+									  highlight = PlaceholderHighlight.shimmer(
+											   highlightColor = Color.White ,
+																			  )
+										 ) ,
 								 )
 			}
 		}

@@ -1,14 +1,15 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
 import android.content.Context
-import com.arshadshah.nimaz.constants.AppConstants
+import com.apollographql.apollo3.api.ApolloResponse
+import com.arshadshah.nimaz.GetPrayerTimesForMonthQuery
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.remote.models.PrayerTimes
+import com.arshadshah.nimaz.type.Parameters
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.api.ApiResponse
 import com.arshadshah.nimaz.utils.api.NimazServicesImpl
-import com.arshadshah.nimaz.utils.api.PrayerTimeResponse
-import io.ktor.client.plugins.*
+import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper.getParams
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDate
@@ -37,45 +38,6 @@ object PrayerTimesRepository
 			LocalDataStore.init(context)
 		}
 		val dataStore = LocalDataStore.getDataStore()
-		val sharedPreferences = PrivateSharedPreferences(context)
-		val latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE , 0.0)
-		val longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE , 0.0)
-		val fajrAngle : String =
-			sharedPreferences.getData(AppConstants.FAJR_ANGLE , "18")
-		val ishaAngle : String =
-			sharedPreferences.getData(AppConstants.ISHA_ANGLE , "17")
-		val ishaInterval : String = sharedPreferences.getData(AppConstants.ISHA_INTERVAL , "0")
-		val calculationMethod : String =
-			sharedPreferences.getData(AppConstants.CALCULATION_METHOD , "IRELAND")
-		val madhab : String = sharedPreferences.getData(AppConstants.MADHAB , "SHAFI")
-		val highLatitudeRule : String =
-			sharedPreferences.getData(AppConstants.HIGH_LATITUDE_RULE , "TWILIGHT_ANGLE")
-		val fajrAdjustment : String = sharedPreferences.getData(AppConstants.FAJR_ADJUSTMENT , "0")
-		val sunriseAdjustment : String =
-			sharedPreferences.getData(AppConstants.SUNRISE_ADJUSTMENT , "0")
-		val dhuhrAdjustment : String =
-			sharedPreferences.getData(AppConstants.DHUHR_ADJUSTMENT , "0")
-		val asrAdjustment : String = sharedPreferences.getData(AppConstants.ASR_ADJUSTMENT , "0")
-		val maghribAdjustment : String =
-			sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT , "0")
-		val ishaAdjustment : String = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT , "0")
-
-		val mapOfParams = mutableMapOf<String , String>()
-		mapOfParams["latitude"] = latitude.toString()
-		mapOfParams["longitude"] = longitude.toString()
-		mapOfParams["date"] = LocalDateTime.now().toString()
-		mapOfParams["fajrAngle"] = fajrAngle
-		mapOfParams["ishaAngle"] = ishaAngle
-		mapOfParams["ishaInterval"] = ishaInterval
-		mapOfParams["method"] = calculationMethod
-		mapOfParams["madhab"] = madhab
-		mapOfParams["highLatitudeRule"] = highLatitudeRule
-		mapOfParams["fajrAdjustment"] = fajrAdjustment
-		mapOfParams["sunriseAdjustment"] = sunriseAdjustment
-		mapOfParams["dhuhrAdjustment"] = dhuhrAdjustment
-		mapOfParams["asrAdjustment"] = asrAdjustment
-		mapOfParams["maghribAdjustment"] = maghribAdjustment
-		mapOfParams["ishaAdjustment"] = ishaAdjustment
 
 		return try
 		{
@@ -94,107 +56,19 @@ object PrayerTimesRepository
 				if (dateMonth != currentMonth || dateYear != currentYear)
 				{
 					val prayerTimesResponse =
-						NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
-					val prayerTimes = mutableListOf<PrayerTimes>()
-					dataStore.deleteAllPrayerTimes()
-					for (prayerTimeResponse in prayerTimesResponse)
-					{
-						val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
-						//check if the day light saving is on or off
-						val isDayLightSaving =
-							ZoneId.systemDefault().rules.isDaylightSavings(Instant.now())
-						//check if its an add or subtract
-						val timezoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
-						val timezoneOffsetHours = timezoneOffset.totalSeconds / 3600
-						//check if the offset is positive or negative
-						val isPositive = timezoneOffsetHours > 0
-						val isNegative = timezoneOffsetHours < 0
-						if (isDayLightSaving && isPositive)
-						{
-							prayerTime.fajr =
-								prayerTime.fajr?.plusHours((timezoneOffsetHours.toLong()))
-							prayerTime.sunrise =
-								prayerTime.sunrise?.plusHours((timezoneOffsetHours.toLong()))
-							prayerTime.dhuhr =
-								prayerTime.dhuhr?.plusHours((timezoneOffsetHours.toLong()))
-							prayerTime.asr =
-								prayerTime.asr?.plusHours((timezoneOffsetHours.toLong()))
-							prayerTime.maghrib =
-								prayerTime.maghrib?.plusHours((timezoneOffsetHours.toLong()))
-							prayerTime.isha =
-								prayerTime.isha?.plusHours((timezoneOffsetHours.toLong()))
-						} else if (isDayLightSaving && isNegative)
-						{
-							prayerTime.fajr =
-								prayerTime.fajr?.minusHours((timezoneOffsetHours.toLong()))
-							prayerTime.sunrise =
-								prayerTime.sunrise?.minusHours((timezoneOffsetHours.toLong()))
-							prayerTime.dhuhr =
-								prayerTime.dhuhr?.minusHours((timezoneOffsetHours.toLong()))
-							prayerTime.asr =
-								prayerTime.asr?.minusHours((timezoneOffsetHours.toLong()))
-							prayerTime.maghrib =
-								prayerTime.maghrib?.minusHours((timezoneOffsetHours.toLong()))
-							prayerTime.isha =
-								prayerTime.isha?.minusHours((timezoneOffsetHours.toLong()))
-						}
-						prayerTimes.add(prayerTime)
-						dataStore.saveAllPrayerTimes(prayerTime)
-					}
-					return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
+						NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
+					val prayerTimesList = processPrayerTimes(dataStore , prayerTimesResponse)
+					return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
 				}
 
 				return ApiResponse.Success(prayerTimesLocal)
 			} else
 			{
-				val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParams)
-				val prayerTimes = mutableListOf<PrayerTimes>()
-				for (prayerTimeResponse in prayerTimesResponse)
-				{
-					val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
-					//check if the day light saving is on or off
-					val isDayLightSaving =
-						ZoneId.systemDefault().rules.isDaylightSavings(Instant.now())
-					//check if its an add or subtract
-					val timezoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
-					val timezoneOffsetHours = timezoneOffset.totalSeconds / 3600
-					//check if the offset is positive or negative
-					val isPositive = timezoneOffsetHours > 0
-					val isNegative = timezoneOffsetHours < 0
-					if (isDayLightSaving && isPositive)
-					{
-						prayerTime.fajr = prayerTime.fajr?.plusHours((timezoneOffsetHours.toLong()))
-						prayerTime.sunrise =
-							prayerTime.sunrise?.plusHours((timezoneOffsetHours.toLong()))
-						prayerTime.dhuhr =
-							prayerTime.dhuhr?.plusHours((timezoneOffsetHours.toLong()))
-						prayerTime.asr = prayerTime.asr?.plusHours((timezoneOffsetHours.toLong()))
-						prayerTime.maghrib =
-							prayerTime.maghrib?.plusHours((timezoneOffsetHours.toLong()))
-						prayerTime.isha = prayerTime.isha?.plusHours((timezoneOffsetHours.toLong()))
-					} else if (isDayLightSaving && isNegative)
-					{
-						prayerTime.fajr =
-							prayerTime.fajr?.minusHours((timezoneOffsetHours.toLong()))
-						prayerTime.sunrise =
-							prayerTime.sunrise?.minusHours((timezoneOffsetHours.toLong()))
-						prayerTime.dhuhr =
-							prayerTime.dhuhr?.minusHours((timezoneOffsetHours.toLong()))
-						prayerTime.asr = prayerTime.asr?.minusHours((timezoneOffsetHours.toLong()))
-						prayerTime.maghrib =
-							prayerTime.maghrib?.minusHours((timezoneOffsetHours.toLong()))
-						prayerTime.isha =
-							prayerTime.isha?.minusHours((timezoneOffsetHours.toLong()))
-					}
-					prayerTimes.add(prayerTime)
-					dataStore.saveAllPrayerTimes(prayerTime)
-				}
-				return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
+				val prayerTimesResponse =
+					NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
+				val prayerTimesList = processPrayerTimes(dataStore , prayerTimesResponse)
+				return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
 			}
-		} catch (e : ClientRequestException)
-		{
-			ApiResponse.Error(e.message , null)
-
 		} catch (e : IOException)
 		{
 			ApiResponse.Error(e.message !! , null)
@@ -202,17 +76,35 @@ object PrayerTimesRepository
 	}
 
 
-	suspend fun updatePrayerTimes(mapOfParameters : Map<String , String>) : ApiResponse<PrayerTimes>
+	suspend fun updatePrayerTimes(parameters : Parameters) : ApiResponse<PrayerTimes>
 	{
 		val dataStore = LocalDataStore.getDataStore()
-		val prayerTimesResponse = NimazServicesImpl.getPrayerTimesMonthlyCustom(mapOfParameters)
-		val prayerTimes = mutableListOf<PrayerTimes>()
-		dataStore.deleteAllPrayerTimes()
-		for (prayerTimeResponse in prayerTimesResponse)
-		{
-			val prayerTime = mapPrayerTimesResponseToPrayerTimes(prayerTimeResponse)
+		val prayerTimesResponse =
+			NimazServicesImpl.getPrayerTimesMonthlyCustom(parameters)
+		val prayerTimesList = processPrayerTimes(dataStore , prayerTimesResponse)
+		return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() } !!)
+	}
+
+
+	private suspend fun processPrayerTimes(
+		dataStore : DataStore ,
+		prayerTimesResponse : ApolloResponse<GetPrayerTimesForMonthQuery.Data> ,
+										  ) : MutableList<PrayerTimes>
+	{
+		val prayerTimesList = mutableListOf<PrayerTimes>()
+		prayerTimesResponse.data !!.getPrayerTimesForMonthCustom?.map { prayerTimes ->
+			val prayerTime = PrayerTimes(
+					 date = LocalDate.parse(prayerTimes !!.date) ,
+					 LocalDateTime.parse(prayerTimes.fajr) ,
+					 LocalDateTime.parse(prayerTimes.sunrise) ,
+					 LocalDateTime.parse(prayerTimes.dhuhr) ,
+					 LocalDateTime.parse(prayerTimes.asr) ,
+					 LocalDateTime.parse(prayerTimes.maghrib) ,
+					 LocalDateTime.parse(prayerTimes.isha) ,
+										)
 			//check if the day light saving is on or off
-			val isDayLightSaving = ZoneId.systemDefault().rules.isDaylightSavings(Instant.now())
+			val isDayLightSaving =
+				ZoneId.systemDefault().rules.isDaylightSavings(Instant.now())
 			//check if its an add or subtract
 			val timezoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
 			val timezoneOffsetHours = timezoneOffset.totalSeconds / 3600
@@ -221,38 +113,37 @@ object PrayerTimesRepository
 			val isNegative = timezoneOffsetHours < 0
 			if (isDayLightSaving && isPositive)
 			{
-				prayerTime.fajr = prayerTime.fajr?.plusHours(timezoneOffsetHours.toLong())
-				prayerTime.sunrise = prayerTime.sunrise?.plusHours((timezoneOffsetHours.toLong()))
-				prayerTime.dhuhr = prayerTime.dhuhr?.plusHours((timezoneOffsetHours.toLong()))
-				prayerTime.asr = prayerTime.asr?.plusHours((timezoneOffsetHours.toLong()))
-				prayerTime.maghrib = prayerTime.maghrib?.plusHours((timezoneOffsetHours.toLong()))
-				prayerTime.isha = prayerTime.isha?.plusHours((timezoneOffsetHours.toLong()))
+				prayerTime.fajr =
+					prayerTime.fajr?.plusHours((timezoneOffsetHours.toLong()))
+				prayerTime.sunrise =
+					prayerTime.sunrise?.plusHours((timezoneOffsetHours.toLong()))
+				prayerTime.dhuhr =
+					prayerTime.dhuhr?.plusHours((timezoneOffsetHours.toLong()))
+				prayerTime.asr =
+					prayerTime.asr?.plusHours((timezoneOffsetHours.toLong()))
+				prayerTime.maghrib =
+					prayerTime.maghrib?.plusHours((timezoneOffsetHours.toLong()))
+				prayerTime.isha =
+					prayerTime.isha?.plusHours((timezoneOffsetHours.toLong()))
 			} else if (isDayLightSaving && isNegative)
 			{
-				prayerTime.fajr = prayerTime.fajr?.minusHours((timezoneOffsetHours.toLong()))
-				prayerTime.sunrise = prayerTime.sunrise?.minusHours((timezoneOffsetHours.toLong()))
-				prayerTime.dhuhr = prayerTime.dhuhr?.minusHours((timezoneOffsetHours.toLong()))
-				prayerTime.asr = prayerTime.asr?.minusHours((timezoneOffsetHours.toLong()))
-				prayerTime.maghrib = prayerTime.maghrib?.minusHours((timezoneOffsetHours.toLong()))
-				prayerTime.isha = prayerTime.isha?.minusHours((timezoneOffsetHours.toLong()))
+				prayerTime.fajr =
+					prayerTime.fajr?.minusHours((timezoneOffsetHours.toLong()))
+				prayerTime.sunrise =
+					prayerTime.sunrise?.minusHours((timezoneOffsetHours.toLong()))
+				prayerTime.dhuhr =
+					prayerTime.dhuhr?.minusHours((timezoneOffsetHours.toLong()))
+				prayerTime.asr =
+					prayerTime.asr?.minusHours((timezoneOffsetHours.toLong()))
+				prayerTime.maghrib =
+					prayerTime.maghrib?.minusHours((timezoneOffsetHours.toLong()))
+				prayerTime.isha =
+					prayerTime.isha?.minusHours((timezoneOffsetHours.toLong()))
 			}
-			prayerTimes.add(prayerTime)
+			prayerTimesList.add(prayerTime)
 			dataStore.saveAllPrayerTimes(prayerTime)
 		}
-		return ApiResponse.Success(prayerTimes.find { it.date == LocalDate.now() } !!)
-	}
 
-	//a function to map a prayer times response to a prayer times object
-	private fun mapPrayerTimesResponseToPrayerTimes(prayerTimesResponse : PrayerTimeResponse) : PrayerTimes
-	{
-		return PrayerTimes(
-				date = LocalDate.parse(prayerTimesResponse.date) ,
-				LocalDateTime.parse(prayerTimesResponse.fajr) ,
-				LocalDateTime.parse(prayerTimesResponse.sunrise) ,
-				LocalDateTime.parse(prayerTimesResponse.dhuhr) ,
-				LocalDateTime.parse(prayerTimesResponse.asr) ,
-				LocalDateTime.parse(prayerTimesResponse.maghrib) ,
-				LocalDateTime.parse(prayerTimesResponse.isha) ,
-						  )
+		return prayerTimesList
 	}
 }

@@ -19,38 +19,39 @@ import kotlin.reflect.KFunction1
 fun Calender(
 	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
 	progressForMonth : State<MutableList<PrayerTracker>> ,
-	fastProgressForMonth : State<MutableList<FastTracker>>
+	fastProgressForMonth : State<MutableList<FastTracker>> ,
 			)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge.copy(
-					bottomStart = CornerSize(0.dp) ,
-					bottomEnd = CornerSize(0.dp),
-														) ,
-			modifier = Modifier
-				.fillMaxWidth()
+			 shape = MaterialTheme.shapes.extraLarge.copy(
+					  bottomStart = CornerSize(0.dp) ,
+					  bottomEnd = CornerSize(0.dp) ,
+														 ) ,
+			 modifier = Modifier
+				 .fillMaxWidth()
 				) {
 		SelectableCalendar(
-				horizontalSwipeEnabled = false ,
-				dayContent = {
-					CalenderDay(
-							dayState = it ,
-							handleEvents = handleEvents ,
-							progressForMonth ,
-							fastProgressForMonth
-							   )
-				} ,
-				daysOfWeekHeader = { weekState ->
-					CalenderWeekHeader(
-							weekState = weekState,)
-				} ,
-				monthContainer = {
-					CalenderMonth(monthState = it)
-				} ,
-				monthHeader = { monthState ->
-					CalenderHeader(monthState = monthState, handleEvents = handleEvents)
-				} ,
-				calendarState = rememberSelectableCalendarState()
+				 horizontalSwipeEnabled = false ,
+				 dayContent = {
+					 CalenderDay(
+							  dayState = it ,
+							  handleEvents = handleEvents ,
+							  progressForMonth ,
+							  fastProgressForMonth
+								)
+				 } ,
+				 daysOfWeekHeader = { weekState ->
+					 CalenderWeekHeader(
+							  weekState = weekState ,
+									   )
+				 } ,
+				 monthContainer = {
+					 CalenderMonth(monthState = it)
+				 } ,
+				 monthHeader = { monthState ->
+					 CalenderHeader(monthState = monthState , handleEvents = handleEvents)
+				 } ,
+				 calendarState = rememberSelectableCalendarState()
 						  )
 	}
 }

@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterialApi::class , ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListOfTasbih(
 	paddingValues : PaddingValues ,
@@ -70,9 +70,9 @@ fun ListOfTasbih(
 	val context = LocalContext.current
 
 	val viewModel = viewModel(
-			key = AppConstants.TASBIH_VIEWMODEL_KEY ,
-			initializer = { TasbihViewModel(context) } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.TASBIH_VIEWMODEL_KEY ,
+			 initializer = { TasbihViewModel(context) } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 							 )
 	val sharedPref = context.getSharedPreferences("tasbih" , 0)
 	val selected =
@@ -82,8 +82,8 @@ fun ListOfTasbih(
 	//if user leaves tis activity or the app, the selected item and indexSelected will be saved
 	//buit if the count is 0, the selected item and indexSelected will be reset
 	LaunchedEffect(
-			key1 = selected.value ,
-			key2 = indexSelected.value ,
+			 key1 = selected.value ,
+			 key2 = indexSelected.value ,
 				  ) {
 		sharedPref.edit().putBoolean("selected" , selected.value).apply()
 		sharedPref.edit().putInt("indexSelected" , indexSelected.value).apply()
@@ -106,118 +106,123 @@ fun ListOfTasbih(
 	val translationNames = resources.getStringArray(R.array.tasbeehTranslation)
 
 	val titles = listOf("Tasbih List" , "My Tasbih")
-	val pagerState = rememberPagerState()
+	val pagerState = rememberPagerState(
+			 initialPage = 0 ,
+			 initialPageOffsetFraction = 0F ,
+									   ) {
+		titles.size
+	}
 	val scope = rememberCoroutineScope()
 	Column(
-			modifier = Modifier
-				.padding(paddingValues)
-				.testTag(AppConstants.TEST_TAG_QURAN)
+			 modifier = Modifier
+				 .padding(paddingValues)
+				 .testTag(AppConstants.TEST_TAG_QURAN)
 		  ) {
 
 		TabRow(
-				selectedTabIndex = pagerState.currentPage ,
-				modifier = Modifier
-					.padding(vertical = 4.dp , horizontal = 4.dp)
-					.clip(MaterialTheme.shapes.extraLarge) ,
-				containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) ,
-				indicator = { tabPositions : List<TabPosition> ->
-					val transition = updateTransition(pagerState.currentPage , label = "")
-					val indicatorStart by transition.animateDp(
-							transitionSpec = {
-								if (initialState < targetState)
-								{
-									spring(dampingRatio = 1f , stiffness = 50f)
-								} else
-								{
-									spring(dampingRatio = 1f , stiffness = 1000f)
-								}
-							} , label = ""
-															  ) {
-						tabPositions[it].left
-					}
+				 selectedTabIndex = pagerState.currentPage ,
+				 modifier = Modifier
+					 .padding(vertical = 4.dp , horizontal = 4.dp)
+					 .clip(MaterialTheme.shapes.extraLarge) ,
+				 containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) ,
+				 indicator = { tabPositions : List<TabPosition> ->
+					 val transition = updateTransition(pagerState.currentPage , label = "")
+					 val indicatorStart by transition.animateDp(
+							  transitionSpec = {
+								  if (initialState < targetState)
+								  {
+									  spring(dampingRatio = 1f , stiffness = 50f)
+								  } else
+								  {
+									  spring(dampingRatio = 1f , stiffness = 1000f)
+								  }
+							  } , label = ""
+															   ) {
+						 tabPositions[it].left
+					 }
 
-					val indicatorEnd by transition.animateDp(
-							transitionSpec = {
-								if (initialState < targetState)
-								{
-									spring(dampingRatio = 1f , stiffness = 1000f)
-								} else
-								{
-									spring(dampingRatio = 1f , stiffness = 50f)
-								}
-							} , label = ""
-															) {
-						tabPositions[it].right
-					}
+					 val indicatorEnd by transition.animateDp(
+							  transitionSpec = {
+								  if (initialState < targetState)
+								  {
+									  spring(dampingRatio = 1f , stiffness = 1000f)
+								  } else
+								  {
+									  spring(dampingRatio = 1f , stiffness = 50f)
+								  }
+							  } , label = ""
+															 ) {
+						 tabPositions[it].right
+					 }
 
-					Box(
-							Modifier
-								.offset(x = indicatorStart)
-								.wrapContentSize(align = Alignment.BottomStart)
-								.width(indicatorEnd - indicatorStart)
-								.padding(4.dp)
-								.fillMaxSize()
-								.background(
-										color = MaterialTheme.colorScheme.secondaryContainer ,
-										MaterialTheme.shapes.extraLarge
-										   )
-								.zIndex(1f)
-					   )
-				} ,
-				divider = { }
+					 Box(
+							  Modifier
+								  .offset(x = indicatorStart)
+								  .wrapContentSize(align = Alignment.BottomStart)
+								  .width(indicatorEnd - indicatorStart)
+								  .padding(4.dp)
+								  .fillMaxSize()
+								  .background(
+										   color = MaterialTheme.colorScheme.secondaryContainer ,
+										   MaterialTheme.shapes.extraLarge
+											 )
+								  .zIndex(1f)
+						)
+				 } ,
+				 divider = { }
 			  ) {
 			titles.forEachIndexed { index , title ->
 				val selectedTabIndx = pagerState.currentPage == index
 				Tab(
-						modifier = Modifier
-							.zIndex(2f)
-							.clip(MaterialTheme.shapes.extraLarge)
-							.testTag(
-									AppConstants.TEST_TAG_QURAN_TAB.replace(
-											"{number}" ,
-											index.toString()
-																		   )
-									) ,
-						selected = pagerState.currentPage == index ,
-						onClick = {
-							scope.launch {
-								pagerState.animateScrollToPage(index)
-							}
-						} ,
-						text = {
-							Text(
-									text = title ,
-									maxLines = 1 ,
-									overflow = TextOverflow.Ellipsis ,
-									fontWeight = if (selectedTabIndx) FontWeight.ExtraBold
-									else FontWeight.Normal ,
-									style = MaterialTheme.typography.titleMedium ,
-									color = if (selectedTabIndx) MaterialTheme.colorScheme.onSecondaryContainer
-									else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-								)
-						}
+						 modifier = Modifier
+							 .zIndex(2f)
+							 .clip(MaterialTheme.shapes.extraLarge)
+							 .testTag(
+									  AppConstants.TEST_TAG_QURAN_TAB.replace(
+											   "{number}" ,
+											   index.toString()
+																			 )
+									 ) ,
+						 selected = pagerState.currentPage == index ,
+						 onClick = {
+							 scope.launch {
+								 pagerState.animateScrollToPage(index)
+							 }
+						 } ,
+						 text = {
+							 Text(
+									  text = title ,
+									  maxLines = 1 ,
+									  overflow = TextOverflow.Ellipsis ,
+									  fontWeight = if (selectedTabIndx) FontWeight.ExtraBold
+									  else FontWeight.Normal ,
+									  style = MaterialTheme.typography.titleMedium ,
+									  color = if (selectedTabIndx) MaterialTheme.colorScheme.onSecondaryContainer
+									  else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+								 )
+						 }
 				   )
 			}
 		}
 
 		HorizontalPager(
-				pageCount = titles.size ,
-				state = pagerState ,
+				 pageSize = PageSize.Fill ,
+				 state = pagerState ,
 					   ) { page ->
 			when (page)
 			{
 				0 ->
 				{
 					LazyColumn(
-							modifier = Modifier.testTag(AppConstants.TEST_TAG_TASBIH_LIST) ,
-							state = listState ,
+							 modifier = Modifier.testTag(AppConstants.TEST_TAG_TASBIH_LIST) ,
+							 state = listState ,
 							  ) {
 						items(englishNames.size) { index ->
 							TasbihRow(
-									arabicNames[index] ,
-									englishNames[index] ,
-									translationNames[index] ,
-									onNavigateToTasbihScreen
+									 arabicNames[index] ,
+									 englishNames[index] ,
+									 translationNames[index] ,
+									 onNavigateToTasbihScreen
 									 )
 						}
 					}
@@ -233,16 +238,16 @@ fun ListOfTasbih(
 					if (listOfTasbih.value.isEmpty())
 					{
 						Box(
-								modifier = Modifier
-									.fillMaxSize()
-									.background(MaterialTheme.colorScheme.surface)
+								 modifier = Modifier
+									 .fillMaxSize()
+									 .background(MaterialTheme.colorScheme.surface)
 						   ) {
 							Text(
-									text = "No Tasbih Added" ,
-									textAlign = TextAlign.Center ,
-									modifier = Modifier
-										.fillMaxWidth()
-										.align(Alignment.Center)
+									 text = "No Tasbih Added" ,
+									 textAlign = TextAlign.Center ,
+									 modifier = Modifier
+										 .fillMaxWidth()
+										 .align(Alignment.Center)
 								)
 						}
 					} else
@@ -255,20 +260,20 @@ fun ListOfTasbih(
 						}
 						val tasbihToEdit = remember {
 							mutableStateOf(
-									Tasbih(
-											0 ,
-											"" ,
-											"" ,
-											"" ,
-											"" ,
-											0 ,
-											0 ,
-										  )
+									 Tasbih(
+											  0 ,
+											  "" ,
+											  "" ,
+											  "" ,
+											  "" ,
+											  0 ,
+											  0 ,
+										   )
 										  )
 						}
 						LazyColumn(
-								modifier = Modifier.fillMaxSize() ,
-								userScrollEnabled = true ,
+								 modifier = Modifier.fillMaxSize() ,
+								 userScrollEnabled = true ,
 								  ) {
 							//extract the dates from the list of tasbih
 							val dates = listOfTasbih.value.map { tasbih ->
@@ -300,46 +305,46 @@ fun ListOfTasbih(
 									for (dateIndex in dates.indices)
 									{
 										FeaturesDropDown(
-												header = {
-													DropDownHeader(
-															headerLeft = "Name" ,
-															headerRight = "Count" ,
-															headerMiddle = "Goal"
-																  )
-												} ,
-												//the list of tasbih for the date at the index
-												items = listOfTasbih.value.filter { tasbih ->
-													tasbih.date == dates[dateIndex]
-												} ,
-												label = LocalDate.parse(dates[dateIndex])
-													.format(
-															DateTimeFormatter.ofPattern(
-																	"E dd MMMM"
-																					   )
-														   ) ,
-												dropDownItem = {
-													TasbihDropdownItem(
-															it ,
-															onClick = { tasbih ->
-																onNavigateToTasbihScreen(
-																		tasbih.id.toString() ,
-																		tasbih.arabicName ,
-																		tasbih.englishName ,
-																		tasbih.translationName
-																						)
-															} ,
-															onDelete = { tasbih ->
-																showDeleteDialog.value = true
-																tasbihToEdit.value = tasbih
-															} ,
-															onEdit = { tasbih ->
-																showTasbihDialog.value =
-																	true
-																tasbihToEdit.value =
-																	tasbih
-															} ,
-																	  )
-												}
+												 header = {
+													 DropDownHeader(
+															  headerLeft = "Name" ,
+															  headerRight = "Count" ,
+															  headerMiddle = "Goal"
+																   )
+												 } ,
+												 //the list of tasbih for the date at the index
+												 items = listOfTasbih.value.filter { tasbih ->
+													 tasbih.date == dates[dateIndex]
+												 } ,
+												 label = LocalDate.parse(dates[dateIndex])
+													 .format(
+															  DateTimeFormatter.ofPattern(
+																	   "E dd MMMM"
+																						 )
+															) ,
+												 dropDownItem = {
+													 TasbihDropdownItem(
+															  it ,
+															  onClick = { tasbih ->
+																  onNavigateToTasbihScreen(
+																		   tasbih.id.toString() ,
+																		   tasbih.arabicName ,
+																		   tasbih.englishName ,
+																		   tasbih.translationName
+																						  )
+															  } ,
+															  onDelete = { tasbih ->
+																  showDeleteDialog.value = true
+																  tasbihToEdit.value = tasbih
+															  } ,
+															  onEdit = { tasbih ->
+																  showTasbihDialog.value =
+																	  true
+																  tasbihToEdit.value =
+																	  tasbih
+															  } ,
+																	   )
+												 }
 
 														)
 									}
@@ -351,89 +356,91 @@ fun ListOfTasbih(
 								{
 									item {
 										FeaturesDropDown(
-												//the list of tasbih for the date at the index
-												items = months[index] ,
-												label = years[index] ,
-												dropDownItem = {
-													//for each month in the year, render the month header
-													for (monthIndex in months[index].indices)
-													{
-														FeaturesDropDown(
-																//the list of tasbih for the date at the index
-																items = dates ,
-																label = months[index][monthIndex] ,
-																dropDownItem = {
-																	//for each date in the month, render the date header
-																	for (dateIndex in dates.indices)
-																	{
-																		if (LocalDate.parse(dates[dateIndex])
-																				.format(
-																						DateTimeFormatter.ofPattern(
-																								"MMMM"
-																												   )
-																					   ) == months[index][monthIndex]
-																			&& LocalDate.parse(dates[dateIndex])
-																				.format(
-																						DateTimeFormatter.ofPattern(
-																								"YYYY"
-																												   )
-																					   ) == years[index]
-																		)
-																		{
-																			FeaturesDropDown(
-																					header = {
-																						DropDownHeader(
-																								headerLeft = "Name" ,
-																								headerRight = "Count" ,
-																								headerMiddle = "Goal"
-																									  )
-																					} ,
-																					//the list of tasbih for the date at the index
-																					items = listOfTasbih.value.filter { tasbih ->
-																						tasbih.date == dates[dateIndex]
-																					} ,
-																					label = LocalDate.parse(
-																							dates[dateIndex]
-																										   )
-																						.format(
-																								DateTimeFormatter.ofPattern(
-																										"E dd "
-																														   )
-																							   ) ,
-																					dropDownItem = {
-																						TasbihDropdownItem(
-																								it ,
-																								onClick = { tasbih ->
-																									onNavigateToTasbihScreen(
-																											tasbih.id.toString() ,
-																											tasbih.arabicName ,
-																											tasbih.englishName ,
-																											tasbih.translationName
-																															)
-																								} ,
-																								onDelete = { tasbih ->
-																									showDeleteDialog.value =
-																										true
-																									tasbihToEdit.value =
-																										tasbih
-																								} ,
-																								onEdit = { tasbih ->
-																									showTasbihDialog.value =
-																										true
-																									tasbihToEdit.value =
-																										tasbih
-																								} ,
-																										  )
-																					}
+												 //the list of tasbih for the date at the index
+												 items = months[index] ,
+												 label = years[index] ,
+												 dropDownItem = {
+													 //for each month in the year, render the month header
+													 for (monthIndex in months[index].indices)
+													 {
+														 FeaturesDropDown(
+																  //the list of tasbih for the date at the index
+																  items = dates ,
+																  label = months[index][monthIndex] ,
+																  dropDownItem = {
+																	  //for each date in the month, render the date header
+																	  for (dateIndex in dates.indices)
+																	  {
+																		  if (LocalDate.parse(dates[dateIndex])
+																				  .format(
+																						   DateTimeFormatter.ofPattern(
+																									"MMMM"
+																													  )
+																						 ) == months[index][monthIndex]
+																			  && LocalDate.parse(
+																					   dates[dateIndex]
+																								)
+																				  .format(
+																						   DateTimeFormatter.ofPattern(
+																									"YYYY"
+																													  )
+																						 ) == years[index]
+																		  )
+																		  {
+																			  FeaturesDropDown(
+																					   header = {
+																						   DropDownHeader(
+																									headerLeft = "Name" ,
+																									headerRight = "Count" ,
+																									headerMiddle = "Goal"
+																										 )
+																					   } ,
+																					   //the list of tasbih for the date at the index
+																					   items = listOfTasbih.value.filter { tasbih ->
+																						   tasbih.date == dates[dateIndex]
+																					   } ,
+																					   label = LocalDate.parse(
+																								dates[dateIndex]
+																											  )
+																						   .format(
+																									DateTimeFormatter.ofPattern(
+																											 "E dd "
+																															   )
+																								  ) ,
+																					   dropDownItem = {
+																						   TasbihDropdownItem(
+																									it ,
+																									onClick = { tasbih ->
+																										onNavigateToTasbihScreen(
+																												 tasbih.id.toString() ,
+																												 tasbih.arabicName ,
+																												 tasbih.englishName ,
+																												 tasbih.translationName
+																																)
+																									} ,
+																									onDelete = { tasbih ->
+																										showDeleteDialog.value =
+																											true
+																										tasbihToEdit.value =
+																											tasbih
+																									} ,
+																									onEdit = { tasbih ->
+																										showTasbihDialog.value =
+																											true
+																										tasbihToEdit.value =
+																											tasbih
+																									} ,
+																											 )
+																					   }
 
-																							)
-																		}
-																	}
-																}
+																							  )
+																		  }
+																	  }
+																  }
 
-																		)
-													}
-												}
+																		 )
+													 }
+												 }
 														)
 									}
 								}
@@ -450,8 +457,8 @@ fun ListOfTasbih(
 }
 
 @Preview(
-		showBackground = true ,
-		uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+		 showBackground = true ,
+		 uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 		)
 @Composable
 //MyTasbihDropDownItem

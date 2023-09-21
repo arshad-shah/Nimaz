@@ -39,14 +39,14 @@ fun SettingsCheckbox(
 	}
 	Surface {
 		Row(
-				modifier = modifier
-					.fillMaxWidth()
-					.toggleable(
-							value = storageValue ,
-							role = Role.Checkbox ,
-							onValueChange = { update(! storageValue) }
-							   ) ,
-				verticalAlignment = Alignment.CenterVertically ,
+				 modifier = modifier
+					 .fillMaxWidth()
+					 .toggleable(
+							  value = storageValue ,
+							  role = Role.Checkbox ,
+							  onValueChange = { update(! storageValue) }
+								) ,
+				 verticalAlignment = Alignment.CenterVertically ,
 		   ) {
 			if (icon != null)
 			{
@@ -58,8 +58,8 @@ fun SettingsCheckbox(
 			SettingsTileTexts(title = title , subtitle = subtitle)
 			SettingsTileAction {
 				Checkbox(
-						checked = storageValue ,
-						onCheckedChange = update
+						 checked = storageValue ,
+						 onCheckedChange = update
 						)
 			}
 		}
@@ -70,12 +70,12 @@ fun SettingsCheckbox(
 @Composable
 internal fun SettingsCheckboxPreview()
 {
-		val storage = rememberBooleanSettingState(defaultValue = true)
-		SettingsCheckbox(
-				state = storage ,
-				icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-				title = { Text(text = "Hello") } ,
-				subtitle = { Text(text = "This is a longer text") } ,
-				onCheckedChange = { }
-						)
+	val storage = rememberBooleanSettingState(defaultValue = true)
+	SettingsCheckbox(
+			 state = storage ,
+			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
+			 title = { Text(text = "Hello") } ,
+			 subtitle = { Text(text = "This is a longer text") } ,
+			 onCheckedChange = { }
+					)
 }

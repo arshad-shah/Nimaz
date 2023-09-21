@@ -5,7 +5,6 @@ import com.arshadshah.nimaz.data.remote.models.Juz
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.utils.api.ApiResponse
 import com.arshadshah.nimaz.utils.api.NimazServicesImpl
-import io.ktor.client.plugins.*
 
 object QuranRepository
 {
@@ -17,26 +16,21 @@ object QuranRepository
 			val response = NimazServicesImpl.getSurahs()
 			//create an array list of surah from the response
 			val surahs = ArrayList<Surah>()
-			for (surahResponse in response)
-			{
+			response.data?.getAllSura?.map { it ->
 				val surah = Surah(
-						surahResponse.number ,
-						surahResponse.numberOfAyahs ,
-						surahResponse.startAya ,
-						surahResponse.name ,
-						surahResponse.englishName ,
-						surahResponse.englishNameTranslation ,
-						surahResponse.revelationType ,
-						surahResponse.revelationOrder ,
-						surahResponse.rukus
+						 it !!.id ,
+						 it.ayaAmount ,
+						 it.start ,
+						 it.name ,
+						 it.ename ,
+						 it.tname ,
+						 it.type ,
+						 it.order ,
+						 it.rukus
 								 )
 				surahs.add(surah)
 			}
 			ApiResponse.Success(surahs)
-		} catch (e : ClientRequestException)
-		{
-			ApiResponse.Error(e.message , null)
-
 		} catch (e : Exception)
 		{
 			throw Exception(e.message)
@@ -50,21 +44,16 @@ object QuranRepository
 			val response = NimazServicesImpl.getJuzs()
 			//create an array list of surah from the response
 			val Juzs = ArrayList<Juz>()
-			for (juzResponse in response)
-			{
+			response.data?.getAllJuz?.map { it ->
 				val juz = Juz(
-						juzResponse.number ,
-						juzResponse.name ,
-						juzResponse.tname ,
-						juzResponse.juzStartAyaInQuran ,
+						 it !!.id ,
+						 it.name ,
+						 it.tname ,
+						 it.juzStartAyaInQuran ,
 							 )
 				Juzs.add(juz)
 			}
 			ApiResponse.Success(Juzs)
-		} catch (e : ClientRequestException)
-		{
-			ApiResponse.Error(e.message , null)
-
 		} catch (e : Exception)
 		{
 			throw Exception(e.message)
@@ -80,40 +69,30 @@ object QuranRepository
 		{
 			val responses =
 				NimazServicesImpl.getAyaForSurah(surahNumber)
-			//get the english response
-			val responseEnglish = responses["english"] !!
-			val responseUrdu = responses["urdu"] !!
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()
-			for (ayaResponse in responseEnglish)
-			{
-				//get the urdu response index for the english response
-				val indexOfAyaInUrdu =
-					responseUrdu.indexOfFirst { it.ayaNumberInQuran == ayaResponse.ayaNumberInQuran }
+			responses.data?.getListAyaForSura?.map { it ->
 				val aya = Aya(
-						ayaResponse.ayaNumberInQuran ,
-						ayaResponse.number ,
-						ayaResponse.arabic ,
-						ayaResponse.translation ,
-						responseUrdu[indexOfAyaInUrdu].translation ,
-						ayaResponse.surahNumber ,
-						ayaResponse.ayaNumberInSurah ,
-						bookmark = false ,
-						favorite = false ,
-						note = ayaResponse.note ,
-						audioFileLocation = ayaResponse.audioFileLocation ,
-						sajda = ayaResponse.sajda ,
-						sajdaType = ayaResponse.sajdaType ,
-						ruku = ayaResponse.ruku ,
-						juzNumber = ayaResponse.juzNumber ,
+						 it !!.id ,
+						 // TODO: Possible issue here
+						 it.ayaNumberInSura ,
+						 it.arabic ,
+						 it.english ,
+						 it.urdu ,
+						 it.suraNumber ,
+						 it.ayaNumberInSura ,
+						 bookmark = false ,
+						 favorite = false ,
+						 note = it.note ,
+						 audioFileLocation = it.audioFileLocation ,
+						 sajda = it.sajda ,
+						 sajdaType = it.sajdaType ,
+						 ruku = it.ruku ,
+						 juzNumber = it.juzNumber ,
 							 )
 				ayas.add(aya)
 			}
 			ApiResponse.Success(ayas)
-		} catch (e : ClientRequestException)
-		{
-			ApiResponse.Error(e.message , null)
-
 		} catch (e : Exception)
 		{
 			throw Exception(e.message)
@@ -129,37 +108,27 @@ object QuranRepository
 			val responses = NimazServicesImpl.getAyaForJuz(juzNumber)
 			//create an array list of surah from the response
 			val ayas = ArrayList<Aya>()
-			val responseEnglish = responses["english"] !!
-			val responseUrdu = responses["urdu"] !!
-			for (ayaResponse in responseEnglish)
-			{
-				//get the urdu response index for the english response
-				val indexOfAyaInUrdu =
-					responseUrdu.indexOfFirst { it.ayaNumberInQuran == ayaResponse.ayaNumberInQuran }
+			responses.data?.getListAyaForJuz?.map { it ->
 				val aya = Aya(
-						ayaResponse.ayaNumberInQuran ,
-						ayaResponse.number ,
-						ayaResponse.arabic ,
-						ayaResponse.translation ,
-						responseUrdu[indexOfAyaInUrdu].translation ,
-						ayaResponse.surahNumber ,
-						ayaResponse.ayaNumberInSurah ,
-						false ,
-						false ,
-						ayaResponse.note ,
-						ayaResponse.audioFileLocation ,
-						ayaResponse.sajda ,
-						ayaResponse.sajdaType ,
-						ayaResponse.ruku ,
-						ayaResponse.juzNumber ,
+						 it !!.id ,
+						 it.ayaNumberInSura ,
+						 it.arabic ,
+						 it.english ,
+						 it.urdu ,
+						 it.suraNumber ,
+						 it.ayaNumberInSura ,
+						 bookmark = false ,
+						 favorite = false ,
+						 note = it.note ,
+						 audioFileLocation = it.audioFileLocation ,
+						 sajda = it.sajda ,
+						 sajdaType = it.sajdaType ,
+						 ruku = it.ruku ,
+						 juzNumber = it.juzNumber ,
 							 )
 				ayas.add(aya)
 			}
 			ApiResponse.Success(ayas)
-		} catch (e : ClientRequestException)
-		{
-			ApiResponse.Error(e.message , null)
-
 		} catch (e : Exception)
 		{
 			throw Exception(e.message)

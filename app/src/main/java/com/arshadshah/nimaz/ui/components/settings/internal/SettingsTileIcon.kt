@@ -20,9 +20,9 @@ internal fun SettingsTileIcon(
 	//the circle
 	Box(
 
-			modifier = modifier
-				.size(60.dp) ,
-			contentAlignment = Alignment.Center
+			 modifier = modifier
+				 .size(60.dp) ,
+			 contentAlignment = Alignment.Center
 	   ) {
 		icon()
 	}
@@ -33,9 +33,9 @@ internal fun SettingsTileIcon(
 fun SettingsIconPreview()
 {
 
-		SettingsTileIcon {
-			Icon(imageVector = Icons.Default.Clear , contentDescription = "")
-		}
+	SettingsTileIcon {
+		Icon(imageVector = Icons.Default.Clear , contentDescription = "")
+	}
 }
 
 @Preview
@@ -43,7 +43,7 @@ fun SettingsIconPreview()
 fun SettingsIconPreviewEmpty()
 {
 
-		SettingsTileIcon(
-				icon = { } ,
-						)
+	SettingsTileIcon(
+			 icon = { } ,
+					)
 }

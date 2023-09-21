@@ -73,37 +73,37 @@ fun bearingToCompassDirection(bearing : Float) : String
 fun BearingAndLocationContainerUI(location : String , heading : String)
 {
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(8.dp)
-				.height(IntrinsicSize.Max)
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .height(IntrinsicSize.Max)
 				) {
 		//align items to center
 
 		Row(
-				horizontalArrangement = Arrangement.Center ,
-				modifier = Modifier.fillMaxWidth() ,
-				verticalAlignment = Alignment.CenterVertically
+				 horizontalArrangement = Arrangement.Center ,
+				 modifier = Modifier.fillMaxWidth() ,
+				 verticalAlignment = Alignment.CenterVertically
 		   ) {
 			//only allow 50% of the width for the location text
 			CustomText(
-					modifier = Modifier
-						.weight(0.5f)
-						.padding(8.dp) ,
-					heading = "Location" , text = location
+					 modifier = Modifier
+						 .weight(0.5f)
+						 .padding(8.dp) ,
+					 heading = "Location" , text = location
 					  )
 			//vertical divider line
 			Divider(
-					modifier = Modifier
-						.fillMaxHeight()
-						.width(1.dp) ,
-					color = MaterialTheme.colorScheme.outline
+					 modifier = Modifier
+						 .fillMaxHeight()
+						 .width(1.dp) ,
+					 color = MaterialTheme.colorScheme.outline
 				   )
 			CustomText(
-					modifier = Modifier
-						.weight(0.5f)
-						.padding(8.dp) ,
-					heading = "Heading" , text = heading
+					 modifier = Modifier
+						 .weight(0.5f)
+						 .padding(8.dp) ,
+					 heading = "Heading" , text = heading
 					  )
 		}
 	}

@@ -31,42 +31,43 @@ fun DialComponent(
 	pointingToQibla : Boolean ,
 	imageToDisplay : Painter ,
 	rotateAnim : Animatable<Float , AnimationVector1D> ,
-				 ){
+				 )
+{
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(8.dp) ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .fillMaxWidth()
+				 .padding(8.dp) ,
 				) {
 
 		Text(
-				modifier = Modifier
-					.padding(16.dp)
-					.fillMaxWidth()
-					.align(Alignment.CenterHorizontally) ,
-				text = directionToTurn ,
-				style = MaterialTheme.typography.headlineMedium ,
-				textAlign = TextAlign.Center
+				 modifier = Modifier
+					 .padding(16.dp)
+					 .fillMaxWidth()
+					 .align(Alignment.CenterHorizontally) ,
+				 text = directionToTurn ,
+				 style = MaterialTheme.typography.headlineMedium ,
+				 textAlign = TextAlign.Center
 			)
 
 		Icon(
-				painter = painterResource(id = R.drawable.circle_close_icon) ,
-				contentDescription = "dot" ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.size(28.dp) ,
-				tint = if (pointingToQibla) MaterialTheme.colorScheme.inversePrimary else Color.Red
+				 painter = painterResource(id = R.drawable.circle_close_icon) ,
+				 contentDescription = "dot" ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .size(28.dp) ,
+				 tint = if (pointingToQibla) MaterialTheme.colorScheme.inversePrimary else Color.Red
 			)
 		//the dial
 		Image(
-				painter = imageToDisplay ,
-				contentDescription = "Compass" ,
-				modifier = Modifier
-					.clip(CircleShape)
-					.rotate(rotateAnim.value)
-					.fillMaxWidth()
-					.padding(12.dp) ,
-				alignment = Alignment.Center
+				 painter = imageToDisplay ,
+				 contentDescription = "Compass" ,
+				 modifier = Modifier
+					 .clip(CircleShape)
+					 .rotate(rotateAnim.value)
+					 .fillMaxWidth()
+					 .padding(12.dp) ,
+				 alignment = Alignment.Center
 			 )
 	}
 }

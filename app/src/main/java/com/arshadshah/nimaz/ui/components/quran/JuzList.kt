@@ -16,23 +16,23 @@ fun JuzList(
 	if (loading)
 	{
 		JuzListUI(
-				juz = ArrayList(30) ,
-				onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				loading = true
+				 juz = ArrayList(30) ,
+				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				 loading = true
 				 )
 	} else if (error.isNotEmpty())
 	{
 		JuzListUI(
-				juz = ArrayList(30) ,
-				onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				loading = false ,
+				 juz = ArrayList(30) ,
+				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				 loading = false ,
 				 )
 	} else
 	{
 		JuzListUI(
-				juz = state.value ,
-				onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				loading = false
+				 juz = state.value ,
+				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
+				 loading = false
 				 )
 	}
 }

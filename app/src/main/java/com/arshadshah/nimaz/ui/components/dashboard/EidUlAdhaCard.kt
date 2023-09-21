@@ -68,12 +68,12 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 	//we will pick a random image from the list
 	val imagesToShow =
 		listOf(
-				R.drawable.eid ,
-				R.drawable.eid2 ,
-				R.drawable.eid3 ,
-				R.drawable.eid4 ,
-				R.drawable.eid5 ,
-				R.drawable.eid_al_adha ,
+				 R.drawable.eid ,
+				 R.drawable.eid2 ,
+				 R.drawable.eid3 ,
+				 R.drawable.eid4 ,
+				 R.drawable.eid5 ,
+				 R.drawable.eid_al_adha ,
 			  )
 	//pick a random image
 	val randomImage = imagesToShow.random()
@@ -94,16 +94,16 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 	{
 		//show the card
 		ElevatedCard(
-				shape = MaterialTheme.shapes.extraLarge ,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(8.dp)
-					.clickable { onNavigateToCalender() } ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp)
+					 .clickable { onNavigateToCalender() } ,
 					) {
 			Column(
-					modifier = Modifier.padding(16.dp) ,
-					verticalArrangement = Arrangement.Center ,
-					horizontalAlignment = Alignment.CenterHorizontally
+					 modifier = Modifier.padding(16.dp) ,
+					 verticalArrangement = Arrangement.Center ,
+					 horizontalAlignment = Alignment.CenterHorizontally
 				  ) {
 				if (isAfterEidUlAdhaStart)
 				{
@@ -111,68 +111,68 @@ fun EidUlAdhaCard(onNavigateToCalender : () -> Unit)
 				} else
 				{
 					Text(
-							text = "Eid ul Adha is coming" ,
-							style = MaterialTheme.typography.titleLarge
+							 text = "Eid ul Adha is coming" ,
+							 style = MaterialTheme.typography.titleLarge
 						)
 				}
 
 				Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(top = 16.dp) ,
-						verticalAlignment = Alignment.CenterVertically ,
-						horizontalArrangement = Arrangement.SpaceBetween
+						 modifier = Modifier
+							 .fillMaxWidth()
+							 .padding(top = 16.dp) ,
+						 verticalAlignment = Alignment.CenterVertically ,
+						 horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
 					Box(
-							modifier = Modifier
-								.clip(MaterialTheme.shapes.extraLarge)
-								.padding(8.dp)
-								.size(80.dp)
+							 modifier = Modifier
+								 .clip(MaterialTheme.shapes.extraLarge)
+								 .padding(8.dp)
+								 .size(80.dp)
 					   ) {
 						Image(
-								painter = painterResource(id = imageToShow.value) ,
-								contentDescription = "Moon" ,
-								modifier = Modifier
-									.size(80.dp)
+								 painter = painterResource(id = imageToShow.value) ,
+								 contentDescription = "Moon" ,
+								 modifier = Modifier
+									 .size(80.dp)
 							 )
 					}
 					Column(
-							modifier = Modifier.fillMaxWidth() ,
-							verticalArrangement = Arrangement.Center ,
-							horizontalAlignment = Alignment.CenterHorizontally
+							 modifier = Modifier.fillMaxWidth() ,
+							 verticalArrangement = Arrangement.Center ,
+							 horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
 						if (isAfterEidUlAdhaStart)
 						{
 							//estimated end
 							Text(
-									text = "Eid Mubarak" ,
-									style = MaterialTheme.typography.titleSmall
+									 text = "Eid Mubarak" ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						} else
 						{
 							//estimated start
 							Text(
-									text = "Estimated start" ,
-									style = MaterialTheme.typography.titleSmall
+									 text = "Estimated start" ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						}
 						Text(
-								text = "${eidUlAdhaTimeLeft.value} days" ,
-								style = MaterialTheme.typography.headlineMedium
+								 text = "${eidUlAdhaTimeLeft.value} days" ,
+								 style = MaterialTheme.typography.headlineMedium
 							)
 						if (isAfterEidUlAdhaStart)
 						{
 							//estimated end
 							Text(
-									text = eidUlAdhaEndFormatted.toString() ,
-									style = MaterialTheme.typography.titleSmall
+									 text = eidUlAdhaEndFormatted.toString() ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						} else
 						{
 							//estimated start
 							Text(
-									text = eidUlAdhaStartFormatted.toString() ,
-									style = MaterialTheme.typography.titleSmall
+									 text = eidUlAdhaStartFormatted.toString() ,
+									 style = MaterialTheme.typography.titleSmall
 								)
 						}
 					}

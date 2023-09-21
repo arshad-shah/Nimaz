@@ -32,25 +32,25 @@ fun DatesContainer(onNavigateToTracker : () -> Unit)
 	val islamDate = islamformat.format(islamicDate)
 
 	ElevatedCard(
-			shape = MaterialTheme.shapes.extraLarge ,
-			modifier = Modifier
-				.padding(vertical = 8.dp , horizontal = 8.dp)
-				.fillMaxWidth()
-				.clickable {
-					onNavigateToTracker()
-				}
+			 shape = MaterialTheme.shapes.extraLarge ,
+			 modifier = Modifier
+				 .padding(vertical = 8.dp , horizontal = 8.dp)
+				 .fillMaxWidth()
+				 .clickable {
+					 onNavigateToTracker()
+				 }
 				) {
 		Column(horizontalAlignment = Alignment.CenterHorizontally) {
 			Text(
-					text = GregDate ,
-					Modifier.padding(vertical = 16.dp , horizontal = 8.dp) ,
-					style = MaterialTheme.typography.titleLarge
+					 text = GregDate ,
+					 Modifier.padding(vertical = 16.dp , horizontal = 8.dp) ,
+					 style = MaterialTheme.typography.titleLarge
 				)
 			Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
 			Text(
-					text = islamDate ,
-					Modifier.padding(16.dp) ,
-					style = MaterialTheme.typography.titleLarge
+					 text = islamDate ,
+					 Modifier.padding(16.dp) ,
+					 style = MaterialTheme.typography.titleLarge
 				)
 		}
 	}

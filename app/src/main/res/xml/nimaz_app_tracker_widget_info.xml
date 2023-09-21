@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@drawable/nimaz_prayer_times_widget"
+    android:description="@string/app_widget_tracker_description"
+    android:initialKeyguardLayout="@drawable/nimaz_prayer_times_widget"
+    android:previewImage="@drawable/nimaz_prayer_times_widget"
+    android:resizeMode="horizontal"
+    android:minWidth="350dp"
+    android:updatePeriodMillis="7200000"
+    android:widgetCategory="home_screen">
+</appwidget-provider>

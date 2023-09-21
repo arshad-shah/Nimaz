@@ -3,26 +3,9 @@ package com.arshadshah.nimaz.constants
 object AppConstants
 {
 
-	private const val BASE_URL = "https://nimazapi.arshadshah.com/api"
+	const val BASE_URL = "https://nimazapi.arshadshah.com/gui"
 
-	const val PRAYER_TIMES_URL = "$BASE_URL/prayertimes/custom"
-	const val PRAYER_TIMES_MONTHLY_URL = "$BASE_URL/prayertimes/monthly"
-	const val PRAYER_TIMES_MONTHLY_CUSTOM_URL = "$BASE_URL/prayertimes/monthly/custom"
-
-	//auth
-	const val LOGIN_URL = "$BASE_URL/auth/authenticate"
-
-	const val QURAN_SURAH_URL = "$BASE_URL/quran/surahs/"
-	const val QURAN_JUZ_URL = "$BASE_URL/quran/juzs/"
-	const val QURAN_SURAH_AYAT_URL = "$BASE_URL/quran/surah/{surahNumber}/{translationLanguage}"
-	const val QURAN_JUZ_AYAT_URL = "$BASE_URL/quran/juz/{juzNumber}/{translationLanguage}"
-
-	const val DUA_CHAPTERS_URL = "$BASE_URL/Duas/chapters"
-	const val DUA_CHAPTER_URL = "$BASE_URL/Duas/chapter/{chapterId}"
-
-	const val USER_USERNAME = "user"
-	const val USER_PASSWORD = "Thisworldis100%doomed"
-
+	const val DATABASE_VERSION = 14
 
 	//Preferences file name
 	const val PREFERENCES_FILE_NAME = "com.arshadshah.nimaz.SharedPreferences"
@@ -158,8 +141,8 @@ object AppConstants
 	const val SHAHADAH_SCREEN_ROUTE = "shahadah_screen"
 
 	const val CATEGORY_SCREEN_ROUTE = "category_screen"
-	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen/{title}"
-	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}"
+	const val CHAPTERS_SCREEN_ROUTE = "chapters_screen/{title}/{id}"
+	const val CHAPTER_SCREEN_ROUTE = "chapter_screen/{chapterId}/{categoryName}"
 	const val TASBIH_SCREEN_ROUTE = "tasbih_screen/{id}/{arabic}/{translation}/{transliteration}"
 	const val NAMESOFALLAH_SCREEN_ROUTE = "namesofallah_screen"
 
@@ -258,6 +241,13 @@ object AppConstants
 
 	//NimazServicesImpl
 	const val NIMAZ_SERVICES_IMPL_TAG = "$TAG: NimazServicesImpl"
+
+	//themes names
+	const val THEME_SYSTEM = "SYSTEM"
+	const val THEME_DEFAULT = "DEFAULT"
+	const val THEME_RAISIN_BLACK = "Raisin_Black"
+	const val THEME_DARK_RED = "Dark_Red"
+	const val THEME_RUSTIC_BROWN = "Rustic_brown"
 
 
 	//function to return the map of methods

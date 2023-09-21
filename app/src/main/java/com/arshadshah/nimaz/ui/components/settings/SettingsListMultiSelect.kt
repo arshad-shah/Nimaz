@@ -53,12 +53,12 @@ fun SettingsListMultiSelect(
 	} else subtitle
 
 	SettingsMenuLink(
-			modifier = modifier ,
-			icon = icon ,
-			title = title ,
-			subtitle = safeSubtitle ,
-			action = action ,
-			onClick = { showDialog = true } ,
+			 modifier = modifier ,
+			 icon = icon ,
+			 title = title ,
+			 subtitle = safeSubtitle ,
+			 action = action ,
+			 onClick = { showDialog = true } ,
 					)
 
 	if (! showDialog) return
@@ -75,56 +75,60 @@ fun SettingsListMultiSelect(
 	}
 
 	AlertDialog(
-			title = title ,
-			text = {
-				Column {
-					if (subtitle != null)
-					{
-						subtitle()
-						Spacer(modifier = Modifier.size(8.dp))
-					}
+			 title = title ,
+			 text = {
+				 Column {
+					 if (subtitle != null)
+					 {
+						 subtitle()
+						 Spacer(modifier = Modifier.size(8.dp))
+					 }
 
-					items.forEachIndexed { index , item ->
-						val isSelected by rememberUpdatedState(newValue = state.value.contains(index))
-						Row(
-								modifier = Modifier
-									.fillMaxWidth()
-									.height(56.dp)
-									.toggleable(
-											role = Role.Checkbox ,
-											value = isSelected ,
-											onValueChange = {
-												if (isSelected)
-												{
-													onRemove(index)
-												} else
-												{
-													onAdd(index)
-												}
-											}
-											   ) ,
-								verticalAlignment = Alignment.CenterVertically
+					 items.forEachIndexed { index , item ->
+						 val isSelected by rememberUpdatedState(
+								  newValue = state.value.contains(
+										   index
+																 )
+															   )
+						 Row(
+								  modifier = Modifier
+									  .fillMaxWidth()
+									  .height(56.dp)
+									  .toggleable(
+											   role = Role.Checkbox ,
+											   value = isSelected ,
+											   onValueChange = {
+												   if (isSelected)
+												   {
+													   onRemove(index)
+												   } else
+												   {
+													   onAdd(index)
+												   }
+											   }
+												 ) ,
+								  verticalAlignment = Alignment.CenterVertically
+							) {
+							 Text(
+									  text = item ,
+									  style = MaterialTheme.typography.bodyMedium ,
+									  modifier = Modifier.weight(1f)
+								 )
+							 Checkbox(
+									  checked = isSelected ,
+									  onCheckedChange = null
+									 )
+						 }
+					 }
+				 }
+			 } ,
+			 onDismissRequest = { showDialog = false } ,
+			 confirmButton = {
+				 TextButton(
+						  onClick = { showDialog = false } ,
 						   ) {
-							Text(
-									text = item ,
-									style = MaterialTheme.typography.bodyMedium ,
-									modifier = Modifier.weight(1f)
-								)
-							Checkbox(
-									checked = isSelected ,
-									onCheckedChange = null
-									)
-						}
-					}
-				}
-			} ,
-			onDismissRequest = { showDialog = false } ,
-			confirmButton = {
-				TextButton(
-						onClick = { showDialog = false } ,
-						  ) {
-					Text(text = confirmButton)
-				}
-			}
+					 Text(text = confirmButton)
+				 }
+			 }
 			   )
 }

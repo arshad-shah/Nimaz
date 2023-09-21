@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -54,14 +55,14 @@ fun Dashboard(
 {
 	val context = LocalContext.current
 	val viewModelSettings = viewModel(
-			key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			initializer = { SettingsViewModel(context) } ,
-			viewModelStoreOwner = context as ComponentActivity
+			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
+			 initializer = { SettingsViewModel(context) } ,
+			 viewModelStoreOwner = context as ComponentActivity
 									 )
 	val viewModelTracker = viewModel(
-			key = AppConstants.TRACKING_VIEWMODEL_KEY ,
-			initializer = { TrackerViewModel() } ,
-			viewModelStoreOwner = LocalContext.current as ComponentActivity
+			 key = AppConstants.TRACKING_VIEWMODEL_KEY ,
+			 initializer = { TrackerViewModel() } ,
+			 viewModelStoreOwner = LocalContext.current as ComponentActivity
 									)
 	LaunchedEffect(Unit) {
 		viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context , false))
@@ -78,11 +79,10 @@ fun Dashboard(
 	val stateScroll = rememberLazyListState()
 
 	LazyColumn(
-			state = stateScroll ,
-			modifier = Modifier
-				.testTag(TEST_TAG_HOME)
-			,
-			contentPadding = paddingValues
+			 state = stateScroll ,
+			 modifier = Modifier
+				 .testTag(TEST_TAG_HOME) ,
+			 contentPadding = paddingValues
 			  ) {
 		item {
 			DashboardPrayertimesCard()
@@ -96,12 +96,12 @@ fun Dashboard(
 				val sharedPref = PrivateSharedPreferences(context)
 				val bannerShownLastTime =
 					sharedPref.getData(
-							"Update Available-bannerIsOpen-time" ,
-							LocalDateTime.now().toString()
+							 "Update Available-bannerIsOpen-time" ,
+							 LocalDateTime.now().toString()
 									  )
 				//has it been 24 hours since the last time the banner was shown
 				val has24HoursPassed = LocalDateTime.now().isAfter(
-						LocalDateTime.parse(bannerShownLastTime).plusHours(2)
+						 LocalDateTime.parse(bannerShownLastTime).plusHours(2)
 																  )
 				val isOpen = remember { mutableStateOf(true) }
 				if (has24HoursPassed)
@@ -109,44 +109,45 @@ fun Dashboard(
 					sharedPref.saveDataBoolean("Update Available-bannerIsOpen" , true)
 				}
 				BannerSmall(
-						title = "Update Available" ,
-						message = "Tap here to update the app" ,
-						isOpen = isOpen ,
-						onClick = {
-							viewModelSettings.handleEvent(
-									SettingsViewModel.SettingsEvent.CheckUpdate(context , true)
-														 )
-						} ,
-						dismissable = true ,
-						paddingValues = PaddingValues(
-								top = 8.dp ,
-								bottom = 0.dp ,
-								start = 8.dp ,
-								end = 8.dp
-													 )
+						 title = "Update Available" ,
+						 message = "Tap here to update the app" ,
+						 isOpen = isOpen ,
+						 onClick = {
+							 viewModelSettings.handleEvent(
+									  SettingsViewModel.SettingsEvent.CheckUpdate(context , true)
+														  )
+						 } ,
+						 dismissable = true ,
+						 paddingValues = PaddingValues(
+								  top = 8.dp ,
+								  bottom = 0.dp ,
+								  start = 8.dp ,
+								  end = 8.dp
+													  )
 						   )
 			}
 		}
 		item {
 			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
-					modifier = Modifier
-						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-						.testTag(TEST_TAG_EVENTS_CARD)
-						.clickable {
-							onNavigateToCalender()
-						}
+					 shape = MaterialTheme.shapes.extraLarge ,
+					 modifier = Modifier
+						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
+						 .testTag(TEST_TAG_EVENTS_CARD)
+						 .clip(shape = MaterialTheme.shapes.extraLarge)
+						 .clickable {
+							 onNavigateToCalender()
+						 }
 						) {
 				Text(
-						text = "Events" ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center ,
-						style = MaterialTheme.typography.titleMedium
+						 text = "Events" ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center ,
+						 style = MaterialTheme.typography.titleMedium
 					)
 				RamadanCard(
-						onNavigateToCalender = onNavigateToCalender
+						 onNavigateToCalender = onNavigateToCalender
 						   )
 				EidUlFitrCard {
 					onNavigateToCalender()
@@ -158,22 +159,22 @@ fun Dashboard(
 		}
 		item {
 			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-						.testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
-						.clickable {
-							onNavigateToTracker()
-						}
+					 shape = MaterialTheme.shapes.extraLarge ,
+					 modifier = Modifier
+						 .fillMaxWidth()
+						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
+						 .testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
+						 .clickable {
+							 onNavigateToTracker()
+						 }
 						) {
 				Text(
-						text = "Trackers" ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center ,
-						style = MaterialTheme.typography.titleMedium
+						 text = "Trackers" ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center ,
+						 style = MaterialTheme.typography.titleMedium
 					)
 				DashboardPrayerTracker()
 				DashboardFastTracker()
@@ -182,40 +183,40 @@ fun Dashboard(
 		//quick links to the tasbih and quran
 		item {
 			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
+					 shape = MaterialTheme.shapes.extraLarge ,
+					 modifier = Modifier
+						 .fillMaxWidth()
+						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						) {
 				Text(
-						text = "Quick Links" ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center ,
-						style = MaterialTheme.typography.titleMedium
+						 text = "Quick Links" ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center ,
+						 style = MaterialTheme.typography.titleMedium
 					)
 				DashboardQuranTracker(onNavigateToAyatScreen = onNavigateToAyatScreen)
 				DashboardTasbihTracker(
-						onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
-						onNavigateToTasbihListScreen = onNavigateToTasbihListScreen
+						 onNavigateToTasbihScreen = onNavigateToTasbihScreen ,
+						 onNavigateToTasbihListScreen = onNavigateToTasbihListScreen
 									  )
 			}
 		}
 		item {
 			ElevatedCard(
-					shape = MaterialTheme.shapes.extraLarge ,
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
+					 shape = MaterialTheme.shapes.extraLarge ,
+					 modifier = Modifier
+						 .fillMaxWidth()
+						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						) {
 				Text(
-						text = "Daily Verses" ,
-						modifier = Modifier
-							.padding(8.dp)
-							.fillMaxWidth() ,
-						textAlign = TextAlign.Center ,
-						style = MaterialTheme.typography.titleMedium
+						 text = "Daily Verses" ,
+						 modifier = Modifier
+							 .padding(8.dp)
+							 .fillMaxWidth() ,
+						 textAlign = TextAlign.Center ,
+						 style = MaterialTheme.typography.titleMedium
 					)
 				DashboardRandomAyatCard(onNavigateToAyatScreen = onNavigateToAyatScreen)
 			}
@@ -229,15 +230,15 @@ fun Dashboard(
 fun DashboardPreview()
 {
 	NimazTheme(
-			darkTheme = true
+			 darkTheme = true
 			  ) {
 		Dashboard(
-				onNavigateToTracker = { } ,
-				onNavigateToCalender = { } ,
-				onNavigateToTasbihScreen = { _ , _ , _ , _ -> } ,
-				paddingValues = PaddingValues(8.dp) ,
-				onNavigateToTasbihListScreen = { } ,
-				onNavigateToAyatScreen = { _ , _ , _ , _ -> } ,
+				 onNavigateToTracker = { } ,
+				 onNavigateToCalender = { } ,
+				 onNavigateToTasbihScreen = { _ , _ , _ , _ -> } ,
+				 paddingValues = PaddingValues(8.dp) ,
+				 onNavigateToTasbihListScreen = { } ,
+				 onNavigateToAyatScreen = { _ , _ , _ , _ -> } ,
 				 )
 	}
 }

@@ -68,8 +68,8 @@ fun ProgressBarCustom(
 
 	val stroke = with(LocalDensity.current) {
 		Stroke(
-				width = strokeWidth.toPx() ,
-				cap = if (roundedBorder) StrokeCap.Round else StrokeCap.Square
+				 width = strokeWidth.toPx() ,
+				 cap = if (roundedBorder) StrokeCap.Round else StrokeCap.Square
 			  )
 	}
 
@@ -88,13 +88,13 @@ fun ProgressBarCustom(
 	val animatedCircle = rememberInfiniteTransition()
 
 	val progress by animatedProgress.animateFloat(
-			transitionSpec = {
-				tween(
-						durationMillis = durationInMilliSecond ,
-						easing = LinearEasing ,
-						delayMillis = startDelay
-					 )
-			} , label = "Progress"
+			 transitionSpec = {
+				 tween(
+						  durationMillis = durationInMilliSecond ,
+						  easing = LinearEasing ,
+						  delayMillis = startDelay
+					  )
+			 } , label = "Progress"
 												 ) { state ->
 		when (state)
 		{
@@ -112,15 +112,15 @@ fun ProgressBarCustom(
 	}
 
 	val animatedReverse by animatedCircle.animateFloat(
-			initialValue = 1.40f ,
-			targetValue = 1f ,
-			animationSpec = infiniteRepeatable(tween(2000) , RepeatMode.Reverse)
+			 initialValue = 1.40f ,
+			 targetValue = 1f ,
+			 animationSpec = infiniteRepeatable(tween(2000) , RepeatMode.Reverse)
 													  )
 
 	val animatedColor by animatedCircle.animateColor(
-			initialValue = progressBackgroundColor.copy(0.5f) ,
-			targetValue = progressColor.copy(0.8f) ,
-			animationSpec = infiniteRepeatable(tween(2000) , RepeatMode.Reverse)
+			 initialValue = progressBackgroundColor.copy(0.5f) ,
+			 targetValue = progressColor.copy(0.8f) ,
+			 animationSpec = infiniteRepeatable(tween(2000) , RepeatMode.Reverse)
 													)
 
 	DisposableEffect(Unit) {
@@ -129,11 +129,11 @@ fun ProgressBarCustom(
 	}
 
 	Box(
-			contentAlignment = Alignment.Center ,
-			modifier = Modifier.size(radius * 2)
+			 contentAlignment = Alignment.Center ,
+			 modifier = Modifier.size(radius * 2)
 	   ) {
 		Canvas(
-				modifier.size(radius * 2)
+				 modifier.size(radius * 2)
 			  ) {
 
 			val higherStrokeWidth =
@@ -141,61 +141,61 @@ fun ProgressBarCustom(
 			val radius = (size.minDimension - higherStrokeWidth) / 2
 			val halfSize = size / 2.0f
 			val topLeft = Offset(
-					halfSize.width - radius ,
-					halfSize.height - radius
+					 halfSize.width - radius ,
+					 halfSize.height - radius
 								)
 			val size = Size(radius * 2 , radius * 2)
 			val sweep = progress * 360 / 100
 			isFinished = animatedProgress.currentState == animatedProgress.targetState
 
 			drawArc(
-					startAngle = 0f ,
-					sweepAngle = 360f ,
-					color = progressBackgroundColor ,
-					useCenter = false ,
-					topLeft = topLeft ,
-					size = size ,
-					style = strokeBackground
+					 startAngle = 0f ,
+					 sweepAngle = 360f ,
+					 color = progressBackgroundColor ,
+					 useCenter = false ,
+					 topLeft = topLeft ,
+					 size = size ,
+					 style = strokeBackground
 				   )
 
 			if (waveAnimation && ! isFinished)
 			{
 				drawCircle(
-						color = animatedColor ,
-						style = strokeReverse ,
-						radius = radius * animatedReverse ,
+						 color = animatedColor ,
+						 style = strokeReverse ,
+						 radius = radius * animatedReverse ,
 						  )
 			}
 
 			drawArc(
-					color = progressColor ,
-					startAngle = 270f ,
-					sweepAngle = sweep ,
-					useCenter = false ,
-					topLeft = topLeft ,
-					size = size ,
-					style = stroke
+					 color = progressColor ,
+					 startAngle = 270f ,
+					 sweepAngle = sweep ,
+					 useCenter = false ,
+					 topLeft = topLeft ,
+					 size = size ,
+					 style = stroke
 				   )
 		}
 
 		if (label != null)
 		{
 			Text(
-					text = label ,
-					fontWeight = FontWeight.SemiBold ,
-					fontFamily = FontFamily.Monospace ,
-					style = MaterialTheme.typography.bodyMedium ,
-					color = labelColor
+					 text = label ,
+					 fontWeight = FontWeight.SemiBold ,
+					 fontFamily = FontFamily.Monospace ,
+					 style = MaterialTheme.typography.bodyMedium ,
+					 color = labelColor
 				)
 		} else
 		{
 			Text(
-					text = progress.toInt().toString() + "%" ,
-					color = progressColor ,
-					fontSize = radius.value.sp / 2 ,
-					fontWeight = FontWeight.SemiBold ,
-					fontFamily = FontFamily.Monospace ,
-					style = MaterialTheme.typography.bodySmall
+					 text = progress.toInt().toString() + "%" ,
+					 color = progressColor ,
+					 fontSize = radius.value.sp / 2 ,
+					 fontWeight = FontWeight.SemiBold ,
+					 fontFamily = FontFamily.Monospace ,
+					 style = MaterialTheme.typography.bodySmall
 				)
 		}
 	}
