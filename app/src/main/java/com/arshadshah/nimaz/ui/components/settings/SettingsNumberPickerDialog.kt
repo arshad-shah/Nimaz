@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -98,30 +97,26 @@ fun SettingsNumberPickerDialog(
 			 contentHeight = height ,
 			 title = title ,
 			 contentToShow = {
-				 Card(
+				 Row(
 						  modifier = Modifier.fillMaxWidth() ,
-					 ) {
-					 Row(
-							  modifier = Modifier.fillMaxWidth() ,
-							  horizontalArrangement = Arrangement.Center ,
-							  verticalAlignment = Alignment.CenterVertically ,
-						) {
-						 Picker(
-								  modifier = modifier ,
-								  value = if (items.size == 51) valueState.value.toDouble()
-									  .toInt() else valueState.value.toInt() ,
-								  onValueChange = onSelected ,
-								  list = items ,
-								  dividersColor = MaterialTheme.colorScheme.outline ,
-								  textStyle = MaterialTheme.typography.titleLarge ,
-								  label = {
-									  if (items.size == 51)
-										  if (it < 2 && it > - 1) "$it Degree " else if (it != - 1) "$it Degrees" else "$it Degree"
-									  else
-										  if (it < 2 && it > - 1) "$it Minute " else if (it != - 1) "$it Minutes" else "$it Minute"
-								  } ,
-							   )
-					 }
+						  horizontalArrangement = Arrangement.Center ,
+						  verticalAlignment = Alignment.CenterVertically ,
+					) {
+					 Picker(
+							  modifier = modifier ,
+							  value = if (items.size == 51) valueState.value.toDouble()
+								  .toInt() else valueState.value.toInt() ,
+							  onValueChange = onSelected ,
+							  list = items ,
+							  dividersColor = MaterialTheme.colorScheme.outline ,
+							  textStyle = MaterialTheme.typography.titleLarge ,
+							  label = {
+								  if (items.size == 51)
+									  if (it < 2 && it > - 1) "$it Degree " else if (it != - 1) "$it Degrees" else "$it Degree"
+								  else
+									  if (it < 2 && it > - 1) "$it Minute " else if (it != - 1) "$it Minutes" else "$it Minute"
+							  } ,
+						   )
 				 }
 			 } ,
 			 onDismissRequest = {

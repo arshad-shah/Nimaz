@@ -26,6 +26,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.components.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.utils.FeatureThatRequiresLocationPermission
@@ -38,9 +41,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
 
 
@@ -198,6 +198,18 @@ fun LocationSettings(isIntro : Boolean = false)
 					 exit = shrinkVertically()
 							  ) {
 				ElevatedCard(
+						 colors = CardDefaults.cardColors(
+								  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+										   elevation = 8.dp
+																									) ,
+								  contentColor = MaterialTheme.colorScheme.onSurface ,
+								  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+										   alpha = 0.38f
+																								 ) ,
+								  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+										   alpha = 0.38f
+																								 ) ,
+														 ) ,
 						 shape = MaterialTheme.shapes.extraLarge ,
 						 modifier = Modifier
 							 .padding(8.dp)
@@ -221,6 +233,18 @@ fun LocationSettings(isIntro : Boolean = false)
 								  ) {
 					Column {
 						ElevatedCard(
+								 colors = CardDefaults.elevatedCardColors(
+										  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												   elevation = 32.dp
+																											) ,
+										  contentColor = MaterialTheme.colorScheme.onSurface ,
+										  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												   alpha = 0.38f
+																										 ) ,
+										  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												   alpha = 0.38f
+																										 ) ,
+																		 ) ,
 								 shape = MaterialTheme.shapes.extraLarge ,
 								 modifier = Modifier
 									 .padding(8.dp)
@@ -336,6 +360,12 @@ fun LocationToggleSwitch(
 	}
 
 	ElevatedCard(
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .padding(8.dp)
@@ -509,6 +539,14 @@ fun LocationToggleSwitch(
 			}
 		}
 		ElevatedCard(
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+								   elevation = 32.dp
+																							) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 				 shape = MaterialTheme.shapes.extraLarge ,
 				 modifier = Modifier
 					 .padding(8.dp)

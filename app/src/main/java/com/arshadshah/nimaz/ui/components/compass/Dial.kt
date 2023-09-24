@@ -2,8 +2,11 @@ package com.arshadshah.nimaz.ui.components.compass
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import android.os.CombinedVibration
 import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.VibratorManager
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun Dial(
 	state : State<Double> ,
@@ -81,6 +85,7 @@ fun Dial(
 	}
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
@@ -94,7 +99,7 @@ fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 	val rotateAnim = remember { Animatable(currentAngle) }
 	val target = (bearing - degree).toFloat()
 	val context = LocalContext.current
-	val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+	val vibrator = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
 
 	val pointingToQibla = abs(target) < 5f
 
@@ -122,7 +127,14 @@ fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
 		if (pointingToQibla)
 		{
 			//create a single shot vibration
-			vibrator.vibrate(VibrationEffect.createOneShot(100 , VibrationEffect.DEFAULT_AMPLITUDE))
+			vibrator.vibrate(
+					 CombinedVibration.createParallel(
+							  VibrationEffect.createOneShot(
+									   100 ,
+									   255
+														   )
+													 )
+							)
 		} else
 		{
 			vibrator.cancel()

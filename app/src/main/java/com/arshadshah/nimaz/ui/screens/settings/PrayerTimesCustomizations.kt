@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -192,6 +194,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		}) {
 			CalculationMethodUI()
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -229,6 +239,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				}
 			}
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -282,6 +300,14 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 		}) {
 
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -324,6 +350,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			if (ishaaAngleVisible.value)
 			{
 				ElevatedCard(
+						 colors = CardDefaults.elevatedCardColors(
+								  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+										   elevation = 32.dp
+																									) ,
+								  contentColor = MaterialTheme.colorScheme.onSurface ,
+								  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+										   alpha = 0.38f
+																								 ) ,
+								  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+										   alpha = 0.38f
+																								 ) ,
+																 ) ,
 						 shape = MaterialTheme.shapes.extraLarge ,
 						 modifier = Modifier
 							 .padding(8.dp)
@@ -366,6 +404,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 			} else
 			{
 				ElevatedCard(
+						 colors = CardDefaults.elevatedCardColors(
+								  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+										   elevation = 32.dp
+																									) ,
+								  contentColor = MaterialTheme.colorScheme.onSurface ,
+								  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+										   alpha = 0.38f
+																								 ) ,
+								  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+										   alpha = 0.38f
+																								 ) ,
+																 ) ,
 						 shape = MaterialTheme.shapes.extraLarge ,
 						 modifier = Modifier
 							 .padding(8.dp)
@@ -400,6 +450,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 				 } ,
 				 content = {
 					 ElevatedCard(
+							  colors = CardDefaults.elevatedCardColors(
+									   containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												elevation = 32.dp
+																										 ) ,
+									   contentColor = MaterialTheme.colorScheme.onSurface ,
+									   disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												alpha = 0.38f
+																									  ) ,
+									   disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												alpha = 0.38f
+																									  ) ,
+																	  ) ,
 							  shape = MaterialTheme.shapes.extraLarge ,
 							  modifier = Modifier
 								  .padding(8.dp)
@@ -448,6 +510,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 												   )
 					 }
 					 ElevatedCard(
+							  colors = CardDefaults.elevatedCardColors(
+									   containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												elevation = 32.dp
+																										 ) ,
+									   contentColor = MaterialTheme.colorScheme.onSurface ,
+									   disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												alpha = 0.38f
+																									  ) ,
+									   disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												alpha = 0.38f
+																									  ) ,
+																	  ) ,
 							  shape = MaterialTheme.shapes.extraLarge ,
 							  modifier = Modifier
 								  .padding(8.dp)
@@ -497,6 +571,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 												   )
 					 }
 					 ElevatedCard(
+							  colors = CardDefaults.elevatedCardColors(
+									   containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												elevation = 32.dp
+																										 ) ,
+									   contentColor = MaterialTheme.colorScheme.onSurface ,
+									   disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												alpha = 0.38f
+																									  ) ,
+									   disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												alpha = 0.38f
+																									  ) ,
+																	  ) ,
 							  shape = MaterialTheme.shapes.extraLarge ,
 							  modifier = Modifier
 								  .padding(8.dp)
@@ -545,6 +631,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 												   )
 					 }
 					 ElevatedCard(
+							  colors = CardDefaults.elevatedCardColors(
+									   containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												elevation = 32.dp
+																										 ) ,
+									   contentColor = MaterialTheme.colorScheme.onSurface ,
+									   disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												alpha = 0.38f
+																									  ) ,
+									   disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												alpha = 0.38f
+																									  ) ,
+																	  ) ,
 							  shape = MaterialTheme.shapes.extraLarge ,
 							  modifier = Modifier
 								  .padding(8.dp)
@@ -593,6 +691,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 												   )
 					 }
 					 ElevatedCard(
+							  colors = CardDefaults.elevatedCardColors(
+									   containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												elevation = 32.dp
+																										 ) ,
+									   contentColor = MaterialTheme.colorScheme.onSurface ,
+									   disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												alpha = 0.38f
+																									  ) ,
+									   disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												alpha = 0.38f
+																									  ) ,
+																	  ) ,
 							  shape = MaterialTheme.shapes.extraLarge ,
 							  modifier = Modifier
 								  .padding(8.dp)
@@ -641,6 +751,18 @@ fun PrayerTimesCustomizations(paddingValues : PaddingValues)
 												   )
 					 }
 					 ElevatedCard(
+							  colors = CardDefaults.elevatedCardColors(
+									   containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												elevation = 32.dp
+																										 ) ,
+									   contentColor = MaterialTheme.colorScheme.onSurface ,
+									   disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												alpha = 0.38f
+																									  ) ,
+									   disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												alpha = 0.38f
+																									  ) ,
+																	  ) ,
 							  shape = MaterialTheme.shapes.extraLarge ,
 							  modifier = Modifier
 								  .padding(8.dp)

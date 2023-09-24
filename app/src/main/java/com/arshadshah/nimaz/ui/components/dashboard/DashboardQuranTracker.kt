@@ -4,14 +4,13 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.rememberDismissState
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,7 +34,7 @@ import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
-@OptIn(ExperimentalMaterial3Api::class , ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit)
 {
@@ -93,7 +92,7 @@ fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , 
 				 dropDownItem = { Aya ->
 					 val currentItem = rememberUpdatedState(newValue = Aya)
 					 val dismissState = rememberDismissState(
-							  confirmStateChange = {
+							  confirmValueChange = {
 								  if (it == DismissValue.DismissedToStart)
 								  {
 									  titleOfDialog.value = "Delete Bookmark"

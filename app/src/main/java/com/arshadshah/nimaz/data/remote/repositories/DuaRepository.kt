@@ -11,7 +11,6 @@ import java.io.IOException
 object DuaRepository
 {
 
-	//get chaptesr by categories
 	suspend fun getCategories() : ApiResponse<ArrayList<Category>>
 	{
 		return try
@@ -24,11 +23,11 @@ object DuaRepository
 				//get the categories from the api
 				val response = NimazServicesImpl.getCategories()
 				response.data?.getAllCategories?.map { category ->
-					val category = Category(
+					val fetchedCategory = Category(
 							 category !!.id ,
 							 category.name ,
-										   )
-					categories.add(category)
+												  )
+					categories.add(fetchedCategory)
 				}
 				//save the categories to the database
 				dataStore.saveAllCategories(categories)
@@ -55,16 +54,16 @@ object DuaRepository
 				//get the categories from the api
 				val response = NimazServicesImpl.getChaptersByCategory(id)
 				response.data?.getChaptersByCategory?.map { chapter ->
-					val category = Chapter(
+					val fetchedChapter = Chapter(
 							 chapter !!.id ,
 							 chapter.category !!.name ,
 							 chapter.arabicTitle.toString() ,
 							 chapter.englishTitle.toString()
-										  )
-					chapters.add(category)
+												)
+					chapters.add(fetchedChapter)
 
 					chapter.duas?.map { dua ->
-						val dua = Dua(
+						val fetchedDua = Dua(
 								 dua !!.id ,
 								 chapter.id ,
 								 dua.favourite ,
@@ -72,8 +71,8 @@ object DuaRepository
 								 dua.englishTranslation ,
 								 dua.englishReference ,
 								 chapter.category.name
-									 )
-						duas.add(dua)
+											)
+						duas.add(fetchedDua)
 					}
 				}
 				//save the categories to the database
@@ -102,7 +101,7 @@ object DuaRepository
 				//get the duas from the api
 				val response = NimazServicesImpl.getDuasForChapter(chapterId)
 				response.data?.getChapterById?.map { dua ->
-					val dua = Dua(
+					val fetchedDua = Dua(
 							 dua !!.id ,
 							 chapterId ,
 							 dua.favourite ,
@@ -110,8 +109,8 @@ object DuaRepository
 							 dua.englishTranslation ,
 							 dua.englishReference ,
 							 response.data !!.getCategoryNameForAChapter !!
-								 )
-					duas.add(dua)
+										)
+					duas.add(fetchedDua)
 				}
 				//save the duas to the database
 				dataStore.saveAllDuas(duas)

@@ -4,8 +4,11 @@ import android.os.VibrationEffect
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -38,6 +41,12 @@ fun Decrementbutton(
 	}.collectAsState()
 	val vibrator = viewModel.vibrator
 	ElevatedButton(
+			 colors = ButtonDefaults.elevatedButtonColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 			 contentPadding = PaddingValues(24.dp) ,
 			 onClick = {
 				 //count should not go below 0

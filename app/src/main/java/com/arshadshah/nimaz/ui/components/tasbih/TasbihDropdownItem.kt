@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.tasbih
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,21 +13,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissState
-import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.rememberDismissState
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissState
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +46,7 @@ import com.arshadshah.nimaz.data.remote.models.Tasbih
 
 // a dropdown item for each tasbih
 //to contain annimated visibility delete button and the tasbih name, goal and count
-@OptIn(ExperimentalMaterialApi::class , ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihDropdownItem(
 	item : Tasbih ,
@@ -56,7 +57,7 @@ fun TasbihDropdownItem(
 {
 	val currentItem = rememberUpdatedState(newValue = item)
 	val dismissState = rememberDismissState(
-			 confirmStateChange = {
+			 confirmValueChange = {
 				 if (it == DismissValue.DismissedToEnd)
 				 {
 					 onEdit(currentItem.value)
@@ -74,15 +75,34 @@ fun TasbihDropdownItem(
 				 SwipeBackground(dismissState = dismissState)
 			 } ,
 			 dismissContent = {
-				 ElevatedCard(
+				 Card(
+						  colors = CardDefaults.elevatedCardColors(
+								   containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+											32.dp
+																									 ) ,
+								   contentColor = MaterialTheme.colorScheme.onSurface ,
+								   disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+											alpha = 0.38f
+																								  ) ,
+								   disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+											alpha = 0.38f
+																								  ) ,
+																  ) ,
 						  shape = MaterialTheme.shapes.extraLarge ,
-						  elevation = CardDefaults.elevatedCardElevation(
-								   defaultElevation = 4.dp ,
-																		) ,
 						  modifier = Modifier
-							  .padding(8.dp)
+							  .padding(
+									   bottom = 4.dp ,
+									   start = 8.dp ,
+									   end = 8.dp ,
+									   top = 4.dp
+									  )
+							  .border(
+									   width = 2.dp ,
+									   color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f) ,
+									   shape = MaterialTheme.shapes.extraLarge
+									 )
 							  .clickable { onClick(currentItem.value) }
-							 ) {
+					 ) {
 
 					 //a row to contain the tasbih name, goal and count and the delete button
 					 Row(
@@ -159,7 +179,7 @@ fun TasbihDropdownItem(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class , ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 fun SwipeBackground(dismissState : DismissState)
 {
 	val direction = dismissState.dismissDirection ?: return
@@ -170,7 +190,7 @@ fun SwipeBackground(dismissState : DismissState)
 				 DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
 				 DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
 				 DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
-			 }
+			 } , label = ""
 									)
 	val iconTintColor by animateColorAsState(
 			 when (dismissState.targetValue)
@@ -178,7 +198,7 @@ fun SwipeBackground(dismissState : DismissState)
 				 DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
 				 DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.onPrimary
 				 DismissValue.DismissedToStart -> MaterialTheme.colorScheme.onErrorContainer
-			 }
+			 } , label = ""
 											)
 	val alignment = when (direction)
 	{
@@ -191,7 +211,7 @@ fun SwipeBackground(dismissState : DismissState)
 		DismissDirection.EndToStart -> painterResource(id = com.arshadshah.nimaz.R.drawable.delete_icon)
 	}
 	val scale by animateFloatAsState(
-			 if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+			 if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f , label = ""
 									)
 
 	val haptic = LocalHapticFeedback.current

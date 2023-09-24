@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.common
 
 import android.util.Log
 import androidx.compose.animation.*
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +27,12 @@ fun <T> FeaturesDropDown(
 	items : List<T> ,
 	label : String ,
 	dropDownItem : @Composable (T) -> Unit ,
+	colors : CardColors = CardDefaults.elevatedCardColors(
+			 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
+			 contentColor = MaterialTheme.colorScheme.onSurface ,
+			 disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+			 disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 	header : @Composable (() -> Unit)? = null ,
 						)
 {
@@ -40,6 +48,7 @@ fun <T> FeaturesDropDown(
 	}
 
 	ElevatedCard(
+			 colors = colors ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .padding(8.dp)
@@ -47,6 +56,12 @@ fun <T> FeaturesDropDown(
 
 		//an elevation card that shows the text and icon
 		ElevatedCard(
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 				 modifier = Modifier
 					 .fillMaxWidth()
 					 .clickable {
@@ -145,7 +160,13 @@ fun <T> FeatureDropdownItem(
 	itemContent : @Composable (T) -> Unit ,
 						   )
 {
-	ElevatedCard(
+	Card(
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 			 modifier = Modifier
 				 .padding(
 						  bottom = 4.dp ,
@@ -154,6 +175,12 @@ fun <T> FeatureDropdownItem(
 						  top = 4.dp
 						 )
 				 .fillMaxWidth()
+				 .border(
+						  width = 2.dp ,
+						  color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f) ,
+						  shape = MaterialTheme.shapes.extraLarge
+						)
+				 .clip(MaterialTheme.shapes.extraLarge)
 				 .clickable {
 					 onClick(item)
 				 } ,
@@ -177,7 +204,7 @@ fun <T> FeatureDropdownItem(
 						 )
 				 }
 			 }
-				)
+		)
 }
 
 //FeaturesDropDown preview

@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -224,6 +226,14 @@ fun SettingsScreen(
 		LocationSettings()
 
 		ElevatedCard(
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+								   elevation = 32.dp
+																							) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 				 shape = MaterialTheme.shapes.extraLarge ,
 				 modifier = Modifier
 					 .padding(8.dp)
@@ -269,6 +279,18 @@ fun SettingsScreen(
 					 ) {
 			AnimatedVisibility(visible = stateOfTheme.value != "SYSTEM") {
 				ElevatedCard(
+						 colors = CardDefaults.elevatedCardColors(
+								  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+										   elevation = 32.dp
+																									) ,
+								  contentColor = MaterialTheme.colorScheme.onSurface ,
+								  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+										   alpha = 0.38f
+																								 ) ,
+								  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+										   alpha = 0.38f
+																								 ) ,
+																 ) ,
 						 shape = MaterialTheme.shapes.extraLarge ,
 						 modifier = Modifier
 							 .padding(8.dp)
@@ -312,6 +334,14 @@ fun SettingsScreen(
 			}
 			//theme
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -337,6 +367,14 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -375,6 +413,14 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -433,6 +479,14 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -442,6 +496,14 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -480,6 +542,14 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -491,6 +561,14 @@ fun SettingsScreen(
 
 		SettingsGroup(title = { Text(text = "Legal") }) {
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)
@@ -521,6 +599,14 @@ fun SettingsScreen(
 			}
 
 			ElevatedCard(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+									   elevation = 32.dp
+																								) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .padding(8.dp)

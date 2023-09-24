@@ -26,7 +26,7 @@ fun WidgetPrayerTimeRowList(data : PrayerTimes)
 	Row(
 			 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
 				 .background(GlanceTheme.colors.background).clickable(
-					  onClick = actionStartActivity<MainActivity>()
+						  onClick = actionStartActivity<MainActivity>()
 																	 )
 	   ) {
 		val modifier = GlanceModifier.defaultWeight()

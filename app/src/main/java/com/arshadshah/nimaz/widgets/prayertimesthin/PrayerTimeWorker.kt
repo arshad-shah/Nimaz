@@ -86,7 +86,7 @@ class PrayerTimeWorker(private val context : Context , workerParams : WorkerPara
 		} catch (e : Exception)
 		{
 			setWidgetState(glanceIds , PrayerTimesWidget.Error(e.message.orEmpty()))
-			if (runAttemptCount < 20)
+			if (runAttemptCount < 5)
 			{
 				// Exponential backoff strategy will avoid the request to repeat
 				// too fast in case of failures.

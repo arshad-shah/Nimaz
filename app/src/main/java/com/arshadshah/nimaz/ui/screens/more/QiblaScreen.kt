@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.ui.screens.more
 
+import android.os.Build
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +34,7 @@ import com.arshadshah.nimaz.ui.components.compass.ImageSwitcherCard
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QiblaViewModel
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun QiblaScreen(paddingValues : PaddingValues)
 {

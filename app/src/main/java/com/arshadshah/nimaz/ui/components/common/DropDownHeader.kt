@@ -39,7 +39,7 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 				 textAlign = TextAlign.Center ,
 				 maxLines = 2 ,
 				 overflow = TextOverflow.Ellipsis ,
-				 style = MaterialTheme.typography.bodyLarge
+				 style = MaterialTheme.typography.bodyMedium
 			)
 		//divider
 		Divider(
@@ -58,7 +58,7 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 				 textAlign = TextAlign.Center ,
 				 maxLines = 2 ,
 				 overflow = TextOverflow.Ellipsis ,
-				 style = MaterialTheme.typography.bodyLarge
+				 style = MaterialTheme.typography.bodyMedium
 			)
 		//divider
 		Divider(
@@ -77,7 +77,7 @@ fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : S
 				 textAlign = TextAlign.Center ,
 				 maxLines = 2 ,
 				 overflow = TextOverflow.Ellipsis ,
-				 style = MaterialTheme.typography.bodyLarge
+				 style = MaterialTheme.typography.bodyMedium
 			)
 	}
 }

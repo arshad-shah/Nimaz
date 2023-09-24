@@ -11,7 +11,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -68,37 +67,35 @@ fun SettingsSwitch(
 
 
 
-	Surface {
-		Row(
-				 modifier = modifier
-					 .fillMaxWidth()
-					 .height(60.dp)
-					 .toggleable(
-							  value = storageValue ,
-							  role = Role.Switch ,
-							  onValueChange = { update(! storageValue) }
-								) ,
-				 verticalAlignment = Alignment.CenterVertically ,
-		   ) {
-			if (icon != null)
-			{
-				SettingsTileIcon(icon = icon)
-			} else
-			{
-				Spacer(
-						 modifier = Modifier
-							 .width(24.dp)
-							 .height(60.dp)
-					  )
-			}
-			SettingsTileTexts(title = title , subtitle = subtitle)
-			SettingsTileAction {
-				Switch(
-						 checked = storageValue ,
-						 onCheckedChange = update ,
-						 thumbContent = iconForSwitch ,
-					  )
-			}
+	Row(
+			 modifier = modifier
+				 .fillMaxWidth()
+				 .height(60.dp)
+				 .toggleable(
+						  value = storageValue ,
+						  role = Role.Switch ,
+						  onValueChange = { update(! storageValue) }
+							) ,
+			 verticalAlignment = Alignment.CenterVertically ,
+	   ) {
+		if (icon != null)
+		{
+			SettingsTileIcon(icon = icon)
+		} else
+		{
+			Spacer(
+					 modifier = Modifier
+						 .width(24.dp)
+						 .height(60.dp)
+				  )
+		}
+		SettingsTileTexts(title = title , subtitle = subtitle)
+		SettingsTileAction {
+			Switch(
+					 checked = storageValue ,
+					 onCheckedChange = update ,
+					 thumbContent = iconForSwitch ,
+				  )
 		}
 	}
 }

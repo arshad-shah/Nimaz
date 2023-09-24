@@ -3,10 +3,11 @@ package com.arshadshah.nimaz.ui.components.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -26,6 +27,12 @@ fun AuthorDetails()
 	//it is created as part of my final year project for my BSc in Computer Science.
 	//it is a free and open source project that I hope will be useful to many people. I hope you enjoy it.
 	ElevatedCard(
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .padding(8.dp)
@@ -60,11 +67,6 @@ fun AuthorDetails()
 							  style = MaterialTheme.typography.bodyMedium ,
 							  textAlign = TextAlign.Center
 						 )
-					 Divider(
-							  modifier = Modifier.padding(8.dp) ,
-							  color = MaterialTheme.colorScheme.outline ,
-							  thickness = 1.dp
-							)
 					 AuthorLinks()
 				 }
 			 } ,

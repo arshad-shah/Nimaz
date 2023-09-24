@@ -9,8 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Badge
-import androidx.compose.material.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -161,6 +159,7 @@ fun HtmlText(
 }
 
 //composable for a library item
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryItem(
 	library : Library ,
@@ -170,14 +169,18 @@ fun LibraryItem(
 	onClick : () -> Unit ,
 			   )
 {
-
-	val context = LocalContext.current
-	ElevatedCard(
+	Card(
+			 colors = CardDefaults.cardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+											 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .padding(8.dp)
 				 .clickable { onClick.invoke() }
-				) {
+		) {
 		Column(
 				 modifier = Modifier
 					 .padding(8.dp)
@@ -242,7 +245,7 @@ fun LibraryItem(
 					library.licenses.forEach {
 						Badge(
 								 contentColor = MaterialTheme.colorScheme.onPrimary ,
-								 backgroundColor = MaterialTheme.colorScheme.primary ,
+								 containerColor = MaterialTheme.colorScheme.primary ,
 							 ) {
 							Text(
 									 modifier = Modifier.padding(4.dp) ,

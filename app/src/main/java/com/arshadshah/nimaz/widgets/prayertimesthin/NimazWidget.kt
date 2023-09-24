@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.widgets.prayertimesthin
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -40,7 +41,12 @@ class NimazWidget : GlanceAppWidget()
 
 		provideContent {
 			val prayerTimes = currentState<PrayerTimesWidget>()
-			GlanceTheme(colors = NimazWidgetColorScheme.colors) {
+			GlanceTheme(
+					 colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+						 GlanceTheme.colors
+					 else
+						 NimazWidgetColorScheme.colors
+					   ) {
 
 				when (prayerTimes)
 				{
@@ -50,7 +56,7 @@ class NimazWidget : GlanceAppWidget()
 
 								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
 									 .background(GlanceTheme.colors.background).clickable(
-										  onClick = actionStartActivity<MainActivity>()
+											  onClick = actionStartActivity<MainActivity>()
 																						 ) ,
 								 verticalAlignment = Alignment.CenterVertically ,
 								 horizontalAlignment = Alignment.CenterHorizontally
@@ -81,7 +87,7 @@ class NimazWidget : GlanceAppWidget()
 
 								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
 									 .background(GlanceTheme.colors.background).clickable(
-										  onClick = actionStartActivity<MainActivity>()
+											  onClick = actionStartActivity<MainActivity>()
 																						 ) ,
 								 verticalAlignment = Alignment.CenterVertically ,
 								 horizontalAlignment = Alignment.CenterHorizontally
