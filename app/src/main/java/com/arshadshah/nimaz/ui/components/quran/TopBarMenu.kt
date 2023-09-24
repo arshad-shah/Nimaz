@@ -3,18 +3,25 @@ package com.arshadshah.nimaz.ui.components.quran
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -86,90 +93,100 @@ fun TopBarMenu(number : Int , isSurah : Boolean)
 	}
 
 	val expanded = remember { mutableStateOf(false) }
-	//size of the main button that opens the dropdown
 	ElevatedCard(
 			 modifier = Modifier
 				 .width(150.dp)
+				 .height(48.dp)
 				 .padding(start = 8.dp)
+				 .clip(MaterialTheme.shapes.medium)
+				 .clickable {
+					 expanded.value = ! expanded.value
+				 } ,
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 				) {
-		//an elevation card that shows the text and icon
-		ElevatedCard(
+		Row(
 				 modifier = Modifier
 					 .fillMaxWidth()
-					 .clickable {
-						 expanded.value = ! expanded.value
-					 } ,
-				 shape = MaterialTheme.shapes.medium ,
-				 content = {
-					 Row(
-							  modifier = Modifier.fillMaxWidth() ,
-							  verticalAlignment = Alignment.CenterVertically ,
-							  horizontalArrangement = Arrangement.SpaceBetween
-						) {
-						 Row(
-								  modifier = Modifier.padding(horizontal = 4.dp) ,
-								  verticalAlignment = Alignment.CenterVertically ,
-								  horizontalArrangement = Arrangement.Start
-							) {
-							 //the text
-							 Text(
-									  modifier = Modifier
-										  .padding(8.dp) ,
-									  text = label ,
-									  textAlign = TextAlign.Start ,
-									  maxLines = 2 ,
-									  overflow = TextOverflow.Ellipsis ,
-									  style = MaterialTheme.typography.bodyLarge
-								 )
-							 Badge(
-									  containerColor = MaterialTheme.colorScheme.primary ,
-									  contentColor = MaterialTheme.colorScheme.onPrimary ,
-								  )
-							 {
-								 Text(
-										  text = selectedSurah.toString() ,
-										  style = MaterialTheme.typography.bodyMedium ,
-										  textAlign = TextAlign.Center ,
-									 )
-							 }
-						 }
-						 Crossfade(
-								  targetState = expanded.value ,
-								  animationSpec = tween(durationMillis = 300)
-								  ) { expanded ->
-							 if (expanded)
-							 {
-								 Icon(
-										  painter = painterResource(id = R.drawable.arrow_up_icon) ,
-										  contentDescription = "dropdown icon" ,
-										  modifier = Modifier
-											  .padding(horizontal = 8.dp)
-											  .size(18.dp)
-									 )
-							 } else
-							 {
-								 Icon(
-										  painter = painterResource(id = R.drawable.arrow_down_icon) ,
-										  contentDescription = "dropdown icon" ,
-										  modifier = Modifier
-											  .padding(horizontal = 8.dp)
-											  .size(18.dp)
-									 )
-							 }
-						 }
-					 }
-				 } ,
+					 .fillMaxHeight() ,
+				 verticalAlignment = Alignment.CenterVertically ,
+				 horizontalArrangement = Arrangement.SpaceBetween
+		   ) {
+			Row(
+					 modifier = Modifier.padding(horizontal = 4.dp) ,
+					 verticalAlignment = Alignment.CenterVertically ,
+					 horizontalArrangement = Arrangement.Start
+			   ) {
+				//the text
+				Text(
+						 modifier = Modifier
+							 .padding(8.dp) ,
+						 text = label ,
+						 textAlign = TextAlign.Start ,
+						 maxLines = 2 ,
+						 overflow = TextOverflow.Ellipsis ,
+						 style = MaterialTheme.typography.bodyLarge
 					)
+				Badge(
+						 containerColor = MaterialTheme.colorScheme.primary ,
+						 contentColor = MaterialTheme.colorScheme.onPrimary ,
+					 )
+				{
+					Text(
+							 text = selectedSurah.toString() ,
+							 style = MaterialTheme.typography.bodyMedium ,
+							 textAlign = TextAlign.Center ,
+						)
+				}
+			}
+			Crossfade(
+					 targetState = expanded.value ,
+					 animationSpec = tween(durationMillis = 300) , label = ""
+					 ) { expanded ->
+				if (expanded)
+				{
+					Icon(
+							 painter = painterResource(id = R.drawable.arrow_up_icon) ,
+							 contentDescription = "dropdown icon" ,
+							 modifier = Modifier
+								 .padding(horizontal = 8.dp)
+								 .size(18.dp)
+						)
+				} else
+				{
+					Icon(
+							 painter = painterResource(id = R.drawable.arrow_down_icon) ,
+							 contentDescription = "dropdown icon" ,
+							 modifier = Modifier
+								 .padding(horizontal = 8.dp)
+								 .size(18.dp)
+						)
+				}
+			}
+		}
+	}
 
+	if (expanded.value)
+	{
 
-		DropdownMenuQuranSection(
-				 getAllAyats = if (isSurah) viewModel::getAllAyaForSurah else viewModel::getAllAyaForJuz ,
-				 setSelectedSurah = setSelectedSurah ,
-				 expanded = expanded ,
-				 list = list ,
-				 translation = translation ,
-				 label = label
-								)
+		Popup(
+				 alignment = Alignment.BottomEnd ,
+				 onDismissRequest = { expanded.value = false } ,
+			 ) {
+			DropdownMenuQuranSection(
+					 getAllAyats = if (isSurah) viewModel::getAllAyaForSurah else viewModel::getAllAyaForJuz ,
+					 selectedSurah = selectedSurah ,
+					 setSelectedSurah = setSelectedSurah ,
+					 expanded = expanded ,
+					 list = list ,
+					 translation = translation ,
+					 label = label
+									)
+		}
 	}
 }
 
@@ -182,6 +199,7 @@ fun DropdownMenuQuranSection(
 	label : String ,
 	list : List<Int> ,
 	setSelectedSurah : (Int) -> Unit ,
+	selectedSurah : Int ,
 							)
 {
 
@@ -193,31 +211,81 @@ fun DropdownMenuQuranSection(
 			expanded.value = false
 		}
 	}
-	DropdownMenu(
+
+	val listState = rememberLazyListState(selectedSurah , - 500)
+
+	ElevatedCard(
 			 modifier = Modifier
-				 .width(120.dp)
-				 .height(300.dp) ,
-			 expanded = expanded.value ,
-			 onDismissRequest = {
-				 expanded.value = false
-			 }) {
-		//the list of numbers in a dropdown menu
-		list.forEach { surah ->
-			DropdownMenuItem(
-					 modifier = Modifier
-						 .fillMaxWidth()
-						 .height(48.dp) ,
-					 onClick = {
-						 onSelected(surah)
-					 } ,
-					 text = {
-						 Text(
-								  text = "$label $surah" ,
-								  style = MaterialTheme.typography.bodyLarge ,
-								  textAlign = TextAlign.Center ,
-							 )
-					 } ,
+				 .width(150.dp)
+				 .height(300.dp)
+				 .shadow(12.dp , MaterialTheme.shapes.medium)
+				 .clip(MaterialTheme.shapes.medium) ,
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
+			 shape = MaterialTheme.shapes.medium ,
+				) {
+		LazyColumn(
+				 state = listState ,
+				  ) {
+			items(list.size) { index ->
+				Row(
+						 modifier = Modifier
+							 .fillMaxWidth()
+							 .clip(if (list[index] == selectedSurah) MaterialTheme.shapes.medium else MaterialTheme.shapes.small)
+							 .clickable {
+								 onSelected(list[index])
+							 }
+							 .size(48.dp)
+							 .border(
+									  width = 2.dp ,
+									  color = if (list[index] == selectedSurah) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceColorAtElevation(
+											   64.dp
+																																										) ,
+									  shape = if (list[index] == selectedSurah) MaterialTheme.shapes.medium else MaterialTheme.shapes.small
+									)
+							 .padding(vertical = 1.dp , horizontal = 2.dp)
+							 .background(
+									  color = if (list[index] == selectedSurah)
+									  {
+										  MaterialTheme.colorScheme.secondaryContainer
+									  } else
+									  {
+										  MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
+									  }
+										) ,
+						 verticalAlignment = Alignment.CenterVertically ,
+						 horizontalArrangement = Arrangement.SpaceBetween
+				   ) {
+					Text(
+							 text = "$label ${list[index]}" ,
+							 style = MaterialTheme.typography.bodyLarge ,
+							 textAlign = if (list[index] == selectedSurah) TextAlign.Start else TextAlign.Center ,
+							 maxLines = 2 ,
+							 overflow = TextOverflow.Ellipsis ,
+							 modifier = if (list[index] == selectedSurah) Modifier.padding(
+									  horizontal = 18.dp
+																						  ) else Modifier
+								 .padding(horizontal = 0.dp)
+								 .fillMaxWidth() ,
+							 color = if (list[index] == selectedSurah) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+						)
+					if (list[index] == selectedSurah)
+					{
+						Icon(
+								 painter = painterResource(id = R.drawable.check_icon) ,
+								 contentDescription = "check icon" ,
+								 tint = MaterialTheme.colorScheme.primary ,
+								 modifier = Modifier
+									 .padding(horizontal = 8.dp)
+									 .size(24.dp)
 							)
+					}
+				}
+			}
 		}
 	}
 }
@@ -227,12 +295,13 @@ fun DropdownMenuQuranSection(
 fun DropdownMenuSurahPreview()
 {
 	DropdownMenuQuranSection(
+			 getAllAyats = { _ , _ -> } ,
 			 expanded = remember { mutableStateOf(false) } ,
-			 list = (1 .. 114).toList() ,
 			 translation = "english" ,
 			 label = "Surah" ,
-			 getAllAyats = { _ , _ -> } ,
-			 setSelectedSurah = { }
+			 list = (1 .. 114).toList() ,
+			 setSelectedSurah = { } ,
+			 selectedSurah = 1
 							)
 }
 

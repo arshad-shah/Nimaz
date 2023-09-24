@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -21,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,15 +85,22 @@ fun AlertDialogNimaz(
 	confirmButtonText : String = "Done" ,
 	onDismiss : () -> Unit ,
 	dismissButtonText : String = "Cancel" ,
+	scrollState : LazyListState = rememberLazyListState() ,
 					)
 {
-	//state of the scrollable column
-	val stateScroll = rememberScrollState()
 	Dialog(
 			 onDismissRequest = onDismissRequest ,
 			 properties = properties ,
 		  ) {
 		ElevatedCard(
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+								   elevation = 32.dp
+																							) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 				 modifier = modifier
 					 .fillMaxWidth()
 					 .wrapContentHeight() ,
@@ -171,6 +181,18 @@ fun AlertDialogNimaz(
 					if (cardContent)
 					{
 						Card(
+								 colors = CardDefaults.cardColors(
+										  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+												   elevation = 8.dp
+																											) ,
+										  contentColor = MaterialTheme.colorScheme.onSurface ,
+										  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+												   alpha = 0.38f
+																										 ) ,
+										  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+												   alpha = 0.38f
+																										 ) ,
+																 ) ,
 								 modifier = Modifier.fillMaxWidth() ,
 							) {
 							Row(
@@ -180,13 +202,14 @@ fun AlertDialogNimaz(
 									 verticalAlignment = Alignment.CenterVertically ,
 									 horizontalArrangement = Arrangement.Center
 							   ) {
-								Column(
-										 Modifier
-											 .verticalScroll(state = stateScroll) ,
+								LazyColumn(
+										 state = scrollState ,
 										 verticalArrangement = Arrangement.Center ,
 										 horizontalAlignment = Alignment.CenterHorizontally
-									  ) {
-									contentToShow()
+										  ) {
+									item {
+										contentToShow()
+									}
 								}
 							}
 						}
@@ -199,13 +222,14 @@ fun AlertDialogNimaz(
 								 verticalAlignment = Alignment.CenterVertically ,
 								 horizontalArrangement = Arrangement.Center
 						   ) {
-							Column(
-									 Modifier
-										 .verticalScroll(state = stateScroll) ,
+							LazyColumn(
+									 state = scrollState ,
 									 verticalArrangement = Arrangement.Center ,
 									 horizontalAlignment = Alignment.CenterHorizontally
-								  ) {
-								contentToShow()
+									  ) {
+								item {
+									contentToShow()
+								}
 							}
 						}
 					}

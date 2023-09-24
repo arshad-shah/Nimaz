@@ -23,10 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.Surah
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 
 //surah header component
 @Composable

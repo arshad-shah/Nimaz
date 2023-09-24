@@ -64,7 +64,7 @@ fun QuranScreen(
 		TabRow(
 				 selectedTabIndex = pagerState.currentPage ,
 				 modifier = Modifier
-					 .padding(vertical = 4.dp , horizontal = 4.dp)
+					 .padding(vertical = 8.dp , horizontal = 4.dp)
 					 .clip(MaterialTheme.shapes.extraLarge) ,
 				 containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) ,
 				 indicator = { tabPositions : List<TabPosition> ->

@@ -24,9 +24,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay

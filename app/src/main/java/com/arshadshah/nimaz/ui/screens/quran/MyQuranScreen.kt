@@ -3,14 +3,15 @@ package com.arshadshah.nimaz.ui.screens.quran
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.rememberDismissState
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -33,7 +34,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlin.reflect.KFunction1
 
-@OptIn(ExperimentalMaterial3Api::class , ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyQuranScreen(
 	bookmarks : State<List<Aya>> ,
@@ -76,26 +77,54 @@ fun MyQuranScreen(
 		mutableStateOf<Aya?>(null)
 	}
 
+	val listOfMapOfDropdowns = listOf(
+			 mapOf(
+					  "label" to "Bookmarks" ,
+					  "messageTitle" to "Delete Bookmark" ,
+					  "message" to "Are you sure you want to delete this bookmark?" ,
+					  "items" to bookmarks.value
+				  ) ,
+			 mapOf(
+					  "label" to "Favorites" ,
+					  "messageTitle" to "Delete Favorite" ,
+					  "message" to "Are you sure you want to delete this favorite?" ,
+					  "items" to favorites.value
+				  ) ,
+			 mapOf(
+					  "label" to "Notes" ,
+					  "messageTitle" to "Delete Note" ,
+					  "message" to "Are you sure you want to delete this note?" ,
+					  "items" to notes.value
+				  )
+									 )
+
 	LazyColumn(
 			 modifier = Modifier
 				 .testTag("MyQuranScreen")
 				 .fillMaxSize() ,
 			 userScrollEnabled = true ,
 			  ) {
-		item {
+		items(listOfMapOfDropdowns.size) {
 			FeaturesDropDown(
-					 label = "Bookmarks" ,
-					 items = bookmarks.value ,
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
+					 label = listOfMapOfDropdowns[it]["label"] as String ,
+					 items = listOfMapOfDropdowns[it]["items"] as List<Aya> ,
 					 dropDownItem = { bookmark ->
 						 val currentItem = rememberUpdatedState(newValue = bookmark)
 						 val dismissState = rememberDismissState(
-								  confirmStateChange = {
-									  if (it == DismissValue.DismissedToStart)
+								  confirmValueChange = { newDismissValue ->
+									  if (newDismissValue == DismissValue.DismissedToStart)
 									  {
 										  itemToDelete.value = currentItem.value
-										  titleOfDialog.value = "Delete Bookmark"
+										  titleOfDialog.value =
+											  listOfMapOfDropdowns[it]["messageTitle"] as String
 										  messageOfDialog.value =
-											  "Are you sure you want to delete this bookmark?"
+											  listOfMapOfDropdowns[it]["message"] as String
 										  openDialog.value = true
 									  }
 									  false
@@ -131,114 +160,6 @@ fun MyQuranScreen(
 															style = MaterialTheme.typography.bodyLarge
 													   )
 											   }
-														 )
-								  })
-					 }
-							)
-		}
-		item {
-			FeaturesDropDown(
-					 label = "Favorites" ,
-					 items = favorites.value ,
-					 dropDownItem = { favourite ->
-						 val currentItem = rememberUpdatedState(newValue = favourite)
-						 val dismissState = rememberDismissState(
-								  confirmStateChange = {
-									  if (it == DismissValue.DismissedToStart)
-									  {
-										  itemToDelete.value = currentItem.value
-										  titleOfDialog.value = "Delete Favorite"
-										  messageOfDialog.value =
-											  "Are you sure you want to delete this favorite?"
-										  openDialog.value = true
-									  }
-									  false
-								  }
-																)
-
-						 SwipeToDismiss(
-								  directions = setOf(DismissDirection.EndToStart) ,
-								  state = dismissState ,
-								  background = {
-									  SwipeBackground(dismissState = dismissState)
-								  } ,
-								  dismissContent = {
-									  FeatureDropdownItem(
-											   item = favourite ,
-											   onClick = { aya ->
-												   onNavigateToAyatScreen(
-															aya.suraNumber.toString() ,
-															true ,
-															translation ,
-															aya.ayaNumberInSurah
-																		 )
-											   } ,
-											   itemContent = { aya ->
-												   //the text
-												   Text(
-															modifier = Modifier
-																.padding(8.dp) ,
-															text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-															textAlign = TextAlign.Start ,
-															maxLines = 2 ,
-															overflow = TextOverflow.Ellipsis ,
-															style = MaterialTheme.typography.bodyLarge
-													   )
-											   } ,
-														 )
-								  })
-					 }
-							)
-		}
-		item {
-			FeaturesDropDown(
-					 label = "Notes" ,
-					 items = notes.value ,
-					 dropDownItem = { note ->
-						 val currentItem = rememberUpdatedState(newValue = note)
-						 val dismissState = rememberDismissState(
-								  confirmStateChange = {
-									  if (it == DismissValue.DismissedToStart)
-									  {
-										  itemToDelete.value = currentItem.value
-										  titleOfDialog.value = "Delete Note"
-										  messageOfDialog.value =
-											  "Are you sure you want to delete this note?"
-										  openDialog.value = true
-									  }
-									  false
-								  }
-																)
-
-						 SwipeToDismiss(
-								  directions = setOf(DismissDirection.EndToStart) ,
-								  state = dismissState ,
-								  background = {
-									  SwipeBackground(dismissState = dismissState)
-								  } ,
-								  dismissContent = {
-									  FeatureDropdownItem(
-											   item = note ,
-											   onClick = { aya ->
-												   onNavigateToAyatScreen(
-															aya.suraNumber.toString() ,
-															true ,
-															translation ,
-															aya.ayaNumberInSurah
-																		 )
-											   } ,
-											   itemContent = { aya ->
-												   //the text
-												   Text(
-															modifier = Modifier
-																.padding(8.dp) ,
-															text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-															textAlign = TextAlign.Start ,
-															maxLines = 2 ,
-															overflow = TextOverflow.Ellipsis ,
-															style = MaterialTheme.typography.bodyLarge
-													   )
-											   } ,
 														 )
 								  })
 					 }

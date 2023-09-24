@@ -6,9 +6,11 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -65,6 +67,12 @@ fun CalculationMethodUI()
 		settingViewModel.longitude
 	}.collectAsState()
 	ElevatedCard(
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .padding(8.dp)
@@ -158,6 +166,14 @@ fun CalculationMethodUI()
 			 exit = shrinkVertically()
 					  ) {
 		ElevatedCard(
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+								   elevation = 32.dp
+																							) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 				 shape = MaterialTheme.shapes.extraLarge ,
 				 modifier = Modifier
 					 .padding(8.dp)

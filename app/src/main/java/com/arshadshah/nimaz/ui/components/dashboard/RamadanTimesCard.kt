@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
 import android.content.Intent
+import android.text.format.DateFormat
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,12 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableLongStateOf
@@ -90,16 +92,18 @@ fun RamadanTimesCard(isFasting : Boolean)
 	if (showCard)
 	{
 		//show the card
-		ElevatedCard(
-				 colors = CardDefaults.elevatedCardColors(
-						  containerColor = MaterialTheme.colorScheme.secondaryContainer ,
-						  contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-														 ) ,
-				 shape = MaterialTheme.shapes.extraLarge ,
+		Card(
 				 modifier = Modifier
 					 .fillMaxWidth()
 					 .padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
-					) {
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(16.dp) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
+				 shape = MaterialTheme.shapes.extraLarge ,
+			) {
 			Column(
 					 modifier = Modifier.padding(16.dp) ,
 					 verticalArrangement = Arrangement.Center ,
@@ -112,7 +116,10 @@ fun RamadanTimesCard(isFasting : Boolean)
 						 verticalAlignment = Alignment.CenterVertically ,
 						 horizontalArrangement = Arrangement.SpaceBetween
 				   ) {
-					Text(text = "Fasting Times" , style = MaterialTheme.typography.titleMedium)
+					Text(
+							 text = "Fasting Times Today" ,
+							 style = MaterialTheme.typography.titleMedium
+						)
 					IconButton(
 							 modifier = Modifier.size(32.dp) ,
 							 onClick = {
@@ -159,7 +166,7 @@ fun RamadanTimesCard(isFasting : Boolean)
 				}
 
 				val deviceTimeFormat =
-					android.text.format.DateFormat.is24HourFormat(LocalContext.current)
+					DateFormat.is24HourFormat(LocalContext.current)
 				//if the device time format is 24 hour then use the 24 hour format
 				val formatter = if (deviceTimeFormat)
 				{
@@ -181,11 +188,11 @@ fun RamadanTimesCard(isFasting : Boolean)
 							 horizontalAlignment = Alignment.CenterHorizontally
 						  ) {
 						TimeComponent(
-								 title = "Imsak (Fajr)" ,
+								 title = "Fajr (Imsak)" ,
 								 fajrPrayerTime = formatter.format(fajrPrayerTime.value)
 									 )
 						TimeComponent(
-								 title = "Iftar (Maghrib)" ,
+								 title = "Maghrib (Iftar)" ,
 								 fajrPrayerTime = formatter.format(maghribPrayerTime.value)
 									 )
 					}

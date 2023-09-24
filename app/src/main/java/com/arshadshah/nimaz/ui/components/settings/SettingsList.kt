@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -85,6 +86,17 @@ fun SettingsList(
 			onChange(valueState.value)
 		}
 	}
+
+	val scrollState = rememberLazyListState(
+			 initialFirstVisibleItemIndex = state.value
+										   )
+
+	val scrollToItem = { index : Int ->
+		coroutineScope.launch {
+			scrollState.animateScrollToItem(index , - 100)
+		}
+	}
+
 	AlertDialogNimaz(
 			 topDivider = false ,
 			 bottomDivider = false ,
@@ -93,7 +105,9 @@ fun SettingsList(
 			 icon = iconPainter ,
 			 title = title ,
 			 contentHeight = height ,
+			 scrollState = scrollState ,
 			 contentToShow = {
+				 scrollToItem(state.value)
 				 items.forEach { (s , s2) ->
 					 val isSelected by rememberUpdatedState(newValue = s == valueState.value)
 					 //if valuestate.value has a value, then set the state.value to the index of the valuestate.value

@@ -410,7 +410,7 @@ private fun PrayerTimes.toLocalPrayerTimes() = LocalPrayerTimes(
 
 private fun LocalPrayerTimes.toPrayerTimes() : PrayerTimes?
 {
-	return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null && date != null)
+	return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null)
 	{
 		PrayerTimes(
 				 date = LocalDate.parse(date) ,

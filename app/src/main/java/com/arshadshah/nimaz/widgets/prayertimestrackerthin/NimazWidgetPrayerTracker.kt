@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.widgets.prayertimestrackerthin
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +56,12 @@ class NimazWidgetPrayerTracker : GlanceAppWidget()
 			val isIshaChecked = remember { mutableStateOf(false) }
 
 			val progress = remember { mutableFloatStateOf(0F) }
-			GlanceTheme(colors = NimazWidgetColorScheme.colors) {
+			GlanceTheme(
+					 colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+						 GlanceTheme.colors
+					 else
+						 NimazWidgetColorScheme.colors
+					   ) {
 
 				when (prayerTimesTracker)
 				{
@@ -65,7 +71,7 @@ class NimazWidgetPrayerTracker : GlanceAppWidget()
 
 								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
 									 .background(GlanceTheme.colors.background).clickable(
-										  onClick = actionStartActivity<MainActivity>()
+											  onClick = actionStartActivity<MainActivity>()
 																						 ) ,
 								 verticalAlignment = Alignment.CenterVertically ,
 								 horizontalAlignment = Alignment.CenterHorizontally
@@ -113,7 +119,7 @@ class NimazWidgetPrayerTracker : GlanceAppWidget()
 						Column(
 								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
 									 .background(GlanceTheme.colors.background).clickable(
-										  onClick = actionStartActivity<MainActivity>()
+											  onClick = actionStartActivity<MainActivity>()
 																						 ) ,
 								 verticalAlignment = Alignment.CenterVertically ,
 								 horizontalAlignment = Alignment.CenterHorizontally

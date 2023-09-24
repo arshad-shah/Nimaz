@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,8 +52,6 @@ fun PrayerTimesScreen(
 		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
 	}
 
-	// Collecting the state of the view model
-	val state by remember { viewModel.prayerTimesState }.collectAsState()
 	val locationState = remember { settingViewModel.locationName }.collectAsState()
 	val latitude = remember { settingViewModel.latitude }.collectAsState()
 	val longitude = remember { settingViewModel.longitude }.collectAsState()
@@ -81,8 +78,6 @@ fun PrayerTimesScreen(
 		viewModel.currentPrayerName
 	}.collectAsState()
 
-	//log all the states
-	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "state: $state")
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "locationState: $locationState")
 	Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG , "currentPrayerName: $currentPrayerName")
 

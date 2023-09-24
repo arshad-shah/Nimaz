@@ -16,11 +16,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.ui.components.common.ToggleableItemColumn
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek

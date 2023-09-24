@@ -27,11 +27,11 @@ import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.viewModel.QuranViewModel
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import kotlin.reflect.KFunction1
 
 @Composable
