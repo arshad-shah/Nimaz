@@ -55,7 +55,6 @@ fun NavigationGraph(
 	paddingValues : PaddingValues ,
 				   )
 {
-
 	NavHost(
 			 navController = navController as NavHostController ,
 			 startDestination = BottomNavItem.Dashboard.screen_route ,

@@ -15,12 +15,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -54,6 +58,7 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardPrayertimesCard()
 {
@@ -93,6 +98,19 @@ fun DashboardPrayertimesCard()
 	val nextPrayerTime = remember {
 		viewModel.nextPrayerTime
 	}.collectAsState()
+
+	// if next prayer time is not in today then show the next prayer name as Fajr Tomorrow
+	val newNextPrayerName = if (nextPrayerTime.value.toLocalDate() != LocalDate.now())
+	{
+		"Fajr Tomorrow"
+	} else
+	{
+		nextPrayerName.value.first()
+			.uppercase() + nextPrayerName.value.substring(1)
+			.lowercase(
+					 Locale.ROOT
+					  )
+	}
 
 	val timer = remember {
 		viewModel.timer
@@ -161,13 +179,19 @@ fun DashboardPrayertimesCard()
 			 PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
 						 )
 
-	ElevatedCard(
-			 shape = MaterialTheme.shapes.extraLarge ,
+	Card(
 			 modifier = Modifier
 				 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 				 .fillMaxWidth()
 				 .testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD) ,
-				) {
+			 colors = CardDefaults.cardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+											 ) ,
+			 shape = MaterialTheme.shapes.extraLarge ,
+		) {
 		Column(
 				 modifier = Modifier
 					 .padding(8.dp) ,
@@ -281,11 +305,7 @@ fun DashboardPrayertimesCard()
 						 horizontalAlignment = Alignment.CenterHorizontally
 					  ) {
 					Text(
-							 text = nextPrayerName.value.first()
-								 .uppercase() + nextPrayerName.value.substring(1)
-								 .lowercase(
-										  Locale.ROOT
-										   ) ,
+							 text = newNextPrayerName ,
 							 style = MaterialTheme.typography.titleLarge
 						)
 					Text(
@@ -431,7 +451,7 @@ fun MoonPhaseImage(image : Int)
 @Composable
 fun MoonPhaseImagePreview()
 {
-	val fraction = remember { mutableStateOf(0.0) }
+	val fraction = remember { mutableDoubleStateOf(0.0) }
 	//list of phases
 	val phases = listOf(
 			 MoonPhase.NEW_MOON ,

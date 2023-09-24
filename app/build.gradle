@@ -26,8 +26,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 146
-        versionName '1.6.0'
+        versionCode 147
+        versionName '1.6.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -70,33 +70,6 @@ android {
 }
 
 dependencies {
-
-    implementation "androidx.core:core-ktx:$core_ktx_version"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$navigation_ui_ktx_version"
-    implementation "androidx.preference:preference-ktx:$preference_ktx_version"
-    implementation "androidx.datastore:datastore-core:$datastore_core_version"
-    implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
-
-    implementation platform('com.google.firebase:firebase-bom:32.2.2')
-    implementation "com.google.firebase:firebase-crashlytics-ktx"
-    implementation "com.google.firebase:firebase-analytics-ktx"
-    implementation 'com.google.firebase:firebase-perf-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.9.9'
-
-    implementation platform('androidx.compose:compose-bom:2023.08.00')
-    implementation "androidx.activity:activity-compose"
-    implementation "androidx.compose.ui:ui"
-    implementation "androidx.compose.ui:ui-tooling-preview"
-    implementation "androidx.compose.material:material"
-    implementation "androidx.compose.material3:material3"
-    implementation "androidx.navigation:navigation-compose"
-
-    debugImplementation "androidx.compose.ui:ui-tooling"
-    debugImplementation "androidx.compose.ui:ui-test-manifest"
-    androidTestImplementation('androidx.compose.ui:ui-test-junit4:1.5.1')
-
-
     implementation 'androidx.test:monitor:1.6.1'
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
     implementation 'androidx.test:runner:1.5.2'
@@ -109,8 +82,34 @@ dependencies {
     testImplementation "org.robolectric:robolectric:$robolectric_version"
     androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+
     //navigation testing
     androidTestImplementation "androidx.navigation:navigation-testing:$navigation_testing_version"
+
+    implementation "androidx.core:core-ktx:$core_ktx_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$navigation_ui_ktx_version"
+    implementation "androidx.preference:preference-ktx:$preference_ktx_version"
+    implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
+
+    implementation platform('com.google.firebase:firebase-bom:32.2.2')
+    implementation "com.google.firebase:firebase-crashlytics-ktx"
+    implementation "com.google.firebase:firebase-analytics-ktx"
+    implementation 'com.google.firebase:firebase-perf-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.9.9'
+
+    implementation platform('androidx.compose:compose-bom:2023.08.00')
+    implementation "androidx.activity:activity-compose"
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    implementation 'androidx.compose.material:material-icons-extended'
+    implementation "androidx.compose.material3:material3"
+    debugImplementation "androidx.compose.ui:ui-tooling"
+    debugImplementation "androidx.compose.ui:ui-test-manifest"
+    androidTestImplementation('androidx.compose.ui:ui-test-junit4')
+
+    //navigation compose
+    implementation("androidx.navigation:navigation-compose:$nav_version")
 
     implementation "com.google.android.gms:play-services-location:$play_services_location_version"
 
@@ -125,9 +124,6 @@ dependencies {
 
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
-    implementation "com.google.accompanist:accompanist-placeholder-material:$accompanist_placeholder_material_version"
-
-    implementation("androidx.navigation:navigation-compose:$nav_version")
 
     implementation "com.google.android.play:app-update:$app_update_version"
     implementation "com.google.android.play:app-update-ktx:$app_update_version"
@@ -164,7 +160,6 @@ dependencies {
     implementation("com.apollographql.apollo3:apollo-runtime:4.0.0-alpha.3")
 
     implementation "androidx.glance:glance-appwidget:1.0.0"
-
     implementation "androidx.glance:glance-material3:1.0.0"
     implementation "androidx.work:work-runtime-ktx:2.8.1"
 

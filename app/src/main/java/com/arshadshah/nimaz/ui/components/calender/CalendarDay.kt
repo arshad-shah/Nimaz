@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.calender
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,11 +13,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -27,14 +31,18 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import io.github.boguszpawlowski.composecalendar.day.Day
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
+import io.github.boguszpawlowski.composecalendar.selection.SelectionMode
+import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
 import kotlin.reflect.KFunction1
@@ -43,7 +51,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun CalenderDay(
 	dayState : DayState<DynamicSelectionState> ,
-	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
+	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit>? ,
 	progressForMonth : State<MutableList<PrayerTracker>> ,
 	fastProgressForMonth : State<MutableList<FastTracker>> ,
 			   )
@@ -67,16 +75,21 @@ fun CalenderDay(
 	val todaysTracker = progressForMonth.value.find { it.date == currentDate.toString() }
 	val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate.toString() }
 	val isMenstratingToday = todaysTracker?.isMenstruating ?: false
+
+	val isFromCurrentMonth = dayState.isFromCurrentMonth
+
+	Log.d("CalenderDay" , "isFromCurrentMonth: $currentDate $isFromCurrentMonth")
+
 	ElevatedCard(
 			 shape = MaterialTheme.shapes.medium ,
 			 elevation = CardDefaults.elevatedCardElevation(
-					  defaultElevation = if (dayState.isFromCurrentMonth) 2.dp else 0.dp ,
+					  defaultElevation = if (isFromCurrentMonth) 2.dp else 0.dp ,
 														   ) ,
 			 modifier = Modifier
 				 .padding(2.dp)
-				 .alpha(if (dayState.isFromCurrentMonth) 1f else 0.2f)
+				 .alpha(if (isFromCurrentMonth) 1f else 0.2f)
 				 .border(
-						  width = if (isSelectedDay || today) 2.dp else 0.dp ,
+						  width = if (isSelectedDay || today) 2.dp else 0.75.dp ,
 						  color = when (importantDay.first)
 						  {
 							  false -> if (isSelectedDay && ! today && ! isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
@@ -86,7 +99,7 @@ fun CalenderDay(
 									   alpha = 0.5f
 																											  )
 							  else if (isMenstratingToday) Color(0xFFE91E63)
-							  else MaterialTheme.colorScheme.surface
+							  else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
 
 							  true -> if (isSelectedDay && ! today && ! isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
 									   alpha = 0.5f
@@ -104,10 +117,12 @@ fun CalenderDay(
 					  {
 						  false -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
 						  else if (today) MaterialTheme.colorScheme.secondaryContainer
-						  else MaterialTheme.colorScheme.surface
+						  else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
 
 						  true -> if (isSelectedDay && ! today) MaterialTheme.colorScheme.tertiaryContainer
-						  else if (today) MaterialTheme.colorScheme.surface
+						  else if (today) MaterialTheme.colorScheme.surfaceColorAtElevation(
+								   elevation = 32.dp
+																						   )
 						  else MaterialTheme.colorScheme.primaryContainer
 					  }
 													 )
@@ -116,9 +131,10 @@ fun CalenderDay(
 		Column(
 				 modifier = Modifier
 					 .combinedClickable(
-							  enabled = dayState.isFromCurrentMonth ,
+							  enabled = isFromCurrentMonth ,
 							  onClick = {
 								  dayState.selectionState.onDateSelected(dayState.date)
+								  if (handleEvents == null) return@combinedClickable
 								  handleEvents(
 										   TrackerViewModel.TrackerEvent.SET_DATE(
 													dayState.date.toString()
@@ -354,5 +370,61 @@ fun isImportantDay(day : Int , month : Int) : Pair<Boolean , String>
 	} else
 	{
 		Pair(false , "")
+	}
+}
+
+@Preview
+@Composable
+fun CalenderDayPreview()
+{
+	class DayOfWeek : Day
+	{
+
+		override val date : LocalDate = LocalDate.now()
+		override val isCurrentDay : Boolean = true
+		override val isFromCurrentMonth : Boolean = true
+	}
+
+	val dayState = DayState(
+			 day = DayOfWeek() , selectionState = DynamicSelectionState(
+			 selection = listOf() ,
+			 confirmSelectionChange = { true } ,
+			 selectionMode = SelectionMode.Single
+																	   )
+						   )
+	Card(
+			 modifier = Modifier
+				 .padding(8.dp)
+				 .width(48.dp)
+				 .background(color = MaterialTheme.colorScheme.surface) ,
+		) {
+		CalenderDay(
+				 dayState = dayState ,
+				 handleEvents = null ,
+				 progressForMonth = remember {
+					 mutableStateOf(
+							  mutableListOf(
+									   PrayerTracker(
+												date = LocalDate.now().toString() ,
+												fajr = true ,
+												dhuhr = true ,
+												asr = true ,
+												maghrib = true ,
+												isha = true
+													)
+										   )
+								   )
+				 } ,
+				 fastProgressForMonth = remember {
+					 mutableStateOf(
+							  mutableListOf(
+									   FastTracker(
+												date = LocalDate.now().toString() ,
+												isFasting = true
+												  )
+										   )
+								   )
+				 }
+				   )
 	}
 }

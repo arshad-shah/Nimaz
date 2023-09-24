@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,31 +35,29 @@ fun SettingsMenuLink(
 	onClick : () -> Unit ,
 					)
 {
-	Surface {
-		Row(
-				 modifier = modifier
-					 .fillMaxWidth()
-					 .height(60.dp)
-					 .clickable(onClick = onClick) ,
-				 verticalAlignment = Alignment.CenterVertically ,
-		   ) {
-			if (icon != null)
-			{
-				SettingsTileIcon(icon = icon)
-			} else
-			{
-				Spacer(
-						 modifier = Modifier
-							 .width(24.dp)
-							 .height(60.dp)
-					  )
-			}
-			SettingsTileTexts(title = title , subtitle = subtitle)
-			if (action != null)
-			{
-				SettingsTileAction {
-					action.invoke()
-				}
+	Row(
+			 modifier = modifier
+				 .fillMaxWidth()
+				 .height(60.dp)
+				 .clickable(onClick = onClick) ,
+			 verticalAlignment = Alignment.CenterVertically ,
+	   ) {
+		if (icon != null)
+		{
+			SettingsTileIcon(icon = icon)
+		} else
+		{
+			Spacer(
+					 modifier = Modifier
+						 .width(24.dp)
+						 .height(60.dp)
+				  )
+		}
+		SettingsTileTexts(title = title , subtitle = subtitle)
+		if (action != null)
+		{
+			SettingsTileAction {
+				action.invoke()
 			}
 		}
 	}

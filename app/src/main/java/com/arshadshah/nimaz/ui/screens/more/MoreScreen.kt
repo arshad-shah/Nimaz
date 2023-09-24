@@ -1,19 +1,20 @@
 package com.arshadshah.nimaz.ui.screens.more
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +31,40 @@ fun MoreScreen(
 	onNavigateToTasbihListScreen : () -> Unit ,
 			  )
 {
+	val listOfLinks = listOf(
+			 mapOf(
+					  "title" to "Tasbih" ,
+					  "icon" to R.drawable.counter_icon ,
+				  ) ,
+			 mapOf(
+					  "title" to "Tasbih List" ,
+					  "icon" to R.drawable.tasbih ,
+				  ) ,
+			 mapOf(
+					  "title" to "Qibla" ,
+					  "icon" to R.drawable.qibla ,
+				  ) ,
+			 mapOf(
+					  "title" to "Names of Allah" ,
+					  "icon" to R.drawable.names_of_allah ,
+				  ) ,
+			 mapOf(
+					  "title" to "Duas" ,
+					  "icon" to R.drawable.dua ,
+				  ) ,
+			 mapOf(
+					  "title" to "Trackers" ,
+					  "icon" to R.drawable.tracker_icon ,
+				  ) ,
+			 mapOf(
+					  "title" to "Calender" ,
+					  "icon" to R.drawable.calendar_icon ,
+				  ) ,
+			 mapOf(
+					  "title" to "Shahadah" ,
+					  "icon" to R.drawable.shahadah ,
+				  ) ,
+							)
 	LazyColumn(
 			 modifier = Modifier
 				 .fillMaxSize()
@@ -38,13 +73,14 @@ fun MoreScreen(
 			 horizontalAlignment = Alignment.CenterHorizontally ,
 			 verticalArrangement = Arrangement.Center
 			  ) {
-		item {
+		items(listOfLinks.size) { index ->
+			val item = listOfLinks[index]
 			MoreScreenLink(
-					 title = "Tasbih" ,
+					 title = item["title"] as String ,
 					 icon = {
 						 Image(
-								  painter = painterResource(id = R.drawable.counter_icon) ,
-								  contentDescription = "Tasbih" ,
+								  painter = painterResource(id = item["icon"] as Int) ,
+								  contentDescription = item["title"] as String ,
 								  modifier = Modifier
 									  .size(48.dp)
 									  .padding(4.dp)
@@ -55,198 +91,27 @@ fun MoreScreen(
 								  modifier = Modifier
 									  .size(24.dp) ,
 								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Tasbih page" ,
+								  contentDescription = item["title"] as String ,
 							 )
 					 } ,
 					 onClick = {
-						 onNavigateToTasbihScreen(
-								  " " ,
-								  " " ,
-								  " " ,
-								  " "
-												 )
-					 }
-						  )
-		}
-		item {
-			//tasbih list link
-			MoreScreenLink(
-					 title = "Tasbih List" ,
-					 icon = {
-						 Image(
-								  painter = painterResource(id = R.drawable.tasbih) ,
-								  contentDescription = "Tasbih List" ,
-								  modifier = Modifier
-									  .size(48.dp)
-									  .padding(4.dp)
-							  )
-					 } ,
-					 action = {
-						 Icon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Tasbih List page" ,
-							 )
-					 } ,
-					 onClick = {
-						 onNavigateToTasbihListScreen()
-					 }
-						  )
-		}
-		item {
-			//Qibla link
-			MoreScreenLink(
-					 title = "Qibla" ,
-					 icon = {
-						 Image(
-								  painter = painterResource(id = R.drawable.qibla) ,
-								  contentDescription = "Qibla" ,
-								  modifier = Modifier
-									  .size(48.dp)
-									  .padding(4.dp)
-							  )
-					 } ,
-					 action = {
-						 Icon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Qibla page" ,
-							 )
-					 } ,
-					 onClick = {
-						 onNavigateToQibla()
-					 }
-						  )
-		}
-		item {
-			//names of allah link
-			MoreScreenLink(
-					 title = "Names of Allah" ,
-					 icon = {
-						 Image(
-								  painter = painterResource(id = R.drawable.names_of_allah) ,
-								  contentDescription = "Names of Allah" ,
-								  modifier = Modifier
-									  .size(48.dp)
-									  .padding(4.dp)
-							  )
-					 } ,
-					 action = {
-						 Icon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Names of Allah page" ,
-							 )
-					 } ,
-					 onClick = {
-						 onNavigateToNames()
-					 }
-						  )
-		}
-		item {
-			//Duas link
-			MoreScreenLink(
-					 title = "Duas" ,
-					 icon = {
-						 Image(
-								  painter = painterResource(id = R.drawable.dua) ,
-								  contentDescription = "Duas" ,
-								  modifier = Modifier
-									  .size(48.dp)
-									  .padding(4.dp)
-							  )
-					 } ,
-					 action = {
-						 Icon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Duas page" ,
-							 )
-					 } ,
-					 onClick = {
-						 onNavigateToListOfTasbeeh()
-					 }
-						  )
-		}
-		item {
-			//Trackers link
-			MoreScreenLink(
-					 title = "Trackers" ,
-					 icon = {
-						 Image(
-								  painter = painterResource(id = R.drawable.tracker_icon) ,
-								  contentDescription = "Trackers" ,
-								  modifier = Modifier
-									  .size(48.dp)
-									  .padding(4.dp)
-							  )
-					 } ,
-					 action = {
-						 Icon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Trackers page" ,
-							 )
-					 } ,
-					 onClick = {
-						 onNavigateToPrayerTracker()
-					 }
-						  )
-		}
-		item {
-			//Calender link
-			MoreScreenLink(
-					 title = "Calender" ,
-					 icon = {
-						 Image(
-								  painter = painterResource(id = R.drawable.calendar_icon) ,
-								  contentDescription = "Calender" ,
-								  modifier = Modifier
-									  .size(48.dp)
-									  .padding(4.dp)
-							  )
-					 } ,
-					 action = {
-						 Icon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Calender page" ,
-							 )
-					 } ,
-					 onClick = {
-						 onNavigateToCalender()
-					 }
-						  )
-		}
-		item {
-			//Shahadah link
-			MoreScreenLink(
-					 title = "Shahadah" ,
-					 icon = {
-						 Image(
-								  painter = painterResource(id = R.drawable.shahadah) ,
-								  contentDescription = "Shahadah" ,
-								  modifier = Modifier
-									  .size(48.dp)
-									  .padding(4.dp)
-							  )
-					 } ,
-					 action = {
-						 Icon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-								  contentDescription = "Shahadah page" ,
-							 )
-					 } ,
-					 onClick = {
-						 onNavigateToShadah()
+						 when (index)
+						 {
+							 0 -> onNavigateToTasbihScreen(
+									  " " ,
+									  " " ,
+									  " " ,
+									  " "
+														  )
+
+							 1 -> onNavigateToTasbihListScreen()
+							 2 -> onNavigateToQibla()
+							 3 -> onNavigateToNames()
+							 4 -> onNavigateToListOfTasbeeh()
+							 5 -> onNavigateToPrayerTracker()
+							 6 -> onNavigateToCalender()
+							 7 -> onNavigateToShadah()
+						 }
 					 }
 						  )
 		}
@@ -263,28 +128,37 @@ fun MoreScreenLink(
 	onClick : () -> Unit ,
 				  )
 {
-	//Shahadah link
-	ElevatedCard(
+	Card(
+			 colors = CardDefaults.cardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+											 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .padding(8.dp)
 				 .fillMaxWidth()
-				 .testTag(AppConstants.TEST_TAG_MORE_LINK.replace("{title}" , title)) ,
-				) {
-		SettingsMenuLink(
-				 title = {
-					 Text(
-							  text = title ,
-						 )
+				 .testTag(AppConstants.TEST_TAG_MORE_LINK.replace("{title}" , title))
+				 .clip(MaterialTheme.shapes.extraLarge)
+				 .clickable {
+					 onClick()
 				 } ,
-				 icon = {
-					 icon()
-				 } ,
-				 action = {
-					 action()
-				 }
-						) {
-			onClick()
+		) {
+		Row(
+				 modifier = Modifier
+					 .fillMaxWidth()
+					 .padding(8.dp) ,
+				 verticalAlignment = Alignment.CenterVertically ,
+		   ) {
+			icon()
+			Spacer(modifier = Modifier.width(16.dp))
+			Text(
+					 text = title ,
+					 style = MaterialTheme.typography.titleLarge ,
+					 modifier = Modifier.weight(1f) ,
+				)
+			action()
 		}
 	}
 }
