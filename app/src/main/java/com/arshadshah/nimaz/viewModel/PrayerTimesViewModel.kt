@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
-import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.type.Parameters
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
@@ -23,18 +22,6 @@ import java.time.ZoneOffset
 
 class PrayerTimesViewModel : ViewModel()
 {
-
-	sealed class PrayerTimesState
-	{
-
-		object Loading : PrayerTimesState()
-		data class Success(val prayerTimes : PrayerTimes) : PrayerTimesState()
-		data class Error(val error : String) : PrayerTimesState()
-	}
-
-	private var _prayerTimesState =
-		MutableStateFlow(PrayerTimesState.Loading as PrayerTimesState)
-	val prayerTimesState = _prayerTimesState.asStateFlow()
 
 	private var countDownTimer : CountDownTimer? = null
 

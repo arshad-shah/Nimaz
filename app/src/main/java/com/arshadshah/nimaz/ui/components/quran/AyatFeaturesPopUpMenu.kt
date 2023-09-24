@@ -12,6 +12,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -50,6 +51,12 @@ fun AyatFeaturesPopUpMenu(
 			 offset = IntOffset(0 , - 150) ,
 		 ) {
 		ElevatedCard(
+				 colors = CardDefaults.elevatedCardColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 				 shape = MaterialTheme.shapes.extraLarge ,
 				 elevation = CardDefaults.elevatedCardElevation(
 						  defaultElevation = 8.dp ,

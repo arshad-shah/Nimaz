@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
@@ -34,7 +37,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun CalenderHeader(
 	monthState : MonthState ,
-	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
+	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit>? ,
 				  )
 {
 	val currentMonth = monthState.currentMonth
@@ -85,6 +88,7 @@ fun CalenderHeader(
 			if (currentYearMonth != currentMonth)
 			{
 				monthState.currentMonth = currentYearMonth
+				if (handleEvents == null) return@LaunchedEffect
 				handleEvents(
 						 TrackerViewModel.TrackerEvent.SET_DATE(
 								  LocalDate.now().toString()
@@ -113,6 +117,7 @@ fun CalenderHeader(
 
 			} else
 			{
+				if (handleEvents == null) return@LaunchedEffect
 				handleEvents(
 						 TrackerViewModel.TrackerEvent.SET_DATE(
 								  LocalDate.now().toString()
@@ -135,6 +140,12 @@ fun CalenderHeader(
 	}
 
 	ElevatedCard(
+			 colors = CardDefaults.cardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+											 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 				) {
 		Row(
@@ -150,6 +161,7 @@ fun CalenderHeader(
 						 monthState.currentMonth = monthState.currentMonth.minusMonths(1)
 						 //get a date in the new month
 						 val date = monthState.currentMonth.atDay(1)
+						 if (handleEvents == null) return@FilledIconButton
 						 handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
 						 handleEvents(
 								  TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
@@ -167,6 +179,7 @@ fun CalenderHeader(
 			}
 			Column(
 					 modifier = Modifier
+						 .fillMaxWidth(0.8f)
 						 .clickable {
 							 showCurrentMonth.value = true
 						 } ,
@@ -248,6 +261,7 @@ fun CalenderHeader(
 						 monthState.currentMonth = monthState.currentMonth.plusMonths(1)
 						 //get a date in the new month
 						 val date = monthState.currentMonth.atDay(1)
+						 if (handleEvents == null) return@FilledIconButton
 						 handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
 						 handleEvents(
 								  TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
@@ -265,4 +279,14 @@ fun CalenderHeader(
 			}
 		}
 	}
+}
+
+@Preview
+@Composable
+fun CalenderHeaderPreview()
+{
+	CalenderHeader(
+			 monthState = MonthState(initialMonth = YearMonth.now()) ,
+			 handleEvents = null
+				  )
 }

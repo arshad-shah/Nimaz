@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -29,10 +31,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -156,12 +158,18 @@ fun PrayerTimesListUI(
 	val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 1)
 	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 29)
 	val isRamadan = todayHijri.isAfter(ramadanStart) && todayHijri.isBefore(ramadanEnd)
-	ElevatedCard(
+	Card(
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .fillMaxWidth()
 				 .padding(vertical = 8.dp , horizontal = 8.dp)
-				) {
+		) {
 		Column(
 				 modifier = Modifier.scrollable(
 						  orientation = Orientation.Vertical ,
@@ -239,7 +247,7 @@ fun PrayerTimesRow(
 			 {
 				 Modifier
 					 .fillMaxWidth()
-					 .background(MaterialTheme.colorScheme.secondaryContainer)
+					 .background(MaterialTheme.colorScheme.primaryContainer)
 					 .clip(
 							  RoundedCornerShape(
 									   topStart = 8.dp ,

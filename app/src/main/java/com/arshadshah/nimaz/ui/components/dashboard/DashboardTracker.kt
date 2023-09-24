@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,11 +31,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.ui.components.common.ToggleableItemRow
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -100,7 +103,7 @@ fun DashboardPrayerTracker()
 	val asrChecked = remember { mutableStateOf(false) }
 	val maghribChecked = remember { mutableStateOf(false) }
 	val ishaChecked = remember { mutableStateOf(false) }
-	val progress = remember { mutableStateOf(0f) }
+	val progress = remember { mutableFloatStateOf(0f) }
 
 	Box {
 		when (stateOfTrackerForToday.value)
@@ -186,6 +189,12 @@ fun PrayerTrackerListItemsRow(
 	}
 
 	ElevatedCard(
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .padding(8.dp)

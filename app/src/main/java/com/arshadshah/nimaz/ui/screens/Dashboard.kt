@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_EVENTS_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
@@ -128,16 +129,22 @@ fun Dashboard(
 			}
 		}
 		item {
-			ElevatedCard(
-					 shape = MaterialTheme.shapes.extraLarge ,
+			Card(
 					 modifier = Modifier
 						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-						 .testTag(TEST_TAG_EVENTS_CARD)
+						 .testTag(AppConstants.TEST_TAG_EVENTS_CARD)
 						 .clip(shape = MaterialTheme.shapes.extraLarge)
 						 .clickable {
 							 onNavigateToCalender()
-						 }
-						) {
+						 } ,
+					 colors = CardDefaults.cardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
+					 shape = MaterialTheme.shapes.extraLarge ,
+				) {
 				Text(
 						 text = "Events" ,
 						 modifier = Modifier
@@ -158,16 +165,22 @@ fun Dashboard(
 			}
 		}
 		item {
-			ElevatedCard(
-					 shape = MaterialTheme.shapes.extraLarge ,
+			Card(
 					 modifier = Modifier
 						 .fillMaxWidth()
 						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
 						 .testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
 						 .clickable {
 							 onNavigateToTracker()
-						 }
-						) {
+						 } ,
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
+					 shape = MaterialTheme.shapes.extraLarge ,
+				) {
 				Text(
 						 text = "Trackers" ,
 						 modifier = Modifier
@@ -182,12 +195,18 @@ fun Dashboard(
 		}
 		//quick links to the tasbih and quran
 		item {
-			ElevatedCard(
+			Card(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .fillMaxWidth()
 						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-						) {
+				) {
 				Text(
 						 text = "Quick Links" ,
 						 modifier = Modifier
@@ -204,12 +223,18 @@ fun Dashboard(
 			}
 		}
 		item {
-			ElevatedCard(
+			Card(
+					 colors = CardDefaults.elevatedCardColors(
+							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+							  contentColor = MaterialTheme.colorScheme.onSurface ,
+							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+															 ) ,
 					 shape = MaterialTheme.shapes.extraLarge ,
 					 modifier = Modifier
 						 .fillMaxWidth()
-						 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-						) {
+						 .padding(8.dp)
+				) {
 				Text(
 						 text = "Daily Verses" ,
 						 modifier = Modifier

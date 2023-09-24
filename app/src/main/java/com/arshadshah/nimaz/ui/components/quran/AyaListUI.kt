@@ -38,11 +38,11 @@ import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.BannerDuration
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.theme.*
 import com.arshadshah.nimaz.viewModel.QuranViewModel
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import java.io.File
 
 
@@ -534,19 +534,22 @@ fun AyaListItemUI(
 				 onDismiss = {
 				 })
 	}
-	ElevatedCard(
+	Card(
 			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = cardBackgroundColor ,
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
 													 ) ,
 			 modifier = Modifier
 				 .padding(4.dp)
 				 .fillMaxWidth() ,
 			 shape = MaterialTheme.shapes.extraLarge ,
-				) {
+		) {
 		Row(
 				 modifier = Modifier
 					 .fillMaxWidth()
-					 .padding(8.dp)
+					 .padding(6.dp)
 		   ) {
 			Column(
 					 modifier = Modifier
@@ -669,26 +672,26 @@ fun AyaListItemUI(
 					if (aya.ayaNumberInQuran != 0)
 					{
 						//a button that opens a popup menu
-						IconButton(
+						FilledIconButton(
+								 modifier = Modifier
+									 .padding(end = 8.dp)
+									 .placeholder(
+											  visible = loading ,
+											  color = MaterialTheme.colorScheme.outline ,
+											  shape = RoundedCornerShape(4.dp) ,
+											  highlight = PlaceholderHighlight.shimmer(
+													   highlightColor = Color.White ,
+																					  )
+												 ) ,
 								 onClick = {
 									 popUpOpen.value = ! popUpOpen.value
 								 } ,
 								 enabled = ! loading ,
-								  ) {
+										) {
 							Icon(
 									 modifier = Modifier
-										 .size(36.dp)
-										 .padding(end = 8.dp)
-										 .placeholder(
-												  visible = loading ,
-												  color = MaterialTheme.colorScheme.outline ,
-												  shape = RoundedCornerShape(4.dp) ,
-												  highlight = PlaceholderHighlight.shimmer(
-														   highlightColor = Color.White ,
-																						  )
-													 ) ,
+										 .padding(6.dp) ,
 									 painter = painterResource(id = R.drawable.more_menu_icon) ,
-									 tint = MaterialTheme.colorScheme.primary ,
 									 contentDescription = "More Menu for Ayat ${aya.ayaNumberInSurah}" ,
 								)
 						}

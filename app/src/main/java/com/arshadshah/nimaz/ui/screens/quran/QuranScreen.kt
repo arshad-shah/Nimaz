@@ -64,9 +64,9 @@ fun QuranScreen(
 		TabRow(
 				 selectedTabIndex = pagerState.currentPage ,
 				 modifier = Modifier
-					 .padding(vertical = 4.dp , horizontal = 4.dp)
+					 .padding(vertical = 8.dp , horizontal = 4.dp)
 					 .clip(MaterialTheme.shapes.extraLarge) ,
-				 containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) ,
+				 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f) ,
 				 indicator = { tabPositions : List<TabPosition> ->
 					 val transition = updateTransition(pagerState.currentPage , label = "")
 					 val indicatorStart by transition.animateDp(
@@ -105,7 +105,7 @@ fun QuranScreen(
 								  .padding(4.dp)
 								  .fillMaxSize()
 								  .background(
-										   color = MaterialTheme.colorScheme.secondaryContainer ,
+										   color = MaterialTheme.colorScheme.primaryContainer ,
 										   MaterialTheme.shapes.extraLarge
 											 )
 								  .zIndex(1f)
@@ -125,8 +125,8 @@ fun QuranScreen(
 											   index.toString()
 																			 )
 									 ) ,
-						 selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer ,
-						 unselectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+						 selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer ,
+						 unselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
 								  alpha = 0.6f
 																									 ) ,
 						 selected = pagerState.currentPage == index ,
@@ -143,7 +143,7 @@ fun QuranScreen(
 									  style = MaterialTheme.typography.titleMedium ,
 									  fontWeight = if (selected) FontWeight.ExtraBold
 									  else FontWeight.Normal ,
-									  color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+									  color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
 									  else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 								 )
 						 }

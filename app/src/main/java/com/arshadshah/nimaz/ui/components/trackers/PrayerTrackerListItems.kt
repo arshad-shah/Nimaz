@@ -3,9 +3,11 @@ package com.arshadshah.nimaz.ui.components.trackers
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -16,11 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.ui.components.common.ToggleableItemColumn
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.placeholder
-import com.google.accompanist.placeholder.shimmer
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -58,6 +60,12 @@ fun PrayerTrackerListItems(
 					)
 	}
 	ElevatedCard(
+			 colors = CardDefaults.elevatedCardColors(
+					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
+					  contentColor = MaterialTheme.colorScheme.onSurface ,
+					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+													 ) ,
 			 shape = MaterialTheme.shapes.extraLarge ,
 			 modifier = Modifier
 				 .fillMaxWidth()
