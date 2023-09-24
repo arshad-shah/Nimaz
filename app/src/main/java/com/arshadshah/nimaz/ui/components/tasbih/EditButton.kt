@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -34,6 +36,12 @@ fun Editbutton(
 			 verticalAlignment = Alignment.CenterVertically
 	   ) {
 		ElevatedButton(
+				 colors = ButtonDefaults.elevatedButtonColors(
+						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
+						  contentColor = MaterialTheme.colorScheme.onSurface ,
+						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
+						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
+														 ) ,
 				 onClick = {
 					 //if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
 					 if (count.value > 0)

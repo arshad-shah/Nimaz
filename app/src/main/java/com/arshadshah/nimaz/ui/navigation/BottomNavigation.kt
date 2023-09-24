@@ -68,11 +68,11 @@ fun BottomNavigationBar(navController : NavController)
 							 contentDescription = bottomNavItem.title
 						 } ,
 					 colors = NavigationBarItemDefaults.colors(
-							  selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer ,
-							  selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer ,
-							  unselectedIconColor = MaterialTheme.colorScheme.secondary ,
-							  unselectedTextColor = MaterialTheme.colorScheme.secondary ,
-							  indicatorColor = MaterialTheme.colorScheme.secondaryContainer
+							  selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer ,
+							  selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer ,
+							  unselectedIconColor = MaterialTheme.colorScheme.primary ,
+							  unselectedTextColor = MaterialTheme.colorScheme.primary ,
+							  indicatorColor = MaterialTheme.colorScheme.primaryContainer,
 															  ) ,
 					 icon = {
 						 AnimatableIcon(
