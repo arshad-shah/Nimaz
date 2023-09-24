@@ -47,7 +47,7 @@ fun IncrementDecrement(
 														  )
 								 )
 			 } ,
-			 targetState = rOrl.value
+			 targetState = rOrl.value , label = ""
 				   ) { rorl ->
 		if (rorl)
 		{

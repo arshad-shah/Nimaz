@@ -247,7 +247,7 @@ fun PrayerTimesRow(
 			 {
 				 Modifier
 					 .fillMaxWidth()
-					 .background(MaterialTheme.colorScheme.secondaryContainer)
+					 .background(MaterialTheme.colorScheme.primaryContainer)
 					 .clip(
 							  RoundedCornerShape(
 									   topStart = 8.dp ,
