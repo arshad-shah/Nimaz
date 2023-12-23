@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
+import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.ui.components.calender.Calender
+import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 
@@ -47,17 +49,18 @@ fun CalenderScreen(paddingValues: PaddingValues) {
         viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
     }
 
-    val dateState = remember {
-        viewModel.dateState
-    }.collectAsState()
+    val dateState = viewModel.dateState.collectAsState()
 
-    val progressForMonth = remember {
-        viewModel.progressForMonth
-    }.collectAsState()
+    val progressForMonth = viewModel.progressForMonth.collectAsState()
 
-    val fastProgressForMonth = remember {
-        viewModel.fastProgressForMonth
-    }.collectAsState()
+    val fastProgressForMonth = viewModel.fastProgressForMonth.collectAsState()
+
+    val isFastingToday = viewModel.isFasting.collectAsState()
+    val isMenstruatingToday = viewModel.isMenstrauting.collectAsState()
+
+    val isLoading = remember {
+        mutableStateOf(false)
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -71,7 +74,7 @@ fun CalenderScreen(paddingValues: PaddingValues) {
             Calender(
                 handleEvents = viewModel::onEvent,
                 progressForMonth = progressForMonth,
-                fastProgressForMonth = fastProgressForMonth
+                isFastingToday = isFastingToday,
             )
         }
         item {
@@ -93,7 +96,20 @@ fun CalenderScreen(paddingValues: PaddingValues) {
             ) {
 //                DashboardPrayerTracker(dashboardPrayerTracker)
 
-//                DashboardFastTracker()
+                FastTrackerCard(
+                    dateState = dateState,
+                    isFastingToday = isFastingToday,
+                    isMenstrauting = isMenstruatingToday.value,
+                    isLoading = isLoading,
+                    handleEvent = { date: String, isFasting: Boolean ->
+                        viewModel.onEvent(TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
+                            FastTracker(
+                                date = date,
+                                isFasting = isFasting
+                            )
+                        ))
+                    }
+                )
             }
         }
     }

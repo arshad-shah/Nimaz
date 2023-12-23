@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.remote.models.FastTracker
@@ -10,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -155,6 +158,8 @@ class TrackerViewModel : ViewModel() {
 
         //update menstrauting state
         class UPDATE_MENSTRAUTING_STATE(val isMenstrauting: Boolean) : TrackerEvent()
+
+        class IsFastingToday(val date: String) : TrackerEvent()
     }
 
     fun onEvent(event: TrackerEvent) {
@@ -180,6 +185,7 @@ class TrackerViewModel : ViewModel() {
             is TrackerEvent.UPDATE_MENSTRAUTING_STATE -> updateMenstrautingState(
                 event.isMenstrauting
             )
+            is TrackerEvent.IsFastingToday -> isFastingToday(event.date)
 
         }
     }
@@ -227,13 +233,21 @@ class TrackerViewModel : ViewModel() {
 
             //get all trackers for the month
             for (i in firstDayOfMonth.dayOfMonth..lastDayOfMonth.dayOfMonth) {
-                val date = firstDayOfMonth.withDayOfMonth(i).toString()
-                val trackerExists = dataStore.fastTrackerExistsForDate(date)
+                val dateInTheMonth = firstDayOfMonth.withDayOfMonth(i).toString()
+                val trackerExists = dataStore.fastTrackerExistsForDate(dateInTheMonth)
                 if (trackerExists) {
-                    val tracker = dataStore.getFastTrackerForDate(date)
-                    trackers.add(tracker)
+                    dataStore.getFastTrackerForDateAsFlow(dateInTheMonth).catch {
+                        Log.e("error", "error getting fast tracker for date $dateInTheMonth")
+                    }.collect{
+                        Log.e("data", "data getting fast tracker for date $dateInTheMonth")
+                        trackers.add(FastTracker(
+                            date = dateInTheMonth,
+                            isFasting = it.isFasting,
+                            isMenstruating = it.isMenstruating
+                        ))
+                    }
                 } else {
-                    val tracker = FastTracker(date, false)
+                    val tracker = FastTracker(dateInTheMonth, false)
                     trackers.add(tracker)
                 }
             }
@@ -361,6 +375,21 @@ class TrackerViewModel : ViewModel() {
             } catch (e: Exception) {
                 _fastTrackerState.value =
                     FastTrackerState.Error(e.message ?: "An unknown error occurred")
+            }
+        }
+    }
+
+    private fun isFastingToday(date: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val dataStore = LocalDataStore.getDataStore()
+                dataStore.isFastingForDate(date)
+                    .catch { emit(false) }
+                    .collect {
+                        _isFasting.value = it
+                    }
+            } catch (e: Exception) {
+                _isFasting.value = false
             }
         }
     }
