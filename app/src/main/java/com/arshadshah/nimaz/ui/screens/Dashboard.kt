@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.ui.screens
 
-import androidx.activity.ComponentActivity
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,8 +38,8 @@ import com.arshadshah.nimaz.ui.components.dashboard.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.viewModel.DashboardViewmodel
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Composable
@@ -50,29 +50,52 @@ fun Dashboard(
     paddingValues: PaddingValues,
     onNavigateToTasbihListScreen: () -> Unit,
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
+    context: Context = LocalContext.current,
+    viewModel: DashboardViewmodel = viewModel(
+        key = "dashboard_viewmodel",
+        initializer = { DashboardViewmodel(context) }
+    ),
 ) {
-    val context = LocalContext.current
-    val viewModelSettings = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    val viewModelTracker = viewModel(
-        key = AppConstants.TRACKING_VIEWMODEL_KEY,
-        initializer = { TrackerViewModel() },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
+
     LaunchedEffect(Unit) {
-        viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context, false))
+        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.CheckUpdate(context, false))
+        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.IsFastingToday)
+        viewModel.handleEvent(
+            DashboardViewmodel.DashboardEvent.GetTrackerForToday(
+                LocalDate.now().toString()
+            )
+        )
+        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.GetBookmarksOfQuran)
+        viewModel.handleEvent(
+            DashboardViewmodel.DashboardEvent.RecreateTasbih(
+                LocalDate.now().toString()
+            )
+        )
+        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.GetRandomAya)
+    }
+    val isFasting = viewModel.isFasting.collectAsState()
+
+    LaunchedEffect(isFasting.value) {
+        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.FajrAndMaghribTime)
     }
 
-    val updateAvailable = remember {
-        viewModelSettings.isUpdateAvailable
-    }.collectAsState()
+    val updateAvailable = viewModel.isUpdateAvailable.collectAsState()
 
-    val isFasting = remember {
-        viewModelTracker.isFasting
-    }.collectAsState()
+    val location = viewModel.locationName.collectAsState()
+
+    val fajrPrayerTime = viewModel.fajrTime.collectAsState()
+
+    val maghribPrayerTime = viewModel.maghribTime.collectAsState()
+
+    val dashboardPrayerTracker = viewModel.trackerState.collectAsState()
+
+    val isLoading = viewModel.isLoading.collectAsState()
+
+    val quranBookmarks = viewModel.bookmarks.collectAsState()
+
+    val tasbihList = viewModel.tasbihList.collectAsState()
+
+    val randomAya = viewModel.randomAyaState
 
     val stateScroll = rememberLazyListState()
 
@@ -86,7 +109,12 @@ fun Dashboard(
             DashboardPrayertimesCard()
         }
         item {
-            RamadanTimesCard(isFasting.value)
+            RamadanTimesCard(
+                isFasting.value,
+                location.value,
+                fajrPrayerTime.value,
+                maghribPrayerTime.value
+            )
         }
         item {
             if (updateAvailable.value) {
@@ -109,8 +137,11 @@ fun Dashboard(
                     message = "Tap here to update the app",
                     isOpen = isOpen,
                     onClick = {
-                        viewModelSettings.handleEvent(
-                            SettingsViewModel.SettingsEvent.CheckUpdate(context, true)
+                        viewModel.handleEvent(
+                            DashboardViewmodel.DashboardEvent.CheckUpdate(
+                                context,
+                                true
+                            )
                         )
                     },
                     dismissable = true,
@@ -124,69 +155,78 @@ fun Dashboard(
             }
         }
         item {
-                Card(
+            Card(
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
+                    .testTag(AppConstants.TEST_TAG_EVENTS_CARD)
+                    .clip(shape = MaterialTheme.shapes.extraLarge)
+                    .clickable {
+                        onNavigateToCalender()
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+                ),
+                shape = MaterialTheme.shapes.extraLarge,
+            ) {
+                Text(
+                    text = "Events",
                     modifier = Modifier
-                        .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
-                        .testTag(AppConstants.TEST_TAG_EVENTS_CARD)
-                        .clip(shape = MaterialTheme.shapes.extraLarge)
-                        .clickable {
-                            onNavigateToCalender()
-                        },
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
-                ) {
-                    Text(
-                        text = "Events",
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    RamadanCard(
-                        onNavigateToCalender = onNavigateToCalender
-                    )
-                    EidUlFitrCard {
-                        onNavigateToCalender()
-                    }
-                    EidUlAdhaCard {
-                        onNavigateToCalender()
-                    }
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                RamadanCard(
+                    onNavigateToCalender = onNavigateToCalender
+                )
+                EidUlFitrCard {
+                    onNavigateToCalender()
                 }
+                EidUlAdhaCard {
+                    onNavigateToCalender()
+                }
+            }
         }
         item {
-                Card(
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
+                    .testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
+                    .clickable {
+                        onNavigateToTracker()
+                    },
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+                ),
+                shape = MaterialTheme.shapes.extraLarge,
+            ) {
+                Text(
+                    text = "Trackers",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
-                        .testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
-                        .clickable {
-                            onNavigateToTracker()
-                        },
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
-                ) {
-                    Text(
-                        text = "Trackers",
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    DashboardPrayerTracker()
-                    DashboardFastTracker()
-                }
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                DashboardPrayerTracker(
+                    dashboardPrayerTracker.value,
+                    viewModel::handleEvent,
+                    isLoading
+                )
+                DashboardFastTracker(
+                    isFasting,
+                    viewModel::handleEvent,
+                    isLoading,
+                    dashboardPrayerTracker.value.isMenstruating
+                )
+            }
         }
         //quick links to the tasbih and quran
         item {
@@ -210,10 +250,18 @@ fun Dashboard(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
-                DashboardQuranTracker(onNavigateToAyatScreen = onNavigateToAyatScreen)
+                DashboardQuranTracker(
+                    onNavigateToAyatScreen = onNavigateToAyatScreen,
+                    quranBookmarks,
+                    handleEvents = viewModel::handleEvent,
+                    isLoading = isLoading
+                )
                 DashboardTasbihTracker(
                     onNavigateToTasbihScreen = onNavigateToTasbihScreen,
-                    onNavigateToTasbihListScreen = onNavigateToTasbihListScreen
+                    onNavigateToTasbihListScreen = onNavigateToTasbihListScreen,
+                    tasbihList = tasbihList.value,
+                    handleEvents = viewModel::handleEvent,
+                    isLoading = isLoading
                 )
             }
         }
@@ -238,7 +286,7 @@ fun Dashboard(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
-                DashboardRandomAyatCard(onNavigateToAyatScreen = onNavigateToAyatScreen)
+                DashboardRandomAyatCard(onNavigateToAyatScreen = onNavigateToAyatScreen, randomAya)
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -12,8 +11,7 @@ import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -22,9 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.Aya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
@@ -32,23 +28,17 @@ import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.common.Placeholder
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.QuranViewModel
+import com.arshadshah.nimaz.viewModel.DashboardViewmodel
+import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardQuranTracker(onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit) {
-    val context = LocalContext.current
-    val viewModel = viewModel(
-        key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-
-    LaunchedEffect(Unit)
-    {
-        viewModel.handleAyaEvent(QuranViewModel.AyaEvent.getBookmarks)
-    }
-    val bookmarks = remember { viewModel.bookmarks }.collectAsState()
+fun DashboardQuranTracker(
+    onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
+    quranBookmarks: State<List<Aya>>,
+    handleEvents: KFunction1<DashboardViewmodel.DashboardEvent, Unit>,
+    isLoading: State<Boolean>
+) {
 
     val translationType =
         PrivateSharedPreferences(LocalContext.current).getData(
@@ -73,7 +63,7 @@ fun DashboardQuranTracker(onNavigateToAyatScreen: (String, Boolean, String, Int)
     val itemToDelete = remember {
         mutableStateOf<Aya?>(null)
     }
-    if (bookmarks.value.isEmpty()) {
+    if (quranBookmarks.value.isEmpty()) {
         Box(
             modifier = Modifier.clickable {
                 onNavigateToAyatScreen(1.toString(), true, translation, 1)
@@ -84,7 +74,7 @@ fun DashboardQuranTracker(onNavigateToAyatScreen: (String, Boolean, String, Int)
     } else {
         FeaturesDropDown(
             label = "Quran Bookmarks",
-            items = bookmarks.value,
+            items = quranBookmarks.value,
             dropDownItem = { Aya ->
                 val currentItem = rememberUpdatedState(newValue = Aya)
                 val dismissState = rememberDismissState(
@@ -156,8 +146,8 @@ fun DashboardQuranTracker(onNavigateToAyatScreen: (String, Boolean, String, Int)
             confirmButtonText = "Yes",
             dismissButtonText = "No, Cancel",
             onConfirm = {
-                viewModel.handleAyaEvent(
-                    QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+                handleEvents(
+                    DashboardViewmodel.DashboardEvent.DeleteBookmarkFromAya(
                         itemToDelete.value!!.ayaNumber,
                         itemToDelete.value!!.suraNumber,
                         itemToDelete.value!!.ayaNumberInSurah

@@ -56,7 +56,7 @@ fun LocationSettings(isIntro: Boolean = false) {
     )
     val viewModelPrayerTimes = viewModel(
         key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
+        initializer = { PrayerTimesViewModel(context) },
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
 
@@ -273,7 +273,7 @@ fun LocationToggleSwitch(
     )
     val viewModelPrayerTimes = viewModel(
         key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
+        initializer = { PrayerTimesViewModel(context) },
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
     val isLocationAuto = remember {

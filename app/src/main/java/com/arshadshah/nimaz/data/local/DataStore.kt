@@ -114,15 +114,18 @@ class DataStore(db: AppDatabase) {
     suspend fun updateTracker(tracker: PrayerTracker) =
         prayerTrackerDao.updateTracker(tracker.toLocalPrayersTracker())
 
+    //updateSpecificPrayer
+    suspend fun updateSpecificPrayer(date: String, prayerName: String, prayerDone: Boolean) =
+        prayerTrackerDao.updateSpecificPrayer(date, prayerName, prayerDone)
+
+    fun getPrayersForDate(date: String) = prayerTrackerDao.getPrayersForDate(date)
+
     //delete a tracker
     suspend fun deleteTracker(tracker: PrayerTracker) =
         prayerTrackerDao.deleteTracker(tracker.toLocalPrayersTracker())
 
     //check if a tracker exists
     suspend fun checkIfTrackerExists(date: String) = prayerTrackerDao.trackerExistsForDate(date)
-    suspend fun getDatesWithTrackers() = prayerTrackerDao.getDatesWithTrackers()
-
-    suspend fun getProgressForDate(date: String) = prayerTrackerDao.getProgressForDate(date)
 
     //fasting tracker
 
@@ -130,9 +133,7 @@ class DataStore(db: AppDatabase) {
     suspend fun getFastTrackerForDate(date: String) =
         fastTrackerDao.getFastTrackerForDate(date).toFastTracker()
 
-    //get all the trackers
-    suspend fun getAllFastTrackers() =
-        fastTrackerDao.getAllFastTrackers().map { it.toFastTracker() }
+    fun isFastingForDate(date: String) = fastTrackerDao.isFastingForDate(date)
 
     //save a tracker
     suspend fun saveFastTracker(tracker: FastTracker) =

@@ -26,8 +26,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.calender.Calender
-import com.arshadshah.nimaz.ui.components.dashboard.DashboardFastTracker
-import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 
@@ -93,9 +91,9 @@ fun CalenderScreen(paddingValues: PaddingValues) {
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                DashboardPrayerTracker()
+//                DashboardPrayerTracker(dashboardPrayerTracker)
 
-                DashboardFastTracker()
+//                DashboardFastTracker()
             }
         }
     }

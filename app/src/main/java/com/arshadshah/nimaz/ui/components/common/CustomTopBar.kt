@@ -17,7 +17,6 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +37,6 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
-import com.arshadshah.nimaz.ui.components.settings.SettingsListMultiSelect
 import com.arshadshah.nimaz.utils.CustomAnimation
 import com.arshadshah.nimaz.utils.RouteUtils.checkRoute
 import com.arshadshah.nimaz.utils.RouteUtils.processPageTitle
@@ -90,7 +88,7 @@ fun CustomTopBar(route: MutableState<String?>, navController: NavHostController)
 
     val viewModel = viewModel(
         key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
+        initializer = { PrayerTimesViewModel(context) },
         viewModelStoreOwner = context
     )
 
@@ -100,52 +98,14 @@ fun CustomTopBar(route: MutableState<String?>, navController: NavHostController)
     val vibrationAllowed = remember { mutableStateOf(true) }
     val rOrl = remember { mutableStateOf(true) }
 
-    val isMenstruatingState = remember {
-        viewModelTracker.isMenstrauting
-    }.collectAsState()
+    val isMenstruatingState = viewModelTracker.isMenstrauting.collectAsState()
 
 
-    val isPlaying = remember {
-        viewModelNames.isPlaying
-    }.collectAsState()
-    val isPaused = remember {
-        viewModelNames.isPaused
-    }.collectAsState()
-    val isStopped = remember {
-        viewModelNames.isStopped
-    }.collectAsState()
-    val isPlayingState = remember {
-        mutableStateOf(false)
-    }
-    val isPausedState = remember {
-        mutableStateOf(false)
-    }
-    val isStoppedState = remember {
-        mutableStateOf(false)
-    }
+    val playBackState = viewModelNames.playbackState.collectAsState()
 
-    val isLoading = remember {
-        viewModel.isLoading
-    }.collectAsState()
+    val isLoading = viewModel.isLoading.collectAsState()
 
-    val locationName = remember {
-        settingViewModel.locationName
-    }.collectAsState()
-
-
-    LaunchedEffect(
-        key1 = isPlaying.value,
-        key2 = isPaused.value,
-        key3 = isStopped.value
-    ) {
-        isPlayingState.value = isPlaying.value
-        isPausedState.value = isPaused.value
-        isStoppedState.value = isStopped.value
-    }
-
-    val openDialog = remember {
-        mutableStateOf(false)
-    }
+    val locationName = settingViewModel.locationName.collectAsState()
 
 
     AnimatedVisibility(
@@ -332,7 +292,11 @@ fun CustomTopBar(route: MutableState<String?>, navController: NavHostController)
                         }
 
                         AppConstants.NAMESOFALLAH_SCREEN_ROUTE -> {
-                            if (!isStoppedState.value) {
+                            if (
+                                playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING
+                                ||
+                                playBackState.value == NamesOfAllahViewModel.PlaybackState.PAUSED
+                            ) {
                                 IconButton(onClick = {
                                     viewModelNames.handleAudioEvent(
                                         NamesOfAllahViewModel.AudioEvent.Stop
@@ -351,7 +315,7 @@ fun CustomTopBar(route: MutableState<String?>, navController: NavHostController)
                                 }
                             }
                             IconButton(onClick = {
-                                if (isPlayingState.value.not()) {
+                                if (playBackState.value != NamesOfAllahViewModel.PlaybackState.PLAYING) {
                                     viewModelNames.handleAudioEvent(
                                         NamesOfAllahViewModel.AudioEvent.Play(
                                             context
@@ -364,7 +328,7 @@ fun CustomTopBar(route: MutableState<String?>, navController: NavHostController)
                                 }
                             }
                             ) {
-                                if (isPlayingState.value) {
+                                if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING) {
                                     Icon(
                                         modifier = Modifier.size(
                                             24.dp
@@ -483,23 +447,4 @@ fun CustomTopBar(route: MutableState<String?>, navController: NavHostController)
             )
         }
     )
-
-    if(openDialog.value){
-        val listOfCards = listOf(
-            "Events",
-            "Prayer Tracker",
-            "Quick Links",
-            "Daily Verse"
-        )
-        SettingsListMultiSelect(
-            title = {
-                Text(text = "Dashboard", style = MaterialTheme.typography.titleMedium)
-        },
-            items = listOfCards,
-            confirmButton = "Save",
-
-            ) {
-
-        }
-    }
 }

@@ -102,27 +102,17 @@ fun SettingsScreen(
         initializer = { SettingsViewModel(context) },
         viewModelStoreOwner = context as ComponentActivity
     )
-    val themeState = remember {
-        viewModelSettings.theme
-    }.collectAsState()
-
-    val isDarkMode = remember {
-        viewModelSettings.isDarkMode
-    }.collectAsState()
-
-    val viewModel = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
 
     LaunchedEffect(Unit) {
         viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
         viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context, false))
     }
-    val updateAvailabile = remember {
-        viewModelSettings.isUpdateAvailable
-    }.collectAsState()
+
+    val themeState = viewModelSettings.theme.collectAsState()
+
+    val isDarkMode = viewModelSettings.isDarkMode.collectAsState()
+
+    val updateAvailabile = viewModelSettings.isUpdateAvailable.collectAsState()
 
     val updateAvailableText = if (updateAvailabile.value) {
         "Update Available"
@@ -130,29 +120,19 @@ fun SettingsScreen(
         "Nimaz is up to date"
     }
 
-    val fajrTime = remember {
-        viewModel.fajrTime
-    }.collectAsState()
+    val prayerTimesState = viewModelSettings.prayerTimesState.collectAsState(initial = null)
 
-    val sunriseTime = remember {
-        viewModel.sunriseTime
-    }.collectAsState()
+    val fajrTime = prayerTimesState.value?.fajrTime ?: LocalDateTime.now()
 
-    val dhuhrTime = remember {
-        viewModel.dhuhrTime
-    }.collectAsState()
+    val sunriseTime = prayerTimesState.value?.sunriseTime ?: LocalDateTime.now()
 
-    val asrTime = remember {
-        viewModel.asrTime
-    }.collectAsState()
+    val dhuhrTime = prayerTimesState.value?.dhuhrTime ?: LocalDateTime.now()
 
-    val maghribTime = remember {
-        viewModel.maghribTime
-    }.collectAsState()
+    val asrTime = prayerTimesState.value?.asrTime ?: LocalDateTime.now()
 
-    val ishaTime = remember {
-        viewModel.ishaTime
-    }.collectAsState()
+    val maghribTime = prayerTimesState.value?.maghribTime ?: LocalDateTime.now()
+
+    val ishaTime = prayerTimesState.value?.ishaTime ?: LocalDateTime.now()
 
     val sharedPreferences = PrivateSharedPreferences(context)
 
@@ -382,12 +362,12 @@ fun SettingsScreen(
                         if (!alarmLock) {
                             CreateAlarms().exact(
                                 context,
-                                fajrTime.value!!,
-                                sunriseTime.value!!,
-                                dhuhrTime.value!!,
-                                asrTime.value!!,
-                                maghribTime.value!!,
-                                ishaTime.value!!,
+                                fajrTime!!,
+                                sunriseTime!!,
+                                dhuhrTime!!,
+                                asrTime!!,
+                                maghribTime!!,
+                                ishaTime!!,
                             )
                             sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
                         }
@@ -629,13 +609,15 @@ fun SettingsScreen(
             }
         }
         SettingsGroup(title = { Text(text = "Other") }) {
-            Option(title = { Text(text = "Help") },
+            Option(
+                title = { Text(text = "Help") },
                 onClick = {
                     onNavigateToWebViewScreen("help")
                 },
                 icon = painterResource(id = R.drawable.help_icon),
                 iconDescription = "Help documentation",
-                testTag = TEST_TAG_ABOUT) {
+                testTag = TEST_TAG_ABOUT
+            ) {
                 Icon(
                     modifier = Modifier
                         .size(24.dp)
@@ -657,7 +639,8 @@ fun SettingsScreen(
                 onClick = { onNavigateToLicencesScreen() },
                 icon = painterResource(id = R.drawable.license_icon),
                 iconDescription = "License & Acknowledgements",
-                testTag = TEST_TAG_ABOUT) {
+                testTag = TEST_TAG_ABOUT
+            ) {
                 Icon(
                     modifier = Modifier
                         .size(24.dp)
@@ -667,7 +650,8 @@ fun SettingsScreen(
                 )
             }
 
-            Option(title = { Text(text = "Rate Nimaz") },
+            Option(
+                title = { Text(text = "Rate Nimaz") },
                 onClick = {
                     val manager = ReviewManagerFactory.create(context)
                     val request = manager.requestReviewFlow()
@@ -690,7 +674,8 @@ fun SettingsScreen(
                 },
                 icon = painterResource(id = R.drawable.rating_icon),
                 iconDescription = "Rate Nimaz",
-                testTag = TEST_TAG_ABOUT)
+                testTag = TEST_TAG_ABOUT
+            )
 
             Option(
                 title = { Text(text = "Share Nimaz") },
@@ -708,7 +693,8 @@ fun SettingsScreen(
                 },
                 icon = painterResource(id = R.drawable.share_icon),
                 iconDescription = "Share Nimaz",
-                testTag = TEST_TAG_ABOUT)
+                testTag = TEST_TAG_ABOUT
+            )
 
             Option(
                 title = { Text(text = "About") },

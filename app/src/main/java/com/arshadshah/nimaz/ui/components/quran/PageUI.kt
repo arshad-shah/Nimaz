@@ -55,7 +55,8 @@ fun Page(
     val viewModel = viewModel(
         key = AppConstants.QURAN_VIEWMODEL_KEY,
         initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity)
+        viewModelStoreOwner = context as ComponentActivity
+    )
     val arabicFontSize = remember {
         viewModel.arabic_Font_size
     }.collectAsState()

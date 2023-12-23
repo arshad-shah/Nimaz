@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -50,37 +51,25 @@ fun PrayerTimesList() {
 
     val viewModel = viewModel(
         key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
+        initializer = { PrayerTimesViewModel(context) },
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
 
-    val currentPrayerName = remember {
-        viewModel.currentPrayerName
-    }.collectAsState()
+    val prayerTimesState = viewModel.prayerTimesState.collectAsState()
 
-    val fajrTime = remember {
-        viewModel.fajrTime
-    }.collectAsState()
+    val currentPrayerName = prayerTimesState.value.currentPrayerName
 
-    val sunriseTime = remember {
-        viewModel.sunriseTime
-    }.collectAsState()
+    val fajrTime = prayerTimesState.value.fajrTime
 
-    val dhuhrTime = remember {
-        viewModel.dhuhrTime
-    }.collectAsState()
+    val sunriseTime = prayerTimesState.value.sunriseTime
 
-    val asrTime = remember {
-        viewModel.asrTime
-    }.collectAsState()
+    val dhuhrTime = prayerTimesState.value.dhuhrTime
 
-    val maghribTime = remember {
-        viewModel.maghribTime
-    }.collectAsState()
+    val asrTime = prayerTimesState.value.asrTime
 
-    val ishaTime = remember {
-        viewModel.ishaTime
-    }.collectAsState()
+    val maghribTime = prayerTimesState.value.maghribTime
+
+    val ishaTime = prayerTimesState.value.ishaTime
 
     val isLoading = remember {
         viewModel.isLoading
@@ -90,33 +79,32 @@ fun PrayerTimesList() {
         viewModel.error
     }.collectAsState()
 
-    val nextPrayerName = remember {
-        viewModel.nextPrayerName
-    }.collectAsState()
+    val nextPrayerName = prayerTimesState.value.nextPrayerName
 
-    val nextPrayerTime = remember {
-        viewModel.nextPrayerTime
-    }.collectAsState()
+    val nextPrayerTime = prayerTimesState.value.nextPrayerTime
 
-    if (isError.value.isNotBlank()) {
-        Toasty.error(context, isError.value).show()
+    val timer = prayerTimesState.value.countDownTime
+
+    if (isError.value?.isNotBlank() == true) {
+        Toasty.error(context, isError.value!!).show()
     } else if (isLoading.value) {
         PrayerTimesListUI(
             prayerTimesMap = mapOf(
-                "Fajr" to fajrTime.value,
-                "Sunrise" to sunriseTime.value,
-                "Dhuhr" to dhuhrTime.value,
-                "Asr" to asrTime.value,
-                "Maghrib" to maghribTime.value,
-                "Isha" to ishaTime.value,
+                "Fajr" to fajrTime,
+                "Sunrise" to sunriseTime,
+                "Dhuhr" to dhuhrTime,
+                "Asr" to asrTime,
+                "Maghrib" to maghribTime,
+                "Isha" to ishaTime,
             ),
-            name = nextPrayerName.value,
             loading = true,
-            currentPrayerName = currentPrayerName.value,
+            currentPrayerName = currentPrayerName,
+            name = nextPrayerName ?: "Loading...",
+            timer = timer,
         )
     } else {
         val timeToNextPrayerLong =
-            nextPrayerTime.value.atZone(java.time.ZoneId.systemDefault())
+            nextPrayerTime?.atZone(java.time.ZoneId.systemDefault())
                 ?.toInstant()
                 ?.toEpochMilli()
         val currentTime =
@@ -130,20 +118,21 @@ fun PrayerTimesList() {
         )
 
         val mapOfPrayerTimes = mapOf(
-            "Fajr" to fajrTime.value!!,
-            "Sunrise" to sunriseTime.value!!,
-            "Dhuhr" to dhuhrTime.value!!,
-            "Asr" to asrTime.value!!,
-            "Maghrib" to maghribTime.value!!,
-            "Isha" to ishaTime.value!!,
+            "Fajr" to fajrTime,
+            "Sunrise" to sunriseTime,
+            "Dhuhr" to dhuhrTime,
+            "Asr" to asrTime,
+            "Maghrib" to maghribTime,
+            "Isha" to ishaTime,
         )
         PrayerTimesListUI(
             loading = false,
-            currentPrayerName = currentPrayerName.value.first()
-                .uppercaseChar() + currentPrayerName.value.substring(1),
-            name = nextPrayerName.value.first()
-                .uppercaseChar() + nextPrayerName.value.substring(1),
+            currentPrayerName = currentPrayerName.first()
+                ?.uppercaseChar()?.plus(currentPrayerName.substring(1)) ?: "Loading...",
+            name = nextPrayerName?.first()
+                ?.uppercaseChar()?.plus(nextPrayerName.substring(1)) ?: "Loading...",
             prayerTimesMap = mapOfPrayerTimes,
+            timer = timer,
         )
     }
 
@@ -155,6 +144,7 @@ fun PrayerTimesListUI(
     loading: Boolean,
     currentPrayerName: String,
     name: String,
+    timer: CountDownTime?,
 ) {
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
@@ -202,6 +192,7 @@ fun PrayerTimesListUI(
                     shouldShowTimer = name == key,
                     loading = loading,
                     isBoldText = isBoldText,
+                    timer = timer,
                 )
             }
         }
@@ -217,13 +208,8 @@ fun PrayerTimesRow(
     loading: Boolean,
     isBoldText: Boolean,
     shouldShowTimer: Boolean,
+    timer: CountDownTime?,
 ) {
-    val viewModel = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-    val countDownTime = remember { viewModel.timer }.collectAsState()
     //format the date to time based on device format
     //get the device trime format
     val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
@@ -283,7 +269,7 @@ fun PrayerTimesRow(
                             highlightColor = Color.White,
                         )
                     ),
-                text = " -${countDownTime.value.hours} : ${countDownTime.value.minutes} : ${countDownTime.value.seconds}",
+                text = " -${timer?.hours} : ${timer?.minutes} : ${timer?.seconds}",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleSmall
             )

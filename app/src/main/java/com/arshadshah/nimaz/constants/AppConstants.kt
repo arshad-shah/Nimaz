@@ -6,6 +6,14 @@ object AppConstants {
 
     const val DATABASE_VERSION = 14
 
+    //prayer names
+    const val PRAYER_NAME_FAJR = "Fajr"
+    const val PRAYER_NAME_SUNRISE = "Sunrise"
+    const val PRAYER_NAME_DHUHR = "Dhuhr"
+    const val PRAYER_NAME_ASR = "Asr"
+    const val PRAYER_NAME_MAGHRIB = "Maghrib"
+    const val PRAYER_NAME_ISHA = "Isha"
+
     //Preferences file name
     const val PREFERENCES_FILE_NAME = "com.arshadshah.nimaz.SharedPreferences"
 

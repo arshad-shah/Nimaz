@@ -34,7 +34,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
-import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
 import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerGrid
 import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerListItems
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
@@ -397,12 +396,13 @@ fun Fasting(
 
         is TrackerViewModel.FastTrackerState.Tracker -> {
             isFastingToday.value = isFasting
-            FastTrackerCard(
-                handleEvent = handleEvent,
-                dateState = dateState,
-                isFastingToday = isFastingToday,
-                isMenstrauting = isMenstrauting
-            )
+//            FastTrackerCard(
+//                handleEvent = handleEvent,
+//                dateState = dateState,
+//                isFastingToday = isFastingToday,
+//                isMenstrauting = isMenstrauting,
+//                isLoading = isLoading
+//            )
 
         }
 

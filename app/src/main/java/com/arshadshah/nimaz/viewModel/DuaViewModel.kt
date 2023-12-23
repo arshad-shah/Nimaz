@@ -8,49 +8,63 @@ import com.arshadshah.nimaz.data.remote.models.Chapter
 import com.arshadshah.nimaz.data.remote.models.Dua
 import com.arshadshah.nimaz.data.remote.repositories.DuaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class DuaViewModel : ViewModel() {
 
-    //categories
-    private val _categories = MutableStateFlow(ArrayList<Category>())
-    val categories = _categories.asStateFlow()
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
+    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
 
-    //chapters for a category
-    private val _chapters = MutableStateFlow(ArrayList<Chapter>())
-    val chapters = _chapters.asStateFlow()
+    private val _chapters = MutableStateFlow<List<Chapter>>(emptyList())
+    val chapters: StateFlow<List<Chapter>> = _chapters.asStateFlow()
 
-    //duas for a chapter
-    private val _duas = MutableStateFlow(ArrayList<Dua>())
-    val duas = _duas.asStateFlow()
+    private val _duas = MutableStateFlow<List<Dua>>(emptyList())
+    val duas: StateFlow<List<Dua>> = _duas.asStateFlow()
 
-    //get the categories
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     fun getCategories() {
         viewModelScope.launch {
-            val response = DuaRepository.getCategories()
-            if (response.data != null) {
-                _categories.value = response.data
-            } else {
-                Log.e("DuaViewModel", "getCategories: ${response.message}")
+            _isLoading.value = true
+            try {
+                val response = DuaRepository.getCategories()
+                _categories.value = response.data ?: emptyList()
+            } catch (e: Exception) {
+                Log.e("DuaViewModel", "Error getting categories", e)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    //get the chapters of a category
     fun getChapters(id: Int) {
         viewModelScope.launch {
-            val response = DuaRepository.getChaptersByCategory(id)
-            _chapters.value = response.data!!
+            _isLoading.value = true
+            try {
+                val response = DuaRepository.getChaptersByCategory(id)
+                _chapters.value = response.data ?: emptyList()
+            } catch (e: Exception) {
+                Log.e("DuaViewModel", "Error getting chapters", e)
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
-    //get the duas of a chapter
     fun getDuas(chapterId: Int) {
         viewModelScope.launch {
-            val response = DuaRepository.getDuasOfChapter(chapterId)
-            _duas.value = response.data!!
+            _isLoading.value = true
+            try {
+                val response = DuaRepository.getDuasOfChapter(chapterId)
+                _duas.value = response.data ?: emptyList()
+            } catch (e: Exception) {
+                Log.e("DuaViewModel", "Error getting duas", e)
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
-
 }

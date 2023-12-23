@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.utils.LocalDataStore
+import kotlinx.coroutines.flow.Flow
 
 object PrayerTrackerRepository {
 
@@ -29,6 +31,21 @@ object PrayerTrackerRepository {
         val dataStore = LocalDataStore.getDataStore()
         dataStore.updateTracker(tracker)
         return getTrackerForDate(tracker.date)
+    }
+
+    suspend fun updateSpecificPrayer(
+        date: String,
+        prayerName: String,
+        prayerDone: Boolean
+    ): PrayerTracker {
+        val dataStore = LocalDataStore.getDataStore()
+        dataStore.updateSpecificPrayer(date, prayerName, prayerDone)
+        return getTrackerForDate(date)
+    }
+
+    fun getPrayersForDate(date: String): Flow<LocalPrayersTracker> {
+        val dataStore = LocalDataStore.getDataStore()
+        return dataStore.getPrayersForDate(date)
     }
 
     suspend fun getAllTrackers(): List<PrayerTracker> {
