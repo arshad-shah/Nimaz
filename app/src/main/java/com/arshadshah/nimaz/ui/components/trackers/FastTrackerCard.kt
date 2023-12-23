@@ -8,28 +8,26 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.ui.components.common.ToggleableItemColumn
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import es.dmoral.toasty.Toasty
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun FastTrackerCard(
-    handleEvent: (TrackerViewModel.TrackerEvent) -> Unit,
     dateState: State<String>,
-    isFastingToday: MutableState<Boolean>,
-    isMenstrauting: State<Boolean>,
+    isFastingToday: State<Boolean>,
+    isMenstrauting: Boolean,
+    isLoading: State<Boolean>,
+    handleEvent: (String, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val dateForTracker = LocalDate.parse(dateState.value)
@@ -50,7 +48,7 @@ fun FastTrackerCard(
             .padding(8.dp),
     ) {
         ToggleableItemColumn(
-            enabled = !isMenstrauting.value,
+            enabled = !isMenstrauting,
             text = if (dateForTracker.isBefore(LocalDate.now())) "Did not fast"
             else "Not Fasting",
             //if date state is in the fast then shoow the date
@@ -73,16 +71,7 @@ fun FastTrackerCard(
                     ).show()
                     return@ToggleableItemColumn
                 }
-                isFastingToday.value = !isFastingToday.value
-                handleEvent(
-                    TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-                        FastTracker(
-                            date = dateState.value,
-                            isFasting = isFastingToday.value
-                        )
-                    )
-                )
-                handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(dateState.value))
+                handleEvent(dateState.value, it)
             },
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)

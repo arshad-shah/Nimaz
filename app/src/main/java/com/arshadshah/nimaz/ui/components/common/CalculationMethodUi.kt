@@ -35,7 +35,7 @@ fun CalculationMethodUI() {
     val context = LocalContext.current
     val viewModel = viewModel(
         key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
+        initializer = { PrayerTimesViewModel(context) },
         viewModelStoreOwner = context as ComponentActivity
     )
     val settingViewModel = viewModel(

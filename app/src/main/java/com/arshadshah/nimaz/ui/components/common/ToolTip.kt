@@ -29,7 +29,14 @@ import com.skydoves.balloon.compose.rememberBalloonBuilder
  * @param tipTextSize the size to apply to the tooltip text
  */
 @Composable
-fun ToolTip(icon: Painter, iconTint: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), contentDescription: String = "info", iconSize: Int = 24, tipText: String, tipTextSize: TextStyle = MaterialTheme.typography.bodySmall) {
+fun ToolTip(
+    icon: Painter,
+    iconTint: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+    contentDescription: String = "info",
+    iconSize: Int = 24,
+    tipText: String,
+    tipTextSize: TextStyle = MaterialTheme.typography.bodySmall
+) {
 
     val colorOfToolTip = MaterialTheme.colorScheme.surface.hashCode()
 

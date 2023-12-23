@@ -64,7 +64,7 @@ fun DashboardPrayertimesCard() {
 
     val viewModel = viewModel(
         key = PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
+        initializer = { PrayerTimesViewModel(context) },
         viewModelStoreOwner = context as ComponentActivity
     )
     val settingViewModel = viewModel(
@@ -87,28 +87,23 @@ fun DashboardPrayertimesCard() {
         }
     }
 
-    val nextPrayerName = remember {
-        viewModel.nextPrayerName
-    }.collectAsState()
+    val prayerTimesState = viewModel.prayerTimesState.collectAsState(initial = null)
+    val nextPrayerName = prayerTimesState.value?.nextPrayerName ?: "Loading..."
 
-    val nextPrayerTime = remember {
-        viewModel.nextPrayerTime
-    }.collectAsState()
+    val nextPrayerTime = prayerTimesState.value?.nextPrayerTime ?: LocalDateTime.now()
 
     // if next prayer time is not in today then show the next prayer name as Fajr Tomorrow
-    val newNextPrayerName = if (nextPrayerTime.value.toLocalDate() != LocalDate.now()) {
+    val newNextPrayerName = if (nextPrayerTime.toLocalDate() != LocalDate.now()) {
         "Fajr Tomorrow"
     } else {
-        nextPrayerName.value.first()
-            .uppercase() + nextPrayerName.value.substring(1)
+        nextPrayerName.first()
+            .uppercase() + nextPrayerName.substring(1)
             .lowercase(
                 Locale.ROOT
             )
     }
 
-    val timer = remember {
-        viewModel.timer
-    }.collectAsState()
+    val timer = prayerTimesState.value?.countDownTime
 
     val locationName = remember {
         settingViewModel.locationName
@@ -132,7 +127,7 @@ fun DashboardPrayertimesCard() {
 
 
     val timeToNextPrayerLong =
-        nextPrayerTime.value?.atZone(java.time.ZoneId.systemDefault())
+        nextPrayerTime?.atZone(java.time.ZoneId.systemDefault())
             ?.toInstant()
             ?.toEpochMilli()
     val currentTime =
@@ -157,9 +152,9 @@ fun DashboardPrayertimesCard() {
 
     Card(
         modifier = Modifier
-			.padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
-			.fillMaxWidth()
-			.testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD),
+            .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
+            .fillMaxWidth()
+            .testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -182,14 +177,14 @@ fun DashboardPrayertimesCard() {
             ) {
                 Box(
                     modifier = Modifier
-						.clip(MaterialTheme.shapes.extraLarge)
-						.size(100.dp)
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .size(100.dp)
                 ) {
                     Image(
                         modifier = Modifier
-							.size(100.dp)
-							.testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD),
-                        painter = when (nextPrayerName.value) {
+                            .size(100.dp)
+                            .testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD),
+                        painter = when (nextPrayerName) {
                             "sunrise" -> {
                                 painterResource(id = R.drawable.sunrise_icon)
                             }
@@ -231,16 +226,16 @@ fun DashboardPrayertimesCard() {
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
-                        text = nextPrayerTime.value.format(formatter),
+                        text = nextPrayerTime.format(formatter),
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
-                        text = getTimerText(timer.value),
+                        text = getTimerText(timer),
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
-							.fillMaxWidth()
-							.padding(8.dp)
+                            .fillMaxWidth()
+                            .padding(8.dp)
                     )
                 }
             }
@@ -249,7 +244,10 @@ fun DashboardPrayertimesCard() {
 }
 
 //a function to return in text how much time is left for the next prayer
-fun getTimerText(timeToNextPrayer: CountDownTime): String {
+fun getTimerText(timeToNextPrayer: CountDownTime?): String {
+    if (timeToNextPrayer == null) {
+        return "No Timer set"
+    }
     return when {
         timeToNextPrayer.hours > 1 -> {
             //check if there are minutes left
@@ -325,21 +323,21 @@ fun MoonPhaseImage(image: Int) {
     //and a black border
     Box(
         modifier = Modifier
-			.size(40.dp)
-			.border(
-				width = 1.dp,
-				color = MaterialTheme.colorScheme.outline,
-				shape = CircleShape
-			)
-			.clip(shape = CircleShape)
+            .size(40.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = CircleShape
+            )
+            .clip(shape = CircleShape)
     ) {
         Image(
             painter = painterResource(id = image),
             contentDescription = "Moon Phase Image",
             modifier = Modifier
-				.size(40.dp)
-				.background(color = Color.White.copy(alpha = 0.8f))
-				.clip(shape = CircleShape)
+                .size(40.dp)
+                .background(color = Color.White.copy(alpha = 0.8f))
+                .clip(shape = CircleShape)
         )
     }
 }

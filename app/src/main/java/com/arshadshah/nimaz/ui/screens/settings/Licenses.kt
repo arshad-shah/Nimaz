@@ -135,7 +135,8 @@ fun Licences(paddingValues: PaddingValues) {
                 libraryToShow.value = null
             },
             showDismissButton = false,
-            confirmButtonText = "OK")
+            confirmButtonText = "OK"
+        )
     }
 
 }

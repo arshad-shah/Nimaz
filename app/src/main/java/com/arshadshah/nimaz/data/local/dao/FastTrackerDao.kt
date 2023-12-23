@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.dao
 
 import androidx.room.*
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FastTrackerDao {
@@ -32,4 +33,8 @@ interface FastTrackerDao {
 
     @Query("SELECT EXISTS(SELECT * FROM FastTracker WHERE date = :date)")
     suspend fun fastTrackerExistsForDate(date: String): Boolean
+
+    // is fasting for a specific date
+    @Query("SELECT isFasting FROM FastTracker WHERE date = :date")
+    fun isFastingForDate(date: String): Flow<Boolean>
 }

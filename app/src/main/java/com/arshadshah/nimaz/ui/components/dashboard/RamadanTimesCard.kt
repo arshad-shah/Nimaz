@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.ui.components.dashboard
 
 import android.content.Intent
 import android.text.format.DateFormat
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,40 +23,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 
 
 @Composable
-fun RamadanTimesCard(isFasting: Boolean) {
+fun RamadanTimesCard(
+    isFasting: Boolean,
+    location: String,
+    fajrPrayerTime: LocalDateTime,
+    maghribPrayerTime: LocalDateTime
+) {
 
     val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    val settingViewModel = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context
-    )
-    val fajrPrayerTime = remember {
-        viewModel.fajrTime
-    }.collectAsState()
-    val maghribPrayerTime = remember {
-        viewModel.maghribTime
-    }.collectAsState()
-    val location = remember {
-        settingViewModel.locationName
-    }.collectAsState()
+
     //a card that shows the time left for ramadan
     //it should only show when 40 days are left for ramadan
     //it should show the time left for ramadan in days, hours, minutes and seconds
@@ -126,18 +108,18 @@ fun RamadanTimesCard(isFasting: Boolean) {
                             //the sura number followed by the aya number
                             shareIntent.putExtra(
                                 Intent.EXTRA_TEXT,
-                                "Ramadan Fasting Times for ${location.value} \n${
+                                "Ramadan Fasting Times for $location \n${
                                     DateTimeFormatter.ofPattern(
                                         "EEEE, d MMMM yyyy"
                                     ).format(today)
                                 } \n" +
                                         "Imsak (Fajr): ${
                                             DateTimeFormatter.ofPattern("hh:mm a")
-                                                .format(fajrPrayerTime.value)
+                                                .format(fajrPrayerTime)
                                         } \n" +
                                         "Iftar (Maghrib): ${
                                             DateTimeFormatter.ofPattern("hh:mm a")
-                                                .format(maghribPrayerTime.value)
+                                                .format(maghribPrayerTime)
                                         } \n" +
                                         "Times are Provided by Nimaz : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
                             )
@@ -182,11 +164,11 @@ fun RamadanTimesCard(isFasting: Boolean) {
                     ) {
                         TimeComponent(
                             title = "Fajr (Imsak)",
-                            fajrPrayerTime = formatter.format(fajrPrayerTime.value)
+                            time = formatter.format(fajrPrayerTime)
                         )
                         TimeComponent(
                             title = "Maghrib (Iftar)",
-                            fajrPrayerTime = formatter.format(maghribPrayerTime.value)
+                            time = formatter.format(maghribPrayerTime)
                         )
                     }
                 }
@@ -197,7 +179,7 @@ fun RamadanTimesCard(isFasting: Boolean) {
 
 //compoennt to show the fajr time with a label
 @Composable
-fun TimeComponent(title: String = "Suhoor Time", fajrPrayerTime: String) {
+fun TimeComponent(title: String = "Suhoor Time", time: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -206,6 +188,6 @@ fun TimeComponent(title: String = "Suhoor Time", fajrPrayerTime: String) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = title, style = MaterialTheme.typography.titleLarge)
-        Text(text = fajrPrayerTime, style = MaterialTheme.typography.titleLarge)
+        Text(text = time, style = MaterialTheme.typography.titleLarge)
     }
 }

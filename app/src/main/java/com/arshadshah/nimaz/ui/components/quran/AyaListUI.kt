@@ -62,7 +62,8 @@ fun AyaListUI(
     val viewModel = viewModel(
         key = QURAN_VIEWMODEL_KEY,
         initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity)
+        viewModelStoreOwner = context as ComponentActivity
+    )
     val spaceFilesRepository = SpacesFileRepository(context)
     val surah = remember {
         viewModel.surahState
@@ -250,7 +251,8 @@ fun AyaListItemUI(
     val viewModel = viewModel(
         key = QURAN_VIEWMODEL_KEY,
         initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity)
+        viewModelStoreOwner = context as ComponentActivity
+    )
 
     val error = remember {
         mutableStateOf("")

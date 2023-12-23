@@ -8,84 +8,66 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.services.LocationService
+import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.type.Parameters
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 
-class PrayerTimesViewModel : ViewModel() {
+class PrayerTimesViewModel(context: Context) : ViewModel() {
+    val sharedPreferences = PrivateSharedPreferences(context)
+    private val locationService = LocationService(context, LocationRepository(context))
+    private val prayerTimesService = PrayerTimesService(context, PrayerTimesRepository)
+
+    data class PrayerTimesState(
+        val currentPrayerName: String = "Loading...",
+        val nextPrayerName: String = "Loading...",
+        val nextPrayerTime: LocalDateTime = LocalDateTime.now(),
+        val fajrTime: LocalDateTime = LocalDateTime.now(),
+        val sunriseTime: LocalDateTime = LocalDateTime.now(),
+        val dhuhrTime: LocalDateTime = LocalDateTime.now(),
+        val asrTime: LocalDateTime = LocalDateTime.now(),
+        val maghribTime: LocalDateTime = LocalDateTime.now(),
+        val ishaTime: LocalDateTime = LocalDateTime.now(),
+        val countDownTime: CountDownTime = CountDownTime(0, 0, 0),
+        val locationName: String = "Loading...",
+        val latitude: Double = 0.0,
+        val longitude: Double = 0.0,
+    )
+
+    sealed class PrayerTimesEvent {
+        class Start(val timeToNextPrayer: Long) : PrayerTimesEvent()
+        object RELOAD : PrayerTimesEvent()
+        class UPDATE_PRAYERTIMES(val mapOfParameters: Parameters) : PrayerTimesEvent()
+        class UPDATE_WIDGET(val context: Context) : PrayerTimesEvent()
+        class SET_LOADING(val isLoading: Boolean) : PrayerTimesEvent()
+        class SET_ALARMS(val context: Context) : PrayerTimesEvent()
+
+        object LOAD_LOCATION : PrayerTimesEvent()
+    }
 
     private var countDownTimer: CountDownTimer? = null
 
-    private val _countDownTimeState = MutableStateFlow(CountDownTime(0, 0, 0))
-    val timer = _countDownTimeState.asStateFlow()
+    private val _prayerTimesState = MutableStateFlow(PrayerTimesState())
+    val prayerTimesState: StateFlow<PrayerTimesState> = _prayerTimesState.asStateFlow()
 
-    //current prayer name
-    private val _currentPrayerName = MutableStateFlow("Loading...")
-    val currentPrayerName = _currentPrayerName.asStateFlow()
-
-    private val _nextPrayerName = MutableStateFlow("Loading...")
-    val nextPrayerName = _nextPrayerName.asStateFlow()
-
-    private val _nextPrayerTime = MutableStateFlow(LocalDateTime.now())
-    val nextPrayerTime = _nextPrayerTime.asStateFlow()
-
-    private val _fajrTimeState = MutableStateFlow(LocalDateTime.now())
-    val fajrTime = _fajrTimeState.asStateFlow()
-
-    private val _sunriseTimeState = MutableStateFlow(LocalDateTime.now())
-    val sunriseTime = _sunriseTimeState.asStateFlow()
-
-    private val _dhuhrTimeState = MutableStateFlow(LocalDateTime.now())
-    val dhuhrTime = _dhuhrTimeState.asStateFlow()
-
-    private val _asrTimeState = MutableStateFlow(LocalDateTime.now())
-    val asrTime = _asrTimeState.asStateFlow()
-
-    private val _maghribTimeState = MutableStateFlow(LocalDateTime.now())
-    val maghribTime = _maghribTimeState.asStateFlow()
-
-    private val _ishaTimeState = MutableStateFlow(LocalDateTime.now())
-    val ishaTime = _ishaTimeState.asStateFlow()
-
-    //loading
     private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    //error
-    private val _error = MutableStateFlow("")
-    val error = _error.asStateFlow()
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
 
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean>
-        get() = _isRefreshing.asStateFlow()
-
-
-    //event that starts the timer
-    sealed class PrayerTimesEvent {
-
-        class Start(val timeToNextPrayer: Long) : PrayerTimesEvent()
-        object RELOAD : PrayerTimesEvent()
-
-        //get updated prayertimes if parameters change in settings
-        class UPDATE_PRAYERTIMES(val mapOfParameters: Parameters) : PrayerTimesEvent()
-
-        class UPDATE_WIDGET(val context: Context) : PrayerTimesEvent()
-
-        class REFRESH(val isRefreshingUI: Boolean) : PrayerTimesEvent()
-
-        class SET_LOADING(val isLoading: Boolean) : PrayerTimesEvent()
-
-        //set alarms
-        class SET_ALARMS(val context: Context) : PrayerTimesEvent()
-    }
 
     //function to handle the timer event
     fun handleEvent(context: Context, event: PrayerTimesEvent) {
@@ -96,7 +78,7 @@ class PrayerTimesViewModel : ViewModel() {
             }
             //event to reload the prayer times
             is PrayerTimesEvent.RELOAD -> {
-                loadPrayerTimes(context)
+                loadPrayerTimes()
             }
             //event to update the prayer times
             is PrayerTimesEvent.UPDATE_PRAYERTIMES -> {
@@ -106,10 +88,6 @@ class PrayerTimesViewModel : ViewModel() {
             is PrayerTimesEvent.UPDATE_WIDGET -> {
                 updateWidget(event.context)
             }
-            //event to refresh the UI
-            is PrayerTimesEvent.REFRESH -> {
-                _isRefreshing.value = event.isRefreshingUI
-            }
             //event to set the loading state
             is PrayerTimesEvent.SET_LOADING -> {
                 _isLoading.value = event.isLoading
@@ -118,19 +96,23 @@ class PrayerTimesViewModel : ViewModel() {
             is PrayerTimesEvent.SET_ALARMS -> {
                 setAlarms(event.context)
             }
+            //event to load the location
+            is PrayerTimesEvent.LOAD_LOCATION -> {
+                loadLocation()
+            }
         }
     }
 
     private fun setAlarms(context: Context) {
-        loadPrayerTimes(context)
+        loadPrayerTimes()
         CreateAlarms().exact(
             context,
-            fajrTime.value!!,
-            sunriseTime.value!!,
-            dhuhrTime.value!!,
-            asrTime.value!!,
-            maghribTime.value!!,
-            ishaTime.value!!,
+            _prayerTimesState.value.fajrTime,
+            _prayerTimesState.value.sunriseTime,
+            _prayerTimesState.value.dhuhrTime,
+            _prayerTimesState.value.asrTime,
+            _prayerTimesState.value.maghribTime,
+            _prayerTimesState.value.ishaTime,
         )
     }
 
@@ -159,40 +141,49 @@ class PrayerTimesViewModel : ViewModel() {
 
                     val currentPrayerName =
                         currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                    val nextPrayerName = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                    if (nextPrayerName == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data.isha!!.toLocalTime().hour) {
-                        //add 1 day to next prayer times
-                        _nextPrayerName.value =
-                            nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                        _nextPrayerTime.value = response.data.fajr!!.plusDays(1)
+                    val nextPrayerName = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes)
+                    if (nextPrayerName.first == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data.isha!!.toLocalTime().hour) {
+                        _prayerTimesState.update {
+                            it.copy(
+                                nextPrayerName = nextPrayerName.first,
+                                nextPrayerTime = response.data.fajr!!.plusDays(1)
+                            )
+                        }
                     } else {
-                        _nextPrayerName.value =
-                            nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                        _nextPrayerTime.value =
-                            nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).second
+                        _prayerTimesState.update {
+                            it.copy(
+                                nextPrayerName = nextPrayerName.first,
+                                nextPrayerTime = nextPrayerName.second
+                            )
+                        }
                     }
 
-                    //set the current prayer name
-                    _currentPrayerName.value =
-                        currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                    _fajrTimeState.value = response.data.fajr!!
-                    _sunriseTimeState.value = response.data.sunrise!!
-                    _dhuhrTimeState.value = response.data.dhuhr!!
-                    _asrTimeState.value = response.data.asr!!
-                    _maghribTimeState.value = response.data.maghrib!!
+                    _prayerTimesState.update {
+                        it.copy(
+                            currentPrayerName = currentPrayerName,
+                            fajrTime = response.data.fajr!!,
+                            sunriseTime = response.data.sunrise!!,
+                            dhuhrTime = response.data.dhuhr!!,
+                            asrTime = response.data.asr!!,
+                            maghribTime = response.data.maghrib!!,
+                        )
+                    }
                     val ishaTime = response.data.isha?.toLocalTime()?.hour
                     val newIshaTime = if (ishaTime!! >= 22) {
                         response.data.maghrib?.plusMinutes(60)
                     } else {
                         response.data.isha
                     }
-                    _ishaTimeState.value = newIshaTime!!
+                    _prayerTimesState.update {
+                        it.copy(
+                            ishaTime = newIshaTime!!
+                        )
+                    }
                     Log.d(
                         AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel",
                         "UpdatePrayerTimes: ${response.data}"
                     )
                     _isLoading.value = false
-                    _isRefreshing.value = false
                 } else {
                     _error.value = response.message.toString()
                     _isLoading.value = false
@@ -210,59 +201,29 @@ class PrayerTimesViewModel : ViewModel() {
     }
 
     //load prayer times again
-    fun loadPrayerTimes(context: Context) {
+    fun loadPrayerTimes() {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             _error.value = ""
             try {
-                val response = PrayerTimesRepository.getPrayerTimes(context)
-                if (response.data != null) {
-                    val mapOfPrayerTimes = mapOf(
-                        "fajr" to response.data.fajr,
-                        "sunrise" to response.data.sunrise,
-                        "dhuhr" to response.data.dhuhr,
-                        "asr" to response.data.asr,
-                        "maghrib" to response.data.maghrib,
-                        "isha" to response.data.isha
+                val prayerTimes = prayerTimesService.getPrayerTimes()
+                val currentAndNextPrayer = prayerTimesService.getCurrentAndNextPrayer(prayerTimes)
+
+                _prayerTimesState.update {
+                    it.copy(
+                        currentPrayerName = currentAndNextPrayer.currentPrayer,
+                        nextPrayerName = currentAndNextPrayer.nextPrayer,
+                        nextPrayerTime = currentAndNextPrayer.nextPrayerTime,
+                        fajrTime = prayerTimes.fajr,
+                        sunriseTime = prayerTimes.sunrise,
+                        dhuhrTime = prayerTimes.dhuhr,
+                        asrTime = prayerTimes.asr,
+                        maghribTime = prayerTimes.maghrib,
+                        ishaTime = prayerTimes.isha
                     )
-                    val currentDate = LocalDateTime.now()
-                    val currentPrayerName = currentPrayer(currentDate, mapOfPrayerTimes).first
-                    val nextPrayerName = nextPrayer(currentDate, mapOfPrayerTimes).first
-                    if (nextPrayerName == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data.isha!!.toLocalTime().hour) {
-                        //add 1 day to next prayer times
-                        _nextPrayerName.value =
-                            nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                        _nextPrayerTime.value = response.data.fajr!!.plusDays(1)
-                    } else {
-                        _nextPrayerName.value =
-                            nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                        _nextPrayerTime.value =
-                            nextPrayer(LocalDateTime.now(), mapOfPrayerTimes).second
-                    }
-                    //set the current prayer name
-                    _currentPrayerName.value =
-                        currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                    _fajrTimeState.value = response.data.fajr!!
-                    _sunriseTimeState.value = response.data.sunrise!!
-                    _dhuhrTimeState.value = response.data.dhuhr!!
-                    _asrTimeState.value = response.data.asr!!
-                    _maghribTimeState.value = response.data.maghrib!!
-
-                    val ishaTime = response.data.isha?.toLocalTime()?.hour
-                    val newIshaTime = if (ishaTime!! >= 22) {
-                        response.data.maghrib?.plusMinutes(60)
-                    } else {
-                        response.data.isha
-                    }
-                    _ishaTimeState.value = newIshaTime!!
-
-                    _isLoading.value = false
-                    _isRefreshing.value = false
-
-                } else {
-                    _isLoading.value = false
-                    _error.value = response.message.toString()
                 }
+
+                _isLoading.value = false
 
             } catch (e: Exception) {
                 Log.d(
@@ -294,13 +255,40 @@ class PrayerTimesViewModel : ViewModel() {
                 diff %= secondsInMilli
 
                 val countDownTime = CountDownTime(elapsedHours, elapsedMinutes, elapsedSeconds)
-                _countDownTimeState.value = countDownTime
+                _prayerTimesState.update {
+                    it.copy(
+                        countDownTime = countDownTime
+                    )
+                }
             }
 
             override fun onFinish() {
-                loadPrayerTimes(context)
+                loadPrayerTimes()
             }
         }.start()
+    }
+
+    private fun loadLocation() {
+        val isAutoLocation = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
+        locationService.loadLocation(isAutoLocation, onSuccess = { location ->
+            _prayerTimesState.update {
+                it.copy(
+                    locationName = location.locationName,
+                    latitude = location.latitude,
+                    longitude = location.longitude
+                )
+            }
+        },
+            onError = { errorMessage ->
+                _prayerTimesState.update {
+                    it.copy(
+                        locationName = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
+                        latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
+                        longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+                    )
+                }
+                _error.value = errorMessage
+            })
     }
 }
 

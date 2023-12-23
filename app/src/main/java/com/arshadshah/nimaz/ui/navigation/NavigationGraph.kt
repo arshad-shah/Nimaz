@@ -156,9 +156,7 @@ fun NavigationGraph(
         {
             PrayerTimesScreen(
                 paddingValues = paddingValues
-            ) {
-                navController.navigate(CALENDER_SCREEN_ROUTE)
-            }
+            )
         }
 
         composable(CALENDER_SCREEN_ROUTE) {
@@ -409,7 +407,8 @@ fun NavigationGraph(
                         DEBUG_MODE
                     )
                 },
-                paddingValues = paddingValues)
+                paddingValues = paddingValues
+            )
         }
         composable(WEB_VIEW_SCREEN_ROUTE) {
             WebViewScreen(

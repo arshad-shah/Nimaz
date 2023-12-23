@@ -2,9 +2,6 @@ package com.arshadshah.nimaz.viewModel
 
 import android.app.Activity
 import android.content.Context
-import android.content.IntentSender
-import android.location.Address
-import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,23 +9,41 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
-import com.arshadshah.nimaz.utils.AutoLocationUtils
-import com.arshadshah.nimaz.utils.NetworkChecker
+import com.arshadshah.nimaz.data.remote.models.CountDownTime
+import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.services.LocationService
+import com.arshadshah.nimaz.services.PrayerTimesService
+import com.arshadshah.nimaz.services.UpdateService
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Locale
+import java.time.LocalDateTime
 
 class SettingsViewModel(context: Context) : ViewModel() {
 
     val sharedPreferences = PrivateSharedPreferences(context)
+    private val locationRepository = LocationRepository(context)
+    private val locationService = LocationService(context, LocationRepository(context))
+    private val updateService = UpdateService(context)
+    private val prayerTimesService = PrayerTimesService(context, PrayerTimesRepository)
 
-    private val geocoder = Geocoder(context, Locale.getDefault())
+    data class PrayerTimesState(
+        val nextPrayerTime: LocalDateTime = LocalDateTime.now(),
+        val fajrTime: LocalDateTime = LocalDateTime.now(),
+        val sunriseTime: LocalDateTime = LocalDateTime.now(),
+        val dhuhrTime: LocalDateTime = LocalDateTime.now(),
+        val asrTime: LocalDateTime = LocalDateTime.now(),
+        val maghribTime: LocalDateTime = LocalDateTime.now(),
+        val ishaTime: LocalDateTime = LocalDateTime.now(),
+    )
+
+    private val _prayerTimesState = MutableStateFlow(PrayerTimesState())
+    val prayerTimesState: StateFlow<PrayerTimesState> = _prayerTimesState.asStateFlow()
 
     //theme state
     //it has four states: light, dark and system , and dynamic if we are in Build.VERSION.SDK_INT >= Build.VERSION_CODES.S else it has three states: light, dark and system
@@ -40,9 +55,6 @@ class SettingsViewModel(context: Context) : ViewModel() {
     private var _isDarkMode =
         MutableStateFlow(sharedPreferences.getDataBoolean(AppConstants.DARK_MODE, false))
     val isDarkMode = _isDarkMode.asStateFlow()
-
-    private var _hasUpdate = MutableStateFlow(false)
-    val hasUpdate = _hasUpdate.asStateFlow()
 
 
     //state for switch of location toggle between manual and automatic
@@ -215,6 +227,8 @@ class SettingsViewModel(context: Context) : ViewModel() {
         class AutoParameters(val checked: Boolean) : SettingsEvent()
 
         class CheckUpdate(val context: Context, val doUpdate: Boolean) : SettingsEvent()
+
+        object LoadPrayerTimes : SettingsEvent()
     }
 
     //events for the settings screen
@@ -223,33 +237,49 @@ class SettingsViewModel(context: Context) : ViewModel() {
             is SettingsEvent.LocationToggle -> {
                 sharedPreferences.saveDataBoolean(LOCATION_TYPE, event.checked)
                 _isLocationAuto.value = event.checked
-                loadLocation(event.context, event.checked)
+                loadLocation(event.checked)
                 Log.d("Nimaz: SettingsViewModel", "Location toggle : ${event.checked}")
             }
 
             is SettingsEvent.LocationInput -> {
                 _locationName.value = event.location
                 sharedPreferences.saveData(AppConstants.LOCATION_INPUT, event.location)
-                forwardGeocode(event.location)
-                Log.d("Nimaz: SettingsViewModel", "Location input : ${event.location}")
+                val locationData = locationRepository.forwardGeocode(event.location)
+                locationData.onSuccess {
+                    _latitude.value = it.latitude
+                    _longitude.value = it.longitude
+                    _locationName.value = it.locationName
+                    sharedPreferences.saveDataDouble(AppConstants.LATITUDE, it.latitude)
+                    sharedPreferences.saveDataDouble(AppConstants.LONGITUDE, it.longitude)
+                    Log.d("Nimaz: SettingsViewModel", "Location input : ${event.location}")
+                }
+                locationData.onFailure {
+                    val locationLatitudeFromStorage =
+                        sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+                    val locationLongitudeFromStorage =
+                        sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+                    _latitude.value = locationLatitudeFromStorage
+                    _longitude.value = locationLongitudeFromStorage
+                    Log.d("Nimaz: SettingsViewModel", "Location input : ${event.location}")
+                }
             }
 
             is SettingsEvent.Latitude -> {
                 _latitude.value = event.latitude
                 sharedPreferences.saveData(AppConstants.LATITUDE, event.latitude.toString())
-                loadLocation(event.context, sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
+                loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
                 Log.d("Nimaz: SettingsViewModel", "Latitude : ${event.latitude}")
             }
 
             is SettingsEvent.Longitude -> {
                 _longitude.value = event.longitude
                 sharedPreferences.saveData(AppConstants.LONGITUDE, event.longitude.toString())
-                loadLocation(event.context, sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
+                loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
                 Log.d("Nimaz: SettingsViewModel", "Longitude : ${event.longitude}")
             }
 
             is SettingsEvent.LoadLocation -> {
-                loadLocation(event.context, sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
+                loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, true))
                 Log.d("Nimaz: SettingsViewModel", "Load location")
             }
 
@@ -459,201 +489,67 @@ class SettingsViewModel(context: Context) : ViewModel() {
 
             is SettingsEvent.CheckUpdate -> {
                 Log.d("Nimaz: SettingsViewModel", "Checking for update")
-                val appUpdateManager = AppUpdateManagerFactory.create(event.context)
-                val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-                appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-                    if (event.doUpdate) {
-                        Log.d(
-                            "Nimaz: SettingsViewModel", "Update available : ${
-                                appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-                                    AppUpdateType.IMMEDIATE
-                                )
-                            }"
+                updateService.checkForUpdate(event.doUpdate) { updateIsAvailable ->
+                    _isUpdateAvailable.value = updateIsAvailable
+                    if (event.doUpdate && updateIsAvailable) {
+                        updateService.startUpdateFlowForResult(
+                            event.context.applicationContext as Activity,
+                            APP_UPDATE_REQUEST_CODE
                         )
-                        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-                                AppUpdateType.IMMEDIATE
-                            )
-                        ) {
-                            try {
-                                Log.d("Nimaz: SettingsViewModel", "Starting update")
-                                appUpdateManager.startUpdateFlowForResult(
-                                    appUpdateInfo,
-                                    AppUpdateType.IMMEDIATE,
-                                    event.context as Activity,
-                                    APP_UPDATE_REQUEST_CODE
-                                )
-                            } catch (e: IntentSender.SendIntentException) {
-                                e.printStackTrace()
-                            }
-                        }
-                    } else {
-                        Log.d(
-                            "Nimaz: SettingsViewModel", "Update available : ${
-                                appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-                                    AppUpdateType.IMMEDIATE
-                                )
-                            }"
-                        )
-                        _isUpdateAvailable.value =
-                            appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-                                AppUpdateType.IMMEDIATE
-                            )
                     }
                 }
+            }
+            is SettingsEvent.LoadPrayerTimes -> {
+                loadPrayerTimes()
             }
         }
     }
 
     //load location from shared preferences
-    private fun loadLocation(context: Context, checked: Boolean) {
+    private fun loadLocation(checked: Boolean) {
+        locationService.loadLocation(checked, onSuccess = {
+            _locationName.value = it.locationName
+            _latitude.value = it.latitude
+            _longitude.value = it.longitude
+        },
+            onError = {
+                _latitude.value =
+                    sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+                _longitude.value =
+                    sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+                _locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
+                _isError.value = it
+            })
+    }
+
+    private fun loadPrayerTimes() {
         viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
+            _isError.value = ""
             try {
-                if (NetworkChecker().networkCheck(context)) {
-                    if (checked) {
-                        _isLoading.value = true
-                        if (!AutoLocationUtils.isInitialized()) {
-                            AutoLocationUtils.init(context)
-                            AutoLocationUtils.startLocationUpdates()
-                        }
-                        AutoLocationUtils.getLastKnownLocation()
-                        AutoLocationUtils.setLocationDataCallback { location ->
-                            Log.d("Nimaz: SettingsViewModel", "Location : $location")
-                            sharedPreferences.saveData(
-                                AppConstants.LATITUDE,
-                                location.latitude.toString()
-                            )
-                            sharedPreferences.saveData(
-                                AppConstants.LONGITUDE,
-                                location.longitude.toString()
-                            )
-                            Log.d(
-                                "Nimaz: SettingsViewModel",
-                                "Location saved : ${location.latitude} , ${location.longitude}"
-                            )
-                            reverseGeocode(location.latitude, location.longitude)
-                        }
-                    } else {
-                        _isLoading.value = true
-                        AutoLocationUtils.stopLocationUpdates()
-                        forwardGeocode(sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
-                        _isLoading.value = false
-                    }
-                } else {
-                    _locationName.value = "No Network"
-                    _latitude.value =
-                        sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-                    _longitude.value =
-                        sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                    _isLoading.value = false
+                val prayerTimes = prayerTimesService.getPrayerTimes()
+
+                _prayerTimesState.update {
+                    it.copy(
+                        fajrTime = prayerTimes.fajr,
+                        sunriseTime = prayerTimes.sunrise,
+                        dhuhrTime = prayerTimes.dhuhr,
+                        asrTime = prayerTimes.asr,
+                        maghribTime = prayerTimes.maghrib,
+                        ishaTime = prayerTimes.isha
+                    )
                 }
+
+                _isLoading.value = false
+
             } catch (e: Exception) {
                 Log.d(
                     AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel",
-                    "loadLocation: ${e.message}"
+                    "loadPrayerTimes: ${e.message}"
                 )
-                _isLoading.value = false
                 _isError.value = e.message.toString()
+                _isLoading.value = false
             }
-        }
-    }
-
-    private fun reverseGeocode(latitude: Double, longitude: Double) {
-        Log.d("Nimaz: reverseGeocode", "reverseGeocode")
-        try {
-            val gcd = geocoder.getFromLocation(latitude, longitude, 1)
-            val addresses: List<Address> = gcd as List<Address>
-            Log.d("Nimaz: reverseGeocode", "addresses : ${addresses.size}")
-            if (addresses.isNotEmpty()) {
-                val address: Address = addresses[0]
-                //check if locality is available if not then use admin area instead if admin area is also not available then use country name
-                if (address.locality != null) {
-                    _locationName.value = address.locality
-                    sharedPreferences.saveData(AppConstants.LOCATION_INPUT, address.locality)
-                } else if (address.adminArea != null) {
-                    _locationName.value = address.adminArea
-                    sharedPreferences.saveData(AppConstants.LOCATION_INPUT, address.adminArea)
-                } else {
-                    _locationName.value = address.countryName
-                    sharedPreferences.saveData(AppConstants.LOCATION_INPUT, address.countryName)
-                }
-                _latitude.value = latitude
-                _longitude.value = longitude
-                sharedPreferences.saveDataDouble(AppConstants.LATITUDE, latitude)
-                sharedPreferences.saveDataDouble(AppConstants.LONGITUDE, longitude)
-                _isLoading.value = false
-
-                Log.d("Nimaz: Location", "Location Found From value $latitude $longitude")
-            } else {
-                _latitude.value =
-                    sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-                _longitude.value =
-                    sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                val cityNameFromStorage =
-                    sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-                _isLoading.value = false
-                Log.d("Nimaz: Location", "Location Found From Storage $cityNameFromStorage")
-            }
-        } catch (e: Exception) {
-            Log.e("Geocoder", "Geocoder has failed")
-            _latitude.value =
-                sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-            _longitude.value =
-                sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-            val cityNameFromStorage =
-                sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-            _isLoading.value = false
-            Log.d("Nimaz: Location", "Location Found From Storage $cityNameFromStorage")
-        }
-    }
-
-    private fun forwardGeocode(cityName: String) {
-        Log.d("Nimaz: forwardGeocode", "forwardGeocode")
-        _isLoading.value = true
-        try {
-            val addresses: List<Address> =
-                geocoder.getFromLocationName(cityName, 1) as List<Address>
-            if (addresses.isNotEmpty()) {
-                val address: Address = addresses[0]
-                //check if locality is available if not then use admin area instead if admin area is also not available then use country name
-                if (address.locality != null) {
-                    _locationName.value = address.locality
-                    sharedPreferences.saveData(AppConstants.LOCATION_INPUT, address.locality)
-                    _isLoading.value = false
-                } else if (address.adminArea != null) {
-                    _locationName.value = address.adminArea
-                    sharedPreferences.saveData(AppConstants.LOCATION_INPUT, address.adminArea)
-                    _isLoading.value = false
-                } else {
-                    _locationName.value = address.countryName
-                    sharedPreferences.saveData(AppConstants.LOCATION_INPUT, address.countryName)
-                    _isLoading.value = false
-                }
-                _latitude.value = address.latitude
-                _longitude.value = address.longitude
-                sharedPreferences.saveDataDouble(AppConstants.LATITUDE, address.latitude)
-                sharedPreferences.saveDataDouble(AppConstants.LONGITUDE, address.longitude)
-                _isLoading.value = false
-                Log.d("Nimaz: Location", "Location Found From value $cityName")
-            } else {
-                _latitude.value =
-                    sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-                _longitude.value =
-                    sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                val cityNameFromStorage =
-                    sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-                _isLoading.value = false
-                Log.d("Nimaz: Location", "Location Found From Storage $cityNameFromStorage")
-            }
-        } catch (e: Exception) {
-            Log.e("Geocoder", "Geocoder has failed")
-            _latitude.value =
-                sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-            _longitude.value =
-                sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-            val cityNameFromStorage =
-                sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-            _isLoading.value = false
-            Log.d("Nimaz: Location", "Location Found From Storage $cityNameFromStorage")
         }
     }
 }

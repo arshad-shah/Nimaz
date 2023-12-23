@@ -48,11 +48,12 @@ fun WidgetTogglableItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val modifierInternal = GlanceModifier.defaultWeight().padding(2.dp)
-        CheckBox(checked = checked, action(
-            key = "${text}-CheckBox",
-        ) {
-            onCheckedChange(!checked)
-        }, modifier = modifierInternal
+        CheckBox(
+            checked = checked, action(
+                key = "${text}-CheckBox",
+            ) {
+                onCheckedChange(!checked)
+            }, modifier = modifierInternal
         )
         Text(
             text = text, modifier = modifierInternal, style = TextStyle(

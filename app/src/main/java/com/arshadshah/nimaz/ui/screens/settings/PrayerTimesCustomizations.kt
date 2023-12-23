@@ -56,7 +56,7 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
 
     val viewModel = viewModel(
         key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel() },
+        initializer = { PrayerTimesViewModel(context) },
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
     val settingViewModel = viewModel(
