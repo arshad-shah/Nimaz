@@ -17,46 +17,44 @@ import com.arshadshah.nimaz.viewModel.TasbihViewModel
 
 @Composable
 fun DeleteDialog(
-	tasbih : Tasbih ,
-	showDialog : MutableState<Boolean> ,
-				)
-{
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = TASBIH_VIEWMODEL_KEY ,
-			 initializer = { TasbihViewModel(context) } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
-	if (showDialog.value)
-	{
-		AlertDialogNimaz(
-				 bottomDivider = false ,
-				 topDivider = false ,
-				 contentHeight = 100.dp ,
-				 confirmButtonText = "Yes" ,
-				 dismissButtonText = "No, Cancel" ,
-				 contentDescription = "Delete Tasbih" ,
-				 title = "Delete Tasbih" ,
-				 contentToShow = {
-					 Text(
-							  text = "Are you sure you want to delete this tasbih?" ,
-							  style = MaterialTheme.typography.bodyMedium ,
-							  modifier = Modifier.padding(16.dp)
-						 )
-				 } ,
-				 onDismissRequest = {
-					 showDialog.value = false
-				 } ,
-				 onConfirm = {
-					 viewModel.handleEvent(
-							  TasbihViewModel.TasbihEvent.DeleteTasbih(
-									   tasbih
-																	  )
-										  )
-					 showDialog.value = false
-				 } ,
-				 onDismiss = {
-					 showDialog.value = false
-				 })
-	}
+    tasbih: Tasbih,
+    showDialog: MutableState<Boolean>,
+) {
+    val context = LocalContext.current
+    val viewModel = viewModel(
+        key = TASBIH_VIEWMODEL_KEY,
+        initializer = { TasbihViewModel(context) },
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+    if (showDialog.value) {
+        AlertDialogNimaz(
+            bottomDivider = false,
+            topDivider = false,
+            contentHeight = 100.dp,
+            confirmButtonText = "Yes",
+            dismissButtonText = "No, Cancel",
+            contentDescription = "Delete Tasbih",
+            title = "Delete Tasbih",
+            contentToShow = {
+                Text(
+                    text = "Are you sure you want to delete this tasbih?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            },
+            onDismissRequest = {
+                showDialog.value = false
+            },
+            onConfirm = {
+                viewModel.handleEvent(
+                    TasbihViewModel.TasbihEvent.DeleteTasbih(
+                        tasbih
+                    )
+                )
+                showDialog.value = false
+            },
+            onDismiss = {
+                showDialog.value = false
+            })
+    }
 }

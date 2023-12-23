@@ -18,59 +18,52 @@ import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @Composable
 fun ThemeChoser(
-	darkTheme : MutableState<Boolean> ,
-	dynamicTheme : MutableState<Boolean> ,
-	themeName : MutableState<String> ,
-			   )
-{
-	val context = LocalContext.current
-	val viewModelSettings = viewModel(
-			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			 initializer = { SettingsViewModel(context) } ,
-			 viewModelStoreOwner = context as ComponentActivity
-									 )
-	val themeState = remember {
-		viewModelSettings.theme
-	}.collectAsState()
-	val isDarkTheme = remember {
-		viewModelSettings.isDarkMode
-	}.collectAsState()
+    darkTheme: MutableState<Boolean>,
+    dynamicTheme: MutableState<Boolean>,
+    themeName: MutableState<String>,
+) {
+    val context = LocalContext.current
+    val viewModelSettings = viewModel(
+        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
+        initializer = { SettingsViewModel(context) },
+        viewModelStoreOwner = context as ComponentActivity
+    )
+    val themeState = remember {
+        viewModelSettings.theme
+    }.collectAsState()
+    val isDarkTheme = remember {
+        viewModelSettings.isDarkMode
+    }.collectAsState()
 
-	when (themeState.value)
-	{
-		THEME_SYSTEM ->
-		{
-			dynamicTheme.value = true
-			darkTheme.value = isSystemInDarkTheme()
-			themeName.value = THEME_DEFAULT
-		}
+    when (themeState.value) {
+        THEME_SYSTEM -> {
+            dynamicTheme.value = true
+            darkTheme.value = isSystemInDarkTheme()
+            themeName.value = THEME_DEFAULT
+        }
 
-		THEME_DEFAULT ->
-		{
-			dynamicTheme.value = false
-			darkTheme.value = isDarkTheme.value
-			themeName.value = THEME_DEFAULT
-		}
+        THEME_DEFAULT -> {
+            dynamicTheme.value = false
+            darkTheme.value = isDarkTheme.value
+            themeName.value = THEME_DEFAULT
+        }
 
-		THEME_RAISIN_BLACK ->
-		{
-			dynamicTheme.value = false
-			darkTheme.value = isDarkTheme.value
-			themeName.value = THEME_RAISIN_BLACK
-		}
+        THEME_RAISIN_BLACK -> {
+            dynamicTheme.value = false
+            darkTheme.value = isDarkTheme.value
+            themeName.value = THEME_RAISIN_BLACK
+        }
 
-		THEME_DARK_RED ->
-		{
-			dynamicTheme.value = false
-			darkTheme.value = isDarkTheme.value
-			themeName.value = THEME_DARK_RED
-		}
+        THEME_DARK_RED -> {
+            dynamicTheme.value = false
+            darkTheme.value = isDarkTheme.value
+            themeName.value = THEME_DARK_RED
+        }
 
-		THEME_RUSTIC_BROWN ->
-		{
-			dynamicTheme.value = false
-			darkTheme.value = isDarkTheme.value
-			themeName.value = THEME_RUSTIC_BROWN
-		}
-	}
+        THEME_RUSTIC_BROWN -> {
+            dynamicTheme.value = false
+            darkTheme.value = isDarkTheme.value
+            themeName.value = THEME_RUSTIC_BROWN
+        }
+    }
 }

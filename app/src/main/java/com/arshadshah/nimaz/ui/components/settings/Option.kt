@@ -16,42 +16,41 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Option(
-	title : @Composable () -> Unit ,
-	subtitle : @Composable (() -> Unit)? = null ,
-	onClick : () -> Unit ,
-	icon : Painter ,
-	iconDescription : String ,
-	testTag : String ,
-	action : @Composable (() -> Unit)? = null ,
-		  )
-{
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .fillMaxWidth()
-				 .testTag(testTag) ,
-				) {
-		SettingsMenuLink(
-				 title = title ,
-				 subtitle = subtitle ,
-				 onClick = {
-					 onClick()
-				 } ,
-				 icon = {
-					 Icon(
-							  modifier = Modifier.size(24.dp) ,
-							  painter = icon ,
-							  contentDescription = iconDescription
-						 )
-				 } ,
-				 action = action
-						)
-	}
+    title: @Composable () -> Unit,
+    subtitle: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit,
+    icon: Painter,
+    iconDescription: String,
+    testTag: String,
+    action: @Composable (() -> Unit)? = null,
+) {
+    ElevatedCard(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .testTag(testTag),
+    ) {
+        SettingsMenuLink(
+            title = title,
+            subtitle = subtitle,
+            onClick = {
+                onClick()
+            },
+            icon = {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = icon,
+                    contentDescription = iconDescription
+                )
+            },
+            action = action
+        )
+    }
 }

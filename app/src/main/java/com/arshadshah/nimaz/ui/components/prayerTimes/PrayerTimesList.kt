@@ -41,274 +41,267 @@ import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
-import java.util.*
+import java.util.Locale
 
 
 @Composable
-fun PrayerTimesList()
-{
-	val context = LocalContext.current
+fun PrayerTimesList() {
+    val context = LocalContext.current
 
-	val viewModel = viewModel(
-			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			 initializer = { PrayerTimesViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
+    val viewModel = viewModel(
+        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
+        initializer = { PrayerTimesViewModel() },
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
 
-	val fajrTime = remember {
-		viewModel.fajrTime
-	}.collectAsState()
+    val currentPrayerName = remember {
+        viewModel.currentPrayerName
+    }.collectAsState()
 
-	val sunriseTime = remember {
-		viewModel.sunriseTime
-	}.collectAsState()
+    val fajrTime = remember {
+        viewModel.fajrTime
+    }.collectAsState()
 
-	val dhuhrTime = remember {
-		viewModel.dhuhrTime
-	}.collectAsState()
+    val sunriseTime = remember {
+        viewModel.sunriseTime
+    }.collectAsState()
 
-	val asrTime = remember {
-		viewModel.asrTime
-	}.collectAsState()
+    val dhuhrTime = remember {
+        viewModel.dhuhrTime
+    }.collectAsState()
 
-	val maghribTime = remember {
-		viewModel.maghribTime
-	}.collectAsState()
+    val asrTime = remember {
+        viewModel.asrTime
+    }.collectAsState()
 
-	val ishaTime = remember {
-		viewModel.ishaTime
-	}.collectAsState()
+    val maghribTime = remember {
+        viewModel.maghribTime
+    }.collectAsState()
 
-	val isLoading = remember {
-		viewModel.isLoading
-	}.collectAsState()
+    val ishaTime = remember {
+        viewModel.ishaTime
+    }.collectAsState()
 
-	val isError = remember {
-		viewModel.error
-	}.collectAsState()
+    val isLoading = remember {
+        viewModel.isLoading
+    }.collectAsState()
 
-	val nextPrayerName = remember {
-		viewModel.nextPrayerName
-	}.collectAsState()
+    val isError = remember {
+        viewModel.error
+    }.collectAsState()
 
-	val nextPrayerTime = remember {
-		viewModel.nextPrayerTime
-	}.collectAsState()
+    val nextPrayerName = remember {
+        viewModel.nextPrayerName
+    }.collectAsState()
 
-	if (isError.value.isNotBlank())
-	{
-		Toasty.error(context , isError.value).show()
-	} else if (isLoading.value)
-	{
-		PrayerTimesListUI(
-				 name = nextPrayerName.value ,
-				 prayerTimesMap = mapOf(
-						  "Fajr" to fajrTime.value ,
-						  "Sunrise" to sunriseTime.value ,
-						  "Dhuhr" to dhuhrTime.value ,
-						  "Asr" to asrTime.value ,
-						  "Maghrib" to maghribTime.value ,
-						  "Isha" to ishaTime.value ,
-									   ) ,
-				 loading = true ,
-						 )
-	} else
-	{
-		val timeToNextPrayerLong =
-			nextPrayerTime.value.atZone(java.time.ZoneId.systemDefault())
-				?.toInstant()
-				?.toEpochMilli()
-		val currentTime =
-			LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
-				.toEpochMilli()
+    val nextPrayerTime = remember {
+        viewModel.nextPrayerTime
+    }.collectAsState()
 
-		val difference = timeToNextPrayerLong?.minus(currentTime)
-		viewModel.handleEvent(
-				 LocalContext.current ,
-				 PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
-							 )
+    if (isError.value.isNotBlank()) {
+        Toasty.error(context, isError.value).show()
+    } else if (isLoading.value) {
+        PrayerTimesListUI(
+            prayerTimesMap = mapOf(
+                "Fajr" to fajrTime.value,
+                "Sunrise" to sunriseTime.value,
+                "Dhuhr" to dhuhrTime.value,
+                "Asr" to asrTime.value,
+                "Maghrib" to maghribTime.value,
+                "Isha" to ishaTime.value,
+            ),
+            name = nextPrayerName.value,
+            loading = true,
+            currentPrayerName = currentPrayerName.value,
+        )
+    } else {
+        val timeToNextPrayerLong =
+            nextPrayerTime.value.atZone(java.time.ZoneId.systemDefault())
+                ?.toInstant()
+                ?.toEpochMilli()
+        val currentTime =
+            LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
+                .toEpochMilli()
 
-		val mapOfPrayerTimes = mapOf(
-				 "Fajr" to fajrTime.value !! ,
-				 "Sunrise" to sunriseTime.value !! ,
-				 "Dhuhr" to dhuhrTime.value !! ,
-				 "Asr" to asrTime.value !! ,
-				 "Maghrib" to maghribTime.value !! ,
-				 "Isha" to ishaTime.value !! ,
-									)
-		PrayerTimesListUI(
-				 name = nextPrayerName.value.first()
-					 .uppercaseChar() + nextPrayerName.value.substring(1) ,
-				 loading = false ,
-				 prayerTimesMap = mapOfPrayerTimes ,
-						 )
-	}
+        val difference = timeToNextPrayerLong?.minus(currentTime)
+        viewModel.handleEvent(
+            LocalContext.current,
+            PrayerTimesViewModel.PrayerTimesEvent.Start(difference!!)
+        )
+
+        val mapOfPrayerTimes = mapOf(
+            "Fajr" to fajrTime.value!!,
+            "Sunrise" to sunriseTime.value!!,
+            "Dhuhr" to dhuhrTime.value!!,
+            "Asr" to asrTime.value!!,
+            "Maghrib" to maghribTime.value!!,
+            "Isha" to ishaTime.value!!,
+        )
+        PrayerTimesListUI(
+            loading = false,
+            currentPrayerName = currentPrayerName.value.first()
+                .uppercaseChar() + currentPrayerName.value.substring(1),
+            name = nextPrayerName.value.first()
+                .uppercaseChar() + nextPrayerName.value.substring(1),
+            prayerTimesMap = mapOfPrayerTimes,
+        )
+    }
 
 }
 
 @Composable
 fun PrayerTimesListUI(
-	prayerTimesMap : Map<String , LocalDateTime?> ,
-	name : String ,
-	loading : Boolean ,
-					 )
-{
-	val today = LocalDate.now()
-	val todayHijri = HijrahDate.from(today)
-	val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 1)
-	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 29)
-	val isRamadan = todayHijri.isAfter(ramadanStart) && todayHijri.isBefore(ramadanEnd)
-	Card(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .fillMaxWidth()
-				 .padding(vertical = 8.dp , horizontal = 8.dp)
-		) {
-		Column(
-				 modifier = Modifier.scrollable(
-						  orientation = Orientation.Vertical ,
-						  enabled = true ,
-						  state = rememberScrollState()
-											   )
-			  ) {
-			//iterate over the map
-			for ((key , value) in prayerTimesMap)
-			{
-				//if the element is first then dont add a divider else add a divider on top
-				if (key != prayerTimesMap.keys.first())
-				{
-					Divider(
-							 modifier = Modifier.fillMaxWidth() ,
-							 thickness = 1.dp ,
-							 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
-						   )
-				}
-				//check if the row is to be highlighted
-				val isHighlighted = key == name
-				val isBoldText = if (isRamadan)
-				{
-					key == "Fajr" || key == "Maghrib"
-				} else
-				{
-					false
-				}
-				PrayerTimesRow(
-						 prayerName = key ,
-						 prayerTime = value ,
-						 isHighlighted = isHighlighted ,
-						 loading = loading ,
-						 isBoldText = isBoldText ,
-							  )
-			}
-		}
-	}
+    prayerTimesMap: Map<String, LocalDateTime?>,
+    loading: Boolean,
+    currentPrayerName: String,
+    name: String,
+) {
+    val today = LocalDate.now()
+    val todayHijri = HijrahDate.from(today)
+    val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 1)
+    val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 29)
+    val isRamadan = todayHijri.isAfter(ramadanStart) && todayHijri.isBefore(ramadanEnd)
+    Card(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier.scrollable(
+                orientation = Orientation.Vertical,
+                enabled = true,
+                state = rememberScrollState()
+            )
+        ) {
+            //iterate over the map
+            for ((key, value) in prayerTimesMap) {
+                //if the element is first then dont add a divider else add a divider on top
+                if (key != prayerTimesMap.keys.first()) {
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                    )
+                }
+                val isBoldText = if (isRamadan) {
+                    key == "Fajr" || key == "Maghrib"
+                } else {
+                    false
+                }
+                PrayerTimesRow(
+                    prayerName = key,
+                    prayerTime = value,
+                    isHighlighted = currentPrayerName == key,
+                    shouldShowTimer = name == key,
+                    loading = loading,
+                    isBoldText = isBoldText,
+                )
+            }
+        }
+    }
 }
 
 //the row for the prayer times
 @Composable
 fun PrayerTimesRow(
-	prayerName : String ,
-	prayerTime : LocalDateTime? ,
-	isHighlighted : Boolean ,
-	loading : Boolean ,
-	isBoldText : Boolean ,
-				  )
-{
-	val viewModel = viewModel(
-			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			 initializer = { PrayerTimesViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
-	val countDownTime = remember { viewModel.timer }.collectAsState()
-	//format the date to time based on device format
-	//get the device trime format
-	val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
-	//if the device time format is 24 hour then use the 24 hour format
-	val formatter = if (deviceTimeFormat)
-	{
-		DateTimeFormatter.ofPattern("HH:mm")
-	} else
-	{
-		DateTimeFormatter.ofPattern("hh:mm a")
-	}
-	val sentenceCase =
-		prayerName.lowercase(Locale.ROOT)
-			.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-	Row(
-			 horizontalArrangement = Arrangement.SpaceBetween ,
-			 verticalAlignment = Alignment.CenterVertically ,
-			 modifier = if (isHighlighted)
-			 {
-				 Modifier
-					 .fillMaxWidth()
-					 .background(MaterialTheme.colorScheme.primaryContainer)
-					 .clip(
-							  RoundedCornerShape(
-									   topStart = 8.dp ,
-									   topEnd = 8.dp ,
-									   bottomStart = 8.dp ,
-									   bottomEnd = 8.dp
-												)
-						  )
-			 } else
-			 {
-				 Modifier
-					 .fillMaxWidth()
-			 }
-	   ) {
-		Text(
-				 text = sentenceCase ,
-				 modifier = Modifier
-					 .padding(16.dp)
-					 .placeholder(
-							  visible = loading ,
-							  color = MaterialTheme.colorScheme.outline ,
-							  shape = RoundedCornerShape(4.dp) ,
-							  highlight = PlaceholderHighlight.shimmer(
-									   highlightColor = Color.White ,
-																	  )
-								 ) ,
-				 style = MaterialTheme.typography.titleLarge ,
-				 fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
-			)
-		if (isHighlighted)
-		{
-			Text(
-					 modifier = Modifier
-						 .padding(16.dp)
-						 .placeholder(
-								  visible = loading ,
-								  color = MaterialTheme.colorScheme.outline ,
-								  shape = RoundedCornerShape(4.dp) ,
-								  highlight = PlaceholderHighlight.shimmer(
-										   highlightColor = Color.White ,
-																		  )
-									 ) ,
-					 text = " -${countDownTime.value.hours} : ${countDownTime.value.minutes} : ${countDownTime.value.seconds}" ,
-					 textAlign = TextAlign.Center ,
-					 style = MaterialTheme.typography.titleSmall
-				)
-		}
-		Text(
-				 text = prayerTime !!.format(formatter) ,
-				 modifier = Modifier
-					 .padding(16.dp)
-					 .placeholder(
-							  visible = loading ,
-							  color = MaterialTheme.colorScheme.outline ,
-							  shape = RoundedCornerShape(4.dp) ,
-							  highlight = PlaceholderHighlight.shimmer(
-									   highlightColor = Color.White ,
-																	  )
-								 ) ,
-				 style = MaterialTheme.typography.titleLarge ,
-				 fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
-			)
-	}
+    prayerName: String,
+    prayerTime: LocalDateTime?,
+    isHighlighted: Boolean,
+    loading: Boolean,
+    isBoldText: Boolean,
+    shouldShowTimer: Boolean,
+) {
+    val viewModel = viewModel(
+        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
+        initializer = { PrayerTimesViewModel() },
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+    val countDownTime = remember { viewModel.timer }.collectAsState()
+    //format the date to time based on device format
+    //get the device trime format
+    val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
+    //if the device time format is 24 hour then use the 24 hour format
+    val formatter = if (deviceTimeFormat) {
+        DateTimeFormatter.ofPattern("HH:mm")
+    } else {
+        DateTimeFormatter.ofPattern("hh:mm a")
+    }
+    val sentenceCase =
+        prayerName.lowercase(Locale.ROOT)
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = if (isHighlighted) {
+            Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 8.dp,
+                        topEnd = 8.dp,
+                        bottomStart = 8.dp,
+                        bottomEnd = 8.dp
+                    )
+                )
+        } else {
+            Modifier
+                .fillMaxWidth()
+        }
+    ) {
+        Text(
+            text = sentenceCase,
+            modifier = Modifier
+                .padding(16.dp)
+                .placeholder(
+                    visible = loading,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(4.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                ),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
+        )
+        if (shouldShowTimer) {
+            Text(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .placeholder(
+                        visible = loading,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(4.dp),
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = Color.White,
+                        )
+                    ),
+                text = " -${countDownTime.value.hours} : ${countDownTime.value.minutes} : ${countDownTime.value.seconds}",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleSmall
+            )
+        }
+        Text(
+            text = prayerTime!!.format(formatter),
+            modifier = Modifier
+                .padding(16.dp)
+                .placeholder(
+                    visible = loading,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(4.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                ),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
+        )
+    }
 }

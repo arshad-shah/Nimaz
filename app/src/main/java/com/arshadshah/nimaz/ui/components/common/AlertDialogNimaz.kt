@@ -66,303 +66,291 @@ import com.arshadshah.nimaz.R
  * */
 @Composable
 fun AlertDialogNimaz(
-	modifier : Modifier = Modifier ,
-	icon : Painter? = null ,
-	action : @Composable (() -> Unit)? = null ,
-	title : String ,
-	contentDescription : String ,
-	description : String? = null ,
-	contentToShow : @Composable () -> Unit ,
-	contentHeight : Dp = 300.dp ,
-	cardContent : Boolean = true ,
-	onDismissRequest : () -> Unit ,
-	properties : DialogProperties = DialogProperties() ,
-	topDivider : Boolean = true ,
-	bottomDivider : Boolean = true ,
-	showConfirmButton : Boolean = true ,
-	showDismissButton : Boolean = true ,
-	onConfirm : () -> Unit ,
-	confirmButtonText : String = "Done" ,
-	onDismiss : () -> Unit ,
-	dismissButtonText : String = "Cancel" ,
-	scrollState : LazyListState = rememberLazyListState() ,
-					)
-{
-	Dialog(
-			 onDismissRequest = onDismissRequest ,
-			 properties = properties ,
-		  ) {
-		ElevatedCard(
-				 colors = CardDefaults.elevatedCardColors(
-						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-								   elevation = 32.dp
-																							) ,
-						  contentColor = MaterialTheme.colorScheme.onSurface ,
-						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-														 ) ,
-				 modifier = modifier
-					 .fillMaxWidth()
-					 .wrapContentHeight() ,
-				 shape = MaterialTheme.shapes.extraLarge ,
-					) {
-			Column(
-					 modifier = Modifier
-						 .padding(top = 16.dp , bottom = 8.dp , start = 16.dp , end = 16.dp)
-						 .fillMaxWidth()
-						 .wrapContentHeight()
-				  ) {
-				Column(
-						 modifier = Modifier
-							 .fillMaxWidth()
-							 .wrapContentHeight() ,
-						 verticalArrangement = Arrangement.Center ,
-						 horizontalAlignment = Alignment.CenterHorizontally
-					  ) {
-					if (icon != null)
-					{
-						Icon(
-								 painter = icon ,
-								 contentDescription = contentDescription ,
-								 tint = MaterialTheme.colorScheme.primary ,
-								 modifier = Modifier
-									 .size(32.dp)
-							)
-					}
-					if (action != null)
-					{
-						Row(
-								 modifier
-									 .padding(bottom = 4.dp)
-									 .fillMaxWidth() ,
-								 horizontalArrangement = Arrangement.SpaceBetween ,
-								 verticalAlignment = Alignment.CenterVertically
-						   ) {
-							Text(
-									 text = title ,
-									 style = MaterialTheme.typography.titleLarge ,
-									 modifier = Modifier
-										 .weight(0.8f)
-										 .padding(4.dp) ,
-									 textAlign = TextAlign.Start ,
-									 maxLines = 1 ,
-									 overflow = TextOverflow.Ellipsis ,
-									 softWrap = true
-								)
-							action()
-						}
-					} else
-					{
-						Text(
-								 text = title ,
-								 style = MaterialTheme.typography.titleLarge ,
-								 modifier = Modifier
-									 .padding(8.dp)
-							)
-					}
-				}
+    modifier: Modifier = Modifier,
+    icon: Painter? = null,
+    action: @Composable (() -> Unit)? = null,
+    title: String,
+    contentDescription: String,
+    description: String? = null,
+    contentToShow: @Composable () -> Unit,
+    contentHeight: Dp = 300.dp,
+    cardContent: Boolean = true,
+    onDismissRequest: () -> Unit,
+    properties: DialogProperties = DialogProperties(),
+    topDivider: Boolean = true,
+    bottomDivider: Boolean = true,
+    showConfirmButton: Boolean = true,
+    showDismissButton: Boolean = true,
+    onConfirm: () -> Unit,
+    confirmButtonText: String = "Done",
+    onDismiss: () -> Unit,
+    dismissButtonText: String = "Cancel",
+    scrollState: LazyListState = rememberLazyListState(),
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties,
+    ) {
+        ElevatedCard(
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                    elevation = 32.dp
+                ),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+            ),
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            shape = MaterialTheme.shapes.extraLarge,
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (icon != null) {
+                        Icon(
+                            painter = icon,
+                            contentDescription = contentDescription,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(32.dp)
+                        )
+                    }
+                    if (action != null) {
+                        Row(
+                            modifier
+                                .padding(bottom = 4.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier
+                                    .weight(0.8f)
+                                    .padding(4.dp),
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                softWrap = true
+                            )
+                            action()
+                        }
+                    } else {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier
+                                .padding(8.dp)
+                        )
+                    }
+                }
 
-				Column {
-					if (description != null)
-					{
-						Row(
-								 modifier
-									 .padding(bottom = 4.dp)
-									 .fillMaxWidth()
-						   ) {
-							Text(
-									 text = description ,
-									 style = MaterialTheme.typography.bodyMedium ,
-									 modifier = Modifier.padding(vertical = 8.dp)
-								)
-						}
-					}
-					if (topDivider) Divider(color = MaterialTheme.colorScheme.outline)
-					if (cardContent)
-					{
-						Card(
-								 colors = CardDefaults.cardColors(
-										  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-												   elevation = 8.dp
-																											) ,
-										  contentColor = MaterialTheme.colorScheme.onSurface ,
-										  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-												   alpha = 0.38f
-																										 ) ,
-										  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-												   alpha = 0.38f
-																										 ) ,
-																 ) ,
-								 modifier = Modifier.fillMaxWidth() ,
-							) {
-							Row(
-									 modifier
-										 .height(contentHeight)
-										 .fillMaxWidth() ,
-									 verticalAlignment = Alignment.CenterVertically ,
-									 horizontalArrangement = Arrangement.Center
-							   ) {
-								LazyColumn(
-										 state = scrollState ,
-										 verticalArrangement = Arrangement.Center ,
-										 horizontalAlignment = Alignment.CenterHorizontally
-										  ) {
-									item {
-										contentToShow()
-									}
-								}
-							}
-						}
-					} else
-					{
-						Row(
-								 modifier
-									 .height(contentHeight)
-									 .fillMaxWidth() ,
-								 verticalAlignment = Alignment.CenterVertically ,
-								 horizontalArrangement = Arrangement.Center
-						   ) {
-							LazyColumn(
-									 state = scrollState ,
-									 verticalArrangement = Arrangement.Center ,
-									 horizontalAlignment = Alignment.CenterHorizontally
-									  ) {
-								item {
-									contentToShow()
-								}
-							}
-						}
-					}
-				}
-				if (bottomDivider) Divider(color = MaterialTheme.colorScheme.outline)
-				Row(
-						 modifier = Modifier
-							 .fillMaxWidth()
-							 .wrapContentHeight()
-							 .padding(top = 16.dp , end = 8.dp , bottom = 0.dp) ,
-						 horizontalArrangement = Arrangement.End
-				   ) {
-					if (showDismissButton)
-					{
-						TextButton(
-								 modifier = Modifier.padding(horizontal = 16.dp) ,
-								 onClick = { onDismiss() } ,
-								 content = {
-									 Text(
-											  text = dismissButtonText ,
-											  style = MaterialTheme.typography.titleMedium
-										 )
-								 }
-								  )
-					}
-					if (showConfirmButton)
-					{
-						Button(
-								 modifier = Modifier.padding(start = 8.dp) ,
-								 onClick = { onConfirm() } ,
-								 content = {
-									 Text(
-											  text = confirmButtonText ,
-											  style = MaterialTheme.typography.titleMedium
-										 )
-								 }
-							  )
-					}
-				}
-			}
-		}
-	}
+                Column {
+                    if (description != null) {
+                        Row(
+                            modifier
+                                .padding(bottom = 4.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                    }
+                    if (topDivider) Divider(color = MaterialTheme.colorScheme.outline)
+                    if (cardContent) {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                    elevation = 8.dp
+                                ),
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = 0.38f
+                                ),
+                                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
+                                    alpha = 0.38f
+                                ),
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier
+                                    .height(contentHeight)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                LazyColumn(
+                                    state = scrollState,
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    item {
+                                        contentToShow()
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier
+                                .height(contentHeight)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            LazyColumn(
+                                state = scrollState,
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                item {
+                                    contentToShow()
+                                }
+                            }
+                        }
+                    }
+                }
+                if (bottomDivider) Divider(color = MaterialTheme.colorScheme.outline)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(top = 16.dp, end = 8.dp, bottom = 0.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (showDismissButton) {
+                        TextButton(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            onClick = { onDismiss() },
+                            content = {
+                                Text(
+                                    text = dismissButtonText,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        )
+                    }
+                    if (showConfirmButton) {
+                        Button(
+                            modifier = Modifier.padding(start = 8.dp),
+                            onClick = { onConfirm() },
+                            content = {
+                                Text(
+                                    text = confirmButtonText,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 
 //alert dilog nimaz preview
 @Preview
 @Composable
-fun AlertDialogNimazPreview()
-{
-	AlertDialogNimaz(
-			 title = "Hello" ,
-			 icon = painterResource(id = R.drawable.mail_icon) ,
-			 contentDescription = "Add" ,
-			 contentToShow = { Text(text = "This is a content") } ,
-			 onDismissRequest = { } ,
-			 onConfirm = { } ,
-			 onDismiss = { } ,
-			 description = "This is a description"
-					)
+fun AlertDialogNimazPreview() {
+    AlertDialogNimaz(
+        title = "Hello",
+        icon = painterResource(id = R.drawable.mail_icon),
+        contentDescription = "Add",
+        contentToShow = { Text(text = "This is a content") },
+        onDismissRequest = { },
+        onConfirm = { },
+        onDismiss = { },
+        description = "This is a description"
+    )
 }
 
 //preview of the alert dialog nimaz with action
 @Preview
 @Composable
-fun AlertDialogNimazPreviewWithAction()
-{
-	AlertDialogNimaz(
-			 title = "very long title to test the alert dialog" ,
-			 contentDescription = "Add" ,
-			 contentToShow = { Text(text = "This is a content") } ,
-			 onDismissRequest = { } ,
-			 onConfirm = { } ,
-			 onDismiss = { } ,
-			 description = "This is a description" ,
-			 action = {
-				 IconButton(
-						  onClick = { } ,
-						  content = {
-							  Icon(
-									   modifier = Modifier.size(24.dp) ,
-									   painter = painterResource(id = R.drawable.play_icon) ,
-									   contentDescription = "Add" ,
-									   tint = MaterialTheme.colorScheme.primary
-								  )
-						  }
-						   )
-			 }
-					)
+fun AlertDialogNimazPreviewWithAction() {
+    AlertDialogNimaz(
+        title = "very long title to test the alert dialog",
+        contentDescription = "Add",
+        contentToShow = { Text(text = "This is a content") },
+        onDismissRequest = { },
+        onConfirm = { },
+        onDismiss = { },
+        description = "This is a description",
+        action = {
+            IconButton(
+                onClick = { },
+                content = {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.play_icon),
+                        contentDescription = "Add",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            )
+        }
+    )
 }
 
 //with a oulinedTextField
 @Preview
 @Composable
-fun AlertDialogNimazPreviewWithOutlinedTextField()
-{
-	val textToShow = remember { mutableStateOf("") }
-	AlertDialogNimaz(
-			 title = "Hello" ,
-			 contentDescription = "Add" ,
-			 topDivider = false ,
-			 bottomDivider = false ,
-			 contentToShow = {
-				 OutlinedTextField(
-						  label = { Text(text = "Enter your name") } ,
-						  singleLine = true ,
-						  shape = MaterialTheme.shapes.extraLarge ,
-						  value = textToShow.value ,
-						  onValueChange = {
-							  textToShow.value = it
-						  } ,
-						  modifier = Modifier
-							  .fillMaxWidth()
-							  .fillMaxHeight()
-								  )
-			 } ,
-			 cardContent = false ,
-			 contentHeight = 100.dp ,
-			 onDismissRequest = { } ,
-			 onConfirm = { } ,
-			 onDismiss = { } ,
-			 action = {
-				 IconButton(
-						  onClick = { } ,
-						  content = {
-							  Icon(
-									   modifier = Modifier.size(24.dp) ,
-									   painter = painterResource(id = R.drawable.play_icon) ,
-									   contentDescription = "Add" ,
-									   tint = MaterialTheme.colorScheme.primary
-								  )
-						  }
-						   )
-			 }
-					)
+fun AlertDialogNimazPreviewWithOutlinedTextField() {
+    val textToShow = remember { mutableStateOf("") }
+    AlertDialogNimaz(
+        title = "Hello",
+        contentDescription = "Add",
+        topDivider = false,
+        bottomDivider = false,
+        contentToShow = {
+            OutlinedTextField(
+                label = { Text(text = "Enter your name") },
+                singleLine = true,
+                shape = MaterialTheme.shapes.extraLarge,
+                value = textToShow.value,
+                onValueChange = {
+                    textToShow.value = it
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            )
+        },
+        cardContent = false,
+        contentHeight = 100.dp,
+        onDismissRequest = { },
+        onConfirm = { },
+        onDismiss = { },
+        action = {
+            IconButton(
+                onClick = { },
+                content = {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.play_icon),
+                        contentDescription = "Add",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            )
+        }
+    )
 }

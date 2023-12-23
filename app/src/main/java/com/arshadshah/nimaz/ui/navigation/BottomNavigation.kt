@@ -25,102 +25,100 @@ import com.arshadshah.nimaz.ui.components.common.AnimatableIcon
 import com.arshadshah.nimaz.ui.components.common.AnimatedText
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
-@OptIn(ExperimentalAnimationApi::class , ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(navController : NavController)
-{
-	val bottomNavItems = listOf(
-			 BottomNavItem.Dashboard ,
-			 BottomNavItem.PrayerTimesScreen ,
-			 BottomNavItem.QuranScreen ,
-			 BottomNavItem.MoreScreen ,
-			 BottomNavItem.SettingsScreen
-							   )
+fun BottomNavigationBar(navController: NavController) {
+    val bottomNavItems = listOf(
+        BottomNavItem.Dashboard,
+        BottomNavItem.PrayerTimesScreen,
+        BottomNavItem.QuranScreen,
+        BottomNavItem.MoreScreen,
+        BottomNavItem.SettingsScreen
+    )
 
-	NavigationBar(
-			 containerColor = MaterialTheme.colorScheme.surface ,
-			 contentColor = MaterialTheme.colorScheme.secondary ,
-			 modifier = Modifier.semantics {
-				 contentDescription = "Bottom Navigation Bar"
-			 }
-				 ) {
-		val navBackStackEntry by navController.currentBackStackEntryAsState()
-		val currentRoute = navBackStackEntry?.destination?.route
-		bottomNavItems.forEach { bottomNavItem ->
-			val selected =
-				navBackStackEntry?.destination?.hierarchy?.any { it.route == bottomNavItem.screen_route } == true
-			NavigationBarItem(
-					 modifier = Modifier
-						 .clickable(
-								  enabled = true ,
-								  role = Role.Tab ,
-								  onClick = {
-									  navController.navigate(bottomNavItem.screen_route) {
-										  popUpTo(navController.graph.startDestinationId) {
-											  saveState = true
-										  }
-										  launchSingleTop = true
-										  restoreState = true
-									  }
-								  }
-								   )
-						 .semantics {
-							 contentDescription = bottomNavItem.title
-						 } ,
-					 colors = NavigationBarItemDefaults.colors(
-							  selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer ,
-							  selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer ,
-							  unselectedIconColor = MaterialTheme.colorScheme.primary ,
-							  unselectedTextColor = MaterialTheme.colorScheme.primary ,
-							  indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-															  ) ,
-					 icon = {
-						 AnimatableIcon(
-								  modifier = Modifier
-									  .size(24.dp) ,
-								  painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
-										   id = bottomNavItem.icon_empty
-																													   ) ,
-								  scale = if (selected) 1.1f else 1f ,
-								  color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
-									   )
-					 } ,
-					 label = {
-						 AnimatedText(
-								  text = bottomNavItem.title ,
-								  scale = if (selected) 1.2f else 1f ,
-								  modifier = Modifier
-									  .semantics {
-										  contentDescription = bottomNavItem.title
-									  } ,
-								  color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary ,
-									 )
-					 } ,
-					 selected = currentRoute == bottomNavItem.screen_route ,
-					 onClick = {
-						 navController.navigate(bottomNavItem.screen_route) {
-							 popUpTo(navController.graph.startDestinationId) {
-								 saveState = true
-							 }
-							 launchSingleTop = true
-							 restoreState = true
-						 }
-					 }
-							 )
-		}
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.semantics {
+            contentDescription = "Bottom Navigation Bar"
+        }
+    ) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+        bottomNavItems.forEach { bottomNavItem ->
+            val selected =
+                navBackStackEntry?.destination?.hierarchy?.any { it.route == bottomNavItem.screen_route } == true
+            NavigationBarItem(
+                modifier = Modifier
+                    .clickable(
+                        enabled = true,
+                        role = Role.Tab,
+                        onClick = {
+                            navController.navigate(bottomNavItem.screen_route) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                    .semantics {
+                        contentDescription = bottomNavItem.title
+                    },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    unselectedIconColor = MaterialTheme.colorScheme.primary,
+                    unselectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                ),
+                icon = {
+                    AnimatableIcon(
+                        modifier = Modifier
+                            .size(24.dp),
+                        painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
+                            id = bottomNavItem.icon_empty
+                        ),
+                        scale = if (selected) 1.1f else 1f,
+                        color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary,
+                    )
+                },
+                label = {
+                    AnimatedText(
+                        text = bottomNavItem.title,
+                        scale = if (selected) 1.2f else 1f,
+                        modifier = Modifier
+                            .semantics {
+                                contentDescription = bottomNavItem.title
+                            },
+                        color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary,
+                    )
+                },
+                selected = currentRoute == bottomNavItem.screen_route,
+                onClick = {
+                    navController.navigate(bottomNavItem.screen_route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
 
-	}
+    }
 }
 
 
 @Preview(showBackground = true)
 @Composable
-fun BottomNavigationBarPreview()
-{
-	val navController = rememberNavController()
-	NimazTheme(
-			 darkTheme = true
-			  ) {
-		BottomNavigationBar(navController = navController)
-	}
+fun BottomNavigationBarPreview() {
+    val navController = rememberNavController()
+    NimazTheme(
+        darkTheme = true
+    ) {
+        BottomNavigationBar(navController = navController)
+    }
 }

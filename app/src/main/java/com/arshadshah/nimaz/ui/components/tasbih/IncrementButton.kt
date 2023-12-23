@@ -27,85 +27,79 @@ import es.dmoral.toasty.Toasty
 
 @Composable
 fun IncrementButton(
-	count : MutableState<Int> ,
-	lap : MutableState<Int> ,
-	lapCountCounter : MutableState<Int> ,
-	objective : MutableState<String> ,
-	context : Context ,
-				   )
-{
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = AppConstants.TASBIH_VIEWMODEL_KEY ,
-			 initializer = { TasbihViewModel(context) } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
-	val vibrationAllowed = remember {
-		viewModel.vibrationButtonState
-	}.collectAsState()
-	val vibrator = viewModel.vibrator
+    count: MutableState<Int>,
+    lap: MutableState<Int>,
+    lapCountCounter: MutableState<Int>,
+    objective: MutableState<String>,
+    context: Context,
+) {
+    val context = LocalContext.current
+    val viewModel = viewModel(
+        key = AppConstants.TASBIH_VIEWMODEL_KEY,
+        initializer = { TasbihViewModel(context) },
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+    val vibrationAllowed = remember {
+        viewModel.vibrationButtonState
+    }.collectAsState()
+    val vibrator = viewModel.vibrator
 
-	ElevatedButton(
-			 colors = ButtonDefaults.elevatedButtonColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-														 ) ,
-			 elevation = ButtonDefaults.elevatedButtonElevation(
-					  defaultElevation = 4.dp
-															   ) ,
-			 contentPadding = PaddingValues(48.dp) ,
-			 onClick = {
-				 if (vibrationAllowed.value)
-				 {
-					 Log.d("Nimaz: vibration" , "vibrating")
-					 vibrator.vibrate(
-							  VibrationEffect.createOneShot(
-									   50 ,
-									   VibrationEffect.DEFAULT_AMPLITUDE
-														   )
-									 )
-				 } else
-				 {
-					 Log.d("Nimaz: vibration" , "can't vibrate")
-					 //can't vibrate
-					 vibrator.cancel()
-				 }
-				 count.value = count.value + 1
-				 lapCountCounter.value ++
-				 if (lapCountCounter.value == objective.value.toInt())
-				 {
-					 if (vibrationAllowed.value)
-					 {
-						 Log.d("Nimaz: vibration" , "vibrating")
-						 vibrator.vibrate(
-								  VibrationEffect.createOneShot(
-										   200 ,
-										   VibrationEffect.DEFAULT_AMPLITUDE
-															   )
-										 )
-					 } else
-					 {
-						 Log.d("Nimaz: vibration" , "can't vibrate")
-						 //can't vibrate
-						 vibrator.cancel()
-					 }
-					 lap.value ++
-					 lapCountCounter.value = 0
-					 Toasty
-						 .info(
-								  context ,
-								  "Objective of ${objective.value.toInt()} has been reached" ,
-								  Toasty.LENGTH_SHORT
-							  )
-						 .show()
-				 }
-			 }) {
-		Icon(
-				 modifier = Modifier.size(48.dp) ,
-				 painter = painterResource(id = R.drawable.plus_icon) ,
-				 contentDescription = "Add"
-			)
-	}
+    ElevatedButton(
+        colors = ButtonDefaults.elevatedButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        elevation = ButtonDefaults.elevatedButtonElevation(
+            defaultElevation = 4.dp
+        ),
+        contentPadding = PaddingValues(48.dp),
+        onClick = {
+            if (vibrationAllowed.value) {
+                Log.d("Nimaz: vibration", "vibrating")
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(
+                        50,
+                        VibrationEffect.DEFAULT_AMPLITUDE
+                    )
+                )
+            } else {
+                Log.d("Nimaz: vibration", "can't vibrate")
+                //can't vibrate
+                vibrator.cancel()
+            }
+            count.value = count.value + 1
+            lapCountCounter.value++
+            if (lapCountCounter.value == objective.value.toInt()) {
+                if (vibrationAllowed.value) {
+                    Log.d("Nimaz: vibration", "vibrating")
+                    vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                            200,
+                            VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                    )
+                } else {
+                    Log.d("Nimaz: vibration", "can't vibrate")
+                    //can't vibrate
+                    vibrator.cancel()
+                }
+                lap.value++
+                lapCountCounter.value = 0
+                Toasty
+                    .info(
+                        context,
+                        "Objective of ${objective.value.toInt()} has been reached",
+                        Toasty.LENGTH_SHORT
+                    )
+                    .show()
+            }
+        }) {
+        Icon(
+            modifier = Modifier.size(48.dp),
+            painter = painterResource(id = R.drawable.plus_icon),
+            contentDescription = "Add"
+        )
+    }
 }

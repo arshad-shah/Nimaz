@@ -32,72 +32,71 @@ import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 
 @Composable
-fun CalenderScreen(paddingValues : PaddingValues)
-{
+fun CalenderScreen(paddingValues: PaddingValues) {
 
-	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
+    val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
-	val viewModel = viewModel(
-			 key = TRACKING_VIEWMODEL_KEY ,
-			 initializer = { TrackerViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
-	//call this effect only once
-	LaunchedEffect(Unit) {
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
-	}
+    val viewModel = viewModel(
+        key = TRACKING_VIEWMODEL_KEY,
+        initializer = { TrackerViewModel() },
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+    //call this effect only once
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
+        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
+        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
+        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
+    }
 
-	val dateState = remember {
-		viewModel.dateState
-	}.collectAsState()
+    val dateState = remember {
+        viewModel.dateState
+    }.collectAsState()
 
-	val progressForMonth = remember {
-		viewModel.progressForMonth
-	}.collectAsState()
+    val progressForMonth = remember {
+        viewModel.progressForMonth
+    }.collectAsState()
 
-	val fastProgressForMonth = remember {
-		viewModel.fastProgressForMonth
-	}.collectAsState()
+    val fastProgressForMonth = remember {
+        viewModel.fastProgressForMonth
+    }.collectAsState()
 
-	LazyColumn(
-			 modifier = Modifier
-				 .fillMaxSize()
-				 .padding(paddingValues)
-				 .testTag(TEST_TAG_CALENDER) ,
-			 horizontalAlignment = Alignment.CenterHorizontally ,
-			 verticalArrangement = Arrangement.Top
-			  ) {
-		item {
-			Calender(
-					 handleEvents = viewModel::onEvent ,
-					 progressForMonth = progressForMonth ,
-					 fastProgressForMonth = fastProgressForMonth
-					)
-		}
-		item {
-			Card(
-					 colors = CardDefaults.cardColors(
-							  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-									   elevation = 8.dp
-																								) ,
-							  contentColor = MaterialTheme.colorScheme.onSurface ,
-							  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-							  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-					 shape = MaterialTheme.shapes.extraLarge.copy(
-							  topStart = CornerSize(0.dp) ,
-							  topEnd = CornerSize(0.dp) ,
-																 ) ,
-					 modifier = Modifier
-						 .fillMaxWidth()
-				) {
-				DashboardPrayerTracker()
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .testTag(TEST_TAG_CALENDER),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        item {
+            Calender(
+                handleEvents = viewModel::onEvent,
+                progressForMonth = progressForMonth,
+                fastProgressForMonth = fastProgressForMonth
+            )
+        }
+        item {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        elevation = 8.dp
+                    ),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+                ),
+                shape = MaterialTheme.shapes.extraLarge.copy(
+                    topStart = CornerSize(0.dp),
+                    topEnd = CornerSize(0.dp),
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                DashboardPrayerTracker()
 
-				DashboardFastTracker()
-			}
-		}
-	}
+                DashboardFastTracker()
+            }
+        }
+    }
 }

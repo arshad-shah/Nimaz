@@ -32,90 +32,88 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
-fun ImageSwitcherCard(changeImageIndex : (Int) -> Unit)
-{
-	val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
-	val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
-	val state = rememberLazyListState(initialFirstVisibleItemIndex = imageIndexFromStorage)
+fun ImageSwitcherCard(changeImageIndex: (Int) -> Unit) {
+    val sharedPreferences = PrivateSharedPreferences(LocalContext.current)
+    val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
+    val state = rememberLazyListState(initialFirstVisibleItemIndex = imageIndexFromStorage)
 
-	//an is selected state that will be used to change the size of the image
-	//it tracks the index of the image
-	val isSelected = remember { mutableStateOf(imageIndexFromStorage) }
+    //an is selected state that will be used to change the size of the image
+    //it tracks the index of the image
+    val isSelected = remember { mutableStateOf(imageIndexFromStorage) }
 
-	//map the images to a number
-	val imagesMapped = mapOf(
-			 0 to painterResource(id = R.drawable.qibla1) ,
-			 1 to painterResource(id = R.drawable.qibla2) ,
-			 2 to painterResource(id = R.drawable.qibla3) ,
-			 3 to painterResource(id = R.drawable.qibla4) ,
-			 4 to painterResource(id = R.drawable.qibla5) ,
-			 5 to painterResource(id = R.drawable.qibla6) ,
-							)
+    //map the images to a number
+    val imagesMapped = mapOf(
+        0 to painterResource(id = R.drawable.qibla1),
+        1 to painterResource(id = R.drawable.qibla2),
+        2 to painterResource(id = R.drawable.qibla3),
+        3 to painterResource(id = R.drawable.qibla4),
+        4 to painterResource(id = R.drawable.qibla5),
+        5 to painterResource(id = R.drawable.qibla6),
+    )
 
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-				) {
-		LazyRow(
-				 state = state ,
-				 modifier = Modifier
-					 .padding(horizontal = 8.dp)
-					 .fillMaxWidth() ,
-				 horizontalArrangement = Arrangement.Center ,
-				 verticalAlignment = Alignment.CenterVertically
-			   ) {
-			imagesMapped.forEach { (index , image) ->
-				item {
-					Image(
-							 painter = image ,
-							 contentDescription = "Compass option $index" ,
-							 modifier = Modifier
-								 //its a circle so clip it
-								 .clip(CircleShape)
-								 //scale the image based on the index
-								 .scale(animateFloatAsState(if (isSelected.value == index) 1.5f else 1f).value)
-								 .size(80.dp)
-								 .padding(vertical = 16.dp , horizontal = 8.dp)
-								 .clickable(
-										  role = Role.RadioButton ,
-										   ) {
-									 changeImageIndex(index)
-									 isSelected.value = index
-								 } ,
-							 alignment = Alignment.Center
-						 )
-				}
-			}
-		}
-	}
+    ElevatedCard(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        LazyRow(
+            state = state,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            imagesMapped.forEach { (index, image) ->
+                item {
+                    Image(
+                        painter = image,
+                        contentDescription = "Compass option $index",
+                        modifier = Modifier
+                            //its a circle so clip it
+                            .clip(CircleShape)
+                            //scale the image based on the index
+                            .scale(animateFloatAsState(if (isSelected.value == index) 1.5f else 1f).value)
+                            .size(80.dp)
+                            .padding(vertical = 16.dp, horizontal = 8.dp)
+                            .clickable(
+                                role = Role.RadioButton,
+                            ) {
+                                changeImageIndex(index)
+                                isSelected.value = index
+                            },
+                        alignment = Alignment.Center
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Preview
 @Composable
-fun ImageSwitcherCardPreview()
-{
-	val defaultImage = painterResource(id = R.drawable.qibla1)
-	//create a mu	 that will be used to switch between the images
-	var imageToDisplay by remember { mutableStateOf(defaultImage) }
-	val imagesMapped = mapOf(
-			 0 to painterResource(id = R.drawable.qibla1) ,
-			 1 to painterResource(id = R.drawable.qibla2) ,
-			 2 to painterResource(id = R.drawable.qibla3) ,
-			 3 to painterResource(id = R.drawable.qibla4) ,
-			 4 to painterResource(id = R.drawable.qibla5) ,
-			 5 to painterResource(id = R.drawable.qibla6) ,
-							)
+fun ImageSwitcherCardPreview() {
+    val defaultImage = painterResource(id = R.drawable.qibla1)
+    //create a mu	 that will be used to switch between the images
+    var imageToDisplay by remember { mutableStateOf(defaultImage) }
+    val imagesMapped = mapOf(
+        0 to painterResource(id = R.drawable.qibla1),
+        1 to painterResource(id = R.drawable.qibla2),
+        2 to painterResource(id = R.drawable.qibla3),
+        3 to painterResource(id = R.drawable.qibla4),
+        4 to painterResource(id = R.drawable.qibla5),
+        5 to painterResource(id = R.drawable.qibla6),
+    )
 
 
-	//a function that will change the image index to the index given
-	val changeImageIndex = { index : Int ->
-		imageToDisplay = imagesMapped[index] ?: defaultImage
-	}
+    //a function that will change the image index to the index given
+    val changeImageIndex = { index: Int ->
+        imageToDisplay = imagesMapped[index] ?: defaultImage
+    }
 
-	ImageSwitcherCard(changeImageIndex)
+    ImageSwitcherCard(changeImageIndex)
 }

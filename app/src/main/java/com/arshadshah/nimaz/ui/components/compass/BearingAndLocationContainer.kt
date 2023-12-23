@@ -28,91 +28,85 @@ import kotlin.math.roundToInt
 
 @Composable
 fun BearingAndLocationContainer(
-	state : State<Double> ,
-	isLoading : State<Boolean> ,
-	errorMessage : State<String> ,
-							   )
-{
+    state: State<Double>,
+    isLoading: State<Boolean>,
+    errorMessage: State<String>,
+) {
 
-	//get the context
-	val context = LocalContext.current
-	//get the shared preferences
-	val sharedPref = PrivateSharedPreferences(context)
+    //get the context
+    val context = LocalContext.current
+    //get the shared preferences
+    val sharedPref = PrivateSharedPreferences(context)
 
-	if (isLoading.value)
-	{
-		//show a loading indicator
-		BearingAndLocationContainerUI(location = "Loading..." , heading = "Loading...")
-	} else if (errorMessage.value != "")
-	{
-		BearingAndLocationContainerUI(location = "Error" , heading = "Error")
-		Toasty.error(LocalContext.current , errorMessage.value).show()
-	} else
-	{
-		//get the location
-		val location = sharedPref.getData(AppConstants.LOCATION_INPUT , "")
-		//round the bearing to 2 decimal places
-		val bearing = state.value.roundToInt()
-		val compassDirection = bearingToCompassDirection(state.value.toFloat())
-		val heading = "$bearing° $compassDirection"
-		Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "BearingAndLocationContainer: $heading")
-		//show the bearing and location
-		BearingAndLocationContainerUI(location , heading)
-	}
+    if (isLoading.value) {
+        //show a loading indicator
+        BearingAndLocationContainerUI(location = "Loading...", heading = "Loading...")
+    } else if (errorMessage.value != "") {
+        BearingAndLocationContainerUI(location = "Error", heading = "Error")
+        Toasty.error(LocalContext.current, errorMessage.value).show()
+    } else {
+        //get the location
+        val location = sharedPref.getData(AppConstants.LOCATION_INPUT, "")
+        //round the bearing to 2 decimal places
+        val bearing = state.value.roundToInt()
+        val compassDirection = bearingToCompassDirection(state.value.toFloat())
+        val heading = "$bearing° $compassDirection"
+        Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG, "BearingAndLocationContainer: $heading")
+        //show the bearing and location
+        BearingAndLocationContainerUI(location, heading)
+    }
 }
 
 
 //a function that turns a bearing into actual compass direction with a heading
-fun bearingToCompassDirection(bearing : Float) : String
-{
-	val directions = arrayOf("N" , "NE" , "E" , "SE" , "S" , "SW" , "W" , "NW" , "N")
-	val index = ((bearing + 22.5f) / 45f).toInt()
-	return directions[index % 8]
+fun bearingToCompassDirection(bearing: Float): String {
+    val directions = arrayOf("N", "NE", "E", "SE", "S", "SW", "W", "NW", "N")
+    val index = ((bearing + 22.5f) / 45f).toInt()
+    return directions[index % 8]
 }
 
 
 @Composable
-fun BearingAndLocationContainerUI(location : String , heading : String)
-{
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .height(IntrinsicSize.Max)
-				) {
-		//align items to center
+fun BearingAndLocationContainerUI(location: String, heading: String) {
+    ElevatedCard(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier
+            .padding(8.dp)
+            .height(IntrinsicSize.Max)
+    ) {
+        //align items to center
 
-		Row(
-				 horizontalArrangement = Arrangement.Center ,
-				 modifier = Modifier.fillMaxWidth() ,
-				 verticalAlignment = Alignment.CenterVertically
-		   ) {
-			//only allow 50% of the width for the location text
-			CustomText(
-					 modifier = Modifier
-						 .weight(0.5f)
-						 .padding(8.dp) ,
-					 heading = "Location" , text = location
-					  )
-			//vertical divider line
-			Divider(
-					 modifier = Modifier
-						 .fillMaxHeight()
-						 .width(1.dp) ,
-					 color = MaterialTheme.colorScheme.outline
-				   )
-			CustomText(
-					 modifier = Modifier
-						 .weight(0.5f)
-						 .padding(8.dp) ,
-					 heading = "Heading" , text = heading
-					  )
-		}
-	}
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            //only allow 50% of the width for the location text
+            CustomText(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .padding(8.dp),
+                heading = "Location", text = location
+            )
+            //vertical divider line
+            Divider(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp),
+                color = MaterialTheme.colorScheme.outline
+            )
+            CustomText(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .padding(8.dp),
+                heading = "Heading", text = heading
+            )
+        }
+    }
 }

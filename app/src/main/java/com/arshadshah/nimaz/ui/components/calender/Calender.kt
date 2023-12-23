@@ -19,47 +19,46 @@ import kotlin.reflect.KFunction1
 
 @Composable
 fun Calender(
-	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
-	progressForMonth : State<MutableList<PrayerTracker>> ,
-	fastProgressForMonth : State<MutableList<FastTracker>> ,
-			)
-{
-	Card(
-			 colors = CardDefaults.cardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-											 ) ,
-			 shape = MaterialTheme.shapes.extraLarge.copy(
-					  bottomStart = CornerSize(0.dp) ,
-					  bottomEnd = CornerSize(0.dp) ,
-														 ) ,
-			 modifier = Modifier
-				 .fillMaxWidth()
-		) {
-		SelectableCalendar(
-				 horizontalSwipeEnabled = false ,
-				 dayContent = { state ->
-					 CalenderDay(
-							  dayState = state ,
-							  handleEvents = handleEvents ,
-							  progressForMonth ,
-							  fastProgressForMonth
-								)
-				 } ,
-				 daysOfWeekHeader = { weekState ->
-					 CalenderWeekHeader(
-							  weekState = weekState ,
-									   )
-				 } ,
-				 monthContainer = {
-					 CalenderMonth(monthState = it)
-				 } ,
-				 monthHeader = { monthState ->
-					 CalenderHeader(monthState = monthState , handleEvents = handleEvents)
-				 } ,
-				 calendarState = rememberSelectableCalendarState()
-						  )
-	}
+    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>,
+    progressForMonth: State<MutableList<PrayerTracker>>,
+    fastProgressForMonth: State<MutableList<FastTracker>>,
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge.copy(
+            bottomStart = CornerSize(0.dp),
+            bottomEnd = CornerSize(0.dp),
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        SelectableCalendar(
+            horizontalSwipeEnabled = false,
+            dayContent = { state ->
+                CalenderDay(
+                    dayState = state,
+                    handleEvents = handleEvents,
+                    progressForMonth,
+                    fastProgressForMonth
+                )
+            },
+            daysOfWeekHeader = { weekState ->
+                CalenderWeekHeader(
+                    weekState = weekState,
+                )
+            },
+            monthContainer = {
+                CalenderMonth(monthState = it)
+            },
+            monthHeader = { monthState ->
+                CalenderHeader(monthState = monthState, handleEvents = handleEvents)
+            },
+            calendarState = rememberSelectableCalendarState()
+        )
+    }
 }

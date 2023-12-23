@@ -29,62 +29,60 @@ import com.arshadshah.nimaz.R
 
 @Composable
 fun DialComponent(
-	directionToTurn : String ,
-	pointingToQibla : Boolean ,
-	imageToDisplay : Painter ,
-	rotateAnim : Animatable<Float , AnimationVector1D> ,
-				 )
-{
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .fillMaxWidth()
-				 .padding(8.dp) ,
-				) {
+    directionToTurn: String,
+    pointingToQibla: Boolean,
+    imageToDisplay: Painter,
+    rotateAnim: Animatable<Float, AnimationVector1D>,
+) {
+    ElevatedCard(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+    ) {
 
-		Text(
-				 modifier = Modifier
-					 .padding(16.dp)
-					 .fillMaxWidth()
-					 .align(Alignment.CenterHorizontally) ,
-				 text = directionToTurn ,
-				 style = MaterialTheme.typography.headlineMedium ,
-				 textAlign = TextAlign.Center
-			)
+        Text(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally),
+            text = directionToTurn,
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center
+        )
 
-		Icon(
-				 painter = painterResource(id = R.drawable.circle_close_icon) ,
-				 contentDescription = "dot" ,
-				 modifier = Modifier
-					 .fillMaxWidth()
-					 .size(28.dp) ,
-				 tint = if (pointingToQibla) MaterialTheme.colorScheme.inversePrimary else Color.Red
-			)
-		//the dial
-		Image(
-				 painter = imageToDisplay ,
-				 contentDescription = "Compass" ,
-				 modifier = Modifier
-					 .clip(CircleShape)
-					 .rotate(rotateAnim.value)
-					 .fillMaxWidth()
-					 .padding(12.dp) ,
-				 alignment = Alignment.Center
-			 )
-	}
+        Icon(
+            painter = painterResource(id = R.drawable.circle_close_icon),
+            contentDescription = "dot",
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(28.dp),
+            tint = if (pointingToQibla) MaterialTheme.colorScheme.inversePrimary else Color.Red
+        )
+        //the dial
+        Image(
+            painter = imageToDisplay,
+            contentDescription = "Compass",
+            modifier = Modifier
+                .clip(CircleShape)
+                .rotate(rotateAnim.value)
+                .fillMaxWidth()
+                .padding(12.dp),
+            alignment = Alignment.Center
+        )
+    }
 }
 
 @Preview
 @Composable
-fun DialPreview()
-{
-	DialComponent("Turn Left" , false , painterResource(id = R.drawable.qibla2) , remember {
-		Animatable(0f)
-	})
+fun DialPreview() {
+    DialComponent("Turn Left", false, painterResource(id = R.drawable.qibla2), remember {
+        Animatable(0f)
+    })
 }

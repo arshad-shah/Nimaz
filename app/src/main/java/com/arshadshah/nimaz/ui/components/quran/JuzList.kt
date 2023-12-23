@@ -7,32 +7,28 @@ import com.arshadshah.nimaz.data.remote.models.Juz
 
 @Composable
 fun JuzList(
-	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
-	loading : Boolean ,
-	error : String ,
-	state : State<ArrayList<Juz>> ,
-		   )
-{
-	if (loading)
-	{
-		JuzListUI(
-				 juz = ArrayList(30) ,
-				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				 loading = true
-				 )
-	} else if (error.isNotEmpty())
-	{
-		JuzListUI(
-				 juz = ArrayList(30) ,
-				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				 loading = false ,
-				 )
-	} else
-	{
-		JuzListUI(
-				 juz = state.value ,
-				 onNavigateToAyatScreen = onNavigateToAyatScreen ,
-				 loading = false
-				 )
-	}
+    onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
+    loading: Boolean,
+    error: String,
+    state: State<ArrayList<Juz>>,
+) {
+    if (loading) {
+        JuzListUI(
+            juz = ArrayList(30),
+            onNavigateToAyatScreen = onNavigateToAyatScreen,
+            loading = true
+        )
+    } else if (error.isNotEmpty()) {
+        JuzListUI(
+            juz = ArrayList(30),
+            onNavigateToAyatScreen = onNavigateToAyatScreen,
+            loading = false,
+        )
+    } else {
+        JuzListUI(
+            juz = state.value,
+            onNavigateToAyatScreen = onNavigateToAyatScreen,
+            loading = false
+        )
+    }
 }

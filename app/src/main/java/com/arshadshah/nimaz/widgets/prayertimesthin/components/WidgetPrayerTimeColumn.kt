@@ -16,31 +16,30 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 
 @Composable
-fun WidgetPrayerTimeColumn(name : String , time : String , modifier : GlanceModifier)
-{
-	Column(
-			 modifier = modifier.fillMaxHeight()
-				 .padding(top = 16.dp , bottom = 12.dp , start = 4.dp , end = 4.dp)
-				 .background(colorProvider = GlanceTheme.colors.secondaryContainer) ,
-			 verticalAlignment = Alignment.CenterVertically ,
-			 horizontalAlignment = Alignment.CenterHorizontally
-		  ) {
-		val modifierInternal = GlanceModifier.defaultWeight().padding(2.dp)
-		Text(
-				 text = name , modifier = modifierInternal , style = TextStyle(
-				 color = GlanceTheme.colors.onSecondaryContainer ,
-				 fontSize = TextUnit(
-						  16F , TextUnitType.Sp
-									) ,
-				 fontWeight = FontWeight.Bold
-																			  )
-			)
-		Text(
-				 text = time , modifier = modifierInternal , style = TextStyle(
-				 color = GlanceTheme.colors.onSecondaryContainer , fontSize = TextUnit(
-				 18F , TextUnitType.Sp
-																					  )
-																			  )
-			)
-	}
+fun WidgetPrayerTimeColumn(name: String, time: String, modifier: GlanceModifier) {
+    Column(
+        modifier = modifier.fillMaxHeight()
+            .padding(top = 16.dp, bottom = 12.dp, start = 4.dp, end = 4.dp)
+            .background(colorProvider = GlanceTheme.colors.secondaryContainer),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val modifierInternal = GlanceModifier.defaultWeight().padding(2.dp)
+        Text(
+            text = name, modifier = modifierInternal, style = TextStyle(
+                color = GlanceTheme.colors.onSecondaryContainer,
+                fontSize = TextUnit(
+                    16F, TextUnitType.Sp
+                ),
+                fontWeight = FontWeight.Bold
+            )
+        )
+        Text(
+            text = time, modifier = modifierInternal, style = TextStyle(
+                color = GlanceTheme.colors.onSecondaryContainer, fontSize = TextUnit(
+                    18F, TextUnitType.Sp
+                )
+            )
+        )
+    }
 }
