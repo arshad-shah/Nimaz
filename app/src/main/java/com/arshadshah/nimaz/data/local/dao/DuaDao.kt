@@ -8,34 +8,33 @@ import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.data.local.models.LocalDua
 
 @Dao
-interface DuaDao
-{
+interface DuaDao {
 
-	//get all the chapters
-	@Query("SELECT * FROM Chapter")
-	suspend fun getAllChapters() : List<LocalChapter>
+    //get all the chapters
+    @Query("SELECT * FROM Chapter")
+    suspend fun getAllChapters(): List<LocalChapter>
 
-	//get duas of a chapter by chapter id
-	@Query("SELECT * FROM Dua WHERE chapter_id = :chapterId")
-	suspend fun getDuasOfChapter(chapterId : Int) : List<LocalDua>
+    //get duas of a chapter by chapter id
+    @Query("SELECT * FROM Dua WHERE chapter_id = :chapterId")
+    suspend fun getDuasOfChapter(chapterId: Int): List<LocalDua>
 
-	//save a list of chapters
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	suspend fun saveChapters(chapters : List<LocalChapter>)
+    //save a list of chapters
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveChapters(chapters: List<LocalChapter>)
 
-	//save a one chapter
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	suspend fun saveDuas(duas : List<LocalDua>)
+    //save a one chapter
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveDuas(duas: List<LocalDua>)
 
-	//get all duas
-	@Query("SELECT * FROM Dua")
-	suspend fun getAllDuas() : List<LocalDua>
+    //get all duas
+    @Query("SELECT * FROM Dua")
+    suspend fun getAllDuas(): List<LocalDua>
 
-	//count
-	@Query("SELECT COUNT(*) FROM Chapter")
-	suspend fun countChapters() : Int
+    //count
+    @Query("SELECT COUNT(*) FROM Chapter")
+    suspend fun countChapters(): Int
 
-	//count
-	@Query("SELECT COUNT(*) FROM Dua")
-	suspend fun countDuas() : Int
+    //count
+    @Query("SELECT COUNT(*) FROM Dua")
+    suspend fun countDuas(): Int
 }

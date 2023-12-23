@@ -32,99 +32,94 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 
 @Composable
 fun Categories(
-	paddingValues : PaddingValues ,
-	onNavigateToChapterListScreen : (String , Int) -> Unit ,
-			  )
-{
-	val viewModel = viewModel(
-			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			 initializer = { DuaViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
+    paddingValues: PaddingValues,
+    onNavigateToChapterListScreen: (String, Int) -> Unit,
+) {
+    val viewModel = viewModel(
+        key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY,
+        initializer = { DuaViewModel() },
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
 
-	LaunchedEffect(Unit) {
-		viewModel.getCategories()
-	}
+    LaunchedEffect(Unit) {
+        viewModel.getCategories()
+    }
 
-	val categories = remember { viewModel.categories }.collectAsState()
+    val categories = remember { viewModel.categories }.collectAsState()
 
-	//if the categories are not null, and not empty, then show them
-	if (categories.value.isNotEmpty())
-	{
-		//sort the categories alphabetically
-		categories.value.sortBy { it.name }
+    //if the categories are not null, and not empty, then show them
+    if (categories.value.isNotEmpty()) {
+        //sort the categories alphabetically
+        categories.value.sortBy { it.name }
 
-		LazyVerticalGrid(
-				 columns = GridCells.Adaptive(minSize = 128.dp) ,
-				 contentPadding = paddingValues
-						) {
-			items(categories.value.size) {
-				Category(
-						 title = categories.value[it].name ,
-						 onClicked = {
-							 onNavigateToChapterListScreen(
-									  categories.value[it].name ,
-									  categories.value[it].id
-														  )
-						 }
-						)
-			}
-		}
-	}
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 128.dp),
+            contentPadding = paddingValues
+        ) {
+            items(categories.value.size) {
+                Category(
+                    title = categories.value[it].name,
+                    onClicked = {
+                        onNavigateToChapterListScreen(
+                            categories.value[it].name,
+                            categories.value[it].id
+                        )
+                    }
+                )
+            }
+        }
+    }
 }
 
 //one category
 @Composable
 fun Category(
-	title : String ,
-	icon : Int? = null ,
-	description : String = "" ,
-	onClicked : () -> Unit = {} ,
-			)
-{
-	ElevatedCard(
-			 shape = MaterialTheme.shapes.large ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .fillMaxWidth()
-				 .fillMaxHeight()
-				 .clickable {
-					 onClicked()
-				 }
-				) {
-		Row(
-				 modifier = Modifier
-					 .padding(8.dp)
-					 .fillMaxWidth() ,
-				 verticalAlignment = Alignment.CenterVertically ,
-				 horizontalArrangement = Arrangement.SpaceBetween
-		   ) {
-			Column(
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth() ,
-					 verticalArrangement = Arrangement.SpaceAround ,
-					 horizontalAlignment = Alignment.Start
-				  ) {
-				Text(text = title , style = MaterialTheme.typography.titleMedium)
-			}
-			if (icon != null)
-			{
-				Image(
-						 painter = painterResource(id = icon) ,
-						 contentDescription = description ,
-						 modifier = Modifier
-							 .padding(8.dp)
-							 .size(32.dp)
-					 )
-			}
-		}
-	}
+    title: String,
+    icon: Int? = null,
+    description: String = "",
+    onClicked: () -> Unit = {},
+) {
+    ElevatedCard(
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .clickable {
+                onClicked()
+            }
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceAround,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(text = title, style = MaterialTheme.typography.titleMedium)
+            }
+            if (icon != null) {
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = description,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(32.dp)
+                )
+            }
+        }
+    }
 }
 
 @Preview
 @Composable
-fun PreviewCategory()
-{
-	Category(title = "Subhanallah")
+fun PreviewCategory() {
+    Category(title = "Subhanallah")
 }

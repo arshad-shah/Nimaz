@@ -17,44 +17,41 @@ import com.arshadshah.nimaz.ui.components.tasbih.TasbihRow
 
 @Composable
 fun TasbihScreen(
-	paddingValues : PaddingValues ,
-	tasbihId : String = "" ,
-	tasbihArabic : String = "" ,
-	tasbihEnglish : String = "" ,
-	tasbihTranslitration : String = "" ,
-				)
-{
-	val context = LocalContext.current
+    paddingValues: PaddingValues,
+    tasbihId: String = "",
+    tasbihArabic: String = "",
+    tasbihEnglish: String = "",
+    tasbihTranslitration: String = "",
+) {
+    val context = LocalContext.current
 
-	Column(
-			 modifier = Modifier
-				 .padding(paddingValues)
-				 .testTag(TEST_TAG_TASBIH) ,
-			 horizontalAlignment = Alignment.CenterHorizontally ,
-			 verticalArrangement = Arrangement.Top ,
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .testTag(TEST_TAG_TASBIH),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
 
-			 ) {
+        ) {
 
-		if (tasbihArabic.isNotBlank() && tasbihEnglish.isNotBlank() && tasbihTranslitration.isNotBlank() && tasbihId.isNotBlank())
-		{
-			CustomCounter(
-					 paddingValues ,
-					 tasbihId
-						 )
-			LazyColumn(content = {
-				item {
-					TasbihRow(
-							 englishName = tasbihEnglish ,
-							 arabicName = tasbihArabic ,
-							 translationName = tasbihTranslitration ,
-							 )
-				}
-			})
-		} else
-		{
-			Counter(
-					 paddingValues ,
-				   )
-		}
-	}
+        if (tasbihArabic.isNotBlank() && tasbihEnglish.isNotBlank() && tasbihTranslitration.isNotBlank() && tasbihId.isNotBlank()) {
+            CustomCounter(
+                paddingValues,
+                tasbihId
+            )
+            LazyColumn(content = {
+                item {
+                    TasbihRow(
+                        englishName = tasbihEnglish,
+                        arabicName = tasbihArabic,
+                        translationName = tasbihTranslitration,
+                    )
+                }
+            })
+        } else {
+            Counter(
+                paddingValues,
+            )
+        }
+    }
 }

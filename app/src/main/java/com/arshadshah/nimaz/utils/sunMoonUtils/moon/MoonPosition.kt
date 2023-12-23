@@ -8,8 +8,8 @@ package com.arshadshah.nimaz.utils.sunMoonUtils.moon
  * @property parallacticAngle Parallactic angle of the moon in radians
  */
 data class MoonPosition(
-	val altitude : Double ,
-	val azimuth : Double ,
-	val distanceKm : Double ,
-	val parallacticAngle : Double ,
-					   )
+    val altitude: Double,
+    val azimuth: Double,
+    val distanceKm: Double,
+    val parallacticAngle: Double,
+)

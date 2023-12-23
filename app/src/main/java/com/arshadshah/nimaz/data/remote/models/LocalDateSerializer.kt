@@ -6,16 +6,13 @@ import kotlinx.serialization.encoding.Encoder
 import java.time.LocalDate
 
 @Serializer(forClass = LocalDate::class)
-object LocalDateSerializer
-{
+object LocalDateSerializer {
 
-	override fun serialize(encoder : Encoder , date : LocalDate)
-	{
-		encoder.encodeString(date.toString())
-	}
+    override fun serialize(encoder: Encoder, date: LocalDate) {
+        encoder.encodeString(date.toString())
+    }
 
-	override fun deserialize(decoder : Decoder) : LocalDate
-	{
-		return LocalDate.parse(decoder.decodeString())
-	}
+    override fun deserialize(decoder: Decoder): LocalDate {
+        return LocalDate.parse(decoder.decodeString())
+    }
 }

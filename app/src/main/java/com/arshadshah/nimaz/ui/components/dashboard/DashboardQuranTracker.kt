@@ -36,143 +36,137 @@ import com.arshadshah.nimaz.viewModel.QuranViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardQuranTracker(onNavigateToAyatScreen : (String , Boolean , String , Int) -> Unit)
-{
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = QURAN_VIEWMODEL_KEY ,
-			 initializer = { QuranViewModel(context) } ,
-			 viewModelStoreOwner = context as ComponentActivity
-							 )
+fun DashboardQuranTracker(onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit) {
+    val context = LocalContext.current
+    val viewModel = viewModel(
+        key = QURAN_VIEWMODEL_KEY,
+        initializer = { QuranViewModel(context) },
+        viewModelStoreOwner = context as ComponentActivity
+    )
 
-	LaunchedEffect(Unit)
-	{
-		viewModel.handleAyaEvent(QuranViewModel.AyaEvent.getBookmarks)
-	}
-	val bookmarks = remember { viewModel.bookmarks }.collectAsState()
+    LaunchedEffect(Unit)
+    {
+        viewModel.handleAyaEvent(QuranViewModel.AyaEvent.getBookmarks)
+    }
+    val bookmarks = remember { viewModel.bookmarks }.collectAsState()
 
-	val translationType =
-		PrivateSharedPreferences(LocalContext.current).getData(
-				 key = AppConstants.TRANSLATION_LANGUAGE ,
-				 s = "English"
-															  )
-	val translation = when (translationType)
-	{
-		"English" -> "english"
-		"Urdu" -> "urdu"
-		else -> "english"
-	}
+    val translationType =
+        PrivateSharedPreferences(LocalContext.current).getData(
+            key = AppConstants.TRANSLATION_LANGUAGE,
+            s = "English"
+        )
+    val translation = when (translationType) {
+        "English" -> "english"
+        "Urdu" -> "urdu"
+        else -> "english"
+    }
 
-	val titleOfDialog = remember {
-		mutableStateOf("")
-	}
-	val openDialog = remember {
-		mutableStateOf(false)
-	}
-	val messageOfDialog = remember {
-		mutableStateOf("")
-	}
-	val itemToDelete = remember {
-		mutableStateOf<Aya?>(null)
-	}
-	if (bookmarks.value.isEmpty())
-	{
-		Box(
-				 modifier = Modifier.clickable {
-					 onNavigateToAyatScreen(1.toString() , true , translation , 1)
-				 }
-		   ) {
-			Placeholder(nameOfDropdown = "Quran Bookmarks")
-		}
-	} else
-	{
-		FeaturesDropDown(
-				 label = "Quran Bookmarks" ,
-				 items = bookmarks.value ,
-				 dropDownItem = { Aya ->
-					 val currentItem = rememberUpdatedState(newValue = Aya)
-					 val dismissState = rememberDismissState(
-							  confirmValueChange = {
-								  if (it == DismissValue.DismissedToStart)
-								  {
-									  titleOfDialog.value = "Delete Bookmark"
-									  messageOfDialog.value =
-										  "Are you sure you want to delete this bookmark?"
-									  itemToDelete.value = currentItem.value
-									  openDialog.value = true
-								  }
-								  false
-							  }
-															)
+    val titleOfDialog = remember {
+        mutableStateOf("")
+    }
+    val openDialog = remember {
+        mutableStateOf(false)
+    }
+    val messageOfDialog = remember {
+        mutableStateOf("")
+    }
+    val itemToDelete = remember {
+        mutableStateOf<Aya?>(null)
+    }
+    if (bookmarks.value.isEmpty()) {
+        Box(
+            modifier = Modifier.clickable {
+                onNavigateToAyatScreen(1.toString(), true, translation, 1)
+            }
+        ) {
+            Placeholder(nameOfDropdown = "Quran Bookmarks")
+        }
+    } else {
+        FeaturesDropDown(
+            label = "Quran Bookmarks",
+            items = bookmarks.value,
+            dropDownItem = { Aya ->
+                val currentItem = rememberUpdatedState(newValue = Aya)
+                val dismissState = rememberDismissState(
+                    confirmValueChange = {
+                        if (it == DismissValue.DismissedToStart) {
+                            titleOfDialog.value = "Delete Bookmark"
+                            messageOfDialog.value =
+                                "Are you sure you want to delete this bookmark?"
+                            itemToDelete.value = currentItem.value
+                            openDialog.value = true
+                        }
+                        false
+                    }
+                )
 
-					 SwipeToDismiss(
-							  directions = setOf(DismissDirection.EndToStart) ,
-							  state = dismissState ,
-							  background = {
-								  SwipeBackground(dismissState = dismissState)
-							  } ,
-							  dismissContent = {
-								  FeatureDropdownItem(
-										   item = Aya ,
-										   onClick = { aya ->
-											   onNavigateToAyatScreen(
-														aya.suraNumber.toString() ,
-														true ,
-														translation ,
-														aya.ayaNumberInSurah
-																	 )
-										   } ,
-										   itemContent = { aya ->
-											   //the text
-											   Text(
-														modifier = Modifier
-															.padding(8.dp) ,
-														text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-														textAlign = TextAlign.Start ,
-														maxLines = 2 ,
-														overflow = TextOverflow.Ellipsis ,
-														style = MaterialTheme.typography.bodyLarge
-												   )
-										   }
-													 )
-							  })
-				 }
-						)
-	}
+                SwipeToDismiss(
+                    directions = setOf(DismissDirection.EndToStart),
+                    state = dismissState,
+                    background = {
+                        SwipeBackground(dismissState = dismissState)
+                    },
+                    dismissContent = {
+                        FeatureDropdownItem(
+                            item = Aya,
+                            onClick = { aya ->
+                                onNavigateToAyatScreen(
+                                    aya.suraNumber.toString(),
+                                    true,
+                                    translation,
+                                    aya.ayaNumberInSurah
+                                )
+                            },
+                            itemContent = { aya ->
+                                //the text
+                                Text(
+                                    modifier = Modifier
+                                        .padding(8.dp),
+                                    text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString(),
+                                    textAlign = TextAlign.Start,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        )
+                    })
+            }
+        )
+    }
 
 
-	if (openDialog.value)
-	{
-		AlertDialogNimaz(
-				 topDivider = false ,
-				 bottomDivider = false ,
-				 contentDescription = "Ayat features dialog" ,
-				 title = titleOfDialog.value ,
-				 contentToShow = {
-					 Text(
-							  text = messageOfDialog.value ,
-							  style = MaterialTheme.typography.bodyMedium ,
-							  modifier = Modifier.padding(8.dp)
-						 )
-				 } ,
-				 onDismissRequest = {
-					 openDialog.value = false
-				 } ,
-				 contentHeight = 100.dp ,
-				 confirmButtonText = "Yes" ,
-				 dismissButtonText = "No, Cancel" ,
-				 onConfirm = {
-					 viewModel.handleAyaEvent(
-							  QuranViewModel.AyaEvent.deleteBookmarkFromAya(
-									   itemToDelete.value !!.ayaNumber ,
-									   itemToDelete.value !!.suraNumber ,
-									   itemToDelete.value !!.ayaNumberInSurah
-																		   )
-											 )
-					 openDialog.value = false
-				 } ,
-				 onDismiss = {
-					 openDialog.value = false
-				 })
-	}
+    if (openDialog.value) {
+        AlertDialogNimaz(
+            topDivider = false,
+            bottomDivider = false,
+            contentDescription = "Ayat features dialog",
+            title = titleOfDialog.value,
+            contentToShow = {
+                Text(
+                    text = messageOfDialog.value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(8.dp)
+                )
+            },
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            contentHeight = 100.dp,
+            confirmButtonText = "Yes",
+            dismissButtonText = "No, Cancel",
+            onConfirm = {
+                viewModel.handleAyaEvent(
+                    QuranViewModel.AyaEvent.deleteBookmarkFromAya(
+                        itemToDelete.value!!.ayaNumber,
+                        itemToDelete.value!!.suraNumber,
+                        itemToDelete.value!!.ayaNumberInSurah
+                    )
+                )
+                openDialog.value = false
+            },
+            onDismiss = {
+                openDialog.value = false
+            })
+    }
 }

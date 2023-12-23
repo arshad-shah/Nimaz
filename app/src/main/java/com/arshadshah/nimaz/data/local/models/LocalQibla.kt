@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Qibla")
 data class LocalQibla(
-	@PrimaryKey(autoGenerate = true)
-	val _id : Int ,
-	val timestamp : Long ,
-	val direction : Double ,
-					 )
+    @PrimaryKey(autoGenerate = true)
+    val _id: Int,
+    val timestamp: Long,
+    val direction: Double,
+)

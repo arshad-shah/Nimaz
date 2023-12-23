@@ -31,175 +31,151 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun PrayerTrackerGrid()
-{
-	val viewModelTracker = viewModel(
-			 key = AppConstants.TRACKING_VIEWMODEL_KEY ,
-			 initializer = { TrackerViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-									)
-	LaunchedEffect(Unit) {
-		viewModelTracker.onEvent(
-				 TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-						  LocalDate.now().toString()
-																	 )
-								)
-	}
-	val progressForMonth = remember {
-		viewModelTracker.progressForMonth
-	}.collectAsState()
-	val dateState = remember {
-		viewModelTracker.dateState
-	}.collectAsState()
+fun PrayerTrackerGrid() {
+    val viewModelTracker = viewModel(
+        key = AppConstants.TRACKING_VIEWMODEL_KEY,
+        initializer = { TrackerViewModel() },
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+    LaunchedEffect(Unit) {
+        viewModelTracker.onEvent(
+            TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+                LocalDate.now().toString()
+            )
+        )
+    }
+    val progressForMonth = remember {
+        viewModelTracker.progressForMonth
+    }.collectAsState()
+    val dateState = remember {
+        viewModelTracker.dateState
+    }.collectAsState()
 
-	val currentDate = LocalDate.now()
-	val yearMonth = YearMonth.of(currentDate.year , currentDate.month)
-	val daysInMonth = yearMonth.lengthOfMonth()
-	//Bit of a hack to get the day number to align
-	val prayers = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
+    val currentDate = LocalDate.now()
+    val yearMonth = YearMonth.of(currentDate.year, currentDate.month)
+    val daysInMonth = yearMonth.lengthOfMonth()
+    //Bit of a hack to get the day number to align
+    val prayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
 
-	val userSelectedDate = LocalDate.parse(dateState.value)
+    val userSelectedDate = LocalDate.parse(dateState.value)
 
-	// a grid of 6 rows 1 for the number of the day and 5 for the prayers
-	// amount of days in the month columns + 1 for the name of the prayer
-	Column(
-			 modifier = Modifier
-				 .fillMaxWidth()
-				 .padding(horizontal = 16.dp , vertical = 8.dp) ,
-			 verticalArrangement = Arrangement.Center ,
-			 horizontalAlignment = Alignment.Start
-		  ) {
-		prayers.forEach { prayer ->
-			Row(
-					 modifier = Modifier
-						 .fillMaxWidth() ,
-					 horizontalArrangement = Arrangement.SpaceBetween ,
-					 verticalAlignment = Alignment.CenterVertically
-			   ) {
-				// Render the name of the prayer on the left
-				//if its Maghri1 then it must be transparent
-				Text(
-						 text = prayers[prayers.indexOf(prayer)] ,
-						 style = MaterialTheme.typography.labelSmall ,
-						 modifier = Modifier
-							 .width(40.dp) ,
-					)
+    // a grid of 6 rows 1 for the number of the day and 5 for the prayers
+    // amount of days in the month columns + 1 for the name of the prayer
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
+    ) {
+        prayers.forEach { prayer ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Render the name of the prayer on the left
+                //if its Maghri1 then it must be transparent
+                Text(
+                    text = prayers[prayers.indexOf(prayer)],
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier
+                        .width(40.dp),
+                )
 
-				// Render the small boxes (dots) for each day of the month
-				for (i in 0 until daysInMonth)
-				{
-					val date = yearMonth.atDay(i + 1)
-					val prayerTracker = progressForMonth.value.find { it.date == date.toString() }
-					val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
-							 prayers[prayers.indexOf(prayer)]
-																								)
-					val isMenstrauting = prayerTracker?.isMenstruating ?: false
+                // Render the small boxes (dots) for each day of the month
+                for (i in 0 until daysInMonth) {
+                    val date = yearMonth.atDay(i + 1)
+                    val prayerTracker = progressForMonth.value.find { it.date == date.toString() }
+                    val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
+                        prayers[prayers.indexOf(prayer)]
+                    )
+                    val isMenstrauting = prayerTracker?.isMenstruating ?: false
 
-					Box(
-							 modifier = Modifier
-								 .size(8.dp)
-								 //if the day is today then add border
-								 .border(
-										  width = 1.dp ,
-										  color = when (date)
-										  {
-											  currentDate ->
-											  {
-												  MaterialTheme.colorScheme.tertiary
-											  }
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            //if the day is today then add border
+                            .border(
+                                width = 1.dp,
+                                color = when (date) {
+                                    currentDate -> {
+                                        MaterialTheme.colorScheme.tertiary
+                                    }
 
-											  userSelectedDate ->
-											  {
-												  MaterialTheme.colorScheme.onSecondaryContainer
-											  }
+                                    userSelectedDate -> {
+                                        MaterialTheme.colorScheme.onSecondaryContainer
+                                    }
 
-											  else ->
-											  {
-												  if (isHighlighted && ! isMenstrauting)
-												  {
-													  MaterialTheme.colorScheme.primary
-												  } else if (isMenstrauting)
-												  {
-													  //pink
-													  Color(0xFFE91E63)
-												  } else
-												  {
-													  Color.Gray
-												  }
-											  }
-										  } ,
-										  shape = CircleShape
-										)
-								 .background(
-										  color =
-										  when (date)
-										  {
-											  currentDate ->
-											  {
-												  if (isHighlighted)
-												  {
-													  MaterialTheme.colorScheme.primary
-												  } else if (isMenstrauting)
-												  {
-													  //pink
-													  Color(0xFFE91E63)
-												  } else
-												  {
-													  Color.Gray
-												  }
-											  }
+                                    else -> {
+                                        if (isHighlighted && !isMenstrauting) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else if (isMenstrauting) {
+                                            //pink
+                                            Color(0xFFE91E63)
+                                        } else {
+                                            Color.Gray
+                                        }
+                                    }
+                                },
+                                shape = CircleShape
+                            )
+                            .background(
+                                color =
+                                when (date) {
+                                    currentDate -> {
+                                        if (isHighlighted) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else if (isMenstrauting) {
+                                            //pink
+                                            Color(0xFFE91E63)
+                                        } else {
+                                            Color.Gray
+                                        }
+                                    }
 
-											  userSelectedDate ->
-											  {
-												  if (isHighlighted)
-												  {
-													  MaterialTheme.colorScheme.primary
-												  } else if (isMenstrauting)
-												  {
-													  //pink
-													  Color(
-															   0xFFE91E63
-														   )
-												  } else
-												  {
-													  MaterialTheme.colorScheme.secondaryContainer
-												  }
-											  }
+                                    userSelectedDate -> {
+                                        if (isHighlighted) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else if (isMenstrauting) {
+                                            //pink
+                                            Color(
+                                                0xFFE91E63
+                                            )
+                                        } else {
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                        }
+                                    }
 
-											  else ->
-											  {
-												  if (isHighlighted)
-												  {
-													  MaterialTheme.colorScheme.primary
-												  } else if (isMenstrauting)
-												  {
-													  //pink
-													  Color(0xFFE91E63)
-												  } else
-												  {
-													  Color.Gray
-												  }
-											  }
-										  } ,
-										  shape = CircleShape
-											)
-					   )
-				}
-			}
-		}
-	}
+                                    else -> {
+                                        if (isHighlighted) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else if (isMenstrauting) {
+                                            //pink
+                                            Color(0xFFE91E63)
+                                        } else {
+                                            Color.Gray
+                                        }
+                                    }
+                                },
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
+        }
+    }
 }
 
 // Extension function to check if a prayer is completed for a specific day
-fun PrayerTracker.isPrayerCompleted(prayer : String) : Boolean
-{
-	return when (prayer)
-	{
-		"Fajr" -> fajr
-		"Dhuhr" -> dhuhr
-		"Asr" -> asr
-		"Maghrib" -> maghrib
-		"Isha" -> isha
-		else -> false
-	}
+fun PrayerTracker.isPrayerCompleted(prayer: String): Boolean {
+    return when (prayer) {
+        "Fajr" -> fajr
+        "Dhuhr" -> dhuhr
+        "Asr" -> asr
+        "Maghrib" -> maghrib
+        "Isha" -> isha
+        else -> false
+    }
 }

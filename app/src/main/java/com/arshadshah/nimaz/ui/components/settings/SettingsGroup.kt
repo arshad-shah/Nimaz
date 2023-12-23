@@ -22,70 +22,66 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun SettingsGroup(
-	modifier : Modifier = Modifier ,
-	title : @Composable (() -> Unit)? = null ,
-	content : @Composable ColumnScope.() -> Unit ,
-				 )
-{
-	Card(
-			 colors = CardDefaults.cardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-											 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = modifier
-				 .padding(8.dp)
-		) {
-		Column(
-				 modifier = modifier.fillMaxWidth() ,
-			  ) {
-			if (title != null)
-			{
-				SettingsGroupTitle(title)
-				Divider(
-						 modifier = Modifier.fillMaxWidth() ,
-						 color = MaterialTheme.colorScheme.outline
-					   )
-			}
-			content()
-		}
-	}
+    modifier: Modifier = Modifier,
+    title: @Composable (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = modifier
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = modifier.fillMaxWidth(),
+        ) {
+            if (title != null) {
+                SettingsGroupTitle(title)
+                Divider(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+            content()
+        }
+    }
 }
 
 @Composable
-internal fun SettingsGroupTitle(title : @Composable () -> Unit)
-{
-	Box(
-			 modifier = Modifier
-				 .fillMaxWidth()
-				 .height(52.dp)
-				 .padding(start = 24.dp , end = 16.dp) ,
-			 contentAlignment = Alignment.CenterStart
-	   ) {
-		val primary = MaterialTheme.colorScheme.onSecondaryContainer
-		val titleStyle = MaterialTheme.typography.titleLarge.copy(color = primary)
-		ProvideTextStyle(value = titleStyle) { title() }
-	}
+internal fun SettingsGroupTitle(title: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .padding(start = 24.dp, end = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        val primary = MaterialTheme.colorScheme.onSecondaryContainer
+        val titleStyle = MaterialTheme.typography.titleLarge.copy(color = primary)
+        ProvideTextStyle(value = titleStyle) { title() }
+    }
 }
 
 @Preview
 @Composable
-internal fun SettingsGroupPreview()
-{
-	NimazTheme {
-		SettingsGroup(
-				 title = { Text(text = "Title") }
-					 ) {
-			Box(
-					 modifier = Modifier
-						 .height(64.dp)
-						 .fillMaxWidth() ,
-					 contentAlignment = Alignment.Center ,
-			   ) {
-				Text(text = "Settings group")
-			}
-		}
-	}
+internal fun SettingsGroupPreview() {
+    NimazTheme {
+        SettingsGroup(
+            title = { Text(text = "Title") }
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(64.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = "Settings group")
+            }
+        }
+    }
 }
