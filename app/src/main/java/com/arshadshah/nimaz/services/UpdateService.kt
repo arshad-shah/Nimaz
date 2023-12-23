@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.services
 
 import android.app.Activity
 import android.content.Context
+import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.repositories.UpdateRepository
 
 class UpdateService(context: Context) {

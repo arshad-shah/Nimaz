@@ -133,6 +133,9 @@ class DataStore(db: AppDatabase) {
     suspend fun getFastTrackerForDate(date: String) =
         fastTrackerDao.getFastTrackerForDate(date).toFastTracker()
 
+    fun getFastTrackerForDateAsFlow(date: String) =
+        fastTrackerDao.getFastTrackerForDateAsFlow(date)
+
     fun isFastingForDate(date: String) = fastTrackerDao.isFastingForDate(date)
 
     //save a tracker

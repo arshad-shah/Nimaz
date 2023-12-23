@@ -11,6 +11,10 @@ interface FastTrackerDao {
     @Query("SELECT * FROM FastTracker WHERE date = :date")
     suspend fun getFastTrackerForDate(date: String): LocalFastTracker
 
+    //get trtacker for a specific date as a flow
+    @Query("SELECT * FROM FastTracker WHERE date = :date")
+    fun getFastTrackerForDateAsFlow(date: String): Flow<LocalFastTracker>
+
     //get all the trackers
     @Query("SELECT * FROM FastTracker")
     suspend fun getAllFastTrackers(): List<LocalFastTracker>

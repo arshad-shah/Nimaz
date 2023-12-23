@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.activities
 
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +21,7 @@ import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
+import com.arshadshah.nimaz.services.UpdateService
 import com.arshadshah.nimaz.ui.components.common.CustomTopBar
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
@@ -48,18 +50,17 @@ class MainActivity : ComponentActivity() {
             AutoLocationUtils.startLocationUpdates()
         }
 
-        val appUpdateManager = AppUpdateManagerFactory.create(this)
-        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                Log.d(MAIN_ACTIVITY_TAG, "onResume:  update is installed")
-                appUpdateManager.startUpdateFlowForResult(
-                    appUpdateInfo,
-                    AppUpdateType.IMMEDIATE,
+        val updateService = UpdateService(this)
+
+        updateService.checkForUpdate(true) { updateIsAvailable ->
+            if (updateIsAvailable) {
+                updateService.startUpdateFlowForResult(
                     this,
                     APP_UPDATE_REQUEST_CODE
                 )
             }
         }
+
     }
 
     override fun onDestroy() {

@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
@@ -21,7 +20,7 @@ import kotlin.reflect.KFunction1
 fun Calender(
     handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>,
     progressForMonth: State<MutableList<PrayerTracker>>,
-    fastProgressForMonth: State<MutableList<FastTracker>>,
+    isFastingToday: State<Boolean>,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -44,7 +43,7 @@ fun Calender(
                     dayState = state,
                     handleEvents = handleEvents,
                     progressForMonth,
-                    fastProgressForMonth
+                    isFastingToday
                 )
             },
             daysOfWeekHeader = { weekState ->

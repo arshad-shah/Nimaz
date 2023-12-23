@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,8 +54,14 @@ fun CalenderDay(
     dayState: DayState<DynamicSelectionState>,
     handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?,
     progressForMonth: State<MutableList<PrayerTracker>>,
-    fastProgressForMonth: State<MutableList<FastTracker>>,
+    isFastingToday: State<Boolean>,
 ) {
+
+    LaunchedEffect(Unit){
+        if (handleEvents != null) {
+            handleEvents(TrackerViewModel.TrackerEvent.IsFastingToday(dayState.date.toString()))
+        }
+    }
 
     //get the day for the hijri calendar
     val hijriDay = HijrahDate.from(dayState.date)
@@ -72,12 +79,11 @@ fun CalenderDay(
 
     //find todays tracker in the list of trackers from progressForMonth
     val todaysTracker = progressForMonth.value.find { it.date == currentDate.toString() }
-    val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate.toString() }
+    val todaysFastTracker = isFastingToday.value
+    Log.d("CalenderDay", "todaysFastTracker: ${isFastingToday.value}")
     val isMenstratingToday = todaysTracker?.isMenstruating ?: false
 
     val isFromCurrentMonth = dayState.isFromCurrentMonth
-
-    Log.d("CalenderDay", "isFromCurrentMonth: $currentDate $isFromCurrentMonth")
 
     ElevatedCard(
         shape = MaterialTheme.shapes.medium,
@@ -268,7 +274,7 @@ fun CalenderDay(
                     modifier = Modifier
                         .size(6.dp)
                         .background(
-                            color = if (todaysFastTracker?.isFasting == true) MaterialTheme.colorScheme.error
+                            color = if (todaysFastTracker) MaterialTheme.colorScheme.error
                             else Color.Transparent,
                             shape = CircleShape
                         )
@@ -360,59 +366,5 @@ fun isImportantDay(day: Int, month: Int): Pair<Boolean, String> {
         Pair(true, importantDays[month]!![day] ?: "")
     } else {
         Pair(false, "")
-    }
-}
-
-@Preview
-@Composable
-fun CalenderDayPreview() {
-    class DayOfWeek : Day {
-
-        override val date: LocalDate = LocalDate.now()
-        override val isCurrentDay: Boolean = true
-        override val isFromCurrentMonth: Boolean = true
-    }
-
-    val dayState = DayState(
-        day = DayOfWeek(), selectionState = DynamicSelectionState(
-            selection = listOf(),
-            confirmSelectionChange = { true },
-            selectionMode = SelectionMode.Single
-        )
-    )
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .width(48.dp)
-            .background(color = MaterialTheme.colorScheme.surface),
-    ) {
-        CalenderDay(
-            dayState = dayState,
-            handleEvents = null,
-            progressForMonth = remember {
-                mutableStateOf(
-                    mutableListOf(
-                        PrayerTracker(
-                            date = LocalDate.now().toString(),
-                            fajr = true,
-                            dhuhr = true,
-                            asr = true,
-                            maghrib = true,
-                            isha = true
-                        )
-                    )
-                )
-            },
-            fastProgressForMonth = remember {
-                mutableStateOf(
-                    mutableListOf(
-                        FastTracker(
-                            date = LocalDate.now().toString(),
-                            isFasting = true
-                        )
-                    )
-                )
-            }
-        )
     }
 }
