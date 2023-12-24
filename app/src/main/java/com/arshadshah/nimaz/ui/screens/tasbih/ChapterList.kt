@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import androidx.activity.ComponentActivity
+import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -17,65 +17,65 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CHAPTERS
 import com.arshadshah.nimaz.ui.components.tasbih.ChapterListItem
+import com.arshadshah.nimaz.ui.screens.tasbih.SharedPreferencesUtil.getLastVisibleItemIndex
+import com.arshadshah.nimaz.ui.screens.tasbih.SharedPreferencesUtil.saveLastVisibleItemIndex
 import com.arshadshah.nimaz.viewModel.DuaViewModel
 
 @Composable
 fun ChapterList(
-	paddingValues : PaddingValues ,
-	onNavigateToChapter : (Int , String) -> Unit ,
-	categoryId : String ,
-			   )
-{
-	val context = LocalContext.current
+    viewModel: DuaViewModel = viewModel(
+        key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY
+    ),
+    paddingValues: PaddingValues,
+    onNavigateToChapter: (Int, String) -> Unit,
+    categoryId: String
+) {
+    val context = LocalContext.current
+    val chapterState = viewModel.chapters.collectAsState()
 
-	val viewModel = viewModel(
-			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			 initializer = { DuaViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
+    val listState = rememberLazyListState()
+    val lastVisibleItemIndexState = remember {
+        mutableIntStateOf(getLastVisibleItemIndex(context))
+    }
 
-	LaunchedEffect(Unit) {
-		viewModel.getChapters(categoryId.toInt())
-	}
+    LaunchedEffect(categoryId) {
+        viewModel.getChapters(categoryId.toInt())
+    }
 
-	val chapterState = remember { viewModel.chapters }.collectAsState()
+    LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } }) {
+        saveLastVisibleItemIndex(context, listState.firstVisibleItemIndex)
+    }
 
-	//if a new item is viewed, then scroll to that item
-	val sharedPref = context.getSharedPreferences("dua" , 0)
-	val listState = rememberLazyListState()
-	val visibleItemIndex =
-		remember { mutableIntStateOf(sharedPref.getInt("visibleItemIndex" , - 1)) }
+    LaunchedEffect(lastVisibleItemIndexState) {
+        if (lastVisibleItemIndexState.intValue != -1) {
+            listState.scrollToItem(lastVisibleItemIndexState.intValue)
+            lastVisibleItemIndexState.intValue = -1
+        }
+    }
 
-	//when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-	LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })
-	{
-		sharedPref.edit().putInt("visibleItemIndex" , listState.firstVisibleItemIndex).apply()
-	}
+    LazyColumn(
+        modifier = Modifier.testTag(TEST_TAG_CHAPTERS),
+        contentPadding = paddingValues,
+        state = listState
+    ) {
+        items(chapterState.value.size) {
+            ChapterListItem(
+                chapter = chapterState.value[it],
+                onNavigateToChapter = onNavigateToChapter,
+                loading = false
+            )
+        }
+    }
+}
 
-	//when we reopen the app, we want to scroll to the last item viewed
-	LaunchedEffect(visibleItemIndex.value)
-	{
-		if (visibleItemIndex.value != - 1)
-		{
-			listState.scrollToItem(visibleItemIndex.value)
-			//set the value back to -1 so that we don't scroll to the same item again
-			visibleItemIndex.value = - 1
-		}
-	}
+object SharedPreferencesUtil {
+    fun saveLastVisibleItemIndex(context: Context, index: Int) {
+        val sharedPref = context.getSharedPreferences("dua", Context.MODE_PRIVATE)
+        sharedPref.edit().putInt("visibleItemIndex", index).apply()
+    }
 
-	LazyColumn(
-			 modifier = Modifier.testTag(TEST_TAG_CHAPTERS) ,
-			 contentPadding = paddingValues ,
-			 state = listState
-			  )
-	{
-		items(chapterState.value.size)
-		{
-			ChapterListItem(
-					 chapter = chapterState.value[it] ,
-					 onNavigateToChapter = onNavigateToChapter ,
-					 loading = false
-						   )
-		}
-	}
+    fun getLastVisibleItemIndex(context: Context): Int {
+        val sharedPref = context.getSharedPreferences("dua", Context.MODE_PRIVATE)
+        return sharedPref.getInt("visibleItemIndex", -1)
+    }
 }

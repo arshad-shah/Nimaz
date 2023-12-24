@@ -18,66 +18,65 @@ import androidx.compose.ui.unit.dp
 
 //my tasbih drop down item for each tasbih
 @Composable
-fun DropDownHeader(headerLeft : String , headerMiddle : String , headerRight : String)
-{
-	// a three section row for the tasbih name, goal and count
-	//divider between each section
-	//should look like this
-	//Name - Goal - Count
+fun DropDownHeader(headerLeft: String, headerMiddle: String, headerRight: String) {
+    // a three section row for the tasbih name, goal and count
+    //divider between each section
+    //should look like this
+    //Name - Goal - Count
 
-	Row(
-			 modifier = Modifier
-				 .fillMaxWidth() ,
-			 verticalAlignment = Alignment.CenterVertically
-	   ) {
-		//name
-		Text(
-				 modifier = Modifier
-					 .weight(1f)
-					 .padding(8.dp) ,
-				 text = headerLeft ,
-				 textAlign = TextAlign.Center ,
-				 maxLines = 2 ,
-				 overflow = TextOverflow.Ellipsis ,
-				 style = MaterialTheme.typography.bodyMedium
-			)
-		//divider
-		Divider(
-				 modifier = Modifier
-					 .width(1.dp)
-					 .height(24.dp) ,
-				 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
-				 thickness = 1.dp ,
-			   )
-		//goal
-		Text(
-				 modifier = Modifier
-					 .weight(1f)
-					 .padding(8.dp) ,
-				 text = headerMiddle ,
-				 textAlign = TextAlign.Center ,
-				 maxLines = 2 ,
-				 overflow = TextOverflow.Ellipsis ,
-				 style = MaterialTheme.typography.bodyMedium
-			)
-		//divider
-		Divider(
-				 modifier = Modifier
-					 .width(1.dp)
-					 .height(24.dp) ,
-				 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) ,
-				 thickness = 1.dp ,
-			   )
-		//count
-		Text(
-				 modifier = Modifier
-					 .weight(1f)
-					 .padding(8.dp) ,
-				 text = headerRight ,
-				 textAlign = TextAlign.Center ,
-				 maxLines = 2 ,
-				 overflow = TextOverflow.Ellipsis ,
-				 style = MaterialTheme.typography.bodyMedium
-			)
-	}
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        //name
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp),
+            text = headerLeft,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        //divider
+        Divider(
+            modifier = Modifier
+                .width(1.dp)
+                .height(24.dp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            thickness = 1.dp,
+        )
+        //goal
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp),
+            text = headerMiddle,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        //divider
+        Divider(
+            modifier = Modifier
+                .width(1.dp)
+                .height(24.dp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            thickness = 1.dp,
+        )
+        //count
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp),
+            text = headerRight,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
 }

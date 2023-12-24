@@ -31,7 +31,7 @@ class DashboardPrayertimesCardKtTest
 	@Test
 	fun dashboardPrayerTimesCard_displaysNextPrayerInfo() {
 		val context = InstrumentationRegistry.getInstrumentation().targetContext
-		val viewModel = PrayerTimesViewModel()
+		val viewModel = PrayerTimesViewModel(context)
 		viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
 		composeTestRule.setContent {
 			DashboardPrayertimesCard()

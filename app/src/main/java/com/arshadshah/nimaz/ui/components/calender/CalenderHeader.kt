@@ -16,9 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -33,260 +30,197 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KFunction1
 
-//composable for the header
 @Composable
 fun CalenderHeader(
-	monthState : MonthState ,
-	handleEvents : KFunction1<TrackerViewModel.TrackerEvent , Unit>? ,
-				  )
-{
-	val currentMonth = monthState.currentMonth
-	val currentYear = monthState.currentMonth.year
+    monthState: MonthState,
+    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+) {
+    val currentMonthYear = monthState.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+    val hijriDate = HijrahDate.from(monthState.currentMonth.atDay(1))
+    val hijriFormatted = getFormattedHijriDate(YearMonth.from(hijriDate))
 
-	val formatter = DateTimeFormatter.ofPattern("MMMM yyyy")
-	//sentence case the month name
-	val currentMonthYear = currentMonth.format(formatter)
+    ElevatedCard(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CalendarNavigationButton(
+                iconId = R.drawable.angle_left_icon,
+                description = "Previous Month",
+                onClick = { changeMonth(monthState, -1, handleEvents) }
+            )
 
-	val dateToBeUsedToGetHijriDate = LocalDate.of(currentYear , currentMonth.month , 1)
-	//go through all the days in the month and get the hijri month for each day
-	//add the hijri month to a list
-	val formatterHijriMonth = DateTimeFormatter.ofPattern("MMMM")
-	val listOfUniqueHijriMonths = mutableListOf<String>()
-	//process this in a separate thread
-	for (i in 1 .. currentMonth.lengthOfMonth())
-	{
-		val date = LocalDate.of(currentYear , currentMonth.month , i)
-		val hijriDateForDay = HijrahDate.from(date)
-		val formattedHijriDate = hijriDateForDay.format(formatterHijriMonth)
-		if (! listOfUniqueHijriMonths.contains(formattedHijriDate))
-		{
-			listOfUniqueHijriMonths.add(formattedHijriDate)
-		}
-	}
+            CalendarMonthDisplay(
+                currentMonthYear = currentMonthYear,
+                hijriFormatted = hijriFormatted,
+                monthState = monthState,
+                handleEvents = handleEvents
+            )
 
-	val hijriDate = HijrahDate.from(dateToBeUsedToGetHijriDate)
-	val formatterHijriYear = DateTimeFormatter.ofPattern("yyyy")
-	val hijriFormatedYear = hijriDate.format(formatterHijriYear)
-
-	//create a string of the hijri months and year
-	val hijriFormated = listOfUniqueHijriMonths.joinToString(" / ") + " $hijriFormatedYear"
-
-	//a toggle to move user back to month with current date
-	val showCurrentMonth = remember {
-		mutableStateOf(false)
-	}
-
-	val inCurrentMonth = remember {
-		mutableStateOf(true)
-	}
-
-	LaunchedEffect(showCurrentMonth.value) {
-		if (showCurrentMonth.value)
-		{
-			val currentYearMonth = YearMonth.now()
-			val currentMonth = monthState.currentMonth
-			if (currentYearMonth != currentMonth)
-			{
-				monthState.currentMonth = currentYearMonth
-				if (handleEvents == null) return@LaunchedEffect
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.SET_DATE(
-								  LocalDate.now().toString()
-															   )
-							)
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-								  LocalDate.now().toString()
-																		   )
-							)
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-								  LocalDate.now().toString()
-																				)
-							)
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-								  LocalDate.now().toString()
-																			 )
-							)
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-								  LocalDate.now().toString()
-																				  )
-							)
-
-			} else
-			{
-				if (handleEvents == null) return@LaunchedEffect
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.SET_DATE(
-								  LocalDate.now().toString()
-															   )
-							)
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-								  LocalDate.now().toString()
-																		   )
-							)
-				handleEvents(
-						 TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-								  LocalDate.now().toString()
-																				)
-							)
-			}
-			showCurrentMonth.value = false
-			inCurrentMonth.value = true
-		}
-	}
-
-	ElevatedCard(
-			 colors = CardDefaults.cardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-											 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-				) {
-		Row(
-				 modifier = Modifier
-					 .padding(horizontal = 12.dp)
-					 .fillMaxWidth() ,
-				 horizontalArrangement = Arrangement.SpaceBetween ,
-				 verticalAlignment = Alignment.CenterVertically
-		   ) {
-			//left arrow
-			FilledIconButton(
-					 onClick = {
-						 monthState.currentMonth = monthState.currentMonth.minusMonths(1)
-						 //get a date in the new month
-						 val date = monthState.currentMonth.atDay(1)
-						 if (handleEvents == null) return@FilledIconButton
-						 handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
-						 handleEvents(
-								  TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-										   date.toString()
-																						   )
-									 )
-						 inCurrentMonth.value = false
-					 } ,
-							) {
-				Icon(
-						 modifier = Modifier.size(24.dp) ,
-						 painter = painterResource(id = R.drawable.angle_left_icon) ,
-						 contentDescription = "Previous Month"
-					)
-			}
-			Column(
-					 modifier = Modifier
-						 .fillMaxWidth(0.8f)
-						 .clickable {
-							 showCurrentMonth.value = true
-						 } ,
-					 horizontalAlignment = Alignment.CenterHorizontally ,
-					 verticalArrangement = Arrangement.Center
-				  ) {
-				//if its today show today else show the today dimmed with a symbol to show which way to go to get to today
-				if (monthState.currentMonth == YearMonth.now())
-				{
-					Text(
-							 modifier = Modifier
-								 .padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
-							 text = "Today" ,
-							 style = MaterialTheme.typography.titleSmall
-						)
-				} else
-				{
-					Row(
-							 modifier = Modifier
-								 .background(
-										  color = MaterialTheme.colorScheme.primary ,
-										  shape = MaterialTheme.shapes.small
-											)
-								 .padding(horizontal = 8.dp) ,
-							 horizontalArrangement = Arrangement.Center ,
-							 verticalAlignment = Alignment.CenterVertically
-					   ) {
-						if (monthState.currentMonth.isAfter(YearMonth.now()))
-						{
-							Icon(
-									 modifier = Modifier.size(16.dp) ,
-									 painter = painterResource(id = R.drawable.angle_small_left_icon) ,
-									 contentDescription = "Previous Day" ,
-									 tint = MaterialTheme.colorScheme.onPrimary
-								)
-							Text(
-									 text = "Today" ,
-									 style = MaterialTheme.typography.titleSmall ,
-									 modifier = Modifier
-										 .padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
-									 color = MaterialTheme.colorScheme.onPrimary
-								)
-						} else
-						{
-							Text(
-									 text = "Today" ,
-									 style = MaterialTheme.typography.titleSmall ,
-									 modifier = Modifier
-										 .padding(start = 4.dp , top = 4.dp , bottom = 4.dp) ,
-									 color = MaterialTheme.colorScheme.onPrimary
-								)
-							Icon(
-									 modifier = Modifier.size(16.dp) ,
-									 painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-									 contentDescription = "Next Day" ,
-									 tint = MaterialTheme.colorScheme.onPrimary
-								)
-						}
-					}
-				}
-				Text(
-						 text = currentMonthYear ,
-						 style = MaterialTheme.typography.titleLarge ,
-						 maxLines = 1 ,
-						 modifier = Modifier.padding(4.dp)
-					)
-
-				Text(
-						 text = hijriFormated ,
-						 style = MaterialTheme.typography.bodySmall ,
-						 maxLines = 1 ,
-						 modifier = Modifier.padding(4.dp)
-					)
-			}
-
-			//right arrow
-			FilledIconButton(
-					 onClick = {
-						 monthState.currentMonth = monthState.currentMonth.plusMonths(1)
-						 //get a date in the new month
-						 val date = monthState.currentMonth.atDay(1)
-						 if (handleEvents == null) return@FilledIconButton
-						 handleEvents(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date.toString()))
-						 handleEvents(
-								  TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-										   date.toString()
-																						   )
-									 )
-						 inCurrentMonth.value = false
-					 } ,
-							) {
-				Icon(
-						 modifier = Modifier.size(24.dp) ,
-						 painter = painterResource(id = R.drawable.angle_right_icon) ,
-						 contentDescription = "Next Month"
-					)
-			}
-		}
-	}
+            CalendarNavigationButton(
+                iconId = R.drawable.angle_right_icon,
+                description = "Next Month",
+                onClick = { changeMonth(monthState, 1, handleEvents) }
+            )
+        }
+    }
 }
+
+fun getFormattedHijriDate(yearMonth: YearMonth): String {
+    val formatterHijriMonth = DateTimeFormatter.ofPattern("MMMM")
+    val uniqueHijriMonths = linkedSetOf<String>()
+
+    // Check the start, middle, and end of the month for Hijri months
+    val daysToCheck = listOf(1, yearMonth.lengthOfMonth() / 2, yearMonth.lengthOfMonth())
+    for (day in daysToCheck) {
+        val date = LocalDate.of(yearMonth.year, yearMonth.month, day)
+        val hijriDateForDay = HijrahDate.from(date)
+        uniqueHijriMonths.add(hijriDateForDay.format(formatterHijriMonth))
+    }
+
+    val hijriDate = HijrahDate.from(yearMonth.atDay(1))
+    val hijriFormattedYear = hijriDate.format(DateTimeFormatter.ofPattern("yyyy"))
+
+    return uniqueHijriMonths.joinToString(" / ") + " $hijriFormattedYear"
+}
+
+
+@Composable
+private fun CalendarMonthDisplay(
+    currentMonthYear: String,
+    hijriFormatted: String,
+    monthState: MonthState,
+    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(0.8f)
+            .clickable { navigateToCurrentMonth(monthState, handleEvents) },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (monthState.currentMonth == YearMonth.now()) {
+            Text(
+                text = "Today",
+                style = MaterialTheme.typography.titleSmall
+            )
+        } else {
+            TodayIndicator(monthState)
+        }
+
+        Text(
+            text = currentMonthYear,
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1,
+            modifier = Modifier.padding(4.dp)
+        )
+
+        Text(
+            text = hijriFormatted,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            modifier = Modifier.padding(4.dp)
+        )
+    }
+}
+
+@Composable
+private fun TodayIndicator(monthState: MonthState) {
+    Row(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = MaterialTheme.shapes.small
+            )
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val iconId = if (monthState.currentMonth.isAfter(YearMonth.now()))
+            R.drawable.angle_small_left_icon
+        else
+            R.drawable.angle_small_right_icon
+
+        Icon(
+            modifier = Modifier.size(16.dp),
+            painter = painterResource(id = iconId),
+            contentDescription = if (monthState.currentMonth.isAfter(YearMonth.now())) "Previous Day" else "Next Day",
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+
+        Text(
+            text = "Today",
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+}
+
+@Composable
+private fun CalendarNavigationButton(iconId: Int, description: String, onClick: () -> Unit) {
+    FilledIconButton(onClick = onClick) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = iconId),
+            contentDescription = description
+        )
+    }
+}
+
+private fun navigateToCurrentMonth(
+    monthState: MonthState,
+    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+) {
+    val currentYearMonth = YearMonth.now()
+    if (monthState.currentMonth != currentYearMonth) {
+        monthState.currentMonth = currentYearMonth
+        updateTrackerEvents(LocalDate.now().toString(), handleEvents)
+    }
+}
+
+private fun changeMonth(
+    monthState: MonthState,
+    monthsToAdd: Long,
+    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+) {
+    monthState.currentMonth = monthState.currentMonth.plusMonths(monthsToAdd)
+    val date = monthState.currentMonth.atDay(1)
+    updateTrackerEvents(date.toString(), handleEvents)
+}
+
+private fun updateTrackerEvents(
+    date: String,
+    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+) {
+    handleEvents?.invoke(TrackerViewModel.TrackerEvent.SET_DATE(date))
+    handleEvents?.invoke(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date))
+    handleEvents?.invoke(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date))
+    handleEvents?.invoke(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date))
+    handleEvents?.invoke(
+        TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+            YearMonth.from(
+                LocalDate.parse(date)
+            )
+        )
+    )
+}
+
 
 @Preview
 @Composable
-fun CalenderHeaderPreview()
-{
-	CalenderHeader(
-			 monthState = MonthState(initialMonth = YearMonth.now()) ,
-			 handleEvents = null
-				  )
+fun CalenderHeaderPreview() {
+    CalenderHeader(
+        monthState = MonthState(initialMonth = YearMonth.now()),
+        handleEvents = null
+    )
 }

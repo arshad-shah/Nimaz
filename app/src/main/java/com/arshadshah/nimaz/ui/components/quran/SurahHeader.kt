@@ -31,131 +31,129 @@ import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 //surah header component
 @Composable
 fun SurahHeader(
-	surah : Surah ,
-	loading : Boolean ,
-			   )
-{
-	OutlinedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surface ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-													 ) ,
-			 modifier = Modifier
-				 .padding(4.dp)
-				 .fillMaxWidth() ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-				) {
-		Row(
-				 modifier = Modifier
-					 .padding(top = 8.dp)
-					 .fillMaxWidth()
-					 .background(MaterialTheme.colorScheme.surface) ,
-				 horizontalArrangement = Arrangement.SpaceAround ,
-				 verticalAlignment = Alignment.CenterVertically
-		   ) {
-			Text(
-					 text = surah.revelationType ,
-					 style = MaterialTheme.typography.titleSmall ,
-					 textAlign = TextAlign.Center ,
-					 modifier = Modifier
-						 .padding(4.dp)
-						 .placeholder(
-								  visible = loading ,
-								  color = MaterialTheme.colorScheme.outline ,
-								  shape = RoundedCornerShape(4.dp) ,
-								  highlight = PlaceholderHighlight.shimmer(
-										   highlightColor = Color.White ,
-																		  )
-									 )
-				)
-			Column(
-					 modifier = Modifier.padding(4.dp) ,
-					 verticalArrangement = Arrangement.Center ,
-					 horizontalAlignment = Alignment.CenterHorizontally
-				  ) {
-				CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-					Text(
-							 text = surah.name ,
-							 style = MaterialTheme.typography.headlineLarge ,
-							 fontFamily = utmaniQuranFont ,
-							 fontWeight = FontWeight.Bold ,
-							 textAlign = TextAlign.Center ,
-							 modifier = Modifier
-								 .placeholder(
-										  visible = loading ,
-										  color = MaterialTheme.colorScheme.outline ,
-										  shape = RoundedCornerShape(4.dp) ,
-										  highlight = PlaceholderHighlight.shimmer(
-												   highlightColor = Color.White ,
-																				  )
-											 )
-						)
-				}
+    surah: Surah,
+    loading: Boolean,
+) {
+    OutlinedCard(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = surah.revelationType,
+                style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(4.dp)
+                    .placeholder(
+                        visible = loading,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(4.dp),
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = Color.White,
+                        )
+                    )
+            )
+            Column(
+                modifier = Modifier.padding(4.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = surah.name,
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontFamily = utmaniQuranFont,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .placeholder(
+                                visible = loading,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp),
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color.White,
+                                )
+                            )
+                    )
+                }
 
-				Text(
-						 text = surah.englishName ,
-						 style = MaterialTheme.typography.titleLarge ,
-						 textAlign = TextAlign.Center ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = loading ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 )
-					)
-				Text(
-						 text = surah.englishNameTranslation ,
-						 style = MaterialTheme.typography.titleMedium ,
-						 textAlign = TextAlign.Center ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = loading ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 )
-					)
-			}
+                Text(
+                    text = surah.englishName,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .placeholder(
+                            visible = loading,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White,
+                            )
+                        )
+                )
+                Text(
+                    text = surah.englishNameTranslation,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .placeholder(
+                            visible = loading,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White,
+                            )
+                        )
+                )
+            }
 
-			Text(
-					 text = "${surah.numberOfAyahs} Verses" ,
-					 style = MaterialTheme.typography.titleSmall ,
-					 textAlign = TextAlign.Center ,
-					 modifier = Modifier
-						 .placeholder(
-								  visible = loading ,
-								  color = MaterialTheme.colorScheme.outline ,
-								  shape = RoundedCornerShape(4.dp) ,
-								  highlight = PlaceholderHighlight.shimmer(
-										   highlightColor = Color.White ,
-																		  )
-									 )
-				)
-		}
-	}
+            Text(
+                text = "${surah.numberOfAyahs} Verses",
+                style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .placeholder(
+                        visible = loading,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(4.dp),
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = Color.White,
+                        )
+                    )
+            )
+        }
+    }
 }
 
 @Preview
 @Composable
-fun SurahHeaderPreview()
-{
-	SurahHeader(
-			 surah = Surah(
-					  1 ,
-					  7 ,
-					  1 ,
-					  "الفاتحة" ,
-					  "Al-Faatiha" ,
-					  "The Opening" ,
-					  "Meccan" ,
-					  5 ,
-					  1 ,
-						  ) ,
-			 loading = false ,
-			   )
+fun SurahHeaderPreview() {
+    SurahHeader(
+        surah = Surah(
+            1,
+            7,
+            1,
+            "الفاتحة",
+            "Al-Faatiha",
+            "The Opening",
+            "Meccan",
+            5,
+            1,
+        ),
+        loading = false,
+    )
 }

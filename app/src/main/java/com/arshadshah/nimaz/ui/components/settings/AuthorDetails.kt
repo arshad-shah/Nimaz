@@ -16,68 +16,66 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
-fun AuthorDetails()
-{
+fun AuthorDetails() {
 
-	//Designed and Created By: Arshad Shah
-	//occupation: Associate Software Engineer
-	//company: HMHco (Houghton Mifflin Harcourt)
-	//Description: Loves to code, create, and learn new things.
-	//Nimaz is a project that I created to learn more about Android development and to help others learn about Islam.
-	//it is created as part of my final year project for my BSc in Computer Science.
-	//it is a free and open source project that I hope will be useful to many people. I hope you enjoy it.
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .fillMaxWidth() ,
-			 content = {
-				 Column(
-						  modifier = Modifier
-							  .padding(16.dp)
-							  .fillMaxWidth() ,
-					   ) {
-					 Text(
-							  modifier = Modifier
-								  .padding(8.dp)
-								  .fillMaxWidth() ,
-							  text = "Designed and Developed By" ,
-							  style = MaterialTheme.typography.bodyMedium ,
-							  textAlign = TextAlign.Center
-						 )
-					 Text(
-							  modifier = Modifier
-								  .padding(8.dp)
-								  .fillMaxWidth() ,
-							  text = "Arshad Shah" ,
-							  style = MaterialTheme.typography.titleLarge ,
-							  textAlign = TextAlign.Center
-						 )
-					 Text(
-							  modifier = Modifier
-								  .padding(8.dp)
-								  .fillMaxWidth() ,
-							  text = "Associate Software Engineer" ,
-							  style = MaterialTheme.typography.bodyMedium ,
-							  textAlign = TextAlign.Center
-						 )
-					 AuthorLinks()
-				 }
-			 } ,
-				)
+    //Designed and Created By: Arshad Shah
+    //occupation: Associate Software Engineer
+    //company: HMHco (Houghton Mifflin Harcourt)
+    //Description: Loves to code, create, and learn new things.
+    //Nimaz is a project that I created to learn more about Android development and to help others learn about Islam.
+    //it is created as part of my final year project for my BSc in Computer Science.
+    //it is a free and open source project that I hope will be useful to many people. I hope you enjoy it.
+    ElevatedCard(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        content = {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+            ) {
+                Text(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    text = "Designed and Developed By",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    text = "Arshad Shah",
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    text = "Associate Software Engineer",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+                AuthorLinks()
+            }
+        },
+    )
 }
 
 @Preview
 @Composable
-fun AuthorDetailsPreview()
-{
-	NimazTheme {
-		AuthorDetails()
-	}
+fun AuthorDetailsPreview() {
+    NimazTheme {
+        AuthorDetails()
+    }
 }

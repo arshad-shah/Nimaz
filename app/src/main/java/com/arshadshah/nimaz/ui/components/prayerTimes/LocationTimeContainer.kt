@@ -22,88 +22,84 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.common.CustomText
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
-import java.util.*
+import java.util.Locale
 import kotlin.reflect.KFunction1
 
 @Composable
 fun LocationTimeContainer(
-	locationState : State<String> ,
-	currentPrayerName : State<String> ,
-	handleEvent : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
-	isLoading : State<Boolean> ,
-						 )
-{
-	if (isLoading.value)
-	{
-		ContainerUI(
-				 currentPrayerNameSentenceCase = "Loading..." ,
-				 location = locationState ,
-				 handleEvent = handleEvent
-				   )
-	} else
-	{
-		val currentPrayerNameSentenceCase = currentPrayerName.value
-			.substring(0 , 1)
-			.uppercase(Locale.ROOT) + currentPrayerName.value
-			.substring(1).lowercase(Locale.ROOT)
+    locationState: State<String>,
+    currentPrayerName: State<String>,
+    handleEvent: KFunction1<SettingsViewModel.SettingsEvent, Unit>,
+    isLoading: State<Boolean>,
+) {
+    if (isLoading.value) {
+        ContainerUI(
+            currentPrayerNameSentenceCase = "Loading...",
+            location = locationState,
+            handleEvent = handleEvent
+        )
+    } else {
+        val currentPrayerNameSentenceCase = currentPrayerName.value
+            .substring(0, 1)
+            .uppercase(Locale.ROOT) + currentPrayerName.value
+            .substring(1).lowercase(Locale.ROOT)
 
-		ContainerUI(
-				 currentPrayerNameSentenceCase = currentPrayerNameSentenceCase ,
-				 location = locationState ,
-				 handleEvent = handleEvent
-				   )
-	}
+        ContainerUI(
+            currentPrayerNameSentenceCase = currentPrayerNameSentenceCase,
+            location = locationState,
+            handleEvent = handleEvent
+        )
+    }
 }
 
 @Composable
 fun ContainerUI(
-	currentPrayerNameSentenceCase : String ,
-	location : State<String> ,
-	handleEvent : KFunction1<SettingsViewModel.SettingsEvent , Unit> ,
-			   )
-{
-	val context = LocalContext.current
-	Card(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(vertical = 8.dp , horizontal = 8.dp)
-				 .height(IntrinsicSize.Max)
-		) {
-		Row(
-				 horizontalArrangement = Arrangement.Center ,
-				 modifier = Modifier.fillMaxWidth() ,
-				 verticalAlignment = Alignment.CenterVertically
-		   ) {
-			CustomText(
-					 modifier = Modifier
-						 .weight(0.5f)
-						 .padding(8.dp)
-						 .clickable {
-							 handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
-						 } ,
-					 heading = "Location" , text = location.value
-					  )
-			//vertical divider line
-			Divider(
-					 modifier = Modifier
-						 .fillMaxHeight()
-						 .width(1.dp) ,
-					 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f) ,
-				   )
-			CustomText(
-					 modifier = Modifier
-						 .weight(0.5f)
-						 .padding(8.dp) ,
-					 heading = "Current Prayer" ,
-					 //fix the name to be sentence case,
-					 text = currentPrayerNameSentenceCase
-					  )
-		}
-	}
+    currentPrayerNameSentenceCase: String,
+    location: State<String>,
+    handleEvent: KFunction1<SettingsViewModel.SettingsEvent, Unit>,
+) {
+    val context = LocalContext.current
+    Card(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier
+            .padding(vertical = 8.dp, horizontal = 8.dp)
+            .height(IntrinsicSize.Max)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CustomText(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .padding(8.dp)
+                    .clickable {
+                        handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
+                    },
+                heading = "Location", text = location.value
+            )
+            //vertical divider line
+            Divider(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+            )
+            CustomText(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .padding(8.dp),
+                heading = "Current Prayer",
+                //fix the name to be sentence case,
+                text = currentPrayerNameSentenceCase
+            )
+        }
+    }
 }

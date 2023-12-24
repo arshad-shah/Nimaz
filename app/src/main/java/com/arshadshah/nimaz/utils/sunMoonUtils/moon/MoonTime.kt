@@ -11,8 +11,8 @@ import java.time.LocalDateTime
  * @property alwaysDown true if the moon is always below the horizon
  */
 data class MoonTime(
-	val rise : LocalDateTime ,
-	val set : LocalDateTime ,
-	val alwaysUp : Boolean ,
-	val alwaysDown : Boolean ,
-				   )
+    val rise: LocalDateTime,
+    val set: LocalDateTime,
+    val alwaysUp: Boolean,
+    val alwaysDown: Boolean,
+)

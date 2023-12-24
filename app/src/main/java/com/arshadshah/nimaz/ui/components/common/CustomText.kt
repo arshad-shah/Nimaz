@@ -20,39 +20,37 @@ import androidx.compose.ui.unit.dp
  * */
 @Composable
 fun CustomText(
-	modifier : Modifier ,
-	headingModifier : Modifier = Modifier ,
-	textModifier : Modifier = Modifier ,
-	heading : String ,
-	text : String ,
-			  )
-{
-	//process the text to only show the 10 first characters of the text and add ... at the end
-	val processedText = if (text.length > 10) text.substring(0 , 10) + "..." else text
-	Column(modifier = modifier , horizontalAlignment = Alignment.CenterHorizontally) {
-		Text(
-				 modifier = headingModifier ,
-				 text = heading ,
-				 textAlign = TextAlign.Center ,
-				 style = MaterialTheme.typography.titleSmall
-			)
-		Spacer(modifier = Modifier.padding(4.dp))
-		Text(
-				 modifier = textModifier ,
-				 text = processedText ,
-				 textAlign = TextAlign.Center ,
-				 style = MaterialTheme.typography.titleMedium ,
-			)
-	}
+    modifier: Modifier,
+    headingModifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier,
+    heading: String,
+    text: String,
+) {
+    //process the text to only show the 10 first characters of the text and add ... at the end
+    val processedText = if (text.length > 10) text.substring(0, 10) + "..." else text
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            modifier = headingModifier,
+            text = heading,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleSmall
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        Text(
+            modifier = textModifier,
+            text = processedText,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
 }
 
 @Preview
 @Composable
-fun CustomTextPreview()
-{
-	CustomText(
-			 modifier = Modifier.padding(8.dp) ,
-			 heading = "Heading" ,
-			 text = "Long piece of text"
-			  )
+fun CustomTextPreview() {
+    CustomText(
+        modifier = Modifier.padding(8.dp),
+        heading = "Heading",
+        text = "Long piece of text"
+    )
 }

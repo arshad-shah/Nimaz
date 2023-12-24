@@ -13,34 +13,33 @@ import com.arshadshah.nimaz.GetPrayerTimesForMonthQuery
 import com.arshadshah.nimaz.type.Parameters
 
 
-interface NimazService
-{
+interface NimazService {
 
-	suspend fun getPrayerTimesMonthlyCustom(
-		parameters : Parameters ,
-										   ) : ApolloResponse<GetPrayerTimesForMonthQuery.Data>
+    suspend fun getPrayerTimesMonthlyCustom(
+        parameters: Parameters,
+    ): ApolloResponse<GetPrayerTimesForMonthQuery.Data>
 
-	suspend fun getSurahs() : ApolloResponse<GetAllSurahQuery.Data>
+    suspend fun getSurahs(): ApolloResponse<GetAllSurahQuery.Data>
 
-	suspend fun getJuzs() : ApolloResponse<GetAllJuzQuery.Data>
+    suspend fun getJuzs(): ApolloResponse<GetAllJuzQuery.Data>
 
-	suspend fun getAyaForSurah(
-		surahNumber : Int ,
-							  ) : ApolloResponse<GetAllAyaForSuraQuery.Data>
+    suspend fun getAyaForSurah(
+        surahNumber: Int,
+    ): ApolloResponse<GetAllAyaForSuraQuery.Data>
 
-	suspend fun getAyaForJuz(
-		juzNumber : Int ,
-							) : ApolloResponse<GetAllAyaForJuzQuery.Data>
+    suspend fun getAyaForJuz(
+        juzNumber: Int,
+    ): ApolloResponse<GetAllAyaForJuzQuery.Data>
 
-	//get duas chapters
-	suspend fun getChapters() : ApolloResponse<GetAllChaptersQuery.Data>
+    //get duas chapters
+    suspend fun getChapters(): ApolloResponse<GetAllChaptersQuery.Data>
 
-	suspend fun getCategories() : ApolloResponse<GetAllCategoriesQuery.Data>
-	suspend fun getChaptersByCategory(id : Int) : ApolloResponse<GetChaptersByCategoryQuery.Data>
+    suspend fun getCategories(): ApolloResponse<GetAllCategoriesQuery.Data>
+    suspend fun getChaptersByCategory(id: Int): ApolloResponse<GetChaptersByCategoryQuery.Data>
 
-	//get duas for chapter
-	suspend fun getDuasForChapter(
-		chapterId : Int ,
-								 ) : ApolloResponse<GetChapterByIdQuery.Data>
+    //get duas for chapter
+    suspend fun getDuasForChapter(
+        chapterId: Int,
+    ): ApolloResponse<GetChapterByIdQuery.Data>
 
 }

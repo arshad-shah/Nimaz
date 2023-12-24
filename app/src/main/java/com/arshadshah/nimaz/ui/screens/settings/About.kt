@@ -35,103 +35,99 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
 
 @Composable
-fun About(paddingValues : PaddingValues , onImageClicked : () -> Unit)
-{
-	Column(
-			 modifier = Modifier
-				 .verticalScroll(rememberScrollState() , true)
-				 .padding(paddingValues)
-				 .fillMaxWidth()
-				 .fillMaxHeight()
-				 .testTag(TEST_TAG_ABOUT_PAGE) ,
-			 verticalArrangement = Arrangement.Center ,
-			 horizontalAlignment = Alignment.CenterHorizontally
-		  ) {
-		AppDetails(onImageClicked)
-		AuthorDetails()
-	}
+fun About(paddingValues: PaddingValues, onImageClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState(), true)
+            .padding(paddingValues)
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .testTag(TEST_TAG_ABOUT_PAGE),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppDetails(onImageClicked)
+        AuthorDetails()
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AppDetails(onImageClicked : () -> Unit)
-{
-	val context = LocalContext.current
-	val sharedPref = PrivateSharedPreferences(LocalContext.current)
-	//multiple click count
-	val clickCount = remember {
-		mutableIntStateOf(0)
-	}
-	val updateClickCount = {
-		Toasty.info(context , "Click ${clickCount.value + 1} more times to enable debug mode")
-			.show()
-		clickCount.value = clickCount.value + 1
-	}
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .fillMaxWidth() ,
-			 content = {
-				 Column(
-						  modifier = Modifier.padding(8.dp) ,
-						  verticalArrangement = Arrangement.Center ,
-						  horizontalAlignment = Alignment.CenterHorizontally
-					   ) {
-					 //circular image
-					 Image(
-							  painter = painterResource(id = R.drawable.logo) ,
-							  contentDescription = "App Icon" ,
-							  modifier = Modifier
-								  .padding(8.dp)
-								  .size(100.dp)
-								  .combinedClickable(
-										   onClick = {
-											   if (clickCount.value == 5)
-											   {
-												   Toasty
-													   .success(context , "Debug Mode Enabled")
-													   .show()
-												   sharedPref.saveDataBoolean("debug" , true)
-												   onImageClicked()
-											   } else
-											   {
-												   updateClickCount()
-											   }
-										   } ,
-										   onLongClick = {
-											   Toasty
-												   .info(context , "Debug Mode Disabled")
-												   .show()
-											   sharedPref.saveDataBoolean("debug" , false)
-											   clickCount.value = 0
-										   }
-													)
-						  )
-					 Text(
-							  modifier = Modifier.padding(8.dp) ,
-							  text = "Nimaz" ,
-							  style = MaterialTheme.typography.titleLarge ,
-						 )
-					 Text(
-							  modifier = Modifier.padding(8.dp) ,
-							  text = "Version ${BuildConfig.VERSION_NAME}" ,
-							  style = MaterialTheme.typography.bodyMedium ,
-						 )
-					 Text(
-							  modifier = Modifier
-								  .padding(8.dp)
-								  .fillMaxWidth() ,
-							  text = "A free ,Ad-free , app for calculating prayer times, qibla direction, and more." ,
-							  style = MaterialTheme.typography.bodyMedium ,
-							  textAlign = TextAlign.Center
-						 )
-				 }
-			 })
+fun AppDetails(onImageClicked: () -> Unit) {
+    val context = LocalContext.current
+    val sharedPref = PrivateSharedPreferences(LocalContext.current)
+    //multiple click count
+    val clickCount = remember {
+        mutableIntStateOf(0)
+    }
+    val updateClickCount = {
+        Toasty.info(context, "Click ${clickCount.value + 1} more times to enable debug mode")
+            .show()
+        clickCount.value = clickCount.value + 1
+    }
+    ElevatedCard(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        content = {
+            Column(
+                modifier = Modifier.padding(8.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                //circular image
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "App Icon",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(100.dp)
+                        .combinedClickable(
+                            onClick = {
+                                if (clickCount.value == 5) {
+                                    Toasty
+                                        .success(context, "Debug Mode Enabled")
+                                        .show()
+                                    sharedPref.saveDataBoolean("debug", true)
+                                    onImageClicked()
+                                } else {
+                                    updateClickCount()
+                                }
+                            },
+                            onLongClick = {
+                                Toasty
+                                    .info(context, "Debug Mode Disabled")
+                                    .show()
+                                sharedPref.saveDataBoolean("debug", false)
+                                clickCount.value = 0
+                            }
+                        )
+                )
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = "Nimaz",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = "Version ${BuildConfig.VERSION_NAME}",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    text = "A free ,Ad-free , app for calculating prayer times, qibla direction, and more.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        })
 }

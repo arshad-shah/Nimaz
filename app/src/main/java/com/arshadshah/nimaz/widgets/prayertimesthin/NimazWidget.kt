@@ -29,90 +29,84 @@ import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.widgets.NimazWidgetColorScheme
 import com.arshadshah.nimaz.widgets.prayertimesthin.components.WidgetPrayerTimeRowList
 
-class NimazWidget : GlanceAppWidget()
-{
+class NimazWidget : GlanceAppWidget() {
 
-	override val stateDefinition = PrayerTimesStateDefinition
+    override val stateDefinition = PrayerTimesStateDefinition
 
-	override val sizeMode : SizeMode = SizeMode.Exact
+    override val sizeMode: SizeMode = SizeMode.Exact
 
-	override suspend fun provideGlance(context : Context , id : GlanceId)
-	{
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
 
-		provideContent {
-			val prayerTimes = currentState<PrayerTimesWidget>()
-			GlanceTheme(
-					 colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-						 GlanceTheme.colors
-					 else
-						 NimazWidgetColorScheme.colors
-					   ) {
+        provideContent {
+            val prayerTimes = currentState<PrayerTimesWidget>()
+            GlanceTheme(
+                colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                    GlanceTheme.colors
+                else
+                    NimazWidgetColorScheme.colors
+            ) {
 
-				when (prayerTimes)
-				{
-					is PrayerTimesWidget.Loading ->
-					{
-						Column(
+                when (prayerTimes) {
+                    is PrayerTimesWidget.Loading -> {
+                        Column(
 
-								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
-									 .background(GlanceTheme.colors.background).clickable(
-											  onClick = actionStartActivity<MainActivity>()
-																						 ) ,
-								 verticalAlignment = Alignment.CenterVertically ,
-								 horizontalAlignment = Alignment.CenterHorizontally
-							  ) {
-							CircularProgressIndicator()
-							Text(
-									 text = "Loading..." ,
-									 modifier = GlanceModifier.padding(6.dp) ,
-									 style = TextStyle(
-											  color = GlanceTheme.colors.onBackground ,
-											  fontSize = TextUnit(
-													   18F , TextUnitType.Sp
-																 )
-													  )
-								)
-						}
-					}
+                            modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
+                                .background(GlanceTheme.colors.background).clickable(
+                                    onClick = actionStartActivity<MainActivity>()
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                            Text(
+                                text = "Loading...",
+                                modifier = GlanceModifier.padding(6.dp),
+                                style = TextStyle(
+                                    color = GlanceTheme.colors.onBackground,
+                                    fontSize = TextUnit(
+                                        18F, TextUnitType.Sp
+                                    )
+                                )
+                            )
+                        }
+                    }
 
-					is PrayerTimesWidget.Success ->
-					{
-						Log.d("PrayerTimeWorker" , "provideGlance: ${prayerTimes.data}")
-						WidgetPrayerTimeRowList(prayerTimes.data)
-					}
+                    is PrayerTimesWidget.Success -> {
+                        Log.d("PrayerTimeWorker", "provideGlance: ${prayerTimes.data}")
+                        WidgetPrayerTimeRowList(prayerTimes.data)
+                    }
 
-					is PrayerTimesWidget.Error ->
-					{
-						Column(
+                    is PrayerTimesWidget.Error -> {
+                        Column(
 
-								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
-									 .background(GlanceTheme.colors.background).clickable(
-											  onClick = actionStartActivity<MainActivity>()
-																						 ) ,
-								 verticalAlignment = Alignment.CenterVertically ,
-								 horizontalAlignment = Alignment.CenterHorizontally
-							  ) {
-							Log.d("PrayerTimeWorker" , "provideGlance: ${prayerTimes.message}")
-							Text(
-									 text = "Data is not available" ,
-									 modifier = GlanceModifier.padding(6.dp) ,
-									 style = TextStyle(
-											  color = GlanceTheme.colors.onBackground ,
-											  fontSize = TextUnit(
-													   18F , TextUnitType.Sp
-																 )
-													  )
-								)
-							Button(text = "Retry" , onClick = {
-								PrayerTimeWorker.enqueue(
-										 context ,
-										 true
-														)
-							})
-						}
-					}
-				}
-			}
-		}
-	}
+                            modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
+                                .background(GlanceTheme.colors.background).clickable(
+                                    onClick = actionStartActivity<MainActivity>()
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Log.d("PrayerTimeWorker", "provideGlance: ${prayerTimes.message}")
+                            Text(
+                                text = "Data is not available",
+                                modifier = GlanceModifier.padding(6.dp),
+                                style = TextStyle(
+                                    color = GlanceTheme.colors.onBackground,
+                                    fontSize = TextUnit(
+                                        18F, TextUnitType.Sp
+                                    )
+                                )
+                            )
+                            Button(text = "Retry", onClick = {
+                                PrayerTimeWorker.enqueue(
+                                    context,
+                                    true
+                                )
+                            })
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

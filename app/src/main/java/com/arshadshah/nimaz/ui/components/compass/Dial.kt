@@ -29,116 +29,106 @@ import kotlin.math.abs
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun Dial(
-	state : State<Double> ,
-	imageToDisplay : Painter ,
-	errorMessage : String ,
-	isLoading : Boolean ,
-		)
-{
+    state: State<Double>,
+    imageToDisplay: Painter,
+    errorMessage: String,
+    isLoading: Boolean,
+) {
 
-	val context = LocalContext.current
-	val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
-	var data by remember { mutableStateOf<SensorData?>(null) }
+    var data by remember { mutableStateOf<SensorData?>(null) }
 
-	DisposableEffect(Unit) {
-		val dataManager = SensorDataManager(context)
-		dataManager.init(context)
+    DisposableEffect(Unit) {
+        val dataManager = SensorDataManager(context)
+        dataManager.init(context)
 
-		val job = scope.launch {
-			dataManager.data
-				.receiveAsFlow()
-				.onEach { data = it }
-				.collect {
-					// do nothing
-				}
-		}
+        val job = scope.launch {
+            dataManager.data
+                .receiveAsFlow()
+                .onEach { data = it }
+                .collect {
+                    // do nothing
+                }
+        }
 
-		onDispose {
-			dataManager.cancel()
-			job.cancel()
-		}
-	}
+        onDispose {
+            dataManager.cancel()
+            job.cancel()
+        }
+    }
 
-	if (isLoading)
-	{
-		DialUI(0.0 , data , imageToDisplay)
-	} else if (errorMessage != "")
-	{
-		ElevatedCard(
-				 modifier = Modifier
-					 .fillMaxWidth()
-					 .padding(16.dp) ,
-					)
-		{
-			Text(
-					 text = errorMessage ,
-					 style = MaterialTheme.typography.titleMedium ,
-					 color = Color.Red ,
-					 textAlign = TextAlign.Center ,
-					 modifier = Modifier.padding(16.dp)
-				)
-		}
-	} else
-	{
-		DialUI(state.value , data , imageToDisplay)
-	}
+    if (isLoading) {
+        DialUI(0.0, data, imageToDisplay)
+    } else if (errorMessage != "") {
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        )
+        {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.Red,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    } else {
+        DialUI(state.value, data, imageToDisplay)
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.S)
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun DialUI(bearing : Double , data : SensorData? , imageToDisplay : Painter)
-{
-	val yaw by derivedStateOf { (data?.yaw ?: 0f) }
-	val pitch by derivedStateOf { (data?.pitch ?: 0f) }
-	val roll by derivedStateOf { (data?.roll ?: 0f) }
-	val degree = ((Math.toDegrees(yaw.toDouble()) + 360).toFloat() % 360)
+fun DialUI(bearing: Double, data: SensorData?, imageToDisplay: Painter) {
+    val yaw by derivedStateOf { (data?.yaw ?: 0f) }
+    val pitch by derivedStateOf { (data?.pitch ?: 0f) }
+    val roll by derivedStateOf { (data?.roll ?: 0f) }
+    val degree = ((Math.toDegrees(yaw.toDouble()) + 360).toFloat() % 360)
 
-	val currentAngle = 0f
-	val rotateAnim = remember { Animatable(currentAngle) }
-	val target = (bearing - degree).toFloat()
-	val context = LocalContext.current
-	val vibrator = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+    val currentAngle = 0f
+    val rotateAnim = remember { Animatable(currentAngle) }
+    val target = (bearing - degree).toFloat()
+    val context = LocalContext.current
+    val vibrator = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
 
-	val pointingToQibla = abs(target) < 5f
+    val pointingToQibla = abs(target) < 5f
 
-	val directionToTurn = when
-	{
-		abs(target) < 5f -> "You are facing the Qibla"
-		target > 0f -> "Turn Right"
-		else -> "Turn Left"
-	}
+    val directionToTurn = when {
+        abs(target) < 5f -> "You are facing the Qibla"
+        target > 0f -> "Turn Right"
+        else -> "Turn Left"
+    }
 
-	//if the user is facing the qibla, vibrate the phone and show a message to the user and stop the vibration after 1 second and stop animating the dial until the user turns away from the qibla
-	LaunchedEffect(key1 = target , key2 = pointingToQibla) {
-		if (abs(target) < 5f)
-		{
-			//animate to 0f
-			rotateAnim.animateTo(0f , tween(100))
-			//stop the animation
-			rotateAnim.stop()
-		} else
-		{
-			//start the animation
-			rotateAnim.animateTo(target , tween(200))
-		}
+    //if the user is facing the qibla, vibrate the phone and show a message to the user and stop the vibration after 1 second and stop animating the dial until the user turns away from the qibla
+    LaunchedEffect(key1 = target, key2 = pointingToQibla) {
+        if (abs(target) < 5f) {
+            //animate to 0f
+            rotateAnim.animateTo(0f, tween(100))
+            //stop the animation
+            rotateAnim.stop()
+        } else {
+            //start the animation
+            rotateAnim.animateTo(target, tween(200))
+        }
 
-		if (pointingToQibla)
-		{
-			//create a single shot vibration
-			vibrator.vibrate(
-					 CombinedVibration.createParallel(
-							  VibrationEffect.createOneShot(
-									   100 ,
-									   255
-														   )
-													 )
-							)
-		} else
-		{
-			vibrator.cancel()
-		}
-	}
-	DialComponent(directionToTurn , pointingToQibla , imageToDisplay , rotateAnim)
+        if (pointingToQibla) {
+            //create a single shot vibration
+            vibrator.vibrate(
+                CombinedVibration.createParallel(
+                    VibrationEffect.createOneShot(
+                        100,
+                        255
+                    )
+                )
+            )
+        } else {
+            vibrator.cancel()
+        }
+    }
+    DialComponent(directionToTurn, pointingToQibla, imageToDisplay, rotateAnim)
 }
