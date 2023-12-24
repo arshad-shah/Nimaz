@@ -99,12 +99,12 @@ fun PrayerTimesList() {
             ),
             loading = true,
             currentPrayerName = currentPrayerName,
-            name = nextPrayerName ?: "Loading...",
+            name = nextPrayerName,
             timer = timer,
         )
     } else {
         val timeToNextPrayerLong =
-            nextPrayerTime?.atZone(java.time.ZoneId.systemDefault())
+            nextPrayerTime.atZone(java.time.ZoneId.systemDefault())
                 ?.toInstant()
                 ?.toEpochMilli()
         val currentTime =
@@ -128,8 +128,8 @@ fun PrayerTimesList() {
         PrayerTimesListUI(
             loading = false,
             currentPrayerName = currentPrayerName.first()
-                ?.uppercaseChar()?.plus(currentPrayerName.substring(1)) ?: "Loading...",
-            name = nextPrayerName?.first()
+                .uppercaseChar()?.plus(currentPrayerName.substring(1)) ?: "Loading...",
+            name = nextPrayerName.first()
                 ?.uppercaseChar()?.plus(nextPrayerName.substring(1)) ?: "Loading...",
             prayerTimesMap = mapOfPrayerTimes,
             timer = timer,

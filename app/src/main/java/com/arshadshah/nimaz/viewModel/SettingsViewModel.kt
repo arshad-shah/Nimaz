@@ -9,7 +9,6 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.services.LocationService
@@ -499,6 +498,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
                     }
                 }
             }
+
             is SettingsEvent.LoadPrayerTimes -> {
                 loadPrayerTimes()
             }

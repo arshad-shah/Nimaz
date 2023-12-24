@@ -20,6 +20,7 @@ import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.data.remote.models.Surah
 import com.arshadshah.nimaz.data.remote.models.Tasbih
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -80,28 +81,27 @@ class DataStore(db: AppDatabase) {
     suspend fun getTasbihForDate(date: String) =
         tasbihTrackerDao.getForDate(date).map { it.toTasbih() }
 
-    //get all the tasbih that are completed
-    suspend fun getCompletedTasbih() = tasbihTrackerDao.getCompleted().map { it.toTasbih() }
-
-    //get all the tasbih that are not completed
-    suspend fun getNotCompletedTasbih() = tasbihTrackerDao.getNotCompleted().map { it.toTasbih() }
-
-    //get all the tasbih that are completed today
-    suspend fun getCompletedTasbihToday(date: String) =
-        tasbihTrackerDao.getCompletedToday(date).map { it.toTasbih() }
-
-    //get all the tasbih that are not completed today
-    suspend fun getNotCompletedTasbihToday(date: String) =
-        tasbihTrackerDao.getNotCompletedToday(date).map { it.toTasbih() }
-
     //delete a tasbih from the database
-    suspend fun deleteTasbih(tasbih: Tasbih) =
+    fun deleteTasbih(tasbih: Tasbih) =
         tasbihTrackerDao.deleteTasbih(tasbih.toLocalTasbih())
 
 
     //get trtacker for a specific date
     suspend fun getTrackerForDate(date: String) =
         prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
+
+
+    fun getTrackersForMonth(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>> =
+        prayerTrackerDao.getTrackersForMonth(startDate, endDate)
+
+    fun getTrackersForWeek(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>> =
+        prayerTrackerDao.getTrackersForWeek(startDate, endDate)
+
+    suspend fun updateIsMenstruating(date: String, isMenstruating: Boolean) {
+        fastTrackerDao.updateIsMenstruating(date, isMenstruating)
+        prayerTrackerDao.updateMenstruationStatus(date, isMenstruating)
+    }
+
 
     //get all the trackers
     suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers().map { it.toPrayerTracker() }
@@ -120,9 +120,6 @@ class DataStore(db: AppDatabase) {
 
     fun getPrayersForDate(date: String) = prayerTrackerDao.getPrayersForDate(date)
 
-    //delete a tracker
-    suspend fun deleteTracker(tracker: PrayerTracker) =
-        prayerTrackerDao.deleteTracker(tracker.toLocalPrayersTracker())
 
     //check if a tracker exists
     suspend fun checkIfTrackerExists(date: String) = prayerTrackerDao.trackerExistsForDate(date)
@@ -133,8 +130,8 @@ class DataStore(db: AppDatabase) {
     suspend fun getFastTrackerForDate(date: String) =
         fastTrackerDao.getFastTrackerForDate(date).toFastTracker()
 
-    fun getFastTrackerForDateAsFlow(date: String) =
-        fastTrackerDao.getFastTrackerForDateAsFlow(date)
+    fun getFastTrackersForMonth(firstDay: String, lastDay: String): Flow<List<LocalFastTracker>> =
+        fastTrackerDao.getFastTrackersForMonth(firstDay, lastDay)
 
     fun isFastingForDate(date: String) = fastTrackerDao.isFastingForDate(date)
 
@@ -324,6 +321,10 @@ class DataStore(db: AppDatabase) {
     //save all duas
     suspend fun saveAllDuas(duas: ArrayList<Dua>) =
         duaDao.saveDuas(duas.map { it.toLocalDua() })
+
+    fun getMenstruatingState(date: String): Flow<Boolean> {
+        return prayerTrackerDao.getMenstruatingState(date)
+    }
 }
 
 private fun Aya.toLocalAya() = LocalAya(
@@ -466,7 +467,7 @@ private fun LocalChapter.toChapter() = Chapter(
     category = category,
 )
 
-private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
+fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
     date = date,
     fajr = fajr,
     dhuhr = dhuhr,
@@ -477,7 +478,7 @@ private fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
     isMenstruating = isMenstruating,
 )
 
-private fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
+fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
     date = date,
     fajr = fajr,
     dhuhr = dhuhr,

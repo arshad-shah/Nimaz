@@ -2,8 +2,6 @@ package com.arshadshah.nimaz.repositories
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
-import com.arshadshah.nimaz.constants.AppConstants
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -38,7 +36,7 @@ class UpdateRepository(context: Context) {
 
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
             if ((appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE) || appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
+                        appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE) || appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
             ) {
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
