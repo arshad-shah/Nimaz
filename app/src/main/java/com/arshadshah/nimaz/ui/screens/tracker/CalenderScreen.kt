@@ -27,33 +27,54 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.remote.models.FastTracker
 import com.arshadshah.nimaz.ui.components.calender.Calender
+import com.arshadshah.nimaz.ui.components.calender.PrayersTrackerCard
 import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Composable
 fun CalenderScreen(paddingValues: PaddingValues) {
-
-    val mutableDate = remember { mutableStateOf(LocalDate.now()) }
 
     val viewModel = viewModel(
         key = TRACKING_VIEWMODEL_KEY,
         initializer = { TrackerViewModel() },
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
+
     //call this effect only once
     LaunchedEffect(Unit) {
-        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
-        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(mutableDate.value.toString()))
-        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
-        viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(mutableDate.value.toString()))
+        viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now().toString()))
+        viewModel.onEvent(
+            TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+                LocalDate.now().toString()
+            )
+        )
+        viewModel.onEvent(
+            TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+                YearMonth.from(
+                    LocalDate.now()
+                )
+            )
+        )
+        viewModel.onEvent(
+            TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+                LocalDate.now().toString()
+            )
+        )
+        viewModel.onEvent(
+            TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+                LocalDate.now().toString()
+            )
+        )
     }
-
     val dateState = viewModel.dateState.collectAsState()
 
     val progressForMonth = viewModel.progressForMonth.collectAsState()
 
     val fastProgressForMonth = viewModel.fastProgressForMonth.collectAsState()
+
+    val prayerTrackerState = viewModel.prayerTrackerState.collectAsState()
 
     val isFastingToday = viewModel.isFasting.collectAsState()
     val isMenstruatingToday = viewModel.isMenstrauting.collectAsState()
@@ -74,7 +95,7 @@ fun CalenderScreen(paddingValues: PaddingValues) {
             Calender(
                 handleEvents = viewModel::onEvent,
                 progressForMonth = progressForMonth,
-                isFastingToday = isFastingToday,
+                fastProgressForMonth = fastProgressForMonth
             )
         }
         item {
@@ -94,7 +115,12 @@ fun CalenderScreen(paddingValues: PaddingValues) {
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-//                DashboardPrayerTracker(dashboardPrayerTracker)
+                PrayersTrackerCard(
+                    isLoading = isLoading,
+                    prayerTrackerState = prayerTrackerState,
+                    handleEvents = viewModel::onEvent,
+                    dateState = dateState
+                )
 
                 FastTrackerCard(
                     dateState = dateState,
@@ -102,12 +128,14 @@ fun CalenderScreen(paddingValues: PaddingValues) {
                     isMenstrauting = isMenstruatingToday.value,
                     isLoading = isLoading,
                     handleEvent = { date: String, isFasting: Boolean ->
-                        viewModel.onEvent(TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-                            FastTracker(
-                                date = date,
-                                isFasting = isFasting
+                        viewModel.onEvent(
+                            TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
+                                FastTracker(
+                                    date = date,
+                                    isFasting = isFasting
+                                )
                             )
-                        ))
+                        )
                     }
                 )
             }

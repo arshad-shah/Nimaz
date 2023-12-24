@@ -39,10 +39,6 @@ interface PrayerTrackerDao {
     @Query("SELECT EXISTS(SELECT * FROM PrayersTracker WHERE date = :date)")
     suspend fun trackerExistsForDate(date: String): Boolean
 
-    //find out which dates have trackers
-    @Query("SELECT date FROM PrayersTracker")
-    suspend fun getDatesWithTrackers(): List<String>
-
     //get progress for a specific date
     @Query("SELECT progress FROM PrayersTracker WHERE date = :date")
     suspend fun getProgressForDate(date: String): Int
@@ -74,4 +70,16 @@ interface PrayerTrackerDao {
     @Query("SELECT * FROM PrayersTracker WHERE date = :date")
     fun getPrayersForDate(date: String): Flow<LocalPrayersTracker>
 
+    @Query("SELECT * FROM PrayersTracker WHERE date BETWEEN :startDate AND :endDate")
+    fun getTrackersForMonth(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>>
+
+    // update menstruation status
+    @Query("UPDATE PrayersTracker SET isMenstruating = :isMenstruating WHERE date = :date")
+    suspend fun updateMenstruationStatus(date: String, isMenstruating: Boolean)
+
+    @Query("SELECT isMenstruating FROM PrayersTracker WHERE date = :date")
+    fun getMenstruatingState(date: String): Flow<Boolean>
+
+    @Query("SELECT * FROM PrayersTracker WHERE date BETWEEN :startDate AND :endDate")
+    fun getTrackersForWeek(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>>
 }

@@ -43,8 +43,13 @@ object PrayerTrackerRepository {
         return getTrackerForDate(date)
     }
 
-    fun getPrayersForDate(date: String): Flow<LocalPrayersTracker> {
+    suspend fun getPrayersForDate(date: String): Flow<LocalPrayersTracker> {
         val dataStore = LocalDataStore.getDataStore()
+        // check if tracker exists
+        if (!trackerExistsForDate(date)) {
+            val tracker = PrayerTracker(date)
+            saveTrackerForDate(tracker)
+        }
         return dataStore.getPrayersForDate(date)
     }
 

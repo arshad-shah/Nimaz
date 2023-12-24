@@ -11,13 +11,9 @@ interface FastTrackerDao {
     @Query("SELECT * FROM FastTracker WHERE date = :date")
     suspend fun getFastTrackerForDate(date: String): LocalFastTracker
 
-    //get trtacker for a specific date as a flow
-    @Query("SELECT * FROM FastTracker WHERE date = :date")
-    fun getFastTrackerForDateAsFlow(date: String): Flow<LocalFastTracker>
-
     //get all the trackers
-    @Query("SELECT * FROM FastTracker")
-    suspend fun getAllFastTrackers(): List<LocalFastTracker>
+    @Query("SELECT * FROM FastTracker WHERE date BETWEEN :firstDay AND :lastDay")
+    fun getFastTrackersForMonth(firstDay: String, lastDay: String): Flow<List<LocalFastTracker>>
 
     //save a tracker
     @Insert(entity = LocalFastTracker::class, onConflict = OnConflictStrategy.REPLACE)
@@ -41,4 +37,8 @@ interface FastTrackerDao {
     // is fasting for a specific date
     @Query("SELECT isFasting FROM FastTracker WHERE date = :date")
     fun isFastingForDate(date: String): Flow<Boolean>
+
+    // update menstruating status
+    @Query("UPDATE FastTracker SET isMenstruating = :isMenstruating WHERE date = :date")
+    suspend fun updateIsMenstruating(date: String, isMenstruating: Boolean)
 }

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.activities
 
-import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,9 +28,6 @@ import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.ThemeChoser
 import com.arshadshah.nimaz.utils.*
 import com.arshadshah.nimaz.utils.RouteUtils.checkRoute
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.launch
 
 
@@ -148,6 +144,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.testTag("mainActivity"),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
+                    floatingActionButtonPosition = FabPosition.End,
                     topBar = {
                         CustomTopBar(route = route, navController = navController)
                     },
