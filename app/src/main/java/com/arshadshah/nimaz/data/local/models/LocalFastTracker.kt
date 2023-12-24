@@ -6,8 +6,8 @@ import java.time.LocalDate
 
 @Entity(tableName = "FastTracker")
 data class LocalFastTracker(
-	@PrimaryKey
-	val date : String = LocalDate.now().toString() ,
-	val isFasting : Boolean = false ,
-	val isMenstruating : Boolean = false ,
-						   )
+    @PrimaryKey
+    val date: String = LocalDate.now().toString(),
+    val isFasting: Boolean = false,
+    val isMenstruating: Boolean = false,
+)

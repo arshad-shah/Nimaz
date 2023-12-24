@@ -5,9 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Juz")
 data class LocalJuz(
-	@PrimaryKey
-	val number : Int ,
-	val name : String ,
-	val tname : String ,
-	val juzStartAyaInQuran : Int ,
-				   )
+    @PrimaryKey
+    val number: Int,
+    val name: String,
+    val tname: String,
+    val juzStartAyaInQuran: Int,
+)

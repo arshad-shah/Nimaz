@@ -14,46 +14,43 @@ import com.arshadshah.nimaz.data.remote.models.PrayerTimes
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun WidgetPrayerTimeRowList(data : PrayerTimes)
-{
-	val newIshaTime = if (data.isha !!.hour >= 22)
-	{
-		data.maghrib?.plusMinutes(60)
-	} else
-	{
-		data.isha
-	}
-	Row(
-			 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
-				 .background(GlanceTheme.colors.background).clickable(
-						  onClick = actionStartActivity<MainActivity>()
-																	 )
-	   ) {
-		val modifier = GlanceModifier.defaultWeight()
-		WidgetPrayerTimeColumn(
-				 name = "Fajr" ,
-				 time = data.fajr !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
-				 modifier
-							  )
-		WidgetPrayerTimeColumn(
-				 name = "Dhuhr" ,
-				 time = data.dhuhr !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
-				 modifier = modifier
-							  )
-		WidgetPrayerTimeColumn(
-				 name = "Asr" ,
-				 time = data.asr !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
-				 modifier = modifier
-							  )
-		WidgetPrayerTimeColumn(
-				 name = "Maghrib" ,
-				 time = data.maghrib !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
-				 modifier = modifier
-							  )
-		WidgetPrayerTimeColumn(
-				 name = "Isha" ,
-				 time = newIshaTime !!.format(DateTimeFormatter.ofPattern("hh:mm")) ,
-				 modifier = modifier
-							  )
-	}
+fun WidgetPrayerTimeRowList(data: PrayerTimes) {
+    val newIshaTime = if (data.isha!!.hour >= 22) {
+        data.maghrib?.plusMinutes(60)
+    } else {
+        data.isha
+    }
+    Row(
+        modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
+            .background(GlanceTheme.colors.background).clickable(
+                onClick = actionStartActivity<MainActivity>()
+            )
+    ) {
+        val modifier = GlanceModifier.defaultWeight()
+        WidgetPrayerTimeColumn(
+            name = "Fajr",
+            time = data.fajr!!.format(DateTimeFormatter.ofPattern("hh:mm")),
+            modifier
+        )
+        WidgetPrayerTimeColumn(
+            name = "Dhuhr",
+            time = data.dhuhr!!.format(DateTimeFormatter.ofPattern("hh:mm")),
+            modifier = modifier
+        )
+        WidgetPrayerTimeColumn(
+            name = "Asr",
+            time = data.asr!!.format(DateTimeFormatter.ofPattern("hh:mm")),
+            modifier = modifier
+        )
+        WidgetPrayerTimeColumn(
+            name = "Maghrib",
+            time = data.maghrib!!.format(DateTimeFormatter.ofPattern("hh:mm")),
+            modifier = modifier
+        )
+        WidgetPrayerTimeColumn(
+            name = "Isha",
+            time = newIshaTime!!.format(DateTimeFormatter.ofPattern("hh:mm")),
+            modifier = modifier
+        )
+    }
 }

@@ -22,67 +22,65 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @Composable
-fun ShahadahScreen(paddingValues : PaddingValues)
-{
+fun ShahadahScreen(paddingValues: PaddingValues) {
 
-	Column(
-			 modifier = Modifier
-				 .padding(paddingValues)
-				 .fillMaxSize() ,
-			 horizontalAlignment = Alignment.CenterHorizontally ,
-			 verticalArrangement = Arrangement.Center
-		  ) {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
 
-		ElevatedCard(
-				 shape = MaterialTheme.shapes.extraLarge ,
-				 modifier = Modifier
-					 .padding(8.dp) ,
-					) {
+        ElevatedCard(
+            shape = MaterialTheme.shapes.extraLarge,
+            modifier = Modifier
+                .padding(8.dp),
+        ) {
 
-			//Shadaah in arabic with diacritics
-			CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-				Text(
-						 text = "أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ ٱللَّٰهِ" ,
-						 style = MaterialTheme.typography.headlineLarge ,
-						 fontFamily = utmaniQuranFont ,
-						 textAlign = TextAlign.Center ,
-						 modifier = Modifier
-							 .padding(8.dp)
-							 .fillMaxWidth() ,
-						 color = MaterialTheme.colorScheme.onSurface ,
-						 fontWeight = FontWeight.SemiBold
-					)
-			}
-			//Shadaah transliteration
-			Text(
-					 text = "Ash-hadu an la ilaha illa Allah wa ash-hadu anna Muhammadan Rasulullah" ,
-					 style = MaterialTheme.typography.titleLarge ,
-					 textAlign = TextAlign.Left ,
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth() ,
-					 color = MaterialTheme.colorScheme.onSurface ,
-				)
+            //Shadaah in arabic with diacritics
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Text(
+                    text = "أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ ٱللَّٰهِ",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontFamily = utmaniQuranFont,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            //Shadaah transliteration
+            Text(
+                text = "Ash-hadu an la ilaha illa Allah wa ash-hadu anna Muhammadan Rasulullah",
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
 
-			//Shadaah in english
-			Text(
-					 text = "I bear witness that there is no god but Allah and I bear witness that Muhammad is the messenger of Allah" ,
-					 style = MaterialTheme.typography.titleLarge ,
-					 textAlign = TextAlign.Left ,
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth() ,
-					 color = MaterialTheme.colorScheme.onSurface ,
-				)
+            //Shadaah in english
+            Text(
+                text = "I bear witness that there is no god but Allah and I bear witness that Muhammad is the messenger of Allah",
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
 
-		}
-	}
+        }
+    }
 }
 
 //preview
 @Preview(showBackground = true)
 @Composable
-fun ShahadahScreenPreview()
-{
-	ShahadahScreen(paddingValues = PaddingValues(8.dp))
+fun ShahadahScreenPreview() {
+    ShahadahScreen(paddingValues = PaddingValues(8.dp))
 }

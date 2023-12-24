@@ -36,62 +36,61 @@ import com.arshadshah.nimaz.viewModel.QiblaViewModel
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun QiblaScreen(paddingValues : PaddingValues)
-{
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = QIBLA_VIEWMODEL_KEY ,
-			 initializer = { QiblaViewModel(context) } ,
-			 viewModelStoreOwner = context as ComponentActivity
-							 )
+fun QiblaScreen(paddingValues: PaddingValues) {
+    val context = LocalContext.current
+    val viewModel = viewModel(
+        key = QIBLA_VIEWMODEL_KEY,
+        initializer = { QiblaViewModel(context) },
+        viewModelStoreOwner = context as ComponentActivity
+    )
 
-	LaunchedEffect(Unit) {
-		viewModel.loadQibla(context)
-	}
+    LaunchedEffect(Unit) {
+        viewModel.loadQibla(context)
+    }
 
-	val state = remember { viewModel.qiblaState }.collectAsState()
-	val isLoading = remember { viewModel.isLoading }.collectAsState()
-	val errorMessage = remember { viewModel.errorMessage }.collectAsState()
-	Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG , "QiblaScreen: ${state.value}")
+    val state = remember { viewModel.qiblaState }.collectAsState()
+    val isLoading = remember { viewModel.isLoading }.collectAsState()
+    val errorMessage = remember { viewModel.errorMessage }.collectAsState()
+    Log.d(AppConstants.QIBLA_COMPASS_SCREEN_TAG, "QiblaScreen: ${state.value}")
 
-	val sharedPreferences = PrivateSharedPreferences(context)
-	val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
+    val sharedPreferences = PrivateSharedPreferences(context)
+    val imageIndexFromStorage = sharedPreferences.getDataInt("QiblaImageIndex")
 
-	val imagesMapped = mapOf(
-			 0 to painterResource(id = R.drawable.qibla1) ,
-			 1 to painterResource(id = R.drawable.qibla2) ,
-			 2 to painterResource(id = R.drawable.qibla3) ,
-			 3 to painterResource(id = R.drawable.qibla4) ,
-			 4 to painterResource(id = R.drawable.qibla5) ,
-			 5 to painterResource(id = R.drawable.qibla6) ,
-							)
-	//create a mu	 that will be used to switch between the images
-	var imageToDisplay by remember { mutableStateOf(imagesMapped[imageIndexFromStorage]) }
-
-
-	//a function that will change the image index to the index given
-	val changeImageIndex = { index : Int ->
-		imageToDisplay = imagesMapped[index]
-		sharedPreferences.saveDataInt("QiblaImageIndex" , index)
-	}
+    val imagesMapped = mapOf(
+        0 to painterResource(id = R.drawable.qibla1),
+        1 to painterResource(id = R.drawable.qibla2),
+        2 to painterResource(id = R.drawable.qibla3),
+        3 to painterResource(id = R.drawable.qibla4),
+        4 to painterResource(id = R.drawable.qibla5),
+        5 to painterResource(id = R.drawable.qibla6),
+    )
+    //create a mu	 that will be used to switch between the images
+    var imageToDisplay by remember { mutableStateOf(imagesMapped[imageIndexFromStorage]) }
 
 
-	Column(
-			 modifier = Modifier
-				 .padding(paddingValues)
-				 .fillMaxSize()
-				 .verticalScroll(rememberScrollState())
-				 .testTag(TEST_TAG_QIBLA) ,
-			 horizontalAlignment = Alignment.CenterHorizontally ,
-			 verticalArrangement = Arrangement.Top
-		  ) {
-		BearingAndLocationContainer(state , isLoading , errorMessage)
-		Dial(
-				 state = state ,
-				 imageToDisplay = imageToDisplay !! ,
-				 isLoading = isLoading.value ,
-				 errorMessage = errorMessage.value
-			)
-		ImageSwitcherCard(changeImageIndex = changeImageIndex)
-	}
+    //a function that will change the image index to the index given
+    val changeImageIndex = { index: Int ->
+        imageToDisplay = imagesMapped[index]
+        sharedPreferences.saveDataInt("QiblaImageIndex", index)
+    }
+
+
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .testTag(TEST_TAG_QIBLA),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        BearingAndLocationContainer(state, isLoading, errorMessage)
+        Dial(
+            state = state,
+            imageToDisplay = imageToDisplay!!,
+            isLoading = isLoading.value,
+            errorMessage = errorMessage.value
+        )
+        ImageSwitcherCard(changeImageIndex = changeImageIndex)
+    }
 }

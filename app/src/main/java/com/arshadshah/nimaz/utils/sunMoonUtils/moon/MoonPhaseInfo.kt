@@ -7,9 +7,9 @@ package com.arshadshah.nimaz.utils.sunMoonUtils.moon
  * @property angle midpoint angle in radians of the illuminated limb of the moon reckoned eastward from the north point of the disk; the moon is waxing if the angle is negative, and waning if positive
  */
 data class MoonPhaseInfo(
-	val fraction : Double ,
-	val phase : Double ,
-	val angle : Double ,
-	val phaseName : MoonPhase ,
-	val phaseSvg : Int ,
-						)
+    val fraction: Double,
+    val phase: Double,
+    val angle: Double,
+    val phaseName: MoonPhase,
+    val phaseSvg: Int,
+)

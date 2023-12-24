@@ -29,135 +29,130 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsList(
-	modifier : Modifier = Modifier ,
-	state : SettingValueState<Int> = rememberIntSettingState() ,
-	valueState : SettingValueState<String> = rememberStringSettingState() ,
-	title : String ,
-	description : String? = null ,
-	items : Map<String , String> ,
-	icon : @Composable (() -> Unit)? = null ,
-	iconPainter : Painter? = null ,
-	iconDescription : String? = null ,
-	useSelectedValueAsSubtitle : Boolean = true ,
-	subtitle : String? = null ,
-	action : @Composable (() -> Unit)? = null ,
-	height : Dp = 56.dp ,
-	onChange : (String) -> Unit = { } ,
-				)
-{
+    modifier: Modifier = Modifier,
+    state: SettingValueState<Int> = rememberIntSettingState(),
+    valueState: SettingValueState<String> = rememberStringSettingState(),
+    title: String,
+    description: String? = null,
+    items: Map<String, String>,
+    icon: @Composable (() -> Unit)? = null,
+    iconPainter: Painter? = null,
+    iconDescription: String? = null,
+    useSelectedValueAsSubtitle: Boolean = true,
+    subtitle: String? = null,
+    action: @Composable (() -> Unit)? = null,
+    height: Dp = 56.dp,
+    onChange: (String) -> Unit = { },
+) {
 
-	if (state.value >= items.size)
-	{
-		throw IndexOutOfBoundsException("Current value for $title list setting cannot be greater than items size")
-	}
+    if (state.value >= items.size) {
+        throw IndexOutOfBoundsException("Current value for $title list setting cannot be greater than items size")
+    }
 
-	var showDialog by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
-	val safeSubtitle = if (state.value >= 0 && useSelectedValueAsSubtitle)
-	{
-		val key = valueState.value
-		//find the value of the key in the map
-		val value : String? = items[key]
-		value
-	} else subtitle
+    val safeSubtitle = if (state.value >= 0 && useSelectedValueAsSubtitle) {
+        val key = valueState.value
+        //find the value of the key in the map
+        val value: String? = items[key]
+        value
+    } else subtitle
 
-	SettingsMenuLink(
-			 icon = icon ,
-			 title = {
-				 Text(text = title)
-			 } ,
-			 subtitle = {
-				 if (safeSubtitle != null)
-				 {
-					 Text(text = safeSubtitle)
-				 }
-			 } ,
-			 action = action ,
-			 onClick = { showDialog = true } ,
-					)
+    SettingsMenuLink(
+        icon = icon,
+        title = {
+            Text(text = title)
+        },
+        subtitle = {
+            if (safeSubtitle != null) {
+                Text(text = safeSubtitle)
+            }
+        },
+        action = action,
+        onClick = { showDialog = true },
+    )
 
-	if (! showDialog) return
+    if (!showDialog) return
 
-	val coroutineScope = rememberCoroutineScope()
-	val onSelected : (Int) -> Unit = { selectedIndex ->
-		coroutineScope.launch {
-			state.value = selectedIndex
-			valueState.value = items.keys.elementAt(selectedIndex)
-			onChange(valueState.value)
-		}
-	}
+    val coroutineScope = rememberCoroutineScope()
+    val onSelected: (Int) -> Unit = { selectedIndex ->
+        coroutineScope.launch {
+            state.value = selectedIndex
+            valueState.value = items.keys.elementAt(selectedIndex)
+            onChange(valueState.value)
+        }
+    }
 
-	val scrollState = rememberLazyListState(
-			 initialFirstVisibleItemIndex = state.value
-										   )
+    val scrollState = rememberLazyListState(
+        initialFirstVisibleItemIndex = state.value
+    )
 
-	val scrollToItem = { index : Int ->
-		coroutineScope.launch {
-			scrollState.animateScrollToItem(index , - 100)
-		}
-	}
+    val scrollToItem = { index: Int ->
+        coroutineScope.launch {
+            scrollState.animateScrollToItem(index, -100)
+        }
+    }
 
-	AlertDialogNimaz(
-			 topDivider = false ,
-			 bottomDivider = false ,
-			 description = description ,
-			 contentDescription = iconDescription ?: "" ,
-			 icon = iconPainter ,
-			 title = title ,
-			 contentHeight = height ,
-			 scrollState = scrollState ,
-			 contentToShow = {
-				 scrollToItem(state.value)
-				 items.forEach { (s , s2) ->
-					 val isSelected by rememberUpdatedState(newValue = s == valueState.value)
-					 //if valuestate.value has a value, then set the state.value to the index of the valuestate.value
-					 if (isSelected)
-					 {
-						 state.value = items.keys.indexOf(s)
-					 }
-					 Row(
-							  modifier = Modifier
-								  .fillMaxWidth()
-								  .padding(vertical = 4.dp , horizontal = 8.dp)
-								  .height(52.dp)
-								  .selectable(
-										   role = Role.RadioButton ,
-										   selected = isSelected ,
-										   onClick = {
-											   if (! isSelected) onSelected(
-														items.keys.indexOf(
-																 s
-																		  )
-																		   )
-										   }
-											 ) ,
-							  verticalAlignment = Alignment.CenterVertically
-						) {
-						 RadioButtonCustom(
-								  selected = isSelected ,
-								  onClick = {
-									  if (! isSelected) onSelected(items.keys.indexOf(s))
-								  } ,
-								  modifier = Modifier.padding(start = 16.dp) ,
-										  )
-						 Text(
-								  text = s2 ,
-								  style = MaterialTheme.typography.titleMedium ,
-								  modifier = Modifier.padding(start = 16.dp) ,
-								  overflow = TextOverflow.Ellipsis ,
-								  maxLines = 1
-							 )
-					 }
-				 }
+    AlertDialogNimaz(
+        topDivider = false,
+        bottomDivider = false,
+        description = description,
+        contentDescription = iconDescription ?: "",
+        icon = iconPainter,
+        title = title,
+        contentHeight = height,
+        scrollState = scrollState,
+        contentToShow = {
+            scrollToItem(state.value)
+            items.forEach { (s, s2) ->
+                val isSelected by rememberUpdatedState(newValue = s == valueState.value)
+                //if valuestate.value has a value, then set the state.value to the index of the valuestate.value
+                if (isSelected) {
+                    state.value = items.keys.indexOf(s)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp, horizontal = 8.dp)
+                        .height(52.dp)
+                        .selectable(
+                            role = Role.RadioButton,
+                            selected = isSelected,
+                            onClick = {
+                                if (!isSelected) onSelected(
+                                    items.keys.indexOf(
+                                        s
+                                    )
+                                )
+                            }
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButtonCustom(
+                        selected = isSelected,
+                        onClick = {
+                            if (!isSelected) onSelected(items.keys.indexOf(s))
+                        },
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                    Text(
+                        text = s2,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(start = 16.dp),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                }
+            }
 
-			 } ,
-			 onDismissRequest = {
-				 showDialog = false
-			 } ,
-			 onConfirm = {
-				 showDialog = false
-			 } ,
-			 onDismiss = {
-				 showDialog = false
-			 })
+        },
+        onDismissRequest = {
+            showDialog = false
+        },
+        onConfirm = {
+            showDialog = false
+        },
+        onDismiss = {
+            showDialog = false
+        })
 }

@@ -32,119 +32,149 @@ import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.widgets.NimazWidgetColorScheme
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.components.PrayerTimesTrackerRowItems
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-class NimazWidgetPrayerTracker : GlanceAppWidget()
-{
+class NimazWidgetPrayerTracker : GlanceAppWidget() {
 
-	override val stateDefinition = PrayerTimesTrackerStateDefinition
+    override val stateDefinition = PrayerTimesTrackerStateDefinition
 
-	override val sizeMode : SizeMode = SizeMode.Exact
+    override val sizeMode: SizeMode = SizeMode.Exact
 
-	override suspend fun provideGlance(context : Context , id : GlanceId)
-	{
-		if (! LocalDataStore.isInitialized())
-		{
-			LocalDataStore.init(context)
-		}
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        if (!LocalDataStore.isInitialized()) {
+            LocalDataStore.init(context)
+        }
 
-		provideContent {
-			val prayerTimesTracker = currentState<PrayerTimesTrackerWidget>()
-			val isFajrChecked = remember { mutableStateOf(false) }
-			val isDhuhrChecked = remember { mutableStateOf(false) }
-			val isAsrChecked = remember { mutableStateOf(false) }
-			val isMaghribChecked = remember { mutableStateOf(false) }
-			val isIshaChecked = remember { mutableStateOf(false) }
+        provideContent {
+            val prayerTimesTracker = currentState<PrayerTimesTrackerWidget>()
+            val isFajrChecked = remember { mutableStateOf(false) }
+            val isDhuhrChecked = remember { mutableStateOf(false) }
+            val isAsrChecked = remember { mutableStateOf(false) }
+            val isMaghribChecked = remember { mutableStateOf(false) }
+            val isIshaChecked = remember { mutableStateOf(false) }
 
-			val progress = remember { mutableFloatStateOf(0F) }
-			GlanceTheme(
-					 colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-						 GlanceTheme.colors
-					 else
-						 NimazWidgetColorScheme.colors
-					   ) {
+            val fajrTime = remember { mutableStateOf("") }
+            val dhuhrTime = remember { mutableStateOf("") }
+            val asrTime = remember { mutableStateOf("") }
+            val maghribTime = remember { mutableStateOf("") }
+            val ishaTime = remember { mutableStateOf("") }
 
-				when (prayerTimesTracker)
-				{
-					is PrayerTimesTrackerWidget.Loading ->
-					{
-						Column(
+            val progress = remember { mutableFloatStateOf(0F) }
 
-								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
-									 .background(GlanceTheme.colors.background).clickable(
-											  onClick = actionStartActivity<MainActivity>()
-																						 ) ,
-								 verticalAlignment = Alignment.CenterVertically ,
-								 horizontalAlignment = Alignment.CenterHorizontally
-							  ) {
-							CircularProgressIndicator()
-							Text(
-									 text = "Loading..." ,
-									 modifier = GlanceModifier.padding(6.dp) ,
-									 style = TextStyle(
-											  color = GlanceTheme.colors.onBackground ,
-											  fontSize = TextUnit(
-													   18F , TextUnitType.Sp
-																 )
-													  )
-								)
-						}
-					}
+            val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(context)
+            //if the device time format is 24 hour then use the 24 hour format
+            val formatter = if (deviceTimeFormat) {
+                DateTimeFormatter.ofPattern("HH:mm")
+            } else {
+                DateTimeFormatter.ofPattern("hh:mm")
+            }
 
-					is PrayerTimesTrackerWidget.Success ->
-					{
-						Log.d(
-								 "PrayerTimeTrackerWorker" ,
-								 "provideGlance: ${prayerTimesTracker.data}"
-							 )
-						isFajrChecked.value = prayerTimesTracker.data.fajr
-						isDhuhrChecked.value = prayerTimesTracker.data.dhuhr
-						isAsrChecked.value = prayerTimesTracker.data.asr
-						isMaghribChecked.value = prayerTimesTracker.data.maghrib
-						isIshaChecked.value = prayerTimesTracker.data.isha
+            GlanceTheme(
+                colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                    GlanceTheme.colors
+                else
+                    NimazWidgetColorScheme.colors
+            ) {
 
-						progress.value = prayerTimesTracker.data.progress.toFloat()
+                when (prayerTimesTracker) {
+                    is PrayerTimesTrackerWidget.Loading -> {
+                        Column(
 
-						PrayerTimesTrackerRowItems(
-								 fajr = isFajrChecked ,
-								 dhuhr = isDhuhrChecked ,
-								 asr = isAsrChecked ,
-								 maghrib = isMaghribChecked ,
-								 isha = isIshaChecked ,
-								 progress = progress
-												  )
-					}
+                            modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
+                                .background(GlanceTheme.colors.background).clickable(
+                                    onClick = actionStartActivity<MainActivity>()
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                            Text(
+                                text = "Loading...",
+                                modifier = GlanceModifier.padding(6.dp),
+                                style = TextStyle(
+                                    color = GlanceTheme.colors.onBackground,
+                                    fontSize = TextUnit(
+                                        18F, TextUnitType.Sp
+                                    )
+                                )
+                            )
+                        }
+                    }
 
-					is PrayerTimesTrackerWidget.Error ->
-					{
-						Column(
-								 modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
-									 .background(GlanceTheme.colors.background).clickable(
-											  onClick = actionStartActivity<MainActivity>()
-																						 ) ,
-								 verticalAlignment = Alignment.CenterVertically ,
-								 horizontalAlignment = Alignment.CenterHorizontally
-							  ) {
-							Log.d(
-									 "PrayerTimeTrackerWorker" ,
-									 "provideGlance: ${prayerTimesTracker.message}"
-								 )
-							Text(
-									 text = "Data is not available" ,
-									 modifier = GlanceModifier.padding(6.dp) ,
-									 style = TextStyle(
-											  color = GlanceTheme.colors.onBackground ,
-											  fontSize = TextUnit(
-													   18F , TextUnitType.Sp
-																 )
-													  )
-								)
-							Button(
-									 text = "Retry" ,
-									 onClick = { PrayerTimesTrackerWorker.enqueue(context , true) })
-						}
-					}
-				}
-			}
-		}
-	}
+                    is PrayerTimesTrackerWidget.Success -> {
+                        Log.d(
+                            "PrayerTimeTrackerWorker",
+                            "provideGlance: ${prayerTimesTracker.data}"
+                        )
+                        isFajrChecked.value = prayerTimesTracker.data.fajr
+                        isDhuhrChecked.value = prayerTimesTracker.data.dhuhr
+                        isAsrChecked.value = prayerTimesTracker.data.asr
+                        isMaghribChecked.value = prayerTimesTracker.data.maghrib
+                        isIshaChecked.value = prayerTimesTracker.data.isha
+
+                        fajrTime.value =
+                            LocalDateTime.parse(prayerTimesTracker.data.fajrTime).format(formatter)
+                        dhuhrTime.value =
+                            LocalDateTime.parse(prayerTimesTracker.data.dhuhrTime).format(formatter)
+                        asrTime.value =
+                            LocalDateTime.parse(prayerTimesTracker.data.asrTime).format(formatter)
+                        maghribTime.value = LocalDateTime.parse(prayerTimesTracker.data.maghribTime)
+                            .format(formatter)
+                        ishaTime.value =
+                            LocalDateTime.parse(prayerTimesTracker.data.ishaTime).format(formatter)
+                        Log.d(
+                            "PrayerTimeTrackerWorker",
+                            "provideGlance: ${fajrTime.value} ${dhuhrTime.value} ${asrTime.value} ${maghribTime.value} ${ishaTime.value}"
+                        )
+
+                        progress.value = prayerTimesTracker.data.progress.toFloat()
+
+                        PrayerTimesTrackerRowItems(
+                            fajr = isFajrChecked,
+                            dhuhr = isDhuhrChecked,
+                            asr = isAsrChecked,
+                            maghrib = isMaghribChecked,
+                            isha = isIshaChecked,
+                            progress = progress,
+                            fajrTime = fajrTime,
+                            dhuhrTime = dhuhrTime,
+                            asrTime = asrTime,
+                            maghribTime = maghribTime,
+                            ishaTime = ishaTime,
+                        )
+                    }
+
+                    is PrayerTimesTrackerWidget.Error -> {
+                        Column(
+                            modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
+                                .background(GlanceTheme.colors.background).clickable(
+                                    onClick = actionStartActivity<MainActivity>()
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Log.d(
+                                "PrayerTimeTrackerWorker",
+                                "provideGlance: ${prayerTimesTracker.message}"
+                            )
+                            Text(
+                                text = "Data is not available",
+                                modifier = GlanceModifier.padding(6.dp),
+                                style = TextStyle(
+                                    color = GlanceTheme.colors.onBackground,
+                                    fontSize = TextUnit(
+                                        18F, TextUnitType.Sp
+                                    )
+                                )
+                            )
+                            Button(
+                                text = "Retry",
+                                onClick = { PrayerTimesTrackerWorker.enqueue(context, true) })
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
