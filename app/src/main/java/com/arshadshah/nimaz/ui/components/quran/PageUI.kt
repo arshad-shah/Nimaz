@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -42,19 +42,21 @@ import com.arshadshah.nimaz.ui.theme.amiri
 import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
 @Composable
 fun Page(
-    AyaList: ArrayList<Aya>,
+    AyaList: ArrayList<LocalAya>,
     paddingValues: PaddingValues,
     loading: Boolean,
 ) {
 
     val context = LocalContext.current
+    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
     val viewModel = viewModel(
         key = AppConstants.QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
+        initializer = { QuranViewModel(sharedPreferencesRepository) },
         viewModelStoreOwner = context as ComponentActivity
     )
     val arabicFontSize = remember {
@@ -99,7 +101,7 @@ fun Page(
                         }
                         Verse(
 
-                            isNotBismillah = aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" && aya.ayaNumber != 0,
+                            isNotBismillah = aya.ayaArabic != "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" && aya.ayaNumberInSurah != 0,
                             //split the aya into words
                             word = aya.ayaArabic,
                             loading = loading,

@@ -25,22 +25,22 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
-import kotlin.reflect.KFunction1
 
 @Composable
 fun AyatFeatures(
     isBookMarkedVerse: MutableState<Boolean>,
     isFavouredVerse: MutableState<Boolean>,
     hasNote: MutableState<Boolean>,
-    handleEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
-    aya: Aya,
+    handleEvents: (QuranViewModel.AyaEvent) -> Unit,
+    aya: LocalAya,
     showNoteDialog: MutableState<Boolean>,
     noteContent: MutableState<String>,
     isLoading: Boolean,
@@ -171,7 +171,7 @@ fun AyatFeatures(
                 onClick = {
                     handleEvents(
                         QuranViewModel.AyaEvent.getNoteForAya(
-                            aya.ayaNumber,
+                            aya.ayaNumberInSurah,
                             aya.suraNumber,
                             aya.ayaNumberInSurah
                         )
@@ -214,7 +214,7 @@ fun AyatFeatures(
                 aya.note = noteContent.value
                 handleEvents(
                     QuranViewModel.AyaEvent.AddNoteToAya(
-                        aya.ayaNumber,
+                        aya.ayaNumberInSurah,
                         aya.suraNumber,
                         aya.ayaNumberInSurah,
                         noteContent.value
@@ -248,7 +248,7 @@ fun AyatFeatures(
                 if (titleOfDialog.value == "Remove from Bookmarks") {
                     handleEvents(
                         QuranViewModel.AyaEvent.deleteBookmarkFromAya(
-                            aya.ayaNumber,
+                            aya.ayaNumberInSurah,
                             aya.suraNumber,
                             aya.ayaNumberInSurah
                         )
@@ -258,7 +258,7 @@ fun AyatFeatures(
                 } else if (titleOfDialog.value == "Remove from Favourites") {
                     handleEvents(
                         QuranViewModel.AyaEvent.deleteFavoriteFromAya(
-                            aya.ayaNumber,
+                            aya.ayaNumberInSurah,
                             aya.suraNumber,
                             aya.ayaNumberInSurah
                         )
@@ -275,21 +275,21 @@ fun AyatFeatures(
 }
 
 @Preview(
-    device = "id:S20 Fe", showSystemUi = false, showBackground = true,
+    device = "id:pixel_5", showSystemUi = false, showBackground = true,
     backgroundColor = 0xFFFFFFFF
 )
 @Composable
 fun AyatFeaturesPreview() {
-
-    val viewModel = QuranViewModel(LocalContext.current)
+    val context = LocalContext.current
+    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
+    val viewModel = QuranViewModel(sharedPreferencesRepository)
     LocalDataStore.init(LocalContext.current)
     //create a dummy aya
-    val aya = Aya(
-        ayaNumber = 1,
+    val aya = LocalAya(
         ayaNumberInQuran = 1,
         ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
-        ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
-        ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے",
+        translationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+        translationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے",
         audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3",
         ayaNumberInSurah = 1,
         bookmark = true,

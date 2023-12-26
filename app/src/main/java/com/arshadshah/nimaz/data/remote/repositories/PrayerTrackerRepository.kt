@@ -1,59 +1,59 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 object PrayerTrackerRepository {
 
-    suspend fun trackerExistsForDate(date: String): Boolean {
+    private suspend fun trackerExistsForDate(date: LocalDate): Boolean {
         val dataStore = LocalDataStore.getDataStore()
         return dataStore.checkIfTrackerExists(date)
     }
 
-    suspend fun getTrackerForDate(date: String): PrayerTracker {
+    suspend fun getTrackerForDate(date: LocalDate): LocalPrayersTracker {
         val dataStore = LocalDataStore.getDataStore()
         if (!trackerExistsForDate(date)) {
-            val tracker = PrayerTracker(date)
+            val tracker = LocalPrayersTracker(date)
             return saveTrackerForDate(tracker)
         }
         return dataStore.getTrackerForDate(date)
     }
 
-    suspend fun saveTrackerForDate(tracker: PrayerTracker): PrayerTracker {
+    suspend fun saveTrackerForDate(tracker: LocalPrayersTracker): LocalPrayersTracker {
         val dataStore = LocalDataStore.getDataStore()
         dataStore.saveTracker(tracker)
         return getTrackerForDate(tracker.date)
     }
 
-    suspend fun updateTracker(tracker: PrayerTracker): PrayerTracker {
+    suspend fun updateTracker(tracker: LocalPrayersTracker): LocalPrayersTracker {
         val dataStore = LocalDataStore.getDataStore()
         dataStore.updateTracker(tracker)
         return getTrackerForDate(tracker.date)
     }
 
     suspend fun updateSpecificPrayer(
-        date: String,
+        date: LocalDate,
         prayerName: String,
         prayerDone: Boolean
-    ): PrayerTracker {
+    ): LocalPrayersTracker {
         val dataStore = LocalDataStore.getDataStore()
         dataStore.updateSpecificPrayer(date, prayerName, prayerDone)
         return getTrackerForDate(date)
     }
 
-    suspend fun getPrayersForDate(date: String): Flow<LocalPrayersTracker> {
+    suspend fun getPrayersForDate(date: LocalDate): Flow<LocalPrayersTracker> {
         val dataStore = LocalDataStore.getDataStore()
         // check if tracker exists
         if (!trackerExistsForDate(date)) {
-            val tracker = PrayerTracker(date)
+            val tracker = LocalPrayersTracker(date)
             saveTrackerForDate(tracker)
         }
         return dataStore.getPrayersForDate(date)
     }
 
-    suspend fun getAllTrackers(): List<PrayerTracker> {
+    suspend fun getAllTrackers(): List<LocalPrayersTracker> {
         val dataStore = LocalDataStore.getDataStore()
         return dataStore.getAllTrackers()
     }

@@ -23,17 +23,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.viewModel.QuranViewModel
-import kotlin.reflect.KFunction1
 
 @Composable
 fun AyatFeaturesPopUpMenu(
-    aya: Aya,
+    aya: LocalAya,
     isBookMarkedVerse: MutableState<Boolean>,
     isFavouredVerse: MutableState<Boolean>,
     hasNote: MutableState<Boolean>,
-    handleEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
+    handleEvents: (QuranViewModel.AyaEvent) -> Unit,
     showNoteDialog: MutableState<Boolean>,
     noteContent: MutableState<String>,
     popUpOpen: MutableState<Boolean>,
@@ -75,7 +74,7 @@ fun AyatFeaturesPopUpMenu(
                         aya.bookmark = isBookMarkedVerse.value
                         handleEvents(
                             QuranViewModel.AyaEvent.BookmarkAya(
-                                aya.ayaNumber,
+                                aya.ayaNumberInSurah,
                                 aya.suraNumber,
                                 aya.ayaNumberInSurah,
                                 isBookMarkedVerse.value
@@ -102,7 +101,7 @@ fun AyatFeaturesPopUpMenu(
                         aya.favorite = isFavouredVerse.value
                         handleEvents(
                             QuranViewModel.AyaEvent.FavoriteAya(
-                                aya.ayaNumber,
+                                aya.ayaNumberInSurah,
                                 aya.suraNumber,
                                 aya.ayaNumberInSurah,
                                 isFavouredVerse.value
@@ -156,7 +155,7 @@ fun AyatFeaturesPopUpMenu(
                         //the sura number followed by the aya number
                         shareIntent.putExtra(
                             Intent.EXTRA_TEXT,
-                            "Chapter ${aya.suraNumber}: Verse ${aya.ayaNumberInSurah}\n\n${aya.ayaArabic}\n${aya.ayaTranslationEnglish}"
+                            "Chapter ${aya.suraNumber}: Verse ${aya.ayaNumberInSurah}\n\n${aya.ayaArabic}\n${aya.translationEnglish}"
                         )
 
                         //start the share intent

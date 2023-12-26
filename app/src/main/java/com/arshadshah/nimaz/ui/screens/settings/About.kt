@@ -61,9 +61,9 @@ fun AppDetails(onImageClicked: () -> Unit) {
         mutableIntStateOf(0)
     }
     val updateClickCount = {
-        Toasty.info(context, "Click ${clickCount.value + 1} more times to enable debug mode")
+        Toasty.info(context, "Click ${clickCount.intValue + 1} more times to enable debug mode")
             .show()
-        clickCount.value = clickCount.value + 1
+        clickCount.intValue = clickCount.intValue + 1
     }
     ElevatedCard(
         colors = CardDefaults.elevatedCardColors(
@@ -91,7 +91,7 @@ fun AppDetails(onImageClicked: () -> Unit) {
                         .size(100.dp)
                         .combinedClickable(
                             onClick = {
-                                if (clickCount.value == 5) {
+                                if (clickCount.intValue == 5) {
                                     Toasty
                                         .success(context, "Debug Mode Enabled")
                                         .show()
@@ -106,7 +106,7 @@ fun AppDetails(onImageClicked: () -> Unit) {
                                     .info(context, "Debug Mode Disabled")
                                     .show()
                                 sharedPref.saveDataBoolean("debug", false)
-                                clickCount.value = 0
+                                clickCount.intValue = 0
                             }
                         )
                 )

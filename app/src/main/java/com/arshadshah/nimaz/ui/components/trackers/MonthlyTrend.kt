@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 import java.time.YearMonth
@@ -40,7 +39,7 @@ fun PrayerTrackerGrid() {
     LaunchedEffect(Unit) {
         viewModelTracker.onEvent(
             TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
     }
@@ -54,10 +53,15 @@ fun PrayerTrackerGrid() {
     val currentDate = LocalDate.now()
     val yearMonth = YearMonth.of(currentDate.year, currentDate.month)
     val daysInMonth = yearMonth.lengthOfMonth()
-    //Bit of a hack to get the day number to align
-    val prayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+    val prayers = listOf(
+        AppConstants.PRAYER_NAME_FAJR,
+        AppConstants.PRAYER_NAME_DHUHR,
+        AppConstants.PRAYER_NAME_ASR,
+        AppConstants.PRAYER_NAME_MAGHRIB,
+        AppConstants.PRAYER_NAME_ISHA
+    )
 
-    val userSelectedDate = LocalDate.parse(dateState.value)
+    val userSelectedDate = dateState.value
 
     // a grid of 6 rows 1 for the number of the day and 5 for the prayers
     // amount of days in the month columns + 1 for the name of the prayer
@@ -87,7 +91,7 @@ fun PrayerTrackerGrid() {
                 // Render the small boxes (dots) for each day of the month
                 for (i in 0 until daysInMonth) {
                     val date = yearMonth.atDay(i + 1)
-                    val prayerTracker = progressForMonth.value.find { it.date == date.toString() }
+                    val prayerTracker = progressForMonth.value.find { it.date == date }
                     val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
                         prayers[prayers.indexOf(prayer)]
                     )
@@ -165,17 +169,5 @@ fun PrayerTrackerGrid() {
                 }
             }
         }
-    }
-}
-
-// Extension function to check if a prayer is completed for a specific day
-fun PrayerTracker.isPrayerCompleted(prayer: String): Boolean {
-    return when (prayer) {
-        "Fajr" -> fajr
-        "Dhuhr" -> dhuhr
-        "Asr" -> asr
-        "Maghrib" -> maghrib
-        "Isha" -> isha
-        else -> false
     }
 }

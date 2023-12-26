@@ -96,7 +96,6 @@ fun DuaListItemPreview() {
         "اللهم صل على محمد وآل محمد",
         "O Allah, <small>send</small> blessings on Muhammad and the family of Muhammad",
         "O Allah, send blessings on Muhammad and the family of Muhammad",
-        category = "Salawat",
     )
     DuaListItem(dua, false)
 }

@@ -8,15 +8,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
+import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.data.remote.models.FastTracker
-import com.arshadshah.nimaz.data.remote.models.Juz
-import com.arshadshah.nimaz.data.remote.models.Surah
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTrackerRepository
-import com.arshadshah.nimaz.data.remote.repositories.QuranRepository
 import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesService
@@ -73,12 +72,12 @@ class DashboardViewmodel(context: Context) : ViewModel() {
     val maghribTime = _maghribTime.asStateFlow()
 
     private var _tasbihList = MutableStateFlow(
-        listOf<Tasbih>()
+        listOf<LocalTasbih>()
     )
     val tasbihList = _tasbihList.asStateFlow()
 
     data class DashboardTrackerState(
-        val date: String,
+        val date: LocalDate,
         val fajr: Boolean,
         val dhuhr: Boolean,
         val asr: Boolean,
@@ -89,10 +88,21 @@ class DashboardViewmodel(context: Context) : ViewModel() {
     )
 
     private var _trackerState =
-        MutableStateFlow(DashboardTrackerState("", false, false, false, false, false, 0, false))
+        MutableStateFlow(
+            DashboardTrackerState(
+                LocalDate.now(),
+                false,
+                false,
+                false,
+                false,
+                false,
+                0,
+                false
+            )
+        )
     val trackerState = _trackerState.asStateFlow()
 
-    private val _bookmarks = MutableStateFlow(listOf<Aya>())
+    private val _bookmarks = MutableStateFlow(listOf<LocalAya>())
     val bookmarks = _bookmarks.asStateFlow()
 
     sealed class DashboardEvent {
@@ -104,14 +114,14 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         object FajrAndMaghribTime : DashboardEvent()
 
         class UpdatePrayerTracker(
-            val date: String,
+            val date: LocalDate,
             val prayerName: String,
             val prayerDone: Boolean
         ) : DashboardEvent()
 
-        class GetTrackerForToday(val date: String) : DashboardEvent()
+        class GetTrackerForToday(val date: LocalDate) : DashboardEvent()
 
-        class UpdateFastTracker(val date: String, val isFasting: Boolean) : DashboardEvent()
+        class UpdateFastTracker(val date: LocalDate, val isFasting: Boolean) : DashboardEvent()
 
         object GetBookmarksOfQuran : DashboardEvent()
         class DeleteBookmarkFromAya(
@@ -120,7 +130,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
             val ayaNumberInSurah: Int,
         ) : DashboardEvent()
 
-        class RecreateTasbih(val date: String) : DashboardEvent()
+        class RecreateTasbih(val date: LocalDate) : DashboardEvent()
 
         object GetRandomAya : DashboardEvent()
     }
@@ -215,7 +225,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val dataStore = LocalDataStore.getDataStore()
-                dataStore.isFastingForDate(LocalDate.now().toString())
+                dataStore.isFastingForDate(LocalDate.now())
                     .catch { emit(false) }
                     .collect {
                         _isFasting.value = it
@@ -235,8 +245,8 @@ class DashboardViewmodel(context: Context) : ViewModel() {
 
                 Log.d("Nimaz: dashboard viewmodel", "Fajr and Maghrib Times: $prayerTimes")
 
-                _fajrTime.value = prayerTimes.fajr
-                _maghribTime.value = prayerTimes.maghrib
+                _fajrTime.value = prayerTimes?.fajr
+                _maghribTime.value = prayerTimes?.maghrib
                 _isLoading.value = false
                 _isError.value = false
             } catch (e: Exception) {
@@ -246,7 +256,11 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         }
     }
 
-    private fun updatePrayerTrackerForToday(date: String, prayerName: String, prayerDone: Boolean) {
+    private fun updatePrayerTrackerForToday(
+        date: LocalDate,
+        prayerName: String,
+        prayerDone: Boolean
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             _isError.value = false
             _isLoading.value = true
@@ -273,7 +287,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         }
     }
 
-    private fun getTodaysPrayerTracker(date: String) {
+    private fun getTodaysPrayerTracker(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 PrayerTrackerRepository.getPrayersForDate(date)
@@ -298,14 +312,14 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         }
     }
 
-    private fun updateFastingTracker(date: String, isFasting: Boolean) {
+    private fun updateFastingTracker(date: LocalDate, isFasting: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             _isError.value = false
             _isLoading.value = true
             try {
                 val dataStore = LocalDataStore.getDataStore()
                 dataStore.updateFastTracker(
-                    FastTracker(
+                    LocalFastTracker(
                         date = date,
                         isFasting = isFasting
                     )
@@ -336,7 +350,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
             })
     }
 
-    private fun recreateTasbih(date: String) {
+    private fun recreateTasbih(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _isLoading.value = true
@@ -352,7 +366,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
                 //then insert the tasbih into the database
                 //then get the tasbih list for today
                 //yersterday date
-                val yesterday = LocalDate.parse(date).minusDays(1).toString()
+                val yesterday = date.minusDays(1)
                 val yesterdayTasbihList = tasbihListByDate[yesterday]
                 if (yesterdayTasbihList != null) {
                     for (tasbih in yesterdayTasbihList) {
@@ -367,7 +381,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
                                 continue
                             }
                         }
-                        val newTasbih = Tasbih(
+                        val newTasbih = LocalTasbih(
                             id = 0,
                             arabicName = tasbih.arabicName,
                             englishName = tasbih.englishName,
@@ -390,7 +404,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         }
     }
 
-    private fun getTasbihList(date: String) {
+    private fun getTasbihList(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             val datastore = LocalDataStore.getDataStore()
             val tasbihList = datastore.getTasbihForDate(date)
@@ -398,7 +412,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         }
     }
 
-    data class RandomAyaState(val randomAya: Aya, val surah: Surah, val juz: Juz)
+    data class RandomAyaState(val randomAya: LocalAya, val surah: LocalSurah, val juz: LocalJuz)
 
     private val _randomAyaState = MutableLiveData<RandomAyaState>()
     val randomAyaState: LiveData<RandomAyaState> = _randomAyaState
@@ -430,9 +444,6 @@ class DashboardViewmodel(context: Context) : ViewModel() {
                     )
 
                 } else {
-                    val ayat = QuranRepository.getAyaForSurah(1)
-                    //add the ayat to the database
-                    dataStore.insertAyats(ayat.data!!)
                     //get a random aya
                     val randomAya = dataStore.getRandomAya()
                     if (randomAya.ayaNumberInSurah == 0 || randomAya.ayaNumberInSurah == 1) {

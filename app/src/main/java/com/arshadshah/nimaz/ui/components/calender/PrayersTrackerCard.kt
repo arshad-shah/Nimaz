@@ -28,6 +28,7 @@ import com.arshadshah.nimaz.ui.components.trackers.DateSelector
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
 @Composable
@@ -35,7 +36,7 @@ fun PrayersTrackerCard(
     isLoading: State<Boolean>,
     prayerTrackerState: State<TrackerViewModel.PrayerTrackerState>,
     handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>,
-    dateState: State<String>,
+    dateState: State<LocalDate>,
     showDateSelector: State<Boolean> = remember { mutableStateOf(false) }
 ) {
 

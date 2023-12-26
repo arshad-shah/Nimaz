@@ -8,13 +8,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import java.time.LocalDate
 
 @Composable
 //function to open the dialog with the tasbih data
-fun GoalEditDialog(tasbih: Tasbih, showTasbihDialog: MutableState<Boolean>) {
+fun GoalEditDialog(tasbih: LocalTasbih, showTasbihDialog: MutableState<Boolean>) {
     val context = LocalContext.current
 
     val goal = remember {
@@ -31,14 +31,14 @@ fun GoalEditDialog(tasbih: Tasbih, showTasbihDialog: MutableState<Boolean>) {
         onConfirm = {
             viewModel.handleEvent(
                 TasbihViewModel.TasbihEvent.UpdateTasbihGoal(
-                    Tasbih(
+                    LocalTasbih(
                         id = tasbih.id,
                         arabicName = tasbih.arabicName,
                         englishName = tasbih.englishName,
                         translationName = tasbih.translationName,
                         goal = it.toInt(),
                         count = tasbih.count,
-                        date = LocalDate.now().toString(),
+                        date = LocalDate.now(),
                     )
                 )
             )

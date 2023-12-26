@@ -1,14 +1,15 @@
 package com.arshadshah.nimaz.data.remote.repositories
 
 import android.content.Context
-import com.apollographql.apollo3.api.ApolloResponse
-import com.arshadshah.nimaz.GetPrayerTimesForMonthQuery
 import com.arshadshah.nimaz.data.local.DataStore
-import com.arshadshah.nimaz.data.remote.models.PrayerTimes
-import com.arshadshah.nimaz.type.Parameters
+import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
+import com.arshadshah.nimaz.data.remote.models.Parameters
+import com.arshadshah.nimaz.libs.prayertimes.PrayerTimesCalculated
+import com.arshadshah.nimaz.libs.prayertimes.calculationClasses.CalculationParameters
+import com.arshadshah.nimaz.libs.prayertimes.enums.Prayer
+import com.arshadshah.nimaz.libs.prayertimes.objects.Coordinates
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.api.ApiResponse
-import com.arshadshah.nimaz.utils.api.NimazServicesImpl
 import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper.getParams
 import java.io.IOException
 import java.time.Instant
@@ -28,7 +29,7 @@ object PrayerTimesRepository {
     suspend fun getPrayerTimes(
         context: Context,
         dateForTimes: String = LocalDate.now().toString(),
-    ): ApiResponse<PrayerTimes> {
+    ): ApiResponse<LocalPrayerTimes> {
 
         //check if the local datastore has been initialized if not initialize it
         if (!LocalDataStore.isInitialized()) {
@@ -42,15 +43,14 @@ object PrayerTimesRepository {
                 val prayerTimesLocal = dataStore.getPrayerTimesForADate(dateForTimes)
 
                 //check if the date is for current month if not update the prayer times
-                val date = prayerTimesLocal?.date
+                val date = prayerTimesLocal.date
                 val currentDate = LocalDate.now()
                 val currentMonth = currentDate.monthValue
                 val currentYear = currentDate.year
-                val dateMonth = date?.monthValue
-                val dateYear = date?.year
+                val dateMonth = date.monthValue
+                val dateYear = date.year
                 if (dateMonth != currentMonth || dateYear != currentYear) {
-                    val prayerTimesResponse =
-                        NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
+                    val prayerTimesResponse = getPrayerTimesForMonthCustom(getParams(context))
                     val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
                     return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() }!!)
                 }
@@ -58,7 +58,7 @@ object PrayerTimesRepository {
                 return ApiResponse.Success(prayerTimesLocal)
             } else {
                 val prayerTimesResponse =
-                    NimazServicesImpl.getPrayerTimesMonthlyCustom(getParams(context))
+                    getPrayerTimesForMonthCustom(getParams(context))
                 val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
                 return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() }!!)
             }
@@ -68,10 +68,9 @@ object PrayerTimesRepository {
     }
 
 
-    suspend fun updatePrayerTimes(parameters: Parameters): ApiResponse<PrayerTimes> {
+    suspend fun updatePrayerTimes(parameters: Parameters): ApiResponse<LocalPrayerTimes> {
         val dataStore = LocalDataStore.getDataStore()
-        val prayerTimesResponse =
-            NimazServicesImpl.getPrayerTimesMonthlyCustom(parameters)
+        val prayerTimesResponse = getPrayerTimesForMonthCustom(parameters)
         val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
         return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() }!!)
     }
@@ -79,18 +78,18 @@ object PrayerTimesRepository {
 
     private suspend fun processPrayerTimes(
         dataStore: DataStore,
-        prayerTimesResponse: ApolloResponse<GetPrayerTimesForMonthQuery.Data>,
-    ): MutableList<PrayerTimes> {
-        val prayerTimesList = mutableListOf<PrayerTimes>()
-        prayerTimesResponse.data!!.getPrayerTimesForMonthCustom?.map { prayerTimes ->
-            val prayerTime = PrayerTimes(
-                date = LocalDate.parse(prayerTimes!!.date),
-                LocalDateTime.parse(prayerTimes.fajr),
-                LocalDateTime.parse(prayerTimes.sunrise),
-                LocalDateTime.parse(prayerTimes.dhuhr),
-                LocalDateTime.parse(prayerTimes.asr),
-                LocalDateTime.parse(prayerTimes.maghrib),
-                LocalDateTime.parse(prayerTimes.isha),
+        prayerTimesResponse: List<LocalPrayerTimes>,
+    ): MutableList<LocalPrayerTimes> {
+        val prayerTimesList = mutableListOf<LocalPrayerTimes>()
+        prayerTimesResponse.map { prayerTimes ->
+            val prayerTime = LocalPrayerTimes(
+                date = prayerTimes.date,
+                prayerTimes.fajr,
+                prayerTimes.sunrise,
+                prayerTimes.dhuhr,
+                prayerTimes.asr,
+                prayerTimes.maghrib,
+                prayerTimes.isha,
             )
             //check if the day light saving is on or off
             val isDayLightSaving =
@@ -133,5 +132,58 @@ object PrayerTimesRepository {
         }
 
         return prayerTimesList
+    }
+
+    private fun getPrayerTimesForMonthCustom(params: Parameters): List<LocalPrayerTimes> {
+        //get the latitude and longitude from the parameters
+        val coordinates =
+            Coordinates(params.latitude, params.longitude)
+
+        val date = LocalDateTime.parse(params.date)
+        val calculationParameters =
+            CalculationParameters(
+                params.fajrAngle,
+                params.ishaAngle,
+                params.method
+            )
+        calculationParameters.madhab = params.madhab
+        calculationParameters.highLatitudeRule = params.highLatitudeRule
+        calculationParameters.adjustments.fajr = params.fajrAdjustment
+        calculationParameters.adjustments.sunrise = params.sunriseAdjustment
+        calculationParameters.adjustments.dhuhr = params.dhuhrAdjustment
+        calculationParameters.adjustments.asr = params.asrAdjustment
+        calculationParameters.adjustments.maghrib = params.maghribAdjustment
+        calculationParameters.adjustments.isha = params.ishaAdjustment
+        calculationParameters.coordinates = coordinates
+
+        //get the number of days in the month
+        val daysInMonth = date.month.length(date.toLocalDate().isLeapYear)
+
+        //create a list of Prayertimes objects
+        val prayertimesList = mutableListOf<LocalPrayerTimes>()
+        //loop through the days in the month
+        for (i in 1..daysInMonth) {
+            val newDate = LocalDateTime.of(date.year, date.month, i, 0, 0)
+            //get the prayer times for the day
+            val prayertimes = PrayerTimesCalculated(
+                coordinates,
+                newDate,
+                calculationParameters
+            )
+            //add the prayertimes object to the list
+            prayertimesList.add(
+                LocalPrayerTimes(
+                    newDate.toLocalDate(),
+                    prayertimes.timeForPrayer(Prayer.FAJR),
+                    prayertimes.timeForPrayer(Prayer.SUNRISE),
+                    prayertimes.timeForPrayer(Prayer.DHUHR),
+                    prayertimes.timeForPrayer(Prayer.ASR),
+                    prayertimes.timeForPrayer(Prayer.MAGHRIB),
+                    prayertimes.timeForPrayer(Prayer.ISHA)
+                )
+            )
+        }
+        //return the list
+        return prayertimesList
     }
 }

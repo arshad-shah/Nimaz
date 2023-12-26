@@ -7,16 +7,9 @@ plugins {
     id 'com.google.firebase.firebase-perf'
     id "com.google.devtools.ksp"
     id "com.mikepenz.aboutlibraries.plugin" version "10.6.2"
-    id("com.apollographql.apollo3") version "4.0.0-alpha.3"
 }
 
 apply plugin: 'com.mikepenz.aboutlibraries.plugin'
-
-apollo {
-    service("service") {
-        packageName.set("com.arshadshah.nimaz")
-    }
-}
 
 android {
     namespace 'com.arshadshah.nimaz'
@@ -26,8 +19,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 147
-        versionName '1.6.1'
+        versionCode 150
+        versionName '1.7.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -66,6 +59,10 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
             pickFirst '**'
         }
+    }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 }
 
@@ -157,11 +154,9 @@ dependencies {
 
     implementation "com.github.skydoves:balloon-compose:$balloon_version"
 
-    implementation("com.apollographql.apollo3:apollo-runtime:4.0.0-alpha.3")
-
     implementation "androidx.glance:glance-appwidget:1.0.0"
     implementation "androidx.glance:glance-material3:1.0.0"
-    implementation "androidx.work:work-runtime-ktx:2.8.1"
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
 
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
     //kotlinx date time

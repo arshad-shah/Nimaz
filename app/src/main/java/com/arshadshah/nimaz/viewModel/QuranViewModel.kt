@@ -1,17 +1,17 @@
 package com.arshadshah.nimaz.viewModel
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FULL_QURAN_DOWNLOADED
-import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.data.remote.models.Juz
-import com.arshadshah.nimaz.data.remote.models.Surah
-import com.arshadshah.nimaz.data.remote.repositories.QuranRepository
+import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_TAG
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalJuz
+import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.QuranUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,12 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class QuranViewModel(context: Context) : ViewModel() {
-
-    //repository
-    private val quranRepository = QuranRepository
-
-    val sharedPreferences = PrivateSharedPreferences(context)
+class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : ViewModel() {
 
     //general state for error and loading
     private val _errorState = MutableStateFlow("")
@@ -34,14 +29,14 @@ class QuranViewModel(context: Context) : ViewModel() {
 
 
     //surah list state
-    private var _surahListState = MutableStateFlow(ArrayList<Surah>(114))
+    private var _surahListState = MutableStateFlow(ArrayList<LocalSurah>(114))
     val surahListState = _surahListState.asStateFlow()
 
     //juz list state
-    private var _juzListState = MutableStateFlow(ArrayList<Juz>(30))
+    private var _juzListState = MutableStateFlow(ArrayList<LocalJuz>(30))
     val juzListState = _juzListState.asStateFlow()
 
-    private val _ayaListState = MutableStateFlow(ArrayList<Aya>(100))
+    private val _ayaListState = MutableStateFlow(ArrayList<LocalAya>(100))
     val ayaListState = _ayaListState.asStateFlow()
 
     //state for quran menu features like page display, font size, font type, etc
@@ -60,41 +55,10 @@ class QuranViewModel(context: Context) : ViewModel() {
     private val _display_Mode = MutableStateFlow("List")
     val display_Mode = _display_Mode.asStateFlow()
 
-    //random aya state a map of aya, surah, juz data
-    private val _randomAyaState = MutableStateFlow(
-        Aya(
-            0,
-            0,
-            "",
-            "",
-            "",
-            0,
-            0,
-            bookmark = false,
-            favorite = false,
-            note = "",
-            audioFileLocation = "",
-            sajda = false,
-            sajdaType = "",
-            ruku = 0,
-            juzNumber = 0
-        )
-    )
-    val randomAyaState = _randomAyaState.asStateFlow()
-    private val _randomAyaSurahState =
-        MutableStateFlow(Surah(0, 0, 0, "", "", "", "", 0, 0))
-    val randomAyaSurahState = _randomAyaSurahState.asStateFlow()
-    private val _randomAyaJuzState = MutableStateFlow(Juz(0, "", "", 0))
-    val randomAyaJuzState = _randomAyaJuzState.asStateFlow()
-
     private val _surahState = MutableStateFlow(
-        Surah(0, 0, 0, "", "", "", "", 0, 0)
+        LocalSurah(0, 0, 0, "", "", "", "", 0, 0)
     )
     val surahState = _surahState.asStateFlow()
-
-    private val _surahStateForScroll = MutableStateFlow(
-        Surah(0, 0, 0, "", "", "", "", 0, 0)
-    )
 
     //download button state
     private val _downloadButtonState =
@@ -102,7 +66,7 @@ class QuranViewModel(context: Context) : ViewModel() {
     val downloadButtonState = _downloadButtonState.asStateFlow()
 
     //_scrollToAya
-    private val _scrollToAya = MutableStateFlow<Aya?>(null)
+    private val _scrollToAya = MutableStateFlow<LocalAya?>(null)
     val scrollToAya = _scrollToAya.asStateFlow()
 
     init {
@@ -139,7 +103,7 @@ class QuranViewModel(context: Context) : ViewModel() {
         object Initialize_Quran : QuranMenuEvents()
 
         //scroll to aya
-        data class Scroll_To_Aya(val aya: Aya?) : QuranMenuEvents()
+        data class Scroll_To_Aya(val aya: LocalAya?) : QuranMenuEvents()
 
         //reset quran data
         object Reset_Quran_Data : QuranMenuEvents()
@@ -294,17 +258,6 @@ class QuranViewModel(context: Context) : ViewModel() {
                     _loadingState.value = false
                     return@launch
                 }
-                //for 114 surahs, get all ayats
-                for (i in surahsToDownload) {
-                    val response = quranRepository.getAyaForSurah(i)
-                    if (response.data != null) {
-                        dataStore.insertAyats(response.data)
-                    } else {
-                        _loadingState.value = false
-                        _errorState.value = response.message.toString()
-                    }
-                }
-
 
                 //check if all ayats are downloaded
                 val ayats = dataStore.countAllAyat()
@@ -326,25 +279,10 @@ class QuranViewModel(context: Context) : ViewModel() {
             _errorState.value = ""
             try {
                 val dataStore = LocalDataStore.getDataStore()
-                val surahAvailable = dataStore.countSurah()
-                if (surahAvailable > 0) {
-                    val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<Surah>
-                    _surahListState.value = surahList
-                    _loadingState.value = false
-                    _errorState.value = ""
-                } else {
-                    val response = quranRepository.getSurahs()
-                    if (response.data != null) {
-                        dataStore.saveAllSurah(response.data)
-                        _surahListState.value = response.data
-                        _loadingState.value = false
-                        _errorState.value = ""
-                    } else {
-                        _surahListState.value = ArrayList()
-                        _loadingState.value = false
-                        _errorState.value = response.message!!
-                    }
-                }
+                val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<LocalSurah>
+                _surahListState.value = surahList
+                _loadingState.value = false
+                _errorState.value = ""
             } catch (e: Exception) {
                 _surahListState.value = ArrayList()
                 _loadingState.value = false
@@ -359,25 +297,10 @@ class QuranViewModel(context: Context) : ViewModel() {
             _errorState.value = ""
             try {
                 val dataStore = LocalDataStore.getDataStore()
-                val juzAvailable = dataStore.countJuz()
-                if (juzAvailable > 0) {
-                    val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<Juz>
-                    _juzListState.value = juzList
-                    _loadingState.value = false
-                    _errorState.value = ""
-                } else {
-                    val response = quranRepository.getJuzs()
-                    if (response.data != null) {
-                        dataStore.saveAllJuz(response.data)
-                        _juzListState.value = response.data
-                        _loadingState.value = false
-                        _errorState.value = ""
-                    } else {
-                        _juzListState.value = ArrayList()
-                        _loadingState.value = false
-                        _errorState.value = response.message!!
-                    }
-                }
+                val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<LocalJuz>
+                _juzListState.value = juzList
+                _loadingState.value = false
+                _errorState.value = ""
             } catch (e: Exception) {
                 _juzListState.value = ArrayList()
                 _loadingState.value = false
@@ -388,39 +311,23 @@ class QuranViewModel(context: Context) : ViewModel() {
 
     fun getAllAyaForSurah(surahNumber: Int, language: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _loadingState.value = true
-            _errorState.value = ""
-            _ayaListState.value = ArrayList()
             try {
+                _loadingState.value = true
+                _errorState.value = ""
                 val dataStore = LocalDataStore.getDataStore()
-                val surahTotalAya = dataStore.getSurahById(surahNumber).numberOfAyahs
                 val languageConverted = language.uppercase(Locale.ROOT)
-                val ayaInDatabase = dataStore.countSurahAyat(surahNumber)
-                //check if the ayat are teh same as the surah total ayat
-                val areAyatSame = ayaInDatabase == surahTotalAya
-
-                if (areAyatSame) {
-                    val surahAyatList =
-                        dataStore.getAyasOfSurah(surahNumber) as ArrayList<Aya>
+                dataStore.getAyasOfSurah(surahNumber).collect {
+                    Log.d(QURAN_SCREEN_TAG, "Update occurred: $it")
+                    _ayaListState.value = ArrayList()
                     val newList =
-                        addBismillahToFirstAya(surahAyatList, languageConverted, surahNumber)
+                        addBismillahToFirstAya(
+                            it as ArrayList<LocalAya>,
+                            languageConverted,
+                            surahNumber
+                        )
                     _ayaListState.value = newList
                     _loadingState.value = false
                     _errorState.value = ""
-                } else {
-                    val response = quranRepository.getAyaForSurah(surahNumber)
-                    if (response.data != null) {
-                        dataStore.insertAyats(response.data)
-                        val newList =
-                            addBismillahToFirstAya(response.data, languageConverted, surahNumber)
-                        _ayaListState.value = newList
-                        _loadingState.value = false
-                        _errorState.value = ""
-                    } else {
-                        _ayaListState.value = ArrayList()
-                        _loadingState.value = false
-                        _errorState.value = response.message!!
-                    }
                 }
             } catch (e: Exception) {
                 _ayaListState.value = ArrayList()
@@ -431,10 +338,10 @@ class QuranViewModel(context: Context) : ViewModel() {
     }
 
     private fun addBismillahToFirstAya(
-        surahAyatList: ArrayList<Aya>,
+        surahAyatList: ArrayList<LocalAya>,
         languageConverted: String,
         surahNumber: Int,
-    ): ArrayList<Aya> {
+    ): ArrayList<LocalAya> {
         //an empty number
         val ayaNumberOfBismillah = 0
         val ayaOfBismillah = when (languageConverted) {
@@ -446,11 +353,10 @@ class QuranViewModel(context: Context) : ViewModel() {
             }
         }
         val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
-        val aya: Aya
+        val aya: LocalAya
         if (languageConverted == "ENGLISH") {
-            aya = Aya(
+            aya = LocalAya(
                 0,
-                ayaNumberOfBismillah,
                 ayaArabicOfBismillah,
                 ayaOfBismillah,
                 "",
@@ -466,11 +372,10 @@ class QuranViewModel(context: Context) : ViewModel() {
                 0,
             )
         } else {
-            aya = Aya(
+            aya = LocalAya(
                 0,
-                ayaNumberOfBismillah,
                 ayaArabicOfBismillah,
-                "",
+                ayaOfBismillah,
                 ayaOfBismillah,
                 surahNumber,
                 1,
@@ -492,7 +397,7 @@ class QuranViewModel(context: Context) : ViewModel() {
             }
         }
 
-        return surahAyatList
+        return QuranUtils.processAyaEnd(surahAyatList)
     }
 
     fun getAllAyaForJuz(juzNumber: Int, language: String) {
@@ -503,35 +408,13 @@ class QuranViewModel(context: Context) : ViewModel() {
             try {
                 val dataStore = LocalDataStore.getDataStore()
                 val languageConverted = language.uppercase(Locale.ROOT)
-                val areAyatAvailable = dataStore.countJuzAyat(juzNumber)
-                val juzStartAya = dataStore.getJuzById(juzNumber).juzStartAyaInQuran
-                val juzEndAya =
-                    if (juzNumber != 30) (dataStore.getJuzById(juzNumber + 1).juzStartAyaInQuran) else 6236
-                val juzTotalAyat = juzEndAya - juzStartAya
 
-                if (juzTotalAyat == areAyatAvailable) {
-                    val listOfJuzAyat =
-                        dataStore.getAyasOfJuz(juzNumber) as ArrayList<Aya>
-                    val newList = addBismillahInJuz(juzNumber, languageConverted, listOfJuzAyat)
-                    _ayaListState.value = newList
-                    _loadingState.value = false
-                    _errorState.value = ""
-
-                } else {
-                    val response = quranRepository.getAyaForJuz(juzNumber)
-                    if (response.data != null) {
-                        dataStore.insertAyats(response.data)
-                        val newList =
-                            addBismillahInJuz(juzNumber, languageConverted, response.data)
-                        _ayaListState.value = newList
-                        _loadingState.value = false
-                        _errorState.value = ""
-                    } else {
-                        _ayaListState.value = ArrayList()
-                        _loadingState.value = false
-                        _errorState.value = response.message!!
-                    }
-                }
+                val listOfJuzAyat =
+                    dataStore.getAyasOfJuz(juzNumber) as ArrayList<LocalAya>
+                val newList = addBismillahInJuz(juzNumber, languageConverted, listOfJuzAyat)
+                _ayaListState.value = newList
+                _loadingState.value = false
+                _errorState.value = ""
 
             } catch (e: Exception) {
                 _ayaListState.value = ArrayList()
@@ -545,11 +428,8 @@ class QuranViewModel(context: Context) : ViewModel() {
     private fun addBismillahInJuz(
         juzNumber: Int,
         languageConverted: String,
-        listOfJuzAyat: ArrayList<Aya>,
-    ): ArrayList<Aya> {
-
-        //add the following object to index 0 of ayaForSurah without losing value of index 0 in ayaForSurah
-        val ayaNumberOfBismillah = 0
+        listOfJuzAyat: ArrayList<LocalAya>,
+    ): ArrayList<LocalAya> {
 
         val ayaOfBismillah = when (languageConverted) {
             "ENGLISH" -> "In the name of Allah, the Entirely Merciful, the Especially Merciful"
@@ -562,19 +442,18 @@ class QuranViewModel(context: Context) : ViewModel() {
         val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
 
         //create a map of the aya of bismillah
-        var aya: Aya
+        var aya: LocalAya
         //find all the objects in arraylist ayaForJuz where ayaForJuz[i]!!.ayaNumber = 1
         //add object bismillah before it for every occurance of ayaForJuz[i]!!.ayaNumber = 1
         var index = 0
         while (index < listOfJuzAyat.size) {
-            if (listOfJuzAyat[index].ayaNumber == 1 && listOfJuzAyat[index].suraNumber != 1) {
+            if (listOfJuzAyat[index].ayaNumberInSurah == 1 && listOfJuzAyat[index].suraNumber != 1) {
                 //add bismillah before ayaForJuz[i]
-                if (listOfJuzAyat[index].ayaNumber == 1) {
+                if (listOfJuzAyat[index].ayaNumberInSurah == 1) {
                     if (juzNumber + 1 != 10 && index != 36) {
                         if (languageConverted == "ENGLISH") {
-                            aya = Aya(
+                            aya = LocalAya(
                                 0,
-                                ayaNumberOfBismillah,
                                 ayaArabicOfBismillah,
                                 ayaOfBismillah,
                                 "",
@@ -590,9 +469,8 @@ class QuranViewModel(context: Context) : ViewModel() {
                                 0,
                             )
                         } else {
-                            aya = Aya(
+                            aya = LocalAya(
                                 0,
-                                ayaNumberOfBismillah,
                                 ayaArabicOfBismillah,
                                 "",
                                 ayaOfBismillah,
@@ -618,7 +496,7 @@ class QuranViewModel(context: Context) : ViewModel() {
             index++
         }
 
-        return listOfJuzAyat
+        return QuranUtils.processAyaEnd(listOfJuzAyat)
     }
 
     //events to bookmark an aya, favorite an aya, add a note to an aya
@@ -661,32 +539,35 @@ class QuranViewModel(context: Context) : ViewModel() {
         object getNotes : AyaEvent()
 
         //addAudioToAya
-        data class addAudioToAya(
+        class addAudioToAya(
             val surahNumber: Int,
             val ayaNumberInSurah: Int,
             val audio: String,
         ) : AyaEvent()
 
         //delete a note from an aya
-        data class deleteNoteFromAya(
+        class deleteNoteFromAya(
             val ayaNumber: Int,
             val surahNumber: Int,
             val ayaNumberInSurah: Int,
         ) : AyaEvent()
 
         //delete a bookmark from an aya
-        data class deleteBookmarkFromAya(
+        class deleteBookmarkFromAya(
             val ayaNumber: Int,
             val surahNumber: Int,
             val ayaNumberInSurah: Int,
         ) : AyaEvent()
 
         //delete a favorite from an aya
-        data class deleteFavoriteFromAya(
+        class deleteFavoriteFromAya(
             val ayaNumber: Int,
             val surahNumber: Int,
             val ayaNumberInSurah: Int,
         ) : AyaEvent()
+
+        class getSurahById(val id: Int) : AyaEvent()
+
     }
 
     //events handler
@@ -766,6 +647,10 @@ class QuranViewModel(context: Context) : ViewModel() {
                     ayaEvent.ayaNumberInSurah
                 )
             }
+
+            is AyaEvent.getSurahById -> {
+                getSurahById(ayaEvent.id)
+            }
         }
     }
 
@@ -844,13 +729,13 @@ class QuranViewModel(context: Context) : ViewModel() {
     }
 
     //state for bookmarking, favoriting, adding a note
-    private val _bookmarks = MutableStateFlow(listOf<Aya>())
+    private val _bookmarks = MutableStateFlow(listOf<LocalAya>())
     val bookmarks = _bookmarks.asStateFlow()
 
-    private val _favorites = MutableStateFlow(listOf<Aya>())
+    private val _favorites = MutableStateFlow(listOf<LocalAya>())
     val favorites = _favorites.asStateFlow()
 
-    private val _notes = MutableStateFlow(listOf<Aya>())
+    private val _notes = MutableStateFlow(listOf<LocalAya>())
     val notes = _notes.asStateFlow()
 
     private fun deleteNoteFromAya(

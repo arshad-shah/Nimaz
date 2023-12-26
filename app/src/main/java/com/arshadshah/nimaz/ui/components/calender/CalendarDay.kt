@@ -20,7 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.ui.components.calender.calenderday.DayTextGreg
 import com.arshadshah.nimaz.ui.components.calender.calenderday.HijriDateAndFastIndicator
 import com.arshadshah.nimaz.ui.components.calender.calenderday.ImportantDayDescriptionPopup
@@ -38,7 +38,7 @@ import kotlin.reflect.KFunction1
 fun CalenderDay(
     dayState: DayState<DynamicSelectionState>,
     handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?,
-    progressForMonth: State<List<PrayerTracker>>,
+    progressForMonth: State<List<LocalPrayersTracker>>,
     fastProgressForMonth: State<List<LocalFastTracker>>,
 ) {
 
@@ -57,8 +57,8 @@ fun CalenderDay(
     val importantDay = isImportantDay(hijriDayOfMonth, hijriMonth)
 
     //find todays tracker in the list of trackers from progressForMonth
-    val todaysTracker = progressForMonth.value.find { it.date == currentDate.toString() }
-    val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate.toString() }
+    val todaysTracker = progressForMonth.value.find { it.date == currentDate }
+    val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate }
     val isMenstratingToday = todaysTracker?.isMenstruating ?: false
 
     val isFromCurrentMonth = dayState.isFromCurrentMonth
@@ -120,22 +120,22 @@ fun CalenderDay(
                         if (handleEvents == null) return@combinedClickable
                         handleEvents(
                             TrackerViewModel.TrackerEvent.SET_DATE(
-                                dayState.date.toString()
+                                dayState.date
                             )
                         )
                         handleEvents(
                             TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                                dayState.date.toString()
+                                dayState.date
                             )
                         )
                         handleEvents(
                             TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                                dayState.date.toString()
+                                dayState.date
                             )
                         )
                         handleEvents(
                             TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                                dayState.date.toString()
+                                dayState.date
                             )
                         )
                         handleEvents(

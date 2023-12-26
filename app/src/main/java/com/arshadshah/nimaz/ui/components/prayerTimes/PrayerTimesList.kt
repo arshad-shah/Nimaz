@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.ui.components.prayerTimes
 
 
-import androidx.activity.ComponentActivity
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
@@ -19,8 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,8 +28,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_SUNRISE
 import com.arshadshah.nimaz.data.remote.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
@@ -43,19 +46,18 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.util.Locale
+import kotlin.reflect.KFunction2
 
 
 @Composable
-fun PrayerTimesList() {
+fun PrayerTimesList(
+    prayerTimesState: State<PrayerTimesViewModel.PrayerTimesState>,
+    error: State<String?>,
+    isLoading: State<Boolean>,
+    handleEvents: KFunction2<Context, PrayerTimesViewModel.PrayerTimesEvent, Unit>
+) {
+
     val context = LocalContext.current
-
-    val viewModel = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-
-    val prayerTimesState = viewModel.prayerTimesState.collectAsState()
 
     val currentPrayerName = prayerTimesState.value.currentPrayerName
 
@@ -71,32 +73,26 @@ fun PrayerTimesList() {
 
     val ishaTime = prayerTimesState.value.ishaTime
 
-    val isLoading = remember {
-        viewModel.isLoading
-    }.collectAsState()
-
-    val isError = remember {
-        viewModel.error
-    }.collectAsState()
-
     val nextPrayerName = prayerTimesState.value.nextPrayerName
 
     val nextPrayerTime = prayerTimesState.value.nextPrayerTime
 
     val timer = prayerTimesState.value.countDownTime
 
-    if (isError.value?.isNotBlank() == true) {
-        Toasty.error(context, isError.value!!).show()
+    val mapOfPrayerTimes = mapOf(
+        PRAYER_NAME_FAJR to fajrTime,
+        PRAYER_NAME_SUNRISE to sunriseTime,
+        PRAYER_NAME_DHUHR to dhuhrTime,
+        PRAYER_NAME_ASR to asrTime,
+        PRAYER_NAME_MAGHRIB to maghribTime,
+        PRAYER_NAME_ISHA to ishaTime,
+    )
+
+    if (error.value?.isNotBlank() == true) {
+        Toasty.error(context, error.value!!).show()
     } else if (isLoading.value) {
         PrayerTimesListUI(
-            prayerTimesMap = mapOf(
-                "Fajr" to fajrTime,
-                "Sunrise" to sunriseTime,
-                "Dhuhr" to dhuhrTime,
-                "Asr" to asrTime,
-                "Maghrib" to maghribTime,
-                "Isha" to ishaTime,
-            ),
+            prayerTimesMap = mapOfPrayerTimes,
             loading = true,
             currentPrayerName = currentPrayerName,
             name = nextPrayerName,
@@ -112,25 +108,14 @@ fun PrayerTimesList() {
                 .toEpochMilli()
 
         val difference = timeToNextPrayerLong?.minus(currentTime)
-        viewModel.handleEvent(
-            LocalContext.current,
+        handleEvents(
+            context,
             PrayerTimesViewModel.PrayerTimesEvent.Start(difference!!)
-        )
-
-        val mapOfPrayerTimes = mapOf(
-            "Fajr" to fajrTime,
-            "Sunrise" to sunriseTime,
-            "Dhuhr" to dhuhrTime,
-            "Asr" to asrTime,
-            "Maghrib" to maghribTime,
-            "Isha" to ishaTime,
         )
         PrayerTimesListUI(
             loading = false,
-            currentPrayerName = currentPrayerName.first()
-                .uppercaseChar()?.plus(currentPrayerName.substring(1)) ?: "Loading...",
-            name = nextPrayerName.first()
-                ?.uppercaseChar()?.plus(nextPrayerName.substring(1)) ?: "Loading...",
+            currentPrayerName = currentPrayerName,
+            name = nextPrayerName,
             prayerTimesMap = mapOfPrayerTimes,
             timer = timer,
         )

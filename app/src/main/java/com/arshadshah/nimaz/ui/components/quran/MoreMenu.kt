@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.CancellationException
@@ -62,9 +63,10 @@ fun MoreMenu(
     val (showDialog3, setShowDialog3) = remember { mutableStateOf(false) }
     val (showDialog4, setShowDialog4) = remember { mutableStateOf(false) }
 
+    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
     val viewModel = viewModel(
         key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
+        initializer = { QuranViewModel(sharedPreferencesRepository) },
         viewModelStoreOwner = context as ComponentActivity
     )
     //downloadButtonState
@@ -226,9 +228,10 @@ fun MoreMenuMain(
     val (showDialog4, setShowDialog4) = remember { mutableStateOf(false) }
     val (showDialog6, setShowDialog6) = remember { mutableStateOf(false) }
 
+    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
     val viewModel = viewModel(
         key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
+        initializer = { QuranViewModel(sharedPreferencesRepository) },
         viewModelStoreOwner = context as ComponentActivity
     )
     //downloadButtonState

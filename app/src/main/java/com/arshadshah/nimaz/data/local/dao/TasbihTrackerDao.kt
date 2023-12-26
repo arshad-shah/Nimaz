@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.dao
 
 import androidx.room.*
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import java.time.LocalDate
 
 @Dao
 interface TasbihTrackerDao {
@@ -19,15 +20,15 @@ interface TasbihTrackerDao {
 
     //get a list of tasbih that are completed today
     @Query("SELECT * FROM Tasbih WHERE count == goal AND date = :date")
-    fun getCompletedToday(date: String): List<LocalTasbih>
+    fun getCompletedToday(date: LocalDate): List<LocalTasbih>
 
     //get a list of tasbih that are not completed today
     @Query("SELECT * FROM Tasbih WHERE count != goal AND date = :date")
-    fun getNotCompletedToday(date: String): List<LocalTasbih>
+    fun getNotCompletedToday(date: LocalDate): List<LocalTasbih>
 
     //get a list of tasbih for a specific date
     @Query("SELECT * FROM Tasbih WHERE date = :date")
-    fun getForDate(date: String): List<LocalTasbih>
+    fun getForDate(date: LocalDate): List<LocalTasbih>
 
     //get a tasbih by id
     @Query("SELECT * FROM Tasbih WHERE id = :id")

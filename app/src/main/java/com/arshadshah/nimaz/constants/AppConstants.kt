@@ -4,7 +4,7 @@ object AppConstants {
 
     const val BASE_URL = "https://nimazapi.arshadshah.com/gui"
 
-    const val DATABASE_VERSION = 14
+    const val DATABASE_VERSION = 1
 
     //prayer names
     const val PRAYER_NAME_FAJR = "Fajr"
@@ -245,9 +245,6 @@ object AppConstants {
 
     //MissedPrayerReciever
     const val MISSED_PRAYER_RECEIVER_TAG = "$TAG: MissedPrayerReciever"
-
-    //NimazServicesImpl
-    const val NIMAZ_SERVICES_IMPL_TAG = "$TAG: NimazServicesImpl"
 
     //themes names
     const val THEME_SYSTEM = "SYSTEM"
