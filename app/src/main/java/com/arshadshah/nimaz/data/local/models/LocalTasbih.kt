@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.data.local.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.arshadshah.nimaz.data.remote.models.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 

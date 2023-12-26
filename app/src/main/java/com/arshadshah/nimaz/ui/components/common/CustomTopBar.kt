@@ -34,7 +34,6 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.quran.MoreMenu
-import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.utils.CustomAnimation
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -271,26 +270,6 @@ fun CustomTopBar(
                             MoreMenu(
                                 menuOpen = menuOpen,
                                 setMenuOpen = setMenuOpen,
-                            )
-                        }
-
-                        AppConstants.QURAN_SCREEN_ROUTE -> {
-                            IconButton(onClick = {
-                                setMenuOpen2(true)
-                            }) {
-                                Icon(
-                                    modifier = Modifier.size(
-                                        24.dp
-                                    ),
-                                    painter = painterResource(
-                                        id = R.drawable.settings_sliders_icon
-                                    ),
-                                    contentDescription = "Menu"
-                                )
-                            }
-                            MoreMenuMain(
-                                menuOpen = menuOpen2,
-                                setMenuOpen = setMenuOpen2,
                             )
                         }
 

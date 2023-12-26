@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.data.remote.repositories
+package com.arshadshah.nimaz.repositories
 
 import android.content.Context
 import android.util.Log

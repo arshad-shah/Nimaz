@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.data.remote.models
+package com.arshadshah.nimaz.data.local.models
 
 data class CountDownTime(
     val hours: Long,

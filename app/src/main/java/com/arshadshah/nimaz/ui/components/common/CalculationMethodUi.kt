@@ -25,7 +25,7 @@ import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel

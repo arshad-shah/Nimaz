@@ -7,7 +7,6 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
-import com.arshadshah.nimaz.data.remote.models.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 

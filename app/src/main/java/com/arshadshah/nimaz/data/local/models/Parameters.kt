@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.data.remote.models
+package com.arshadshah.nimaz.data.local.models
 
 import com.arshadshah.nimaz.libs.prayertimes.enums.CalculationMethod
 import com.arshadshah.nimaz.libs.prayertimes.enums.HighLatitudeRule

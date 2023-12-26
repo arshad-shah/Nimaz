@@ -18,14 +18,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.data.remote.models.Dua
+import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.ui.components.common.MarkdownText
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 
 @Composable
-fun DuaListItem(dua: Dua, loading: Boolean) {
+fun DuaListItem(dua: LocalDua, loading: Boolean) {
     ElevatedCard(
         shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
@@ -89,7 +89,7 @@ fun DuaListItem(dua: Dua, loading: Boolean) {
 @Preview
 @Composable
 fun DuaListItemPreview() {
-    val dua = Dua(
+    val dua = LocalDua(
         1,
         1,
         0,

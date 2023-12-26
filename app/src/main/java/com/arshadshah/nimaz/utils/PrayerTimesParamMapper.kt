@@ -1,12 +1,11 @@
-package com.arshadshah.nimaz.utils.api
+package com.arshadshah.nimaz.utils
 
 import android.content.Context
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Parameters
+import com.arshadshah.nimaz.data.local.models.Parameters
 import com.arshadshah.nimaz.libs.prayertimes.enums.CalculationMethod
 import com.arshadshah.nimaz.libs.prayertimes.enums.HighLatitudeRule
 import com.arshadshah.nimaz.libs.prayertimes.enums.Madhab
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import java.time.LocalDateTime
 
 object PrayerTimesParamMapper {

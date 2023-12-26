@@ -7,7 +7,7 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_SUNRISE
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime

@@ -19,14 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.data.remote.models.Chapter
+import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 
 @Composable
 fun ChapterListItem(
-    chapter: Chapter,
+    chapter: LocalChapter,
     onNavigateToChapter: (Int, String) -> Unit,
     loading: Boolean,
 ) {

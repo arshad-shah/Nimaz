@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTrackerRepository
+import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import com.arshadshah.nimaz.utils.LocalDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
