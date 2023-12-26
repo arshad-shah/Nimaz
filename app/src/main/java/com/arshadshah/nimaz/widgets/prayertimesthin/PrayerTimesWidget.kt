@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.widgets.prayertimesthin
 
-import com.arshadshah.nimaz.data.remote.models.PrayerTimes
+import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -10,7 +10,7 @@ sealed interface PrayerTimesWidget {
     object Loading : PrayerTimesWidget
 
     @Serializable
-    data class Success(val data: PrayerTimes) : PrayerTimesWidget
+    data class Success(val data: LocalPrayerTimes) : PrayerTimesWidget
 
     @Serializable
     data class Error(val message: String?) : PrayerTimesWidget

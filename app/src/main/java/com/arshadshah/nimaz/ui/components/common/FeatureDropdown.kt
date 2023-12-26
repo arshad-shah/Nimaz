@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -222,12 +222,11 @@ fun FeaturesDropDownPreview() {
     //    val ruku: Int,
     //    val juzNumber: Int,
     val ayas = listOf(
-        Aya(
+        LocalAya(
             ayaNumberInQuran = 1,
-            ayaNumber = 1,
             ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
-            ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
-            ayaTranslationUrdu = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+            translationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+            translationUrdu = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
             suraNumber = 1,
             ayaNumberInSurah = 1,
             bookmark = false,
@@ -255,7 +254,7 @@ fun FeaturesDropDownPreview() {
                         Text(
                             modifier = Modifier
                                 .padding(8.dp),
-                            text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString(),
+                            text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumberInSurah.toString(),
                             textAlign = TextAlign.Start,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,

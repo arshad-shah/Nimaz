@@ -11,7 +11,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
 import io.github.boguszpawlowski.composecalendar.rememberSelectableCalendarState
@@ -20,7 +20,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun Calender(
     handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>,
-    progressForMonth: State<List<PrayerTracker>>,
+    progressForMonth: State<List<LocalPrayersTracker>>,
     fastProgressForMonth: State<List<LocalFastTracker>>,
 ) {
     Card(

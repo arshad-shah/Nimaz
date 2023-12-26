@@ -531,12 +531,12 @@ class SettingsViewModel(context: Context) : ViewModel() {
 
                 _prayerTimesState.update {
                     it.copy(
-                        fajrTime = prayerTimes.fajr,
-                        sunriseTime = prayerTimes.sunrise,
-                        dhuhrTime = prayerTimes.dhuhr,
-                        asrTime = prayerTimes.asr,
-                        maghribTime = prayerTimes.maghrib,
-                        ishaTime = prayerTimes.isha
+                        fajrTime = prayerTimes?.fajr ?: LocalDateTime.now(),
+                        sunriseTime = prayerTimes?.sunrise ?: LocalDateTime.now(),
+                        dhuhrTime = prayerTimes?.dhuhr ?: LocalDateTime.now(),
+                        asrTime = prayerTimes?.asr ?: LocalDateTime.now(),
+                        maghribTime = prayerTimes?.maghrib ?: LocalDateTime.now(),
+                        ishaTime = prayerTimes?.isha ?: LocalDateTime.now()
                     )
                 }
 

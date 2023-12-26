@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
@@ -53,7 +53,7 @@ fun CustomCounter(
         //update the tasbih
         viewModel.handleEvent(
             TasbihViewModel.TasbihEvent.UpdateTasbih(
-                Tasbih(
+                LocalTasbih(
                     id = tasbih.value.id,
                     date = tasbih.value.date,
                     arabicName = tasbih.value.arabicName,

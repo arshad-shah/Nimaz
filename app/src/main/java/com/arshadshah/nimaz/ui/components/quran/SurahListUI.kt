@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_SURAH_ITEM
-import com.arshadshah.nimaz.data.remote.models.Surah
+import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -43,7 +43,7 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun SurahListUI(
-    surahs: ArrayList<Surah>,
+    surahs: ArrayList<LocalSurah>,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
     loading: Boolean,
 ) {

@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
@@ -37,9 +37,9 @@ import kotlin.reflect.KFunction1
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyQuranScreen(
-    bookmarks: State<List<Aya>>,
-    favorites: State<List<Aya>>,
-    notes: State<List<Aya>>,
+    bookmarks: State<List<LocalAya>>,
+    favorites: State<List<LocalAya>>,
+    notes: State<List<LocalAya>>,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
     handleEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
 ) {
@@ -72,7 +72,7 @@ fun MyQuranScreen(
         mutableStateOf("")
     }
     val itemToDelete = remember {
-        mutableStateOf<Aya?>(null)
+        mutableStateOf<LocalAya?>(null)
     }
 
     val listOfMapOfDropdowns = listOf(
@@ -111,7 +111,7 @@ fun MyQuranScreen(
                     disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
                 ),
                 label = listOfMapOfDropdowns[it]["label"] as String,
-                items = listOfMapOfDropdowns[it]["items"] as List<Aya>,
+                items = listOfMapOfDropdowns[it]["items"] as List<LocalAya>,
                 dropDownItem = { bookmark ->
                     val currentItem = rememberUpdatedState(newValue = bookmark)
                     val dismissState = rememberDismissState(
@@ -150,7 +150,7 @@ fun MyQuranScreen(
                                     Text(
                                         modifier = Modifier
                                             .padding(8.dp),
-                                        text = "Chapter " + aya.suraNumber.toString() + ":" + " Verse " + aya.ayaNumber.toString(),
+                                        text = "Chapter " + aya.suraNumber.toString() + ":" + " Verse " + aya.ayaNumberInSurah.toString(),
                                         textAlign = TextAlign.Start,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,
@@ -188,7 +188,7 @@ fun MyQuranScreen(
                     "Delete Bookmark" -> {
                         handleEvents(
                             QuranViewModel.AyaEvent.deleteBookmarkFromAya(
-                                itemToDelete.value!!.ayaNumber,
+                                itemToDelete.value!!.ayaNumberInSurah,
                                 itemToDelete.value!!.suraNumber,
                                 itemToDelete.value!!.ayaNumberInSurah
                             )
@@ -198,7 +198,7 @@ fun MyQuranScreen(
                     "Delete Favorite" -> {
                         handleEvents(
                             QuranViewModel.AyaEvent.deleteFavoriteFromAya(
-                                itemToDelete.value!!.ayaNumber,
+                                itemToDelete.value!!.ayaNumberInSurah,
                                 itemToDelete.value!!.suraNumber,
                                 itemToDelete.value!!.ayaNumberInSurah
                             )
@@ -208,7 +208,7 @@ fun MyQuranScreen(
                     "Delete Note" -> {
                         handleEvents(
                             QuranViewModel.AyaEvent.deleteNoteFromAya(
-                                itemToDelete.value!!.ayaNumber,
+                                itemToDelete.value!!.ayaNumberInSurah,
                                 itemToDelete.value!!.suraNumber,
                                 itemToDelete.value!!.ayaNumberInSurah
                             )

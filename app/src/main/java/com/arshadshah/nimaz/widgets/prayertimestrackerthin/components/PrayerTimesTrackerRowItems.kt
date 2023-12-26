@@ -25,7 +25,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.remote.repositories.PrayerTrackerRepository
 import kotlinx.coroutines.launch
 
@@ -138,7 +138,7 @@ fun PrayerTimesTrackerRowItems(
                     }
                     scope.launch {
                         PrayerTrackerRepository.updateTracker(
-                            tracker = PrayerTracker(
+                            tracker = LocalPrayersTracker(
                                 fajr = fajr.value,
                                 dhuhr = dhuhr.value,
                                 asr = asr.value,

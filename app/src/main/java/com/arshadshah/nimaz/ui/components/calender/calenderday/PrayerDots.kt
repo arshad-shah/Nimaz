@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 
 @Composable
-fun PrayerDots(todaysTracker: PrayerTracker?) {
+fun PrayerDots(todaysTracker: LocalPrayersTracker?) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),

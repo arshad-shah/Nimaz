@@ -6,7 +6,7 @@ import java.time.LocalDate
 @Serializable
 data class PrayerTrackerWithTime(
     @Serializable(with = LocalDateSerializer::class)
-    val date: String = LocalDate.now().toString(),
+    val date: LocalDate = LocalDate.now(),
     val fajr: Boolean = false,
     val fajrTime: String = "",
     val dhuhr: Boolean = false,

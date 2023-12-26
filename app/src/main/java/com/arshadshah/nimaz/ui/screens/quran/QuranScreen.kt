@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,11 +11,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN
@@ -29,15 +27,13 @@ import com.arshadshah.nimaz.viewModel.QuranViewModel
 @Composable
 fun QuranScreen(
     paddingValues: PaddingValues,
+    context: MainActivity,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
-) {
-    val context = LocalContext.current
-    val viewModel = viewModel(
+    viewModel: QuranViewModel = viewModel(
         key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-
+        viewModelStoreOwner = context
+    ),
+) {
     viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
 
     val titles = listOf("Sura", "Juz", "My Quran")
@@ -62,9 +58,9 @@ fun QuranScreen(
             when (page) {
                 0 -> {
                     Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG, "Surah Screen")
-                    val surahListState = remember { viewModel.surahListState }.collectAsState()
-                    val isLoadingSurah = remember { viewModel.loadingState }.collectAsState()
-                    val errorSurah = remember { viewModel.errorState }.collectAsState()
+                    val surahListState = viewModel.surahListState.collectAsState()
+                    val isLoadingSurah = viewModel.loadingState.collectAsState()
+                    val errorSurah = viewModel.errorState.collectAsState()
                     Log.d(
                         AppConstants.QURAN_SURAH_SCREEN_TAG,
                         "surahListState.value = ${surahListState.value}"
@@ -79,9 +75,9 @@ fun QuranScreen(
 
                 1 -> {
                     Log.d(AppConstants.QURAN_JUZ_SCREEN_TAG, "Juz Screen")
-                    val juzListState = remember { viewModel.juzListState }.collectAsState()
-                    val isLoadingJuz = remember { viewModel.loadingState }.collectAsState()
-                    val errorJuz = remember { viewModel.errorState }.collectAsState()
+                    val juzListState = viewModel.juzListState.collectAsState()
+                    val isLoadingJuz = viewModel.loadingState.collectAsState()
+                    val errorJuz = viewModel.errorState.collectAsState()
                     Log.d(
                         AppConstants.QURAN_JUZ_SCREEN_TAG,
                         "juzListState.value = ${juzListState.value}"
@@ -95,9 +91,9 @@ fun QuranScreen(
                 }
 
                 2 -> {
-                    val bookmarks = remember { viewModel.bookmarks }.collectAsState()
-                    val favorites = remember { viewModel.favorites }.collectAsState()
-                    val notes = remember { viewModel.notes }.collectAsState()
+                    val bookmarks = viewModel.bookmarks.collectAsState()
+                    val favorites = viewModel.favorites.collectAsState()
+                    val notes = viewModel.notes.collectAsState()
                     MyQuranScreen(
                         bookmarks = bookmarks,
                         favorites = favorites,

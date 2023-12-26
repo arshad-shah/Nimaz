@@ -7,7 +7,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.DropDownHeader
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.common.Placeholder
@@ -15,13 +15,14 @@ import com.arshadshah.nimaz.ui.components.tasbih.DeleteDialog
 import com.arshadshah.nimaz.ui.components.tasbih.GoalEditDialog
 import com.arshadshah.nimaz.ui.components.tasbih.TasbihDropdownItem
 import com.arshadshah.nimaz.viewModel.DashboardViewmodel
+import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
 @Composable
 fun DashboardTasbihTracker(
     onNavigateToTasbihScreen: (String, String, String, String) -> Unit,
     onNavigateToTasbihListScreen: () -> Unit,
-    tasbihList: List<Tasbih>,
+    tasbihList: List<LocalTasbih>,
     handleEvents: KFunction1<DashboardViewmodel.DashboardEvent, Unit>,
     isLoading: State<Boolean>,
 
@@ -44,9 +45,9 @@ fun DashboardTasbihTracker(
         }
         val tasbihToEdit = remember {
             mutableStateOf(
-                Tasbih(
+                LocalTasbih(
                     0,
-                    "",
+                    LocalDate.now(),
                     "",
                     "",
                     "",
@@ -81,13 +82,13 @@ fun DashboardTasbihTracker(
                     onDelete = { tasbih ->
                         showDeleteDialog.value = true
                         tasbihToEdit.value = tasbih
-                    },
-                    onEdit = { tasbih ->
-                        showTasbihDialog.value =
-                            true
-                        tasbihToEdit.value =
-                            tasbih
-                    })
+                    }
+                ) { tasbih ->
+                    showTasbihDialog.value =
+                        true
+                    tasbihToEdit.value =
+                        tasbih
+                }
             }
 
         )

@@ -4,7 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
-import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -27,7 +27,6 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
-import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
@@ -53,6 +52,7 @@ import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
 fun NavigationGraph(
     navController: NavController,
     paddingValues: PaddingValues,
+    context: MainActivity,
 ) {
     NavHost(
         navController = navController as NavHostController,
@@ -61,7 +61,7 @@ fun NavigationGraph(
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Left,
                 animationSpec = tween(
-                    easing = LinearOutSlowInEasing,
+                    easing = FastOutSlowInEasing, // Changed easing for a different effect
                     durationMillis = SCREEN_ANIMATION_DURATION
                 )
             )
@@ -70,26 +70,26 @@ fun NavigationGraph(
             slideOutOfContainer(
                 AnimatedContentTransitionScope.SlideDirection.Right,
                 animationSpec = tween(
-                    easing = LinearOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION_Exit
+                    easing = FastOutSlowInEasing,
+                    durationMillis = SCREEN_ANIMATION_DURATION
                 )
             )
         },
         popEnterTransition = {
             slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Left,
+                AnimatedContentTransitionScope.SlideDirection.Right,
                 animationSpec = tween(
-                    easing = LinearOutSlowInEasing,
+                    easing = FastOutSlowInEasing,
                     durationMillis = SCREEN_ANIMATION_DURATION
                 )
             )
         },
         popExitTransition = {
             slideOutOfContainer(
-                AnimatedContentTransitionScope.SlideDirection.Right,
+                AnimatedContentTransitionScope.SlideDirection.Left,
                 animationSpec = tween(
-                    easing = LinearOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION_Exit
+                    easing = FastOutSlowInEasing,
+                    durationMillis = SCREEN_ANIMATION_DURATION
                 )
             )
         }
@@ -168,49 +168,51 @@ fun NavigationGraph(
         }
         composable(BottomNavItem.QuranScreen.screen_route) {
             QuranScreen(
-                paddingValues
-            ) { number: String, isSurah: Boolean, language: String, scrollToAya: Int? ->
-                if (scrollToAya != null) {
-                    navController.navigate(
-                        MY_QURAN_SCREEN_ROUTE.replace(
-                            "{number}",
-                            number
-                        )
-                            .replace(
-                                "{isSurah}",
-                                isSurah.toString()
+                context = context,
+                paddingValues = paddingValues,
+                onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int? ->
+                    if (scrollToAya != null) {
+                        navController.navigate(
+                            MY_QURAN_SCREEN_ROUTE.replace(
+                                "{number}",
+                                number
                             )
-                            .replace(
-                                "{language}",
-                                language
-                            )
-                            .replace(
-                                "{scrollTo}",
-                                scrollToAya.toString()
-                            )
-                    ) {
-                        popUpTo(MY_QURAN_SCREEN_ROUTE) {
-                            inclusive = true
+                                .replace(
+                                    "{isSurah}",
+                                    isSurah.toString()
+                                )
+                                .replace(
+                                    "{language}",
+                                    language
+                                )
+                                .replace(
+                                    "{scrollTo}",
+                                    scrollToAya.toString()
+                                )
+                        ) {
+                            popUpTo(MY_QURAN_SCREEN_ROUTE) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
                         }
-                        launchSingleTop = true
-                    }
-                } else {
-                    navController.navigate(
-                        QURAN_AYA_SCREEN_ROUTE.replace(
-                            "{number}",
-                            number
+                    } else {
+                        navController.navigate(
+                            QURAN_AYA_SCREEN_ROUTE.replace(
+                                "{number}",
+                                number
+                            )
+                                .replace(
+                                    "{isSurah}",
+                                    isSurah.toString()
+                                )
+                                .replace(
+                                    "{language}",
+                                    language
+                                )
                         )
-                            .replace(
-                                "{isSurah}",
-                                isSurah.toString()
-                            )
-                            .replace(
-                                "{language}",
-                                language
-                            )
-                    )
+                    }
                 }
-            }
+            )
         }
         composable(MY_QURAN_SCREEN_ROUTE) {
             AyatScreen(
@@ -219,6 +221,7 @@ fun NavigationGraph(
                 language = it.arguments?.getString("language")!!,
                 scrollToAya = it.arguments?.getString("scrollTo")!!.toInt(),
                 paddingValues = paddingValues,
+                context = context
             )
         }
 
@@ -228,6 +231,7 @@ fun NavigationGraph(
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
                 paddingValues = paddingValues,
+                context = context
             )
         }
 

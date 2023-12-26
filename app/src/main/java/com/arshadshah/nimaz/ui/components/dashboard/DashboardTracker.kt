@@ -85,7 +85,7 @@ fun DashboardPrayerTracker(
                     onCheckedChange = {
                         handleEvents(
                             DashboardViewmodel.DashboardEvent.UpdatePrayerTracker(
-                                date = LocalDate.now().toString(),
+                                date = LocalDate.now(),
                                 prayerName = prayerName,
                                 prayerDone = it
                             )

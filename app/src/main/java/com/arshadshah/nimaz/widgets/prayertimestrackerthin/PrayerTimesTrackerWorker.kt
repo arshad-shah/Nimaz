@@ -81,7 +81,7 @@ class PrayerTimesTrackerWorker(private val context: Context, workerParams: Worke
             setWidgetState(glanceIds, PrayerTimesTrackerWidget.Loading)
 
             val tracker = PrayerTrackerRepository.getTrackerForDate(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
             val prayerTimes = PrayerTimesRepository.getPrayerTimes(context).data
 

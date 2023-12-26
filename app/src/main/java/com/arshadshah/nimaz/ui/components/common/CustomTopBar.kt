@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -33,11 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.quran.MoreMenuMain
 import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.utils.CustomAnimation
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.RouteUtils.checkRoute
 import com.arshadshah.nimaz.utils.RouteUtils.processPageTitle
 import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
@@ -52,14 +52,17 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomTopBar(route: MutableState<String?>, navController: NavHostController) {
+fun CustomTopBar(
+    route: MutableState<String?>,
+    navController: NavHostController,
+    context: MainActivity
+) {
 
-    val context = LocalContext.current
-
+    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
     val viewModelQuran = viewModel(
         key = AppConstants.QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
+        initializer = { QuranViewModel(sharedPreferencesRepository) },
+        viewModelStoreOwner = context
     )
 
     val viewModelTasbih = viewModel(

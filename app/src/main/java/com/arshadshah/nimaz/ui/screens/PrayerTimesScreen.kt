@@ -11,15 +11,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_SUNRISE
 import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
 import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
@@ -40,10 +46,14 @@ fun PrayerTimesScreen(
         viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.LOAD_LOCATION)
         viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
     }
+
     val prayerTimesState = viewModel.prayerTimesState.collectAsState()
     val locationState = prayerTimesState.value.locationName
     val latitude = prayerTimesState.value.latitude
     val longitude = prayerTimesState.value.longitude
+
+    val isLoading = viewModel.isLoading.collectAsState()
+    val error = viewModel.error.collectAsState()
 
 
     LaunchedEffect(locationState, latitude, longitude) {
@@ -62,14 +72,27 @@ fun PrayerTimesScreen(
     }
     val currentPrayerName = prayerTimesState.value.currentPrayerName
 
-    Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG, "locationState: $locationState")
     Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG, "currentPrayerName: $currentPrayerName")
+
+    val mapOfPrayerNameToImagePainterResource = mapOf(
+        PRAYER_NAME_FAJR to R.drawable.fajr_back,
+        PRAYER_NAME_SUNRISE to R.drawable.sunrise_back,
+        PRAYER_NAME_DHUHR to R.drawable.dhuhr_back,
+        PRAYER_NAME_ASR to R.drawable.asr_back,
+        PRAYER_NAME_MAGHRIB to R.drawable.maghrib_back,
+        PRAYER_NAME_ISHA to R.drawable.isha_back,
+    )
+
+    val backgroundImagePainter = remember(currentPrayerName) {
+        mapOfPrayerNameToImagePainterResource[currentPrayerName] ?: R.drawable.fajr_back
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = getBackgroundImage(currentPrayerName),
+            painter = painterResource(id = backgroundImagePainter),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -82,22 +105,14 @@ fun PrayerTimesScreen(
             verticalArrangement = Arrangement.Bottom
         ) {
             item {
-                PrayerTimesList()
+                PrayerTimesList(
+                    prayerTimesState,
+                    error,
+                    isLoading,
+                    handleEvents = viewModel::handleEvent
+                )
             }
         }
     }
 
-}
-
-@Composable
-fun getBackgroundImage(currentPrayerName: String): Painter {
-    return when (currentPrayerName) {
-        "fajr" -> painterResource(id = R.drawable.fajr_back)
-        "sunrise" -> painterResource(id = R.drawable.sunrise_back)
-        "dhuhr" -> painterResource(id = R.drawable.dhuhr_back)
-        "asr" -> painterResource(id = R.drawable.asr_back)
-        "maghrib" -> painterResource(id = R.drawable.maghrib_back)
-        "isha" -> painterResource(id = R.drawable.isha_back)
-        else -> painterResource(id = R.drawable.fajr_back)
-    }
 }

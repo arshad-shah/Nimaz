@@ -62,13 +62,13 @@ fun Dashboard(
         viewModel.handleEvent(DashboardViewmodel.DashboardEvent.IsFastingToday)
         viewModel.handleEvent(
             DashboardViewmodel.DashboardEvent.GetTrackerForToday(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
         viewModel.handleEvent(DashboardViewmodel.DashboardEvent.GetBookmarksOfQuran)
         viewModel.handleEvent(
             DashboardViewmodel.DashboardEvent.RecreateTasbih(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
         viewModel.handleEvent(DashboardViewmodel.DashboardEvent.GetRandomAya)

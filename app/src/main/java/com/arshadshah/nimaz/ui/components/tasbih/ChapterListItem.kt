@@ -36,7 +36,7 @@ fun ChapterListItem(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                onNavigateToChapter(chapter._id, chapter.category)
+                onNavigateToChapter(chapter._id, chapter.english_title)
             }
     ) {
         Row(
