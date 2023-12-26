@@ -45,7 +45,7 @@ import com.arshadshah.nimaz.ui.components.settings.SettingsNumberPickerDialog
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper.getParams
+import com.arshadshah.nimaz.utils.PrayerTimesParamMapper.getParams
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 

@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.utils.api
+package com.arshadshah.nimaz.utils
 
 sealed class ApiResponse<T>(
     val data: T? = null,

@@ -60,11 +60,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     )
     val surahState = _surahState.asStateFlow()
 
-    //download button state
-    private val _downloadButtonState =
-        MutableStateFlow(!sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED, false))
-    val downloadButtonState = _downloadButtonState.asStateFlow()
-
     //_scrollToAya
     private val _scrollToAya = MutableStateFlow<LocalAya?>(null)
     val scrollToAya = _scrollToAya.asStateFlow()
@@ -90,15 +85,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
 
         //change display mode
         data class Change_Display_Mode(val mode: String) : QuranMenuEvents()
-
-        object Download_Quran : QuranMenuEvents()
-
-        //to check progress of download
-        object Check_Download_Progress : QuranMenuEvents()
-
-        //cancel download
-        object Cancel_Download : QuranMenuEvents()
-
         //initialize quran using settings
         object Initialize_Quran : QuranMenuEvents()
 
@@ -156,22 +142,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
                     }
 
                 _display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE, "List")
-
-                //downloadButtonState
-                _downloadButtonState.value =
-                    !sharedPreferences.getDataBoolean(FULL_QURAN_DOWNLOADED, false)
-            }
-
-            is QuranMenuEvents.Download_Quran -> {
-                downloadQuran()
-            }
-
-            is QuranMenuEvents.Check_Download_Progress -> {
-                checkDownloadProgress()
-            }
-
-            is QuranMenuEvents.Cancel_Download -> {
-                cancelDownload()
             }
 
             is QuranMenuEvents.Scroll_To_Aya -> {
@@ -190,7 +160,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
                 sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16.0f)
                 _display_Mode.value = "List"
                 sharedPreferences.saveData(AppConstants.PAGE_TYPE, "List")
-                _downloadButtonState.value = true
                 sharedPreferences.saveDataBoolean(FULL_QURAN_DOWNLOADED, false)
                 deleteAllAyat()
             }
@@ -209,70 +178,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
             }
         }
     }
-
-    //progress of download
-    private val _downloadProgress = MutableStateFlow(0)
-    val downloadProgress = _downloadProgress.asStateFlow()
-
-    private fun checkDownloadProgress() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _errorState.value = ""
-            try {
-                //check if quran is downloaded by checking if database has 6236 ayats
-                val dataStore = LocalDataStore.getDataStore()
-                val ayats = dataStore.countAllAyat()
-                _downloadProgress.value = (ayats * 100) / 6236
-            } catch (e: Exception) {
-                _errorState.value = e.message.toString()
-            }
-        }
-    }
-
-    //download coroutine
-    private var downloadJob: Job? = null
-
-    //cancel download
-    private fun cancelDownload() {
-        //cancel download coroutine
-        downloadJob?.cancel()
-    }
-
-    private fun downloadQuran() {
-        //cancel previous download
-        cancelDownload()
-        //start new download
-        downloadJob = viewModelScope.launch(Dispatchers.IO) {
-            _errorState.value = ""
-            try {
-                val dataStore = LocalDataStore.getDataStore()
-                //find out what is the last surah downloaded
-                val ayat = dataStore.getAllAyat()
-                //array of the surah numbers from 1 to 114
-                val surahs = IntArray(114) { it + 1 }
-                //check which surahs are already downloaded
-                val downloadedSurahs = ayat.map { it.suraNumber }.distinct()
-                //remove downloaded surahs from array
-                val surahsToDownload = surahs.filter { !downloadedSurahs.contains(it) }
-                //if all surahs are downloaded, return
-                if (surahsToDownload.isEmpty()) {
-                    _loadingState.value = false
-                    return@launch
-                }
-
-                //check if all ayats are downloaded
-                val ayats = dataStore.countAllAyat()
-                if (ayats == 6236) {
-                    //downloadButtonState
-                    _downloadButtonState.value = false
-                    //save that quran is downloaded
-                    sharedPreferences.saveDataBoolean(FULL_QURAN_DOWNLOADED, true)
-                }
-            } catch (e: Exception) {
-                _errorState.value = e.message.toString()
-            }
-        }
-    }
-
     private fun getSurahList() {
         viewModelScope.launch(Dispatchers.IO) {
             _loadingState.value = true

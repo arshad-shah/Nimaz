@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.data.remote.repositories
+package com.arshadshah.nimaz.repositories
 
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.utils.LocalDataStore

@@ -1,16 +1,16 @@
-package com.arshadshah.nimaz.data.remote.repositories
+package com.arshadshah.nimaz.repositories
 
 import android.content.Context
 import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
-import com.arshadshah.nimaz.data.remote.models.Parameters
+import com.arshadshah.nimaz.data.local.models.Parameters
 import com.arshadshah.nimaz.libs.prayertimes.PrayerTimesCalculated
 import com.arshadshah.nimaz.libs.prayertimes.calculationClasses.CalculationParameters
 import com.arshadshah.nimaz.libs.prayertimes.enums.Prayer
 import com.arshadshah.nimaz.libs.prayertimes.objects.Coordinates
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.api.ApiResponse
-import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper.getParams
+import com.arshadshah.nimaz.utils.ApiResponse
+import com.arshadshah.nimaz.utils.PrayerTimesParamMapper.getParams
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDate

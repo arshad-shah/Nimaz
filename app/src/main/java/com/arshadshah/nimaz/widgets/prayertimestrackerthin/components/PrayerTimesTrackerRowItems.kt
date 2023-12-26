@@ -26,7 +26,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTrackerRepository
+import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import kotlinx.coroutines.launch
 
 @Composable

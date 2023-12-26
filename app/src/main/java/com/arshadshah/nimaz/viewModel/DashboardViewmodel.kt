@@ -14,8 +14,8 @@ import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTrackerRepository
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesService

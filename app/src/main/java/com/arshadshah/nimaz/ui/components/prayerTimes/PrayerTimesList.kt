@@ -34,7 +34,7 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_SUNRISE
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
+import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
