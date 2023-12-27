@@ -42,17 +42,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 
 // a dropdown item for each tasbih
 //to contain annimated visibility delete button and the tasbih name, goal and count
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihDropdownItem(
-    item: Tasbih,
-    onClick: (Tasbih) -> Unit,
-    onDelete: (Tasbih) -> Unit,
-    onEdit: (Tasbih) -> Unit,
+    item: LocalTasbih,
+    onClick: (LocalTasbih) -> Unit,
+    onDelete: (LocalTasbih) -> Unit,
+    onEdit: (LocalTasbih) -> Unit,
 ) {
     val currentItem = rememberUpdatedState(newValue = item)
     val dismissState = rememberDismissState(
@@ -245,7 +245,7 @@ fun TasbihDropDownItemPreview() {
     //    val translationName: String,
     //    val goal: Int = 0,
     //    val count: Int =
-    val tasbih = Tasbih(
+    val tasbih = LocalTasbih(
         arabicName = "الله أكبر",
         englishName = "Allahu Akbar",
         translationName = "God is the greatest",
@@ -258,8 +258,7 @@ fun TasbihDropDownItemPreview() {
         onDelete = { tasbih ->
 
         },
-        onEdit = { tasbih ->
+    ) { tasbih ->
 
-        },
-    )
+    }
 }

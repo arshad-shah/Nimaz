@@ -11,7 +11,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import java.time.Duration
 
 class PrayerTimeWorker(private val context: Context, workerParams: WorkerParameters) :

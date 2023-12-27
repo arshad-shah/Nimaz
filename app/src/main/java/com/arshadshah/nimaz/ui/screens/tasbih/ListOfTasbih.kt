@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.CustomTabs
 import com.arshadshah.nimaz.ui.components.common.DropDownHeader
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
@@ -153,9 +153,9 @@ fun ListOfTasbih(
                         }
                         val tasbihToEdit = remember {
                             mutableStateOf(
-                                Tasbih(
+                                LocalTasbih(
                                     0,
-                                    "",
+                                    LocalDate.now(),
                                     "",
                                     "",
                                     "",
@@ -175,17 +175,17 @@ fun ListOfTasbih(
 
                             //find out what year the dates are in
                             val years = dates.map { date ->
-                                LocalDate.parse(date)
+                                date
                                     .format(DateTimeFormatter.ofPattern("YYYY"))
                             }.distinct()
 
                             //find out for each year in what month the tasbih are in
                             val months = years.map { year ->
                                 dates.filter { date ->
-                                    LocalDate.parse(date)
+                                    date
                                         .format(DateTimeFormatter.ofPattern("YYYY")) == year
                                 }.map { date ->
-                                    LocalDate.parse(date)
+                                    date
                                         .format(DateTimeFormatter.ofPattern("MMMM"))
                                 }.distinct()
                             }
@@ -207,7 +207,7 @@ fun ListOfTasbih(
                                             items = listOfTasbih.value.filter { tasbih ->
                                                 tasbih.date == dates[dateIndex]
                                             },
-                                            label = LocalDate.parse(dates[dateIndex])
+                                            label = dates[dateIndex]
                                                 .format(
                                                     DateTimeFormatter.ofPattern(
                                                         "E dd MMMM"
@@ -228,13 +228,12 @@ fun ListOfTasbih(
                                                         showDeleteDialog.value = true
                                                         tasbihToEdit.value = tasbih
                                                     },
-                                                    onEdit = { tasbih ->
-                                                        showTasbihDialog.value =
-                                                            true
-                                                        tasbihToEdit.value =
-                                                            tasbih
-                                                    },
-                                                )
+                                                ) { tasbih ->
+                                                    showTasbihDialog.value =
+                                                        true
+                                                    tasbihToEdit.value =
+                                                        tasbih
+                                                }
                                             }
 
                                         )
@@ -258,15 +257,14 @@ fun ListOfTasbih(
                                                         dropDownItem = {
                                                             //for each date in the month, render the date header
                                                             for (dateIndex in dates.indices) {
-                                                                if (LocalDate.parse(dates[dateIndex])
+                                                                if (dates[dateIndex]
                                                                         .format(
                                                                             DateTimeFormatter.ofPattern(
                                                                                 "MMMM"
                                                                             )
                                                                         ) == months[index][monthIndex]
-                                                                    && LocalDate.parse(
-                                                                        dates[dateIndex]
-                                                                    )
+                                                                    &&
+                                                                    dates[dateIndex]
                                                                         .format(
                                                                             DateTimeFormatter.ofPattern(
                                                                                 "YYYY"
@@ -285,9 +283,8 @@ fun ListOfTasbih(
                                                                         items = listOfTasbih.value.filter { tasbih ->
                                                                             tasbih.date == dates[dateIndex]
                                                                         },
-                                                                        label = LocalDate.parse(
-                                                                            dates[dateIndex]
-                                                                        )
+                                                                        label =
+                                                                        dates[dateIndex]
                                                                             .format(
                                                                                 DateTimeFormatter.ofPattern(
                                                                                     "E dd "
@@ -310,13 +307,12 @@ fun ListOfTasbih(
                                                                                     tasbihToEdit.value =
                                                                                         tasbih
                                                                                 },
-                                                                                onEdit = { tasbih ->
-                                                                                    showTasbihDialog.value =
-                                                                                        true
-                                                                                    tasbihToEdit.value =
-                                                                                        tasbih
-                                                                                },
-                                                                            )
+                                                                            ) { tasbih ->
+                                                                                showTasbihDialog.value =
+                                                                                    true
+                                                                                tasbihToEdit.value =
+                                                                                    tasbih
+                                                                            }
                                                                         }
 
                                                                     )

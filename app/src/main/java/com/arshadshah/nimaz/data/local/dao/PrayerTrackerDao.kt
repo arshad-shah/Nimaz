@@ -8,13 +8,14 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface PrayerTrackerDao {
 
     //get trtacker for a specific date
     @Query("SELECT * FROM PrayersTracker WHERE date = :date")
-    suspend fun getTrackerForDate(date: String): LocalPrayersTracker
+    suspend fun getTrackerForDate(date: LocalDate): LocalPrayersTracker
 
     //get all the trackers
     @Query("SELECT * FROM PrayersTracker")
@@ -37,13 +38,13 @@ interface PrayerTrackerDao {
     suspend fun deleteAllTrackers()
 
     @Query("SELECT EXISTS(SELECT * FROM PrayersTracker WHERE date = :date)")
-    suspend fun trackerExistsForDate(date: String): Boolean
+    suspend fun trackerExistsForDate(date: LocalDate): Boolean
 
     //get progress for a specific date
     @Query("SELECT progress FROM PrayersTracker WHERE date = :date")
-    suspend fun getProgressForDate(date: String): Int
+    suspend fun getProgressForDate(date: LocalDate): Int
 
-    suspend fun updateSpecificPrayer(date: String, prayerName: String, prayerDone: Boolean) {
+    suspend fun updateSpecificPrayer(date: LocalDate, prayerName: String, prayerDone: Boolean) {
         val dailyPrayer = getTrackerForDate(date)
 
         val updatedPrayer = when (prayerName) {
@@ -68,18 +69,24 @@ interface PrayerTrackerDao {
     }
 
     @Query("SELECT * FROM PrayersTracker WHERE date = :date")
-    fun getPrayersForDate(date: String): Flow<LocalPrayersTracker>
+    fun getPrayersForDate(date: LocalDate): Flow<LocalPrayersTracker>
 
     @Query("SELECT * FROM PrayersTracker WHERE date BETWEEN :startDate AND :endDate")
-    fun getTrackersForMonth(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>>
+    fun getTrackersForMonth(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<LocalPrayersTracker>>
 
     // update menstruation status
     @Query("UPDATE PrayersTracker SET isMenstruating = :isMenstruating WHERE date = :date")
-    suspend fun updateMenstruationStatus(date: String, isMenstruating: Boolean)
+    suspend fun updateMenstruationStatus(date: LocalDate, isMenstruating: Boolean)
 
     @Query("SELECT isMenstruating FROM PrayersTracker WHERE date = :date")
-    fun getMenstruatingState(date: String): Flow<Boolean>
+    fun getMenstruatingState(date: LocalDate): Flow<Boolean>
 
     @Query("SELECT * FROM PrayersTracker WHERE date BETWEEN :startDate AND :endDate")
-    fun getTrackersForWeek(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>>
+    fun getTrackersForWeek(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<LocalPrayersTracker>>
 }

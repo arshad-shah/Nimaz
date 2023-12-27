@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.CancellationException
@@ -60,17 +61,12 @@ fun MoreMenu(
 
     //a dialog with two sliders to control the font size of quran
     val (showDialog3, setShowDialog3) = remember { mutableStateOf(false) }
-    val (showDialog4, setShowDialog4) = remember { mutableStateOf(false) }
-
+    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
     val viewModel = viewModel(
         key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
+        initializer = { QuranViewModel(sharedPreferencesRepository) },
         viewModelStoreOwner = context as ComponentActivity
     )
-    //downloadButtonState
-    val isDownloadButtonEnabled = remember {
-        viewModel.downloadButtonState
-    }.collectAsState()
 
     viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
 
@@ -100,7 +96,6 @@ fun MoreMenu(
     Log.d("MoreMenu", "arabicFontSizeState.value = ${arabicFontSizeState.value}")
     Log.d("MoreMenu", "translationFontSizeState.value = ${translationFontSizeState.value}")
     Log.d("MoreMenu", "fontStyleState.value = ${fontStyleState.value}")
-    Log.d("MoreMenu", "isDownloadButtonEnabled.value = ${isDownloadButtonEnabled.value}")
 
     DropdownMenu(
         expanded = menuOpen,
@@ -138,33 +133,6 @@ fun MoreMenu(
                 setShowDialog3(true)
                 setMenuOpen(false)
             }, text = { Text(text = "Font") })
-
-            //download quran
-            DropdownMenuItem(
-                onClick = {
-                    //if isDownloadButtonEnabled.value then gray out the download button
-                    //else download the quran
-                    if (!isDownloadButtonEnabled.value) {
-                        Toasty.info(
-                            context,
-                            "Quran is already downloaded",
-                            Toasty.LENGTH_SHORT,
-                            true
-                        ).show()
-                        return@DropdownMenuItem
-                    } else {
-                        //if the quran is not downloaded then download it
-                        viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Download_Quran)
-                        setShowDialog4(true)
-                        setMenuOpen(false)
-                    }
-                },
-                text = {
-                    Text(
-                        text = "Download Quran",
-                        color = if (!isDownloadButtonEnabled.value) Color.Gray else MaterialTheme.colorScheme.onBackground,
-                    )
-                })
         }
     )
 
@@ -197,11 +165,6 @@ fun MoreMenu(
                 )
             )
         }
-    } else if (showDialog4) {
-        val downloadState = remember {
-            viewModel.downloadProgress
-        }.collectAsState()
-        DownloadQuranDialog(setShowDialog4, downloadState, viewModel::handleQuranMenuEvents)
     } else if (showDialog3) {
         FontSizeDialog(
             setShowDialog3,
@@ -213,226 +176,5 @@ fun MoreMenu(
         )
     } else {
         return
-    }
-}
-
-@Composable
-fun MoreMenuMain(
-    menuOpen: Boolean = false,
-    setMenuOpen: (Boolean) -> Unit,
-) {
-
-    val context = LocalContext.current
-    val (showDialog4, setShowDialog4) = remember { mutableStateOf(false) }
-    val (showDialog6, setShowDialog6) = remember { mutableStateOf(false) }
-
-    val viewModel = viewModel(
-        key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    //downloadButtonState
-    val isDownloadButtonEnabled = remember {
-        viewModel.downloadButtonState
-    }.collectAsState()
-
-    viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
-
-    Log.d("MoreMenu", "isDownloadButtonEnabled.value = ${isDownloadButtonEnabled.value}")
-
-    DropdownMenu(
-        expanded = menuOpen,
-        onDismissRequest = { setMenuOpen(false) },
-        content = {
-            //Reset_Quran_Data
-            DropdownMenuItem(onClick = {
-                setShowDialog6(true)
-                setMenuOpen(false)
-            }, text = { Text(text = "Reset Quran") })
-
-            //download quran
-            DropdownMenuItem(
-                onClick = {
-                    //if isDownloadButtonEnabled.value then gray out the download button
-                    //else download the quran
-                    if (!isDownloadButtonEnabled.value) {
-                        Toasty.info(
-                            context,
-                            "Quran is already downloaded",
-                            Toasty.LENGTH_SHORT,
-                            true
-                        ).show()
-                        return@DropdownMenuItem
-                    } else {
-                        //if the quran is not downloaded then download it
-                        viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Download_Quran)
-                        setShowDialog4(true)
-                        setMenuOpen(false)
-                    }
-                },
-                text = {
-                    Text(
-                        text = "Download Quran",
-                        color = if (!isDownloadButtonEnabled.value) Color.Gray else MaterialTheme.colorScheme.onBackground,
-                    )
-                })
-        }
-    )
-
-
-    if (showDialog4) {
-        val downloadState = remember {
-            viewModel.downloadProgress
-        }.collectAsState()
-        DownloadQuranDialog(setShowDialog4, downloadState, viewModel::handleQuranMenuEvents)
-    } else if (showDialog6) {
-        ResetQuranDataDialog(setShowDialog6, viewModel::handleQuranMenuEvents)
-    } else {
-        return
-    }
-}
-
-@Composable
-fun ResetQuranDataDialog(
-    showDialog6: (Boolean) -> Unit,
-    handleEvents: (QuranViewModel.QuranMenuEvents) -> Unit,
-) {
-    AlertDialogNimaz(
-        topDivider = false,
-        bottomDivider = false,
-        contentDescription = "Reset Quran Data",
-        contentHeight = 180.dp,
-        title = "Reset Quran Data",
-        contentToShow = {
-            Text(
-                text = "Are you sure you want to reset the Quran Data?",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(8.dp)
-            )
-            Text(
-                text = "This will delete all the Verses, and get fresh data from the server.",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(8.dp)
-            )
-            Text(
-                text = "Bookmarks, Notes, Favorites, and Settings for Quran will be deleted.",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(8.dp)
-            )
-        },
-        onDismissRequest = {
-            showDialog6(false)
-        },
-        onConfirm = {
-            handleEvents(QuranViewModel.QuranMenuEvents.Reset_Quran_Data)
-            showDialog6(false)
-        },
-        onDismiss = {
-            showDialog6(false)
-        },
-        confirmButtonText = "Yes",
-        dismissButtonText = "No, Cancel",
-    )
-}
-
-@Composable
-fun DownloadQuranDialog(
-    showDialog4: (Boolean) -> Unit,
-    downloadProgress: State<Int>,
-    handleEvents: (QuranViewModel.QuranMenuEvents) -> Unit,
-) {
-
-    val progress = remember { mutableStateOf(0f) }
-    //every few seconds check if the download is complete
-    LaunchedEffect(Unit) {
-        launch {
-            while (isActive) {
-                delay(10)
-                handleEvents(QuranViewModel.QuranMenuEvents.Check_Download_Progress)
-                progress.value = downloadProgress.value.toFloat()
-                when (progress.value) {
-                    -1f -> {
-                        showDialog4(false)
-                        cancel(
-                            cause = CancellationException(
-                                "Download Failed"
-                            )
-                        )
-                        Log.d("Nimaz: DownloadQuranDialog", "Download Failed")
-                    }
-
-                    -2f -> {
-                        showDialog4(false)
-                        cancel(
-                            cause = CancellationException(
-                                "Download Cancelled"
-                            )
-                        )
-                        Log.d("Nimaz: DownloadQuranDialog", "Download Cancelled")
-                    }
-
-                    100f -> {
-                        showDialog4(false)
-                        cancel(
-                            cause = CancellationException(
-                                "Download Complete"
-                            )
-                        )
-                        Log.d("Nimaz: DownloadQuranDialog", "Download Complete")
-                    }
-                }
-            }
-        }
-    }
-    AlertDialogNimaz(
-        icon = painterResource(id = R.drawable.download_icon),
-        topDivider = false,
-        bottomDivider = false,
-        contentHeight = 200.dp,
-        contentDescription = "Download Quran",
-        title = "Downloading Quran",
-        contentToShow = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            )
-            {
-                ProgressBarCustom(
-                    progress = progress.value,
-                    radius = 80.dp,
-                    waveAnimation = true,
-                )
-            }
-        },
-        onDismissRequest = {
-            handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
-            showDialog4(false)
-        },
-        showDismissButton = false,
-        confirmButtonText = "Cancel",
-        onConfirm = {
-            handleEvents(QuranViewModel.QuranMenuEvents.Cancel_Download)
-            showDialog4(false)
-        },
-        onDismiss = {
-
-        })
-}
-
-@Preview
-@Composable
-fun DownloadQuranDialogPreview() {
-    //satte for the progress bar
-    val state = remember {
-        derivedStateOf {
-            0
-        }
-    }
-
-    NimazTheme {
-        DownloadQuranDialog({}, state, {})
     }
 }

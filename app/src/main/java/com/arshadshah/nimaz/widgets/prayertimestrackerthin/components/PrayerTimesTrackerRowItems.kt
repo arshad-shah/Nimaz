@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.widgets.prayertimestrackerthin.components
 
+import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.TextUnit
@@ -14,6 +14,7 @@ import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
 import androidx.glance.appwidget.appWidgetBackground
+import androidx.glance.appwidget.updateAll
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
@@ -25,9 +26,11 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTrackerRepository
+import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
+import com.arshadshah.nimaz.widgets.prayertimestrackerthin.NimazWidgetPrayerTracker
+import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @Composable
 fun WidgetTogglableItem(
@@ -48,13 +51,6 @@ fun WidgetTogglableItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val modifierInternal = GlanceModifier.defaultWeight().padding(2.dp)
-        CheckBox(
-            checked = checked, action(
-                key = "${text}-CheckBox",
-            ) {
-                onCheckedChange(!checked)
-            }, modifier = modifierInternal
-        )
         Text(
             text = text, modifier = modifierInternal, style = TextStyle(
                 color = GlanceTheme.colors.onSecondaryContainer,
@@ -64,6 +60,15 @@ fun WidgetTogglableItem(
                 fontWeight = FontWeight.Bold
             )
         )
+
+        CheckBox(
+            checked = checked, action(
+                key = "${text}-CheckBox",
+            ) {
+                onCheckedChange(!checked)
+            }, modifier = modifierInternal
+        )
+
         Text(
             text = timeText, modifier = modifierInternal, style = TextStyle(
                 color = GlanceTheme.colors.onSecondaryContainer, fontSize = TextUnit(
@@ -82,12 +87,12 @@ fun PrayerTimesTrackerRowItems(
     asr: MutableState<Boolean>,
     maghrib: MutableState<Boolean>,
     isha: MutableState<Boolean>,
-    progress: MutableFloatState,
     fajrTime: MutableState<String>,
     dhuhrTime: MutableState<String>,
     asrTime: MutableState<String>,
     maghribTime: MutableState<String>,
     ishaTime: MutableState<String>,
+    context: Context,
 ) {
 
     val scope = rememberCoroutineScope()
@@ -128,25 +133,9 @@ fun PrayerTimesTrackerRowItems(
                         "Maghrib" -> maghrib.value = b
                         "Isha" -> isha.value = b
                     }
-                    progress.value = when (prayer) {
-                        "Fajr" -> if (b) progress.value + 20 else progress.value - 20
-                        "Dhuhr" -> if (b) progress.value + 20 else progress.value - 20
-                        "Asr" -> if (b) progress.value + 20 else progress.value - 20
-                        "Maghrib" -> if (b) progress.value + 20 else progress.value - 20
-                        "Isha" -> if (b) progress.value + 20 else progress.value - 20
-                        else -> 0f
-                    }
                     scope.launch {
-                        PrayerTrackerRepository.updateTracker(
-                            tracker = PrayerTracker(
-                                fajr = fajr.value,
-                                dhuhr = dhuhr.value,
-                                asr = asr.value,
-                                maghrib = maghrib.value,
-                                isha = isha.value,
-                                progress = progress.value.toInt()
-                            )
-                        )
+                        PrayerTrackerRepository.updateSpecificPrayer(LocalDate.now(), prayer, b)
+                        PrayerTimesTrackerWorker.enqueue(context, true)
                     }
                 },
                 modifier = modifier

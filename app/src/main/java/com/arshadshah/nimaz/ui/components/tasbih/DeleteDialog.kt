@@ -11,13 +11,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 
 @Composable
 fun DeleteDialog(
-    tasbih: Tasbih,
+    tasbih: LocalTasbih,
     showDialog: MutableState<Boolean>,
 ) {
     val context = LocalContext.current

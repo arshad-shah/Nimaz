@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -43,9 +42,9 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
+import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonCalc
 import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonPhase
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
@@ -54,9 +53,8 @@ import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardPrayertimesCard() {
 
@@ -358,7 +356,7 @@ fun MoonPhaseImagePreview() {
         MoonPhase.WANING_CRESCENT
     )
     val currentPhase = remember { mutableStateOf(phases[0]) }
-    val percentage = (fraction.value * 100).toInt()
+    val percentage = (fraction.doubleValue * 100).toInt()
     val imageToShow = when (currentPhase.value) {
         MoonPhase.NEW_MOON -> {
             R.drawable.new_moon
@@ -455,15 +453,15 @@ fun MoonPhaseImagePreview() {
         //print the date
         LaunchedEffect(key1 = Unit) {
             moonPhases.forEachIndexed { index, moonPhase ->
-                fraction.value = moonPhase.fraction
+                fraction.doubleValue = moonPhase.fraction
                 currentPhase.value = moonPhase.phaseName
                 dateOfCurrentPhase.value = dates.value[index]
                 delay(1000)
             }
         }
         Text(text = "Date: ${dateOfCurrentPhase.value}")
-        Text(text = "Fraction: ${fraction.value}")
-        Text(text = "Percentage: ${percentage}")
+        Text(text = "Fraction: ${fraction.doubleValue}")
+        Text(text = "Percentage: $percentage")
         Text(text = "Phase: ${currentPhase.value}")
         Spacer(modifier = Modifier.height(10.dp))
         MoonPhaseImage(image = imageToShow)

@@ -10,11 +10,11 @@ import androidx.glance.background
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.data.remote.models.PrayerTimes
+import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun WidgetPrayerTimeRowList(data: PrayerTimes) {
+fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
     val newIshaTime = if (data.isha!!.hour >= 22) {
         data.maghrib?.plusMinutes(60)
     } else {

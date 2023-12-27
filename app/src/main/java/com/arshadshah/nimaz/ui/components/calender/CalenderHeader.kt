@@ -184,7 +184,7 @@ private fun navigateToCurrentMonth(
     val currentYearMonth = YearMonth.now()
     if (monthState.currentMonth != currentYearMonth) {
         monthState.currentMonth = currentYearMonth
-        updateTrackerEvents(LocalDate.now().toString(), handleEvents)
+        updateTrackerEvents(LocalDate.now(), handleEvents)
     }
 }
 
@@ -195,11 +195,11 @@ private fun changeMonth(
 ) {
     monthState.currentMonth = monthState.currentMonth.plusMonths(monthsToAdd)
     val date = monthState.currentMonth.atDay(1)
-    updateTrackerEvents(date.toString(), handleEvents)
+    updateTrackerEvents(date, handleEvents)
 }
 
 private fun updateTrackerEvents(
-    date: String,
+    date: LocalDate,
     handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
 ) {
     handleEvents?.invoke(TrackerViewModel.TrackerEvent.SET_DATE(date))
@@ -209,7 +209,7 @@ private fun updateTrackerEvents(
     handleEvents?.invoke(
         TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
             YearMonth.from(
-                LocalDate.parse(date)
+                date
             )
         )
     )

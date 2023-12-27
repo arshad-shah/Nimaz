@@ -1,196 +1,140 @@
 package com.arshadshah.nimaz.data.local
 
-import com.arshadshah.nimaz.data.local.models.LocalAya
-import com.arshadshah.nimaz.data.local.models.LocalCategory
-import com.arshadshah.nimaz.data.local.models.LocalChapter
-import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
-import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
-import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.data.remote.models.Category
-import com.arshadshah.nimaz.data.remote.models.Chapter
-import com.arshadshah.nimaz.data.remote.models.Dua
-import com.arshadshah.nimaz.data.remote.models.FastTracker
-import com.arshadshah.nimaz.data.remote.models.Juz
-import com.arshadshah.nimaz.data.remote.models.PrayerTimes
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
-import com.arshadshah.nimaz.data.remote.models.Surah
-import com.arshadshah.nimaz.data.remote.models.Tasbih
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class DataStore(db: AppDatabase) {
-
     private val ayaDao = db.ayaDao
     private val juzDao = db.juz
     private val surahDao = db.surah
     private val prayerTimesDao = db.prayerTimes
     private val duaDao = db.dua
     private val prayerTrackerDao = db.prayersTracker
-
-    //fastTracker
     private val fastTrackerDao = db.fastTracker
-
-    //tasbihTracker
     private val tasbihTrackerDao = db.tasbihTracker
-
     private val categoryDao = db.category
 
-    suspend fun getAllCategories() = categoryDao.getAllCategories().map { it.toCategory() }
-
-    suspend fun countCategories() = categoryDao.countCategories()
-
-    suspend fun getCategory(id: Int) = categoryDao.getCategory(id).toCategory()
-
-    suspend fun getCategory(name: String) = categoryDao.getCategory(name).toCategory()
-
-    //getAllDuas
-    suspend fun getAllDuas() = duaDao.getAllDuas().map { it.toDua() }
-
-    //save list of categories
-    suspend fun saveAllCategories(categories: ArrayList<Category>) =
-        categoryDao.saveAllCategories(categories.map { it.toLocalCategory() })
-
+    suspend fun getAllCategories() = categoryDao.getAllCategories()
 
     //update tasbih
-    suspend fun updateTasbih(tasbih: Tasbih) =
+    fun updateTasbih(tasbih: LocalTasbih) =
         tasbihTrackerDao.updateTasbih(tasbih.id, tasbih.count)
 
     //update tasbih goal
-    suspend fun updateTasbihGoal(tasbih: Tasbih) =
+    fun updateTasbihGoal(tasbih: LocalTasbih) =
         tasbihTrackerDao.updateTasbihGoal(tasbih.id, tasbih.goal)
 
     //save a tasbih to the database
-    fun saveTasbih(tasbih: Tasbih) = tasbihTrackerDao.saveTasbih(tasbih.toLocalTasbih())
+    fun saveTasbih(tasbih: LocalTasbih) = tasbihTrackerDao.saveTasbih(tasbih)
 
     //getTasbihById
-    suspend fun getTasbihById(id: Int) = tasbihTrackerDao.getTasbihById(id).toTasbih()
-
-    //getLatestTasbih
-    suspend fun getLatestTasbih() = tasbihTrackerDao.getLatestTasbih().toTasbih()
+    fun getTasbihById(id: Int) = tasbihTrackerDao.getTasbihById(id)
 
     //get all the tasbih
-    suspend fun getAllTasbih() = tasbihTrackerDao.getAll().map { it.toTasbih() }
+    fun getAllTasbih() = tasbihTrackerDao.getAll()
 
     //get all the tasbih for a specific date
-    suspend fun getTasbihForDate(date: String) =
-        tasbihTrackerDao.getForDate(date).map { it.toTasbih() }
+    fun getTasbihForDate(date: LocalDate) =
+        tasbihTrackerDao.getForDate(date)
 
     //delete a tasbih from the database
-    fun deleteTasbih(tasbih: Tasbih) =
-        tasbihTrackerDao.deleteTasbih(tasbih.toLocalTasbih())
+    fun deleteTasbih(tasbih: LocalTasbih) =
+        tasbihTrackerDao.deleteTasbih(tasbih)
 
 
     //get trtacker for a specific date
-    suspend fun getTrackerForDate(date: String) =
-        prayerTrackerDao.getTrackerForDate(date).toPrayerTracker()
+    suspend fun getTrackerForDate(date: LocalDate) =
+        prayerTrackerDao.getTrackerForDate(date)
 
 
-    fun getTrackersForMonth(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>> =
+    fun getTrackersForMonth(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<LocalPrayersTracker>> =
         prayerTrackerDao.getTrackersForMonth(startDate, endDate)
 
-    fun getTrackersForWeek(startDate: String, endDate: String): Flow<List<LocalPrayersTracker>> =
+    fun getTrackersForWeek(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<LocalPrayersTracker>> =
         prayerTrackerDao.getTrackersForWeek(startDate, endDate)
 
-    suspend fun updateIsMenstruating(date: String, isMenstruating: Boolean) {
+    suspend fun updateIsMenstruating(date: LocalDate, isMenstruating: Boolean) {
         fastTrackerDao.updateIsMenstruating(date, isMenstruating)
         prayerTrackerDao.updateMenstruationStatus(date, isMenstruating)
     }
 
 
     //get all the trackers
-    suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers().map { it.toPrayerTracker() }
+    suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers()
 
     //save a tracker
-    suspend fun saveTracker(tracker: PrayerTracker) =
-        prayerTrackerDao.saveTracker(tracker.toLocalPrayersTracker())
+    suspend fun saveTracker(tracker: LocalPrayersTracker) =
+        prayerTrackerDao.saveTracker(tracker)
 
     //update a tracker
-    suspend fun updateTracker(tracker: PrayerTracker) =
-        prayerTrackerDao.updateTracker(tracker.toLocalPrayersTracker())
+    suspend fun updateTracker(tracker: LocalPrayersTracker) =
+        prayerTrackerDao.updateTracker(tracker)
 
     //updateSpecificPrayer
-    suspend fun updateSpecificPrayer(date: String, prayerName: String, prayerDone: Boolean) =
+    suspend fun updateSpecificPrayer(date: LocalDate, prayerName: String, prayerDone: Boolean) =
         prayerTrackerDao.updateSpecificPrayer(date, prayerName, prayerDone)
 
-    fun getPrayersForDate(date: String) = prayerTrackerDao.getPrayersForDate(date)
+    fun getPrayersForDate(date: LocalDate) = prayerTrackerDao.getPrayersForDate(date)
 
 
     //check if a tracker exists
-    suspend fun checkIfTrackerExists(date: String) = prayerTrackerDao.trackerExistsForDate(date)
+    suspend fun checkIfTrackerExists(date: LocalDate) = prayerTrackerDao.trackerExistsForDate(date)
 
     //fasting tracker
 
     //get tracker for a specific date
-    suspend fun getFastTrackerForDate(date: String) =
-        fastTrackerDao.getFastTrackerForDate(date).toFastTracker()
+    suspend fun getFastTrackerForDate(date: LocalDate) =
+        fastTrackerDao.getFastTrackerForDate(date)
 
-    fun getFastTrackersForMonth(firstDay: String, lastDay: String): Flow<List<LocalFastTracker>> =
+    fun getFastTrackersForMonth(
+        firstDay: LocalDate,
+        lastDay: LocalDate
+    ): Flow<List<LocalFastTracker>> =
         fastTrackerDao.getFastTrackersForMonth(firstDay, lastDay)
 
-    fun isFastingForDate(date: String) = fastTrackerDao.isFastingForDate(date)
+    fun isFastingForDate(date: LocalDate) = fastTrackerDao.isFastingForDate(date)
 
     //save a tracker
-    suspend fun saveFastTracker(tracker: FastTracker) =
-        fastTrackerDao.saveFastTracker(tracker.toLocalFastTracker())
+    suspend fun saveFastTracker(tracker: LocalFastTracker) =
+        fastTrackerDao.saveFastTracker(tracker)
 
     //update a tracker
-    suspend fun updateFastTracker(tracker: FastTracker) =
-        fastTrackerDao.updateFastTracker(tracker.toLocalFastTracker())
+    suspend fun updateFastTracker(tracker: LocalFastTracker) =
+        fastTrackerDao.updateFastTracker(tracker)
 
-    //delete a tracker
-    suspend fun deleteFastTracker(tracker: FastTracker) =
-        fastTrackerDao.deleteFastTracker(tracker.toLocalFastTracker())
-
-    //delete all trackers
-    suspend fun deleteFastAllTrackers() = fastTrackerDao.deleteFastAllTrackers()
-
-    suspend fun fastTrackerExistsForDate(date: String) =
+    suspend fun fastTrackerExistsForDate(date: LocalDate) =
         fastTrackerDao.fastTrackerExistsForDate(date)
 
 
     //get all the ayas of a surah
-    suspend fun getAyasOfSurah(surahNumber: Int) =
-        ayaDao.getAyasOfSurah(surahNumber).map { it.toAya() }
+    fun getAyasOfSurah(surahNumber: Int) =
+        ayaDao.getAyasOfSurah(surahNumber)
 
     //get all the ayas of a juz
     suspend fun getAyasOfJuz(juzNumber: Int) =
-        ayaDao.getAyasOfJuz(juzNumber).map { it.toAya() }
-
-    //insert all the ayas
-    suspend fun insertAyats(aya: List<Aya>) = ayaDao.insert(aya.map { it.toLocalAya() })
+        ayaDao.getAyasOfJuz(juzNumber)
 
     //getRandomAya
-    suspend fun getRandomAya() = ayaDao.getRandomAya().toAya()
-
-    //getAyatByAyaNumberInSurah
-    suspend fun getAyatByAyaNumberInSurah(
-        ayaNumberInSurah: Int,
-    ) =
-        ayaDao.getAyatByAyaNumberInSurah(ayaNumberInSurah).toAya()
+    suspend fun getRandomAya() = ayaDao.getRandomAya()
 
     //countAllAyas
     suspend fun countAllAyat() = ayaDao.countAllAyas()
 
     //get allAyas
-    suspend fun getAllAyat() = ayaDao.getAllAyas().map { it.toAya() }
+    suspend fun getAllAyat() = ayaDao.getAllAyas()
 
     //deleteAllAyas
     suspend fun deleteAllAyat() = ayaDao.deleteAllAyas()
-
-    //count the number of ayas
-    suspend fun countSurahAyat(
-        surahNumber: Int,
-    ) =
-        ayaDao.countSurahAya(surahNumber)
-
-    suspend fun countJuzAyat(juzNumber: Int) =
-        ayaDao.countJuzAya(juzNumber)
 
     //bookmark an aya
     suspend fun bookmarkAya(
@@ -224,15 +168,15 @@ class DataStore(db: AppDatabase) {
 
     //get all the bookmarked ayas
     suspend fun getBookmarkedAyas() =
-        ayaDao.getBookmarkedAyas().map { it.toAya() }
+        ayaDao.getBookmarkedAyas()
 
     //get all the favorited ayas
     suspend fun getFavoritedAyas() =
-        ayaDao.getFavoritedAyas().map { it.toAya() }
+        ayaDao.getFavoritedAyas()
 
     //get all the ayas with notes
     suspend fun getAyasWithNotes() =
-        ayaDao.getAyasWithNotes().map { it.toAya() }
+        ayaDao.getAyasWithNotes()
 
     suspend fun deleteNoteFromAya(
         ayaNumber: Int,
@@ -264,270 +208,35 @@ class DataStore(db: AppDatabase) {
         ayaDao.addAudioToAya(surahNumber, ayaNumberInSurah, audio)
 
     //get all juz
-    suspend fun getAllJuz() = juzDao.getAllJuz().map { it.toJuz() }
+    suspend fun getAllJuz() = juzDao.getAllJuz()
 
-    suspend fun getJuzById(number: Int) = juzDao.getJuzById(number).toJuz()
-
-    //save all juz by mapping the Array list of juz to local juz
-    suspend fun saveAllJuz(juz: ArrayList<Juz>) = juzDao.insert(juz.map { it.toLocalJuz() })
-
-    suspend fun countJuz() = juzDao.count()
+    suspend fun getJuzById(number: Int) = juzDao.getJuzById(number)
 
     //get all surah
-    fun getAllSurah() = surahDao.getAllSurahs().map { it.toSurah() }
+    fun getAllSurah() = surahDao.getAllSurahs()
 
-
-    fun getSurahById(number: Int) = surahDao.getSurahById(number).toSurah()
-
-    //save all surah by mapping the Array list of surah to local surah
-    fun saveAllSurah(surah: ArrayList<Surah>) = surahDao.insert(surah.map { it.toLocalSurah() })
-
-    fun countSurah() = surahDao.count()
-
-    //get all prayer times
-    suspend fun getAllPrayerTimes() = prayerTimesDao.getPrayerTimes().toPrayerTimes()
+    fun getSurahById(number: Int) = surahDao.getSurahById(number)
 
     //getPrayerTimesForADate
     suspend fun getPrayerTimesForADate(date: String) =
-        prayerTimesDao.getPrayerTimesForADate(date).toPrayerTimes()
-
-    //delete all prayer times
-    suspend fun deleteAllPrayerTimes() = prayerTimesDao.deleteAllPrayerTimes()
+        prayerTimesDao.getPrayerTimesForADate(date)
 
     //save all prayer times by mapping the Array list of prayer times to local prayer times
-    suspend fun saveAllPrayerTimes(prayerTimes: PrayerTimes) =
-        prayerTimesDao.insert(prayerTimes.toLocalPrayerTimes())
+    suspend fun saveAllPrayerTimes(prayerTimes: LocalPrayerTimes) =
+        prayerTimesDao.insert(prayerTimes)
 
     //get the count of all prayer times
     suspend fun countPrayerTimes() = prayerTimesDao.count()
 
-    //get all the chapters
-    suspend fun getAllChapters() = duaDao.getAllChapters().map { it.toChapter() }
+    //getChaptersByCategory
+    suspend fun getChaptersByCategory(categoryId: Int) =
+        duaDao.getChaptersByCategory(categoryId)
 
     //get duas of a chapter by chapter id
     suspend fun getDuasOfChapter(chapterId: Int) =
-        duaDao.getDuasOfChapter(chapterId).map { it.toDua() }
+        duaDao.getDuasOfChapter(chapterId)
 
-    //count
-    suspend fun countChapters() = duaDao.countChapters()
-
-    //count
-    suspend fun countDuas() = duaDao.countDuas()
-
-    //save all chapters
-    suspend fun saveAllChapters(chapters: ArrayList<Chapter>) =
-        duaDao.saveChapters(chapters.map { it.toLocalChapter() })
-
-    //save all duas
-    suspend fun saveAllDuas(duas: ArrayList<Dua>) =
-        duaDao.saveDuas(duas.map { it.toLocalDua() })
-
-    fun getMenstruatingState(date: String): Flow<Boolean> {
+    fun getMenstruatingState(date: LocalDate): Flow<Boolean> {
         return prayerTrackerDao.getMenstruatingState(date)
     }
 }
-
-private fun Aya.toLocalAya() = LocalAya(
-    ayaNumberInQuran = ayaNumberInQuran,
-    ayaNumber = ayaNumber,
-    ayaArabic = ayaArabic,
-    translationEnglish = ayaTranslationEnglish,
-    translationUrdu = ayaTranslationUrdu,
-    suraNumber = suraNumber,
-    ayaNumberInSurah = ayaNumberInSurah,
-    bookmark = bookmark,
-    favorite = favorite,
-    note = note,
-    audioFileLocation = audioFileLocation,
-    sajda = sajda,
-    sajdaType = sajdaType,
-    ruku = ruku,
-    juzNumber = juzNumber,
-)
-
-private fun LocalAya.toAya() = Aya(
-    ayaNumberInQuran = ayaNumberInQuran,
-    ayaNumber = ayaNumber,
-    ayaArabic = ayaArabic,
-    ayaTranslationEnglish = translationEnglish,
-    ayaTranslationUrdu = translationUrdu,
-    suraNumber = suraNumber,
-    ayaNumberInSurah = ayaNumberInSurah,
-    bookmark = bookmark,
-    favorite = favorite,
-    note = note,
-    audioFileLocation = audioFileLocation,
-    sajda = sajda,
-    sajdaType = sajdaType,
-    ruku = ruku,
-    juzNumber = juzNumber,
-)
-
-
-private fun Juz.toLocalJuz() = LocalJuz(
-    number = number,
-    name = name,
-    tname = tname,
-    juzStartAyaInQuran = juzStartAyaInQuran,
-)
-
-private fun LocalJuz.toJuz() = Juz(
-    number = number,
-    name = name,
-    tname = tname,
-    juzStartAyaInQuran = juzStartAyaInQuran,
-)
-
-private fun Surah.toLocalSurah() = LocalSurah(
-    number = number,
-    numberOfAyahs = numberOfAyahs,
-    startAya = startAya,
-    name = name,
-    englishName = englishName,
-    englishNameTranslation = englishNameTranslation,
-    revelationType = revelationType,
-    revelationOrder = revelationOrder,
-    rukus = rukus,
-)
-
-private fun LocalSurah.toSurah() = Surah(
-    number = number,
-    numberOfAyahs = numberOfAyahs,
-    startAya = startAya,
-    name = name,
-    englishName = englishName,
-    englishNameTranslation = englishNameTranslation,
-    revelationType = revelationType,
-    revelationOrder = revelationOrder,
-    rukus = rukus,
-)
-
-private fun PrayerTimes.toLocalPrayerTimes() = LocalPrayerTimes(
-    date = date.toString(),
-    fajr = fajr.toString(),
-    sunrise = sunrise.toString(),
-    dhuhr = dhuhr.toString(),
-    asr = asr.toString(),
-    maghrib = maghrib.toString(),
-    isha = isha.toString(),
-)
-
-private fun LocalPrayerTimes.toPrayerTimes(): PrayerTimes? {
-    return if (fajr != null && sunrise != null && dhuhr != null && asr != null && maghrib != null && isha != null) {
-        PrayerTimes(
-            date = LocalDate.parse(date),
-            fajr = LocalDateTime.parse(fajr),
-            sunrise = LocalDateTime.parse(sunrise),
-            dhuhr = LocalDateTime.parse(dhuhr),
-            asr = LocalDateTime.parse(asr),
-            maghrib = LocalDateTime.parse(maghrib),
-            isha = LocalDateTime.parse(isha),
-        )
-    } else {
-        null
-    }
-}
-
-
-//duas
-private fun Dua.toLocalDua() = LocalDua(
-    _id = _id,
-    chapter_id = chapter_id,
-    favourite = favourite,
-    arabic_dua = arabic_dua,
-    english_translation = english_translation,
-    english_reference = english_reference,
-    category = category,
-    isFavourite = isFavourite,
-)
-
-private fun LocalDua.toDua() = Dua(
-    _id = _id,
-    chapter_id = chapter_id,
-    favourite = favourite,
-    arabic_dua = arabic_dua,
-    english_translation = english_translation,
-    english_reference = english_reference,
-    category = category,
-    isFavourite = isFavourite,
-)
-
-
-private fun Chapter.toLocalChapter() = LocalChapter(
-    _id = _id,
-    arabic_title = arabic_title,
-    english_title = english_title,
-    category = category,
-)
-
-private fun LocalChapter.toChapter() = Chapter(
-    _id = _id,
-    arabic_title = arabic_title,
-    english_title = english_title,
-    category = category,
-)
-
-fun PrayerTracker.toLocalPrayersTracker() = LocalPrayersTracker(
-    date = date,
-    fajr = fajr,
-    dhuhr = dhuhr,
-    asr = asr,
-    maghrib = maghrib,
-    isha = isha,
-    progress = progress,
-    isMenstruating = isMenstruating,
-)
-
-fun LocalPrayersTracker.toPrayerTracker() = PrayerTracker(
-    date = date,
-    fajr = fajr,
-    dhuhr = dhuhr,
-    asr = asr,
-    maghrib = maghrib,
-    isha = isha,
-    progress = progress,
-    isMenstruating = isMenstruating,
-)
-
-//fasting
-private fun FastTracker.toLocalFastTracker() = LocalFastTracker(
-    date = date,
-    isFasting = isFasting,
-    isMenstruating = isMenstruating,
-)
-
-private fun LocalFastTracker.toFastTracker() = FastTracker(
-    date = date,
-    isFasting = isFasting,
-    isMenstruating = isMenstruating,
-)
-
-private fun Tasbih.toLocalTasbih() = LocalTasbih(
-    id = id,
-    date = date,
-    arabicName = arabicName,
-    englishName = englishName,
-    translationName = translationName,
-    goal = goal,
-    count = count,
-)
-
-private fun LocalTasbih.toTasbih() = Tasbih(
-    id = id,
-    date = date,
-    arabicName = arabicName,
-    englishName = englishName,
-    translationName = translationName,
-    goal = goal,
-    count = count,
-)
-
-private fun Category.toLocalCategory() = LocalCategory(
-    id = id,
-    name = name,
-)
-
-private fun LocalCategory.toCategory() = Category(
-    id = id,
-    name = name,
-)

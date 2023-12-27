@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.widgets.prayertimestrackerthin
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.TextUnit
@@ -32,7 +31,6 @@ import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.widgets.NimazWidgetColorScheme
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.components.PrayerTimesTrackerRowItems
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class NimazWidgetPrayerTracker : GlanceAppWidget() {
@@ -59,8 +57,6 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
             val asrTime = remember { mutableStateOf("") }
             val maghribTime = remember { mutableStateOf("") }
             val ishaTime = remember { mutableStateOf("") }
-
-            val progress = remember { mutableFloatStateOf(0F) }
 
             val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(context)
             //if the device time format is 24 hour then use the 24 hour format
@@ -114,21 +110,19 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
                         isIshaChecked.value = prayerTimesTracker.data.isha
 
                         fajrTime.value =
-                            LocalDateTime.parse(prayerTimesTracker.data.fajrTime).format(formatter)
+                            prayerTimesTracker.data.fajrTime.format(formatter)
                         dhuhrTime.value =
-                            LocalDateTime.parse(prayerTimesTracker.data.dhuhrTime).format(formatter)
+                            prayerTimesTracker.data.dhuhrTime.format(formatter)
                         asrTime.value =
-                            LocalDateTime.parse(prayerTimesTracker.data.asrTime).format(formatter)
-                        maghribTime.value = LocalDateTime.parse(prayerTimesTracker.data.maghribTime)
+                           prayerTimesTracker.data.asrTime.format(formatter)
+                        maghribTime.value = prayerTimesTracker.data.maghribTime
                             .format(formatter)
                         ishaTime.value =
-                            LocalDateTime.parse(prayerTimesTracker.data.ishaTime).format(formatter)
+                            prayerTimesTracker.data.ishaTime.format(formatter)
                         Log.d(
                             "PrayerTimeTrackerWorker",
                             "provideGlance: ${fajrTime.value} ${dhuhrTime.value} ${asrTime.value} ${maghribTime.value} ${ishaTime.value}"
                         )
-
-                        progress.value = prayerTimesTracker.data.progress.toFloat()
 
                         PrayerTimesTrackerRowItems(
                             fajr = isFajrChecked,
@@ -136,12 +130,12 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
                             asr = isAsrChecked,
                             maghrib = isMaghribChecked,
                             isha = isIshaChecked,
-                            progress = progress,
                             fajrTime = fajrTime,
                             dhuhrTime = dhuhrTime,
                             asrTime = asrTime,
                             maghribTime = maghribTime,
                             ishaTime = ishaTime,
+                            context = context
                         )
                     }
 

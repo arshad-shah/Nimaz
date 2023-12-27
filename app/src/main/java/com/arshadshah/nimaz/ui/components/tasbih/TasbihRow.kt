@@ -16,13 +16,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Tasbih
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import java.time.LocalDate
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihRow(
     arabicName: String,
@@ -144,13 +143,13 @@ fun TasbihRow(
         onConfirm = {
             viewModel.handleEvent(
                 TasbihViewModel.TasbihEvent.SetTasbih(
-                    Tasbih(
+                    LocalTasbih(
                         arabicName = arabicName,
                         englishName = englishName,
                         translationName = translationName,
                         goal = it.toInt(),
                         count = 0,
-                        date = LocalDate.now().toString(),
+                        date = LocalDate.now(),
                     )
                 )
             )

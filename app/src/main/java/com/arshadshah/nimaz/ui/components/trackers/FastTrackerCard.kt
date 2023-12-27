@@ -23,14 +23,14 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun FastTrackerCard(
-    dateState: State<String>,
+    dateState: State<LocalDate>,
     isFastingToday: State<Boolean>,
     isMenstrauting: Boolean,
     isLoading: State<Boolean>,
-    handleEvent: (String, Boolean) -> Unit,
+    handleEvent: (LocalDate, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
-    val dateForTracker = LocalDate.parse(dateState.value)
+    val dateForTracker = dateState.value
     val isAfterToday = dateForTracker.isAfter(LocalDate.now())
 
     val formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy")

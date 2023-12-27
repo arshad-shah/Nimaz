@@ -9,7 +9,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesService
@@ -531,12 +531,12 @@ class SettingsViewModel(context: Context) : ViewModel() {
 
                 _prayerTimesState.update {
                     it.copy(
-                        fajrTime = prayerTimes.fajr,
-                        sunriseTime = prayerTimes.sunrise,
-                        dhuhrTime = prayerTimes.dhuhr,
-                        asrTime = prayerTimes.asr,
-                        maghribTime = prayerTimes.maghrib,
-                        ishaTime = prayerTimes.isha
+                        fajrTime = prayerTimes?.fajr ?: LocalDateTime.now(),
+                        sunriseTime = prayerTimes?.sunrise ?: LocalDateTime.now(),
+                        dhuhrTime = prayerTimes?.dhuhr ?: LocalDateTime.now(),
+                        asrTime = prayerTimes?.asr ?: LocalDateTime.now(),
+                        maghribTime = prayerTimes?.maghrib ?: LocalDateTime.now(),
+                        ishaTime = prayerTimes?.isha ?: LocalDateTime.now()
                     )
                 }
 

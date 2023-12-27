@@ -3,14 +3,14 @@ package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import com.arshadshah.nimaz.data.remote.models.Juz
+import com.arshadshah.nimaz.data.local.models.LocalJuz
 
 @Composable
 fun JuzList(
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
     loading: Boolean,
     error: String,
-    state: State<ArrayList<Juz>>,
+    state: State<ArrayList<LocalJuz>>,
 ) {
     if (loading) {
         JuzListUI(

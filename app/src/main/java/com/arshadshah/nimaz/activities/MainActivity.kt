@@ -146,7 +146,11 @@ class MainActivity : ComponentActivity() {
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                     floatingActionButtonPosition = FabPosition.End,
                     topBar = {
-                        CustomTopBar(route = route, navController = navController)
+                        CustomTopBar(
+                            route = route,
+                            navController = navController,
+                            context = this@MainActivity
+                        )
                     },
                     bottomBar = {
                         AnimatedVisibility(
@@ -160,8 +164,8 @@ class MainActivity : ComponentActivity() {
                             })
 
                     }
-                ) { it ->
-                    NavigationGraph(navController = navController, it)
+                ) {
+                    NavigationGraph(navController = navController, it, context = this@MainActivity)
                 }
             }
         }

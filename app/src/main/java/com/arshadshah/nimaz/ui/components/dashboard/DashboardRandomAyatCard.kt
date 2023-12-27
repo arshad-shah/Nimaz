@@ -96,7 +96,7 @@ fun DashboardRandomAyatCard(
                 CustomText(
                     modifier = Modifier,
                     heading = "Verse",
-                    text = randomAya.value?.randomAya?.ayaNumber.toString()
+                    text = randomAya.value?.randomAya?.ayaNumberInSurah.toString()
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
@@ -123,7 +123,7 @@ fun DashboardRandomAyatCard(
                         Intent.EXTRA_TEXT,
                         "Aya of the Day - Chapter ${randomAya.value?.randomAya?.suraNumber}: Verse ${randomAya.value?.randomAya?.ayaNumberInSurah}\n\n" +
                                 "${randomAya.value?.randomAya?.ayaArabic} \n\n" +
-                                "${if (translationSelected == "Urdu") randomAya.value?.randomAya?.ayaTranslationUrdu else randomAya.value?.randomAya?.ayaTranslationEnglish} " +
+                                "${if (translationSelected == "Urdu") randomAya.value?.randomAya?.translationUrdu else randomAya.value?.randomAya?.translationEnglish} " +
                                 "\n\n${randomAya.value?.randomAya?.suraNumber}:${randomAya.value?.randomAya?.ayaNumberInSurah}" +
                                 "\n\nDownload the app to read more: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
                     )
@@ -164,7 +164,7 @@ fun DashboardRandomAyatCard(
                                     style = MaterialTheme.typography.titleLarge,
                                     fontSize = 26.sp,
                                     fontFamily = utmaniQuranFont,
-                                    textAlign = if (randomAya.value?.randomAya?.ayaNumber != 0) TextAlign.Justify else TextAlign.Center,
+                                    textAlign = if (randomAya.value?.randomAya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(4.dp)
@@ -177,11 +177,11 @@ fun DashboardRandomAyatCard(
                 if (translationSelected == "Urdu") {
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         Text(
-                            text = "${randomAya.value?.randomAya?.ayaTranslationUrdu} ۔",
+                            text = "${randomAya.value?.randomAya?.translationUrdu} ۔",
                             style = MaterialTheme.typography.titleSmall,
                             fontSize = 16.sp,
                             fontFamily = urduFont,
-                            textAlign = if (randomAya.value?.randomAya?.ayaNumber != 0) TextAlign.Justify else TextAlign.Center,
+                            textAlign = if (randomAya.value?.randomAya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp)
@@ -189,13 +189,13 @@ fun DashboardRandomAyatCard(
                     }
                 }
                 if (translationSelected == "English") {
-                    randomAya.value?.randomAya?.ayaTranslationEnglish.let {
+                    randomAya.value?.randomAya?.translationEnglish.let {
                         if (it != null) {
                             Text(
                                 text = it,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontSize = 16.sp,
-                                textAlign = if (randomAya.value?.randomAya?.ayaNumber != 0) TextAlign.Justify else TextAlign.Center,
+                                textAlign = if (randomAya.value?.randomAya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 4.dp)
