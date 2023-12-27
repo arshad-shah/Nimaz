@@ -3,10 +3,10 @@ package com.arshadshah.nimaz.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.data.remote.models.Category
-import com.arshadshah.nimaz.data.remote.models.Chapter
-import com.arshadshah.nimaz.data.remote.models.Dua
-import com.arshadshah.nimaz.data.remote.repositories.DuaRepository
+import com.arshadshah.nimaz.data.local.models.LocalCategory
+import com.arshadshah.nimaz.data.local.models.LocalChapter
+import com.arshadshah.nimaz.data.local.models.LocalDua
+import com.arshadshah.nimaz.repositories.DuaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,14 +14,14 @@ import kotlinx.coroutines.launch
 
 class DuaViewModel : ViewModel() {
 
-    private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
+    private val _categories = MutableStateFlow<List<LocalCategory>>(emptyList())
+    val categories: StateFlow<List<LocalCategory>> = _categories.asStateFlow()
 
-    private val _chapters = MutableStateFlow<List<Chapter>>(emptyList())
-    val chapters: StateFlow<List<Chapter>> = _chapters.asStateFlow()
+    private val _chapters = MutableStateFlow<List<LocalChapter>>(emptyList())
+    val chapters: StateFlow<List<LocalChapter>> = _chapters.asStateFlow()
 
-    private val _duas = MutableStateFlow<List<Dua>>(emptyList())
-    val duas: StateFlow<List<Dua>> = _duas.asStateFlow()
+    private val _duas = MutableStateFlow<List<LocalDua>>(emptyList())
+    val duas: StateFlow<List<LocalDua>> = _duas.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

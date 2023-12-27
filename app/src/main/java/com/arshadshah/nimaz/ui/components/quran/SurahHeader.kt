@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.remote.models.Surah
+import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -31,8 +31,8 @@ import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 //surah header component
 @Composable
 fun SurahHeader(
-    surah: Surah,
-    loading: Boolean,
+    surah: LocalSurah,
+    loading: Boolean = false,
 ) {
     OutlinedCard(
         colors = CardDefaults.elevatedCardColors(
@@ -143,7 +143,7 @@ fun SurahHeader(
 @Composable
 fun SurahHeaderPreview() {
     SurahHeader(
-        surah = Surah(
+        surah = LocalSurah(
             1,
             7,
             1,

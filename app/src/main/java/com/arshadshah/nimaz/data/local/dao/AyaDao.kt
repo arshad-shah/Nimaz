@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.dao
 
 import androidx.room.*
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AyaDao {
@@ -16,14 +17,14 @@ interface AyaDao {
 
     //get all the ayas of a surah
     @Query("SELECT * FROM Aya WHERE suraNumber = :surahNumber")
-    suspend fun getAyasOfSurah(surahNumber: Int): List<LocalAya>
+    fun getAyasOfSurah(surahNumber: Int): Flow<List<LocalAya>>
 
     //get all the ayas of a juz
     @Query("SELECT * FROM Aya WHERE juzNumber = :juzNumber")
     suspend fun getAyasOfJuz(juzNumber: Int): List<LocalAya>
 
     //bookmark an aya
-    @Query("UPDATE Aya SET bookmark = :bookmark WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+    @Query("UPDATE Aya SET bookmark = :bookmark WHERE ayaNumberInSurah = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
     suspend fun bookmarkAya(
         ayaNumber: Int,
         surahNumber: Int,
@@ -32,7 +33,7 @@ interface AyaDao {
     )
 
     //favorite an aya
-    @Query("UPDATE Aya SET favorite = :favorite WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+    @Query("UPDATE Aya SET favorite = :favorite WHERE ayaNumberInSurah = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
     suspend fun favoriteAya(
         ayaNumber: Int,
         surahNumber: Int,
@@ -41,7 +42,7 @@ interface AyaDao {
     )
 
     //add a note to an aya
-    @Query("UPDATE Aya SET note = :note WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+    @Query("UPDATE Aya SET note = :note WHERE ayaNumberInSurah = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
     suspend fun addNoteToAya(
         ayaNumber: Int,
         surahNumber: Int,
@@ -50,7 +51,7 @@ interface AyaDao {
     )
 
     //get a  note fro an aya
-    @Query("SELECT note FROM Aya WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+    @Query("SELECT note FROM Aya WHERE ayaNumberInSurah = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
     suspend fun getNoteOfAya(ayaNumber: Int, surahNumber: Int, ayaNumberInSurah: Int): String
 
 
@@ -67,7 +68,7 @@ interface AyaDao {
     suspend fun getAyasWithNotes(): List<LocalAya>
 
     //delete a note from an aya
-    @Query("UPDATE Aya SET note = '' WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+    @Query("UPDATE Aya SET note = '' WHERE ayaNumberInSurah = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
     suspend fun deleteNoteFromAya(
         ayaNumber: Int,
         surahNumber: Int,
@@ -75,7 +76,7 @@ interface AyaDao {
     )
 
     //delete a bookmark from an aya
-    @Query("UPDATE Aya SET bookmark = 0 WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+    @Query("UPDATE Aya SET bookmark = 0 WHERE ayaNumberInSurah = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
     suspend fun deleteBookmarkFromAya(
         ayaNumber: Int,
         surahNumber: Int,
@@ -83,7 +84,7 @@ interface AyaDao {
     )
 
     //delete a favorite from an aya
-    @Query("UPDATE Aya SET favorite = 0 WHERE ayaNumber = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
+    @Query("UPDATE Aya SET favorite = 0 WHERE ayaNumberInSurah = :ayaNumber AND suraNumber = :surahNumber AND ayaNumberInSurah = :ayaNumberInSurah")
     suspend fun deleteFavoriteFromAya(
         ayaNumber: Int,
         surahNumber: Int,

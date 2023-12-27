@@ -37,4 +37,8 @@ interface DuaDao {
     //count
     @Query("SELECT COUNT(*) FROM Dua")
     suspend fun countDuas(): Int
+
+    // get all chanpters by category id
+    @Query("SELECT * FROM Chapter WHERE category_id = :categoryId")
+    suspend fun getChaptersByCategory(categoryId: Int): List<LocalChapter>
 }

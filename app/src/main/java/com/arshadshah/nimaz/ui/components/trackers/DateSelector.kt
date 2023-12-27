@@ -33,9 +33,9 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DateSelector(
     handleEvent: (TrackerViewModel.TrackerEvent) -> Unit,
-    dateState: State<String>,
+    dateState: State<LocalDate>,
 ) {
-    val date = remember(dateState.value) { mutableStateOf(LocalDate.parse(dateState.value)) }
+    val date = remember(dateState.value) { mutableStateOf(dateState.value) }
     val hijrahDate = remember(date.value) { HijrahDate.from(date.value) }
     val formattedDate =
         remember(date.value) { date.value.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy")) }
@@ -65,15 +65,15 @@ fun DateSelector(
 
             // Date Display
             DateDisplay(date, formattedDate, formattedHijrahDate) {
-                handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now().toString()))
+                handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now()))
                 handleEvent(
                     TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                        LocalDate.now().toString()
+                        LocalDate.now()
                     )
                 )
                 handleEvent(
                     TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                        LocalDate.now().toString()
+                        LocalDate.now()
                     )
                 )
             }
@@ -167,7 +167,7 @@ private fun updateDate(
     handleEvent: (TrackerViewModel.TrackerEvent) -> Unit
 ) {
     date.value = date.value.plusDays(daysToAdd)
-    handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value.toString()))
-    handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value.toString()))
-    handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value.toString()))
+    handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value))
+    handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value))
+    handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value))
 }

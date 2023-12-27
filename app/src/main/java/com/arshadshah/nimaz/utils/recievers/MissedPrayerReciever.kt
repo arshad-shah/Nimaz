@@ -45,7 +45,7 @@ class MissedPrayerReciever : BroadcastReceiver() {
                 var amountMissed = 0
                 val nameOfMissedPrayers = mutableListOf<String>()
                 val tracker =
-                    LocalDataStore.getDataStore().getTrackerForDate(LocalDate.now().toString())
+                    LocalDataStore.getDataStore().getTrackerForDate(LocalDate.now())
 
                 Log.d(
                     AppConstants.MISSED_PRAYER_RECEIVER_TAG,

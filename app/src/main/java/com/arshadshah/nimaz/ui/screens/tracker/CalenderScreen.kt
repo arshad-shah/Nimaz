@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.models.FastTracker
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.ui.components.calender.Calender
 import com.arshadshah.nimaz.ui.components.calender.PrayersTrackerCard
 import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
@@ -44,10 +44,10 @@ fun CalenderScreen(paddingValues: PaddingValues) {
 
     //call this effect only once
     LaunchedEffect(Unit) {
-        viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now().toString()))
+        viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now()))
         viewModel.onEvent(
             TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
         viewModel.onEvent(
@@ -59,12 +59,12 @@ fun CalenderScreen(paddingValues: PaddingValues) {
         )
         viewModel.onEvent(
             TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
         viewModel.onEvent(
             TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
     }
@@ -126,18 +126,17 @@ fun CalenderScreen(paddingValues: PaddingValues) {
                     dateState = dateState,
                     isFastingToday = isFastingToday,
                     isMenstrauting = isMenstruatingToday.value,
-                    isLoading = isLoading,
-                    handleEvent = { date: String, isFasting: Boolean ->
-                        viewModel.onEvent(
-                            TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-                                FastTracker(
-                                    date = date,
-                                    isFasting = isFasting
-                                )
+                    isLoading = isLoading
+                ) { date: LocalDate, isFasting: Boolean ->
+                    viewModel.onEvent(
+                        TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
+                            LocalFastTracker(
+                                date = date,
+                                isFasting = isFasting
                             )
                         )
-                    }
-                )
+                    )
+                }
             }
         }
     }

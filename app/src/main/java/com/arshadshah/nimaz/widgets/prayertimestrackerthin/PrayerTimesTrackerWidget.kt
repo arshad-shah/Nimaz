@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.widgets.prayertimestrackerthin
 
-import com.arshadshah.nimaz.data.remote.models.PrayerTrackerWithTime
+import com.arshadshah.nimaz.data.local.models.PrayerTrackerWithTime
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -16,7 +16,7 @@ fun DashboardFastTracker(
     menstruating: Boolean
 ) {
 
-    val dateState = remember { mutableStateOf(LocalDate.now().toString()) }
+    val dateState = remember { mutableStateOf(LocalDate.now()) }
     FastTrackerCard(
         handleEvent = { date, isFastingToday ->
             handleEvents(DashboardViewmodel.DashboardEvent.UpdateFastTracker(date, isFastingToday))

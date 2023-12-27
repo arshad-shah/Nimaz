@@ -6,12 +6,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
-import com.arshadshah.nimaz.data.remote.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.data.local.models.CountDownTime
+import com.arshadshah.nimaz.data.local.models.Parameters
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.services.LocationService
+import com.arshadshah.nimaz.services.PrayerTimesData
 import com.arshadshah.nimaz.services.PrayerTimesService
-import com.arshadshah.nimaz.type.Parameters
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneOffset
 
 class PrayerTimesViewModel(context: Context) : ViewModel() {
@@ -129,76 +129,52 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
             _error.value = ""
             try {
                 val response = PrayerTimesRepository.updatePrayerTimes(parameters)
-                if (response.data != null) {
-                    val mapOfPrayerTimes = mapOf(
-                        "fajr" to response.data.fajr,
-                        "sunrise" to response.data.sunrise,
-                        "dhuhr" to response.data.dhuhr,
-                        "asr" to response.data.asr,
-                        "maghrib" to response.data.maghrib,
-                        "isha" to response.data.isha
+                response.data?.let { data ->
+                    val currentAndNextPrayertimes = prayerTimesService.getCurrentAndNextPrayer(
+                        PrayerTimesData(
+                            fajr = data.fajr ?: LocalDateTime.now(),
+                            sunrise = data.sunrise ?: LocalDateTime.now(),
+                            dhuhr = data.dhuhr ?: LocalDateTime.now(),
+                            asr = data.asr ?: LocalDateTime.now(),
+                            maghrib = data.maghrib ?: LocalDateTime.now(),
+                            isha = data.isha ?: LocalDateTime.now()
+                        )
                     )
 
-                    val currentPrayerName =
-                        currentPrayer(LocalDateTime.now(), mapOfPrayerTimes).first
-                    val nextPrayerName = nextPrayer(LocalDateTime.now(), mapOfPrayerTimes)
-                    if (nextPrayerName.first == "fajr" && currentPrayerName == "isha" && LocalTime.now().hour <= 24 && LocalTime.now().hour >= response.data.isha!!.toLocalTime().hour) {
-                        _prayerTimesState.update {
-                            it.copy(
-                                nextPrayerName = nextPrayerName.first,
-                                nextPrayerTime = response.data.fajr!!.plusDays(1)
-                            )
-                        }
-                    } else {
-                        _prayerTimesState.update {
-                            it.copy(
-                                nextPrayerName = nextPrayerName.first,
-                                nextPrayerTime = nextPrayerName.second
-                            )
-                        }
-                    }
-
-                    _prayerTimesState.update {
-                        it.copy(
-                            currentPrayerName = currentPrayerName,
-                            fajrTime = response.data.fajr!!,
-                            sunriseTime = response.data.sunrise!!,
-                            dhuhrTime = response.data.dhuhr!!,
-                            asrTime = response.data.asr!!,
-                            maghribTime = response.data.maghrib!!,
-                        )
-                    }
-                    val ishaTime = response.data.isha?.toLocalTime()?.hour
-                    val newIshaTime = if (ishaTime!! >= 22) {
-                        response.data.maghrib?.plusMinutes(60)
-                    } else {
-                        response.data.isha
-                    }
-                    _prayerTimesState.update {
-                        it.copy(
-                            ishaTime = newIshaTime!!
-                        )
-                    }
                     Log.d(
-                        AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel",
-                        "UpdatePrayerTimes: ${response.data}"
+                        "Nimaz: PrayerTimesViewModel",
+                        "updatePrayerTimes: $currentAndNextPrayertimes"
                     )
+
+                    _prayerTimesState.update {
+                        it.copy(
+                            currentPrayerName = currentAndNextPrayertimes.currentPrayer,
+                            nextPrayerName = currentAndNextPrayertimes.nextPrayer,
+                            nextPrayerTime = currentAndNextPrayertimes.nextPrayerTime,
+                            fajrTime = data.fajr ?: LocalDateTime.now(),
+                            sunriseTime = data.sunrise ?: LocalDateTime.now(),
+                            dhuhrTime = data.dhuhr ?: LocalDateTime.now(),
+                            asrTime = data.asr ?: LocalDateTime.now(),
+                            maghribTime = data.maghrib ?: LocalDateTime.now(),
+                            ishaTime = data.isha ?: LocalDateTime.now()
+                        )
+                    }
                     _isLoading.value = false
-                } else {
-                    _error.value = response.message.toString()
+                } ?: run {
+                    _error.value = "Failed to update prayer times. Data is null."
                     _isLoading.value = false
                 }
-
             } catch (e: Exception) {
-                Log.d(
+                Log.e(
                     AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel",
-                    "loadPrayerTimes: ${e.message}"
+                    "updatePrayerTimes: ${e.message}"
                 )
-                _error.value = e.message.toString()
+                _error.value = e.message ?: "An unknown error occurred"
                 _isLoading.value = false
             }
         }
     }
+
 
     //load prayer times again
     fun loadPrayerTimes() {
@@ -207,26 +183,29 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
             _error.value = ""
             try {
                 val prayerTimes = prayerTimesService.getPrayerTimes()
-                val currentAndNextPrayer = prayerTimesService.getCurrentAndNextPrayer(prayerTimes)
+                if (prayerTimes != null) {
+                    val currentAndNextPrayer =
+                        prayerTimesService.getCurrentAndNextPrayer(prayerTimes)
 
-                _prayerTimesState.update {
-                    it.copy(
-                        currentPrayerName = currentAndNextPrayer.currentPrayer,
-                        nextPrayerName = currentAndNextPrayer.nextPrayer,
-                        nextPrayerTime = currentAndNextPrayer.nextPrayerTime,
-                        fajrTime = prayerTimes.fajr,
-                        sunriseTime = prayerTimes.sunrise,
-                        dhuhrTime = prayerTimes.dhuhr,
-                        asrTime = prayerTimes.asr,
-                        maghribTime = prayerTimes.maghrib,
-                        ishaTime = prayerTimes.isha
-                    )
+                    _prayerTimesState.update {
+                        it.copy(
+                            currentPrayerName = currentAndNextPrayer.currentPrayer,
+                            nextPrayerName = currentAndNextPrayer.nextPrayer,
+                            nextPrayerTime = currentAndNextPrayer.nextPrayerTime,
+                            fajrTime = prayerTimes.fajr ?: LocalDateTime.now(),
+                            sunriseTime = prayerTimes.sunrise ?: LocalDateTime.now(),
+                            dhuhrTime = prayerTimes.dhuhr ?: LocalDateTime.now(),
+                            asrTime = prayerTimes.asr ?: LocalDateTime.now(),
+                            maghribTime = prayerTimes.maghrib ?: LocalDateTime.now(),
+                            ishaTime = prayerTimes.isha ?: LocalDateTime.now()
+                        )
+                    }
+                } else {
+                    _error.value = "Failed to load prayer times"
                 }
-
                 _isLoading.value = false
-
             } catch (e: Exception) {
-                Log.d(
+                Log.e(
                     AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel",
                     "loadPrayerTimes: ${e.message}"
                 )
@@ -235,6 +214,7 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
             }
         }
     }
+
 
     private fun startTimer(context: Context, timeToNextPrayer: Long) {
         countDownTimer?.cancel()

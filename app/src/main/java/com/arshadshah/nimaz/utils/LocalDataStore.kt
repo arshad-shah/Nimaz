@@ -12,19 +12,9 @@ object LocalDataStore {
     private var dataStore: DataStore? = null
     fun init(context: Context) {
         if (dataStore == null) {
-            val db = Room.databaseBuilder(context, AppDatabase::class.java, "database")
-                .addMigrations(AppDatabase.Migration1To2())
-                .addMigrations(AppDatabase.Migration2To3())
-                .addMigrations(AppDatabase.Migration3To4())
-                .addMigrations(AppDatabase.Migration4To5())
-                .addMigrations(AppDatabase.Migration5To6())
-                .addMigrations(AppDatabase.Migration6To7())
-                .addMigrations(AppDatabase.Migration7To8())
-                .addMigrations(AppDatabase.Migration8To9())
-                .addMigrations(AppDatabase.Migration9To10())
-                .addMigrations(AppDatabase.Migration10To11())
-                .addMigrations(AppDatabase.Migration11To12())
-                .addMigrations(AppDatabase.Migration12To13())
+            val db = Room
+                .databaseBuilder(context, AppDatabase::class.java, "database")
+                .createFromAsset("databases/quran_room_compatible.db")
                 .fallbackToDestructiveMigration()
                 .build()
             dataStore = DataStore(db)

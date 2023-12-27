@@ -3,17 +3,21 @@ package com.arshadshah.nimaz.data.local.dao
 import androidx.room.*
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface FastTrackerDao {
 
     //get trtacker for a specific date
     @Query("SELECT * FROM FastTracker WHERE date = :date")
-    suspend fun getFastTrackerForDate(date: String): LocalFastTracker
+    suspend fun getFastTrackerForDate(date: LocalDate): LocalFastTracker
 
     //get all the trackers
     @Query("SELECT * FROM FastTracker WHERE date BETWEEN :firstDay AND :lastDay")
-    fun getFastTrackersForMonth(firstDay: String, lastDay: String): Flow<List<LocalFastTracker>>
+    fun getFastTrackersForMonth(
+        firstDay: LocalDate,
+        lastDay: LocalDate
+    ): Flow<List<LocalFastTracker>>
 
     //save a tracker
     @Insert(entity = LocalFastTracker::class, onConflict = OnConflictStrategy.REPLACE)
@@ -32,13 +36,13 @@ interface FastTrackerDao {
     suspend fun deleteFastAllTrackers()
 
     @Query("SELECT EXISTS(SELECT * FROM FastTracker WHERE date = :date)")
-    suspend fun fastTrackerExistsForDate(date: String): Boolean
+    suspend fun fastTrackerExistsForDate(date: LocalDate): Boolean
 
     // is fasting for a specific date
     @Query("SELECT isFasting FROM FastTracker WHERE date = :date")
-    fun isFastingForDate(date: String): Flow<Boolean>
+    fun isFastingForDate(date: LocalDate): Flow<Boolean>
 
     // update menstruating status
     @Query("UPDATE FastTracker SET isMenstruating = :isMenstruating WHERE date = :date")
-    suspend fun updateIsMenstruating(date: String, isMenstruating: Boolean)
+    suspend fun updateIsMenstruating(date: LocalDate, isMenstruating: Boolean)
 }

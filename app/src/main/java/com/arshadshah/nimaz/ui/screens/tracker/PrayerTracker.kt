@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.models.FastTracker
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.ui.components.calender.PrayersTrackerCard
 import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
 import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
@@ -49,21 +49,21 @@ fun PrayerTracker(paddingValues: PaddingValues, isIntegrated: Boolean = false) {
     )
 
     LaunchedEffect(Unit) {
-        viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now().toString()))
+        viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now()))
         viewModel.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(!isIntegrated))
         viewModel.onEvent(
             TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
         viewModel.onEvent(
             TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
         viewModel.onEvent(
             TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_WEEK(
-                LocalDate.now().toString()
+                LocalDate.now()
             )
         )
 
@@ -123,17 +123,16 @@ fun PrayerTracker(paddingValues: PaddingValues, isIntegrated: Boolean = false) {
                     isLoading = remember {
                         mutableStateOf(false)
                     },
-                    handleEvent = { date: String, isFasting: Boolean ->
-                        viewModel.onEvent(
-                            TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-                                FastTracker(
-                                    date = date,
-                                    isFasting = isFasting
-                                )
+                ) { date: LocalDate, isFasting: Boolean ->
+                    viewModel.onEvent(
+                        TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
+                            LocalFastTracker(
+                                date = date,
+                                isFasting = isFasting
                             )
                         )
-                    },
-                )
+                    )
+                }
             }
         }
         ElevatedCard(
@@ -196,7 +195,7 @@ fun PrayerTracker(paddingValues: PaddingValues, isIntegrated: Boolean = false) {
 
 //composable to show the prayers for this week using 7 circular progress indicators
 @Composable
-fun SevenDayTrend(trackersForWeek: State<List<PrayerTracker>>) {
+fun SevenDayTrend(trackersForWeek: State<List<LocalPrayersTracker>>) {
 
     Column(
         modifier = Modifier.padding(
@@ -217,7 +216,7 @@ fun SevenDayTrend(trackersForWeek: State<List<PrayerTracker>>) {
                     //if menstrauting then show pink else show primary
                     progressColor = MaterialTheme.colorScheme.primary,
                     radius = 20.dp,
-                    label = LocalDate.parse(prayerTracker.date).dayOfWeek.name.first().toString(),
+                    label = prayerTracker.date.dayOfWeek.name.first().toString(),
                     strokeWidth = 6.dp,
                     strokeBackgroundWidth = 3.dp,
                     startDelay = 0,

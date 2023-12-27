@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Aya
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
@@ -35,7 +35,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun DashboardQuranTracker(
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
-    quranBookmarks: State<List<Aya>>,
+    quranBookmarks: State<List<LocalAya>>,
     handleEvents: KFunction1<DashboardViewmodel.DashboardEvent, Unit>,
     isLoading: State<Boolean>
 ) {
@@ -61,7 +61,7 @@ fun DashboardQuranTracker(
         mutableStateOf("")
     }
     val itemToDelete = remember {
-        mutableStateOf<Aya?>(null)
+        mutableStateOf<LocalAya?>(null)
     }
     if (quranBookmarks.value.isEmpty()) {
         Box(
@@ -75,8 +75,8 @@ fun DashboardQuranTracker(
         FeaturesDropDown(
             label = "Quran Bookmarks",
             items = quranBookmarks.value,
-            dropDownItem = { Aya ->
-                val currentItem = rememberUpdatedState(newValue = Aya)
+            dropDownItem = { LocalAya ->
+                val currentItem = rememberUpdatedState(newValue = LocalAya)
                 val dismissState = rememberDismissState(
                     confirmValueChange = {
                         if (it == DismissValue.DismissedToStart) {
@@ -98,7 +98,7 @@ fun DashboardQuranTracker(
                     },
                     dismissContent = {
                         FeatureDropdownItem(
-                            item = Aya,
+                            item = LocalAya,
                             onClick = { aya ->
                                 onNavigateToAyatScreen(
                                     aya.suraNumber.toString(),
@@ -112,7 +112,7 @@ fun DashboardQuranTracker(
                                 Text(
                                     modifier = Modifier
                                         .padding(8.dp),
-                                    text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString(),
+                                    text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumberInSurah.toString(),
                                     textAlign = TextAlign.Start,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
@@ -148,7 +148,7 @@ fun DashboardQuranTracker(
             onConfirm = {
                 handleEvents(
                     DashboardViewmodel.DashboardEvent.DeleteBookmarkFromAya(
-                        itemToDelete.value!!.ayaNumber,
+                        itemToDelete.value!!.ayaNumberInSurah,
                         itemToDelete.value!!.suraNumber,
                         itemToDelete.value!!.ayaNumberInSurah
                     )

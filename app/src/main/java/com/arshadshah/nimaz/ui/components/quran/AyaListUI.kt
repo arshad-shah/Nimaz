@@ -1,25 +1,45 @@
 package com.arshadshah.nimaz.ui.components.quran
 
+import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -28,12 +48,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_AYA
-import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.data.remote.repositories.SpacesFileRepository
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.BannerDuration
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
@@ -41,325 +58,293 @@ import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.ui.theme.*
+import com.arshadshah.nimaz.ui.theme.almajeed
+import com.arshadshah.nimaz.ui.theme.amiri
+import com.arshadshah.nimaz.ui.theme.hidayat
+import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.urduFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import java.io.File
+import kotlin.reflect.KFunction1
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AyaListUI(
-    ayaList: ArrayList<Aya>,
+    ayaList: ArrayList<LocalAya>,
     paddingValues: PaddingValues,
     language: String,
     loading: Boolean,
     type: String,
     number: Int,
     scrollToAya: Int? = null,
+    surah: LocalSurah,
+    arabicFontSize: Float,
+    arabicFont: String,
+    translationFontSize: Float,
+    translation: String,
+    scrollToVerse: LocalAya?,
+    downloadAyaAudioFile: (Int, Int, (File?, Exception?, progress: Int, completed: Boolean) -> Unit) -> Unit,
+    handleAyaEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
+    handleQuranMenuEvents: KFunction1<QuranViewModel.QuranMenuEvents, Unit>,
 ) {
-
-    val context = LocalContext.current
-    val viewModel = viewModel(
-        key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    val spaceFilesRepository = SpacesFileRepository(context)
-    val surah = remember {
-        viewModel.surahState
-    }.collectAsState()
-    val arabicFontSize = remember {
-        viewModel.arabic_Font_size
-    }.collectAsState()
-    val arabicFont = remember {
-        viewModel.arabic_Font
-    }.collectAsState()
-
-    val translationFontSize = remember {
-        viewModel.translation_Font_size
-    }.collectAsState()
-
-    val translation = remember {
-        viewModel.translation
-    }.collectAsState()
-
-    val scrollToVerse = remember {
-        viewModel.scrollToAya
-    }.collectAsState()
-
     val state = rememberLazyListState()
 
+    // Placeholder for loading
     if (loading) {
-        //dumy list of 10 AYa
-        val dummyList = ArrayList<Aya>()
-        for (i in 0..9) {
-            dummyList.add(
-                Aya(
-                    ayaNumber = i,
-                    ayaNumberInQuran = 1,
-                    ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
-                    ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
-                    ayaTranslationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے",
-                    audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3",
-                    ayaNumberInSurah = 1,
-                    bookmark = true,
-                    favorite = true,
-                    note = "dsfhsdhsgdfhstghs",
-                    juzNumber = 1,
-                    suraNumber = 1,
-                    ruku = 1,
-                    sajda = false,
-                    sajdaType = "",
-                )
-            )
-        }
-        LazyColumn(
-            contentPadding = paddingValues,
-            state = state,
-            userScrollEnabled = false,
-        ) {
-            items(10) { index ->
-                AyaListItemUI(
-                    aya = dummyList[index],
-                    arabic_Font_size = arabicFontSize,
-                    arabic_Font = arabicFont,
-                    translation_Font_size = translationFontSize,
-                    translation = translation,
-                    spacesFileRepository = spaceFilesRepository,
-                    loading = true,
-                )
-            }
-        }
+        PlaceholderAyaList(
+            paddingValues,
+            arabicFontSize,
+            arabicFont,
+            translationFontSize,
+            translation,
+            downloadAyaAudioFile,
+            handleAyaEvents,
+            loading
+        )
     } else {
-        //if a new item is viewed, then scroll to that item
         val sharedPref = LocalContext.current.getSharedPreferences("quran", 0)
         val visibleItemIndex =
-            remember {
-                mutableStateOf(
-                    sharedPref.getInt(
-                        "visibleItemIndex-${type}-${number}",
-                        -1
-                    )
-                )
-            }
+            remember { mutableStateOf(sharedPref.getInt("visibleItemIndex-${type}-${number}", -1)) }
 
-        //when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-        LaunchedEffect(remember { derivedStateOf { state.firstVisibleItemIndex } })
-        {
-            sharedPref.edit()
-                .putInt("visibleItemIndex-${type}-${number}", state.firstVisibleItemIndex)
-                .apply()
-        }
+        HandleScrollEffects(
+            visibleItemIndex,
+            scrollToAya,
+            scrollToVerse,
+            ayaList,
+            state,
+            sharedPref,
+            type,
+            number,
+            handleQuranMenuEvents
+        )
 
-        //when we reopen the app, we want to scroll to the last item viewed
-        LaunchedEffect(visibleItemIndex.value)
-        {
-            if (scrollToAya != null) {
-                state.animateScrollToItem(scrollToAya)
-            } else {
-                if (visibleItemIndex.value != -1) {
-                    state.animateScrollToItem(visibleItemIndex.value)
-                    //set the value back to -1 so that we don't scroll to the same item again
-                    visibleItemIndex.value = -1
-                }
-            }
-        }
-        LaunchedEffect(scrollToVerse.value)
-        {
-            if (scrollToVerse.value != null) {
-                val index = ayaList.indexOfFirst {
-                    it.ayaNumberInQuran == scrollToVerse.value?.ayaNumberInQuran &&
-                            it.suraNumber == scrollToVerse.value?.suraNumber &&
-                            it.juzNumber == scrollToVerse.value?.juzNumber
-                }
-                state.animateScrollToItem(index)
-                viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Scroll_To_Aya(null))
-            }
-        }
+        AyaLazyColumn(
+            ayaList,
+            paddingValues,
+            arabicFontSize,
+            arabicFont,
+            translationFontSize,
+            translation,
+            downloadAyaAudioFile,
+            handleAyaEvents,
+            state,
+            surah
+        )
+    }
+}
 
-        LazyColumn(
-            modifier = Modifier.testTag(TEST_TAG_AYA),
-            userScrollEnabled = true,
-            contentPadding = paddingValues,
-            state = state
-        ) {
-            items(ayaList.size) { index ->
-                if (
-                    ayaList[index].ayaNumberInQuran == 0 ||
-                    ayaList[index].ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ||
-                    ayaList[index].ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
-                    ayaList[index].suraNumber == 9 && ayaList[index].ayaNumberInSurah == 1
-                ) {
-                    viewModel.getSurahById(ayaList[index + 1].suraNumber)
-                    SurahHeader(
-                        surah = surah.value,
-                        loading = loading,
-                    )
-                }
-                AyaListItemUI(
-                    aya = ayaList[index],
-                    spacesFileRepository = spaceFilesRepository,
-                    arabic_Font_size = arabicFontSize,
-                    translation_Font_size = translationFontSize,
-                    arabic_Font = arabicFont,
-                    translation = translation,
-                    loading = false,
-                )
-            }
+@Composable
+fun PlaceholderAyaList(
+    paddingValues: PaddingValues,
+    arabicFontSize: Float,
+    arabicFont: String,
+    translationFontSize: Float,
+    translation: String,
+    downloadAyaAudioFile: (Int, Int, (File?, Exception?, progress: Int, completed: Boolean) -> Unit) -> Unit,
+    handleAyaEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
+    loading: Boolean
+) {
+    val dummyList = remember { generateDummyAyaList() }
+
+    LazyColumn(
+        contentPadding = paddingValues,
+        state = rememberLazyListState(),
+        userScrollEnabled = false
+    ) {
+        item {
+            SurahHeader(
+                surah = LocalSurah(
+                    number = 0,
+                    numberOfAyahs = 0,
+                    startAya = 0,
+                    name = "",
+                    englishName = "",
+                    englishNameTranslation = "",
+                    revelationType = "",
+                    revelationOrder = 0,
+                    rukus = 0
+                ),
+                loading = loading,
+            )
+        }
+        items(dummyList.size) { index ->
+            AyaListItemUI(
+                aya = dummyList[index],
+                arabicFontSize = arabicFontSize,
+                arabicFont = arabicFont,
+                translationFontSize = translationFontSize,
+                translation = translation,
+                downloadAyaAudioFile = downloadAyaAudioFile,
+                handleAyaEvents = handleAyaEvents,
+                loading = loading
+            )
         }
     }
 }
 
 @Composable
-fun AyaListItemUI(
-    aya: Aya,
-    spacesFileRepository: SpacesFileRepository,
-    arabic_Font_size: State<Float>,
-    translation_Font_size: State<Float>,
-    arabic_Font: State<String>,
-    translation: State<String>,
-    loading: Boolean,
+fun HandleScrollEffects(
+    visibleItemIndex: MutableState<Int>,
+    scrollToAya: Int?,
+    scrollToVerse: LocalAya?,
+    ayaList: ArrayList<LocalAya>,
+    state: LazyListState,
+    sharedPref: SharedPreferences,
+    type: String,
+    number: Int,
+    handleQuranMenuEvents: KFunction1<QuranViewModel.QuranMenuEvents, Unit>
 ) {
-    val context = LocalContext.current
-
-    //media player
-    val mediaPlayer = remember {
-        MediaPlayer()
+    // Save the last visible item index
+    LaunchedEffect(key1 = remember { derivedStateOf { state.firstVisibleItemIndex } }) {
+        sharedPref.edit().putInt("visibleItemIndex-${type}-${number}", state.firstVisibleItemIndex)
+            .apply()
     }
 
-    //when we close or move to another screen, we want to clean the state o'f the AyaListItemUI so that we don't have any bugs such as dangling data
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-
-    DisposableEffect(lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_STOP, Lifecycle.Event.ON_DESTROY, Lifecycle.Event.ON_PAUSE -> {
-                    mediaPlayer.release()
-                }
-
-                else -> {
-                }
-            }
-        }
-
-        lifecycle.addObserver(observer)
-        onDispose {
-            lifecycle.removeObserver(observer)
+    // Scroll to the specific Aya or the last visible item
+    LaunchedEffect(key1 = scrollToAya, key2 = visibleItemIndex.value) {
+        scrollToAya?.let {
+            state.animateScrollToItem(it)
+        } ?: if (visibleItemIndex.value != -1) {
+            state.animateScrollToItem(visibleItemIndex.value)
+            visibleItemIndex.value = -1
+        } else {
+            state.animateScrollToItem(state.firstVisibleItemIndex)
         }
     }
 
-    val viewModel = viewModel(
-        key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-
-    val error = remember {
-        mutableStateOf("")
-    }
-
-    val isBookMarkedVerse = remember {
-        mutableStateOf(false)
-    }
-
-    val isFavoured = remember {
-        mutableStateOf(false)
-    }
-
-    val hasNote = remember {
-        mutableStateOf(false)
-    }
-
-    val noteContent = remember {
-        mutableStateOf("")
-    }
-
-    val popUpOpen = remember {
-        mutableStateOf(false)
-    }
-
-    val showNoteDialog = remember {
-        mutableStateOf(false)
-    }
-
-    val duration = remember {
-        mutableStateOf(0)
-    }
-
-    //isDownloaded is used to show a progress bar when the user clicks on the download button
-    val isDownloaded = remember {
-        mutableStateOf(false)
-    }
-    val progressOfDownload = remember {
-        mutableStateOf(0f)
-    }
-    val isPlaying = remember {
-        mutableStateOf(false)
-    }
-    val isPaused = remember {
-        mutableStateOf(false)
-    }
-    val isStopped = remember {
-        mutableStateOf(false)
-    }
-
-    val fileToBePlayed = remember {
-        mutableStateOf<File?>(null)
-    }
-
-    val hasAudio = remember {
-        mutableStateOf(false)
-    }
-
-    isFavoured.value = aya.favorite
-    isBookMarkedVerse.value = aya.bookmark
-    hasNote.value = aya.note.isNotEmpty()
-    hasAudio.value = aya.audioFileLocation.isNotEmpty()
-    fileToBePlayed.value = File(aya.audioFileLocation)
-
-    val downloadInProgress = remember {
-        mutableStateOf(false)
-    }
-
-    //callback fro the download progress
-    //callback: (File?, Exception?, progress:Int, completed: Boolean) -> Unit)
-    val downloadCallback =
-        { file: File?, exception: Exception?, progress: Int, completed: Boolean ->
-            if (exception != null) {
-                downloadInProgress.value = false
-                isDownloaded.value = false
-                progressOfDownload.value = 0f
-                fileToBePlayed.value = null
-                error.value = exception.message.toString()
+    // Scroll to the verse if specified
+    LaunchedEffect(scrollToVerse) {
+        scrollToVerse?.let {
+            val index = ayaList.indexOfFirst {
+                it.ayaNumberInQuran == it.ayaNumberInQuran &&
+                        it.suraNumber == it.suraNumber &&
+                        it.juzNumber == it.juzNumber
             }
-            if (completed) {
-                downloadInProgress.value = false
-                isDownloaded.value = true
-                progressOfDownload.value = 100f
-                fileToBePlayed.value = file
-                aya.audioFileLocation = file?.absolutePath.toString()
-                viewModel.handleAyaEvent(
-                    QuranViewModel.AyaEvent.addAudioToAya(
-                        aya.suraNumber,
-                        aya.ayaNumberInSurah,
-                        aya.audioFileLocation
-                    )
-                )
-            } else {
-                downloadInProgress.value = true
-                isDownloaded.value = false
-                Log.d("download", "progress: $progress")
-                progressOfDownload.value = progress.toFloat()
-                fileToBePlayed.value = null
+            if (index != -1) {
+                state.animateScrollToItem(index)
+                handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Scroll_To_Aya(null))
             }
         }
+    }
+}
 
-    fun prepareMediaPlayer() {
+
+private fun generateDummyAyaList(): ArrayList<LocalAya> {
+    // Generate a list of dummy Ayas
+    val dummyList = ArrayList<LocalAya>()
+    for (i in 0..9) {
+        dummyList.add(
+            LocalAya(
+                ayaNumberInQuran = 1,
+                ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+                translationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+                translationUrdu = "اللہ کا نام سے، جو بہت مہربان ہے اور جو بہت مہربان ہے",
+                audioFileLocation = "https://download.quranicaudio.com/quran/abdulbasitmurattal/001.mp3",
+                ayaNumberInSurah = 1,
+                bookmark = true,
+                favorite = true,
+                note = "dsfhsdhsgdfhstghs",
+                juzNumber = 1,
+                suraNumber = 1,
+                ruku = 1,
+                sajda = false,
+                sajdaType = "",
+            )
+        )
+    }
+    return dummyList
+}
+
+@Composable
+fun AyaLazyColumn(
+    ayaList: ArrayList<LocalAya>,
+    paddingValues: PaddingValues,
+    arabicFontSize: Float,
+    arabicFont: String,
+    translationFontSize: Float,
+    translation: String,
+    downloadAyaAudioFile: (Int, Int, (File?, Exception?, progress: Int, completed: Boolean) -> Unit) -> Unit,
+    handleAyaEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
+    state: LazyListState,
+    surah: LocalSurah
+) {
+    LazyColumn(
+        userScrollEnabled = true,
+        contentPadding = paddingValues,
+        state = state
+    ) {
+        items(ayaList.size) { index ->
+            val aya = ayaList[index]
+
+            // Check for special cases to display Surah Header
+            if (isSpecialAya(aya)) {
+                handleAyaEvents(QuranViewModel.AyaEvent.getSurahById(aya.suraNumber))
+                SurahHeader(surah = surah)
+            }
+
+            // Aya list item UI
+            AyaListItemUI(
+                aya = aya,
+                arabicFontSize = arabicFontSize,
+                arabicFont = arabicFont,
+                translationFontSize = translationFontSize,
+                translation = translation,
+                downloadAyaAudioFile = downloadAyaAudioFile,
+                handleAyaEvents = handleAyaEvents
+            )
+        }
+    }
+}
+
+private fun isSpecialAya(aya: LocalAya): Boolean {
+    // Define conditions for special Ayas here
+    return aya.ayaNumberInQuran == 0 ||
+            aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ||
+            aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
+            (aya.suraNumber == 9 && aya.ayaNumberInSurah == 1)
+}
+
+
+@Composable
+fun AyaListItemUI(
+    aya: LocalAya,
+    arabicFontSize: Float,
+    translationFontSize: Float,
+    arabicFont: String,
+    translation: String,
+    loading: Boolean = false,
+    downloadAyaAudioFile: (Int, Int, (File?, Exception?, progress: Int, completed: Boolean) -> Unit) -> Unit,
+    handleAyaEvents: KFunction1<QuranViewModel.AyaEvent, Unit>
+) {
+    // Initialization
+    val mediaPlayer = rememberMediaPlayer()
+    val error = remember { mutableStateOf("") }
+    val isBookmarkedVerse = remember { mutableStateOf(aya.bookmark) }
+    val isFavored = remember { mutableStateOf(aya.favorite) }
+    val hasNote = remember { mutableStateOf(aya.note.isNotEmpty()) }
+    val hasAudio = remember { mutableStateOf(aya.audioFileLocation.isNotEmpty()) }
+    val noteContent = remember { mutableStateOf(aya.note) }
+    val fileToBePlayed = remember { mutableStateOf<File?>(null) }
+
+    // Audio Player State
+    val (isPlaying, isPaused, isStopped, duration, isDownloaded, progressOfDownload, downloadInProgress) = rememberAudioPlayerState()
+
+    // Handle MediaPlayer Lifecycle
+    DisposableMediaPlayerEffect(mediaPlayer)
+
+    // Other UI States
+    val popUpOpen = remember { mutableStateOf(false) }
+    val showNoteDialog = remember { mutableStateOf(false) }
+
+    // Prepare and Play Functions
+    val prepareMediaPlayer = {
         try {
             mediaPlayer.stop()
             //reset the media player
             mediaPlayer.reset()
-            val uri = Uri.fromFile(fileToBePlayed.value)
+            val file = File(aya.audioFileLocation)
+            val uri = Uri.fromFile(file)
             mediaPlayer.setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -372,9 +357,7 @@ fun AyaListItemUI(
             error.value = e.message.toString()
         }
     }
-
-    //play the file
-    fun playFile() {
+    val playFile = {
         try {
             //if the file isnull and there is no audio playing then prepare the media player and play the file
             //else just start the current file that is playing
@@ -396,9 +379,7 @@ fun AyaListItemUI(
             error.value = e.message.toString()
         }
     }
-
-    //pause the file
-    fun pauseFile() {
+    val pauseFile = {
         try {
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.pause()
@@ -410,9 +391,7 @@ fun AyaListItemUI(
             error.value = e.message.toString()
         }
     }
-
-    //stop the file
-    fun stopFile() {
+    val stopFile = {
         try {
             if (!isStopped.value) {
                 mediaPlayer.stop()
@@ -426,23 +405,235 @@ fun AyaListItemUI(
         }
     }
 
-    //function to check if the file is downloaded already
-    fun downloadFile() {
-        isDownloaded.value = false
-        fileToBePlayed.value = null
-        spacesFileRepository.downloadAyaFile(
-            aya.suraNumber,
-            aya.ayaNumberInSurah,
-            downloadCallback
-        )
+    // Download Callback and Function
+    val downloadCallback = getDownloadCallback(
+        aya,
+        handleAyaEvents,
+        error,
+        fileToBePlayed,
+        isDownloaded,
+        downloadInProgress,
+        progressOfDownload
+    )
+    val downloadFile =
+        { downloadAyaAudioFile(aya.suraNumber, aya.ayaNumberInSurah, downloadCallback) }
+
+    // UI Rendering
+    AyaCard(
+        aya = aya,
+        arabicFontSize = arabicFontSize,
+        translationFontSize = translationFontSize,
+        arabicFont = arabicFont,
+        translation = translation,
+        isPlaying = isPlaying,
+        isPaused = isPaused,
+        isStopped = isStopped,
+        duration = duration,
+        isDownloaded = isDownloaded,
+        hasAudio = hasAudio,
+        playFile = playFile,
+        pauseFile = pauseFile,
+        stopFile = stopFile,
+        loading = loading,
+        error = error,
+        downloadInProgress = downloadInProgress,
+        progressOfDownload = progressOfDownload,
+        isBookmarkedVerse = isBookmarkedVerse,
+        noteContent = noteContent,
+        isFavored = isFavored,
+        hasNote = hasNote,
+        popUpOpen = popUpOpen,
+        showNoteDialog = showNoteDialog,
+        handleAyaEvents = handleAyaEvents,
+        downloadFile = downloadFile
+    )
+}
+
+@Composable
+fun rememberMediaPlayer(): MediaPlayer {
+    // The rememberSaveable function is used to remember the MediaPlayer instance
+    // across configuration changes and process death. However, MediaPlayer cannot be directly
+    // saved and restored, so we use it with a key and manually manage the MediaPlayer instance.
+    val mediaPlayer = remember {
+        MediaPlayer()
     }
 
-    val cardBackgroundColor = if (aya.ayaNumber == 0) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surface
+    // Dispose the MediaPlayer when this composable leaves the composition
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer.release()
+        }
     }
 
+    // Return the remembered MediaPlayer instance
+    return mediaPlayer
+}
+
+@Composable
+fun rememberAudioPlayerState(): AudioPlayerState {
+    // State for tracking if the audio is playing
+    val isPlaying = remember { mutableStateOf(false) }
+
+    // State for tracking if the audio is paused
+    val isPaused = remember { mutableStateOf(false) }
+
+    // State for tracking if the audio is stopped
+    val isStopped = remember { mutableStateOf(false) }
+
+    // State for tracking the duration of the audio
+    val duration = remember { mutableStateOf(0) }
+
+    // State for tracking if the audio is downloaded
+    val isDownloaded = remember { mutableStateOf(false) }
+
+    // State for tracking the progress of the audio download
+    val progressOfDownload = remember { mutableStateOf(0f) }
+
+    // State for tracking if the download is in progress
+    val downloadInProgress = remember { mutableStateOf(false) }
+
+    return AudioPlayerState(
+        isPlaying,
+        isPaused,
+        isStopped,
+        duration,
+        isDownloaded,
+        progressOfDownload,
+        downloadInProgress
+    )
+}
+
+data class AudioPlayerState(
+    val isPlaying: MutableState<Boolean>,
+    val isPaused: MutableState<Boolean>,
+    val isStopped: MutableState<Boolean>,
+    val duration: MutableState<Int>,
+    val isDownloaded: MutableState<Boolean>,
+    val progressOfDownload: MutableState<Float>,
+    val downloadInProgress: MutableState<Boolean>
+)
+
+@Composable
+fun DisposableMediaPlayerEffect(mediaPlayer: MediaPlayer) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // DisposableEffect to handle MediaPlayer lifecycle
+    DisposableEffect(lifecycleOwner) {
+        // Create an observer for lifecycle events
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    // Pause or stop the MediaPlayer if needed
+                    if (mediaPlayer.isPlaying) {
+                        mediaPlayer.pause()
+                    }
+                }
+
+                Lifecycle.Event.ON_STOP -> {
+                    // Reset or stop the MediaPlayer if needed
+                    mediaPlayer.stop()
+                    mediaPlayer.reset()
+                }
+
+                Lifecycle.Event.ON_DESTROY -> {
+                    // Release the MediaPlayer resources
+                    mediaPlayer.release()
+                }
+
+                else -> { /* Handle other lifecycle events if needed */
+                }
+            }
+        }
+
+        // Add the observer to the lifecycle
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        // OnDispose block to remove the observer and release resources
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            mediaPlayer.release()
+        }
+    }
+}
+
+fun getDownloadCallback(
+    aya: LocalAya,
+    handleAyaEvents: (QuranViewModel.AyaEvent) -> Unit,
+    error: MutableState<String>,
+    fileToBePlayed: MutableState<File?>,
+    isDownloaded: MutableState<Boolean>,
+    downloadInProgress: MutableState<Boolean>,
+    progressOfDownload: MutableState<Float>
+): (File?, Exception?, Int, Boolean) -> Unit {
+
+    return { file, exception, progress, completed ->
+        when {
+            exception != null -> {
+                // Handle any error that occurs during the download
+                error.value = exception.message ?: "Unknown error"
+                downloadInProgress.value = false
+                isDownloaded.value = false
+                progressOfDownload.value = 0f
+                fileToBePlayed.value = null
+            }
+
+            completed -> {
+                // Handle the completion of the download
+                downloadInProgress.value = false
+                isDownloaded.value = true
+                progressOfDownload.value = 100f
+                fileToBePlayed.value = file
+                aya.audioFileLocation = file?.absolutePath ?: ""
+                handleAyaEvents(
+                    QuranViewModel.AyaEvent.addAudioToAya(
+                        aya.suraNumber,
+                        aya.ayaNumberInSurah,
+                        aya.audioFileLocation
+                    )
+                )
+            }
+
+            else -> {
+                // Update the progress of the download
+                downloadInProgress.value = true
+                isDownloaded.value = false
+                progressOfDownload.value = progress.toFloat()
+                fileToBePlayed.value = null
+            }
+        }
+    }
+}
+
+
+@Composable
+fun AyaCard(
+    aya: LocalAya,
+    arabicFontSize: Float,
+    translationFontSize: Float,
+    arabicFont: String,
+    translation: String,
+    isPlaying: MutableState<Boolean>,
+    isPaused: MutableState<Boolean>,
+    isStopped: MutableState<Boolean>,
+    duration: MutableState<Int>,
+    isDownloaded: MutableState<Boolean>,
+    hasAudio: MutableState<Boolean>,
+    playFile: () -> Unit,
+    pauseFile: () -> Unit,
+    stopFile: () -> Unit,
+    loading: Boolean,
+    error: MutableState<String>,
+    downloadInProgress: MutableState<Boolean>,
+    progressOfDownload: MutableState<Float>,
+    isBookmarkedVerse: MutableState<Boolean>,
+    isFavored: MutableState<Boolean>,
+    hasNote: MutableState<Boolean>,
+    popUpOpen: MutableState<Boolean>,
+    showNoteDialog: MutableState<Boolean>,
+    handleAyaEvents: (QuranViewModel.AyaEvent) -> Unit,
+    downloadFile: () -> Unit,
+    noteContent: MutableState<String>
+) {
     //a popup to show the error message
     //it is displayed when there is an error in the audio player
     //it should be displayed in the center of the screen on top of everything
@@ -525,8 +716,8 @@ fun AyaListItemUI(
                         Text(
                             text = aya.ayaArabic,
                             style = MaterialTheme.typography.titleLarge,
-                            fontSize = if (arabic_Font_size.value == 0.0f) 24.sp else arabic_Font_size.value.sp,
-                            fontFamily = when (arabic_Font.value) {
+                            fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
+                            fontFamily = when (arabicFont) {
                                 "Default" -> {
                                     utmaniQuranFont
                                 }
@@ -551,7 +742,7 @@ fun AyaListItemUI(
                                     utmaniQuranFont
                                 }
                             },
-                            textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center,
+                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(4.dp)
@@ -567,14 +758,14 @@ fun AyaListItemUI(
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-                if (translation.value == "Urdu") {
+                if (translation == "Urdu") {
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         Text(
-                            text = "${aya.ayaTranslationUrdu} ۔",
+                            text = "${aya.translationUrdu} ۔",
                             style = MaterialTheme.typography.titleSmall,
-                            fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp,
+                            fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
                             fontFamily = urduFont,
-                            textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center,
+                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp)
@@ -589,12 +780,12 @@ fun AyaListItemUI(
                         )
                     }
                 }
-                if (translation.value == "English") {
+                if (translation == "English") {
                     Text(
-                        text = aya.ayaTranslationEnglish,
+                        text = aya.translationEnglish,
                         style = MaterialTheme.typography.bodySmall,
-                        fontSize = if (translation_Font_size.value == 0.0f) 16.sp else translation_Font_size.value.sp,
-                        textAlign = if (aya.ayaNumber != 0) TextAlign.Justify else TextAlign.Center,
+                        fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
+                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp)
@@ -615,10 +806,10 @@ fun AyaListItemUI(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AyatFeatures(
-                        isBookMarkedVerse = isBookMarkedVerse,
-                        isFavouredVerse = isFavoured,
+                        isBookMarkedVerse = isBookmarkedVerse,
+                        isFavouredVerse = isFavored,
                         hasNote = hasNote,
-                        handleEvents = viewModel::handleAyaEvent,
+                        handleEvents = handleAyaEvents,
                         aya = aya,
                         showNoteDialog = showNoteDialog,
                         noteContent = noteContent,
@@ -656,15 +847,14 @@ fun AyaListItemUI(
                 if (popUpOpen.value) {
                     AyatFeaturesPopUpMenu(
                         aya = aya,
-                        isBookMarkedVerse = isBookMarkedVerse,
-                        isFavouredVerse = isFavoured,
+                        isBookMarkedVerse = isBookmarkedVerse,
+                        isFavouredVerse = isFavored,
                         hasNote = hasNote,
-                        handleEvents = viewModel::handleAyaEvent,
+                        handleEvents = handleAyaEvents,
                         showNoteDialog = showNoteDialog,
                         noteContent = noteContent,
-                        popUpOpen = popUpOpen,
-                        onDownloadClicked = { downloadFile() }
-                    )
+                        popUpOpen = popUpOpen
+                    ) { downloadFile() }
                 }
 
                 PlayerForAyat(

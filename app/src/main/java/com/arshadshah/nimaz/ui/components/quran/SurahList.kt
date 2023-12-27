@@ -3,12 +3,12 @@ package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import com.arshadshah.nimaz.data.remote.models.Surah
+import com.arshadshah.nimaz.data.local.models.LocalSurah
 
 @Composable
 fun SurahList(
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
-    state: State<ArrayList<Surah>>,
+    state: State<ArrayList<LocalSurah>>,
     loading: Boolean,
     error: String,
 ) {
