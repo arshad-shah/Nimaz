@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class PrayerTimesTrackerWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -56,6 +57,8 @@ class PrayerTimesTrackerWorker(private val context: Context, workerParams: Worke
         glanceIds: List<GlanceId>,
         newState: PrayerTimesTrackerWidget,
     ) {
+
+        Log.d("PrayerTimeTrackerWorker", "glanceIds: $glanceIds")
         glanceIds.forEach { glanceId ->
             updateAppWidgetState(
                 context = context,
@@ -84,35 +87,46 @@ class PrayerTimesTrackerWorker(private val context: Context, workerParams: Worke
                 LocalDate.now()
             )
             val prayerTimes = PrayerTimesRepository.getPrayerTimes(context).data
+            Log.d("PrayerTimeTrackerWorker", "prayerTimes: $prayerTimes")
 
-            val prayerTrackerWithTime = PrayerTrackerWithTime(
-                date = tracker.date,
-                fajr = tracker.fajr,
-                fajrTime = prayerTimes?.fajr.toString(),
-                dhuhr = tracker.dhuhr,
-                dhuhrTime = prayerTimes?.dhuhr.toString(),
-                asr = tracker.asr,
-                asrTime = prayerTimes?.asr.toString(),
-                maghrib = tracker.maghrib,
-                maghribTime = prayerTimes?.maghrib.toString(),
-                isha = tracker.isha,
-                ishaTime = prayerTimes?.isha.toString(),
-                progress = tracker.progress
-            )
-            // Update state with new data
-            setWidgetState(
-                glanceIds,
-                PrayerTimesTrackerWidget.Success(prayerTrackerWithTime)
-            )
+            if(
+                prayerTimes?.fajr != null
+                && prayerTimes.dhuhr != null
+                && prayerTimes.asr != null
+                && prayerTimes.maghrib!= null
+                && prayerTimes.isha!= null) {
+                val prayerTrackerWithTime = PrayerTrackerWithTime(
+                    date = tracker.date,
+                    fajr = tracker.fajr,
+                    fajrTime = prayerTimes.fajr!!,
+                    dhuhr = tracker.dhuhr,
+                    dhuhrTime = prayerTimes.dhuhr!!,
+                    asr = tracker.asr,
+                    asrTime = prayerTimes.asr!!,
+                    maghrib = tracker.maghrib,
+                    maghribTime = prayerTimes.maghrib!!,
+                    isha = tracker.isha,
+                    ishaTime = prayerTimes.isha!!,
+                )
+                // Update state with new data
+                setWidgetState(
+                    glanceIds,
+                    PrayerTimesTrackerWidget.Success(prayerTrackerWithTime)
+                )
 
-            Result.success()
+                Result.success()
+            }else{
+                Result.failure()
+            }
         } catch (e: Exception) {
             setWidgetState(glanceIds, PrayerTimesTrackerWidget.Error(e.message.orEmpty()))
             if (runAttemptCount < 5) {
                 // Exponential backoff strategy will avoid the request to repeat
                 // too fast in case of failures.
+                Log.w("PrayerTimeTrackerWorker", "doWork: Failure occurred Retrying...")
                 Result.retry()
             } else {
+                Log.e("PrayerTimeTrackerWorker", e.message.orEmpty())
                 Result.failure()
             }
         }

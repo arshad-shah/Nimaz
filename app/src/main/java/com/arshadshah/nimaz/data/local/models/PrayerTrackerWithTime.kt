@@ -2,20 +2,31 @@ package com.arshadshah.nimaz.data.local.models
 
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Serializable
 data class PrayerTrackerWithTime(
+
     @Serializable(with = LocalDateSerializer::class)
     val date: LocalDate = LocalDate.now(),
     val fajr: Boolean = false,
-    val fajrTime: String = "",
+
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val fajrTime: LocalDateTime = LocalDateTime.now(),
     val dhuhr: Boolean = false,
-    val dhuhrTime: String = "",
+
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val dhuhrTime: LocalDateTime = LocalDateTime.now(),
     val asr: Boolean = false,
-    val asrTime: String = "",
+
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val asrTime: LocalDateTime = LocalDateTime.now(),
     val maghrib: Boolean = false,
-    val maghribTime: String = "",
+
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val maghribTime: LocalDateTime = LocalDateTime.now(),
     val isha: Boolean = false,
-    val ishaTime: String = "",
-    val progress: Int = 0,
+
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val ishaTime: LocalDateTime = LocalDateTime.now(),
 )

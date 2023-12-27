@@ -34,7 +34,7 @@ buildscript {
         nav_version = "2.7.6"
 
         app_update_version = '2.1.0'
-        build_gradle_version = '8.1.2'
+        build_gradle_version = '8.2.0'
         google_services_version = "4.3.14"
         firebase_crashlytics_gradle_version = "2.9.2"
         firebase_crashlytics_version = "18.3.4"

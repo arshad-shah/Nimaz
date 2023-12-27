@@ -294,7 +294,7 @@ fun AyatFeaturesPreview() {
         ayaNumberInSurah = 1,
         bookmark = true,
         favorite = true,
-        note = "dsfhsdhsgdfhstghs",
+        note = "dsfhsdhsgdfhstgh",
         juzNumber = 1,
         suraNumber = 1,
         ruku = 1,

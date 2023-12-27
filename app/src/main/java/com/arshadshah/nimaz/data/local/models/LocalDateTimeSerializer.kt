@@ -1,10 +1,12 @@
 package com.arshadshah.nimaz.data.local.models
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.LocalDateTime
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = java.time.LocalDateTime::class)
 object LocalDateTimeSerializer {
 
