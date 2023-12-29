@@ -16,7 +16,6 @@ import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class PrayerTimesTrackerWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -89,12 +88,13 @@ class PrayerTimesTrackerWorker(private val context: Context, workerParams: Worke
             val prayerTimes = PrayerTimesRepository.getPrayerTimes(context).data
             Log.d("PrayerTimeTrackerWorker", "prayerTimes: $prayerTimes")
 
-            if(
+            if (
                 prayerTimes?.fajr != null
                 && prayerTimes.dhuhr != null
                 && prayerTimes.asr != null
-                && prayerTimes.maghrib!= null
-                && prayerTimes.isha!= null) {
+                && prayerTimes.maghrib != null
+                && prayerTimes.isha != null
+            ) {
                 val prayerTrackerWithTime = PrayerTrackerWithTime(
                     date = tracker.date,
                     fajr = tracker.fajr,
@@ -115,7 +115,7 @@ class PrayerTimesTrackerWorker(private val context: Context, workerParams: Worke
                 )
 
                 Result.success()
-            }else{
+            } else {
                 Result.failure()
             }
         } catch (e: Exception) {

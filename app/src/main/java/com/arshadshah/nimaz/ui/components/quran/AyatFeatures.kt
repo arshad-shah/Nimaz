@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,9 +46,6 @@ fun AyatFeatures(
     noteContent: MutableState<String>,
     isLoading: Boolean,
 ) {
-    val sajdahPopUpOpen = remember {
-        mutableStateOf(false)
-    }
     val titleOfDialog = remember {
         mutableStateOf("")
     }
@@ -61,110 +59,63 @@ fun AyatFeatures(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+
         if (aya.sajda) {
-            //a button that opens a popup menu
-            IconButton(
-                onClick = {
-                    sajdahPopUpOpen.value = !sajdahPopUpOpen.value
-                },
-                enabled = !isLoading,
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .placeholder(
-                            visible = isLoading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
-                            highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
-                            )
-                        ),
-                    painter = painterResource(id = R.drawable.sajad_icon),
-                    contentDescription = "Sajda at this Ayat",
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-            }
+            SajdaButton(aya.sajdaType, isLoading)
         }
-        if (sajdahPopUpOpen.value) {
-            Popup(
-                onDismissRequest = {
-                    sajdahPopUpOpen.value = false
-                },
-                alignment = Alignment.BottomCenter,
-                offset = IntOffset(0, -100),
-            ) {
-                ElevatedCard(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    elevation = CardDefaults.elevatedCardElevation(
-                        defaultElevation = 8.dp,
-                    )
-                ) {
-                    Text(
-                        text = "${aya.sajdaType} sujood",
-                        modifier = Modifier.padding(8.dp),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
-        if (isBookMarkedVerse.value) {
-            IconButton(
-                onClick = {
+        TogglableAyatFeature(
+            icon = if (isBookMarkedVerse.value) painterResource(id = R.drawable.bookmark_icon) else painterResource(
+                id = R.drawable.bookmark_icon_unselected
+            ),
+            iconDescription = if (isBookMarkedVerse.value) "Remove Bookmark" else "Add Bookmark",
+            onClick = {
+                if (isBookMarkedVerse.value) {
                     titleOfDialog.value = "Remove from Bookmarks"
                     messageOfDialog.value =
                         "Are you sure you want to remove this verse from your bookmarks?"
                     openDialog.value = true
-                },
-                enabled = !isLoading,
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.bookmark_icon),
-                    contentDescription = "Bookmark",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(4.dp)
-                        .placeholder(
-                            visible = isLoading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
-                            highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
-                            )
+                } else {
+                    isBookMarkedVerse.value = !isBookMarkedVerse.value
+                    aya.bookmark = isBookMarkedVerse.value
+                    handleEvents(
+                        QuranViewModel.AyaEvent.BookmarkAya(
+                            aya.ayaNumberInSurah,
+                            aya.suraNumber,
+                            aya.ayaNumberInSurah,
+                            isBookMarkedVerse.value
                         )
-                )
-            }
-        }
+                    )
+                }
+            },
+            isLoading = isLoading
+        )
 
-        if (isFavouredVerse.value) {
-            IconButton(
-                onClick = {
+        TogglableAyatFeature(
+            icon = if (isFavouredVerse.value) painterResource(id = R.drawable.favorite_icon) else painterResource(
+                id = R.drawable.favorite_icon_unseletced
+            ),
+            iconDescription = if (isFavouredVerse.value) "Remove Favourite" else "Add Favourite",
+            onClick = {
+                if (isFavouredVerse.value) {
                     titleOfDialog.value = "Remove from Favourites"
                     messageOfDialog.value =
                         "Are you sure you want to remove this verse from your favourites?"
                     openDialog.value = true
-                },
-                enabled = !isLoading,
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.favorite_icon),
-                    contentDescription = "Favourite",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(4.dp)
-                        .placeholder(
-                            visible = isLoading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
-                            highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
-                            )
+                } else {
+                    isFavouredVerse.value = !isFavouredVerse.value
+                    aya.favorite = isFavouredVerse.value
+                    handleEvents(
+                        QuranViewModel.AyaEvent.FavoriteAya(
+                            aya.ayaNumberInSurah,
+                            aya.suraNumber,
+                            aya.ayaNumberInSurah,
+                            isFavouredVerse.value
                         )
-                )
-            }
-        }
+                    )
+                }
+            },
+            isLoading = isLoading
+        )
 
         if (hasNote.value) {
             IconButton(
@@ -271,6 +222,89 @@ fun AyatFeatures(
             onDismiss = {
                 openDialog.value = false
             })
+    }
+}
+
+@Composable
+fun SajdaButton(sajdaType: String, isLoading: Boolean) {
+    val sajdahPopUpOpen = remember {
+        mutableStateOf(false)
+    }
+    //a button that opens a popup menu
+    IconButton(
+        onClick = {
+            sajdahPopUpOpen.value = !sajdahPopUpOpen.value
+        },
+        enabled = !isLoading,
+    ) {
+        Icon(
+            modifier = Modifier
+                .size(48.dp)
+                .placeholder(
+                    visible = isLoading,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(4.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                ),
+            painter = painterResource(id = R.drawable.sajad_icon),
+            contentDescription = "Sajda at this Ayat",
+            tint = MaterialTheme.colorScheme.tertiary
+        )
+    }
+    if (sajdahPopUpOpen.value) {
+        Popup(
+            onDismissRequest = {
+                sajdahPopUpOpen.value = false
+            },
+            alignment = Alignment.BottomCenter,
+            offset = IntOffset(0, -100),
+        ) {
+            ElevatedCard(
+                shape = MaterialTheme.shapes.extraLarge,
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 8.dp,
+                )
+            ) {
+                Text(
+                    text = "$sajdaType sujood",
+                    modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TogglableAyatFeature(
+    icon: Painter,
+    iconDescription: String,
+    onClick: () -> Unit,
+    isLoading: Boolean
+) {
+
+    IconButton(
+        onClick = { onClick() },
+        enabled = !isLoading,
+    ) {
+        Icon(
+            painter = icon,
+            contentDescription = iconDescription,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .size(24.dp)
+                .padding(4.dp)
+                .placeholder(
+                    visible = isLoading,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(4.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                )
+        )
     }
 }
 

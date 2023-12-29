@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.data.local
 
+import com.arshadshah.nimaz.data.local.models.HadithChapter
+import com.arshadshah.nimaz.data.local.models.HadithEntity
+import com.arshadshah.nimaz.data.local.models.HadithFavourite
+import com.arshadshah.nimaz.data.local.models.HadithMetadata
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
@@ -17,6 +21,19 @@ class DataStore(db: AppDatabase) {
     private val fastTrackerDao = db.fastTracker
     private val tasbihTrackerDao = db.tasbihTracker
     private val categoryDao = db.category
+    private val hadithDao = db.hadith
+    suspend fun getAllMetadata(): List<HadithMetadata> = hadithDao.getAllMetadata()
+    suspend fun getAllHadithChaptersForABook(bookId: Int): List<HadithChapter> =
+        hadithDao.getAllHadithChaptersForABook(bookId)
+
+    suspend fun getAllHadithsForABook(bookId: Int, chapterId: Int): List<HadithEntity> =
+        hadithDao.getAllHadithsForABook(bookId, chapterId)
+
+    suspend fun updateFavouriteStatus(id: Int, favourite: Boolean) =
+        hadithDao.updateFavouriteStatus(id, favourite)
+
+    //getAllFavourites
+    suspend fun getAllFavourites(): List<HadithFavourite> = hadithDao.getAllFavourites()
 
     suspend fun getAllCategories() = categoryDao.getAllCategories()
 

@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FULL_QURAN_DOWNLOADED
-import com.arshadshah.nimaz.constants.AppConstants.QURAN_SCREEN_TAG
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalSurah
@@ -13,7 +12,6 @@ import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.QuranUtils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -38,6 +36,9 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
 
     private val _ayaListState = MutableStateFlow(ArrayList<LocalAya>(100))
     val ayaListState = _ayaListState.asStateFlow()
+
+    private val _currentAyatScreenNumber = MutableStateFlow(1)
+    val currentAyatScreenNumber = _currentAyatScreenNumber.asStateFlow()
 
     //state for quran menu features like page display, font size, font type, etc
     private val _arabic_Font_size = MutableStateFlow(26.0f)
@@ -85,6 +86,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
 
         //change display mode
         data class Change_Display_Mode(val mode: String) : QuranMenuEvents()
+
         //initialize quran using settings
         object Initialize_Quran : QuranMenuEvents()
 
@@ -178,6 +180,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
             }
         }
     }
+
     private fun getSurahList() {
         viewModelScope.launch(Dispatchers.IO) {
             _loadingState.value = true
@@ -219,21 +222,19 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
             try {
                 _loadingState.value = true
                 _errorState.value = ""
+                _ayaListState.value = ArrayList()
                 val dataStore = LocalDataStore.getDataStore()
                 val languageConverted = language.uppercase(Locale.ROOT)
-                dataStore.getAyasOfSurah(surahNumber).collect {
-                    Log.d(QURAN_SCREEN_TAG, "Update occurred: $it")
-                    _ayaListState.value = ArrayList()
-                    val newList =
-                        addBismillahToFirstAya(
-                            it as ArrayList<LocalAya>,
-                            languageConverted,
-                            surahNumber
-                        )
-                    _ayaListState.value = newList
-                    _loadingState.value = false
-                    _errorState.value = ""
-                }
+                val ayatList = dataStore.getAyasOfSurah(surahNumber)
+                val newList =
+                    addBismillahToFirstAya(
+                        ayatList as ArrayList<LocalAya>,
+                        languageConverted,
+                        surahNumber
+                    )
+                _ayaListState.value = newList
+                _loadingState.value = false
+                _errorState.value = ""
             } catch (e: Exception) {
                 _ayaListState.value = ArrayList()
                 _loadingState.value = false
@@ -313,7 +314,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
             try {
                 val dataStore = LocalDataStore.getDataStore()
                 val languageConverted = language.uppercase(Locale.ROOT)
-
                 val listOfJuzAyat =
                     dataStore.getAyasOfJuz(juzNumber) as ArrayList<LocalAya>
                 val newList = addBismillahInJuz(juzNumber, languageConverted, listOfJuzAyat)

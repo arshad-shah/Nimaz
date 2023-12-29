@@ -2,9 +2,7 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants {
 
-    const val BASE_URL = "https://nimazapi.arshadshah.com/gui"
-
-    const val DATABASE_VERSION = 1
+    const val DATABASE_VERSION = 4
 
     //prayer names
     const val PRAYER_NAME_FAJR = "Fajr"
@@ -65,6 +63,7 @@ object AppConstants {
     const val SETTINGS_VIEWMODEL_KEY = "settings_viewmodel_key"
     const val TASBIH_VIEWMODEL_KEY = "tasbih_viewmodel_key"
     const val TRACKING_VIEWMODEL_KEY = "tracking_viewmodel_key"
+    const val HADITH_VIEW_MODEL = "hadith_viewmodel"
 
     //full quran downloaded
     const val FULL_QURAN_DOWNLOADED = "full_quran_downloaded"
@@ -162,6 +161,9 @@ object AppConstants {
     const val TASBIH_LIST_SCREEN = "tasbih_list_screen"
     const val WEB_VIEW_SCREEN_ROUTE = "web_view_screen/{url}"
     const val LICENCES_SCREEN_ROUTE: String = "Licences"
+    const val HADITH_SHELF_SCREEN_ROUTE = "hadith_shelf_screen"
+    const val HADITH_CHAPTERS_LIST_SCREEN_ROUTE = "hadith_chapters_list_screen/{bookId}/{bookName}"
+    const val HADITH_LIST_SCREEN_ROUTE = "hadith_list_screen/{bookId}/{chapterId}"
 
     //Test tags
     //navigation tags

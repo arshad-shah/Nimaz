@@ -3,8 +3,8 @@ package com.arshadshah.nimaz.repositories
 import com.arshadshah.nimaz.data.local.models.LocalCategory
 import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.data.local.models.LocalDua
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.ApiResponse
+import com.arshadshah.nimaz.utils.LocalDataStore
 import java.io.IOException
 
 object DuaRepository {

@@ -6,10 +6,15 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.compose.rememberNavController
@@ -26,7 +31,12 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.ThemeChoser
-import com.arshadshah.nimaz.utils.*
+import com.arshadshah.nimaz.utils.AutoLocationUtils
+import com.arshadshah.nimaz.utils.CustomAnimation
+import com.arshadshah.nimaz.utils.FirebaseLogger
+import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.NetworkChecker
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.RouteUtils.checkRoute
 import kotlinx.coroutines.launch
 
@@ -144,7 +154,6 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.testTag("mainActivity"),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
-                    floatingActionButtonPosition = FabPosition.End,
                     topBar = {
                         CustomTopBar(
                             route = route,

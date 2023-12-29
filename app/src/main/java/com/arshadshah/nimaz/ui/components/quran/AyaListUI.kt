@@ -31,12 +31,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -100,7 +100,6 @@ fun AyaListUI(
             translation,
             downloadAyaAudioFile,
             handleAyaEvents,
-            loading
         )
     } else {
         val sharedPref = LocalContext.current.getSharedPreferences("quran", 0)
@@ -143,7 +142,6 @@ fun PlaceholderAyaList(
     translation: String,
     downloadAyaAudioFile: (Int, Int, (File?, Exception?, progress: Int, completed: Boolean) -> Unit) -> Unit,
     handleAyaEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
-    loading: Boolean
 ) {
     val dummyList = remember { generateDummyAyaList() }
 
@@ -165,7 +163,7 @@ fun PlaceholderAyaList(
                     revelationOrder = 0,
                     rukus = 0
                 ),
-                loading = loading,
+                loading = true,
             )
         }
         items(dummyList.size) { index ->
@@ -177,7 +175,7 @@ fun PlaceholderAyaList(
                 translation = translation,
                 downloadAyaAudioFile = downloadAyaAudioFile,
                 handleAyaEvents = handleAyaEvents,
-                loading = loading
+                loading = true
             )
         }
     }
@@ -196,7 +194,7 @@ fun HandleScrollEffects(
     handleQuranMenuEvents: KFunction1<QuranViewModel.QuranMenuEvents, Unit>
 ) {
     // Save the last visible item index
-    LaunchedEffect(key1 = remember { derivedStateOf { state.firstVisibleItemIndex } }) {
+    LaunchedEffect(key1 = state.firstVisibleItemIndex) {
         sharedPref.edit().putInt("visibleItemIndex-${type}-${number}", state.firstVisibleItemIndex)
             .apply()
     }
@@ -676,6 +674,8 @@ fun AyaCard(
                 {
                     CircularProgressIndicator(
                         modifier = Modifier.size(50.dp),
+                        strokeWidth = 8.dp,
+                        strokeCap = StrokeCap.Round,
                     )
                 }
             },
@@ -847,12 +847,7 @@ fun AyaCard(
                 if (popUpOpen.value) {
                     AyatFeaturesPopUpMenu(
                         aya = aya,
-                        isBookMarkedVerse = isBookmarkedVerse,
-                        isFavouredVerse = isFavored,
-                        hasNote = hasNote,
-                        handleEvents = handleAyaEvents,
                         showNoteDialog = showNoteDialog,
-                        noteContent = noteContent,
                         popUpOpen = popUpOpen
                     ) { downloadFile() }
                 }

@@ -43,8 +43,8 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 import com.arshadshah.nimaz.data.local.models.CountDownTime
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonCalc
 import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonPhase
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel

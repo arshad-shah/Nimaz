@@ -2,47 +2,25 @@ package com.arshadshah.nimaz.ui.components.quran
 
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
-import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
 import com.arshadshah.nimaz.ui.components.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import es.dmoral.toasty.Toasty
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 @Composable
 fun MoreMenu(

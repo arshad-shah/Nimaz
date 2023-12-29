@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.data.local.models.Parameters
-import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesData
 import com.arshadshah.nimaz.services.PrayerTimesService

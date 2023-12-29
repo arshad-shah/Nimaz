@@ -14,7 +14,6 @@ import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
 import androidx.glance.appwidget.appWidgetBackground
-import androidx.glance.appwidget.updateAll
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
@@ -27,7 +26,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
-import com.arshadshah.nimaz.widgets.prayertimestrackerthin.NimazWidgetPrayerTracker
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDate

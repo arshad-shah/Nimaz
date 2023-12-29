@@ -24,17 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalAya
-import com.arshadshah.nimaz.viewModel.QuranViewModel
 
 @Composable
 fun AyatFeaturesPopUpMenu(
     aya: LocalAya,
-    isBookMarkedVerse: MutableState<Boolean>,
-    isFavouredVerse: MutableState<Boolean>,
-    hasNote: MutableState<Boolean>,
-    handleEvents: (QuranViewModel.AyaEvent) -> Unit,
     showNoteDialog: MutableState<Boolean>,
-    noteContent: MutableState<String>,
     popUpOpen: MutableState<Boolean>,
     onDownloadClicked: () -> Unit,
 ) {
@@ -65,63 +59,6 @@ fun AyatFeaturesPopUpMenu(
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                OutlinedIconButton(
-                    modifier = Modifier.size(52.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                    onClick = {
-                        isBookMarkedVerse.value = !isBookMarkedVerse.value
-                        aya.bookmark = isBookMarkedVerse.value
-                        handleEvents(
-                            QuranViewModel.AyaEvent.BookmarkAya(
-                                aya.ayaNumberInSurah,
-                                aya.suraNumber,
-                                aya.ayaNumberInSurah,
-                                isBookMarkedVerse.value
-                            )
-                        )
-                        popUpOpen.value = false
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.bookmark_icon),
-                        contentDescription = "Bookmark",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .padding(2.dp),
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                OutlinedIconButton(
-                    modifier = Modifier.size(52.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                    onClick = {
-                        isFavouredVerse.value = !isFavouredVerse.value
-                        aya.favorite = isFavouredVerse.value
-                        handleEvents(
-                            QuranViewModel.AyaEvent.FavoriteAya(
-                                aya.ayaNumberInSurah,
-                                aya.suraNumber,
-                                aya.ayaNumberInSurah,
-                                isFavouredVerse.value
-                            )
-                        )
-                        popUpOpen.value = false
-                    },
-                    enabled = true,
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.favorite_icon),
-                        contentDescription = "Favourite",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .padding(2.dp),
-                    )
-                }
-
-
                 Spacer(modifier = Modifier.width(8.dp))
                 OutlinedIconButton(
                     modifier = Modifier.size(52.dp),
