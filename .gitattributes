@@ -1,2 +1,2 @@
-C:/Users/shaha/AndroidStudioProjects/Nimaz/app/src/main/assets/databases/quran_room_compatible.db filter=lfs diff=lfs merge=lfs -text
+app/src/main/assets/databases/*.db filter=lfs diff=lfs merge=lfs -text
 *.db filter=lfs diff=lfs merge=lfs -text
