@@ -1,13 +1,10 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
@@ -24,9 +21,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
@@ -40,15 +35,8 @@ import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
-import com.arshadshah.nimaz.ui.theme.almajeed
-import com.arshadshah.nimaz.ui.theme.amiri
-import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
-import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlin.reflect.KFunction1
@@ -196,7 +184,7 @@ fun MyQuranScreen(
                 }
             )
         }
-        item{
+        item {
             FeaturesDropDown(
                 colors = CardDefaults.elevatedCardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
@@ -220,28 +208,28 @@ fun MyQuranScreen(
                         },
                         itemContent = { aya ->
 
-                                //the text
+                            //the text
+                            Text(
+                                modifier = Modifier
+                                    .padding(8.dp),
+                                text = "${aya.first}.  ${surahs.first}",
+                                textAlign = TextAlign.Start,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                                 Text(
+                                    text = aya.third,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontSize = 24.sp,
+                                    fontFamily = quranFont,
+                                    textAlign = TextAlign.Center,
                                     modifier = Modifier
-                                        .padding(8.dp),
-                                    text = "${aya.first}.  ${surahs.first}",
-                                    textAlign = TextAlign.Start,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.bodyLarge
+                                        .fillMaxWidth()
+                                        .padding(4.dp)
                                 )
-                                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                    Text(
-                                        text = aya.third,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontSize = 24.sp,
-                                        fontFamily = quranFont,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(4.dp)
-                                    )
-                                }
+                            }
                         }
                     )
                 }

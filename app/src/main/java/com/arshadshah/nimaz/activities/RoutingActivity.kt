@@ -16,11 +16,10 @@ class RoutingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         val splashScreen = installSplashScreen()
-        splashScreen.setKeepOnScreenCondition { true }
 
         super.onCreate(savedInstanceState)
 
-        val sharedPref = PrivateSharedPreferences(this.applicationContext)
+        val sharedPref = PrivateSharedPreferences(this)
 
         if (!LocalDataStore.isInitialized()) {
             LocalDataStore.init(this)
@@ -38,6 +37,10 @@ class RoutingActivity : ComponentActivity() {
             )
         }
 
+        splashScreen.setKeepOnScreenCondition {
+            LocalDataStore.isInitialized()
+        }
+
         //get the first time flag
         val firstTime = sharedPref.getDataBoolean(AppConstants.IS_FIRST_INSTALL, true)
 
@@ -46,12 +49,12 @@ class RoutingActivity : ComponentActivity() {
                 AppConstants.SPLASH_SCREEN_TAG,
                 "First time install launching setup activity"
             )
-            val intent = Intent(this.applicationContext, Introduction::class.java)
+            val intent = Intent(this, Introduction::class.java)
             startActivity(intent)
             finish()
         } else {
             Log.d(AppConstants.SPLASH_SCREEN_TAG, "Not first time returning to main activity")
-            val intent = Intent(this.applicationContext, MainActivity::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }

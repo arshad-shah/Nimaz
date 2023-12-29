@@ -77,7 +77,7 @@ fun FastTrackerCard(
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 .fillMaxWidth()
                 .placeholder(
-                    visible = false,
+                    visible = isLoading.value,
                     color = MaterialTheme.colorScheme.outline,
                     shape = RoundedCornerShape(4.dp),
                     highlight = PlaceholderHighlight.shimmer(

@@ -114,7 +114,7 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
                         dhuhrTime.value =
                             prayerTimesTracker.data.dhuhrTime.format(formatter)
                         asrTime.value =
-                           prayerTimesTracker.data.asrTime.format(formatter)
+                            prayerTimesTracker.data.asrTime.format(formatter)
                         maghribTime.value = prayerTimesTracker.data.maghribTime
                             .format(formatter)
                         ishaTime.value =

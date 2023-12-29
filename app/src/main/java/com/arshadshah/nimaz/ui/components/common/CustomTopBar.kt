@@ -95,7 +95,6 @@ fun CustomTopBar(
     )
 
     val (menuOpen, setMenuOpen) = remember { mutableStateOf(false) }
-    val (menuOpen2, setMenuOpen2) = remember { mutableStateOf(false) }
 
     val vibrationAllowed = remember { mutableStateOf(true) }
     val rOrl = remember { mutableStateOf(true) }

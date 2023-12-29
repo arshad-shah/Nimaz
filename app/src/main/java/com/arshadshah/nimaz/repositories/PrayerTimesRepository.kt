@@ -8,8 +8,8 @@ import com.arshadshah.nimaz.libs.prayertimes.PrayerTimesCalculated
 import com.arshadshah.nimaz.libs.prayertimes.calculationClasses.CalculationParameters
 import com.arshadshah.nimaz.libs.prayertimes.enums.Prayer
 import com.arshadshah.nimaz.libs.prayertimes.objects.Coordinates
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.ApiResponse
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper.getParams
 import java.io.IOException
 import java.time.Instant

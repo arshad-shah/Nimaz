@@ -226,6 +226,7 @@ class TrackerViewModel : ViewModel() {
                 lastDay = yearMonth.atEndOfMonth()
             ).collect { trackers ->
                 _fastProgressForMonth.value = trackers
+                getMenstruatingState(_dateState.value)
             }
         }
     }
@@ -239,6 +240,7 @@ class TrackerViewModel : ViewModel() {
         viewModelScope.launch {
             dataStore.getTrackersForMonth(firstDayOfMonth, lastDayOfMonth).collect { trackers ->
                 _progressForMonth.value = trackers
+                getMenstruatingState(_dateState.value)
             }
         }
     }
@@ -264,6 +266,7 @@ class TrackerViewModel : ViewModel() {
                     trackers.find { it.date == date } ?: LocalPrayersTracker(date = date)
                 }
                 _trackersForWeek.value = completeWeek
+                getMenstruatingState(_dateState.value)
             }
         }
     }
@@ -278,10 +281,12 @@ class TrackerViewModel : ViewModel() {
                     dataStore.saveFastTracker(tracker)
                     _isFasting.value = tracker.isFasting
                     _fastTrackerState.value = FastTrackerState.Tracker(tracker)
+                    getMenstruatingState(_dateState.value)
                 } else {
                     dataStore.updateFastTracker(tracker)
                     _isFasting.value = tracker.isFasting
                     _fastTrackerState.value = FastTrackerState.Tracker(tracker)
+                    getMenstruatingState(_dateState.value)
                 }
             } catch (e: Exception) {
                 _fastTrackerState.value =
@@ -314,10 +319,12 @@ class TrackerViewModel : ViewModel() {
                     val tracker = LocalFastTracker(date)
                     dataStore.saveFastTracker(tracker)
                     _fastTrackerState.value = FastTrackerState.Tracker(tracker)
+                    getMenstruatingState(_dateState.value)
                     _isFasting.value = false
                 } else {
                     val tracker = dataStore.getFastTrackerForDate(date)
                     _fastTrackerState.value = FastTrackerState.Tracker(tracker)
+                    getMenstruatingState(_dateState.value)
                     _isFasting.value = tracker.isFasting
                 }
             } catch (e: Exception) {
@@ -333,6 +340,7 @@ class TrackerViewModel : ViewModel() {
                 val dataStore = LocalDataStore.getDataStore()
                 dataStore.saveFastTracker(tracker)
                 _fastTrackerState.value = FastTrackerState.Tracker(tracker)
+                getMenstruatingState(_dateState.value)
             } catch (e: Exception) {
                 _fastTrackerState.value =
                     FastTrackerState.Error(e.message ?: "An unknown error occurred")
@@ -344,6 +352,7 @@ class TrackerViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _allTrackers.value = PrayerTrackerRepository.getAllTrackers()
+                getMenstruatingState(_dateState.value)
             } catch (e: Exception) {
                 _trackerState.value = TrackerState.Error(e.message ?: "An unknown error occurred")
             }
@@ -393,6 +402,7 @@ class TrackerViewModel : ViewModel() {
                         isMenstruating = updatedTracker.isMenstruating
                     )
                 }
+                getMenstruatingState(_dateState.value)
             } catch (e: Exception) {
                 Log.d("updateTracker", e.message ?: "Unknown error")
             }
@@ -419,6 +429,7 @@ class TrackerViewModel : ViewModel() {
                                     isMenstruating = prayerTrackerFromStorage.isMenstruating
                                 )
                             }
+                            getMenstruatingState(_dateState.value)
                         }
                     }
             } catch (e: Exception) {

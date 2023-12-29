@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
@@ -34,13 +34,13 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun CalenderScreen(paddingValues: PaddingValues) {
-
-    val viewModel = viewModel(
+fun CalenderScreen(
+    paddingValues: PaddingValues,
+    viewModel: TrackerViewModel = viewModel(
         key = TRACKING_VIEWMODEL_KEY,
-        initializer = { TrackerViewModel() },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
+        viewModelStoreOwner = LocalContext.current as MainActivity
     )
+) {
 
     //call this effect only once
     LaunchedEffect(Unit) {

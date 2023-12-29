@@ -9,7 +9,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.arshadshah.nimaz.ui.components.settings.state.BooleanPreferenceSettingValueState
-import com.google.accompanist.permissions.*
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

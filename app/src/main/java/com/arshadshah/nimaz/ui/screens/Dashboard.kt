@@ -51,11 +51,12 @@ fun Dashboard(
     onNavigateToTasbihListScreen: () -> Unit,
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
     context: Context = LocalContext.current,
-    viewModel: DashboardViewmodel = viewModel(
+) {
+
+    val viewModel: DashboardViewmodel = viewModel(
         key = "dashboard_viewmodel",
         initializer = { DashboardViewmodel(context) }
-    ),
-) {
+    )
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(DashboardViewmodel.DashboardEvent.CheckUpdate(context, false))
