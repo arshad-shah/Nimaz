@@ -115,15 +115,3 @@ fun IntroPage1() {
         }
     }
 }
-
-@Preview(
-    showBackground = true, showSystemUi = true,
-    uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL,
-    device = "id:S20 Fe"
-)
-@Composable
-fun IntroPage1Preview() {
-    NimazTheme {
-        IntroPage1()
-    }
-}

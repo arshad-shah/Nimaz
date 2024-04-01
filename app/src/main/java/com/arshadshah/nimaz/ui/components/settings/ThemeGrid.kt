@@ -42,31 +42,6 @@ fun ThemeGrid(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            SettingsTileIcon(icon = {
-                Icon(
-                    modifier = Modifier
-                        .size(24.dp),
-                    painter = painterResource(id = R.drawable.theme_icon),
-                    contentDescription = "Color"
-                )
-            })
-            SettingsTileTexts(title = {
-                Text(
-                    text = "Color",
-                )
-            },
-                subtitle = {
-                    Text(
-                        text = themeOptions.find { it.isSelected }?.themeName
-                            ?: "",
-                    )
-                })
-        }
         //the row
         Row(
             modifier = Modifier

@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,8 +13,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -77,17 +80,34 @@ fun BookShelf(
         ) { page ->
             when (page) {
                 0 -> {
-                    LazyColumn(
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                         modifier = Modifier
+                            .padding(8.dp)
                             .fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(metadataList.size) { row ->
-                            BookItem(metadataList[row]) { id: Int, title: String ->
-                                onNavigateToChaptersList(
-                                    id,
-                                    title
-                                )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(metadataList.size) { row ->
+                                BookItem(metadataList[row]) { id: Int, title: String ->
+                                    onNavigateToChaptersList(
+                                        id,
+                                        title
+                                    )
+                                }
+                                if (row != metadataList.size - 1) {
+                                    //if its not the last item, add a divider
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.background,
+                                        thickness = 2.dp,
+                                    )
+                                }
                             }
                         }
                     }
@@ -123,59 +143,59 @@ fun BookShelf(
 fun BookItem(metadata: HadithMetadata, onClick: (id: Int, title: String) -> Unit) {
     val reusableModifier = Modifier
         .fillMaxWidth()
-        .padding(8.dp)
+        .padding(4.dp)
 
-    val cardColors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-    )
-    Card(
-        colors = cardColors,
-        shape = MaterialTheme.shapes.extraLarge,
-        modifier = reusableModifier
-            .clip(MaterialTheme.shapes.extraLarge)
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
             .clickable {
                 onClick(metadata.id, metadata.title_english)
             }
-    ) {
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth(0.7f),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                Text(
-                    text = metadata.title_arabic,
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontFamily = utmaniQuranFont,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = reusableModifier
-                )
-            }
             Text(
                 text = metadata.title_english,
                 style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-                modifier = reusableModifier
-            )
-            Text(
-                text = metadata.author_english,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
                 modifier = reusableModifier
             )
             Text(
                 text = "${metadata.length} Ahadith",
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+                modifier = reusableModifier
             )
         }
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            Text(
+                text = metadata.title_arabic,
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontFamily = utmaniQuranFont,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                textAlign = TextAlign.Center,
+                modifier = reusableModifier
+            )
+        }
+    }
+    Badge(
+        modifier = Modifier.padding(horizontal = 8.dp),
+        containerColor = MaterialTheme.colorScheme.tertiary,
+        contentColor = MaterialTheme.colorScheme.onTertiary,
+    ){
+        Text(
+            text = metadata.author_english,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = reusableModifier,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

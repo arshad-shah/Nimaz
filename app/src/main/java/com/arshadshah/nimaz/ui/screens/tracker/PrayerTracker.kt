@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -97,14 +98,11 @@ fun PrayerTracker(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
+        Card(
+            colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier.padding(
                 top = 4.dp,
                 bottom = 8.dp,
@@ -141,14 +139,11 @@ fun PrayerTracker(
                 }
             }
         }
-        ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
+        Card(
+            colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier.padding(
                 top = 4.dp,
                 bottom = 8.dp,
@@ -156,27 +151,14 @@ fun PrayerTracker(
                 end = 0.dp
             ),
         ) {
-            Column {
-                Text(
-                    text = "7 Day Trend",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
                 //the data
                 SevenDayTrend(trackersForWeek, dateState)
-            }
         }
-        ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
+        Card(
+            colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier.padding(
                 top = 4.dp,
                 bottom = 8.dp,
@@ -184,17 +166,7 @@ fun PrayerTracker(
                 end = 0.dp
             ),
         ) {
-            Column {
-                Text(
-                    text = "Monthly Progress",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
                 PrayerTrackerGrid(progressForMonth, dateState)
-            }
         }
     }
 }

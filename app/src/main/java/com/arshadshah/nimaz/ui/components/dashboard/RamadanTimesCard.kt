@@ -72,28 +72,25 @@ fun RamadanTimesCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, start = 8.dp, end = 8.dp),
+                .padding(4.dp),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(16.dp),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
-            shape = MaterialTheme.shapes.extraLarge,
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
+                        modifier = Modifier.padding(start= 4.dp),
                         text = "Fasting Times Today",
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -153,6 +150,7 @@ fun RamadanTimesCard(
 
                 Row(
                     modifier = Modifier
+                        .padding(4.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -183,7 +181,7 @@ fun TimeComponent(title: String = "Suhoor Time", time: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

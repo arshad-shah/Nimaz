@@ -5,10 +5,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -18,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
@@ -65,91 +72,64 @@ fun CalenderDay(
 
     Log.d("CalenderDay", "isFromCurrentMonth: $currentDate $isFromCurrentMonth")
 
-    ElevatedCard(
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = if (isFromCurrentMonth) 2.dp else 0.dp,
-        ),
+    Card(
         modifier = Modifier
-            .padding(2.dp)
-            .alpha(if (isFromCurrentMonth) 1f else 0.2f)
+            .height(100.dp)
+            .fillMaxWidth()
+            .alpha(if (isFromCurrentMonth) 1f else 0.4f)
             .border(
-                width = if (isSelectedDay || today) 2.dp else 0.75.dp,
-                color = when (importantDay.first) {
-                    false -> if (isSelectedDay && !today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (isMenstratingToday) Color(0xFFE91E63)
-                    else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
-
-                    true -> if (isSelectedDay && !today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (isMenstratingToday) Color(0xFFE91E63)
-                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                },
-                shape = MaterialTheme.shapes.medium
-            ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = when (importantDay.first) {
-                false -> if (isSelectedDay && !today) MaterialTheme.colorScheme.tertiaryContainer
-                else if (today) MaterialTheme.colorScheme.secondaryContainer
-                else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
-
-                true -> if (isSelectedDay && !today) MaterialTheme.colorScheme.tertiaryContainer
-                else if (today) MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
+                width = if (isSelectedDay || today) 2.dp else 0.dp,
+                color = if (isSelectedDay && !today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
+                    alpha = 0.5f
                 )
-                else MaterialTheme.colorScheme.primaryContainer
-            }
-        )
+                else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(
+                    alpha = 0.5f
+                )
+                else if (isMenstratingToday) Color(0xFFE91E63)
+                else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
+                ,
+                shape = MaterialTheme.shapes.medium
+            )
+            .combinedClickable(
+                enabled = isFromCurrentMonth,
+                onClick = {
+                    dayState.selectionState.onDateSelected(dayState.date)
+                    if (handleEvents == null) return@combinedClickable
+                    handleEvents(
+                        TrackerViewModel.TrackerEvent.SET_DATE(
+                            dayState.date
+                        )
+                    )
+                    handleEvents(
+                        TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
+                            dayState.date
+                        )
+                    )
+                    handleEvents(
+                        TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
+                            dayState.date
+                        )
+                    )
+                    handleEvents(
+                        TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
+                            dayState.date
+                        )
+                    )
+                    handleEvents(
+                        TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
+                            YearMonth.from(dayState.date)
+                        )
+                    )
+                },
+                onLongClick = {
+                    if (importantDay.first) {
+                        hasDescription.value = !hasDescription.value
+                    }
+                }
+            ),
     ) {
 
         Column(
-            modifier = Modifier
-                .combinedClickable(
-                    enabled = isFromCurrentMonth,
-                    onClick = {
-                        dayState.selectionState.onDateSelected(dayState.date)
-                        if (handleEvents == null) return@combinedClickable
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.SET_DATE(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-                                YearMonth.from(dayState.date)
-                            )
-                        )
-                    },
-                    onLongClick = {
-                        if (importantDay.first) {
-                            hasDescription.value = !hasDescription.value
-                        }
-                    }
-                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DayTextGreg(
@@ -158,7 +138,6 @@ fun CalenderDay(
                 today = today,
                 importantDay = importantDay
             )
-            PrayerDots(todaysTracker = todaysTracker)
             HijriDateAndFastIndicator(
                 todaysFastTracker = todaysFastTracker,
                 isSelectedDay = isSelectedDay,
@@ -166,6 +145,50 @@ fun CalenderDay(
                 importantDay = importantDay,
                 hijriDay = hijriDay
             )
+
+            PrayerDots(todaysTracker = todaysTracker)
+
+            if (todaysFastTracker?.isFasting == true){
+                Card(
+                    shape = RoundedCornerShape(2.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = Color(0xFFCDDC39),
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Fasted",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
+                    )
+                }
+            }
+
+            if (importantDay.first) {
+                Card(
+                    shape = RoundedCornerShape(2.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = getImportantDayColor(importantDay),
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = importantDay.second,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
+                    )
+                }
+            }
         }
 
     }
@@ -176,6 +199,34 @@ fun CalenderDay(
             hasDescription = hasDescription
         )
     }
+}
+
+
+fun getImportantDayColor(
+    importantDay: Pair<Boolean, String>,
+) = when (importantDay.first) {
+    true -> if (importantDay.second == "Ramadan") Color(0xFF4CAF50)
+    else if (importantDay.second == "Eid Al Fitr") Color(0xFF4CAF50)
+    else if (importantDay.second == "Eid Al Adha") Color(0xFF4CAF50)
+    else if (importantDay.second == "Islamic New Year") Color(0xFF4CAF50)
+    else if (importantDay.second == "Day of Ashura") Color(0xFF4CAF50)
+    else if (importantDay.second == "Mawlid An Nabawi") Color(0xFF4CAF50)
+    else if (importantDay.second == "Start of Dul Hijjah") Color(0xFF4CAF50)
+    else if (importantDay.second == "Dul Hijjah 2") Color(0xFF4CAF50)
+    else if (importantDay.second == "Dul Hijjah 3") Color(0xFF4CAF50)
+    else if (importantDay.second == "Dul Hijjah 4") Color(0xFF4CAF50)
+    else if (importantDay.second == "Dul Hijjah 5") Color(0xFF4CAF50)
+    else if (importantDay.second == "Dul Hijjah 6") Color(0xFF4CAF50)
+    else if (importantDay.second == "Dul Hijjah 7") Color(0xFF4CAF50)
+    else if (importantDay.second == "Hajj Day 1") Color(0xFF4CAF50)
+    else if (importantDay.second == "Day of Arafah") Color(0xFF4CAF50)
+    else if (importantDay.second == "Ramadan Last Day") Color(0xFF4CAF50)
+    else if (importantDay.second == "Shab-e-Barat") Color(0xFF4CAF50)
+    else if (importantDay.second == "Al Isra Wal Mi'raj") Color(0xFF4CAF50)
+    else Color(0xFFE91E63)
+
+    true -> Color.Transparent
+    false -> TODO()
 }
 
 //function to check if a day is an important day

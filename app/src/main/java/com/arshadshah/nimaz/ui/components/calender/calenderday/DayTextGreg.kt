@@ -25,7 +25,7 @@ fun DayTextGreg(
         fontWeight = if (today) FontWeight.ExtraBold else FontWeight.Normal,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp),
+        modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp),
         color = when (importantDay.first) {
             false -> if (isSelectedDay && !today) MaterialTheme.colorScheme.onTertiaryContainer
             else if (today) MaterialTheme.colorScheme.onSecondaryContainer

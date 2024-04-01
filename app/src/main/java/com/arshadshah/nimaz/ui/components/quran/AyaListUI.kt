@@ -19,13 +19,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -60,6 +57,7 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholde
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.theme.almajeed
 import com.arshadshah.nimaz.ui.theme.amiri
+import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.urduFont
@@ -215,9 +213,9 @@ fun HandleScrollEffects(
     LaunchedEffect(scrollToVerse) {
         scrollToVerse?.let {
             val index = ayaList.indexOfFirst {
-                it.ayaNumberInQuran == it.ayaNumberInQuran &&
-                        it.suraNumber == it.suraNumber &&
-                        it.juzNumber == it.juzNumber
+                it.ayaNumberInQuran == scrollToVerse.ayaNumberInQuran &&
+                        it.suraNumber == scrollToVerse.suraNumber &&
+                        it.juzNumber == scrollToVerse.juzNumber
             }
             if (index != -1) {
                 state.animateScrollToItem(index)
@@ -291,6 +289,12 @@ fun AyaLazyColumn(
                 downloadAyaAudioFile = downloadAyaAudioFile,
                 handleAyaEvents = handleAyaEvents
             )
+            if (index != ayaList.size - 1) {
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
         }
     }
 }
@@ -332,7 +336,6 @@ fun AyaListItemUI(
     DisposableMediaPlayerEffect(mediaPlayer)
 
     // Other UI States
-    val popUpOpen = remember { mutableStateOf(false) }
     val showNoteDialog = remember { mutableStateOf(false) }
 
     // Prepare and Play Functions
@@ -435,12 +438,10 @@ fun AyaListItemUI(
         loading = loading,
         error = error,
         downloadInProgress = downloadInProgress,
-        progressOfDownload = progressOfDownload,
         isBookmarkedVerse = isBookmarkedVerse,
         noteContent = noteContent,
         isFavored = isFavored,
         hasNote = hasNote,
-        popUpOpen = popUpOpen,
         showNoteDialog = showNoteDialog,
         handleAyaEvents = handleAyaEvents,
         downloadFile = downloadFile
@@ -622,11 +623,9 @@ fun AyaCard(
     loading: Boolean,
     error: MutableState<String>,
     downloadInProgress: MutableState<Boolean>,
-    progressOfDownload: MutableState<Float>,
     isBookmarkedVerse: MutableState<Boolean>,
     isFavored: MutableState<Boolean>,
     hasNote: MutableState<Boolean>,
-    popUpOpen: MutableState<Boolean>,
     showNoteDialog: MutableState<Boolean>,
     handleAyaEvents: (QuranViewModel.AyaEvent) -> Unit,
     downloadFile: () -> Unit,
@@ -690,18 +689,33 @@ fun AyaCard(
             onDismiss = {
             })
     }
-    Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        modifier = Modifier
-            .padding(4.dp)
-            .fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-    ) {
+    if(aya.ayaNumberInSurah != 0){
+        Card(
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxWidth(),
+        ) {
+            AyatFeatures(
+                isBookMarkedVerse = isBookmarkedVerse,
+                isFavouredVerse = isFavored,
+                hasNote = hasNote,
+                handleEvents = handleAyaEvents,
+                aya = aya,
+                showNoteDialog = showNoteDialog,
+                noteContent = noteContent,
+                downloadFile = downloadFile,
+                isLoading = loading,
+                isPlaying = isPlaying,
+                isPaused = isPaused,
+                isStopped = isStopped,
+                playFile = playFile,
+                pauseFile = pauseFile,
+                stopFile = stopFile,
+                isDownloaded = isDownloaded,
+                hasAudio = hasAudio,
+            )
+        }
+    }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -714,7 +728,7 @@ fun AyaCard(
                 SelectionContainer {
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         Text(
-                            text = aya.ayaArabic,
+                            text = cleanString(aya.ayaArabic),
                             style = MaterialTheme.typography.titleLarge,
                             fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
                             fontFamily = when (arabicFont) {
@@ -761,7 +775,7 @@ fun AyaCard(
                 if (translation == "Urdu") {
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         Text(
-                            text = "${aya.translationUrdu} ۔",
+                            text = "${cleanString(aya.translationUrdu)} ۔",
                             style = MaterialTheme.typography.titleSmall,
                             fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
                             fontFamily = urduFont,
@@ -782,8 +796,9 @@ fun AyaCard(
                 }
                 if (translation == "English") {
                     Text(
-                        text = aya.translationEnglish,
-                        style = MaterialTheme.typography.bodySmall,
+                        text = cleanString(aya.translationEnglish),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = englishQuranTranslation,
                         fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
                         textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                         modifier = Modifier
@@ -799,72 +814,11 @@ fun AyaCard(
                             )
                     )
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AyatFeatures(
-                        isBookMarkedVerse = isBookmarkedVerse,
-                        isFavouredVerse = isFavored,
-                        hasNote = hasNote,
-                        handleEvents = handleAyaEvents,
-                        aya = aya,
-                        showNoteDialog = showNoteDialog,
-                        noteContent = noteContent,
-                        isLoading = loading,
-                    )
-                    //more menu button that opens a popup menu
-                    if (aya.ayaNumberInQuran != 0) {
-                        //a button that opens a popup menu
-                        FilledIconButton(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .placeholder(
-                                    visible = loading,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(4.dp),
-                                    highlight = PlaceholderHighlight.shimmer(
-                                        highlightColor = Color.White,
-                                    )
-                                ),
-                            onClick = {
-                                popUpOpen.value = !popUpOpen.value
-                            },
-                            enabled = !loading,
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(6.dp),
-                                painter = painterResource(id = R.drawable.more_menu_icon),
-                                contentDescription = "More Menu for Ayat ${aya.ayaNumberInSurah}",
-                            )
-                        }
-                    }
-                }
-
-                if (popUpOpen.value) {
-                    AyatFeaturesPopUpMenu(
-                        aya = aya,
-                        showNoteDialog = showNoteDialog,
-                        popUpOpen = popUpOpen
-                    ) { downloadFile() }
-                }
-
-                PlayerForAyat(
-                    isPlaying = isPlaying,
-                    isPaused = isPaused,
-                    isStopped = isStopped,
-                    duration = duration,
-                    isDownloaded = isDownloaded,
-                    hasAudio = hasAudio,
-                    onPlayClicked = { playFile() },
-                    onPauseClicked = { pauseFile() },
-                    onStopClicked = { stopFile() },
-                    isLoading = loading,
-                )
             }
         }
-    }
+}
+
+// function to remove \ from the arabic text
+fun cleanString(text: String): String {
+    return text.replace("\\", "")
 }

@@ -8,17 +8,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,9 +52,15 @@ fun Categories(
     val itemCount = if (loading.value) 5 else categories.value.size
     val itemContent: @Composable (Int) -> Unit = { index ->
         if (loading.value) {
-            Category(title = "Category $index", loading = true, onClicked = {})
+            Category(
+                title = "Category $index",
+                onClicked = {},
+                loading = true,
+                number = index
+            )
         } else {
             Category(
+                number = index + 1,
                 title = categories.value[index].name,
                 loading = false,
                 onClicked = {
@@ -64,12 +73,24 @@ fun Categories(
         }
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 128.dp),
-        contentPadding = paddingValues
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        modifier = Modifier
+            .padding(paddingValues)
+            .padding(8.dp)
+            .fillMaxWidth(),
     ) {
-        items(itemCount) {
-            itemContent(it)
+        LazyColumn{
+            items(itemCount) {
+                itemContent(it)
+                //if (it < itemCount - 1) Divider()
+                if (it < itemCount - 1) {
+                    HorizontalDivider()
+                }
+            }
         }
     }
 }
@@ -82,18 +103,14 @@ fun Category(
     description: String = "",
     onClicked: () -> Unit = {},
     loading: Boolean,
+    number: Int,
 ) {
-    ElevatedCard(
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .clickable(onClick = onClicked, enabled = !loading),
-    ) {
         Row(
             modifier = Modifier
                 .padding(8.dp)
+                .clip(MaterialTheme.shapes.medium)
                 .fillMaxWidth()
+                .clickable(onClick = onClicked, enabled = !loading)
                 .placeholder(
                     visible = loading,
                     color = MaterialTheme.colorScheme.outline,
@@ -101,9 +118,15 @@ fun Category(
                     highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
                 ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Start
         ) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = "${number}.",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(text = title, style = MaterialTheme.typography.titleLarge,color = MaterialTheme.colorScheme.onSurface,)
             icon?.let {
                 Image(
                     painter = painterResource(id = it),
@@ -112,12 +135,4 @@ fun Category(
                 )
             }
         }
-    }
-}
-
-
-@Preview
-@Composable
-fun PreviewCategory() {
-    Category(title = "Subhanallah", loading = false)
 }

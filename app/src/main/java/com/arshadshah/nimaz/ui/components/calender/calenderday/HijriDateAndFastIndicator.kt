@@ -35,13 +35,13 @@ fun HijriDateAndFastIndicator(
     ) {
         Text(
             //put a letter scissor ha in front of the day to show that it is a hijri day
-            text = "ه" + hijriDay[ChronoField.DAY_OF_MONTH].toString(),
-            style = MaterialTheme.typography.titleMedium,
+            text = "${hijriDay[ChronoField.DAY_OF_MONTH]}/${hijriDay[ChronoField.MONTH_OF_YEAR]}",
+            style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontWeight = if (today) FontWeight.ExtraBold else FontWeight.Normal,
             modifier = Modifier
-                .padding(vertical = 3.dp, horizontal = 3.dp),
+                .padding(vertical = 1.dp, horizontal = 3.dp),
             color = when (importantDay.first) {
                 false -> if (isSelectedDay && !today) MaterialTheme.colorScheme.onTertiaryContainer
                 else if (today) MaterialTheme.colorScheme.onSecondaryContainer
@@ -51,15 +51,6 @@ fun HijriDateAndFastIndicator(
                 else if (today) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onTertiaryContainer
             }
-        )
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .background(
-                    color = if (todaysFastTracker?.isFasting == true) MaterialTheme.colorScheme.error
-                    else Color.Transparent,
-                    shape = CircleShape
-                )
         )
     }
 }

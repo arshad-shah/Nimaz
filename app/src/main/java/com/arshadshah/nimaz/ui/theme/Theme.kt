@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
+import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
 import com.arshadshah.nimaz.ui.theme.CustomThemes.DarkColorsDefault
 import com.arshadshah.nimaz.ui.theme.CustomThemes.LightColorsDefault
 
@@ -35,12 +37,11 @@ private val LocalAppDimens = staticCompositionLocalOf {
 fun NimazTheme(
     darkTheme: Boolean = false,
     dynamicColor: Boolean = false,
-    themeName: String = "Default",
+    themeName: String = THEME_SYSTEM,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
-        //if the name of the theme is not default then use the custom theme
-        themeName != "Default" && !dynamicColor ->
+        themeName != THEME_DEFAULT && !dynamicColor ->
             CustomThemes.getTheme(themeName, darkTheme)
 
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -52,21 +53,8 @@ fun NimazTheme(
     }
     val configuration = LocalConfiguration.current
     //if screen is small then use small dimensions
-    val dimensions =
-        if (configuration.screenWidthDp < 360 && configuration.screenHeightDp < 700) smallDimensions else sw360Dimensions
-    val typography =
-        if (configuration.screenHeightDp > 700 || configuration.screenWidthDp < 360) TypographyMain else TypographySmall
-    val view = LocalView.current
-    val window = (view.context as Activity).window
-    if (!view.isInEditMode) {
-        SideEffect {
-            (view.context as Activity).window.statusBarColor = colorScheme.surface.toArgb()
-            // Set the status bar color to be light or dark, depending on the theme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
-                !darkTheme
-        }
-    }
-
+    val dimensions = if (configuration.screenWidthDp >= 600) sw360Dimensions else smallDimensions
+    val typography = if (configuration.screenWidthDp >= 600) TypographyMain else TypographySmall
     ProvideDimens(dimensions) {
         MaterialTheme(
             colorScheme = colorScheme,

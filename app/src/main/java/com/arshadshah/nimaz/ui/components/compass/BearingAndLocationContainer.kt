@@ -69,13 +69,6 @@ fun bearingToCompassDirection(bearing: Float): String {
 @Composable
 fun BearingAndLocationContainerUI(location: String, heading: String) {
     ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
             .padding(8.dp)
             .height(IntrinsicSize.Max)

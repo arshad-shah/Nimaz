@@ -105,12 +105,6 @@ fun CalenderScreen(
                         elevation = 8.dp
                     ),
                     contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge.copy(
-                    topStart = CornerSize(0.dp),
-                    topEnd = CornerSize(0.dp),
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,7 +115,7 @@ fun CalenderScreen(
                     handleEvents = viewModel::onEvent,
                     dateState = dateState
                 )
-
+            }
                 FastTrackerCard(
                     dateState = dateState,
                     isFastingToday = isFastingToday,
@@ -137,7 +131,6 @@ fun CalenderScreen(
                         )
                     )
                 }
-            }
         }
     }
 }

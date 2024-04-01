@@ -97,13 +97,10 @@ fun AlertDialogNimaz(
                     elevation = 32.dp
                 ),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-            shape = MaterialTheme.shapes.extraLarge,
         ) {
             Column(
                 modifier = Modifier

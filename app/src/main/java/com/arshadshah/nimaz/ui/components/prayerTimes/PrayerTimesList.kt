@@ -2,12 +2,14 @@ package com.arshadshah.nimaz.ui.components.prayerTimes
 
 
 import android.content.Context
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -95,8 +97,6 @@ fun PrayerTimesList(
             prayerTimesMap = mapOfPrayerTimes,
             loading = true,
             currentPrayerName = currentPrayerName,
-            name = nextPrayerName,
-            timer = timer,
         )
     } else {
         val timeToNextPrayerLong =
@@ -115,9 +115,7 @@ fun PrayerTimesList(
         PrayerTimesListUI(
             loading = false,
             currentPrayerName = currentPrayerName,
-            name = nextPrayerName,
             prayerTimesMap = mapOfPrayerTimes,
-            timer = timer,
         )
     }
 
@@ -128,58 +126,25 @@ fun PrayerTimesListUI(
     prayerTimesMap: Map<String, LocalDateTime?>,
     loading: Boolean,
     currentPrayerName: String,
-    name: String,
-    timer: CountDownTime?,
 ) {
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
     val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 1)
     val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 29)
     val isRamadan = todayHijri.isAfter(ramadanStart) && todayHijri.isBefore(ramadanEnd)
-    Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 8.dp)
+            .fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier.scrollable(
-                orientation = Orientation.Vertical,
-                enabled = true,
-                state = rememberScrollState()
+        //iterate over the map
+        for ((key, value) in prayerTimesMap) {
+            PrayerTimesRow(
+                prayerName = key,
+                prayerTime = value,
+                isHighlighted = currentPrayerName == key,
+                loading = loading,
+                isRamadan = isRamadan,
             )
-        ) {
-            //iterate over the map
-            for ((key, value) in prayerTimesMap) {
-                //if the element is first then dont add a divider else add a divider on top
-                if (key != prayerTimesMap.keys.first()) {
-                    Divider(
-                        modifier = Modifier.fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    )
-                }
-                val isBoldText = if (isRamadan) {
-                    key == "Fajr" || key == "Maghrib"
-                } else {
-                    false
-                }
-                PrayerTimesRow(
-                    prayerName = key,
-                    prayerTime = value,
-                    isHighlighted = currentPrayerName == key,
-                    shouldShowTimer = name == key,
-                    loading = loading,
-                    isBoldText = isBoldText,
-                    timer = timer,
-                )
-            }
         }
     }
 }
@@ -191,13 +156,11 @@ fun PrayerTimesRow(
     prayerTime: LocalDateTime?,
     isHighlighted: Boolean,
     loading: Boolean,
-    isBoldText: Boolean,
-    shouldShowTimer: Boolean,
-    timer: CountDownTime?,
+    isRamadan: Boolean,
 ) {
     //format the date to time based on device format
     //get the device trime format
-    val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
+    val deviceTimeFormat = DateFormat.is24HourFormat(LocalContext.current)
     //if the device time format is 24 hour then use the 24 hour format
     val formatter = if (deviceTimeFormat) {
         DateTimeFormatter.ofPattern("HH:mm")
@@ -207,43 +170,58 @@ fun PrayerTimesRow(
     val sentenceCase =
         prayerName.lowercase(Locale.ROOT)
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = if (isHighlighted) {
-            Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 8.dp,
-                        topEnd = 8.dp,
-                        bottomStart = 8.dp,
-                        bottomEnd = 8.dp
-                    )
-                )
-        } else {
-            Modifier
-                .fillMaxWidth()
-        }
+
+    val isBold = when {
+        isRamadan && prayerName == PRAYER_NAME_FAJR -> true
+        isRamadan && prayerName == PRAYER_NAME_MAGHRIB -> true
+        else -> false
+    }
+    Card(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
-        Text(
-            text = sentenceCase,
-            modifier = Modifier
-                .padding(16.dp)
-                .placeholder(
-                    visible = loading,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp),
-                    highlight = PlaceholderHighlight.shimmer(
-                        highlightColor = Color.White,
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = if (isHighlighted) {
+                Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 8.dp,
+                            topEnd = 8.dp,
+                            bottomStart = 8.dp,
+                            bottomEnd = 8.dp
+                        )
                     )
-                ),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
-        )
-        if (shouldShowTimer) {
+            }
+            else if(isBold){
+                Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f))
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 8.dp,
+                            topEnd = 8.dp,
+                            bottomStart = 8.dp,
+                            bottomEnd = 8.dp
+                        )
+                    )
+            }
+            else {
+                Modifier
+                    .fillMaxWidth()
+            }
+        ) {
             Text(
+                text = sentenceCase,
                 modifier = Modifier
                     .padding(16.dp)
                     .placeholder(
@@ -254,25 +232,24 @@ fun PrayerTimesRow(
                             highlightColor = Color.White,
                         )
                     ),
-                text = " -${timer?.hours} : ${timer?.minutes} : ${timer?.seconds}",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = if (isBold) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
+            )
+            Text(
+                text = prayerTime!!.format(formatter),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .placeholder(
+                        visible = loading,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(4.dp),
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = Color.White,
+                        )
+                    ),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = if (isBold) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
             )
         }
-        Text(
-            text = prayerTime!!.format(formatter),
-            modifier = Modifier
-                .padding(16.dp)
-                .placeholder(
-                    visible = loading,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp),
-                    highlight = PlaceholderHighlight.shimmer(
-                        highlightColor = Color.White,
-                    )
-                ),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
-        )
     }
 }

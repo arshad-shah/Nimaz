@@ -2,7 +2,9 @@ package com.arshadshah.nimaz.ui.screens.settings
 
 import android.app.Activity
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -17,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +40,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_TEST
@@ -199,43 +201,35 @@ fun SettingsScreen(
     ) {
         LocationSettings()
 
-        ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
-                ),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-            ),
-            shape = MaterialTheme.shapes.extraLarge,
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .testTag(TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON)
-        ) {
-            SettingsMenuLink(
-                title = { Text(text = "Prayer Times") },
-                onClick = onNavigateToPrayerTimeCustomizationScreen,
-                icon = {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(id = R.drawable.settings_sliders_icon),
-                        contentDescription = "Prayer Times settings"
-                    )
-                },
-                action = {
-                    Icon(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .padding(2.dp),
-                        painter = painterResource(id = R.drawable.angle_right_icon),
-                        contentDescription = "Update Available"
-                    )
-                }
-            )
-        }
+        SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
+            ElevatedCard(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+            ) {
+                SettingsMenuLink(
+                    title = { Text(text = "Prayer Times") },
+                    onClick = onNavigateToPrayerTimeCustomizationScreen,
+                    icon = {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.settings_sliders_icon),
+                            contentDescription = "Prayer Times settings"
+                        )
+                    },
+                    action = {
+                        Icon(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(2.dp),
+                            painter = painterResource(id = R.drawable.angle_right_icon),
+                            contentDescription = "Update Available"
+                        )
+                    }
+                )
+            }
 
+        }
         val stateOfTheme =
             rememberPreferenceStringSettingState(key = THEME, defaultValue = themeState.value)
 
@@ -251,25 +245,11 @@ fun SettingsScreen(
         SettingsGroup(
             title = { Text(text = "Appearance") },
         ) {
-            AnimatedVisibility(visible = stateOfTheme.value != "SYSTEM") {
-                ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth()
-                ) {
+            ElevatedCard(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+            ) {
                     //switch for theme mode dark/light when its not dynamic
                     SettingsSwitch(
                         state = stateDarkMode,
@@ -303,20 +283,10 @@ fun SettingsScreen(
                         }
                     )
                 }
-            }
             //theme
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
 
@@ -339,17 +309,8 @@ fun SettingsScreen(
 
         SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsMenuLink(
@@ -384,17 +345,8 @@ fun SettingsScreen(
             }
 
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsMenuLink(
@@ -450,34 +402,16 @@ fun SettingsScreen(
             }
 
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 NotificationScreenUI()
             }
 
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsMenuLink(
@@ -513,17 +447,8 @@ fun SettingsScreen(
             }
 
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 BatteryExemptionUI()
@@ -532,17 +457,8 @@ fun SettingsScreen(
 
         SettingsGroup(title = { Text(text = "Legal") }) {
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsMenuLink(
@@ -570,17 +486,8 @@ fun SettingsScreen(
             }
 
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsMenuLink(
@@ -684,7 +591,7 @@ fun SettingsScreen(
                     shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Nimaz")
                     var shareMessage = "\nCheck out this app\n\n"
                     shareMessage = """
-								${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
+								${shareMessage}https://play.google.com/store/apps/details?id=${getAppID(context)}
 								
 								""".trimIndent()
                     shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
@@ -751,11 +658,30 @@ fun SettingsScreen(
         //get the current year
         val currentYear = LocalDateTime.now().year
         Text(
-            text = "© $currentYear Nimaz " + BuildConfig.VERSION_NAME,
+            text = "© $currentYear Nimaz " +getAppVersion(context),
             modifier = Modifier
                 .padding(8.dp)
                 .align(Alignment.CenterHorizontally),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge
         )
+    }
+}
+
+fun getAppVersion(context: Context): String {
+    return try {
+        val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        pInfo.versionName // Or use versionCode based on your need
+    } catch (e: PackageManager.NameNotFoundException) {
+        "Unknown"
+    }
+}
+
+
+fun getAppID(context: Context): String {
+    return try {
+        val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+        pInfo.packageName // Or use versionCode based on your need
+    } catch (e: PackageManager.NameNotFoundException) {
+        "Unknown"
     }
 }

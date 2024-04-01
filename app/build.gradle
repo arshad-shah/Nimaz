@@ -1,12 +1,12 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
-    id 'com.google.firebase.firebase-perf'
-    id "com.google.devtools.ksp"
-    id "com.mikepenz.aboutlibraries.plugin" version "10.6.2"
+    alias libs.plugins.android.application
+    alias libs.plugins.kotlin.android
+    alias libs.plugins.kotlin.serialization
+    alias libs.plugins.google.services
+    alias libs.plugins.firebase.crashlytics
+    alias libs.plugins.firebase.perf
+    alias libs.plugins.ksp
+    alias libs.plugins.about.libs.plugin
 }
 
 apply plugin: 'com.mikepenz.aboutlibraries.plugin'
@@ -19,8 +19,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 152
-        versionName '1.7.2'
+        versionCode 153
+        versionName '1.8.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,19 +41,18 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = "1.8"
     }
     buildFeatures {
-        compose true
-        viewBinding true
-        buildConfig true
+        compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.4'
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     packagingOptions {
         resources {
@@ -68,99 +67,96 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.test:monitor:1.6.1'
-    implementation 'androidx.test.ext:junit-ktx:1.1.5'
-    implementation 'androidx.test:runner:1.5.2'
+    coreLibraryDesugaring libs.desugar.jdk.libs
+    implementation libs.androidx.monitor
+    implementation libs.androidx.junit.ktx
+    implementation libs.androidx.runner
 
-    testImplementation "junit:junit:$junit_version"
+    testImplementation libs.junit
     //mockito
-    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation libs.mockito.core
     //Robolectric environment
-    testImplementation "androidx.test:core:$test_core_version"
-    testImplementation "org.robolectric:robolectric:$robolectric_version"
-    androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+    testImplementation libs.androidx.core
+    testImplementation libs.robolectric
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
 
     //navigation testing
-    androidTestImplementation "androidx.navigation:navigation-testing:$navigation_testing_version"
+    androidTestImplementation libs.androidx.navigation.testing
 
-    implementation "androidx.core:core-ktx:$core_ktx_version"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$navigation_ui_ktx_version"
-    implementation "androidx.preference:preference-ktx:$preference_ktx_version"
-    implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
+    implementation libs.androidx.ktx
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.navigation.ui.ktx
+    implementation libs.androidx.preference.ktx
+    implementation libs.androidx.core.splashscreen
 
-    implementation platform('com.google.firebase:firebase-bom:32.2.2')
-    implementation "com.google.firebase:firebase-crashlytics-ktx"
-    implementation "com.google.firebase:firebase-analytics-ktx"
-    implementation 'com.google.firebase:firebase-perf-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.9.9'
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.crashlytics.ktx
+    implementation libs.firebase.analytics.ktx
+    implementation libs.firebase.perf.ktx
+    implementation libs.firebase.crashlytics.buildtools
 
-    implementation platform('androidx.compose:compose-bom:2023.08.00')
-    implementation "androidx.activity:activity-compose"
-    implementation "androidx.compose.ui:ui"
-    implementation "androidx.compose.ui:ui-tooling-preview"
-    implementation 'androidx.compose.material:material-icons-extended'
-    implementation "androidx.compose.material3:material3"
-    debugImplementation "androidx.compose.ui:ui-tooling"
-    debugImplementation "androidx.compose.ui:ui-test-manifest"
-    androidTestImplementation('androidx.compose.ui:ui-test-junit4')
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.compose.ui.graphics
+    implementation libs.androidx.compose.material3
+    debugImplementation libs.androidx.compose.ui.tooling
+    debugImplementation libs.androidx.compose.ui.test.manifest
 
     //navigation compose
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation libs.androidx.navigation.compose
 
-    implementation "com.google.android.gms:play-services-location:$play_services_location_version"
+    implementation libs.play.services.location
 
 
-    implementation "com.github.GrenderG:Toasty:$toasty_version"
+    implementation libs.toasty
 
     //room
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    ksp "androidx.room:room-compiler:$room_version"
-    implementation "androidx.room:room-ktx:$room_version"
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
+    ksp libs.room.compiler
+    implementation libs.room.ktx
 
     //accompanist permissions
-    implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
+    implementation libs.accompanist.permissions
 
-    implementation "com.google.android.play:app-update:$app_update_version"
-    implementation "com.google.android.play:app-update-ktx:$app_update_version"
+    implementation libs.app.update
+    implementation libs.app.update.ktx
 
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation libs.gson
 
     //calendar
-    implementation 'io.github.boguszpawlowski.composecalendar:composecalendar:1.1.1'
+    implementation libs.calendar
 
     //Add AWS S3 SDK
-    implementation 'com.amazonaws:aws-android-sdk-s3:2.73.0'
+    implementation libs.aws.android.sdk.s3
 
     // Open Source Libraries Screen.
-    implementation 'com.mikepenz:aboutlibraries-core:10.8.3'
-    implementation 'com.mikepenz:aboutlibraries-compose:10.8.3'
+    implementation libs.aboutlibraries.core.v1083
+    implementation libs.aboutlibraries.compose.v1083
 
-    //markdown
-    final def markwon_version = '4.6.2'
-
-    implementation "io.noties.markwon:core:$markwon_version"
-    implementation "io.noties.markwon:ext-strikethrough:$markwon_version"
-    implementation "io.noties.markwon:ext-tables:$markwon_version"
-    implementation "io.noties.markwon:html:$markwon_version"
-    implementation "io.noties.markwon:linkify:$markwon_version"
+    implementation libs.markwon.core
+    implementation libs.markwon.ext.strikethrough
+    implementation libs.markwon.ext.tables
+    implementation libs.markwon.html
+    implementation libs.markwon.linkify
 
     //org.slf4j.impl.StaticLoggerBinder
-    implementation 'org.slf4j:slf4j-android:1.7.36'
+    implementation libs.slf4j.android
 
-    implementation("com.google.android.play:review:2.0.1")
-    implementation("com.google.android.play:review-ktx:2.0.1")
+    implementation(libs.app.review)
+    implementation(libs.app.review.ktx)
 
-    implementation "com.github.skydoves:balloon-compose:$balloon_version"
+    implementation libs.baloon
 
-    implementation "androidx.glance:glance-appwidget:1.0.0"
-    implementation "androidx.glance:glance-material3:1.0.0"
-    implementation "androidx.work:work-runtime-ktx:2.9.0"
+    implementation libs.glance.appwidget
+    implementation libs.glance.material3
+    implementation libs.work.manager
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
+    implementation libs.kotlinx.serialization.json
     //kotlinx date time
-    implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.3.0'
+    implementation libs.kotlinx.datetime
 
 }

@@ -93,7 +93,8 @@ object RouteUtils {
             AppConstants.DASHBOARD_SCREEN,
             AppConstants.HADITH_SHELF_SCREEN_ROUTE,
             AppConstants.HADITH_CHAPTERS_LIST_SCREEN_ROUTE,
-            AppConstants.HADITH_LIST_SCREEN_ROUTE
+            AppConstants.HADITH_LIST_SCREEN_ROUTE,
+            AppConstants.PRAYER_TIMES_SCREEN_ROUTE,
         )
         //if the route is in the list then return true
         return routeToCheck.contains(route)

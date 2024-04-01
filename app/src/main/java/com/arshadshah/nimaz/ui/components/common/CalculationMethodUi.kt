@@ -66,15 +66,8 @@ fun CalculationMethodUI() {
         settingViewModel.longitude
     }.collectAsState()
     ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
     ) {
         SettingsSwitch(
@@ -161,17 +154,8 @@ fun CalculationMethodUI() {
         exit = shrinkVertically()
     ) {
         ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
-                ),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-            ),
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
-                .padding(8.dp)
+                .padding(4.dp)
                 .fillMaxWidth()
         ) {
             SettingsList(

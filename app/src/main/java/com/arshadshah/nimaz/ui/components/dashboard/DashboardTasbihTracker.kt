@@ -9,8 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.DropDownHeader
+import com.arshadshah.nimaz.ui.components.common.DropdownPlaceholder
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.common.Placeholder
 import com.arshadshah.nimaz.ui.components.tasbih.DeleteDialog
 import com.arshadshah.nimaz.ui.components.tasbih.GoalEditDialog
 import com.arshadshah.nimaz.ui.components.tasbih.TasbihDropdownItem
@@ -34,7 +34,7 @@ fun DashboardTasbihTracker(
                 onNavigateToTasbihListScreen()
             }
         ) {
-            Placeholder(nameOfDropdown = "Tasbih")
+            DropdownPlaceholder(text = "No Tasbih found")
         }
     } else {
         val showTasbihDialog = remember {
@@ -58,13 +58,6 @@ fun DashboardTasbihTracker(
         }
 
         FeaturesDropDown(
-            header = {
-                DropDownHeader(
-                    headerLeft = "Name",
-                    headerRight = "Count",
-                    headerMiddle = "Goal"
-                )
-            },
             //the list of tasbih for the date at the index
             items = tasbihList,
             label = "Tasbih",

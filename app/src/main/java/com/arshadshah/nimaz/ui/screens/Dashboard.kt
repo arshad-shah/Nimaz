@@ -156,30 +156,6 @@ fun Dashboard(
             }
         }
         item {
-            Card(
-                modifier = Modifier
-                    .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
-                    .testTag(AppConstants.TEST_TAG_EVENTS_CARD)
-                    .clip(shape = MaterialTheme.shapes.extraLarge)
-                    .clickable {
-                        onNavigateToCalender()
-                    },
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
-            ) {
-                Text(
-                    text = "Events",
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
                 RamadanCard(
                     onNavigateToCalender = onNavigateToCalender
                 )
@@ -189,33 +165,8 @@ fun Dashboard(
                 EidUlAdhaCard {
                     onNavigateToCalender()
                 }
-            }
         }
         item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
-                    .testTag(AppConstants.TEST_TAG_TRACKERS_CARD)
-                    .clickable {
-                        onNavigateToTracker()
-                    },
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
-            ) {
-                Text(
-                    text = "Trackers",
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
                 DashboardPrayerTracker(
                     dashboardPrayerTracker.value,
                     viewModel::handleEvent,
@@ -227,30 +178,9 @@ fun Dashboard(
                     isLoading,
                     dashboardPrayerTracker.value.isMenstruating
                 )
-            }
         }
         //quick links to the tasbih and quran
         item {
-            Card(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
-            ) {
-                Text(
-                    text = "Quick Links",
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
                 DashboardQuranTracker(
                     onNavigateToAyatScreen = onNavigateToAyatScreen,
                     quranBookmarks,
@@ -264,31 +194,9 @@ fun Dashboard(
                     handleEvents = viewModel::handleEvent,
                     isLoading = isLoading
                 )
-            }
         }
         item {
-            Card(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = "Daily Verses",
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
                 DashboardRandomAyatCard(onNavigateToAyatScreen = onNavigateToAyatScreen, randomAya)
-            }
         }
     }
 }
