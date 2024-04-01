@@ -60,18 +60,6 @@ class MainActivity : ComponentActivity() {
             }
             AutoLocationUtils.startLocationUpdates()
         }
-
-        val updateService = UpdateService(this)
-
-        updateService.checkForUpdate(true) { updateIsAvailable ->
-            if (updateIsAvailable) {
-                updateService.startUpdateFlowForResult(
-                    this,
-                    APP_UPDATE_REQUEST_CODE
-                )
-            }
-        }
-
     }
 
     override fun onDestroy() {

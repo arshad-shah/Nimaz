@@ -16,15 +16,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.DropdownPlaceholder
 import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.quran.SuraListItem
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.DashboardViewmodel
@@ -33,6 +33,7 @@ import kotlin.reflect.KFunction1
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardQuranTracker(
+    suraList: List<LocalSurah>,
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
     quranBookmarks: State<List<LocalAya>>,
     handleEvents: KFunction1<DashboardViewmodel.DashboardEvent, Unit>,
@@ -72,6 +73,7 @@ fun DashboardQuranTracker(
         }
     } else {
         FeaturesDropDown(
+            modifier = Modifier.padding(4.dp),
             label = "Quran Bookmarks",
             items = quranBookmarks.value,
             dropDownItem = { LocalAya ->
@@ -106,16 +108,24 @@ fun DashboardQuranTracker(
                                 )
                             },
                             itemContent = { aya ->
-                                //the text
-                                Text(
-                                    modifier = Modifier
-                                        .padding(8.dp),
-                                    text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumberInSurah.toString(),
-                                    textAlign = TextAlign.Start,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                                val filteredSurah = suraList.filter { it.number == aya.suraNumber }.distinct()[0]
+                                SuraListItem(
+                                    suraNumber = filteredSurah.number,
+                                    englishName = filteredSurah.englishName,
+                                    transliteration = filteredSurah.englishNameTranslation,
+                                    isLoading = false,
+                                    arabicName = filteredSurah.name,
+                                    verseCount = filteredSurah.numberOfAyahs,
+                                    verseNumber = aya.ayaNumberInSurah,
+                                    revelationType = filteredSurah.revelationType
+                                ) { suraNumber: String, isSurah: Boolean, translation: String, ayaNumber: Int? ->
+                                    onNavigateToAyatScreen(
+                                        suraNumber,
+                                        isSurah,
+                                        translation,
+                                        ayaNumber ?: 0
+                                    )
+                                }
                             }
                         )
                     })

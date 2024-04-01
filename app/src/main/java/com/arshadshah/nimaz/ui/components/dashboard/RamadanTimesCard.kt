@@ -185,7 +185,7 @@ fun TimeComponent(title: String = "Suhoor Time", time: String) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = title, style = MaterialTheme.typography.titleLarge)
-        Text(text = time, style = MaterialTheme.typography.titleLarge)
+        Text(text = title, style = MaterialTheme.typography.titleMedium)
+        Text(text = time, style = MaterialTheme.typography.titleMedium)
     }
 }

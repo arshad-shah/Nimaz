@@ -192,11 +192,23 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         }
     }
 
+
+    private val _surahList = MutableStateFlow(listOf<LocalSurah>())
+    val surahList = _surahList.asStateFlow()
+    //get surah for the aya
     private fun getBookmarksOfQuran() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val dataStore = LocalDataStore.getDataStore()
                 val bookmarks = dataStore.getBookmarkedAyas()
+                //suralist
+                val surahList = mutableListOf<LocalSurah>()
+                //for each bookmark get the surah
+                for (bookmark in bookmarks) {
+                    val surah = dataStore.getSurahById(bookmark.suraNumber)
+                    surahList.add(surah)
+                }
+                _surahList.value = surahList
                 _bookmarks.value = bookmarks
             } catch (e: Exception) {
                 Log.d("getAllBookmarks", e.message ?: "Unknown error")

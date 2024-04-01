@@ -2,11 +2,13 @@ package com.arshadshah.nimaz.ui.components.dashboard
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.DropDownHeader
 import com.arshadshah.nimaz.ui.components.common.DropdownPlaceholder
@@ -58,6 +60,7 @@ fun DashboardTasbihTracker(
         }
 
         FeaturesDropDown(
+            modifier = Modifier.padding(4.dp),
             //the list of tasbih for the date at the index
             items = tasbihList,
             label = "Tasbih",
