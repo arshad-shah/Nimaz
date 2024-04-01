@@ -3,11 +3,14 @@ package com.arshadshah.nimaz.ui.theme
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DARK_RED
@@ -29,26 +32,18 @@ fun ThemeChoser(
         initializer = { SettingsViewModel(context) },
         viewModelStoreOwner = context as ComponentActivity
     )
-    val themeState = remember {
-        viewModelSettings.theme
-    }.collectAsState()
-    val isDarkTheme = remember {
-        viewModelSettings.isDarkMode
-    }.collectAsState()
+    val themeState = viewModelSettings.theme.collectAsState()
+    val isDarkTheme = viewModelSettings.isDarkMode.collectAsState()
 
-    val systemUiController = rememberSystemUiController()
-
-    systemUiController.setSystemBarsColor(
-        color = MaterialTheme.colorScheme.background,
-        darkIcons = !darkTheme.value,
-        isNavigationBarContrastEnforced = false
-    )
+    LaunchedEffect(key1 =Unit) {
+        viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
+    }
 
     when (themeState.value) {
         THEME_SYSTEM -> {
             dynamicTheme.value = true
             darkTheme.value = isDarkTheme.value
-            themeName.value = THEME_DEFAULT
+            themeName.value = THEME_SYSTEM
         }
 
         THEME_DEFAULT -> {

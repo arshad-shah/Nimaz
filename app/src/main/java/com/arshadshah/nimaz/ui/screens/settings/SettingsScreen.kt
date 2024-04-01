@@ -145,9 +145,15 @@ fun SettingsScreen(
         mutableStateOf(
             ThemeOption(
                 themeName = "App Default",
-                themeKey = THEME_DEFAULT,
-                themeColor = if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary,
-                isSelected = themeState.value == THEME_DEFAULT
+                themeKey = THEME_SYSTEM,
+                themeColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (isDarkMode.value) dynamicDarkColorScheme(context).primary else dynamicLightColorScheme(
+                        context
+                    ).primary
+                } else {
+                    if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary
+                },
+                isSelected = themeState.value == THEME_SYSTEM
             )
         )
     }
@@ -201,7 +207,7 @@ fun SettingsScreen(
     ) {
         LocationSettings()
 
-        SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
+        SettingsGroup(title = { Text(text = "Prayer Times") }) {
             ElevatedCard(
                 modifier = Modifier
                     .padding(4.dp)
@@ -229,85 +235,6 @@ fun SettingsScreen(
                 )
             }
 
-        }
-        val stateOfTheme =
-            rememberPreferenceStringSettingState(key = THEME, defaultValue = themeState.value)
-
-        stateOfTheme.value = themeState.value
-
-        val stateDarkMode =
-            rememberPreferenceBooleanSettingState(
-                DARK_MODE,
-                false
-            )
-        stateDarkMode.value = isDarkMode.value
-
-        SettingsGroup(
-            title = { Text(text = "Appearance") },
-        ) {
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                    //switch for theme mode dark/light when its not dynamic
-                    SettingsSwitch(
-                        state = stateDarkMode,
-                        title = { Text(text = if (stateDarkMode.value) "Dark Mode" else "Light Mode") },
-                        onCheckedChange = {
-                            viewModelSettings.handleEvent(
-                                SettingsViewModel.SettingsEvent.DarkMode(
-                                    it
-                                )
-                            )
-                        },
-                        icon = {
-                            Crossfade(
-                                targetState = stateDarkMode.value,
-                                label = "themeModeChange"
-                            ) { darkMode ->
-                                if (darkMode) {
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        painter = painterResource(id = R.drawable.dark_icon),
-                                        contentDescription = "Dark Mode"
-                                    )
-                                } else {
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        painter = painterResource(id = R.drawable.light_icon),
-                                        contentDescription = "Light Mode"
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
-            //theme
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-
-                ThemeGrid(
-                    themeOptions = themeOptionsList,
-                    onThemeOptionSelected = {
-                        //set current selected theme to false
-                        isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
-                        isSelectedTheme.value = themeOptionsList[themeOptionsList.indexOf(it)]
-                        isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
-                        viewModelSettings.handleEvent(
-                            SettingsViewModel.SettingsEvent.Theme(
-                                isSelectedTheme.value.themeKey
-                            )
-                        )
-                    }
-                )
-            }
-        }
-
-        SettingsGroup(title = { Text(text = "Alarm and Notifications") }) {
             ElevatedCard(
                 modifier = Modifier
                     .padding(4.dp)
@@ -406,14 +333,6 @@ fun SettingsScreen(
                     .padding(4.dp)
                     .fillMaxWidth()
             ) {
-                NotificationScreenUI()
-            }
-
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
                 SettingsMenuLink(
                     title = { Text(text = "Notification Settings") },
                     subtitle = { Text(text = "Settings for all the Adhan") },
@@ -446,6 +365,93 @@ fun SettingsScreen(
                 )
             }
 
+        }
+        val stateOfTheme =
+            rememberPreferenceStringSettingState(key = THEME, defaultValue = themeState.value)
+
+        stateOfTheme.value = themeState.value
+
+        val stateDarkMode =
+            rememberPreferenceBooleanSettingState(
+                DARK_MODE,
+                false
+            )
+        stateDarkMode.value = isDarkMode.value
+
+        SettingsGroup(
+            title = { Text(text = "Appearance") },
+        ) {
+            ElevatedCard(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+            ) {
+                    //switch for theme mode dark/light when its not dynamic
+                    SettingsSwitch(
+                        state = stateDarkMode,
+                        title = { Text(text = if (stateDarkMode.value) "Dark Mode" else "Light Mode") },
+                        onCheckedChange = {
+                            viewModelSettings.handleEvent(
+                                SettingsViewModel.SettingsEvent.DarkMode(
+                                    it
+                                )
+                            )
+                        },
+                        icon = {
+                            Crossfade(
+                                targetState = stateDarkMode.value,
+                                label = "themeModeChange"
+                            ) { darkMode ->
+                                if (darkMode) {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        painter = painterResource(id = R.drawable.dark_icon),
+                                        contentDescription = "Dark Mode"
+                                    )
+                                } else {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        painter = painterResource(id = R.drawable.light_icon),
+                                        contentDescription = "Light Mode"
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+            //theme
+            ElevatedCard(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+            ) {
+
+                ThemeGrid(
+                    themeOptions = themeOptionsList,
+                    onThemeOptionSelected = {
+                        //set current selected theme to false
+                        isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
+                        isSelectedTheme.value = themeOptionsList[themeOptionsList.indexOf(it)]
+                        isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
+                        viewModelSettings.handleEvent(
+                            SettingsViewModel.SettingsEvent.Theme(
+                                isSelectedTheme.value.themeKey
+                            )
+                        )
+                    }
+                )
+            }
+        }
+
+        SettingsGroup(title = { Text(text = "Permissions") }) {
+
+            ElevatedCard(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+            ) {
+                NotificationScreenUI()
+            }
             ElevatedCard(
                 modifier = Modifier
                     .padding(4.dp)

@@ -12,12 +12,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
@@ -117,16 +119,28 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(THEME_DEFAULT)
             }
 
+            ThemeChoser(
+                darkTheme,
+                dynamicTheme,
+                themeName
+            )
+
 
             NimazTheme(
                 darkTheme = darkTheme.value,
                 dynamicColor = dynamicTheme.value,
                 themeName = themeName.value
             ) {
-                ThemeChoser(
-                    darkTheme,
-                    dynamicTheme,
-                    themeName
+                val systemUiController = rememberSystemUiController()
+
+                systemUiController.setSystemBarsColor(
+                    color = MaterialTheme.colorScheme.background,
+                    darkIcons = !darkTheme.value,
+                    isNavigationBarContrastEnforced = false
+                )
+                systemUiController.setNavigationBarColor(
+                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                    darkIcons = !darkTheme.value,
                 )
                 val navController = rememberNavController()
                 val route =
