@@ -55,7 +55,7 @@ fun AuthorDetails() {
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
-                    text = "Associate Software Engineer",
+                    text = "Software Engineer",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )

@@ -41,6 +41,10 @@ class SettingsViewModel(context: Context) : ViewModel() {
         val ishaTime: LocalDateTime = LocalDateTime.now(),
     )
 
+    init {
+        Log.d("Nimaz: SettingsViewModel", "SettingsViewModel created ${this.hashCode()}")
+    }
+
     private val _prayerTimesState = MutableStateFlow(PrayerTimesState())
     val prayerTimesState: StateFlow<PrayerTimesState> = _prayerTimesState.asStateFlow()
 
@@ -401,6 +405,10 @@ class SettingsViewModel(context: Context) : ViewModel() {
                 _maghribOffset.value =
                     sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT, "0")
                 _ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT, "0")
+                _autoParams.value =
+                    sharedPreferences.getDataBoolean(AppConstants.AUTO_PARAMETERS, false)
+                _theme.value = sharedPreferences.getData(AppConstants.THEME, THEME_SYSTEM)
+                _isDarkMode.value = sharedPreferences.getDataBoolean(AppConstants.DARK_MODE, false)
                 _isLoading.value = false
                 Log.d("Nimaz: SettingsViewModel", "Settings loaded")
             }

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.Duration
 import java.time.LocalDateTime
@@ -31,7 +32,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun AnimatedArcView(timePoints: List<LocalDateTime?>) {
+fun AnimatedArcView(timePoints: List<LocalDateTime?>, countDownTime: CountDownTime) {
     val currentPhase = getCurrentPhase(timePoints)
     // calculate the positions of prayer times on the arc using the timePoints
     // first timePoint is the start of the arc and the last timePoint is the end of the arc
@@ -45,12 +46,16 @@ fun AnimatedArcView(timePoints: List<LocalDateTime?>) {
 
     val endPosition =
         if (currentPhase + 1 < dynamicPositions.size) dynamicPositions[currentPhase + 1] else dynamicPositions[0]
-    val durationMillis = calculateDurationMillis(timePoints, currentPhase)
-    LaunchedEffect(key1 = currentPhase, key2 = timePoints, key3 = durationMillis) {
+    LaunchedEffect(key1 = currentPhase, key2 = timePoints, key3 = countDownTime) {
+        //change the countDownTime to milliseconds
+        val hoursMillis = countDownTime.hours * 60 * 60 * 1000
+        val minutesMillis = countDownTime.minutes * 60 * 1000
+        val secondsMillis = countDownTime.seconds * 1000
+        val durationMillis = hoursMillis + minutesMillis + secondsMillis
         animatablePosition.animateTo(
             targetValue = endPosition,
             animationSpec = tween(
-                durationMillis = durationMillis,
+                durationMillis = durationMillis.toInt(),
             )
         )
     }
@@ -160,21 +165,4 @@ fun getCurrentPhase(timePoints: List<LocalDateTime?>): Int {
 
     // Otherwise, we're in the phase before the next point
     return nextPointIndex - 1
-}
-
-
-@Preview(showBackground = true, device = "id:pixel_7")
-@Composable
-fun AnimatedArcViewPreview() {
-    val timePoints = listOf(
-        LocalDateTime.now().minusHours(8),
-        LocalDateTime.now().minusHours(6),
-        LocalDateTime.now(),
-        LocalDateTime.now().plusHours(3),
-        LocalDateTime.now().plusHours(6),
-        LocalDateTime.now().plusHours(8),
-    )
-    NimazTheme {
-        AnimatedArcView(timePoints)
-    }
 }
