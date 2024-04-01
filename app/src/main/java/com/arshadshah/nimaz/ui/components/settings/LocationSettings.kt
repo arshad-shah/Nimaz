@@ -240,31 +240,18 @@ fun LocationSettings(isIntro: Boolean = false) {
                 ) {
                     Column {
                         ElevatedCard(
-                            colors = CardDefaults.elevatedCardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                    elevation = 32.dp
-                                ),
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.38f
-                                ),
-                                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                                    alpha = 0.38f
-                                ),
-                            ),
-                            shape = MaterialTheme.shapes.extraLarge,
                             modifier = Modifier
-                                .padding(8.dp)
+                                .padding(4.dp)
                                 .fillMaxWidth()
                         ) {
                             ManualLocationInput()
                         }
-                        CoordinatesView(
-                            longitudeState = longitudeState,
-                            latitudeState = latitudeState,
-                        )
                     }
                 }
+                CoordinatesView(
+                    longitudeState = longitudeState,
+                    latitudeState = latitudeState,
+                )
             }
         }
 
@@ -360,17 +347,9 @@ fun LocationToggleSwitch(
     }
 
     ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
-            .testTag("LocationSwitch")
     ) {
         SettingsSwitch(
             state = state,
@@ -520,11 +499,9 @@ fun LocationToggleSwitch(
         ElevatedCard(
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
+                    elevation = 8.dp
                 ),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
@@ -552,7 +529,6 @@ fun LocationToggleSwitch(
                                 highlight = PlaceholderHighlight.shimmer(
                                     highlightColor = Color.White,
                                 )
-
                             ),
                         style = MaterialTheme.typography.bodyMedium
                     )

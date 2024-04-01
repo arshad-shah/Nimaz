@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -137,10 +138,17 @@ fun SettingsList(
                     )
                     Text(
                         text = s2,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(start = 16.dp),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
+                    )
+                }
+                //if not the last item, add a divider
+                if (s != items.keys.last()) {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.surface
                     )
                 }
             }

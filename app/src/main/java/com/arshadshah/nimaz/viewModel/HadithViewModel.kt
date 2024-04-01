@@ -99,8 +99,6 @@ class HadithViewModel : ViewModel() {
 
                 val hadithForAChapter = dataStore.getAllHadithsForABook(bookId, chapterId)
                 _hadithForAChapter.value = hadithForAChapter
-
-                getAllFavourites()
             } catch (e: Exception) {
                 Log.d("updateFavouriteStatus", e.message ?: "Unknown error")
                 _error.value = e.message ?: "Unknown error"

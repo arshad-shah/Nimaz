@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT_PAGE
 import com.arshadshah.nimaz.ui.components.settings.AuthorDetails
@@ -117,7 +116,7 @@ fun AppDetails(onImageClicked: () -> Unit) {
                 )
                 Text(
                     modifier = Modifier.padding(8.dp),
-                    text = "Version ${BuildConfig.VERSION_NAME}",
+                    text = "Version ${getAppVersion(context)}",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(

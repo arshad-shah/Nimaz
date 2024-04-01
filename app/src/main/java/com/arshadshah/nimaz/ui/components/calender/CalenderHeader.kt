@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
@@ -18,6 +19,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,13 +41,14 @@ fun CalenderHeader(
     val hijriDate = HijrahDate.from(monthState.currentMonth.atDay(1))
     val hijriFormatted = getFormattedHijriDate(YearMonth.from(hijriDate))
 
-    ElevatedCard(
+    Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
-        shape = MaterialTheme.shapes.extraLarge,
-    ) {
+        modifier = Modifier
+            .fillMaxWidth()
+    ){
         Row(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
@@ -104,12 +107,14 @@ private fun CalendarMonthDisplay(
     Column(
         modifier = Modifier
             .fillMaxWidth(0.8f)
+            .clip(MaterialTheme.shapes.medium)
             .clickable { navigateToCurrentMonth(monthState, handleEvents) },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         if (monthState.currentMonth == YearMonth.now()) {
             Text(
+                modifier = Modifier.padding(top = 4.dp),
                 text = "Today",
                 style = MaterialTheme.typography.titleSmall
             )
@@ -126,7 +131,7 @@ private fun CalendarMonthDisplay(
 
         Text(
             text = hijriFormatted,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             modifier = Modifier.padding(4.dp)
         )
@@ -212,15 +217,5 @@ private fun updateTrackerEvents(
                 date
             )
         )
-    )
-}
-
-
-@Preview
-@Composable
-fun CalenderHeaderPreview() {
-    CalenderHeader(
-        monthState = MonthState(initialMonth = YearMonth.now()),
-        handleEvents = null
     )
 }

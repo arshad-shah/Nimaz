@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,8 +31,6 @@ fun MoreMenu(
 ) {
 
     val context = LocalContext.current
-
-    val items1: List<String> = listOf("List", "Page (Experimental)")
     val items2: List<String> = listOf("English", "Urdu")
     val items3: List<String> = listOf("Default", "Quranme", "Hidayat", "Amiri", "IndoPak")
     val (showDialog1, setShowDialog1) = remember { mutableStateOf(false) }
@@ -70,19 +69,10 @@ fun MoreMenu(
         defaultValue = "Default",
     )
 
-    //log the initial state of the font size
-    Log.d("MoreMenu", "arabicFontSizeState.value = ${arabicFontSizeState.value}")
-    Log.d("MoreMenu", "translationFontSizeState.value = ${translationFontSizeState.value}")
-    Log.d("MoreMenu", "fontStyleState.value = ${fontStyleState.value}")
-
     DropdownMenu(
         expanded = menuOpen,
         onDismissRequest = { setMenuOpen(false) },
         content = {
-            DropdownMenuItem(onClick = {
-                setShowDialog1(true)
-                setMenuOpen(false)
-            }, text = { Text(text = "Display Type") })
             //disable the translation option if the page type is page
             DropdownMenuItem(onClick = {
                 //if translation is disabled and the user clicks on the translation option
@@ -107,6 +97,7 @@ fun MoreMenu(
                     color = if (pageTypeState.value == "Page (Experimental)") Color.Gray else MaterialTheme.colorScheme.onBackground
                 )
             })
+            HorizontalDivider()
             DropdownMenuItem(onClick = {
                 setShowDialog3(true)
                 setMenuOpen(false)
@@ -115,21 +106,7 @@ fun MoreMenu(
     )
 
 
-    if (showDialog1) {
-        CustomDialog(
-            title = "Display Type",
-            setShowDialog = setShowDialog1,
-            state = state,
-            valueState = pageTypeState,
-            items = items1
-        ) {
-            viewModel.handleQuranMenuEvents(
-                QuranViewModel.QuranMenuEvents.Change_Display_Mode(
-                    it
-                )
-            )
-        }
-    } else if (showDialog2) {
+    if (showDialog2) {
         CustomDialog(
             title = "Translation",
             items = items2,

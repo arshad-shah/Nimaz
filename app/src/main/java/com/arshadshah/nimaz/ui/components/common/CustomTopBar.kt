@@ -134,7 +134,7 @@ fun CustomTopBar(
                             getAllAyats = if (isSurah) viewModelQuran::getAllAyaForSurah else viewModelQuran::getAllAyaForJuz
                         )
                     } else {
-                        if (route.value == AppConstants.DASHBOARD_SCREEN) {
+                        if (route.value == AppConstants.DASHBOARD_SCREEN || route.value == AppConstants.PRAYER_TIMES_SCREEN_ROUTE) {
                             Row(
                                 modifier = Modifier
                                     .padding(horizontal = 2.dp)
@@ -157,20 +157,13 @@ fun CustomTopBar(
                                             contentDescription = "Current Location",
                                             modifier = Modifier.size(14.dp)
                                         )
-                                        if (isLoading.value) {
-                                            Text(
-                                                text = "Loading...",
-                                                style = MaterialTheme.typography.titleMedium
-                                            )
-                                        } else {
                                             Text(
                                                 modifier = Modifier.padding(start = 4.dp),
-                                                text = locationName.value,
+                                                text = if (isLoading.value) "Loading..." else locationName.value,
                                                 style = MaterialTheme.typography.titleMedium,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
-                                        }
                                     }
                                     Row(
                                         modifier = Modifier.padding(2.dp),
@@ -200,7 +193,7 @@ fun CustomTopBar(
                                                         DateTimeFormatter.ofPattern("dd MMMM yyyy")
                                                     )
                                             }",
-                                            style = MaterialTheme.typography.bodySmall
+                                            style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                 }
@@ -220,7 +213,7 @@ fun CustomTopBar(
                     }
                 },
                 navigationIcon = {
-                    if (route.value.toString() != AppConstants.DASHBOARD_SCREEN) {
+                    if (route.value.toString() != AppConstants.DASHBOARD_SCREEN && route.value.toString() != AppConstants.PRAYER_TIMES_SCREEN_ROUTE){
                         OutlinedIconButton(
                             modifier = Modifier
                                 .testTag("backButton")

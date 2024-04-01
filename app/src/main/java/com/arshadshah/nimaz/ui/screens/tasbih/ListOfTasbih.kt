@@ -181,13 +181,6 @@ fun ListOfTasbih(
                                     //for each date in the month, render the date header
                                     for (dateIndex in dates.indices) {
                                         FeaturesDropDown(
-                                            header = {
-                                                DropDownHeader(
-                                                    headerLeft = "Name",
-                                                    headerRight = "Count",
-                                                    headerMiddle = "Goal"
-                                                )
-                                            },
                                             //the list of tasbih for the date at the index
                                             items = listOfTasbih.value.filter { tasbih ->
                                                 tasbih.date == dates[dateIndex]
@@ -257,13 +250,6 @@ fun ListOfTasbih(
                                                                         ) == years[index]
                                                                 ) {
                                                                     FeaturesDropDown(
-                                                                        header = {
-                                                                            DropDownHeader(
-                                                                                headerLeft = "Name",
-                                                                                headerRight = "Count",
-                                                                                headerMiddle = "Goal"
-                                                                            )
-                                                                        },
                                                                         //the list of tasbih for the date at the index
                                                                         items = listOfTasbih.value.filter { tasbih ->
                                                                             tasbih.date == dates[dateIndex]

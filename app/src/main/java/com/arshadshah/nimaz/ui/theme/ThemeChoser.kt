@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.theme
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -35,10 +36,18 @@ fun ThemeChoser(
         viewModelSettings.isDarkMode
     }.collectAsState()
 
+    val systemUiController = rememberSystemUiController()
+
+    systemUiController.setSystemBarsColor(
+        color = MaterialTheme.colorScheme.background,
+        darkIcons = !darkTheme.value,
+        isNavigationBarContrastEnforced = false
+    )
+
     when (themeState.value) {
         THEME_SYSTEM -> {
             dynamicTheme.value = true
-            darkTheme.value = isSystemInDarkTheme()
+            darkTheme.value = isDarkTheme.value
             themeName.value = THEME_DEFAULT
         }
 

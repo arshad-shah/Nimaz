@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
@@ -22,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
@@ -42,14 +44,11 @@ fun DateSelector(
     val formattedHijrahDate =
         remember(hijrahDate) { hijrahDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) }
 
-    ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         ),
-        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Row(
             modifier = Modifier
@@ -111,6 +110,7 @@ private fun DateDisplay(
     Column(
         modifier = Modifier
             .padding(4.dp)
+            .clip(MaterialTheme.shapes.small)
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -121,7 +121,7 @@ private fun DateDisplay(
             TodayIndicator(showFutureIcon, showPastIcon)
         }
         Text(formattedDate, style = MaterialTheme.typography.titleMedium)
-        Text(formattedHijrahDate, style = MaterialTheme.typography.bodySmall)
+        Text(formattedHijrahDate, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

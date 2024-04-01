@@ -23,20 +23,7 @@ fun Calender(
     progressForMonth: State<List<LocalPrayersTracker>>,
     fastProgressForMonth: State<List<LocalFastTracker>>,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge.copy(
-            bottomStart = CornerSize(0.dp),
-            bottomEnd = CornerSize(0.dp),
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
+
         SelectableCalendar(
             horizontalSwipeEnabled = false,
             dayContent = { state ->
@@ -60,5 +47,4 @@ fun Calender(
             },
             calendarState = rememberSelectableCalendarState()
         )
-    }
 }

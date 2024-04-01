@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.settings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -26,44 +28,20 @@ fun SettingsGroup(
     title: @Composable (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
-        modifier = modifier
-            .padding(8.dp)
+    Column(
+        modifier = modifier.padding(8.dp)
     ) {
-        Column(
-            modifier = modifier.fillMaxWidth(),
+        title?.invoke()
+        Spacer(modifier = Modifier.height(8.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
         ) {
-            if (title != null) {
-                SettingsGroupTitle(title)
-                Divider(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.outline
-                )
+            Column {
+                content()
             }
-            content()
         }
-    }
-}
-
-@Composable
-internal fun SettingsGroupTitle(title: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .padding(start = 24.dp, end = 16.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        val primary = MaterialTheme.colorScheme.onSecondaryContainer
-        val titleStyle = MaterialTheme.typography.titleLarge.copy(color = primary)
-        ProvideTextStyle(value = titleStyle) { title() }
     }
 }
 

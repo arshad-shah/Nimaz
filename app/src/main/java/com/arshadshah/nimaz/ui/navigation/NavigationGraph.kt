@@ -69,42 +69,6 @@ fun NavigationGraph(
     NavHost(
         navController = navController as NavHostController,
         startDestination = BottomNavItem.Dashboard.screen_route,
-        enterTransition = {
-            slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing, // Changed easing for a different effect
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        },
-        exitTransition = {
-            slideOutOfContainer(
-                AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        },
-        popEnterTransition = {
-            slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        },
-        popExitTransition = {
-            slideOutOfContainer(
-                AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        }
     ) {
 
         composable(BottomNavItem.Dashboard.screen_route) {

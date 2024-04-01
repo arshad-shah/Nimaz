@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -22,6 +23,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.DASHBOARD_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
@@ -31,6 +33,7 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.ThemeChoser
+import com.arshadshah.nimaz.ui.theme.rememberSystemUiController
 import com.arshadshah.nimaz.utils.AutoLocationUtils
 import com.arshadshah.nimaz.utils.CustomAnimation
 import com.arshadshah.nimaz.utils.FirebaseLogger
@@ -114,17 +117,17 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(THEME_DEFAULT)
             }
 
-            ThemeChoser(
-                darkTheme,
-                dynamicTheme,
-                themeName
-            )
 
             NimazTheme(
                 darkTheme = darkTheme.value,
                 dynamicColor = dynamicTheme.value,
                 themeName = themeName.value
             ) {
+                ThemeChoser(
+                    darkTheme,
+                    dynamicTheme,
+                    themeName
+                )
                 val navController = rememberNavController()
                 val route =
                     remember(navController) { mutableStateOf(navController.currentDestination?.route) }
@@ -163,7 +166,7 @@ class MainActivity : ComponentActivity() {
                     },
                     bottomBar = {
                         AnimatedVisibility(
-                            visible = if (route.value.toString() === DASHBOARD_SCREEN) true else !checkRoute(
+                            visible = if (route.value.toString() === DASHBOARD_SCREEN || route.value.toString() === PRAYER_TIMES_SCREEN_ROUTE) true else !checkRoute(
                                 route.value.toString()
                             ),
                             enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION),

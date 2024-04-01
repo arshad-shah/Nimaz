@@ -2,8 +2,13 @@ package com.arshadshah.nimaz.ui.screens.tasbih
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -13,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.tasbih.DuaListItem
@@ -57,17 +63,30 @@ fun DuaList(chapterId: String, paddingValues: PaddingValues) {
             visibleItemIndex.value = -1
         }
     }
-    LazyColumn(
-        modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER),
-        contentPadding = paddingValues,
-        state = listState,
-        content = {
-            items(duaState.value.size)
-            {
-                DuaListItem(
-                    dua = duaState.value[it],
-                    loading = false
-                )
-            }
-        })
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(paddingValues)
+            .padding(8.dp)
+    ) {
+        LazyColumn(
+            modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER),
+            state = listState,
+            content = {
+                items(duaState.value.size)
+                {
+                    DuaListItem(
+                        dua = duaState.value[it],
+                        loading = false
+                    )
+                    if (it != duaState.value.size - 1) {
+                        //add a divider
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.background,
+                            thickness = 2.dp
+                        )
+                    }
+                }
+            })
+    }
 }

@@ -1,10 +1,9 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -21,21 +21,20 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import es.dmoral.toasty.Toasty
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteInput(
     showNoteDialog: MutableState<Boolean>,
     onClick: () -> Unit,
     noteContent: MutableState<String>,
+    titleOfDialog: MutableState<String>,
 ) {
     val context = LocalContext.current
     AlertDialogNimaz(
-        cardContent = false,
         contentDescription = "Note",
-        title = "Add Note",
+        title = titleOfDialog.value,
         topDivider = false,
         bottomDivider = false,
-        contentHeight = 350.dp,
+        contentHeight = 200.dp,
         action = {
             IconButton(
                 onClick = {
@@ -61,14 +60,35 @@ fun NoteInput(
             OutlinedTextField(
                 textStyle = MaterialTheme.typography.bodyLarge,
                 singleLine = false,
-                shape = MaterialTheme.shapes.extraLarge,
                 value = noteContent.value,
-                onValueChange = { noteContent.value = it },
-                label = { Text(text = "Note") },
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth()
-                    .height(300.dp),
+                onValueChange = {
+                    if (it.length <= 150) {
+                        noteContent.value = it
+                    }
+                },
+                label = { Text(text = "Add a Note") },
+                isError = noteContent.value.length > 150,
+                supportingText = {
+                    Text(
+                        text = "${noteContent.value.length}/150",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                },
+                trailingIcon = {
+                    if (noteContent.value.isNotEmpty()) {
+                        Icon(
+                            modifier = Modifier.size(20.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    noteContent.value = ""
+                                },
+                            painter = painterResource(id = R.drawable.cross_icon),
+                            contentDescription = "Clear note",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+
+                },
             )
         },
         onDismissRequest = {
@@ -84,7 +104,6 @@ fun NoteInput(
                     "Note is empty. closing without save.",
                     Toasty.LENGTH_SHORT
                 ).show()
-                showNoteDialog.value = false
             } else {
                 onClick()
             }

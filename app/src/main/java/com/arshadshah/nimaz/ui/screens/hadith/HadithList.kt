@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
@@ -78,20 +81,33 @@ fun HadithList(
             Text(text = "Loading...", style = MaterialTheme.typography.bodyLarge)
         }
     } else {
-        LazyColumn(
+        val cardColors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        )
+        Card(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(paddingValues)
+                .padding(8.dp),
+            colors = cardColors,
         ) {
-            items(hadithList.size) { row ->
-                HadithItem(hadithList[row]) { id: Int, isFavourite: Boolean ->
-                    viewModel.updateFavouriteStatus(
-                        bookId = hadithList[row].bookId,
-                        chapterId = hadithList[row].chapterId,
-                        id = id,
-                        favouriteStatus = isFavourite
-                    )
+            LazyColumn{
+                items(hadithList.size) { row ->
+                    HadithItem(hadithList[row]) { id: Int, isFavourite: Boolean ->
+                        viewModel.updateFavouriteStatus(
+                            bookId = hadithList[row].bookId,
+                            chapterId = hadithList[row].chapterId,
+                            id = id,
+                            favouriteStatus = isFavourite
+                        )
+                    }
+                    if (row != hadithList.size - 1) {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.background,
+                            thickness = 2.dp,
+                        )
+                    }
                 }
             }
         }
@@ -105,18 +121,47 @@ fun HadithItem(hadith: HadithEntity, updateFavouriteStatus: (Int, Boolean) -> Un
         .fillMaxWidth()
         .padding(8.dp)
 
-    val cardColors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-    )
-    Card(
-        colors = cardColors,
-        shape = MaterialTheme.shapes.extraLarge,
-        modifier = reusableModifier.clip(MaterialTheme.shapes.extraLarge)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Badge(
+                        modifier = Modifier
+                            .size(52.dp),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ) {
+                        Text(
+                            text = hadith.id.toString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+
+                    IconToggleButton(checked = hadith.favourite, onCheckedChange = { isChecked ->
+                        // Handle favorite toggle here
+                        updateFavouriteStatus(hadith.id, isChecked)
+                    }) {
+                        Icon(
+                            modifier = Modifier.size(16.dp),
+                            painter = if (hadith.favourite) painterResource(id = R.drawable.favorite_icon) else painterResource(
+                                id = R.drawable.favorite_icon_unseletced
+                            ),
+                            contentDescription = "Favorite"
+                        )
+                    }
+                }
+            }
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 Text(
                     text = hadith.arabic,
@@ -137,19 +182,5 @@ fun HadithItem(hadith: HadithEntity, updateFavouriteStatus: (Int, Boolean) -> Un
                 style = MaterialTheme.typography.bodySmall,
                 fontStyle = FontStyle.Italic
             )
-            // Optionally handle favorite status
-            IconToggleButton(checked = hadith.favourite, onCheckedChange = { isChecked ->
-                // Handle favorite toggle here
-                updateFavouriteStatus(hadith.id, isChecked)
-            }) {
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    painter = if (hadith.favourite) painterResource(id = R.drawable.favorite_icon) else painterResource(
-                        id = R.drawable.favorite_icon_unseletced
-                    ),
-                    contentDescription = "Favorite"
-                )
-            }
-        }
     }
 }

@@ -21,7 +21,6 @@ fun ImportantDayDescriptionPopup(description: String, hasDescription: MutableSta
         onDismissRequest = { hasDescription.value = false }
     ) {
         ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .padding(8.dp)
                 .clickable {

@@ -41,9 +41,6 @@ fun PagerScreen(onBoardingPage: OnBoardingPage, position: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(
-                color = MaterialTheme.colorScheme.background
-            )
             .testTag("pagerScreen $position"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -66,8 +63,7 @@ fun PagerScreen(onBoardingPage: OnBoardingPage, position: Int) {
                 .padding(bottom = if (position == 4) 0.dp else 20.dp)
                 .testTag("pagerScreenTitle"),
             text = onBoardingPage.title,
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.displaySmall,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -79,8 +75,7 @@ fun PagerScreen(onBoardingPage: OnBoardingPage, position: Int) {
                 .padding(top = 0.dp, bottom = 20.dp)
                 .testTag("pagerScreenDescription"),
             text = onBoardingPage.description,
-            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
         )

@@ -33,15 +33,8 @@ fun DatesContainer(onNavigateToTracker: () -> Unit) {
     val islamDate = islamformat.format(islamicDate)
 
     Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
-            .padding(vertical = 8.dp, horizontal = 8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
             .clickable {
                 onNavigateToTracker()

@@ -4,10 +4,12 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -37,8 +39,6 @@ fun BottomNavigationBar(navController: NavController) {
     )
 
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.semantics {
             contentDescription = "Bottom Navigation Bar"
         }
@@ -66,34 +66,16 @@ fun BottomNavigationBar(navController: NavController) {
                     .semantics {
                         contentDescription = bottomNavItem.title
                     },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    unselectedIconColor = MaterialTheme.colorScheme.primary,
-                    unselectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
                 icon = {
-                    AnimatableIcon(
-                        modifier = Modifier
-                            .size(24.dp),
-                        painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
-                            id = bottomNavItem.icon_empty
-                        ),
-                        scale = if (selected) 1.1f else 1f,
-                        color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary,
-                    )
+                   Icon(
+                       modifier = Modifier.size(24.dp),
+                       painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
+                           id = bottomNavItem.icon_empty
+                       ), contentDescription = null,
+                   )
                 },
                 label = {
-                    AnimatedText(
-                        text = bottomNavItem.title,
-                        scale = if (selected) 1.2f else 1f,
-                        modifier = Modifier
-                            .semantics {
-                                contentDescription = bottomNavItem.title
-                            },
-                        color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.secondary,
-                    )
+                    Text(text = bottomNavItem.title)
                 },
                 selected = currentRoute == bottomNavItem.screen_route,
                 onClick = {

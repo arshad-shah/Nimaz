@@ -3,13 +3,12 @@ package com.arshadshah.nimaz.ui.components.dashboard
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -23,9 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.DropdownPlaceholder
 import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.common.Placeholder
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.DashboardViewmodel
@@ -69,7 +68,7 @@ fun DashboardQuranTracker(
                 onNavigateToAyatScreen(1.toString(), true, translation, 1)
             }
         ) {
-            Placeholder(nameOfDropdown = "Quran Bookmarks")
+            DropdownPlaceholder(text = "No Bookmarks Found")
         }
     } else {
         FeaturesDropDown(
@@ -77,9 +76,9 @@ fun DashboardQuranTracker(
             items = quranBookmarks.value,
             dropDownItem = { LocalAya ->
                 val currentItem = rememberUpdatedState(newValue = LocalAya)
-                val dismissState = rememberDismissState(
+                val dismissState = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
-                        if (it == DismissValue.DismissedToStart) {
+                        if (it == SwipeToDismissBoxValue.EndToStart) {
                             titleOfDialog.value = "Delete Bookmark"
                             messageOfDialog.value =
                                 "Are you sure you want to delete this bookmark?"
@@ -90,13 +89,12 @@ fun DashboardQuranTracker(
                     }
                 )
 
-                SwipeToDismiss(
-                    directions = setOf(DismissDirection.EndToStart),
+                SwipeToDismissBox(
                     state = dismissState,
-                    background = {
+                    backgroundContent = {
                         SwipeBackground(dismissState = dismissState)
                     },
-                    dismissContent = {
+                    content = {
                         FeatureDropdownItem(
                             item = LocalAya,
                             onClick = { aya ->

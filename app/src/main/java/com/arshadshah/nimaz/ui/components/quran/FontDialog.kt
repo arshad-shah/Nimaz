@@ -56,7 +56,7 @@ fun FontSizeDialog(
         contentToShow = {
             Column(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
                     .wrapContentHeight(),
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -188,7 +188,7 @@ fun LabelWithDropdownMenu(
     val expanded = remember { mutableStateOf(false) }
     Row(
         modifier = modifier
-            .padding(vertical = 8.dp)
+            .padding(vertical = 4.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically,

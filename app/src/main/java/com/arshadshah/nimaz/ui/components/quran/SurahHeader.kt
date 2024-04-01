@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -34,63 +36,27 @@ fun SurahHeader(
     surah: LocalSurah,
     loading: Boolean = false,
 ) {
-    OutlinedCard(
+    Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(16.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
         modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Row(
             modifier = Modifier
                 .padding(top = 8.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = surah.revelationType,
-                style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(4.dp)
-                    .placeholder(
-                        visible = loading,
-                        color = MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(4.dp),
-                        highlight = PlaceholderHighlight.shimmer(
-                            highlightColor = Color.White,
-                        )
-                    )
-            )
             Column(
                 modifier = Modifier.padding(4.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        text = surah.name,
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontFamily = utmaniQuranFont,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .placeholder(
-                                visible = loading,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(4.dp),
-                                highlight = PlaceholderHighlight.shimmer(
-                                    highlightColor = Color.White,
-                                )
-                            )
-                    )
-                }
-
                 Text(
                     text = surah.englishName,
                     style = MaterialTheme.typography.titleLarge,
@@ -105,6 +71,24 @@ fun SurahHeader(
                             )
                         )
                 )
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = surah.name,
+                        style = MaterialTheme.typography.displaySmall,
+                        fontFamily = utmaniQuranFont,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .placeholder(
+                                visible = loading,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp),
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color.White,
+                                )
+                            )
+                    )
+                }
                 Text(
                     text = surah.englishNameTranslation,
                     style = MaterialTheme.typography.titleMedium,
@@ -119,22 +103,22 @@ fun SurahHeader(
                             )
                         )
                 )
-            }
-
-            Text(
-                text = "${surah.numberOfAyahs} Verses",
-                style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .placeholder(
-                        visible = loading,
-                        color = MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(4.dp),
-                        highlight = PlaceholderHighlight.shimmer(
-                            highlightColor = Color.White,
+                Text(
+                    text = "${surah.numberOfAyahs} Verses - ${surah.revelationType}",
+                    style = MaterialTheme.typography.titleSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .placeholder(
+                            visible = loading,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White,
+                            )
                         )
-                    )
-            )
+                )
+            }
         }
     }
 }

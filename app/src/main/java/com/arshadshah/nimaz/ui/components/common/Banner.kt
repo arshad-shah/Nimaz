@@ -92,7 +92,6 @@ fun BannerSmall(
         //if its an info banner we use the info color and an info icon
         //if its a warning banner we use the warning color and a warning icon
         ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = modifier
                 .padding(paddingValues ?: PaddingValues(8.dp))
                 .clickable(
@@ -219,7 +218,6 @@ fun BannerLarge(
         //if its an info banner we use the info color and an info icon
         //if its a warning banner we use the warning color and a warning icon
         ElevatedCard(
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = modifier
                 .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
                 .clickable(

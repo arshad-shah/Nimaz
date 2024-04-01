@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +45,9 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
 import com.arshadshah.nimaz.data.local.models.CountDownTime
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonCalc
@@ -150,20 +155,17 @@ fun DashboardPrayertimesCard() {
 
     Card(
         modifier = Modifier
-            .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
             .testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         ),
-        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column(
             modifier = Modifier
-                .padding(8.dp),
+                .padding(4.dp),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -183,27 +185,27 @@ fun DashboardPrayertimesCard() {
                             .size(100.dp)
                             .testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD),
                         painter = when (nextPrayerName) {
-                            "sunrise" -> {
+                            "Sunrise" -> {
                                 painterResource(id = R.drawable.sunrise_icon)
                             }
 
-                            "fajr" -> {
+                            "Fajr" -> {
                                 painterResource(id = R.drawable.fajr_icon)
                             }
 
-                            "dhuhr" -> {
+                            "Dhuhr" -> {
                                 painterResource(id = R.drawable.dhuhr_icon)
                             }
 
-                            "asr" -> {
+                            "Asr" -> {
                                 painterResource(id = R.drawable.asr_icon)
                             }
 
-                            "maghrib" -> {
+                            "Maghrib" -> {
                                 painterResource(id = R.drawable.maghrib_icon)
                             }
 
-                            "isha" -> {
+                            "Isha" -> {
                                 painterResource(id = R.drawable.isha_icon)
                             }
 
@@ -227,14 +229,26 @@ fun DashboardPrayertimesCard() {
                         text = nextPrayerTime.format(formatter),
                         style = MaterialTheme.typography.titleLarge
                     )
-                    Text(
-                        text = getTimerText(timer),
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    )
+                    Badge(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    ){
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .placeholder(
+                                    visible = false,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    shape = RoundedCornerShape(4.dp),
+                                    highlight = PlaceholderHighlight.shimmer(
+                                        highlightColor = Color.White,
+                                    )
+                                ),
+                            text = getTimerText(timer),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
             }
         }
