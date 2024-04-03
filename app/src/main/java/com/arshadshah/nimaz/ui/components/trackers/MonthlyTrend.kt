@@ -20,12 +20,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 
 // Moved outside the composable
@@ -43,11 +45,8 @@ fun PrayerTrackerGrid(
     progressForMonth: State<List<LocalPrayersTracker>>,
     dateState: State<LocalDate>
 ) {
-    val currentDate = LocalDate.now()
-    val yearMonth = YearMonth.of(currentDate.year, currentDate.month)
+    val yearMonth = YearMonth.of(dateState.value.year, dateState.value.month)
     val daysInMonth = yearMonth.lengthOfMonth()
-
-    val userSelectedDate = dateState.value
 
     Column(
         modifier = Modifier
@@ -56,13 +55,18 @@ fun PrayerTrackerGrid(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
+        //month name
+        Text(
+            modifier = Modifier.padding(bottom = 2.dp).fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            text = dateState.value.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+        )
         prayers.forEach { prayer ->
             PrayerRow(
                 prayer,
                 yearMonth,
                 daysInMonth,
-                currentDate,
-                userSelectedDate,
+                dateState.value,
                 progressForMonth
             )
         }
@@ -75,7 +79,6 @@ fun PrayerRow(
     yearMonth: YearMonth,
     daysInMonth: Int,
     currentDate: LocalDate,
-    userSelectedDate: LocalDate,
     progressForMonth: State<List<LocalPrayersTracker>>
 ) {
     Row(
@@ -95,7 +98,7 @@ fun PrayerRow(
             val isHighlighted = prayerTracker?.isPrayerCompleted(prayer) == true
             val isMenstruating = prayerTracker?.isMenstruating == true
 
-            DayDot(date, isHighlighted, isMenstruating, currentDate, userSelectedDate)
+            DayDot(date, isHighlighted, isMenstruating, currentDate)
         }
     }
 }
@@ -106,17 +109,16 @@ fun DayDot(
     isHighlighted: Boolean,
     isMenstruating: Boolean,
     currentDate: LocalDate,
-    userSelectedDate: LocalDate
 ) {
     // Determine border and background color based on conditions
     val borderColor =
-        determineBorderColor(date, isHighlighted, isMenstruating, currentDate, userSelectedDate)
+        determineBorderColor(date, isHighlighted, isMenstruating, currentDate)
     val backgroundColor =
-        determineBackgroundColor(date, isHighlighted, isMenstruating, currentDate, userSelectedDate)
+        determineBackgroundColor(date, isHighlighted, isMenstruating, currentDate)
 
     Box(
         modifier = Modifier
-            .size(if(date == currentDate || date == userSelectedDate) 10.dp else 8.dp)
+            .size(if (date == currentDate || date == LocalDate.now()) 10.dp else 8.dp)
             .border(width = 1.dp, color = borderColor, shape = CircleShape)
             .background(color = backgroundColor, shape = CircleShape)
     )
@@ -128,11 +130,10 @@ fun determineBorderColor(
     isHighlighted: Boolean,
     isMenstruating: Boolean,
     currentDate: LocalDate,
-    userSelectedDate: LocalDate
 ): Color {
     return when {
         date == currentDate -> MaterialTheme.colorScheme.tertiary
-        date == userSelectedDate -> MaterialTheme.colorScheme.onSecondaryContainer
+        date == LocalDate.now() -> MaterialTheme.colorScheme.onSecondaryContainer
         else -> {
             if (isHighlighted && !isMenstruating) {
                 MaterialTheme.colorScheme.primary
@@ -151,10 +152,9 @@ fun determineBackgroundColor(
     isHighlighted: Boolean,
     isMenstruating: Boolean,
     currentDate: LocalDate,
-    userSelectedDate: LocalDate
 ): Color {
     return when {
-        date == currentDate || date == userSelectedDate -> {
+        date == currentDate || date == LocalDate.now() -> {
             if (isHighlighted) {
                 MaterialTheme.colorScheme.primary
             } else if (isMenstruating) {

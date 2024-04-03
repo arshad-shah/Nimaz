@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,10 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.header.MonthState
 import java.time.LocalDate
 import java.time.YearMonth
@@ -35,7 +32,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun CalenderHeader(
     monthState: MonthState,
-    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+    handleEvents: KFunction1<LocalDate, Unit>
 ) {
     val currentMonthYear = monthState.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
     val hijriDate = HijrahDate.from(monthState.currentMonth.atDay(1))
@@ -102,7 +99,7 @@ private fun CalendarMonthDisplay(
     currentMonthYear: String,
     hijriFormatted: String,
     monthState: MonthState,
-    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+    handleEvents: KFunction1<LocalDate, Unit>
 ) {
     Column(
         modifier = Modifier
@@ -184,38 +181,19 @@ private fun CalendarNavigationButton(iconId: Int, description: String, onClick: 
 
 private fun navigateToCurrentMonth(
     monthState: MonthState,
-    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+    handleEvents: KFunction1<LocalDate, Unit>
 ) {
-    val currentYearMonth = YearMonth.now()
-    if (monthState.currentMonth != currentYearMonth) {
-        monthState.currentMonth = currentYearMonth
-        updateTrackerEvents(LocalDate.now(), handleEvents)
-    }
+    val yearMonthAtToday = YearMonth.now()
+    monthState.currentMonth = yearMonthAtToday
+    handleEvents(LocalDate.now())
 }
 
 private fun changeMonth(
     monthState: MonthState,
     monthsToAdd: Long,
-    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
+    handleEvents: KFunction1<LocalDate, Unit>
 ) {
     monthState.currentMonth = monthState.currentMonth.plusMonths(monthsToAdd)
     val date = monthState.currentMonth.atDay(1)
-    updateTrackerEvents(date, handleEvents)
-}
-
-private fun updateTrackerEvents(
-    date: LocalDate,
-    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?
-) {
-    handleEvents?.invoke(TrackerViewModel.TrackerEvent.SET_DATE(date))
-    handleEvents?.invoke(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date))
-    handleEvents?.invoke(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date))
-    handleEvents?.invoke(TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(date))
-    handleEvents?.invoke(
-        TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-            YearMonth.from(
-                date
-            )
-        )
-    )
+    handleEvents(date)
 }

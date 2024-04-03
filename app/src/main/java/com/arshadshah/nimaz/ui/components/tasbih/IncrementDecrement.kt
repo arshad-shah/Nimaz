@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.tasbih
 
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -15,35 +14,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.viewModel.TasbihViewModel
+import kotlin.reflect.KFunction0
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun IncrementDecrement(
-    count: MutableState<Int>,
-    lap: MutableState<Int>,
-    lapCountCounter: MutableState<Int>,
-    objective: MutableState<String>,
+    count: State<Int>,
+    lap: State<Int>,
+    lapCountCounter: State<Int>,
+    objective: State<Int>,
+    increment: KFunction0<Unit>,
+    decrement: KFunction0<Unit>,
+    vibrationAllowed: State<Boolean>,
+    onClick: () -> Unit,
+    rOrl: State<Boolean>,
 ) {
-    val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.TASBIH_VIEWMODEL_KEY,
-        initializer = { TasbihViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-    val rOrl = remember {
-        viewModel.orientationButtonState
-    }.collectAsState()
-
     AnimatedContent(
         transitionSpec = {
             ContentTransform(
@@ -67,9 +56,9 @@ fun IncrementDecrement(
 
                 Decrementbutton(
                     count = count,
-                    lap = lap,
-                    lapCountCounter = lapCountCounter,
-                    objective = objective,
+                    decrement = decrement,
+                    vibrationAllowed = vibrationAllowed,
+                    onClick = onClick
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -78,7 +67,9 @@ fun IncrementDecrement(
                     lap = lap,
                     lapCountCounter = lapCountCounter,
                     objective = objective,
-                    context = context
+                    increment = increment,
+                    vibrationAllowed = vibrationAllowed,
+                    onClick = onClick
                 )
             }
         } else {
@@ -92,14 +83,16 @@ fun IncrementDecrement(
                     lap = lap,
                     lapCountCounter = lapCountCounter,
                     objective = objective,
-                    context = context
+                    increment = increment,
+                    vibrationAllowed = vibrationAllowed,
+                    onClick = onClick,
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Decrementbutton(
                     count = count,
-                    lap = lap,
-                    lapCountCounter = lapCountCounter,
-                    objective = objective,
+                    decrement = decrement,
+                    vibrationAllowed = vibrationAllowed,
+                    onClick = onClick,
                 )
 
             }
