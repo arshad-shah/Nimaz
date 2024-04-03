@@ -3,9 +3,6 @@ package com.arshadshah.nimaz.ui.navigation
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
@@ -29,7 +26,6 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
-import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
@@ -136,7 +132,7 @@ fun NavigationGraph(
         }
 
         composable(CALENDER_SCREEN_ROUTE) {
-            CalenderScreen(paddingValues)
+            CalenderScreen(paddingValues, navController = navController as NavHostController)
         }
 
         composable(QIBLA_SCREEN_ROUTE) {
@@ -335,7 +331,7 @@ fun NavigationGraph(
         }
 
         composable(PRAYER_TRACKER_SCREEN_ROUTE) {
-            PrayerTracker(paddingValues)
+            PrayerTracker(navController = navController as NavHostController)
         }
 
         composable(TASBIH_SCREEN_ROUTE) {
@@ -345,6 +341,7 @@ fun NavigationGraph(
                 tasbihEnglish = it.arguments?.getString("translation")!!,
                 tasbihTranslitration = it.arguments?.getString("transliteration")!!,
                 paddingValues = paddingValues,
+                navController = navController as NavHostController
             )
         }
 

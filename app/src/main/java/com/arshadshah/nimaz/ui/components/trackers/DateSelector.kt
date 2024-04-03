@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,11 +30,12 @@ import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+import kotlin.reflect.KFunction1
 
 @Composable
 fun DateSelector(
-    handleEvent: (TrackerViewModel.TrackerEvent) -> Unit,
     dateState: State<LocalDate>,
+    updateDate: KFunction1<LocalDate, Unit>,
 ) {
     val date = remember(dateState.value) { mutableStateOf(dateState.value) }
     val hijrahDate = remember(date.value) { HijrahDate.from(date.value) }
@@ -59,27 +59,18 @@ fun DateSelector(
         ) {
             // Previous Day Button
             DateChangeButton(iconId = R.drawable.angle_left_icon, description = "Previous Day") {
-                updateDate(date, -1, handleEvent)
+                updateDate(date, -1, updateDate)
             }
 
             // Date Display
             DateDisplay(date, formattedDate, formattedHijrahDate) {
-                handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now()))
-                handleEvent(
-                    TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                        LocalDate.now()
-                    )
-                )
-                handleEvent(
-                    TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                        LocalDate.now()
-                    )
-                )
+                date.value = LocalDate.now()
+                updateDate(date, 0, updateDate)
             }
 
             // Next Day Button
             DateChangeButton(iconId = R.drawable.angle_right_icon, description = "Next Day") {
-                updateDate(date, 1, handleEvent)
+                updateDate(date, 1, updateDate)
             }
         }
     }
@@ -164,10 +155,8 @@ private fun TodayIndicator(showFutureIcon: Boolean, showPastIcon: Boolean) {
 private fun updateDate(
     date: MutableState<LocalDate>,
     daysToAdd: Long,
-    handleEvent: (TrackerViewModel.TrackerEvent) -> Unit
+    updateDateAndFetchData: KFunction1<LocalDate, Unit>
 ) {
     date.value = date.value.plusDays(daysToAdd)
-    handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value))
-    handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value))
-    handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value))
+    updateDateAndFetchData(date.value)
 }

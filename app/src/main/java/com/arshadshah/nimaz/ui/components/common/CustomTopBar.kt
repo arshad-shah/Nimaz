@@ -22,7 +22,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -64,24 +63,11 @@ fun CustomTopBar(
         viewModelStoreOwner = context
     )
 
-    val viewModelTasbih = viewModel(
-        key = AppConstants.TASBIH_VIEWMODEL_KEY,
-        initializer = { TasbihViewModel(context) },
-        viewModelStoreOwner = context
-    )
-
     val viewModelNames = viewModel(
         key = AppConstants.NAMES_OF_ALLAH_VIEWMODEL_KEY,
         initializer = { NamesOfAllahViewModel() },
         viewModelStoreOwner = context
     )
-
-    val viewModelTracker = viewModel(
-        key = AppConstants.TRACKING_VIEWMODEL_KEY,
-        initializer = { TrackerViewModel() },
-        viewModelStoreOwner = context
-    )
-
     val settingViewModel = viewModel(
         key = AppConstants.SETTINGS_VIEWMODEL_KEY,
         initializer = { SettingsViewModel(context) },
@@ -96,11 +82,6 @@ fun CustomTopBar(
 
     val (menuOpen, setMenuOpen) = remember { mutableStateOf(false) }
 
-    val vibrationAllowed = remember { mutableStateOf(true) }
-    val rOrl = remember { mutableStateOf(true) }
-
-    val isMenstruatingState = viewModelTracker.isMenstrauting.collectAsState()
-
 
     val playBackState = viewModelNames.playbackState.collectAsState()
 
@@ -110,12 +91,13 @@ fun CustomTopBar(
 
 
     AnimatedVisibility(
-        visible = checkRoute(route.value.toString()),
+        visible = checkRoute(route.value.toString()) && checkRouteForNotShow(route.value.toString()),
         enter = CustomAnimation.fadeIn(duration = AppConstants.SCREEN_ANIMATION_DURATION),
         exit = CustomAnimation.fadeOut(duration = AppConstants.SCREEN_ANIMATION_DURATION_Exit),
         content = {
             TopAppBar(
                 modifier = Modifier
+
                     .testTag("topAppBar"),
                 title = {
                     if (route.value == AppConstants.MY_QURAN_SCREEN_ROUTE || route.value == AppConstants.QURAN_AYA_SCREEN_ROUTE) {
@@ -326,99 +308,20 @@ fun CustomTopBar(
                             }
 
                         }
-
-                        AppConstants.TASBIH_SCREEN_ROUTE -> {
-                            //icon button to change the position of the button for right or left
-                            IconButton(onClick = {
-                                rOrl.value = !rOrl.value
-                                viewModelTasbih.handleEvent(
-                                    TasbihViewModel.TasbihEvent.UpdateOrientationButtonState(
-                                        rOrl.value
-                                    )
-                                )
-                            }) {
-                                Icon(
-                                    modifier = Modifier.size(
-                                        24.dp
-                                    ),
-                                    painter = if (rOrl.value)
-                                        painterResource(
-                                            id = R.drawable.corner_right_down_icon
-                                        )
-                                    else painterResource(id = R.drawable.corner_left_down_icon),
-                                    contentDescription = "Change the position of the button"
-                                )
-                            }
-                            //vibration toggle button for tasbih to provide feedback
-                            IconButton(onClick = {
-                                vibrationAllowed.value =
-                                    !vibrationAllowed.value
-                                viewModelTasbih.handleEvent(
-                                    TasbihViewModel.TasbihEvent.UpdateVibrationButtonState(
-                                        vibrationAllowed.value
-                                    )
-                                )
-                            }) {
-                                Icon(
-                                    modifier = Modifier.size(
-                                        24.dp
-                                    ),
-                                    painter = if (vibrationAllowed.value) painterResource(
-                                        id = R.drawable.phone_vibration_off_icon
-                                    )
-                                    else painterResource(
-                                        id = R.drawable.phone_vibration_on_icon
-                                    ),
-                                    contentDescription = "Vibration"
-                                )
-                            }
-
-                            //a reset button to reset the count
-                            IconButton(onClick = {
-                                viewModelTasbih.handleEvent(
-                                    TasbihViewModel.TasbihEvent.UpdateResetButtonState(
-                                        true
-                                    )
-                                )
-                            }) {
-                                Icon(
-                                    modifier = Modifier.size(
-                                        24.dp
-                                    ),
-                                    painter = painterResource(
-                                        id = R.drawable.refresh_icon
-                                    ),
-                                    contentDescription = "Reset",
-                                )
-                            }
-                        }
-
-                        AppConstants.PRAYER_TRACKER_SCREEN_ROUTE,
-                        AppConstants.CALENDER_SCREEN_ROUTE,
-                        -> {
-                            IconButton(onClick = {
-                                viewModelTracker.onEvent(
-                                    TrackerViewModel.TrackerEvent.UPDATE_MENSTRAUTING_STATE(
-                                        !isMenstruatingState.value
-                                    )
-                                )
-                            }) {
-                                Icon(
-                                    modifier = Modifier.size(
-                                        24.dp
-                                    ),
-                                    painter = painterResource(
-                                        id = R.drawable.menstruation_icon
-                                    ),
-                                    contentDescription = "Menstruation",
-                                    //color it pink
-                                    tint = Color(0xFFE91E63)
-                                )
-                            }
-                        }
                     }
                 }
             )
         }
     )
+}
+
+//function that returns true for all routes that are not to show the top bar
+fun checkRouteForNotShow(route: String): Boolean {
+    val list = listOf(
+        AppConstants.CALENDER_SCREEN_ROUTE,
+        AppConstants.PRAYER_TRACKER_SCREEN_ROUTE,
+        AppConstants.TASBIH_SCREEN_ROUTE,
+        AppConstants.TASBIH_SCREEN_ROUTE,
+    )
+    return list.none { it == route }
 }

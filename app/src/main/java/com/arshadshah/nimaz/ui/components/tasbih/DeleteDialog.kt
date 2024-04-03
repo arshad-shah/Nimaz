@@ -46,11 +46,7 @@ fun DeleteDialog(
                 showDialog.value = false
             },
             onConfirm = {
-                viewModel.handleEvent(
-                    TasbihViewModel.TasbihEvent.DeleteTasbih(
-                        tasbih
-                    )
-                )
+                viewModel.deleteTasbih(tasbih)
                 showDialog.value = false
             },
             onDismiss = {

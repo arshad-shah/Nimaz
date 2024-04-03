@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -35,6 +34,7 @@ import com.arshadshah.nimaz.ui.components.calender.calenderday.PrayerDots
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
@@ -44,7 +44,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun CalenderDay(
     dayState: DayState<DynamicSelectionState>,
-    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?,
+    handleEvents: KFunction1<LocalDate, Unit>,
     progressForMonth: State<List<LocalPrayersTracker>>,
     fastProgressForMonth: State<List<LocalFastTracker>>,
 ) {
@@ -94,32 +94,7 @@ fun CalenderDay(
                 enabled = isFromCurrentMonth,
                 onClick = {
                     dayState.selectionState.onDateSelected(dayState.date)
-                    if (handleEvents == null) return@combinedClickable
-                    handleEvents(
-                        TrackerViewModel.TrackerEvent.SET_DATE(
-                            dayState.date
-                        )
-                    )
-                    handleEvents(
-                        TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                            dayState.date
-                        )
-                    )
-                    handleEvents(
-                        TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                            dayState.date
-                        )
-                    )
-                    handleEvents(
-                        TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                            dayState.date
-                        )
-                    )
-                    handleEvents(
-                        TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-                            YearMonth.from(dayState.date)
-                        )
-                    )
+                    handleEvents(dayState.date)
                 },
                 onLongClick = {
                     if (importantDay.first) {

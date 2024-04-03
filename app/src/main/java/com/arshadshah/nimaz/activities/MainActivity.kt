@@ -121,10 +121,9 @@ class MainActivity : ComponentActivity() {
             ) {
                 val systemUiController = rememberSystemUiController()
 
-                systemUiController.setSystemBarsColor(
+                systemUiController.setStatusBarColor(
                     color = MaterialTheme.colorScheme.background,
                     darkIcons = !darkTheme.value,
-                    isNavigationBarContrastEnforced = false
                 )
                 systemUiController.setNavigationBarColor(
                     color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),

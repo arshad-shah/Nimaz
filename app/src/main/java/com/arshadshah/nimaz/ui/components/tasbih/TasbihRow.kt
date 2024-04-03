@@ -63,7 +63,7 @@ fun TasbihRow(
 
     LaunchedEffect(key1 = navigateToTasbihScreen.value) {
         if (navigateToTasbihScreen.value) {
-            viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetTasbih(tasbih.value.id))
+            viewModel.getTasbih(tasbih.value.id)
             //navigate to tasbih screen
             onNavigateToTasbihScreen?.invoke(
                 tasbih.value.id.toString(),
@@ -138,18 +138,14 @@ fun TasbihRow(
     TasbihGoalDialog(
         state = goal,
         onConfirm = {
-            viewModel.handleEvent(
-                TasbihViewModel.TasbihEvent.SetTasbih(
-                    LocalTasbih(
-                        arabicName = arabicName,
-                        englishName = englishName,
-                        translationName = translationName,
-                        goal = it.toInt(),
-                        count = 0,
-                        date = LocalDate.now(),
-                    )
-                )
-            )
+            viewModel.updateTasbih(LocalTasbih(
+                arabicName = arabicName,
+                englishName = englishName,
+                translationName = translationName,
+                goal = it.toInt(),
+                count = 0,
+                date = LocalDate.now(),
+            ))
             navigateToTasbihScreen.value = true
         },
         isOpen = showTasbihDialog,

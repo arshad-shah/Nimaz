@@ -1,8 +1,12 @@
 package com.arshadshah.nimaz.viewModel
 
 import android.content.Context
+import android.os.Build
+import android.os.CombinedVibration
 import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
@@ -15,17 +19,15 @@ import java.time.LocalDate
 
 class TasbihViewModel(context: Context) : ViewModel() {
 
-    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
     //state for the tasbih
-    private var _tasbihLoading = MutableStateFlow(false)
+     private var _tasbihLoading = MutableStateFlow(false)
     val tasbihLoading = _tasbihLoading.asStateFlow()
 
     //tasbijh error
-    private var _tasbihError = MutableStateFlow("")
+     private var _tasbihError = MutableStateFlow("")
     val tasbihError = _tasbihError.asStateFlow()
 
-    private var _tasbihCreated = MutableStateFlow(
+     private var _tasbihCreated = MutableStateFlow(
         LocalTasbih(
             id = 0,
             arabicName = "",
@@ -40,112 +42,112 @@ class TasbihViewModel(context: Context) : ViewModel() {
     val tasbihCreated = _tasbihCreated.asStateFlow()
 
     //list of tasbih for today
-    private var _tasbihList = MutableStateFlow(
+     private var _tasbihList = MutableStateFlow(
         listOf<LocalTasbih>()
     )
     val tasbihList = _tasbihList.asStateFlow()
 
     //state for the reset button in top app bar
-    private var _resetButtonState = MutableStateFlow(false)
+     private var _resetButtonState = MutableStateFlow(false)
     val resetButtonState = _resetButtonState.asStateFlow()
 
     //state for the vibration button in top app bar
-    private var _vibrationButtonState = MutableStateFlow(true)
+     private var _vibrationButtonState = MutableStateFlow(true)
     val vibrationButtonState = _vibrationButtonState.asStateFlow()
 
     //state for the orientation button in top app bar
-    private var _orientationButtonState = MutableStateFlow(true)
+     private var _orientationButtonState = MutableStateFlow(true)
     val orientationButtonState = _orientationButtonState.asStateFlow()
 
-    sealed class TasbihEvent {
+     private var _counter = MutableStateFlow(0)
+    val counter = _counter.asStateFlow()
 
-        data class SetTasbih(val tasbih: LocalTasbih) : TasbihEvent()
+     private var _objective = MutableStateFlow(33)
+    val objective = _objective.asStateFlow()
 
-        //update the tasbih
-        data class UpdateTasbih(val tasbih: LocalTasbih) : TasbihEvent()
+    private var _lap = MutableStateFlow(0)
+    val lap = _lap.asStateFlow()
 
-        //get the tasbih by id
-        data class GetTasbih(val id: Int) : TasbihEvent()
+    private var _lapCounter = MutableStateFlow(0)
+    val lapCounter = _lapCounter.asStateFlow()
 
-        //get the tasbih list for today
-        data class GetTasbihList(val date: LocalDate) : TasbihEvent()
-
-        //get all the tasbih
-        object GetAllTasbih : TasbihEvent()
-
-        //delete the tasbih
-        data class DeleteTasbih(val tasbih: LocalTasbih) : TasbihEvent()
-
-        //recreate the tasbih from last date for today
-        data class RecreateTasbih(val date: LocalDate) : TasbihEvent()
-
-        //update tasbih goal
-        data class UpdateTasbihGoal(val tasbih: LocalTasbih) : TasbihEvent()
-
-        //update the reset button state
-        data class UpdateResetButtonState(val state: Boolean) : TasbihEvent()
-
-        //update the vibration button state
-        data class UpdateVibrationButtonState(val state: Boolean) : TasbihEvent()
-
-        //update the orientation button state
-        data class UpdateOrientationButtonState(val state: Boolean) : TasbihEvent()
+    fun setLapCounter(value: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _lapCounter.value = value
+        }
     }
 
-    //event for the tasbih
-    fun handleEvent(event: TasbihEvent) {
-        when (event) {
-            is TasbihEvent.SetTasbih -> {
-                createTasbih(event.tasbih)
-            }
+    fun setLap(value: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _lap.value = value
+        }
+    }
 
-            is TasbihEvent.UpdateTasbih -> {
-                updateTasbih(event.tasbih)
-            }
+    fun setCounter(value: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _counter.value = value
+        }
+    }
 
-            is TasbihEvent.GetTasbih -> {
-                getTasbih(event.id)
-            }
+    fun setObjective(value: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _objective.value = value
+        }
+    }
 
-            is TasbihEvent.GetTasbihList -> {
-                getTasbihList(event.date)
-            }
-
-            is TasbihEvent.GetAllTasbih -> {
-                getAllTasbih()
-            }
-
-            is TasbihEvent.DeleteTasbih -> {
-                deleteTasbih(event.tasbih)
-            }
-
-            is TasbihEvent.RecreateTasbih -> {
-                recreateTasbih(event.date)
-            }
-
-            is TasbihEvent.UpdateTasbihGoal -> {
-                updateTasbihGoal(event.tasbih)
-            }
-
-            is TasbihEvent.UpdateResetButtonState -> {
-                _resetButtonState.value = event.state
-            }
-
-            is TasbihEvent.UpdateVibrationButtonState -> {
-                _vibrationButtonState.value = event.state
-                //vibrate if the vibration button is on
-                if (!event.state) {
-                    vibrator.cancel()
+    fun incrementCounter() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _counter.value += 1
+            if (_counter.value == _objective.value) {
+                _lapCounter.value += 1
+                if (_lapCounter.value == _objective.value) {
+                    _lap.value += 1
+                    _lapCounter.value = 0
                 }
-            }
-
-            is TasbihEvent.UpdateOrientationButtonState -> {
-                _orientationButtonState.value = event.state
             }
         }
     }
 
-    private fun recreateTasbih(date: LocalDate) {
+    fun decrementCounter() {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (_counter.value > 0) {
+                _counter.value -= 1
+                //if count has reached the objective then decrement the lap
+                if (_counter.value == _objective.value) {
+                    _lap.value -= 1
+                }
+
+                if (_counter.value == 0) {
+                    _lapCounter.value = 0
+                    _lap.value = 0
+                }
+            }
+        }
+    }
+
+
+    //tasbih vibration button function
+    fun toggleVibration() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _vibrationButtonState.value = !_vibrationButtonState.value
+        }
+    }
+
+    //tasbih reset button function
+    fun resetTasbih() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _resetButtonState.value = !_resetButtonState.value
+        }
+    }
+
+    //tasbih orientation button function
+    fun toggleOrientation() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _orientationButtonState.value = !_orientationButtonState.value
+        }
+    }
+
+     fun recreateTasbih(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _tasbihLoading.value = true
@@ -199,7 +201,7 @@ class TasbihViewModel(context: Context) : ViewModel() {
         }
     }
 
-    private fun deleteTasbih(tasbih: LocalTasbih) {
+     fun deleteTasbih(tasbih: LocalTasbih) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _tasbihLoading.value = true
@@ -225,7 +227,7 @@ class TasbihViewModel(context: Context) : ViewModel() {
     }
 
     //get the tasbih list for today
-    private fun getTasbihList(date: LocalDate) {
+     fun getTasbihList(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             val datastore = LocalDataStore.getDataStore()
             val tasbihList = datastore.getTasbihForDate(date)
@@ -234,7 +236,7 @@ class TasbihViewModel(context: Context) : ViewModel() {
     }
 
     //get all the tasbih
-    private fun getAllTasbih() {
+     fun getAllTasbih() {
         viewModelScope.launch(Dispatchers.IO) {
             val datastore = LocalDataStore.getDataStore()
             val tasbihList = datastore.getAllTasbih()
@@ -242,7 +244,7 @@ class TasbihViewModel(context: Context) : ViewModel() {
         }
     }
 
-    private fun getTasbih(id: Int) {
+     fun getTasbih(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _tasbihLoading.value = true
@@ -258,7 +260,7 @@ class TasbihViewModel(context: Context) : ViewModel() {
     }
 
 
-    private fun createTasbih(tasbih: LocalTasbih) {
+     fun createTasbih(tasbih: LocalTasbih) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _tasbihLoading.value = true
@@ -277,7 +279,7 @@ class TasbihViewModel(context: Context) : ViewModel() {
         }
     }
 
-    private fun updateTasbih(tasbih: LocalTasbih) {
+     fun updateTasbih(tasbih: LocalTasbih) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _tasbihLoading.value = true
@@ -297,7 +299,7 @@ class TasbihViewModel(context: Context) : ViewModel() {
         }
     }
 
-    private fun updateTasbihGoal(tasbih: LocalTasbih) {
+     fun updateTasbihGoal(tasbih: LocalTasbih) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _tasbihLoading.value = true

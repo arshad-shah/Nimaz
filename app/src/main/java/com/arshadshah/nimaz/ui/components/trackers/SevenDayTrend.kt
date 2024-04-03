@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.components.trackers
 
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,14 +36,13 @@ fun SevenDayTrend(trackersForWeek: State<List<LocalPrayersTracker>>, dateState: 
             verticalAlignment = Alignment.CenterVertically
         ) {
             trackersForWeek.value.forEachIndexed { index, prayerTracker ->
+
                 ProgressBarCustom(
                     progress = prayerTracker.progress.toFloat(),
                     progressColor = if (prayerTracker.progress == 0 && !prayerTracker.isMenstruating) Color.Gray
                     else if (prayerTracker.isMenstruating) Color(0xFFE91E63)
                     else MaterialTheme.colorScheme.primary,
-                    radius = animateIntAsState(if (dateState.value == prayerTracker.date) 30 else 20,
-                        label = "seven_day_trend-Selection"
-                    ).value.dp,
+                    radius = 20.dp,
                     label = prayerTracker.date.dayOfWeek.name.first().toString(),
                     strokeWidth = 6.dp,
                     strokeBackgroundWidth = 3.dp,

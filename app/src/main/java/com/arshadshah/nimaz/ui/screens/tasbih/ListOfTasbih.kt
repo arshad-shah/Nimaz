@@ -142,7 +142,7 @@ fun ListOfTasbih(
                 }
 
                 1 -> {
-                    viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetAllTasbih)
+                    viewModel.getAllTasbih()
                     val listOfTasbih = remember {
                         viewModel.tasbihList
                     }.collectAsState()

@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NAMES_OF_ALLAH
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
@@ -45,28 +48,43 @@ fun NamesOfAllah(paddingValues: PaddingValues) {
     val arabicNames = resources.getStringArray(R.array.Arabic)
     val translationNames = resources.getStringArray(R.array.translation)
 
-    //loop through the arrays and display the names
-    //the names are in the same order in all three arrays
-    //so the first name in English is the same as the first name in Arabic and the first name in translation
-    LazyColumn(
-        //assign a tag to the column
-        //this is used for testing
-        //the tag is used to find the column in the hierarchy
+    Card(
         modifier = Modifier
-            .fillMaxSize()
-            .testTag(TEST_TAG_NAMES_OF_ALLAH),
-        contentPadding = paddingValues
+            .padding(4.dp)
+            .padding(paddingValues)
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
     ) {
-        items(englishNames.size) { index ->
-            NamesOfAllahRow(
-                index,
-                englishNames[index],
-                arabicNames[index],
-                translationNames[index]
-            )
+        //loop through the arrays and display the names
+        //the names are in the same order in all three arrays
+        //so the first name in English is the same as the first name in Arabic and the first name in translation
+        LazyColumn(
+            //assign a tag to the column
+            //this is used for testing
+            //the tag is used to find the column in the hierarchy
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(TEST_TAG_NAMES_OF_ALLAH),
+        ) {
+            items(englishNames.size) { index ->
+                NamesOfAllahRow(
+                    index,
+                    englishNames[index],
+                    arabicNames[index],
+                    translationNames[index]
+                )
+                if (index < englishNames.size - 1) {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.background,
+                        thickness = 2.dp
+                    )
+                }
+            }
         }
     }
-
 }
 
 @Composable
@@ -76,27 +94,15 @@ fun NamesOfAllahRow(
     arabicName: String,
     translationName: String,
 ) {
-
-    ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
-        modifier = Modifier
-            .padding(8.dp),
-    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(4.dp),
         ) {
             Text(
                 modifier = Modifier
-                    .padding(start = 8.dp)
+                    .padding(start = 4.dp)
                     .fillMaxWidth()
                     .weight(0.15f),
                 text = "${index + 1}.",
@@ -111,28 +117,6 @@ fun NamesOfAllahRow(
                     .weight(0.85f),
             ) {
                 Text(
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth(),
-                    text = englishName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        text = arabicName,
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontFamily = utmaniQuranFont,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-                Text(
-                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth(),
@@ -140,9 +124,28 @@ fun NamesOfAllahRow(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        text = arabicName,
+                        textAlign = TextAlign.Center,
+                        fontFamily = utmaniQuranFont,
+                        fontSize = 38.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                Text(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth(),
+                    text = englishName,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
-    }
 }
 
 @Preview(showBackground = true)
