@@ -145,6 +145,8 @@ fun MyQuranScreen(
                     )
 
                     SwipeToDismissBox(
+                        enableDismissFromStartToEnd = false,
+                        enableDismissFromEndToStart = true,
                         state = dismissState,
                         backgroundContent = {
                             SwipeBackground(dismissState = dismissState)

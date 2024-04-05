@@ -41,7 +41,9 @@ fun RamadanCard(onNavigateToCalender: () -> Unit) {
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
     val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 1)
-    val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 29)
+    //find last day of ramadan
+    val ramadanMonthLength = ramadanStart.lengthOfMonth()
+    val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, ramadanMonthLength)
     //get date of ramadan start in gregorian
     val ramadanStartGregorian = LocalDate.from(ramadanStart)
     val ramadanEndGregorian = LocalDate.from(ramadanEnd)

@@ -206,7 +206,7 @@ fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
         SwipeToDismissBoxValue.Settled -> painterResource(id = R.drawable.edit_icon)
     }
     val scale by animateFloatAsState(
-        if (dismissState.targetValue == SwipeToDismissBoxValue.Settled) 0.75f else 1f, label = ""
+        if (dismissState.targetValue == SwipeToDismissBoxValue.Settled) 0f else 1.2f, label = ""
     )
 
     val haptic = LocalHapticFeedback.current

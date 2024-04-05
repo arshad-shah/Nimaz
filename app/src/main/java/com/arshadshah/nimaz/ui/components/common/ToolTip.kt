@@ -50,7 +50,7 @@ fun ToolTip(
         setHeight(BalloonSizeSpec.WRAP)
         setPadding(8)
         setMarginHorizontal(12)
-        setCornerRadius(16F)
+        setCornerRadius(8F)
         setBackgroundColor(colorOfToolTip)
         setBalloonAnimation(BalloonAnimation.ELASTIC)
     }

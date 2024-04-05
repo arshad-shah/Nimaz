@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.prayerTimes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -77,60 +78,63 @@ fun AnimatedArcView(timePoints: List<LocalDateTime?>, countDownTime: CountDownTi
     0.9f to Color(0xFFFAF1D1),
     1f to Color(0xFFFFFBEE)
     )
-    Canvas(
-        modifier = Modifier
-            .width(deviceWidth)
-            .testTag("AnimatedArcView")
-            .height(200.dp)) {
-        inset(horizontal = 100f) {
-            translate(top = 280f) {
-                val maxWidth = size.width
-                val arcRadius = maxWidth / 2
-                val centerY = size.height / 2
+    BoxWithConstraints {
+        val maxWidth = this.maxWidth
+        Canvas(
+            modifier = Modifier
+                .width(maxWidth)
+                .testTag("AnimatedArcView")
+                .height(200.dp)) {
+            inset(horizontal = 100f) {
+                translate(top = 200f) {
+                    val maxWidth = size.width
+                    val arcRadius = maxWidth / 2
+                    val centerY = size.height / 2
 
-                // Draw the animated object
-                val animX = arcRadius + arcRadius * cos(animatablePosition.value)
-                val animY = centerY - arcRadius * sin(animatablePosition.value)
+                    // Draw the animated object
+                    val animX = arcRadius + arcRadius * cos(animatablePosition.value)
+                    val animY = centerY - arcRadius * sin(animatablePosition.value)
 
-                val path = Path()
-                if (timePoints.isNotEmpty()) {
-                    // Drawing the dashed arc
-                    val sweepAngle = 180f
-                    val startAngle = 180f
-                    path.addArc(
-                        oval = Rect(0f, (centerY - arcRadius), maxWidth, (centerY + arcRadius)),
-                        startAngleDegrees = startAngle,
-                        sweepAngleDegrees = sweepAngle
-                    )
-
-                    drawPath(
-                        path = path,
-                        color = internalLineColour,
-                        style = Stroke(
-                            width = 2.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                    val path = Path()
+                    if (timePoints.isNotEmpty()) {
+                        // Drawing the dashed arc
+                        val sweepAngle = 180f
+                        val startAngle = 180f
+                        path.addArc(
+                            oval = Rect(0f, (centerY - arcRadius), maxWidth, (centerY + arcRadius)),
+                            startAngleDegrees = startAngle,
+                            sweepAngleDegrees = sweepAngle
                         )
-                    )
-                    dynamicPositions.forEach { position ->
-                        val xCoord = arcRadius + arcRadius * cos(position)
-                        val yCoord = centerY - arcRadius * sin(position)
-                        drawCircle(
-                            color = prayerTimesLocationOnArcColour,
-                            center = Offset(xCoord, yCoord),
-                            radius = 20f
+
+                        drawPath(
+                            path = path,
+                            color = internalLineColour,
+                            style = Stroke(
+                                width = 2.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                            )
                         )
+                        dynamicPositions.forEach { position ->
+                            val xCoord = arcRadius + arcRadius * cos(position)
+                            val yCoord = centerY - arcRadius * sin(position)
+                            drawCircle(
+                                color = prayerTimesLocationOnArcColour,
+                                center = Offset(xCoord, yCoord),
+                                radius = 20f
+                            )
+                        }
                     }
-                }
 
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colorStops = sunColorArray,
-                        center = Offset(maxWidth - animX, animY),
-                        radius = (50 + 10).toFloat()
-                    ),
-                    radius = 40f,
-                    center = Offset(maxWidth - animX, animY)
-                )
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colorStops = sunColorArray,
+                            center = Offset(maxWidth - animX, animY),
+                            radius = (50 + 10).toFloat()
+                        ),
+                        radius = 40f,
+                        center = Offset(maxWidth - animX, animY)
+                    )
+                }
             }
         }
     }

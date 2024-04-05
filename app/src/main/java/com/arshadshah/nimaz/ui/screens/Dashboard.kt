@@ -47,27 +47,9 @@ fun Dashboard(
         initializer = { DashboardViewmodel(context) }
     )
 
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.CheckUpdate(context, false))
-        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.IsFastingToday)
-        viewModel.handleEvent(
-            DashboardViewmodel.DashboardEvent.GetTrackerForToday(
-                LocalDate.now()
-            )
-        )
-        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.GetBookmarksOfQuran)
-        viewModel.handleEvent(
-            DashboardViewmodel.DashboardEvent.RecreateTasbih(
-                LocalDate.now()
-            )
-        )
-        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.GetRandomAya)
-    }
-    val isFasting = viewModel.isFasting.collectAsState()
+    viewModel.initializeData(context)
 
-    LaunchedEffect(isFasting.value) {
-        viewModel.handleEvent(DashboardViewmodel.DashboardEvent.FajrAndMaghribTime)
-    }
+    val isFasting = viewModel.isFasting.collectAsState()
 
     val updateAvailable = viewModel.isUpdateAvailable.collectAsState()
 

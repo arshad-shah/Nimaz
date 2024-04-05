@@ -5,7 +5,6 @@ import androidx.compose.runtime.State
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import io.github.boguszpawlowski.composecalendar.SelectableCalendar
-import io.github.boguszpawlowski.composecalendar.rememberSelectableCalendarState
 import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
@@ -21,8 +20,8 @@ fun Calender(
             CalenderDay(
                 dayState = state,
                 handleEvents = handleEvents,
-                progressForMonth,
-                fastProgressForMonth
+                progressForMonth = progressForMonth,
+                fastProgressForMonth = fastProgressForMonth
             )
         },
         daysOfWeekHeader = { weekState ->
