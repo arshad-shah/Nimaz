@@ -175,7 +175,7 @@ fun ToggleableItemColumn(
                         painter = painterResource(id = R.drawable.cross_icon),
                         contentDescription = "Close",
                         modifier = Modifier
-                            .padding(8.dp)
+                            .padding(10.dp)
                             .alpha(0.6f)
                     )
                 } else {

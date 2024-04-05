@@ -92,6 +92,8 @@ fun DashboardQuranTracker(
                 )
 
                 SwipeToDismissBox(
+                    enableDismissFromStartToEnd = false,
+                    enableDismissFromEndToStart = true,
                     state = dismissState,
                     backgroundContent = {
                         SwipeBackground(dismissState = dismissState)
