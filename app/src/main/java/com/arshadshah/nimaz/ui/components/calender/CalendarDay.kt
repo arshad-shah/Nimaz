@@ -15,12 +15,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,11 +33,9 @@ import com.arshadshah.nimaz.ui.components.calender.calenderday.DayTextGreg
 import com.arshadshah.nimaz.ui.components.calender.calenderday.HijriDateAndFastIndicator
 import com.arshadshah.nimaz.ui.components.calender.calenderday.ImportantDayDescriptionPopup
 import com.arshadshah.nimaz.ui.components.calender.calenderday.PrayerDots
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
 import kotlin.reflect.KFunction1
@@ -86,10 +86,10 @@ fun CalenderDay(
                     alpha = 0.5f
                 )
                 else if (isMenstratingToday) Color(0xFFE91E63)
-                else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
-                ,
+                else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
                 shape = MaterialTheme.shapes.medium
             )
+            .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
                 enabled = isFromCurrentMonth,
                 onClick = {
@@ -126,8 +126,10 @@ fun CalenderDay(
             if (todaysFastTracker?.isFasting == true){
                 Card(
                     shape = RoundedCornerShape(2.dp),
-                    modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
-                    colors = CardDefaults.elevatedCardColors(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 1.dp),
+                    colors = CardDefaults.cardColors(
                         containerColor = Color(0xFFCDDC39),
                         contentColor = MaterialTheme.colorScheme.onTertiary
                     )
@@ -136,7 +138,6 @@ fun CalenderDay(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Fasted",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
                         maxLines = 1
@@ -147,7 +148,9 @@ fun CalenderDay(
             if (importantDay.first) {
                 Card(
                     shape = RoundedCornerShape(2.dp),
-                    modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 1.dp),
                     colors = CardDefaults.elevatedCardColors(
                         containerColor = getImportantDayColor(importantDay),
                         contentColor = MaterialTheme.colorScheme.onTertiary
@@ -157,7 +160,6 @@ fun CalenderDay(
                         modifier = Modifier.fillMaxWidth(),
                         text = importantDay.second,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
                         maxLines = 1
@@ -180,28 +182,9 @@ fun CalenderDay(
 fun getImportantDayColor(
     importantDay: Pair<Boolean, String>,
 ) = when (importantDay.first) {
-    true -> if (importantDay.second == "Ramadan") Color(0xFF4CAF50)
-    else if (importantDay.second == "Eid Al Fitr") Color(0xFF4CAF50)
-    else if (importantDay.second == "Eid Al Adha") Color(0xFF4CAF50)
-    else if (importantDay.second == "Islamic New Year") Color(0xFF4CAF50)
-    else if (importantDay.second == "Day of Ashura") Color(0xFF4CAF50)
-    else if (importantDay.second == "Mawlid An Nabawi") Color(0xFF4CAF50)
-    else if (importantDay.second == "Start of Dul Hijjah") Color(0xFF4CAF50)
-    else if (importantDay.second == "Dul Hijjah 2") Color(0xFF4CAF50)
-    else if (importantDay.second == "Dul Hijjah 3") Color(0xFF4CAF50)
-    else if (importantDay.second == "Dul Hijjah 4") Color(0xFF4CAF50)
-    else if (importantDay.second == "Dul Hijjah 5") Color(0xFF4CAF50)
-    else if (importantDay.second == "Dul Hijjah 6") Color(0xFF4CAF50)
-    else if (importantDay.second == "Dul Hijjah 7") Color(0xFF4CAF50)
-    else if (importantDay.second == "Hajj Day 1") Color(0xFF4CAF50)
-    else if (importantDay.second == "Day of Arafah") Color(0xFF4CAF50)
-    else if (importantDay.second == "Ramadan Last Day") Color(0xFF4CAF50)
-    else if (importantDay.second == "Shab-e-Barat") Color(0xFF4CAF50)
-    else if (importantDay.second == "Al Isra Wal Mi'raj") Color(0xFF4CAF50)
-    else Color(0xFFE91E63)
+    true -> Color(0xFF4CAF50)
 
-    true -> Color.Transparent
-    false -> TODO()
+    false -> Color.Transparent
 }
 
 //function to check if a day is an important day

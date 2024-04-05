@@ -69,7 +69,7 @@ fun <T> FeaturesDropDown(
     ) = remember { mutableStateOf(false) }
 
     Surface(
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 6.dp),
         modifier = modifier.fillMaxWidth(),
         shape = shape,
     ) {
@@ -79,7 +79,13 @@ fun <T> FeaturesDropDown(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Header(label, items.size, isExpanded, showBadge, setIsExpanded)
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
+                modifier = modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.small,
+            ) {
+                Header(label, items.size, isExpanded, showBadge, setIsExpanded)
+            }
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically(),
@@ -119,8 +125,14 @@ fun Header(
             style = MaterialTheme.typography.titleLarge
         )
         if (showBadge && itemCount > 0) {
-            Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                Text(text = itemCount.toString(), style = MaterialTheme.typography.bodyMedium)
+            Badge(
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Text(
+                    modifier = Modifier.padding(2.dp),
+                    text = itemCount.toString(),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
 
@@ -145,12 +157,6 @@ fun Header(
                     .size(24.dp)
             )
         }
-    }
-    if (isExpanded) {
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 

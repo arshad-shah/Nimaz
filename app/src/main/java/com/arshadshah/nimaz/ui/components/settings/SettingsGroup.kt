@@ -36,7 +36,8 @@ fun SettingsGroup(
         Surface(
             color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
+            //add 4dp to the shape to match the padding of the card
+            shape = MaterialTheme.shapes.large,
         ) {
             Column {
                 content()

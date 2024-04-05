@@ -71,8 +71,9 @@ fun TabsList(
         val selected = pagerState.currentPage == index
         Tab(
             modifier = Modifier
+                .padding(4.dp)
                 .zIndex(2f)
-                .clip(MaterialTheme.shapes.medium)
+                .clip(MaterialTheme.shapes.small)
                 .testTag(
                     AppConstants.TEST_TAG_QURAN_TAB.replace(
                         "{number}",

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,7 +70,7 @@ fun PrayerTimesScreen(
     }
     val currentPrayerName = prayerTimesState.value.currentPrayerName
     val nextPrayerName = prayerTimesState.value.nextPrayerName
-
+    val screenWidth = LocalContext.current.resources.displayMetrics.widthPixels
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,25 +84,28 @@ fun PrayerTimesScreen(
             horizontalArrangement = Arrangement.Center,
         ) {
             if (!isLoading.value) {
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight()
                             .padding(4.dp)
                     ) {
-                        AnimatedArcView(
-                            timePoints =
-                            listOf(
-                                prayerTimesState.value.fajrTime,
-                                prayerTimesState.value.sunriseTime,
-                                prayerTimesState.value.dhuhrTime,
-                                prayerTimesState.value.asrTime,
-                                prayerTimesState.value.maghribTime,
-                                prayerTimesState.value.ishaTime
-                            ),
-                            prayerTimesState.value.countDownTime
-                        )
+                        Text(text = screenWidth.toString())
+                        //if screen is too small then hide the arc
+                        if (screenWidth > 720){
+                            AnimatedArcView(
+                                timePoints =
+                                listOf(
+                                    prayerTimesState.value.fajrTime,
+                                    prayerTimesState.value.sunriseTime,
+                                    prayerTimesState.value.dhuhrTime,
+                                    prayerTimesState.value.asrTime,
+                                    prayerTimesState.value.maghribTime,
+                                    prayerTimesState.value.ishaTime
+                                ),
+                                prayerTimesState.value.countDownTime
+                            )
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
