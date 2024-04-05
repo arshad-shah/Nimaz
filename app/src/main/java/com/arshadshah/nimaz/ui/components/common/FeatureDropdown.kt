@@ -31,6 +31,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -224,7 +225,9 @@ fun DropdownPlaceholder(
                 textAlign = textAlign,
                 overflow = overflow,
                 maxLines = maxLines,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             )
         }
     }
@@ -238,32 +241,17 @@ fun <T> FeatureDropdownItem(
     iconPainter: Painter = painterResource(id = R.drawable.angle_small_right_icon), // Default icon
     iconDescription: String? = null, // Accessibility description for the icon
     iconSize: Dp = 24.dp, // Icon size, default to 24.dp
-    padding: PaddingValues = PaddingValues(horizontal = 8.dp, vertical = 4.dp), // Card padding
-    contentPadding: PaddingValues = PaddingValues(8.dp), // Content padding inside the card
-    borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), // Border color
-    borderWidth: Dp = 2.dp, // Border width
+    padding: PaddingValues = PaddingValues(4.dp), // Card padding
     showIcon: Boolean = true, // Control the visibility of the icon
-    shape: CornerBasedShape = MaterialTheme.shapes.medium // Card shape
 ) {
-    Card(
+    OutlinedCard(
         modifier = Modifier
             .padding(padding)
-            .fillMaxWidth()
-            .border(
-                BorderStroke(borderWidth, borderColor),
-                shape = shape
-            )
-            .clip(shape)
-            .clickable { onClick(item) },
-        shape = shape,
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        )
+            .fillMaxWidth(),
+        onClick = { onClick(item) },
     ) {
         Row(
             modifier = Modifier
-                .padding(contentPadding)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween

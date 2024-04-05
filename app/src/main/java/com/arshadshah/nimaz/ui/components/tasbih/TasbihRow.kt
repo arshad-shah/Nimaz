@@ -138,7 +138,7 @@ fun TasbihRow(
     TasbihGoalDialog(
         state = goal,
         onConfirm = {
-            viewModel.updateTasbih(LocalTasbih(
+            viewModel.createTasbih(LocalTasbih(
                 arabicName = arabicName,
                 englishName = englishName,
                 translationName = translationName,

@@ -150,7 +150,7 @@ fun RamadanTimesCard(
 
                 Row(
                     modifier = Modifier
-                        .padding(4.dp)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
