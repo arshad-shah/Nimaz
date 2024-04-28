@@ -20,7 +20,7 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 33
-        versionCode 156
+        versionCode 157
         versionName '2.3.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
