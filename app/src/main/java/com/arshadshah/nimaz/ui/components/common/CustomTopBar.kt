@@ -322,6 +322,7 @@ fun checkRouteForNotShow(route: String): Boolean {
         AppConstants.PRAYER_TRACKER_SCREEN_ROUTE,
         AppConstants.TASBIH_SCREEN_ROUTE,
         AppConstants.TASBIH_SCREEN_ROUTE,
+        "Intro"
     )
     return list.none { it == route }
 }

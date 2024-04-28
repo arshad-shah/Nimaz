@@ -47,7 +47,9 @@ fun Dashboard(
         initializer = { DashboardViewmodel(context) }
     )
 
-    viewModel.initializeData(context)
+    LaunchedEffect(Unit) {
+        viewModel.initializeData(context)
+    }
 
     val isFasting = viewModel.isFasting.collectAsState()
 

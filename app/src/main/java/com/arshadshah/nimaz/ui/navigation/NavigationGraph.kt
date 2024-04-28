@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.hadith.BookShelf
 import com.arshadshah.nimaz.ui.screens.hadith.HadithChaptersList
 import com.arshadshah.nimaz.ui.screens.hadith.HadithList
+import com.arshadshah.nimaz.ui.screens.introduction.IntroPage1
 import com.arshadshah.nimaz.ui.screens.more.MoreScreen
 import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
 import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
@@ -54,6 +55,7 @@ import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.ui.screens.tracker.CalenderScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -61,11 +63,18 @@ fun NavigationGraph(
     navController: NavController,
     paddingValues: PaddingValues,
     context: MainActivity,
+    isFirstInstall: Boolean,
 ) {
+
+    val startDestination = if (isFirstInstall) "Intro" else BottomNavItem.Dashboard.screen_route
+
     NavHost(
         navController = navController as NavHostController,
-        startDestination = BottomNavItem.Dashboard.screen_route,
+        startDestination = startDestination,
     ) {
+        composable("Intro"){
+            IntroPage1(navController = navController)
+        }
 
         composable(BottomNavItem.Dashboard.screen_route) {
             Dashboard(

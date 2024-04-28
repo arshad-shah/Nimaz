@@ -16,7 +16,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.activities.RoutingActivity
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.NOTIFICATION_PENDING_INTENT_REQUEST_CODE
 import java.text.DateFormat
@@ -136,7 +136,7 @@ class NotificationHelper {
     ) {
         // Create an explicit intent for an Activity in your app
         val notificationIntent =
-            Intent(context, RoutingActivity::class.java).apply {
+            Intent(context, MainActivity::class.java).apply {
                 flags =
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                             Intent
@@ -192,7 +192,7 @@ class NotificationHelper {
     ) {
         // Create an explicit intent for an Activity in your app
         val notificationIntent =
-            Intent(context, RoutingActivity::class.java).apply {
+            Intent(context, MainActivity::class.java).apply {
                 flags =
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                             Intent

@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
-import android.content.Intent
-import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -21,19 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.activities.Introduction
-import com.arshadshah.nimaz.activities.MainActivity
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun IntroPage1() {
+fun IntroPage1(navController: NavHostController) {
     val pages = listOf(
         OnBoardingPage.First,
         OnBoardingPage.Second,
@@ -93,14 +89,11 @@ fun IntroPage1() {
                         AppConstants.IS_FIRST_INSTALL,
                         false
                     )
-                    context.startActivity(
-                        Intent(
-                            context,
-                            MainActivity::class.java
-                        )
-                    )
-                    //remove the activity from the back stack
-                    (context as Introduction).finish()
+                    navController.navigate(BottomNavItem.Dashboard.screen_route) {
+                        popUpTo("introPage") {
+                            inclusive = true
+                        }
+                    }
                 }
             } else {
                 NextButton(

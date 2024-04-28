@@ -90,7 +90,6 @@ fun PrayerTimesScreen(
                             .fillMaxHeight()
                             .padding(4.dp)
                     ) {
-                        Text(text = screenWidth.toString())
                         //if screen is too small then hide the arc
                         if (screenWidth > 720){
                             AnimatedArcView(
@@ -103,7 +102,8 @@ fun PrayerTimesScreen(
                                     prayerTimesState.value.maghribTime,
                                     prayerTimesState.value.ishaTime
                                 ),
-                                prayerTimesState.value.countDownTime
+                                prayerTimesState.value.countDownTime,
+                                topPadding = paddingValues.calculateTopPadding(),
                             )
                         }
                         Box(

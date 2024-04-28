@@ -7,6 +7,7 @@ plugins {
     alias libs.plugins.firebase.perf
     alias libs.plugins.ksp
     alias libs.plugins.about.libs.plugin
+    alias libs.plugins.hilt
 }
 
 apply plugin: 'com.mikepenz.aboutlibraries.plugin'
@@ -20,7 +21,7 @@ android {
         minSdk 28
         targetSdk 33
         versionCode 156
-        versionName '2.2.5'
+        versionName '2.3.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -158,5 +159,8 @@ dependencies {
     implementation libs.kotlinx.serialization.json
     //kotlinx date time
     implementation libs.kotlinx.datetime
+
+    implementation libs.hilt.android
+    ksp libs.hilt.android.compiler
 
 }

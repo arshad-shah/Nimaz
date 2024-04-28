@@ -4,12 +4,15 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -22,18 +25,16 @@ import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.CountDownTime
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun AnimatedArcView(timePoints: List<LocalDateTime?>, countDownTime: CountDownTime) {
+fun AnimatedArcView(timePoints: List<LocalDateTime?>, countDownTime: CountDownTime, topPadding: Dp) {
     val currentPhase = getCurrentPhase(timePoints)
     // calculate the positions of prayer times on the arc using the timePoints
     // first timePoint is the start of the arc and the last timePoint is the end of the arc
@@ -47,12 +48,13 @@ fun AnimatedArcView(timePoints: List<LocalDateTime?>, countDownTime: CountDownTi
 
     val endPosition =
         if (currentPhase + 1 < dynamicPositions.size) dynamicPositions[currentPhase + 1] else dynamicPositions[0]
-    LaunchedEffect(key1 = currentPhase, key2 = timePoints, key3 = countDownTime) {
-        //change the countDownTime to milliseconds
-        val hoursMillis = countDownTime.hours * 60 * 60 * 1000
-        val minutesMillis = countDownTime.minutes * 60 * 1000
-        val secondsMillis = countDownTime.seconds * 1000
-        val durationMillis = hoursMillis + minutesMillis + secondsMillis
+
+    //change the countDownTime to milliseconds
+    val hoursMillis = countDownTime.hours * 60 * 60 * 1000
+    val minutesMillis = countDownTime.minutes * 60 * 1000
+    val secondsMillis = countDownTime.seconds * 1000
+    val durationMillis = hoursMillis + minutesMillis + secondsMillis
+    LaunchedEffect(countDownTime) {
         animatablePosition.animateTo(
             targetValue = endPosition,
             animationSpec = tween(
@@ -78,23 +80,29 @@ fun AnimatedArcView(timePoints: List<LocalDateTime?>, countDownTime: CountDownTi
     0.9f to Color(0xFFFAF1D1),
     1f to Color(0xFFFFFBEE)
     )
-    BoxWithConstraints {
-        val maxWidth = this.maxWidth
+    BoxWithConstraints(
+        modifier = Modifier
+            .padding(
+                top = topPadding,
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 0.dp
+            )
+            .width(deviceWidth)
+            .height(200.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        val maxWidthOfContrainedBox = this.maxWidth
+        val maxHeightOfContrainedBox = this.maxHeight
         Canvas(
             modifier = Modifier
-                .width(maxWidth)
-                .testTag("AnimatedArcView")
-                .height(200.dp)) {
-            inset(horizontal = 100f) {
+                .width(maxWidthOfContrainedBox)
+                .height(maxHeightOfContrainedBox)
+                .testTag("AnimatedArcView")) {
                 translate(top = 200f) {
                     val maxWidth = size.width
                     val arcRadius = maxWidth / 2
                     val centerY = size.height / 2
-
-                    // Draw the animated object
-                    val animX = arcRadius + arcRadius * cos(animatablePosition.value)
-                    val animY = centerY - arcRadius * sin(animatablePosition.value)
-
                     val path = Path()
                     if (timePoints.isNotEmpty()) {
                         // Drawing the dashed arc
@@ -125,29 +133,23 @@ fun AnimatedArcView(timePoints: List<LocalDateTime?>, countDownTime: CountDownTi
                         }
                     }
 
+                    // Draw the animated object
+                    val animX = arcRadius + arcRadius * cos(animatablePosition.value)
+                    val animY = centerY - arcRadius * sin(animatablePosition.value)
+
                     drawCircle(
                         brush = Brush.radialGradient(
                             colorStops = sunColorArray,
-                            center = Offset(maxWidth - animX, animY),
+                            center = Offset((maxWidth - animX), animY),
                             radius = (50 + 10).toFloat()
                         ),
                         radius = 40f,
                         center = Offset(maxWidth - animX, animY)
                     )
                 }
-            }
         }
     }
 }
-
-fun calculateDurationMillis(timePoints: List<LocalDateTime?>, currentPhase: Int): Int {
-    val now = LocalDateTime.now()
-    val nextPoint =
-        if (currentPhase + 1 < timePoints.size) timePoints[currentPhase + 1] else timePoints[0]
-    val duration = ChronoUnit.MILLIS.between(now, nextPoint).toInt()
-    return maxOf(duration, 0) // Ensure duration is not negative
-}
-
 fun getCurrentPhase(timePoints: List<LocalDateTime?>): Int {
     val now = LocalDateTime.now()
 

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.theme
 
 import android.app.Activity
+import android.content.res.Resources.Theme
 import android.os.Build
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
 import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
 import com.arshadshah.nimaz.ui.theme.CustomThemes.DarkColorsDefault
@@ -36,15 +38,15 @@ private val LocalAppDimens = staticCompositionLocalOf {
 @Composable
 fun NimazTheme(
     darkTheme: Boolean = false,
-    dynamicColor: Boolean = false,
     themeName: String = THEME_SYSTEM,
     content: @Composable () -> Unit,
 ) {
+    val isDynamicTheme = themeName == THEME_SYSTEM
     val colorScheme = when {
-        themeName != THEME_DEFAULT && !dynamicColor ->
+        themeName != THEME_DEFAULT && !isDynamicTheme ->
             CustomThemes.getTheme(themeName, darkTheme)
 
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        isDynamicTheme && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
