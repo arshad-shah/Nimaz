@@ -66,6 +66,30 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     val scrollToAya = _scrollToAya.asStateFlow()
 
     init {
+        _arabic_Font.value = sharedPreferences.getData(AppConstants.FONT_STYLE, "Default")
+        _translation.value =
+            sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE, "English")
+
+        //if the font size is not set, set it to default 26 and 16
+
+        _arabic_Font_size.value =
+            if (sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE) == 0.0f) {
+                //save the default font size and also return it
+                sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE, 26.0f)
+                26.0f
+            } else {
+                sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
+            }
+        _translation_Font_size.value =
+            if (sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE) == 0.0f) {
+                //save the default font size and also return it
+                sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16.0f)
+                16.0f
+            } else {
+                sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
+            }
+
+        _display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE, "List")
         getSurahList()
         getJuzList()
     }
@@ -181,7 +205,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
         }
     }
 
-    private fun getSurahList() {
+    fun getSurahList() {
         viewModelScope.launch(Dispatchers.IO) {
             _loadingState.value = true
             _errorState.value = ""
@@ -199,7 +223,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
         }
     }
 
-    private fun getJuzList() {
+    fun getJuzList() {
         viewModelScope.launch(Dispatchers.IO) {
             _loadingState.value = true
             _errorState.value = ""

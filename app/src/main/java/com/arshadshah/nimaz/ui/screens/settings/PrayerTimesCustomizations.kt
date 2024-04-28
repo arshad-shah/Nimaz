@@ -202,6 +202,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     title = "Madhab",
                     description = "The madhab used to calculate the asr prayer times.",
                     items = mapOfMadhabs,
+                    icon = {
+                        Image(
+                            modifier = Modifier
+                                .size(48.dp),
+                            painter = painterResource(id = R.drawable.school),
+                            contentDescription = "Madhab"
+                        )
+                    },
                     subtitle = madhabState.value,
                     height = 120.dp
                 ) { madhab: String ->
@@ -238,6 +246,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     title = "High Latitude Rule",
                     description = "The high latitude rule used to calculate the prayer times.",
                     items = mapOfHighLatitudeRules,
+                    icon = {
+                        Image(
+                            modifier = Modifier
+                                .size(48.dp),
+                            painter = painterResource(id = R.drawable.high_latitude),
+                            contentDescription = "High Latitude Rule"
+                        )
+                    },
                     subtitle = highLatitudeRuleState.value,
                     height = 180.dp
                 ) { highLatRule: String ->
@@ -292,6 +308,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     },
                     description = "The angle of the sun at which the Fajr prayer begins",
                     items = (0..50).map { (it - 25) },
+                    icon = {
+                        Image(
+                            modifier = Modifier
+                                .size(48.dp),
+                            painter = painterResource(id = R.drawable.fajr_angle),
+                            contentDescription = "Fajr Angle"
+                        )
+                    },
                     valueState = fajrAngleState,
                     height = 150.dp,
                     onChange = { angle: Int ->
@@ -331,6 +355,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                         items = (0..50).map { (it - 25) },
                         subtitle = {
                             Text(text = ishaAngleState.value)
+                        },
+                        icon = {
+                            Image(
+                                modifier = Modifier
+                                    .size(48.dp),
+                                painter = painterResource(id = R.drawable.isha_angle),
+                                contentDescription = "Isha Angle"
+                            )
                         },
                         valueState = ishaAngleState,
                         onChange = { angle: Int ->

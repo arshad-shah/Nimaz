@@ -64,7 +64,7 @@ fun TasbihScreen(
     Scaffold(
         topBar = {
             TopAppBar(title = {
-                Text("Calender", style = MaterialTheme.typography.titleLarge)
+                Text("Tasbih", style = MaterialTheme.typography.titleLarge)
             },
                 navigationIcon = {
                     OutlinedIconButton(

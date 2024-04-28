@@ -5,18 +5,15 @@ import android.content.Context
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -28,7 +25,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
@@ -36,7 +32,6 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_SUNRISE
-import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -138,13 +133,61 @@ fun PrayerTimesListUI(
     ) {
         //iterate over the map
         for ((key, value) in prayerTimesMap) {
+            val radii = calculatePrayerTimeRadii(
+                index = prayerTimesMap.keys.indexOf(key),
+                totalItems = prayerTimesMap.size,
+                orientation = Orientation.Vertical,
+            )
             PrayerTimesRow(
                 prayerName = key,
                 prayerTime = value,
                 isHighlighted = currentPrayerName == key,
                 loading = loading,
                 isRamadan = isRamadan,
+                radii = radii,
             )
+        }
+    }
+}
+
+data class PrayerTimeRadii(
+    val topLeft: Float,
+    val topRight: Float,
+    val bottomLeft: Float,
+    val bottomRight: Float,
+)
+
+fun calculatePrayerTimeRadii(
+    index: Int,
+    totalItems: Int,
+    orientation: Orientation,
+): PrayerTimeRadii {
+    val isSingleItem = totalItems == 1
+    val isLastItem = index == totalItems - 1
+    val isFirstItem = index == 0
+
+    return when (orientation) {
+        Orientation.Horizontal -> {
+            if (isSingleItem) {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
+            } else if (isFirstItem) {
+                PrayerTimeRadii(16f, 16f, 4f, 4f)
+            } else if (isLastItem) {
+                PrayerTimeRadii(4f, 4f, 16f, 16f)
+            } else {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
+            }
+        }
+        Orientation.Vertical -> {
+            if (isSingleItem) {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
+            } else if (isFirstItem) {
+                PrayerTimeRadii(16f, 16f, 4f, 4f)
+            } else if (isLastItem) {
+                PrayerTimeRadii(4f, 4f, 16f, 16f)
+            } else {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
+            }
         }
     }
 }
@@ -157,6 +200,7 @@ fun PrayerTimesRow(
     isHighlighted: Boolean,
     loading: Boolean,
     isRamadan: Boolean,
+    radii: PrayerTimeRadii,
 ) {
     //format the date to time based on device format
     //get the device trime format
@@ -181,10 +225,15 @@ fun PrayerTimesRow(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(
+            topStart = radii.topLeft.dp,
+            topEnd = radii.topRight.dp,
+            bottomStart = radii.bottomLeft.dp,
+            bottomEnd = radii.bottomRight.dp
+        ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .padding(vertical = 1.dp, horizontal = 8.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,

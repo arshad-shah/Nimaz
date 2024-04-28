@@ -2,8 +2,12 @@ package com.arshadshah.nimaz.utils
 
 import android.content.Context
 import com.arshadshah.nimaz.constants.AppConstants
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class PrivateSharedPreferences(context: Context) {
+class PrivateSharedPreferences @Inject constructor(
+    @ApplicationContext context: Context
+) {
 
     private val sharedPreferences = context.getSharedPreferences(
         AppConstants.PREFERENCES_FILE_NAME,

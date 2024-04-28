@@ -14,6 +14,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -39,14 +40,18 @@ fun QuranScreen(
         viewModelStoreOwner = context
     ),
 ) {
-    viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
-
+    val surahListState = viewModel.surahListState.collectAsState()
     val titles = listOf("Sura", "Juz", "My Quran")
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0F,
     ) {
         titles.size
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.getSurahList()
+        viewModel.getJuzList()
     }
 
     Column(
@@ -63,7 +68,6 @@ fun QuranScreen(
             when (page) {
                 0 -> {
                     Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG, "Surah Screen")
-                    val surahListState = viewModel.surahListState.collectAsState()
                     val isLoadingSurah = viewModel.loadingState.collectAsState()
                     val errorSurah = viewModel.errorState.collectAsState()
                     Log.d(
@@ -123,7 +127,7 @@ fun QuranScreen(
                         bookmarks = bookmarks,
                         favorites = favorites,
                         notes = notes,
-                        suraList = viewModel.surahListState.collectAsState(),
+                        suraList = surahListState,
                         onNavigateToAyatScreen = onNavigateToAyatScreen,
                         handleEvents = viewModel::handleAyaEvent
                     )
