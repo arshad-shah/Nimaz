@@ -57,7 +57,7 @@ class TrackerViewModel : ViewModel() {
     private val _isMenstruating = MutableStateFlow(false)
     val isMenstruating = _isMenstruating.asStateFlow()
 
-    private val _isLoading= MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
     private val _isError = MutableStateFlow(false)
@@ -78,29 +78,29 @@ class TrackerViewModel : ViewModel() {
                 getFastProgressForMonth(YearMonth.now())
                 isFastingToday(_dateState.value)
                 getMenstruatingState(_dateState.value)
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 error(e.message ?: "An unknown error occurred")
-            }finally {
+            } finally {
                 finishLoading()
             }
         }
     }
 
-    private fun loading(){
+    private fun loading() {
         _isLoading.value = true
     }
 
-    private fun error(message: String){
+    private fun error(message: String) {
         _isError.value = true
         _errorMessage.value = message
     }
 
-    private fun noError(){
+    private fun noError() {
         _isError.value = false
         _errorMessage.value = ""
     }
 
-    private fun finishLoading(){
+    private fun finishLoading() {
         _isLoading.value = false
     }
 
@@ -118,7 +118,7 @@ class TrackerViewModel : ViewModel() {
                 isFastingToday(_dateState.value)
                 getMenstruatingState(_dateState.value)
                 finishLoading()
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 finishLoading()
                 error(e.message ?: "An unknown error occurred")
             }
@@ -282,7 +282,7 @@ class TrackerViewModel : ViewModel() {
     }
 
     private fun getTrackerForDate(date: LocalDate) {
-            viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 PrayerTrackerRepository.getPrayersForDate(date)
                     .catch { emit(LocalPrayersTracker()) }

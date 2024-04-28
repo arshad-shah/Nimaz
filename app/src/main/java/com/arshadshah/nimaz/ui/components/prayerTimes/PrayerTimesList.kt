@@ -178,6 +178,7 @@ fun calculatePrayerTimeRadii(
                 PrayerTimeRadii(4f, 4f, 4f, 4f)
             }
         }
+
         Orientation.Vertical -> {
             if (isSingleItem) {
                 PrayerTimeRadii(4f, 4f, 4f, 4f)
@@ -250,8 +251,7 @@ fun PrayerTimesRow(
                             bottomEnd = 8.dp
                         )
                     )
-            }
-            else if(isBold){
+            } else if (isBold) {
                 Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f))
@@ -263,8 +263,7 @@ fun PrayerTimesRow(
                             bottomEnd = 8.dp
                         )
                     )
-            }
-            else {
+            } else {
                 Modifier
                     .fillMaxWidth()
             }

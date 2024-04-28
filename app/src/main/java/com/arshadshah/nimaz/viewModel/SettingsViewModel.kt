@@ -15,8 +15,6 @@ import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import javax.inject.Inject
 
 class SettingsViewModel(context: Context) : ViewModel() {
 

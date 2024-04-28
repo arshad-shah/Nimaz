@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -79,11 +77,11 @@ fun ContainerUI(
                 heading = "Location", text = location.value
             )
             //vertical divider line
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(1.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
             )
             CustomText(
                 modifier = Modifier

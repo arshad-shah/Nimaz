@@ -55,7 +55,6 @@ import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.ui.screens.tracker.CalenderScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -72,7 +71,7 @@ fun NavigationGraph(
         navController = navController as NavHostController,
         startDestination = startDestination,
     ) {
-        composable("Intro"){
+        composable("Intro") {
             IntroPage1(navController = navController)
         }
 
@@ -141,7 +140,7 @@ fun NavigationGraph(
         }
 
         composable(CALENDER_SCREEN_ROUTE) {
-            CalenderScreen(paddingValues, navController = navController as NavHostController)
+            CalenderScreen(paddingValues, navController = navController)
         }
 
         composable(QIBLA_SCREEN_ROUTE) {
@@ -340,7 +339,7 @@ fun NavigationGraph(
         }
 
         composable(PRAYER_TRACKER_SCREEN_ROUTE) {
-            PrayerTracker(navController = navController as NavHostController)
+            PrayerTracker(navController = navController)
         }
 
         composable(TASBIH_SCREEN_ROUTE) {
@@ -350,7 +349,7 @@ fun NavigationGraph(
                 tasbihEnglish = it.arguments?.getString("translation")!!,
                 tasbihTranslitration = it.arguments?.getString("transliteration")!!,
                 paddingValues = paddingValues,
-                navController = navController as NavHostController
+                navController = navController
             )
         }
 

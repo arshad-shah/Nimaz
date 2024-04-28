@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -94,58 +93,58 @@ fun NamesOfAllahRow(
     arabicName: String,
     translationName: String,
 ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp),
+    ) {
+        Text(
             modifier = Modifier
+                .padding(start = 4.dp)
                 .fillMaxWidth()
-                .padding(4.dp),
+                .weight(0.15f),
+            text = "${index + 1}.",
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 0.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .weight(0.85f),
         ) {
             Text(
                 modifier = Modifier
-                    .padding(start = 4.dp)
-                    .fillMaxWidth()
-                    .weight(0.15f),
-                text = "${index + 1}.",
+                    .padding(4.dp)
+                    .fillMaxWidth(),
+                text = translationName,
                 style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 0.dp, vertical = 8.dp)
-                    .fillMaxWidth()
-                    .weight(0.85f),
-            ) {
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 Text(
                     modifier = Modifier
-                        .padding(4.dp)
                         .fillMaxWidth(),
-                    text = translationName,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = arabicName,
-                        textAlign = TextAlign.Center,
-                        fontFamily = utmaniQuranFont,
-                        fontSize = 38.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-                Text(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth(),
-                    text = englishName,
-                    style = MaterialTheme.typography.titleSmall,
+                    text = arabicName,
+                    textAlign = TextAlign.Center,
+                    fontFamily = utmaniQuranFont,
+                    fontSize = 38.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
+            Text(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth(),
+                text = englishName,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
+    }
 }
 
 @Preview(showBackground = true)

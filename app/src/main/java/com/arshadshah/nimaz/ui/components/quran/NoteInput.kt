@@ -77,7 +77,8 @@ fun NoteInput(
                 trailingIcon = {
                     if (noteContent.value.isNotEmpty()) {
                         Icon(
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier
+                                .size(20.dp)
                                 .clip(CircleShape)
                                 .clickable {
                                     noteContent.value = ""

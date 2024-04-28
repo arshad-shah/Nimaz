@@ -65,7 +65,7 @@ fun CustomTabs(pagerState: PagerState, titles: List<String>) {
 fun TabsList(
     pagerState: PagerState,
     titles: List<String>
-){
+) {
     val scope = rememberCoroutineScope()
     titles.forEachIndexed { index, title ->
         val selected = pagerState.currentPage == index
@@ -107,7 +107,7 @@ fun TabsList(
 fun TabIndicator(
     pagerState: PagerState,
     tabPositions: List<TabPosition>
-){
+) {
     val transition = updateTransition(pagerState.currentPage, label = "indicatorTransition")
     val indicatorStart by transition.animateDp(
         transitionSpec = {

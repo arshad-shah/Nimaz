@@ -73,6 +73,7 @@ internal object MathUtils {
 
         return M + C + P + PI
     }
+
     fun hoursLater(date: LocalDateTime, hoursLater: Int): LocalDateTime =
         date.plusMinutes((hoursLater * 60).toLong())
 

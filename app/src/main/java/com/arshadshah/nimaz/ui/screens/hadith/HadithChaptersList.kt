@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.hadith
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,23 +13,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.HadithChapter
-import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 
 @Composable
@@ -58,7 +51,7 @@ fun HadithChaptersList(
             .padding(paddingValues)
             .padding(8.dp)
     ) {
-        LazyColumn{
+        LazyColumn {
             items(chaptersList.size) { chapter ->
                 ChapterItem(chaptersList[chapter]) {
                     onNavigateToAChapter(
@@ -80,25 +73,25 @@ fun HadithChaptersList(
 @Composable
 fun ChapterItem(chapter: HadithChapter, onClick: () -> Unit) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .clickable {
-                    onClick()
-                },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${chapter.chapterId}. ",
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = chapter.title_english,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge,
-            )
-        }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "${chapter.chapterId}. ",
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Text(
+            modifier = Modifier.padding(8.dp),
+            text = chapter.title_english,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleLarge,
+        )
+    }
 }

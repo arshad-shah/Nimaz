@@ -75,7 +75,7 @@ fun ShowSharedPrefsData() {
                             if (it == SwipeToDismissBoxValue.EndToStart) {
                                 sharedPreferences.removeData(currentItem.value.key)
                                 true
-                            } else if (it == SwipeToDismissBoxValue.StartToEnd){
+                            } else if (it == SwipeToDismissBoxValue.StartToEnd) {
                                 sharedPreferences.removeData(currentItem.value.key)
                                 true
                             }

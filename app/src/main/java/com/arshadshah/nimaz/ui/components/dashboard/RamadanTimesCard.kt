@@ -90,7 +90,7 @@ fun RamadanTimesCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.padding(start= 4.dp),
+                        modifier = Modifier.padding(start = 4.dp),
                         text = "Fasting Times Today",
                         style = MaterialTheme.typography.titleMedium
                     )

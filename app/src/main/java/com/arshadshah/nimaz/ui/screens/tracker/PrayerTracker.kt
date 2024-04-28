@@ -68,7 +68,7 @@ fun PrayerTracker(
     val isErrored = viewModel.isError.collectAsState()
     val error = viewModel.errorMessage.collectAsState()
 
-    if (isErrored.value){
+    if (isErrored.value) {
         Toasty.error(LocalContext.current, error.value, Toasty.LENGTH_LONG, true).show()
     }
     Scaffold(
@@ -149,10 +149,12 @@ fun PrayerTracker(
                         isMenstrauting = isMenstruating.value,
                         isLoading = isLoading,
                     ) { date: LocalDate, isFasting: Boolean ->
-                        viewModel.updateFastTracker(LocalFastTracker(
-                            date = date,
-                            isFasting = isFasting
-                        ))
+                        viewModel.updateFastTracker(
+                            LocalFastTracker(
+                                date = date,
+                                isFasting = isFasting
+                            )
+                        )
                     }
                 }
             }

@@ -689,7 +689,7 @@ fun AyaCard(
             onDismiss = {
             })
     }
-    if(aya.ayaNumberInSurah != 0){
+    if (aya.ayaNumberInSurah != 0) {
         Card(
             modifier = Modifier
                 .padding(4.dp)
@@ -716,90 +716,69 @@ fun AyaCard(
             )
         }
     }
-        Row(
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(6.dp)
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(6.dp)
+                .weight(0.90f)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(0.90f)
-            ) {
-                SelectionContainer {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        Text(
-                            text = cleanString(aya.ayaArabic),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
-                            fontFamily = when (arabicFont) {
-                                "Default" -> {
-                                    utmaniQuranFont
-                                }
-
-                                "Quranme" -> {
-                                    quranFont
-                                }
-
-                                "Hidayat" -> {
-                                    hidayat
-                                }
-
-                                "Amiri" -> {
-                                    amiri
-                                }
-
-                                "IndoPak" -> {
-                                    almajeed
-                                }
-
-                                else -> {
-                                    utmaniQuranFont
-                                }
-                            },
-                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(4.dp)
-                                .placeholder(
-                                    visible = loading,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(4.dp),
-                                    highlight = PlaceholderHighlight.shimmer(
-                                        highlightColor = Color.White,
-                                    )
-                                )
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                if (translation == "Urdu") {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        Text(
-                            text = "${cleanString(aya.translationUrdu)} ۔",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
-                            fontFamily = urduFont,
-                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 4.dp)
-                                .placeholder(
-                                    visible = loading,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(4.dp),
-                                    highlight = PlaceholderHighlight.shimmer(
-                                        highlightColor = Color.White,
-                                    )
-                                )
-                        )
-                    }
-                }
-                if (translation == "English") {
+            SelectionContainer {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Text(
-                        text = cleanString(aya.translationEnglish),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontFamily = englishQuranTranslation,
+                        text = cleanString(aya.ayaArabic),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
+                        fontFamily = when (arabicFont) {
+                            "Default" -> {
+                                utmaniQuranFont
+                            }
+
+                            "Quranme" -> {
+                                quranFont
+                            }
+
+                            "Hidayat" -> {
+                                hidayat
+                            }
+
+                            "Amiri" -> {
+                                amiri
+                            }
+
+                            "IndoPak" -> {
+                                almajeed
+                            }
+
+                            else -> {
+                                utmaniQuranFont
+                            }
+                        },
+                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                            .placeholder(
+                                visible = loading,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp),
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color.White,
+                                )
+                            )
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            if (translation == "Urdu") {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = "${cleanString(aya.translationUrdu)} ۔",
+                        style = MaterialTheme.typography.titleSmall,
                         fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
+                        fontFamily = urduFont,
                         textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -815,7 +794,28 @@ fun AyaCard(
                     )
                 }
             }
+            if (translation == "English") {
+                Text(
+                    text = cleanString(aya.translationEnglish),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = englishQuranTranslation,
+                    fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
+                    textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                        .placeholder(
+                            visible = loading,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White,
+                            )
+                        )
+                )
+            }
         }
+    }
 }
 
 // function to remove \ from the arabic text

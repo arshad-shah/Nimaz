@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,7 +11,6 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -20,13 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalSurah
@@ -35,7 +28,6 @@ import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.quran.SuraListItem
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
-import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlin.reflect.KFunction1
@@ -163,7 +155,9 @@ fun MyQuranScreen(
                                     )
                                 },
                                 itemContent = { aya ->
-                                    val filteredSurah = suraList.value.filter { it.number == aya.suraNumber }.distinct()[0]
+                                    val filteredSurah =
+                                        suraList.value.filter { it.number == aya.suraNumber }
+                                            .distinct()[0]
                                     SuraListItem(
                                         suraNumber = filteredSurah.number,
                                         englishName = filteredSurah.englishName,
@@ -205,7 +199,9 @@ fun MyQuranScreen(
                             )
                         },
                         itemContent = { aya ->
-                            val filteredSurah = suraList.value.filter { it.number == aya.first.toInt() }.distinct()[0]
+                            val filteredSurah =
+                                suraList.value.filter { it.number == aya.first.toInt() }
+                                    .distinct()[0]
                             SuraListItem(
                                 suraNumber = filteredSurah.number,
                                 englishName = filteredSurah.englishName,

@@ -110,7 +110,8 @@ fun DashboardQuranTracker(
                                 )
                             },
                             itemContent = { aya ->
-                                val filteredSurah = suraList.filter { it.number == aya.suraNumber }.distinct()[0]
+                                val filteredSurah =
+                                    suraList.filter { it.number == aya.suraNumber }.distinct()[0]
                                 SuraListItem(
                                     suraNumber = filteredSurah.number,
                                     englishName = filteredSurah.englishName,

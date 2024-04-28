@@ -57,7 +57,9 @@ fun PrayerTrackerGrid(
     ) {
         //month name
         Text(
-            modifier = Modifier.padding(bottom = 2.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(bottom = 2.dp)
+                .fillMaxWidth(),
             textAlign = TextAlign.Center,
             text = dateState.value.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
         )

@@ -112,8 +112,7 @@ fun SuraListItem(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
-                }
-                else{
+                } else {
                     Text(
                         text = "$verseCount Verses | $revelationType",
                         style = MaterialTheme.typography.bodyMedium,

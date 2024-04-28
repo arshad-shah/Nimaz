@@ -10,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
-import com.arshadshah.nimaz.ui.components.common.DropDownHeader
 import com.arshadshah.nimaz.ui.components.common.DropdownPlaceholder
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.tasbih.DeleteDialog

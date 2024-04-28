@@ -203,6 +203,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
 
     private val _surahList = MutableStateFlow(listOf<LocalSurah>())
     val surahList = _surahList.asStateFlow()
+
     //get surah for the aya
     private fun getBookmarksOfQuran() {
         viewModelScope.launch(Dispatchers.IO) {
