@@ -5,17 +5,26 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,9 +39,6 @@ fun PagerScreen(onBoardingPage: OnBoardingPage, position: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(
-                color = MaterialTheme.colorScheme.background
-            )
             .testTag("pagerScreen $position"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -55,8 +61,7 @@ fun PagerScreen(onBoardingPage: OnBoardingPage, position: Int) {
                 .padding(bottom = if (position == 4) 0.dp else 20.dp)
                 .testTag("pagerScreenTitle"),
             text = onBoardingPage.title,
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.displaySmall,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -68,8 +73,7 @@ fun PagerScreen(onBoardingPage: OnBoardingPage, position: Int) {
                 .padding(top = 0.dp, bottom = 20.dp)
                 .testTag("pagerScreenDescription"),
             text = onBoardingPage.description,
-            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
         )

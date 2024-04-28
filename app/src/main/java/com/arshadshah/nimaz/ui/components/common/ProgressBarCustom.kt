@@ -7,8 +7,8 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -82,9 +81,9 @@ fun ProgressBarCustom(
         MutableTransitionState(AnimatedArcState.START)
             .apply { targetState = AnimatedArcState.END }
     }
-    val animatedProgress = updateTransition(currentState, label = "AnimatedProgress")
+    val animatedProgress = rememberTransition(currentState, label = "AnimatedProgress")
     var isFinished by remember { mutableStateOf(false) }
-    val animatedCircle = rememberInfiniteTransition()
+    val animatedCircle = rememberInfiniteTransition(label = "AnimatedCircle")
 
     val progress by animatedProgress.animateFloat(
         transitionSpec = {
@@ -110,13 +109,13 @@ fun ProgressBarCustom(
     val animatedReverse by animatedCircle.animateFloat(
         initialValue = 1.40f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse)
+        animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse), label = ""
     )
 
     val animatedColor by animatedCircle.animateColor(
         initialValue = progressBackgroundColor.copy(0.5f),
         targetValue = progressColor.copy(0.8f),
-        animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse)
+        animationSpec = infiniteRepeatable(tween(2000), RepeatMode.Reverse), label = ""
     )
 
     DisposableEffect(Unit) {
@@ -177,7 +176,6 @@ fun ProgressBarCustom(
             Text(
                 text = label,
                 fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Monospace,
                 style = MaterialTheme.typography.bodyMedium,
                 color = labelColor
             )
@@ -187,7 +185,6 @@ fun ProgressBarCustom(
                 color = progressColor,
                 fontSize = radius.value.sp / 2,
                 fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Monospace,
                 style = MaterialTheme.typography.bodySmall
             )
         }

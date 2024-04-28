@@ -30,7 +30,7 @@ fun AyatScreen(
     spaceFilesRepository: SpacesFileRepository = SpacesFileRepository(context), // Pass repository directly
 ) {
     // LaunchedEffect should depend on both number and isSurah
-    LaunchedEffect(number, isSurah) {
+    LaunchedEffect(Unit) {
         Log.d(AppConstants.QURAN_SCREEN_TAG, "Update occurred on Ayat screen: $number")
         if (isSurah.toBoolean()) {
             viewModel.getAllAyaForSurah(number.toInt(), language)
@@ -42,10 +42,6 @@ fun AyatScreen(
     val ayat = viewModel.ayaListState.collectAsState()
     val loading = viewModel.loadingState.collectAsState()
     val error = viewModel.errorState.collectAsState()
-
-    LaunchedEffect(key1 = ayat.value, block = {
-        Log.d(AppConstants.QURAN_SCREEN_TAG, "Update occurred on Ayat screen: ${ayat.value}")
-    })
 
     val pageMode = viewModel.display_Mode.collectAsState()
     val surah = viewModel.surahState.collectAsState()

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -113,8 +115,9 @@ fun SettingsList(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp, horizontal = 8.dp)
+                        .padding(4.dp)
                         .height(52.dp)
+                        .clip(MaterialTheme.shapes.medium)
                         .selectable(
                             role = Role.RadioButton,
                             selected = isSelected,
@@ -133,14 +136,21 @@ fun SettingsList(
                         onClick = {
                             if (!isSelected) onSelected(items.keys.indexOf(s))
                         },
-                        modifier = Modifier.padding(start = 16.dp),
+                        modifier = Modifier.padding(start = 8.dp),
                     )
                     Text(
                         text = s2,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(start = 16.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 8.dp),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
+                    )
+                }
+                //if not the last item, add a divider
+                if (s != items.keys.last()) {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.surface
                     )
                 }
             }

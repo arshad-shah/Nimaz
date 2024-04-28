@@ -1,28 +1,38 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CALENDER
 import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
@@ -31,43 +41,17 @@ import com.arshadshah.nimaz.ui.components.calender.PrayersTrackerCard
 import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
-import java.time.YearMonth
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalenderScreen(paddingValues: PaddingValues) {
-
-    val viewModel = viewModel(
+fun CalenderScreen(
+    paddingValues: PaddingValues,
+    viewModel: TrackerViewModel = viewModel(
         key = TRACKING_VIEWMODEL_KEY,
-        initializer = { TrackerViewModel() },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-
-    //call this effect only once
-    LaunchedEffect(Unit) {
-        viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now()))
-        viewModel.onEvent(
-            TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                LocalDate.now()
-            )
-        )
-        viewModel.onEvent(
-            TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-                YearMonth.from(
-                    LocalDate.now()
-                )
-            )
-        )
-        viewModel.onEvent(
-            TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                LocalDate.now()
-            )
-        )
-        viewModel.onEvent(
-            TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                LocalDate.now()
-            )
-        )
-    }
+        viewModelStoreOwner = LocalContext.current as MainActivity
+    ),
+    navController: NavHostController
+) {
     val dateState = viewModel.dateState.collectAsState()
 
     val progressForMonth = viewModel.progressForMonth.collectAsState()
@@ -77,63 +61,95 @@ fun CalenderScreen(paddingValues: PaddingValues) {
     val prayerTrackerState = viewModel.prayerTrackerState.collectAsState()
 
     val isFastingToday = viewModel.isFasting.collectAsState()
-    val isMenstruatingToday = viewModel.isMenstrauting.collectAsState()
+    val isMenstruatingToday = viewModel.isMenstruating.collectAsState()
 
     val isLoading = remember {
         mutableStateOf(false)
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .testTag(TEST_TAG_CALENDER),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        item {
-            Calender(
-                handleEvents = viewModel::onEvent,
-                progressForMonth = progressForMonth,
-                fastProgressForMonth = fastProgressForMonth
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text("Calender", style = MaterialTheme.typography.titleLarge)
+            },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.navigateUp()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        viewModel.updateMenstruatingState(!isMenstruatingToday.value)
+                    }) {
+                        Icon(
+                            modifier = Modifier.size(
+                                24.dp
+                            ),
+                            painter = painterResource(
+                                id = R.drawable.menstruation_icon
+                            ),
+                            contentDescription = "Menstruation",
+                            //color it pink
+                            tint = Color(0xFFE91E63)
+                        )
+                    }
+                }
             )
-        }
-        item {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 8.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge.copy(
-                    topStart = CornerSize(0.dp),
-                    topEnd = CornerSize(0.dp),
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                PrayersTrackerCard(
-                    isLoading = isLoading,
-                    prayerTrackerState = prayerTrackerState,
-                    handleEvents = viewModel::onEvent,
-                    dateState = dateState
+        },
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .testTag(TEST_TAG_CALENDER),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            item {
+                Calender(
+                    handleEvents = viewModel::updateDate,
+                    progressForMonth = progressForMonth,
+                    fastProgressForMonth = fastProgressForMonth
                 )
-
+            }
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                            elevation = 8.dp
+                        ),
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    PrayersTrackerCard(
+                        isLoading = isLoading,
+                        prayerTrackerState = prayerTrackerState,
+                        updateTracker = viewModel::updateTracker,
+                        dateState = dateState
+                    )
+                }
                 FastTrackerCard(
                     dateState = dateState,
                     isFastingToday = isFastingToday,
                     isMenstrauting = isMenstruatingToday.value,
                     isLoading = isLoading
                 ) { date: LocalDate, isFasting: Boolean ->
-                    viewModel.onEvent(
-                        TrackerViewModel.TrackerEvent.UPDATE_FAST_TRACKER(
-                            LocalFastTracker(
-                                date = date,
-                                isFasting = isFasting
-                            )
+                    viewModel.updateFastTracker(
+                        LocalFastTracker(
+                            date = date,
+                            isFasting = isFasting
                         )
                     )
                 }

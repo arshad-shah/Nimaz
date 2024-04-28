@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,18 +22,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
+import kotlin.reflect.KFunction1
 
 @Composable
 fun DateSelector(
-    handleEvent: (TrackerViewModel.TrackerEvent) -> Unit,
     dateState: State<LocalDate>,
+    updateDate: KFunction1<LocalDate, Unit>,
 ) {
     val date = remember(dateState.value) { mutableStateOf(dateState.value) }
     val hijrahDate = remember(date.value) { HijrahDate.from(date.value) }
@@ -42,14 +43,11 @@ fun DateSelector(
     val formattedHijrahDate =
         remember(hijrahDate) { hijrahDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) }
 
-    ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         ),
-        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Row(
             modifier = Modifier
@@ -60,27 +58,18 @@ fun DateSelector(
         ) {
             // Previous Day Button
             DateChangeButton(iconId = R.drawable.angle_left_icon, description = "Previous Day") {
-                updateDate(date, -1, handleEvent)
+                updateDate(date, -1, updateDate)
             }
 
             // Date Display
             DateDisplay(date, formattedDate, formattedHijrahDate) {
-                handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(LocalDate.now()))
-                handleEvent(
-                    TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                        LocalDate.now()
-                    )
-                )
-                handleEvent(
-                    TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                        LocalDate.now()
-                    )
-                )
+                date.value = LocalDate.now()
+                updateDate(date, 0, updateDate)
             }
 
             // Next Day Button
             DateChangeButton(iconId = R.drawable.angle_right_icon, description = "Next Day") {
-                updateDate(date, 1, handleEvent)
+                updateDate(date, 1, updateDate)
             }
         }
     }
@@ -111,6 +100,7 @@ private fun DateDisplay(
     Column(
         modifier = Modifier
             .padding(4.dp)
+            .clip(MaterialTheme.shapes.small)
             .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -121,7 +111,7 @@ private fun DateDisplay(
             TodayIndicator(showFutureIcon, showPastIcon)
         }
         Text(formattedDate, style = MaterialTheme.typography.titleMedium)
-        Text(formattedHijrahDate, style = MaterialTheme.typography.bodySmall)
+        Text(formattedHijrahDate, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -164,10 +154,8 @@ private fun TodayIndicator(showFutureIcon: Boolean, showPastIcon: Boolean) {
 private fun updateDate(
     date: MutableState<LocalDate>,
     daysToAdd: Long,
-    handleEvent: (TrackerViewModel.TrackerEvent) -> Unit
+    updateDateAndFetchData: KFunction1<LocalDate, Unit>
 ) {
     date.value = date.value.plusDays(daysToAdd)
-    handleEvent(TrackerViewModel.TrackerEvent.SET_DATE(date.value))
-    handleEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(date.value))
-    handleEvent(TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(date.value))
+    updateDateAndFetchData(date.value)
 }

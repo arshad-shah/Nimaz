@@ -98,11 +98,13 @@ private fun createTextView(
 
     val textColor = color.takeOrElse { style.color.takeOrElse { defaultColor } }
     val mergedStyle = style.merge(
-        TextStyle(
-            color = textColor,
-            fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize,
-            textAlign = textAlign,
-        )
+        textAlign?.let {
+            TextStyle(
+                color = textColor,
+                fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize,
+                textAlign = it,
+            )
+        }
     )
     return TextView(context).apply {
         onClick?.let { setOnClickListener { onClick() } }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,8 +22,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileIcon
-import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
 
 class ThemeOption(
     var themeName: String,
@@ -42,31 +39,6 @@ fun ThemeGrid(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            SettingsTileIcon(icon = {
-                Icon(
-                    modifier = Modifier
-                        .size(24.dp),
-                    painter = painterResource(id = R.drawable.theme_icon),
-                    contentDescription = "Color"
-                )
-            })
-            SettingsTileTexts(title = {
-                Text(
-                    text = "Color",
-                )
-            },
-                subtitle = {
-                    Text(
-                        text = themeOptions.find { it.isSelected }?.themeName
-                            ?: "",
-                    )
-                })
-        }
         //the row
         Row(
             modifier = Modifier

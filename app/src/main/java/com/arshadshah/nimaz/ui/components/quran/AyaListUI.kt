@@ -19,24 +19,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -60,6 +57,7 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholde
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.theme.almajeed
 import com.arshadshah.nimaz.ui.theme.amiri
+import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.urduFont
@@ -100,7 +98,6 @@ fun AyaListUI(
             translation,
             downloadAyaAudioFile,
             handleAyaEvents,
-            loading
         )
     } else {
         val sharedPref = LocalContext.current.getSharedPreferences("quran", 0)
@@ -143,7 +140,6 @@ fun PlaceholderAyaList(
     translation: String,
     downloadAyaAudioFile: (Int, Int, (File?, Exception?, progress: Int, completed: Boolean) -> Unit) -> Unit,
     handleAyaEvents: KFunction1<QuranViewModel.AyaEvent, Unit>,
-    loading: Boolean
 ) {
     val dummyList = remember { generateDummyAyaList() }
 
@@ -165,7 +161,7 @@ fun PlaceholderAyaList(
                     revelationOrder = 0,
                     rukus = 0
                 ),
-                loading = loading,
+                loading = true,
             )
         }
         items(dummyList.size) { index ->
@@ -177,7 +173,7 @@ fun PlaceholderAyaList(
                 translation = translation,
                 downloadAyaAudioFile = downloadAyaAudioFile,
                 handleAyaEvents = handleAyaEvents,
-                loading = loading
+                loading = true
             )
         }
     }
@@ -196,7 +192,7 @@ fun HandleScrollEffects(
     handleQuranMenuEvents: KFunction1<QuranViewModel.QuranMenuEvents, Unit>
 ) {
     // Save the last visible item index
-    LaunchedEffect(key1 = remember { derivedStateOf { state.firstVisibleItemIndex } }) {
+    LaunchedEffect(key1 = state.firstVisibleItemIndex) {
         sharedPref.edit().putInt("visibleItemIndex-${type}-${number}", state.firstVisibleItemIndex)
             .apply()
     }
@@ -217,9 +213,9 @@ fun HandleScrollEffects(
     LaunchedEffect(scrollToVerse) {
         scrollToVerse?.let {
             val index = ayaList.indexOfFirst {
-                it.ayaNumberInQuran == it.ayaNumberInQuran &&
-                        it.suraNumber == it.suraNumber &&
-                        it.juzNumber == it.juzNumber
+                it.ayaNumberInQuran == scrollToVerse.ayaNumberInQuran &&
+                        it.suraNumber == scrollToVerse.suraNumber &&
+                        it.juzNumber == scrollToVerse.juzNumber
             }
             if (index != -1) {
                 state.animateScrollToItem(index)
@@ -293,6 +289,12 @@ fun AyaLazyColumn(
                 downloadAyaAudioFile = downloadAyaAudioFile,
                 handleAyaEvents = handleAyaEvents
             )
+            if (index != ayaList.size - 1) {
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
         }
     }
 }
@@ -334,7 +336,6 @@ fun AyaListItemUI(
     DisposableMediaPlayerEffect(mediaPlayer)
 
     // Other UI States
-    val popUpOpen = remember { mutableStateOf(false) }
     val showNoteDialog = remember { mutableStateOf(false) }
 
     // Prepare and Play Functions
@@ -437,12 +438,10 @@ fun AyaListItemUI(
         loading = loading,
         error = error,
         downloadInProgress = downloadInProgress,
-        progressOfDownload = progressOfDownload,
         isBookmarkedVerse = isBookmarkedVerse,
         noteContent = noteContent,
         isFavored = isFavored,
         hasNote = hasNote,
-        popUpOpen = popUpOpen,
         showNoteDialog = showNoteDialog,
         handleAyaEvents = handleAyaEvents,
         downloadFile = downloadFile
@@ -624,11 +623,9 @@ fun AyaCard(
     loading: Boolean,
     error: MutableState<String>,
     downloadInProgress: MutableState<Boolean>,
-    progressOfDownload: MutableState<Float>,
     isBookmarkedVerse: MutableState<Boolean>,
     isFavored: MutableState<Boolean>,
     hasNote: MutableState<Boolean>,
-    popUpOpen: MutableState<Boolean>,
     showNoteDialog: MutableState<Boolean>,
     handleAyaEvents: (QuranViewModel.AyaEvent) -> Unit,
     downloadFile: () -> Unit,
@@ -676,6 +673,8 @@ fun AyaCard(
                 {
                     CircularProgressIndicator(
                         modifier = Modifier.size(50.dp),
+                        strokeWidth = 8.dp,
+                        strokeCap = StrokeCap.Round,
                     )
                 }
             },
@@ -690,101 +689,96 @@ fun AyaCard(
             onDismiss = {
             })
     }
-    Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        modifier = Modifier
-            .padding(4.dp)
-            .fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-    ) {
-        Row(
+    if (aya.ayaNumberInSurah != 0) {
+        Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(6.dp)
+                .padding(4.dp)
+                .fillMaxWidth(),
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(0.90f)
-            ) {
-                SelectionContainer {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        Text(
-                            text = aya.ayaArabic,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
-                            fontFamily = when (arabicFont) {
-                                "Default" -> {
-                                    utmaniQuranFont
-                                }
-
-                                "Quranme" -> {
-                                    quranFont
-                                }
-
-                                "Hidayat" -> {
-                                    hidayat
-                                }
-
-                                "Amiri" -> {
-                                    amiri
-                                }
-
-                                "IndoPak" -> {
-                                    almajeed
-                                }
-
-                                else -> {
-                                    utmaniQuranFont
-                                }
-                            },
-                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(4.dp)
-                                .placeholder(
-                                    visible = loading,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(4.dp),
-                                    highlight = PlaceholderHighlight.shimmer(
-                                        highlightColor = Color.White,
-                                    )
-                                )
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                if (translation == "Urdu") {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        Text(
-                            text = "${aya.translationUrdu} ۔",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
-                            fontFamily = urduFont,
-                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 4.dp)
-                                .placeholder(
-                                    visible = loading,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(4.dp),
-                                    highlight = PlaceholderHighlight.shimmer(
-                                        highlightColor = Color.White,
-                                    )
-                                )
-                        )
-                    }
-                }
-                if (translation == "English") {
+            AyatFeatures(
+                isBookMarkedVerse = isBookmarkedVerse,
+                isFavouredVerse = isFavored,
+                hasNote = hasNote,
+                handleEvents = handleAyaEvents,
+                aya = aya,
+                showNoteDialog = showNoteDialog,
+                noteContent = noteContent,
+                downloadFile = downloadFile,
+                isLoading = loading,
+                isPlaying = isPlaying,
+                isPaused = isPaused,
+                isStopped = isStopped,
+                playFile = playFile,
+                pauseFile = pauseFile,
+                stopFile = stopFile,
+                isDownloaded = isDownloaded,
+                hasAudio = hasAudio,
+            )
+        }
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(6.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(0.90f)
+        ) {
+            SelectionContainer {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Text(
-                        text = aya.translationEnglish,
-                        style = MaterialTheme.typography.bodySmall,
+                        text = cleanString(aya.ayaArabic),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
+                        fontFamily = when (arabicFont) {
+                            "Default" -> {
+                                utmaniQuranFont
+                            }
+
+                            "Quranme" -> {
+                                quranFont
+                            }
+
+                            "Hidayat" -> {
+                                hidayat
+                            }
+
+                            "Amiri" -> {
+                                amiri
+                            }
+
+                            "IndoPak" -> {
+                                almajeed
+                            }
+
+                            else -> {
+                                utmaniQuranFont
+                            }
+                        },
+                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                            .placeholder(
+                                visible = loading,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp),
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color.White,
+                                )
+                            )
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            if (translation == "Urdu") {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = "${cleanString(aya.translationUrdu)} ۔",
+                        style = MaterialTheme.typography.titleSmall,
                         fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
+                        fontFamily = urduFont,
                         textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -799,77 +793,32 @@ fun AyaCard(
                             )
                     )
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AyatFeatures(
-                        isBookMarkedVerse = isBookmarkedVerse,
-                        isFavouredVerse = isFavored,
-                        hasNote = hasNote,
-                        handleEvents = handleAyaEvents,
-                        aya = aya,
-                        showNoteDialog = showNoteDialog,
-                        noteContent = noteContent,
-                        isLoading = loading,
-                    )
-                    //more menu button that opens a popup menu
-                    if (aya.ayaNumberInQuran != 0) {
-                        //a button that opens a popup menu
-                        FilledIconButton(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .placeholder(
-                                    visible = loading,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(4.dp),
-                                    highlight = PlaceholderHighlight.shimmer(
-                                        highlightColor = Color.White,
-                                    )
-                                ),
-                            onClick = {
-                                popUpOpen.value = !popUpOpen.value
-                            },
-                            enabled = !loading,
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(6.dp),
-                                painter = painterResource(id = R.drawable.more_menu_icon),
-                                contentDescription = "More Menu for Ayat ${aya.ayaNumberInSurah}",
+            }
+            if (translation == "English") {
+                Text(
+                    text = cleanString(aya.translationEnglish),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = englishQuranTranslation,
+                    fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
+                    textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                        .placeholder(
+                            visible = loading,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White,
                             )
-                        }
-                    }
-                }
-
-                if (popUpOpen.value) {
-                    AyatFeaturesPopUpMenu(
-                        aya = aya,
-                        isBookMarkedVerse = isBookmarkedVerse,
-                        isFavouredVerse = isFavored,
-                        hasNote = hasNote,
-                        handleEvents = handleAyaEvents,
-                        showNoteDialog = showNoteDialog,
-                        noteContent = noteContent,
-                        popUpOpen = popUpOpen
-                    ) { downloadFile() }
-                }
-
-                PlayerForAyat(
-                    isPlaying = isPlaying,
-                    isPaused = isPaused,
-                    isStopped = isStopped,
-                    duration = duration,
-                    isDownloaded = isDownloaded,
-                    hasAudio = hasAudio,
-                    onPlayClicked = { playFile() },
-                    onPauseClicked = { pauseFile() },
-                    onStopClicked = { stopFile() },
-                    isLoading = loading,
+                        )
                 )
             }
         }
     }
+}
+
+// function to remove \ from the arabic text
+fun cleanString(text: String): String {
+    return text.replace("\\", "")
 }

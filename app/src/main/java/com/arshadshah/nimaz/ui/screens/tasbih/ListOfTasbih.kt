@@ -3,31 +3,30 @@ package com.arshadshah.nimaz.ui.screens.tasbih
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -35,6 +34,7 @@ import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.CustomTabs
 import com.arshadshah.nimaz.ui.components.common.DropDownHeader
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.common.NoResultFound
 import com.arshadshah.nimaz.ui.components.tasbih.DeleteDialog
 import com.arshadshah.nimaz.ui.components.tasbih.GoalEditDialog
 import com.arshadshah.nimaz.ui.components.tasbih.TasbihDropdownItem
@@ -109,41 +109,49 @@ fun ListOfTasbih(
         ) { page ->
             when (page) {
                 0 -> {
-                    LazyColumn(
-                        modifier = Modifier.testTag(AppConstants.TEST_TAG_TASBIH_LIST),
-                        state = listState,
-                    ) {
-                        items(englishNames.size) { index ->
-                            TasbihRow(
-                                arabicNames[index],
-                                englishNames[index],
-                                translationNames[index],
-                                onNavigateToTasbihScreen
-                            )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        colors = CardDefaults.elevatedCardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
+
+                        ) {
+                        LazyColumn(
+                            modifier = Modifier.testTag(AppConstants.TEST_TAG_TASBIH_LIST),
+                            state = listState,
+                        ) {
+                            items(englishNames.size) { index ->
+                                TasbihRow(
+                                    arabicNames[index],
+                                    englishNames[index],
+                                    translationNames[index],
+                                    onNavigateToTasbihScreen
+                                )
+                                if (index == englishNames.size - 1) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.background,
+                                        thickness = 2.dp,
+                                    )
+                                }
+                            }
                         }
                     }
                 }
 
                 1 -> {
-                    viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetAllTasbih)
+                    viewModel.getAllTasbih()
                     val listOfTasbih = remember {
                         viewModel.tasbihList
                     }.collectAsState()
                     //if the list is empty, show a message
                     if (listOfTasbih.value.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surface)
-                        ) {
-                            Text(
-                                text = "No Tasbih Added",
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.Center)
-                            )
-                        }
+                        NoResultFound(
+                            title = "No Tasbih found",
+                            subtitle = "You will see your Tasbih list here once you create one"
+                        )
                     } else {
                         val showTasbihDialog = remember {
                             mutableStateOf(false)
@@ -196,13 +204,6 @@ fun ListOfTasbih(
                                     //for each date in the month, render the date header
                                     for (dateIndex in dates.indices) {
                                         FeaturesDropDown(
-                                            header = {
-                                                DropDownHeader(
-                                                    headerLeft = "Name",
-                                                    headerRight = "Count",
-                                                    headerMiddle = "Goal"
-                                                )
-                                            },
                                             //the list of tasbih for the date at the index
                                             items = listOfTasbih.value.filter { tasbih ->
                                                 tasbih.date == dates[dateIndex]
@@ -272,13 +273,6 @@ fun ListOfTasbih(
                                                                         ) == years[index]
                                                                 ) {
                                                                     FeaturesDropDown(
-                                                                        header = {
-                                                                            DropDownHeader(
-                                                                                headerLeft = "Name",
-                                                                                headerRight = "Count",
-                                                                                headerMiddle = "Goal"
-                                                                            )
-                                                                        },
                                                                         //the list of tasbih for the date at the index
                                                                         items = listOfTasbih.value.filter { tasbih ->
                                                                             tasbih.date == dates[dateIndex]

@@ -10,10 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.common.CustomText
+import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -51,16 +50,13 @@ fun DashboardRandomAyatCard(
         "English"
     )
 
-    ElevatedCard(
+    Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
             .clickable {
                 randomAya.value?.randomAya?.let {
@@ -80,37 +76,11 @@ fun DashboardRandomAyatCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 8.dp, end = 16.dp),
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.padding(8.dp),
-            ) {
-                CustomText(
-                    modifier = Modifier,
-                    heading = "Chapter",
-                    text = randomAya.value?.randomAya?.suraNumber.toString()
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                CustomText(
-                    modifier = Modifier,
-                    heading = "Verse",
-                    text = randomAya.value?.randomAya?.ayaNumberInSurah.toString()
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-            randomAya.value?.surah?.let {
-                Text(
-                    text = it.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = 26.sp,
-                    fontFamily = utmaniQuranFont,
-                    modifier = Modifier
-                        .padding(4.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = "${randomAya.value?.randomAya?.ayaNumberInSurah} : ${randomAya.value?.randomAya?.suraNumber}")
             IconButton(
                 onClick = {
                     //share the aya
@@ -148,7 +118,7 @@ fun DashboardRandomAyatCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(4.dp)
         ) {
 
             Column(
@@ -195,6 +165,7 @@ fun DashboardRandomAyatCard(
                                 text = it,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontSize = 16.sp,
+                                fontFamily = englishQuranTranslation,
                                 textAlign = if (randomAya.value?.randomAya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()

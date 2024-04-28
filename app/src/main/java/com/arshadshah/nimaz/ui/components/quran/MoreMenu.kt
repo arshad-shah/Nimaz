@@ -1,48 +1,26 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
-import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
 import com.arshadshah.nimaz.ui.components.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import es.dmoral.toasty.Toasty
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 @Composable
 fun MoreMenu(
@@ -52,8 +30,6 @@ fun MoreMenu(
 ) {
 
     val context = LocalContext.current
-
-    val items1: List<String> = listOf("List", "Page (Experimental)")
     val items2: List<String> = listOf("English", "Urdu")
     val items3: List<String> = listOf("Default", "Quranme", "Hidayat", "Amiri", "IndoPak")
     val (showDialog1, setShowDialog1) = remember { mutableStateOf(false) }
@@ -92,19 +68,10 @@ fun MoreMenu(
         defaultValue = "Default",
     )
 
-    //log the initial state of the font size
-    Log.d("MoreMenu", "arabicFontSizeState.value = ${arabicFontSizeState.value}")
-    Log.d("MoreMenu", "translationFontSizeState.value = ${translationFontSizeState.value}")
-    Log.d("MoreMenu", "fontStyleState.value = ${fontStyleState.value}")
-
     DropdownMenu(
         expanded = menuOpen,
         onDismissRequest = { setMenuOpen(false) },
         content = {
-            DropdownMenuItem(onClick = {
-                setShowDialog1(true)
-                setMenuOpen(false)
-            }, text = { Text(text = "Display Type") })
             //disable the translation option if the page type is page
             DropdownMenuItem(onClick = {
                 //if translation is disabled and the user clicks on the translation option
@@ -129,6 +96,7 @@ fun MoreMenu(
                     color = if (pageTypeState.value == "Page (Experimental)") Color.Gray else MaterialTheme.colorScheme.onBackground
                 )
             })
+            HorizontalDivider()
             DropdownMenuItem(onClick = {
                 setShowDialog3(true)
                 setMenuOpen(false)
@@ -137,21 +105,7 @@ fun MoreMenu(
     )
 
 
-    if (showDialog1) {
-        CustomDialog(
-            title = "Display Type",
-            setShowDialog = setShowDialog1,
-            state = state,
-            valueState = pageTypeState,
-            items = items1
-        ) {
-            viewModel.handleQuranMenuEvents(
-                QuranViewModel.QuranMenuEvents.Change_Display_Mode(
-                    it
-                )
-            )
-        }
-    } else if (showDialog2) {
+    if (showDialog2) {
         CustomDialog(
             title = "Translation",
             items = items2,

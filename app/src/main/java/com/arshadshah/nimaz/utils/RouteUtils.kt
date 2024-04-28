@@ -54,6 +54,11 @@ object RouteUtils {
             AppConstants.LICENCES_SCREEN_ROUTE -> "Open Source Libraries"
             AppConstants.DEBUG_MODE -> "Debug Tools"
             AppConstants.CATEGORY_SCREEN_ROUTE -> "Hisnul Muslim"
+            AppConstants.HADITH_SHELF_SCREEN_ROUTE -> "Hadith Shelf"
+            AppConstants.HADITH_CHAPTERS_LIST_SCREEN_ROUTE -> navArguments?.getString("bookName")
+                ?: "Hadith Book List"
+
+            AppConstants.HADITH_LIST_SCREEN_ROUTE -> "Hadith List"
 
             else -> ""
         }
@@ -85,7 +90,11 @@ object RouteUtils {
             AppConstants.LICENCES_SCREEN_ROUTE,
             AppConstants.DEBUG_MODE,
             AppConstants.CATEGORY_SCREEN_ROUTE,
-            AppConstants.DASHBOARD_SCREEN
+            AppConstants.DASHBOARD_SCREEN,
+            AppConstants.HADITH_SHELF_SCREEN_ROUTE,
+            AppConstants.HADITH_CHAPTERS_LIST_SCREEN_ROUTE,
+            AppConstants.HADITH_LIST_SCREEN_ROUTE,
+            AppConstants.PRAYER_TIMES_SCREEN_ROUTE,
         )
         //if the route is in the list then return true
         return routeToCheck.contains(route)

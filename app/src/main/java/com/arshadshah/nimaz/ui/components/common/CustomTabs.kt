@@ -31,103 +31,119 @@ import androidx.compose.ui.zIndex
 import com.arshadshah.nimaz.constants.AppConstants
 import kotlinx.coroutines.launch
 
+/**
+ * Custom Tabs Component for Nimaz App
+ * @param pagerState [PagerState]
+ * @param titles [List] of [String]
+ * */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-        /**
-         * Custom Tabs Component for Nimaz App
-         * @param pagerState [PagerState]
-         * @param titles [List] of [String]
-         * */
 fun CustomTabs(pagerState: PagerState, titles: List<String>) {
-    val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
         modifier = Modifier
-            .padding(
-                top = 0.dp,
-                bottom = 2.dp,
-                start = 4.dp,
-                end = 4.dp
-            )
-            .clip(MaterialTheme.shapes.extraLarge),
-        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            .padding(4.dp)
+            .clip(MaterialTheme.shapes.medium),
+        containerColor = MaterialTheme.colorScheme.primary,
         indicator = { tabPositions: List<TabPosition> ->
-            val transition = updateTransition(pagerState.currentPage, label = "")
-            val indicatorStart by transition.animateDp(
-                transitionSpec = {
-                    if (initialState < targetState) {
-                        spring(dampingRatio = 1f, stiffness = 50f)
-                    } else {
-                        spring(dampingRatio = 1f, stiffness = 1000f)
-                    }
-                }, label = ""
-            ) {
-                tabPositions[it].left
-            }
-
-            val indicatorEnd by transition.animateDp(
-                transitionSpec = {
-                    if (initialState < targetState) {
-                        spring(dampingRatio = 1f, stiffness = 1000f)
-                    } else {
-                        spring(dampingRatio = 1f, stiffness = 50f)
-                    }
-                }, label = ""
-            ) {
-                tabPositions[it].right
-            }
-
-            Box(
-                Modifier
-                    .offset(x = indicatorStart)
-                    .wrapContentSize(align = Alignment.BottomStart)
-                    .width(indicatorEnd - indicatorStart)
-                    .padding(2.dp)
-                    .fillMaxSize()
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.shapes.extraLarge
-                    )
-                    .zIndex(1f)
+            TabIndicator(
+                pagerState = pagerState,
+                tabPositions = tabPositions
             )
         },
         divider = { }
     ) {
-        titles.forEachIndexed { index, title ->
-            val selected = pagerState.currentPage == index
-            Tab(
-                modifier = Modifier
-                    .zIndex(2f)
-                    .clip(MaterialTheme.shapes.extraLarge)
-                    .testTag(
-                        AppConstants.TEST_TAG_QURAN_TAB.replace(
-                            "{number}",
-                            index.toString()
-                        )
-                    ),
-                selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                unselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                    alpha = 0.6f
-                ),
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                },
-                text = {
-                    Text(
-                        text = title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (selected) FontWeight.ExtraBold
-                        else FontWeight.Normal,
-                        color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            )
-        }
+        TabsList(
+            pagerState = pagerState,
+            titles = titles
+        )
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TabsList(
+    pagerState: PagerState,
+    titles: List<String>
+) {
+    val scope = rememberCoroutineScope()
+    titles.forEachIndexed { index, title ->
+        val selected = pagerState.currentPage == index
+        Tab(
+            modifier = Modifier
+                .padding(4.dp)
+                .zIndex(2f)
+                .clip(MaterialTheme.shapes.small)
+                .testTag(
+                    AppConstants.TEST_TAG_QURAN_TAB.replace(
+                        "{number}",
+                        index.toString()
+                    )
+                ),
+            selected = pagerState.currentPage == index,
+            onClick = {
+                scope.launch {
+                    pagerState.animateScrollToPage(index)
+                }
+            },
+            text = {
+                Text(
+                    text = title,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = if (selected) FontWeight.ExtraBold
+                    else FontWeight.Normal,
+                    color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                    else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                )
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TabIndicator(
+    pagerState: PagerState,
+    tabPositions: List<TabPosition>
+) {
+    val transition = updateTransition(pagerState.currentPage, label = "indicatorTransition")
+    val indicatorStart by transition.animateDp(
+        transitionSpec = {
+            if (initialState < targetState) {
+                spring(dampingRatio = 1f, stiffness = 50f)
+            } else {
+                spring(dampingRatio = 1f, stiffness = 1000f)
+            }
+        }, label = "tabIndicatorStart"
+    ) {
+        tabPositions[it].left
+    }
+
+    val indicatorEnd by transition.animateDp(
+        transitionSpec = {
+            if (initialState < targetState) {
+                spring(dampingRatio = 1f, stiffness = 1000f)
+            } else {
+                spring(dampingRatio = 1f, stiffness = 50f)
+            }
+        }, label = "tabIndicatorEnd"
+    ) {
+        tabPositions[it].right
+    }
+
+    Box(
+        Modifier
+            .offset(x = indicatorStart)
+            .wrapContentSize(align = Alignment.BottomStart)
+            .width(indicatorEnd - indicatorStart)
+            .padding(4.dp)
+            .fillMaxSize()
+            .background(
+                color = MaterialTheme.colorScheme.onPrimary,
+                MaterialTheme.shapes.small
+            )
+            .zIndex(1f)
+    )
 }

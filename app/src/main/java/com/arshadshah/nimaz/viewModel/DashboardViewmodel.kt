@@ -14,9 +14,9 @@ import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
-import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
@@ -105,13 +105,21 @@ class DashboardViewmodel(context: Context) : ViewModel() {
     private val _bookmarks = MutableStateFlow(listOf<LocalAya>())
     val bookmarks = _bookmarks.asStateFlow()
 
+    //initialize data
+    fun initializeData(context: Activity) {
+        checkForUpdate(context, false)
+        isFastingToday()
+        getTodaysPrayerTracker(LocalDate.now())
+        getBookmarksOfQuran()
+        recreateTasbih(LocalDate.now())
+        getRandomAya()
+    }
+
     sealed class DashboardEvent {
         object LoadLocation : DashboardEvent()
-        class CheckUpdate(val context: Context, val doUpdate: Boolean) : DashboardEvent()
+        class CheckUpdate(val context: Activity, val doUpdate: Boolean) : DashboardEvent()
 
         object IsFastingToday : DashboardEvent()
-
-        object FajrAndMaghribTime : DashboardEvent()
 
         class UpdatePrayerTracker(
             val date: LocalDate,
@@ -135,19 +143,23 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         object GetRandomAya : DashboardEvent()
     }
 
+    fun checkForUpdate(context: Activity, doUpdate: Boolean) {
+        updateService.checkForUpdate(doUpdate) { updateIsAvailable ->
+            _isUpdateAvailable.value = updateIsAvailable
+            if (doUpdate && updateIsAvailable) {
+                updateService.startUpdateFlowForResult(
+                    context,
+                    AppConstants.APP_UPDATE_REQUEST_CODE
+                )
+            }
+        }
+    }
+
     fun handleEvent(event: DashboardEvent) {
         when (event) {
             is DashboardEvent.CheckUpdate -> {
                 Log.d("Nimaz: SettingsViewModel", "Checking for update")
-                updateService.checkForUpdate(event.doUpdate) { updateIsAvailable ->
-                    _isUpdateAvailable.value = updateIsAvailable
-                    if (event.doUpdate && updateIsAvailable) {
-                        updateService.startUpdateFlowForResult(
-                            event.context.applicationContext as Activity,
-                            AppConstants.APP_UPDATE_REQUEST_CODE
-                        )
-                    }
-                }
+                checkForUpdate(event.context, event.doUpdate)
             }
 
             is DashboardEvent.LoadLocation -> {
@@ -156,10 +168,6 @@ class DashboardViewmodel(context: Context) : ViewModel() {
 
             is DashboardEvent.IsFastingToday -> {
                 isFastingToday()
-            }
-
-            is DashboardEvent.FajrAndMaghribTime -> {
-                fajrAndMaghribTimes()
             }
 
             is DashboardEvent.UpdatePrayerTracker -> {
@@ -192,11 +200,24 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         }
     }
 
+
+    private val _surahList = MutableStateFlow(listOf<LocalSurah>())
+    val surahList = _surahList.asStateFlow()
+
+    //get surah for the aya
     private fun getBookmarksOfQuran() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val dataStore = LocalDataStore.getDataStore()
                 val bookmarks = dataStore.getBookmarkedAyas()
+                //suralist
+                val surahList = mutableListOf<LocalSurah>()
+                //for each bookmark get the surah
+                for (bookmark in bookmarks) {
+                    val surah = dataStore.getSurahById(bookmark.suraNumber)
+                    surahList.add(surah)
+                }
+                _surahList.value = surahList
                 _bookmarks.value = bookmarks
             } catch (e: Exception) {
                 Log.d("getAllBookmarks", e.message ?: "Unknown error")
@@ -229,6 +250,9 @@ class DashboardViewmodel(context: Context) : ViewModel() {
                     .catch { emit(false) }
                     .collect {
                         _isFasting.value = it
+                        if (it) {
+                            fajrAndMaghribTimes()
+                        }
                     }
             } catch (e: Exception) {
                 _isFasting.value = false
@@ -324,6 +348,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
                         isFasting = isFasting
                     )
                 )
+                isFastingToday()
                 _isLoading.value = false
                 _isError.value = false
             } catch (e: Exception) {

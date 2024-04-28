@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -56,7 +57,7 @@ fun FontSizeDialog(
         contentToShow = {
             Column(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
                     .wrapContentHeight(),
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -188,7 +189,7 @@ fun LabelWithDropdownMenu(
     val expanded = remember { mutableStateOf(false) }
     Row(
         modifier = modifier
-            .padding(vertical = 8.dp)
+            .padding(vertical = 4.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically,
@@ -267,6 +268,9 @@ fun LabelWithDropdownMenu(
                                         )
                                     }
                                 )
+                                if (item != items.last()) {
+                                    HorizontalDivider()
+                                }
                             }
                         }
                     )

@@ -4,15 +4,21 @@ import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
@@ -23,7 +29,7 @@ import com.arshadshah.nimaz.ui.components.quran.JuzList
 import com.arshadshah.nimaz.ui.components.quran.SurahList
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun QuranScreen(
     paddingValues: PaddingValues,
@@ -34,14 +40,18 @@ fun QuranScreen(
         viewModelStoreOwner = context
     ),
 ) {
-    viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
-
+    val surahListState = viewModel.surahListState.collectAsState()
     val titles = listOf("Sura", "Juz", "My Quran")
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0F,
     ) {
         titles.size
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.getSurahList()
+        viewModel.getJuzList()
     }
 
     Column(
@@ -58,19 +68,28 @@ fun QuranScreen(
             when (page) {
                 0 -> {
                     Log.d(AppConstants.QURAN_SURAH_SCREEN_TAG, "Surah Screen")
-                    val surahListState = viewModel.surahListState.collectAsState()
                     val isLoadingSurah = viewModel.loadingState.collectAsState()
                     val errorSurah = viewModel.errorState.collectAsState()
                     Log.d(
                         AppConstants.QURAN_SURAH_SCREEN_TAG,
                         "surahListState.value = ${surahListState.value}"
                     )
-                    SurahList(
-                        onNavigateToAyatScreen = onNavigateToAyatScreen,
-                        state = surahListState,
-                        loading = isLoadingSurah.value,
-                        error = errorSurah.value
-                    )
+                    Card(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    ) {
+                        SurahList(
+                            onNavigateToAyatScreen = onNavigateToAyatScreen,
+                            state = surahListState,
+                            loading = isLoadingSurah.value,
+                            error = errorSurah.value
+                        )
+                    }
                 }
 
                 1 -> {
@@ -82,12 +101,22 @@ fun QuranScreen(
                         AppConstants.QURAN_JUZ_SCREEN_TAG,
                         "juzListState.value = ${juzListState.value}"
                     )
-                    JuzList(
-                        onNavigateToAyatScreen = onNavigateToAyatScreen,
-                        state = juzListState,
-                        loading = isLoadingJuz.value,
-                        error = errorJuz.value
-                    )
+                    Card(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    ) {
+                        JuzList(
+                            onNavigateToAyatScreen = onNavigateToAyatScreen,
+                            state = juzListState,
+                            loading = isLoadingJuz.value,
+                            error = errorJuz.value
+                        )
+                    }
                 }
 
                 2 -> {
@@ -98,6 +127,7 @@ fun QuranScreen(
                         bookmarks = bookmarks,
                         favorites = favorites,
                         notes = notes,
+                        suraList = surahListState,
                         onNavigateToAyatScreen = onNavigateToAyatScreen,
                         handleEvents = viewModel::handleAyaEvent
                     )

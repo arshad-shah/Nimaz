@@ -1,10 +1,11 @@
 package com.arshadshah.nimaz.ui.screens
 
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,24 +13,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_SUNRISE
+import com.arshadshah.nimaz.ui.components.dashboard.getTimerText
+import com.arshadshah.nimaz.ui.components.prayerTimes.AnimatedArcView
+import com.arshadshah.nimaz.ui.components.prayerTimes.NextPrayerTimerText
 import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun PrayerTimesScreen(
@@ -72,37 +68,69 @@ fun PrayerTimesScreen(
         )
     }
     val currentPrayerName = prayerTimesState.value.currentPrayerName
-
-    Log.d(AppConstants.PRAYER_TIMES_SCREEN_TAG, "currentPrayerName: $currentPrayerName")
-
-    val mapOfPrayerNameToImagePainterResource = mapOf(
-        PRAYER_NAME_FAJR to R.drawable.fajr_back,
-        PRAYER_NAME_SUNRISE to R.drawable.sunrise_back,
-        PRAYER_NAME_DHUHR to R.drawable.dhuhr_back,
-        PRAYER_NAME_ASR to R.drawable.asr_back,
-        PRAYER_NAME_MAGHRIB to R.drawable.maghrib_back,
-        PRAYER_NAME_ISHA to R.drawable.isha_back,
-    )
-
-    val backgroundImagePainter = remember(currentPrayerName) {
-        mapOfPrayerNameToImagePainterResource[currentPrayerName] ?: R.drawable.fajr_back
-    }
-
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.TopCenter
+    val nextPrayerName = prayerTimesState.value.nextPrayerName
+    val screenWidth = LocalContext.current.resources.displayMetrics.widthPixels
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Image(
-            painter = painterResource(id = backgroundImagePainter),
-            contentDescription = null,
-            modifier = Modifier.fillMaxWidth(),
-            contentScale = ContentScale.FillWidth
-        )
+        Row(
+            modifier = Modifier
+                .weight(3f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            if (!isLoading.value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(4.dp)
+                ) {
+                    //if screen is too small then hide the arc
+                    if (screenWidth > 720) {
+                        AnimatedArcView(
+                            timePoints =
+                            listOf(
+                                prayerTimesState.value.fajrTime,
+                                prayerTimesState.value.sunriseTime,
+                                prayerTimesState.value.dhuhrTime,
+                                prayerTimesState.value.asrTime,
+                                prayerTimesState.value.maghribTime,
+                                prayerTimesState.value.ishaTime
+                            ),
+                            prayerTimesState.value.countDownTime,
+                            topPadding = paddingValues.calculateTopPadding(),
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        NextPrayerTimerText(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth(),
+                            prayerNameDisplay = nextPrayerName,
+                            nextPrayerTimeDisplay = prayerTimesState.value.nextPrayerTime.format(
+                                DateTimeFormatter.ofPattern("HH:mm")
+                            ),
+                            timerText = getTimerText(prayerTimesState.value.countDownTime),
+                            isLoading = isLoading.value,
+                            horizontalPosition = Alignment.CenterHorizontally
+                        )
+                    }
+                }
+            }
+        }
 
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+                .weight(7f),
             verticalArrangement = Arrangement.Bottom
         ) {
             item {
@@ -115,5 +143,4 @@ fun PrayerTimesScreen(
             }
         }
     }
-
 }

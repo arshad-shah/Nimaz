@@ -15,8 +15,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -97,13 +97,10 @@ fun AlertDialogNimaz(
                     elevation = 32.dp
                 ),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-            shape = MaterialTheme.shapes.extraLarge,
         ) {
             Column(
                 modifier = Modifier
@@ -172,7 +169,7 @@ fun AlertDialogNimaz(
                             )
                         }
                     }
-                    if (topDivider) Divider(color = MaterialTheme.colorScheme.outline)
+                    if (topDivider) HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                     if (cardContent) {
                         Card(
                             colors = CardDefaults.cardColors(
@@ -227,7 +224,7 @@ fun AlertDialogNimaz(
                         }
                     }
                 }
-                if (bottomDivider) Divider(color = MaterialTheme.colorScheme.outline)
+                if (bottomDivider) HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

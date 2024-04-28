@@ -4,28 +4,29 @@ import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.AUTO_PARAMETERS
 import com.arshadshah.nimaz.ui.components.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
@@ -66,15 +67,8 @@ fun CalculationMethodUI() {
         settingViewModel.longitude
     }.collectAsState()
     ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
     ) {
         SettingsSwitch(
@@ -161,23 +155,21 @@ fun CalculationMethodUI() {
         exit = shrinkVertically()
     ) {
         ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
-                ),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-            ),
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
-                .padding(8.dp)
+                .padding(4.dp)
                 .fillMaxWidth()
         ) {
             SettingsList(
                 title = "Calculation Method",
                 subtitle = calculationMethodState.value,
                 description = "The method used to calculate the prayer times.",
+                icon = {
+                    Image(
+                        modifier = Modifier.size(34.dp),
+                        painter = painterResource(id = R.drawable.time_calculation),
+                        contentDescription = "Calculation Method"
+                    )
+                },
                 items = mapOfMethods,
                 valueState = calculationMethodState,
                 onChange = { method: String ->

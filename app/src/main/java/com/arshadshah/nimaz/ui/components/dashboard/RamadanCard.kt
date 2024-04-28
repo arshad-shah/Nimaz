@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -40,7 +40,9 @@ fun RamadanCard(onNavigateToCalender: () -> Unit) {
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
     val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 1)
-    val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 29)
+    //find last day of ramadan
+    val ramadanMonthLength = ramadanStart.lengthOfMonth()
+    val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, ramadanMonthLength)
     //get date of ramadan start in gregorian
     val ramadanStartGregorian = LocalDate.from(ramadanStart)
     val ramadanEndGregorian = LocalDate.from(ramadanEnd)
@@ -82,21 +84,19 @@ fun RamadanCard(onNavigateToCalender: () -> Unit) {
     //if yes then show the card
     if (showCard) {
         //show the card
-        ElevatedCard(
+        Card(
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
-            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(4.dp)
+                .clip(MaterialTheme.shapes.medium)
                 .clickable { onNavigateToCalender() },
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(8.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -116,7 +116,7 @@ fun RamadanCard(onNavigateToCalender: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.extraLarge)
-                            .padding(8.dp)
+                            .padding(4.dp)
                             .size(80.dp)
                     ) {
                         Image(

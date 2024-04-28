@@ -1,11 +1,22 @@
 package com.arshadshah.nimaz.ui.components.tasbih
 
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -13,112 +24,57 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import es.dmoral.toasty.Toasty
+import kotlin.reflect.KFunction0
+import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomCounter(
-    paddingValues: PaddingValues,
     tasbihId: String,
+    increment: KFunction0<Unit>,
+    updateTasbih: KFunction1<LocalTasbih, Unit>,
+    resetTasbih: State<Boolean>,
+    count: State<Int>,
+    decrement: KFunction0<Unit>,
+    tasbih: State<LocalTasbih>,
+    objective: State<Int>,
+    setCounter: KFunction1<Int, Unit>,
+    setObjective: KFunction1<Int, Unit>,
+    setLap: KFunction1<Int, Unit>,
+    setLapCounter: KFunction1<Int, Unit>,
+    lap: State<Int>,
+    lapCounter: State<Int>,
+    resetTasbihState: KFunction0<Unit>,
+    rOrl: State<Boolean>,
+    vibrationAllowed: State<Boolean>,
+    getTasbih: KFunction1<Int, Unit>,
 ) {
-    val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.TASBIH_VIEWMODEL_KEY,
-        initializer = { TasbihViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-
-    viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetTasbih(tasbihId.toInt()))
-
-    val resetTasbih = remember {
-        viewModel.resetButtonState
-    }.collectAsState()
-
-    val tasbih = remember {
-        viewModel.tasbihCreated
-    }.collectAsState()
-
-    val error = remember { viewModel.tasbihError }.collectAsState()
-
-    val count = remember {
-        mutableStateOf(tasbih.value.count)
-    }
-
-    LaunchedEffect(key1 = count.value) {
-        //update the tasbih
-        viewModel.handleEvent(
-            TasbihViewModel.TasbihEvent.UpdateTasbih(
-                LocalTasbih(
-                    id = tasbih.value.id,
-                    date = tasbih.value.date,
-                    arabicName = tasbih.value.arabicName,
-                    englishName = tasbih.value.englishName,
-                    translationName = tasbih.value.translationName,
-                    goal = tasbih.value.goal,
-                    count = count.value,
-                )
-            )
-        )
-    }
-
-    val objective = remember {
-        mutableStateOf(tasbih.value.goal.toString())
-    }
-
     val showObjectiveDialog = remember { mutableStateOf(false) }
 
-    //lap counter
-    val lap = remember {
-        mutableStateOf(
-            context.getSharedPreferences("tasbih", 0).getInt("lap-${tasbih.value.id}", 0)
-        )
-    }
-    val lapCountCounter = remember {
-        mutableStateOf(
-            context.getSharedPreferences("tasbih", 0)
-                .getInt("lapCountCounter-${tasbih.value.id}", 0)
-        )
-    }
+    val context = LocalContext.current
 
     //when we firrst launch the composable, we want to set the count to the tasbih count
     LaunchedEffect(key1 = tasbih.value.id) {
-        count.value =
-            context.getSharedPreferences("tasbih", 0).getInt("count-${tasbih.value.id}", 0)
-        objective.value = context.getSharedPreferences("tasbih", 0)
-            .getString("objective-${tasbih.value.id}", tasbih.value.goal.toString())!!
-        lap.value = context.getSharedPreferences("tasbih", 0).getInt("lap-${tasbih.value.id}", 0)
-        lapCountCounter.value = context.getSharedPreferences("tasbih", 0)
-            .getInt("lapCountCounter-${tasbih.value.id}", 0)
-    }
-
-    //persist all the values in shared preferences if the activity is destroyed
-    LaunchedEffect(key1 = count.value, key2 = objective.value, key3 = lap.value)
-    {
-        //save the count
-        context.getSharedPreferences("tasbih", 0).edit()
-            .putInt("count-${tasbih.value.id}", count.value).apply()
-        //save the objective
-        context.getSharedPreferences("tasbih", 0).edit()
-            .putString("objective-${tasbih.value.id}", objective.value)
-            .apply()
-        //save the lap
-        context.getSharedPreferences("tasbih", 0).edit()
-            .putInt("lap-${tasbih.value.id}", lap.value).apply()
-        //save the lap count counter
-        context.getSharedPreferences("tasbih", 0).edit()
-            .putInt("lapCountCounter-${tasbih.value.id}", lapCountCounter.value).apply()
+        getTasbih(tasbih.value.id)
+        setLapCounter(
+            context.getSharedPreferences("tasbih", 0)
+                .getInt("lapCountCounter-${tasbih.value.id}", 0)
+        )
+        setLap(context.getSharedPreferences("tasbih", 0).getInt("lap-${tasbih.value.id}", 0))
+        setCounter(context.getSharedPreferences("tasbih", 0).getInt("count-${tasbih.value.id}", 0))
+        setObjective(
+            context.getSharedPreferences("tasbih", 0)
+                .getString("objective-${tasbih.value.id}", tasbih.value.goal.toString())!!.toInt()
+        )
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .padding(paddingValues),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -151,8 +107,26 @@ fun CustomCounter(
         IncrementDecrement(
             count = count,
             lap = lap,
-            lapCountCounter = lapCountCounter,
+            lapCountCounter = lapCounter,
             objective = objective,
+            increment = increment,
+            rOrl = rOrl,
+            decrement = decrement,
+            vibrationAllowed = vibrationAllowed,
+            onClick = {
+                updateTasbih(
+                    LocalTasbih(
+                        id = tasbih.value.id,
+                        date = tasbih.value.date,
+                        arabicName = tasbih.value.arabicName,
+                        englishName = tasbih.value.englishName,
+                        translationName = tasbih.value.translationName,
+                        goal = tasbih.value.goal,
+                        count = count.value,
+                    )
+                )
+                Toasty.success(context, "Tasbih Updated").show()
+            }
         )
     }
 
@@ -173,20 +147,16 @@ fun CustomCounter(
                 )
             },
             onDismissRequest = {
-                viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+                resetTasbihState()
             },
             onConfirm = {
-                count.value = 0
-                lap.value = 1
-                lapCountCounter.value = 0
-                viewModel.handleEvent(
-                    TasbihViewModel.TasbihEvent.UpdateResetButtonState(
-                        false
-                    )
-                )
+                setCounter(0)
+                setObjective(tasbih.value.goal)
+                setLap(1)
+                setLapCounter(0)
             },
             onDismiss = {
-                viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
+                resetTasbihState()
             })
     }
 
@@ -200,10 +170,14 @@ fun CustomCounter(
             title = "Set Tasbih Objective",
             contentToShow = {
                 OutlinedTextField(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    textStyle = MaterialTheme.typography.titleLarge,
-                    value = objective.value,
-                    onValueChange = { objective.value = it },
+                    value = objective.value.toString(),
+                    onValueChange = {
+                        if (it.isNotEmpty()) {
+                            setObjective(it.toInt())
+                        } else {
+                            setObjective(0)
+                        }
+                    },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
@@ -219,28 +193,7 @@ fun CustomCounter(
                         .padding(horizontal = 16.dp),
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            val isInt = objective.value.toIntOrNull()
-                            if (isInt != null) {
-                                if (objective.value != "" || isInt != 0) {
-                                    showObjectiveDialog.value = false
-                                } else {
-                                    Toasty
-                                        .error(
-                                            context,
-                                            "Objective must be greater than 0",
-                                            Toasty.LENGTH_SHORT
-                                        )
-                                        .show()
-                                }
-                            } else {
-                                Toasty
-                                    .error(
-                                        context,
-                                        "Objective must be greater than 0",
-                                        Toasty.LENGTH_SHORT
-                                    )
-                                    .show()
-                            }
+                            showObjectiveDialog.value = false
                         })
                 )
             },
@@ -248,28 +201,7 @@ fun CustomCounter(
                 showObjectiveDialog.value = false
             },
             onConfirm = {
-                val isInt = objective.value.toIntOrNull()
-                if (isInt != null) {
-                    if (objective.value != "" || isInt != 0) {
-                        showObjectiveDialog.value = false
-                    } else {
-                        Toasty
-                            .error(
-                                context,
-                                "Objective must be greater than 0",
-                                Toasty.LENGTH_SHORT
-                            )
-                            .show()
-                    }
-                } else {
-                    Toasty
-                        .error(
-                            context,
-                            "Objective must be greater than 0",
-                            Toasty.LENGTH_SHORT
-                        )
-                        .show()
-                }
+                showObjectiveDialog.value = false
             },
             onDismiss = {
                 showObjectiveDialog.value = false
