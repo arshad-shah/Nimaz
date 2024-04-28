@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,46 +30,28 @@ fun ChapterListItem(
     onNavigateToChapter: (Int, String) -> Unit,
     loading: Boolean,
 ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.medium)
-                .clickable {
-                    onNavigateToChapter(chapter._id, chapter.english_title)
-                }
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-            ) {
-                Text(
-                    text = chapter.english_title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth()
-                        .placeholder(
-                            visible = loading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
-                            highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
-                            )
-                        ),
-                )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable {
+                onNavigateToChapter(chapter._id, chapter.english_title)
             }
-            //arrow icon to navigate to chapter
-            Icon(
-                painter = painterResource(id = R.drawable.angle_small_right_icon),
-                contentDescription = "Navigate to chapter",
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp),
+        ) {
+            Text(
+                text = chapter.english_title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .size(24.dp)
+                    .padding(8.dp)
                     .fillMaxWidth()
                     .placeholder(
                         visible = loading,
@@ -80,7 +60,25 @@ fun ChapterListItem(
                         highlight = PlaceholderHighlight.shimmer(
                             highlightColor = Color.White,
                         )
-                    )
+                    ),
             )
         }
+        //arrow icon to navigate to chapter
+        Icon(
+            painter = painterResource(id = R.drawable.angle_small_right_icon),
+            contentDescription = "Navigate to chapter",
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .size(24.dp)
+                .fillMaxWidth()
+                .placeholder(
+                    visible = loading,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(4.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                )
+        )
+    }
 }

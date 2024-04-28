@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +44,7 @@ fun DatesContainer(onNavigateToTracker: () -> Unit) {
                 Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
                 style = MaterialTheme.typography.titleLarge
             )
-            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
             Text(
                 text = islamDate,
                 Modifier.padding(16.dp),

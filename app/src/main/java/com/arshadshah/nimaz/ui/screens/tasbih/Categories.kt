@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
@@ -83,7 +82,7 @@ fun Categories(
             .padding(8.dp)
             .fillMaxWidth(),
     ) {
-        LazyColumn{
+        LazyColumn {
             items(itemCount) {
                 itemContent(it)
                 //if (it < itemCount - 1) Divider()
@@ -105,34 +104,38 @@ fun Category(
     loading: Boolean,
     number: Int,
 ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .fillMaxWidth()
-                .clickable(onClick = onClicked, enabled = !loading)
-                .placeholder(
-                    visible = loading,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp),
-                    highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = "${number}.",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+    Row(
+        modifier = Modifier
+            .padding(8.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth()
+            .clickable(onClick = onClicked, enabled = !loading)
+            .placeholder(
+                visible = loading,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(4.dp),
+                highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = "${number}.",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        icon?.let {
+            Image(
+                painter = painterResource(id = it),
+                contentDescription = description,
+                modifier = Modifier.size(32.dp)
             )
-            Text(text = title, style = MaterialTheme.typography.titleLarge,color = MaterialTheme.colorScheme.onSurface,)
-            icon?.let {
-                Image(
-                    painter = painterResource(id = it),
-                    contentDescription = description,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
         }
+    }
 }

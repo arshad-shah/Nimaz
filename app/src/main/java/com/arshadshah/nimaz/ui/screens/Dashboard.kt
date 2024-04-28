@@ -28,7 +28,6 @@ import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.DashboardViewmodel
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Composable
@@ -131,48 +130,48 @@ fun Dashboard(
             }
         }
         item {
-                RamadanCard(
-                    onNavigateToCalender = onNavigateToCalender
-                )
-                EidUlFitrCard {
-                    onNavigateToCalender()
-                }
-                EidUlAdhaCard {
-                    onNavigateToCalender()
-                }
+            RamadanCard(
+                onNavigateToCalender = onNavigateToCalender
+            )
+            EidUlFitrCard {
+                onNavigateToCalender()
+            }
+            EidUlAdhaCard {
+                onNavigateToCalender()
+            }
         }
         item {
-                DashboardPrayerTracker(
-                    dashboardPrayerTracker.value,
-                    viewModel::handleEvent,
-                    isLoading
-                )
-                DashboardFastTracker(
-                    isFasting,
-                    viewModel::handleEvent,
-                    isLoading,
-                    dashboardPrayerTracker.value.isMenstruating
-                )
+            DashboardPrayerTracker(
+                dashboardPrayerTracker.value,
+                viewModel::handleEvent,
+                isLoading
+            )
+            DashboardFastTracker(
+                isFasting,
+                viewModel::handleEvent,
+                isLoading,
+                dashboardPrayerTracker.value.isMenstruating
+            )
         }
         //quick links to the tasbih and quran
         item {
-                DashboardQuranTracker(
-                    suraList = suraList.value,
-                    onNavigateToAyatScreen = onNavigateToAyatScreen,
-                    quranBookmarks,
-                    handleEvents = viewModel::handleEvent,
-                    isLoading = isLoading
-                )
-                DashboardTasbihTracker(
-                    onNavigateToTasbihScreen = onNavigateToTasbihScreen,
-                    onNavigateToTasbihListScreen = onNavigateToTasbihListScreen,
-                    tasbihList = tasbihList.value,
-                    handleEvents = viewModel::handleEvent,
-                    isLoading = isLoading
-                )
+            DashboardQuranTracker(
+                suraList = suraList.value,
+                onNavigateToAyatScreen = onNavigateToAyatScreen,
+                quranBookmarks,
+                handleEvents = viewModel::handleEvent,
+                isLoading = isLoading
+            )
+            DashboardTasbihTracker(
+                onNavigateToTasbihScreen = onNavigateToTasbihScreen,
+                onNavigateToTasbihListScreen = onNavigateToTasbihListScreen,
+                tasbihList = tasbihList.value,
+                handleEvents = viewModel::handleEvent,
+                isLoading = isLoading
+            )
         }
         item {
-                DashboardRandomAyatCard(onNavigateToAyatScreen = onNavigateToAyatScreen, randomAya)
+            DashboardRandomAyatCard(onNavigateToAyatScreen = onNavigateToAyatScreen, randomAya)
         }
     }
 }

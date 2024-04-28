@@ -58,7 +58,7 @@ fun NextPrayerTimerText(
         Badge(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ){
+        ) {
             Text(
                 modifier = Modifier
                     .padding(horizontal = 4.dp)

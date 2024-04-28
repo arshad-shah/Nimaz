@@ -82,7 +82,9 @@ fun BookShelf(
                 0 -> {
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                elevation = 8.dp
+                            ),
                             contentColor = MaterialTheme.colorScheme.onSurface,
                         ),
                         modifier = Modifier
@@ -155,7 +157,7 @@ fun BookItem(metadata: HadithMetadata, onClick: (id: Int, title: String) -> Unit
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.7f),
@@ -189,7 +191,7 @@ fun BookItem(metadata: HadithMetadata, onClick: (id: Int, title: String) -> Unit
         modifier = Modifier.padding(horizontal = 8.dp),
         containerColor = MaterialTheme.colorScheme.tertiary,
         contentColor = MaterialTheme.colorScheme.onTertiary,
-    ){
+    ) {
         Text(
             text = metadata.author_english,
             style = MaterialTheme.typography.labelSmall,

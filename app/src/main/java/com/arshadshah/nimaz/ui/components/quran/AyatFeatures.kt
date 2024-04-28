@@ -156,7 +156,8 @@ fun AyatFeatures(
             ) {
                 Icon(
                     painter = if (aya.note.isNotEmpty()) painterResource(id = R.drawable.note_icon) else painterResource(
-                        id = R.drawable.note_unselected),
+                        id = R.drawable.note_unselected
+                    ),
                     contentDescription = "Note",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
@@ -338,8 +339,7 @@ fun SajdaButton(sajdaType: String, isLoading: Boolean) {
             alignment = Alignment.BottomCenter,
             offset = IntOffset(0, -100),
         ) {
-            ElevatedCard(
-            ) {
+            ElevatedCard {
                 Text(
                     text = "$sajdaType sujood",
                     modifier = Modifier.padding(8.dp),

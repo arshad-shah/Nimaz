@@ -5,10 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,8 +21,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.arshadshah.nimaz.ui.components.common.AnimatableIcon
-import com.arshadshah.nimaz.ui.components.common.AnimatedText
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
@@ -67,12 +63,13 @@ fun BottomNavigationBar(navController: NavController) {
                         contentDescription = bottomNavItem.title
                     },
                 icon = {
-                   Icon(
-                       modifier = Modifier.size(24.dp),
-                       painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
-                           id = bottomNavItem.icon_empty
-                       ), contentDescription = null,
-                   )
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = if (selected) painterResource(id = bottomNavItem.icon) else painterResource(
+                            id = bottomNavItem.icon_empty
+                        ),
+                        contentDescription = null,
+                    )
                 },
                 label = {
                     Text(text = bottomNavItem.title)

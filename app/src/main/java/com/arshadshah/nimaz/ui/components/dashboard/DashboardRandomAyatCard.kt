@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.common.CustomText
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont

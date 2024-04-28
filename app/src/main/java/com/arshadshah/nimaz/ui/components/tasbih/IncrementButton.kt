@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.ui.components.tasbih
 
-import android.os.VibrationEffect
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
@@ -13,12 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import es.dmoral.toasty.Toasty
 import kotlin.reflect.KFunction0
 
 @Composable

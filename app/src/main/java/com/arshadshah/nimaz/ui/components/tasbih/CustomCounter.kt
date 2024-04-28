@@ -59,7 +59,10 @@ fun CustomCounter(
     //when we firrst launch the composable, we want to set the count to the tasbih count
     LaunchedEffect(key1 = tasbih.value.id) {
         getTasbih(tasbih.value.id)
-        setLapCounter(context.getSharedPreferences("tasbih", 0).getInt("lapCountCounter-${tasbih.value.id}", 0))
+        setLapCounter(
+            context.getSharedPreferences("tasbih", 0)
+                .getInt("lapCountCounter-${tasbih.value.id}", 0)
+        )
         setLap(context.getSharedPreferences("tasbih", 0).getInt("lap-${tasbih.value.id}", 0))
         setCounter(context.getSharedPreferences("tasbih", 0).getInt("count-${tasbih.value.id}", 0))
         setObjective(
@@ -169,11 +172,11 @@ fun CustomCounter(
                 OutlinedTextField(
                     value = objective.value.toString(),
                     onValueChange = {
-                                    if (it.isNotEmpty()) {
-                                        setObjective(it.toInt())
-                                    }else{
-                                        setObjective(0)
-                                    }
+                        if (it.isNotEmpty()) {
+                            setObjective(it.toInt())
+                        } else {
+                            setObjective(0)
+                        }
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(

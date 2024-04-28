@@ -29,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -92,7 +91,7 @@ fun HadithList(
                 .padding(8.dp),
             colors = cardColors,
         ) {
-            LazyColumn{
+            LazyColumn {
                 items(hadithList.size) { row ->
                     HadithItem(hadithList[row]) { id: Int, isFavourite: Boolean ->
                         viewModel.updateFavouriteStatus(
@@ -121,66 +120,66 @@ fun HadithItem(hadith: HadithEntity, updateFavouriteStatus: (Int, Boolean) -> Un
         .fillMaxWidth()
         .padding(8.dp)
 
-        Column(modifier = Modifier.padding(8.dp)) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+    Column(modifier = Modifier.padding(8.dp)) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            ),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                Badge(
+                    modifier = Modifier
+                        .size(52.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 ) {
-                    Badge(
-                        modifier = Modifier
-                            .size(52.dp),
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    ) {
-                        Text(
-                            text = hadith.id.toString(),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+                    Text(
+                        text = hadith.id.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
 
-                    IconToggleButton(checked = hadith.favourite, onCheckedChange = { isChecked ->
-                        // Handle favorite toggle here
-                        updateFavouriteStatus(hadith.id, isChecked)
-                    }) {
-                        Icon(
-                            modifier = Modifier.size(16.dp),
-                            painter = if (hadith.favourite) painterResource(id = R.drawable.favorite_icon) else painterResource(
-                                id = R.drawable.favorite_icon_unseletced
-                            ),
-                            contentDescription = "Favorite"
-                        )
-                    }
+                IconToggleButton(checked = hadith.favourite, onCheckedChange = { isChecked ->
+                    // Handle favorite toggle here
+                    updateFavouriteStatus(hadith.id, isChecked)
+                }) {
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        painter = if (hadith.favourite) painterResource(id = R.drawable.favorite_icon) else painterResource(
+                            id = R.drawable.favorite_icon_unseletced
+                        ),
+                        contentDescription = "Favorite"
+                    )
                 }
             }
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                Text(
-                    text = hadith.arabic,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = utmaniQuranFont,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    textAlign = TextAlign.Start,
-                    modifier = reusableModifier
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            val annotatedString = AnnotatedString(
-                text = "${hadith.narrator_english} ${hadith.text_english}"
-            )
+        }
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Text(
-                text = annotatedString,
-                style = MaterialTheme.typography.bodySmall,
-                fontStyle = FontStyle.Italic
+                text = hadith.arabic,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = utmaniQuranFont,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                textAlign = TextAlign.Start,
+                modifier = reusableModifier
             )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        val annotatedString = AnnotatedString(
+            text = "${hadith.narrator_english} ${hadith.text_english}"
+        )
+        Text(
+            text = annotatedString,
+            style = MaterialTheme.typography.bodySmall,
+            fontStyle = FontStyle.Italic
+        )
     }
 }

@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
 import android.annotation.SuppressLint
-import android.content.Intent.*
 import androidx.compose.runtime.Composable
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.BatteryExemptionUI

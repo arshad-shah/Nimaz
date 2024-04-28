@@ -17,10 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -130,14 +128,14 @@ fun TasbihDropdownItem(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     //divider
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .width(1.dp)
                             .height(24.dp),
+                        thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = 0.08f
-                        ),
-                        thickness = 1.dp,
+                        )
                     )
                     //goal
                     Text(
@@ -151,14 +149,14 @@ fun TasbihDropdownItem(
                         style = MaterialTheme.typography.bodySmall
                     )
                     //divider
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .width(1.dp)
                             .height(24.dp),
+                        thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = 0.08f
-                        ),
-                        thickness = 1.dp,
+                        )
                     )
                     //count
                     Text(

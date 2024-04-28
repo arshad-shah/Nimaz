@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.tasbih
 
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,11 +25,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.viewModel.TasbihViewModel
-import es.dmoral.toasty.Toasty
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction1
 
@@ -65,7 +61,8 @@ fun Counter(
         //save the count
         context.getSharedPreferences("tasbih", 0).edit().putInt("count", count.value).apply()
         //save the objective
-        context.getSharedPreferences("tasbih", 0).edit().putString("objective",
+        context.getSharedPreferences("tasbih", 0).edit().putString(
+            "objective",
             objective.value.toString()
         )
             .apply()
@@ -166,7 +163,7 @@ fun Counter(
                     onValueChange = {
                         if (it.isNotEmpty()) {
                             setObjective(it.toInt())
-                        }else{
+                        } else {
                             setObjective(0)
                         }
                     },
@@ -185,7 +182,7 @@ fun Counter(
                         .padding(horizontal = 16.dp),
                     keyboardActions = KeyboardActions(
                         onDone = {
-showObjectiveDialog.value = false
+                            showObjectiveDialog.value = false
                         })
                 )
             },

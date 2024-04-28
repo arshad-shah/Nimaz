@@ -42,8 +42,6 @@ import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
-import com.arshadshah.nimaz.viewModel.TasbihViewModel
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
@@ -139,13 +137,13 @@ fun CustomTopBar(
                                             contentDescription = "Current Location",
                                             modifier = Modifier.size(14.dp)
                                         )
-                                            Text(
-                                                modifier = Modifier.padding(start = 4.dp),
-                                                text = if (isLoading.value) "Loading..." else locationName.value,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                        Text(
+                                            modifier = Modifier.padding(start = 4.dp),
+                                            text = if (isLoading.value) "Loading..." else locationName.value,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
                                     }
                                     Row(
                                         modifier = Modifier.padding(2.dp),
@@ -195,7 +193,7 @@ fun CustomTopBar(
                     }
                 },
                 navigationIcon = {
-                    if (route.value.toString() != AppConstants.DASHBOARD_SCREEN && route.value.toString() != AppConstants.PRAYER_TIMES_SCREEN_ROUTE){
+                    if (route.value.toString() != AppConstants.DASHBOARD_SCREEN && route.value.toString() != AppConstants.PRAYER_TIMES_SCREEN_ROUTE) {
                         OutlinedIconButton(
                             modifier = Modifier
                                 .testTag("backButton")

@@ -45,7 +45,7 @@ fun CalenderHeader(
         ),
         modifier = Modifier
             .fillMaxWidth()
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .padding(horizontal = 12.dp)

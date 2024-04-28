@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -84,48 +83,48 @@ fun PrayerTimesScreen(
             horizontalArrangement = Arrangement.Center,
         ) {
             if (!isLoading.value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(4.dp)
+                ) {
+                    //if screen is too small then hide the arc
+                    if (screenWidth > 720) {
+                        AnimatedArcView(
+                            timePoints =
+                            listOf(
+                                prayerTimesState.value.fajrTime,
+                                prayerTimesState.value.sunriseTime,
+                                prayerTimesState.value.dhuhrTime,
+                                prayerTimesState.value.asrTime,
+                                prayerTimesState.value.maghribTime,
+                                prayerTimesState.value.ishaTime
+                            ),
+                            prayerTimesState.value.countDownTime,
+                            topPadding = paddingValues.calculateTopPadding(),
+                        )
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .fillMaxHeight()
-                            .padding(4.dp)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.BottomCenter
                     ) {
-                        //if screen is too small then hide the arc
-                        if (screenWidth > 720){
-                            AnimatedArcView(
-                                timePoints =
-                                listOf(
-                                    prayerTimesState.value.fajrTime,
-                                    prayerTimesState.value.sunriseTime,
-                                    prayerTimesState.value.dhuhrTime,
-                                    prayerTimesState.value.asrTime,
-                                    prayerTimesState.value.maghribTime,
-                                    prayerTimesState.value.ishaTime
-                                ),
-                                prayerTimesState.value.countDownTime,
-                                topPadding = paddingValues.calculateTopPadding(),
-                            )
-                        }
-                        Box(
+                        NextPrayerTimerText(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight(),
-                            contentAlignment = Alignment.BottomCenter
-                        ) {
-                            NextPrayerTimerText(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .fillMaxWidth(),
-                                prayerNameDisplay = nextPrayerName,
-                                nextPrayerTimeDisplay = prayerTimesState.value.nextPrayerTime.format(
-                                    DateTimeFormatter.ofPattern("HH:mm")
-                                ),
-                                timerText = getTimerText(prayerTimesState.value.countDownTime),
-                                isLoading = isLoading.value,
-                                horizontalPosition = Alignment.CenterHorizontally
-                            )
-                        }
+                                .padding(8.dp)
+                                .fillMaxWidth(),
+                            prayerNameDisplay = nextPrayerName,
+                            nextPrayerTimeDisplay = prayerTimesState.value.nextPrayerTime.format(
+                                DateTimeFormatter.ofPattern("HH:mm")
+                            ),
+                            timerText = getTimerText(prayerTimesState.value.countDownTime),
+                            isLoading = isLoading.value,
+                            horizontalPosition = Alignment.CenterHorizontally
+                        )
                     }
+                }
             }
         }
 

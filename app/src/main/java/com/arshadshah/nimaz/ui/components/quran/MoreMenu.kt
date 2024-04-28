@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem

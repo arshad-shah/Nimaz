@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
 import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,7 +16,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -79,10 +77,10 @@ fun ChapterList(
                 )
                 if (it != chapterState.value.size - 1) {
                     // Add a divider if it's not the last item
-                     HorizontalDivider(
-                         color = MaterialTheme.colorScheme.background,
-                         thickness = 2.dp,
-                     )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.background,
+                        thickness = 2.dp,
+                    )
                 }
             }
         }

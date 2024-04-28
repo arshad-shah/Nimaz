@@ -20,7 +20,7 @@ import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.NOTIFICATION_PENDING_INTENT_REQUEST_CODE
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 
 /**
  * A Helper class that creates both the Notifications and the notification channels

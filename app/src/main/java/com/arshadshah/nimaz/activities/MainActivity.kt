@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +48,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MainActivity: ComponentActivity() {
+class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var sharedPref: PrivateSharedPreferences
@@ -164,7 +163,7 @@ class MainActivity: ComponentActivity() {
                         )
                     },
                     bottomBar = {
-                        if(route.value.toString() !== "Intro"){
+                        if (route.value.toString() !== "Intro") {
                             AnimatedVisibility(
                                 visible = if (route.value.toString() === DASHBOARD_SCREEN || route.value.toString() === PRAYER_TIMES_SCREEN_ROUTE) true else !checkRoute(
                                     route.value.toString()
@@ -177,7 +176,12 @@ class MainActivity: ComponentActivity() {
                         }
                     }
                 ) {
-                    NavigationGraph(navController = navController, it, context = this@MainActivity, isFirstInstall = firstTime)
+                    NavigationGraph(
+                        navController = navController,
+                        it,
+                        context = this@MainActivity,
+                        isFirstInstall = firstTime
+                    )
                 }
             }
         }

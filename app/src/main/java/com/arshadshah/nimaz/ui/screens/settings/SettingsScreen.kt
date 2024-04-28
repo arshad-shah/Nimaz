@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,15 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,7 +45,6 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_CHANNEL_ID
 import com.arshadshah.nimaz.constants.AppConstants.TEST_NOTIFY_ID
 import com.arshadshah.nimaz.constants.AppConstants.TEST_PI_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON
 import com.arshadshah.nimaz.constants.AppConstants.THEME
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DARK_RED
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
@@ -386,39 +381,39 @@ fun SettingsScreen(
                     .padding(4.dp)
                     .fillMaxWidth()
             ) {
-                    //switch for theme mode dark/light when its not dynamic
-                    SettingsSwitch(
-                        state = stateDarkMode,
-                        title = { Text(text = if (stateDarkMode.value) "Dark Mode" else "Light Mode") },
-                        onCheckedChange = {
-                            viewModelSettings.handleEvent(
-                                SettingsViewModel.SettingsEvent.DarkMode(
-                                    it
-                                )
+                //switch for theme mode dark/light when its not dynamic
+                SettingsSwitch(
+                    state = stateDarkMode,
+                    title = { Text(text = if (stateDarkMode.value) "Dark Mode" else "Light Mode") },
+                    onCheckedChange = {
+                        viewModelSettings.handleEvent(
+                            SettingsViewModel.SettingsEvent.DarkMode(
+                                it
                             )
-                        },
-                        icon = {
-                            Crossfade(
-                                targetState = stateDarkMode.value,
-                                label = "themeModeChange"
-                            ) { darkMode ->
-                                if (darkMode) {
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        painter = painterResource(id = R.drawable.dark_icon),
-                                        contentDescription = "Dark Mode"
-                                    )
-                                } else {
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        painter = painterResource(id = R.drawable.light_icon),
-                                        contentDescription = "Light Mode"
-                                    )
-                                }
+                        )
+                    },
+                    icon = {
+                        Crossfade(
+                            targetState = stateDarkMode.value,
+                            label = "themeModeChange"
+                        ) { darkMode ->
+                            if (darkMode) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(id = R.drawable.dark_icon),
+                                    contentDescription = "Dark Mode"
+                                )
+                            } else {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(id = R.drawable.light_icon),
+                                    contentDescription = "Light Mode"
+                                )
                             }
                         }
-                    )
-                }
+                    }
+                )
+            }
             //theme
             ElevatedCard(
                 modifier = Modifier
@@ -597,7 +592,11 @@ fun SettingsScreen(
                     shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Nimaz")
                     var shareMessage = "\nCheck out this app\n\n"
                     shareMessage = """
-								${shareMessage}https://play.google.com/store/apps/details?id=${getAppID(context)}
+								${shareMessage}https://play.google.com/store/apps/details?id=${
+                        getAppID(
+                            context
+                        )
+                    }
 								
 								""".trimIndent()
                     shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
@@ -664,7 +663,7 @@ fun SettingsScreen(
         //get the current year
         val currentYear = LocalDateTime.now().year
         Text(
-            text = "© $currentYear Nimaz " +getAppVersion(context),
+            text = "© $currentYear Nimaz " + getAppVersion(context),
             modifier = Modifier
                 .padding(8.dp)
                 .align(Alignment.CenterHorizontally),

@@ -164,7 +164,7 @@ fun TopBarActionsTasbih(
     updateOrientationButtonState: KFunction0<Unit>,
     updateVibrationButtonState: KFunction0<Unit>,
     updateResetButtonState: KFunction0<Unit>,
-){
+) {
     //icon button to change the position of the button for right or left
     IconButton(onClick = {
         updateOrientationButtonState()

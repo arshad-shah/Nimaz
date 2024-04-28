@@ -2,14 +2,9 @@ package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
@@ -17,7 +12,6 @@ import com.arshadshah.nimaz.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.quran.AyaListUI
-import com.arshadshah.nimaz.ui.components.quran.AyatFeatures
 import com.arshadshah.nimaz.ui.components.quran.Page
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 

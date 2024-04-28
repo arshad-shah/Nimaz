@@ -25,7 +25,9 @@ fun QuranItemNumber(number: Int) {
                 .size(48.dp)
         )
         Text(
-            modifier = Modifier.align(Alignment.Center).padding(4.dp),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(4.dp),
             text = number.toString(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.secondary,
