@@ -9,14 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
@@ -71,25 +70,24 @@ fun ShowSharedPrefsData() {
             allDataSaved.forEach {
                 item {
                     val currentItem = rememberUpdatedState(newValue = it)
-                    val dismissState = rememberDismissState(
+                    val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = {
-                            if (it == DismissValue.DismissedToStart) {
+                            if (it == SwipeToDismissBoxValue.EndToStart) {
                                 sharedPreferences.removeData(currentItem.value.key)
                                 true
-                            } else if (it == DismissValue.DismissedToEnd) {
+                            } else if (it == SwipeToDismissBoxValue.StartToEnd) {
                                 sharedPreferences.removeData(currentItem.value.key)
                                 true
                             }
                             false
                         }
                     )
-                    SwipeToDismiss(
-                        directions = setOf(DismissDirection.EndToStart),
+                    SwipeToDismissBox(
                         state = dismissState,
-                        background = {
+                        backgroundContent = {
                             SwipeBackground(dismissState = dismissState)
                         },
-                        dismissContent = {
+                        content = {
                             ShowSharedPrefsDataItem(it.key, it.value.toString())
                         }
                     )
@@ -106,10 +104,8 @@ fun ShowSharedPrefsData() {
 fun ShowSharedPrefsDataItem(key: String, value: String) {
     Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         ),
         modifier = Modifier
             .padding(4.dp)

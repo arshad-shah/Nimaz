@@ -1,44 +1,30 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_JUZ_ITEM
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.local.models.LocalJuz
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.ui.components.common.QuranItemNumber
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
@@ -55,31 +41,36 @@ fun JuzListUI(
         modifier = Modifier.testTag(TEST_TAG_QURAN_JUZ)
     ) {
         items(juz.size) { index ->
-            JuzListItemUI(
-                loading = loading,
-                juzNumber = juz[index].number.toString(),
+            JuzListItem(
+                isLoading = loading,
+                juzNumber = juz[index].number,
                 name = juz[index].name,
-                tname = juz[index].tname,
-                onNavigateToAyatScreen = onNavigateToAyatScreen
+                translatedName = juz[index].tname,
+                navigateToAyatScreen = onNavigateToAyatScreen
             )
+            //if its not the last item, add a divider
+            if (index != juz.size - 1) {
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.background,
+                    thickness = 2.dp,
+                )
+            }
         }
     }
 }
 
+
 @Composable
-fun JuzListItemUI(
-    juzNumber: String,
+fun JuzListItem(
+    juzNumber: Int,
+    isLoading: Boolean,
     name: String,
-    tname: String,
-    onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
-    context: Context = LocalContext.current,
-    loading: Boolean,
+    translatedName: String,
+    navigateToAyatScreen: (String, Boolean, String, Int?) -> Unit
 ) {
-
-
     //get the translation type from shared preferences
     val translationType =
-        PrivateSharedPreferences(context).getData(
+        PrivateSharedPreferences(LocalContext.current).getData(
             key = AppConstants.TRANSLATION_LANGUAGE,
             s = "English"
         )
@@ -88,127 +79,43 @@ fun JuzListItemUI(
         "Urdu" -> "urdu"
         else -> "english"
     }
-
-    Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
+    Row(
         modifier = Modifier
-            .padding(vertical = 4.dp, horizontal = 8.dp)
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.extraLarge)
-            .clickable(
-                enabled = !loading,
-            ) {
-                onNavigateToAyatScreen(juzNumber, false, translation, null)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable {
+                navigateToAyatScreen(juzNumber.toString(), false, translation, 0)
             }
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .testTag(TEST_TAG_JUZ_ITEM),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.10f)
-                    .placeholder(
-                        visible = loading,
-                        color = MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(4.dp),
-                        highlight = PlaceholderHighlight.shimmer(
-                            highlightColor = Color.White,
-                        )
-                    ),
-                text = "$juzNumber.",
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
-            )
-
+            QuranItemNumber(number = juzNumber)
             Column(
-                modifier = Modifier
-                    .padding(16.dp, 0.dp)
-                    .align(Alignment.CenterVertically)
-                    .weight(0.80f)
-                    .fillMaxWidth()
+                modifier = Modifier.padding(2.dp)
             ) {
-                //apply quran font
                 Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontFamily = utmaniQuranFont,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 32.sp,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .fillMaxWidth()
-                        .placeholder(
-                            visible = loading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
-                            highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
-                            )
-                        ),
-                    textAlign = TextAlign.Center
+                    text = "Juz $juzNumber",
+                    style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = tname,
+                    text = translatedName,
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .placeholder(
-                            visible = loading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
-                            highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
-                            )
-                        ),
-                    textAlign = TextAlign.Center
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            //an arrow right icon
-            Icon(
-                painter = painterResource(id = R.drawable.angle_small_right_icon),
-                contentDescription = "Clear",
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(0.10f)
-                    .size(24.dp)
-                    .fillMaxWidth()
-                    .placeholder(
-                        visible = loading,
-                        color = MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(4.dp),
-                        highlight = PlaceholderHighlight.shimmer(
-                            highlightColor = Color.White,
-                        )
-                    )
-            )
         }
-    }
-}
-
-//preview of the juz list item
-@Preview
-@Composable
-fun JuzListItemUIPreview() {
-    NimazTheme {
-        JuzListItemUI(
-            juzNumber = "1",
-            name = "الفاتحة",
-            tname = "Al-Faatiha",
-            onNavigateToAyatScreen = { _, _, _, _ -> },
-            loading = false,
+        Text(
+            modifier = Modifier.padding(2.dp),
+            text = name,
+            fontFamily = utmaniQuranFont,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.secondary
         )
     }
 }

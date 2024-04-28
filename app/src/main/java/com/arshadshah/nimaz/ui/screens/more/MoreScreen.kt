@@ -2,9 +2,23 @@ package com.arshadshah.nimaz.ui.screens.more
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +43,7 @@ fun MoreScreen(
     onNavigateToCalender: () -> Unit,
     onNavigateToQibla: () -> Unit,
     onNavigateToTasbihListScreen: () -> Unit,
+    onNavigateToHadithShelf: () -> Unit,
 ) {
     val listOfLinks = listOf(
         mapOf(
@@ -50,6 +65,10 @@ fun MoreScreen(
         mapOf(
             "title" to "Duas",
             "icon" to R.drawable.dua,
+        ),
+        mapOf(
+            "title" to "Hadith Shelf",
+            "icon" to R.drawable.bookshelf_icon,
         ),
         mapOf(
             "title" to "Trackers",
@@ -106,9 +125,10 @@ fun MoreScreen(
                         2 -> onNavigateToQibla()
                         3 -> onNavigateToNames()
                         4 -> onNavigateToListOfTasbeeh()
-                        5 -> onNavigateToPrayerTracker()
-                        6 -> onNavigateToCalender()
-                        7 -> onNavigateToShadah()
+                        5 -> onNavigateToHadithShelf()
+                        6 -> onNavigateToPrayerTracker()
+                        7 -> onNavigateToCalender()
+                        8 -> onNavigateToShadah()
                     }
                 }
             )
@@ -129,15 +149,12 @@ fun MoreScreenLink(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
             .testTag(AppConstants.TEST_TAG_MORE_LINK.replace("{title}", title))
-            .clip(MaterialTheme.shapes.extraLarge)
+            .clip(MaterialTheme.shapes.medium)
             .clickable {
                 onClick()
             },
@@ -174,5 +191,5 @@ fun MoreScreenPreview() {
         onNavigateToCalender = { },
         onNavigateToQibla = { },
         onNavigateToTasbihListScreen = { },
-    )
+    ) {}
 }

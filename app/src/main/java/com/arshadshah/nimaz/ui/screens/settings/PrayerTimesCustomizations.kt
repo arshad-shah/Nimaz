@@ -15,11 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,8 +41,8 @@ import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
 import com.arshadshah.nimaz.ui.components.settings.SettingsNumberPickerDialog
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper.getParams
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
@@ -193,17 +190,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
         }) {
             CalculationMethodUI()
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsList(
@@ -211,6 +199,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     title = "Madhab",
                     description = "The madhab used to calculate the asr prayer times.",
                     items = mapOfMadhabs,
+                    icon = {
+                        Image(
+                            modifier = Modifier
+                                .size(48.dp),
+                            painter = painterResource(id = R.drawable.school),
+                            contentDescription = "Madhab"
+                        )
+                    },
                     subtitle = madhabState.value,
                     height = 120.dp
                 ) { madhab: String ->
@@ -238,17 +234,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                 }
             }
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsList(
@@ -256,6 +243,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     title = "High Latitude Rule",
                     description = "The high latitude rule used to calculate the prayer times.",
                     items = mapOfHighLatitudeRules,
+                    icon = {
+                        Image(
+                            modifier = Modifier
+                                .size(48.dp),
+                            painter = painterResource(id = R.drawable.high_latitude),
+                            contentDescription = "High Latitude Rule"
+                        )
+                    },
                     subtitle = highLatitudeRuleState.value,
                     height = 180.dp
                 ) { highLatRule: String ->
@@ -299,17 +294,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
         }) {
 
             ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = 32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
                 SettingsNumberPickerDialog(
@@ -319,6 +305,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     },
                     description = "The angle of the sun at which the Fajr prayer begins",
                     items = (0..50).map { (it - 25) },
+                    icon = {
+                        Image(
+                            modifier = Modifier
+                                .size(48.dp),
+                            painter = painterResource(id = R.drawable.fajr_angle),
+                            contentDescription = "Fajr Angle"
+                        )
+                    },
                     valueState = fajrAngleState,
                     height = 150.dp,
                     onChange = { angle: Int ->
@@ -348,21 +342,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
             }
             if (ishaaAngleVisible.value) {
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(
@@ -371,6 +352,14 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                         items = (0..50).map { (it - 25) },
                         subtitle = {
                             Text(text = ishaAngleState.value)
+                        },
+                        icon = {
+                            Image(
+                                modifier = Modifier
+                                    .size(48.dp),
+                                painter = painterResource(id = R.drawable.isha_angle),
+                                contentDescription = "Isha Angle"
+                            )
                         },
                         valueState = ishaAngleState,
                         onChange = { angle: Int ->
@@ -401,21 +390,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                 }
             } else {
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsMenuLink(
@@ -447,21 +423,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
             },
             content = {
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(
@@ -507,21 +470,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     )
                 }
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(
@@ -568,21 +518,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     )
                 }
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(
@@ -628,21 +565,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     )
                 }
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(
@@ -688,21 +612,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     )
                 }
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(
@@ -748,21 +659,8 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                     )
                 }
                 ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 32.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(

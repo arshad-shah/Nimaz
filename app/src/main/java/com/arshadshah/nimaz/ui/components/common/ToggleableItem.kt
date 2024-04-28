@@ -1,16 +1,31 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import android.util.Log
-import androidx.compose.animation.*
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconToggleButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +53,7 @@ fun ToggleableItemRow(
 
         Column(
             modifier = modifier
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(
                     enabled = enabled,
                 ) {
@@ -69,7 +85,7 @@ fun ToggleableItemRow(
                         contentDescription = "Uncheck",
                         modifier = Modifier
                             .padding(10.dp)
-                            .alpha(0.6f)
+                            .alpha(0.4f)
                     )
                 } else {
                     Icon(
@@ -87,28 +103,18 @@ fun ToggleableItemRow(
             ) { targetState ->
                 if (!targetState) {
                     Text(
-                        modifier = Modifier.padding(
-                            top = 8.dp,
-                            start = 8.dp,
-                            end = 8.dp,
-                            bottom = 8.dp
-                        ),
+                        modifier = Modifier.padding(8.dp),
                         text = text,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
                             0xFFE91E63
                         )
                     )
                 } else {
                     Text(
-                        modifier = Modifier.padding(
-                            top = 8.dp,
-                            start = 8.dp,
-                            end = 8.dp,
-                            bottom = 8.dp
-                        ),
+                        modifier = Modifier.padding(8.dp),
                         text = text,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = if (enabled) MaterialTheme.colorScheme.primary else Color(
                             0xFFE91E63
                         )
@@ -137,6 +143,7 @@ fun ToggleableItemColumn(
     ) { targetState ->
         Row(
             modifier = modifier
+                .clip(MaterialTheme.shapes.medium)
                 .fillMaxWidth()
                 .clickable(
                     enabled = enabled,
@@ -186,28 +193,18 @@ fun ToggleableItemColumn(
             ) { targetState ->
                 if (!targetState) {
                     Text(
-                        modifier = Modifier.padding(
-                            top = 8.dp,
-                            start = 8.dp,
-                            end = 8.dp,
-                            bottom = 8.dp
-                        ),
+                        modifier = Modifier.padding(8.dp),
                         text = text,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleLarge,
                         color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
                             0xFFE91E63
                         )
                     )
                 } else {
                     Text(
-                        modifier = Modifier.padding(
-                            top = 8.dp,
-                            start = 8.dp,
-                            end = 8.dp,
-                            bottom = 8.dp
-                        ),
+                        modifier = Modifier.padding(8.dp),
                         text = selectedText ?: text,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleLarge,
                         color = if (enabled) MaterialTheme.colorScheme.primary else Color(
                             0xFFE91E63
                         )

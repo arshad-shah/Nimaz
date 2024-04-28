@@ -3,22 +3,23 @@ package com.arshadshah.nimaz.ui.navigation
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.arshadshah.nimaz.activities.*
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.ABOUT_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.DEBUG_MODE
+import com.arshadshah.nimaz.constants.AppConstants.HADITH_CHAPTERS_LIST_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.HADITH_LIST_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.HADITH_SHELF_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.LICENCES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.MY_QURAN_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.NAMESOFALLAH_SCREEN_ROUTE
@@ -26,19 +27,28 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SETTINGS_SCREEN_
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
-import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
-import com.arshadshah.nimaz.ui.screens.*
+import com.arshadshah.nimaz.ui.screens.Dashboard
+import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
+import com.arshadshah.nimaz.ui.screens.hadith.BookShelf
+import com.arshadshah.nimaz.ui.screens.hadith.HadithChaptersList
+import com.arshadshah.nimaz.ui.screens.hadith.HadithList
+import com.arshadshah.nimaz.ui.screens.introduction.IntroPage1
 import com.arshadshah.nimaz.ui.screens.more.MoreScreen
 import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
 import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
-import com.arshadshah.nimaz.ui.screens.settings.*
+import com.arshadshah.nimaz.ui.screens.settings.About
+import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
+import com.arshadshah.nimaz.ui.screens.settings.Licences
+import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
+import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
+import com.arshadshah.nimaz.ui.screens.settings.WebViewScreen
 import com.arshadshah.nimaz.ui.screens.tasbih.Categories
 import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
@@ -53,50 +63,22 @@ fun NavigationGraph(
     navController: NavController,
     paddingValues: PaddingValues,
     context: MainActivity,
+    isFirstInstall: Boolean,
 ) {
+
+    val startDestination = if (isFirstInstall) "Intro" else BottomNavItem.Dashboard.screen_route
+
     NavHost(
         navController = navController as NavHostController,
-        startDestination = BottomNavItem.Dashboard.screen_route,
-        enterTransition = {
-            slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing, // Changed easing for a different effect
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        },
-        exitTransition = {
-            slideOutOfContainer(
-                AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        },
-        popEnterTransition = {
-            slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        },
-        popExitTransition = {
-            slideOutOfContainer(
-                AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(
-                    easing = FastOutSlowInEasing,
-                    durationMillis = SCREEN_ANIMATION_DURATION
-                )
-            )
-        }
+        startDestination = startDestination,
     ) {
+        composable("Intro") {
+            IntroPage1(navController = navController)
+        }
 
         composable(BottomNavItem.Dashboard.screen_route) {
             Dashboard(
+                context = context,
                 paddingValues = paddingValues,
                 onNavigateToCalender = {
                     navController.navigate(CALENDER_SCREEN_ROUTE)
@@ -160,7 +142,7 @@ fun NavigationGraph(
         }
 
         composable(CALENDER_SCREEN_ROUTE) {
-            CalenderScreen(paddingValues)
+            CalenderScreen(paddingValues, navController = navController)
         }
 
         composable(QIBLA_SCREEN_ROUTE) {
@@ -284,8 +266,53 @@ fun NavigationGraph(
                 onNavigateToZakat = {
                     navController.navigate("Zakat")
                 },
+                onNavigateToHadithShelf = {
+                    navController.navigate(HADITH_SHELF_SCREEN_ROUTE)
+                }
             )
         }
+
+        composable(HADITH_SHELF_SCREEN_ROUTE) {
+            BookShelf(paddingValues = paddingValues,
+                onNavigateToChapterFromFavourite = { bookId: Int, chapterId: Int ->
+                    navController.navigate(
+                        HADITH_LIST_SCREEN_ROUTE.replace(
+                            "{bookId}", bookId.toString()
+                        ).replace("{chapterId}", chapterId.toString())
+                    )
+                },
+                onNavigateToChaptersList = { id: Int, title: String ->
+                    navController.navigate(
+                        HADITH_CHAPTERS_LIST_SCREEN_ROUTE.replace(
+                            "{bookId}",
+                            id.toString()
+                        ).replace("{bookName}", title)
+                    )
+                }
+            )
+        }
+
+        composable(HADITH_CHAPTERS_LIST_SCREEN_ROUTE) {
+            HadithChaptersList(
+                paddingValues = paddingValues,
+                bookId = it.arguments?.getString("bookId")
+            ) { bookId: Int, chapterId: Int ->
+                navController.navigate(
+                    HADITH_LIST_SCREEN_ROUTE.replace(
+                        "{bookId}", bookId.toString()
+                    ).replace("{chapterId}", chapterId.toString())
+                )
+            }
+        }
+
+        composable(HADITH_LIST_SCREEN_ROUTE) {
+            HadithList(
+                paddingValues,
+                bookId = it.arguments?.getString("bookId"),
+                chapterId = it.arguments?.getString("chapterId")
+            )
+        }
+
 
         composable(TASBIH_LIST_SCREEN) {
             ListOfTasbih(paddingValues) { id: String, arabic: String, translation: String, transliteration: String ->
@@ -314,7 +341,7 @@ fun NavigationGraph(
         }
 
         composable(PRAYER_TRACKER_SCREEN_ROUTE) {
-            PrayerTracker(paddingValues)
+            PrayerTracker(navController = navController)
         }
 
         composable(TASBIH_SCREEN_ROUTE) {
@@ -324,6 +351,7 @@ fun NavigationGraph(
                 tasbihEnglish = it.arguments?.getString("translation")!!,
                 tasbihTranslitration = it.arguments?.getString("transliteration")!!,
                 paddingValues = paddingValues,
+                navController = navController
             )
         }
 
@@ -382,6 +410,7 @@ fun NavigationGraph(
 
         composable(BottomNavItem.SettingsScreen.screen_route) {
             SettingsScreen(
+                activity = context,
                 onNavigateToPrayerTimeCustomizationScreen = {
                     navController.navigate(
                         PRAYER_TIMES_SETTINGS_SCREEN_ROUTE

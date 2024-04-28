@@ -9,8 +9,8 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.APP_UPDATE_REQUEST_CODE
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
-import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
@@ -40,6 +40,10 @@ class SettingsViewModel(context: Context) : ViewModel() {
         val maghribTime: LocalDateTime = LocalDateTime.now(),
         val ishaTime: LocalDateTime = LocalDateTime.now(),
     )
+
+    init {
+        Log.d("Nimaz: SettingsViewModel", "SettingsViewModel created ${this.hashCode()}")
+    }
 
     private val _prayerTimesState = MutableStateFlow(PrayerTimesState())
     val prayerTimesState: StateFlow<PrayerTimesState> = _prayerTimesState.asStateFlow()
@@ -225,7 +229,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
         class UpdateSettings(val method: String) : SettingsEvent()
         class AutoParameters(val checked: Boolean) : SettingsEvent()
 
-        class CheckUpdate(val context: Context, val doUpdate: Boolean) : SettingsEvent()
+        class CheckUpdate(val context: Activity, val doUpdate: Boolean) : SettingsEvent()
 
         object LoadPrayerTimes : SettingsEvent()
     }
@@ -401,6 +405,10 @@ class SettingsViewModel(context: Context) : ViewModel() {
                 _maghribOffset.value =
                     sharedPreferences.getData(AppConstants.MAGHRIB_ADJUSTMENT, "0")
                 _ishaOffset.value = sharedPreferences.getData(AppConstants.ISHA_ADJUSTMENT, "0")
+                _autoParams.value =
+                    sharedPreferences.getDataBoolean(AppConstants.AUTO_PARAMETERS, false)
+                _theme.value = sharedPreferences.getData(AppConstants.THEME, THEME_SYSTEM)
+                _isDarkMode.value = sharedPreferences.getDataBoolean(AppConstants.DARK_MODE, false)
                 _isLoading.value = false
                 Log.d("Nimaz: SettingsViewModel", "Settings loaded")
             }
@@ -492,7 +500,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
                     _isUpdateAvailable.value = updateIsAvailable
                     if (event.doUpdate && updateIsAvailable) {
                         updateService.startUpdateFlowForResult(
-                            event.context.applicationContext as Activity,
+                            event.context,
                             APP_UPDATE_REQUEST_CODE
                         )
                     }

@@ -17,16 +17,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissState
-import androidx.compose.material3.DismissValue
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 
 // a dropdown item for each tasbih
@@ -55,23 +55,23 @@ fun TasbihDropdownItem(
     onEdit: (LocalTasbih) -> Unit,
 ) {
     val currentItem = rememberUpdatedState(newValue = item)
-    val dismissState = rememberDismissState(
+    val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            if (it == DismissValue.DismissedToEnd) {
+            if (it == SwipeToDismissBoxValue.StartToEnd) {
                 onEdit(currentItem.value)
-            } else if (it == DismissValue.DismissedToStart) {
+            } else if (it == SwipeToDismissBoxValue.EndToStart) {
                 onDelete(currentItem.value)
             }
             false
         }
     )
 
-    SwipeToDismiss(
+    SwipeToDismissBox(
         state = dismissState,
-        background = {
+        backgroundContent = {
             SwipeBackground(dismissState = dismissState)
         },
-        dismissContent = {
+        content = {
             Card(
                 colors = CardDefaults.elevatedCardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
@@ -128,14 +128,14 @@ fun TasbihDropdownItem(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     //divider
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .width(1.dp)
                             .height(24.dp),
+                        thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = 0.08f
-                        ),
-                        thickness = 1.dp,
+                        )
                     )
                     //goal
                     Text(
@@ -149,14 +149,14 @@ fun TasbihDropdownItem(
                         style = MaterialTheme.typography.bodySmall
                     )
                     //divider
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .width(1.dp)
                             .height(24.dp),
+                        thickness = 1.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = 0.08f
-                        ),
-                        thickness = 1.dp,
+                        )
                     )
                     //count
                     Text(
@@ -176,38 +176,40 @@ fun TasbihDropdownItem(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun SwipeBackground(dismissState: DismissState) {
-    val direction = dismissState.dismissDirection ?: return
+fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
+    val direction = dismissState.dismissDirection
 
     val color by animateColorAsState(
         when (dismissState.targetValue) {
-            DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
-            DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
-            DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
+            SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
+            SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
+            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
         }, label = ""
     )
     val iconTintColor by animateColorAsState(
         when (dismissState.targetValue) {
-            DismissValue.Default -> MaterialTheme.colorScheme.tertiaryContainer
-            DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.onPrimary
-            DismissValue.DismissedToStart -> MaterialTheme.colorScheme.onErrorContainer
+            SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.surface
+            SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.onPrimary
+            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.onErrorContainer
         }, label = ""
     )
     val alignment = when (direction) {
-        DismissDirection.StartToEnd -> Alignment.CenterStart
-        DismissDirection.EndToStart -> Alignment.CenterEnd
+        SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+        SwipeToDismissBoxValue.Settled -> Alignment.Center
     }
     val icon = when (direction) {
-        DismissDirection.StartToEnd -> painterResource(id = com.arshadshah.nimaz.R.drawable.edit_icon)
-        DismissDirection.EndToStart -> painterResource(id = com.arshadshah.nimaz.R.drawable.delete_icon)
+        SwipeToDismissBoxValue.StartToEnd -> painterResource(id = R.drawable.edit_icon)
+        SwipeToDismissBoxValue.EndToStart -> painterResource(id = R.drawable.delete_icon)
+        SwipeToDismissBoxValue.Settled -> painterResource(id = R.drawable.edit_icon)
     }
     val scale by animateFloatAsState(
-        if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f, label = ""
+        if (dismissState.targetValue == SwipeToDismissBoxValue.Settled) 0f else 1.2f, label = ""
     )
 
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(key1 = dismissState.targetValue, block = {
-        if (dismissState.targetValue != DismissValue.Default) {
+        if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         }
     })

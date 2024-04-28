@@ -2,19 +2,18 @@ package com.arshadshah.nimaz.ui.components.prayerTimes
 
 
 import android.content.Context
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -26,7 +25,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
@@ -34,7 +32,6 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_SUNRISE
-import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -95,8 +92,6 @@ fun PrayerTimesList(
             prayerTimesMap = mapOfPrayerTimes,
             loading = true,
             currentPrayerName = currentPrayerName,
-            name = nextPrayerName,
-            timer = timer,
         )
     } else {
         val timeToNextPrayerLong =
@@ -115,9 +110,7 @@ fun PrayerTimesList(
         PrayerTimesListUI(
             loading = false,
             currentPrayerName = currentPrayerName,
-            name = nextPrayerName,
             prayerTimesMap = mapOfPrayerTimes,
-            timer = timer,
         )
     }
 
@@ -128,57 +121,73 @@ fun PrayerTimesListUI(
     prayerTimesMap: Map<String, LocalDateTime?>,
     loading: Boolean,
     currentPrayerName: String,
-    name: String,
-    timer: CountDownTime?,
 ) {
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
     val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 1)
     val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 29)
     val isRamadan = todayHijri.isAfter(ramadanStart) && todayHijri.isBefore(ramadanEnd)
-    Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 8.dp)
+            .fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier.scrollable(
+        //iterate over the map
+        for ((key, value) in prayerTimesMap) {
+            val radii = calculatePrayerTimeRadii(
+                index = prayerTimesMap.keys.indexOf(key),
+                totalItems = prayerTimesMap.size,
                 orientation = Orientation.Vertical,
-                enabled = true,
-                state = rememberScrollState()
             )
-        ) {
-            //iterate over the map
-            for ((key, value) in prayerTimesMap) {
-                //if the element is first then dont add a divider else add a divider on top
-                if (key != prayerTimesMap.keys.first()) {
-                    Divider(
-                        modifier = Modifier.fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    )
-                }
-                val isBoldText = if (isRamadan) {
-                    key == "Fajr" || key == "Maghrib"
-                } else {
-                    false
-                }
-                PrayerTimesRow(
-                    prayerName = key,
-                    prayerTime = value,
-                    isHighlighted = currentPrayerName == key,
-                    shouldShowTimer = name == key,
-                    loading = loading,
-                    isBoldText = isBoldText,
-                    timer = timer,
-                )
+            PrayerTimesRow(
+                prayerName = key,
+                prayerTime = value,
+                isHighlighted = currentPrayerName == key,
+                loading = loading,
+                isRamadan = isRamadan,
+                radii = radii,
+            )
+        }
+    }
+}
+
+data class PrayerTimeRadii(
+    val topLeft: Float,
+    val topRight: Float,
+    val bottomLeft: Float,
+    val bottomRight: Float,
+)
+
+fun calculatePrayerTimeRadii(
+    index: Int,
+    totalItems: Int,
+    orientation: Orientation,
+): PrayerTimeRadii {
+    val isSingleItem = totalItems == 1
+    val isLastItem = index == totalItems - 1
+    val isFirstItem = index == 0
+
+    return when (orientation) {
+        Orientation.Horizontal -> {
+            if (isSingleItem) {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
+            } else if (isFirstItem) {
+                PrayerTimeRadii(16f, 16f, 4f, 4f)
+            } else if (isLastItem) {
+                PrayerTimeRadii(4f, 4f, 16f, 16f)
+            } else {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
+            }
+        }
+
+        Orientation.Vertical -> {
+            if (isSingleItem) {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
+            } else if (isFirstItem) {
+                PrayerTimeRadii(16f, 16f, 4f, 4f)
+            } else if (isLastItem) {
+                PrayerTimeRadii(4f, 4f, 16f, 16f)
+            } else {
+                PrayerTimeRadii(4f, 4f, 4f, 4f)
             }
         }
     }
@@ -191,13 +200,12 @@ fun PrayerTimesRow(
     prayerTime: LocalDateTime?,
     isHighlighted: Boolean,
     loading: Boolean,
-    isBoldText: Boolean,
-    shouldShowTimer: Boolean,
-    timer: CountDownTime?,
+    isRamadan: Boolean,
+    radii: PrayerTimeRadii,
 ) {
     //format the date to time based on device format
     //get the device trime format
-    val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
+    val deviceTimeFormat = DateFormat.is24HourFormat(LocalContext.current)
     //if the device time format is 24 hour then use the 24 hour format
     val formatter = if (deviceTimeFormat) {
         DateTimeFormatter.ofPattern("HH:mm")
@@ -207,43 +215,61 @@ fun PrayerTimesRow(
     val sentenceCase =
         prayerName.lowercase(Locale.ROOT)
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = if (isHighlighted) {
-            Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 8.dp,
-                        topEnd = 8.dp,
-                        bottomStart = 8.dp,
-                        bottomEnd = 8.dp
-                    )
-                )
-        } else {
-            Modifier
-                .fillMaxWidth()
-        }
+
+    val isBold = when {
+        isRamadan && prayerName == PRAYER_NAME_FAJR -> true
+        isRamadan && prayerName == PRAYER_NAME_MAGHRIB -> true
+        else -> false
+    }
+    Card(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        shape = RoundedCornerShape(
+            topStart = radii.topLeft.dp,
+            topEnd = radii.topRight.dp,
+            bottomStart = radii.bottomLeft.dp,
+            bottomEnd = radii.bottomRight.dp
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 1.dp, horizontal = 8.dp)
     ) {
-        Text(
-            text = sentenceCase,
-            modifier = Modifier
-                .padding(16.dp)
-                .placeholder(
-                    visible = loading,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp),
-                    highlight = PlaceholderHighlight.shimmer(
-                        highlightColor = Color.White,
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = if (isHighlighted) {
+                Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 8.dp,
+                            topEnd = 8.dp,
+                            bottomStart = 8.dp,
+                            bottomEnd = 8.dp
+                        )
                     )
-                ),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
-        )
-        if (shouldShowTimer) {
+            } else if (isBold) {
+                Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f))
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 8.dp,
+                            topEnd = 8.dp,
+                            bottomStart = 8.dp,
+                            bottomEnd = 8.dp
+                        )
+                    )
+            } else {
+                Modifier
+                    .fillMaxWidth()
+            }
+        ) {
             Text(
+                text = sentenceCase,
                 modifier = Modifier
                     .padding(16.dp)
                     .placeholder(
@@ -254,25 +280,24 @@ fun PrayerTimesRow(
                             highlightColor = Color.White,
                         )
                     ),
-                text = " -${timer?.hours} : ${timer?.minutes} : ${timer?.seconds}",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = if (isBold) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
+            )
+            Text(
+                text = prayerTime!!.format(formatter),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .placeholder(
+                        visible = loading,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(4.dp),
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = Color.White,
+                        )
+                    ),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = if (isBold) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
             )
         }
-        Text(
-            text = prayerTime!!.format(formatter),
-            modifier = Modifier
-                .padding(16.dp)
-                .placeholder(
-                    visible = loading,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp),
-                    highlight = PlaceholderHighlight.shimmer(
-                        highlightColor = Color.White,
-                    )
-                ),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = if (isBoldText) FontWeight.ExtraBold else MaterialTheme.typography.titleLarge.fontWeight
-        )
     }
 }

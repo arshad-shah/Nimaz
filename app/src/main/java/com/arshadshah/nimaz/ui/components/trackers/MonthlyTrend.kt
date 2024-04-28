@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.trackers
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,56 +14,40 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+
+
+// Moved outside the composable
+val prayers = listOf(
+    AppConstants.PRAYER_NAME_FAJR,
+    AppConstants.PRAYER_NAME_DHUHR,
+    AppConstants.PRAYER_NAME_ASR,
+    AppConstants.PRAYER_NAME_MAGHRIB,
+    AppConstants.PRAYER_NAME_ISHA
+)
+
 
 @Composable
-fun PrayerTrackerGrid() {
-    val viewModelTracker = viewModel(
-        key = AppConstants.TRACKING_VIEWMODEL_KEY,
-        initializer = { TrackerViewModel() },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-    LaunchedEffect(Unit) {
-        viewModelTracker.onEvent(
-            TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                LocalDate.now()
-            )
-        )
-    }
-    val progressForMonth = remember {
-        viewModelTracker.progressForMonth
-    }.collectAsState()
-    val dateState = remember {
-        viewModelTracker.dateState
-    }.collectAsState()
-
-    val currentDate = LocalDate.now()
-    val yearMonth = YearMonth.of(currentDate.year, currentDate.month)
+fun PrayerTrackerGrid(
+    progressForMonth: State<List<LocalPrayersTracker>>,
+    dateState: State<LocalDate>
+) {
+    val yearMonth = YearMonth.of(dateState.value.year, dateState.value.month)
     val daysInMonth = yearMonth.lengthOfMonth()
-    val prayers = listOf(
-        AppConstants.PRAYER_NAME_FAJR,
-        AppConstants.PRAYER_NAME_DHUHR,
-        AppConstants.PRAYER_NAME_ASR,
-        AppConstants.PRAYER_NAME_MAGHRIB,
-        AppConstants.PRAYER_NAME_ISHA
-    )
 
-    val userSelectedDate = dateState.value
-
-    // a grid of 6 rows 1 for the number of the day and 5 for the prayers
-    // amount of days in the month columns + 1 for the name of the prayer
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -72,102 +55,143 @@ fun PrayerTrackerGrid() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
+        //month name
+        Text(
+            modifier = Modifier
+                .padding(bottom = 2.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            text = dateState.value.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+        )
         prayers.forEach { prayer ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Render the name of the prayer on the left
-                //if its Maghri1 then it must be transparent
-                Text(
-                    text = prayers[prayers.indexOf(prayer)],
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier
-                        .width(40.dp),
-                )
+            PrayerRow(
+                prayer,
+                yearMonth,
+                daysInMonth,
+                dateState.value,
+                progressForMonth
+            )
+        }
+    }
+}
 
-                // Render the small boxes (dots) for each day of the month
-                for (i in 0 until daysInMonth) {
-                    val date = yearMonth.atDay(i + 1)
-                    val prayerTracker = progressForMonth.value.find { it.date == date }
-                    val isHighlighted = prayerTracker != null && prayerTracker.isPrayerCompleted(
-                        prayers[prayers.indexOf(prayer)]
-                    )
-                    val isMenstrauting = prayerTracker?.isMenstruating ?: false
+@Composable
+fun PrayerRow(
+    prayer: String,
+    yearMonth: YearMonth,
+    daysInMonth: Int,
+    currentDate: LocalDate,
+    progressForMonth: State<List<LocalPrayersTracker>>
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = prayer,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.width(40.dp)
+        )
 
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            //if the day is today then add border
-                            .border(
-                                width = 1.dp,
-                                color = when (date) {
-                                    currentDate -> {
-                                        MaterialTheme.colorScheme.tertiary
-                                    }
+        for (i in 0 until daysInMonth) {
+            val date = yearMonth.atDay(i + 1)
+            val prayerTracker = progressForMonth.value.find { it.date == date }
+            val isHighlighted = prayerTracker?.isPrayerCompleted(prayer) == true
+            val isMenstruating = prayerTracker?.isMenstruating == true
 
-                                    userSelectedDate -> {
-                                        MaterialTheme.colorScheme.onSecondaryContainer
-                                    }
+            DayDot(date, isHighlighted, isMenstruating, currentDate)
+        }
+    }
+}
 
-                                    else -> {
-                                        if (isHighlighted && !isMenstrauting) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else if (isMenstrauting) {
-                                            //pink
-                                            Color(0xFFE91E63)
-                                        } else {
-                                            Color.Gray
-                                        }
-                                    }
-                                },
-                                shape = CircleShape
-                            )
-                            .background(
-                                color =
-                                when (date) {
-                                    currentDate -> {
-                                        if (isHighlighted) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else if (isMenstrauting) {
-                                            //pink
-                                            Color(0xFFE91E63)
-                                        } else {
-                                            Color.Gray
-                                        }
-                                    }
+@Composable
+fun DayDot(
+    date: LocalDate,
+    isHighlighted: Boolean,
+    isMenstruating: Boolean,
+    currentDate: LocalDate,
+) {
+    // Determine border and background color based on conditions
+    val borderColor =
+        determineBorderColor(date, isHighlighted, isMenstruating, currentDate)
+    val backgroundColor =
+        determineBackgroundColor(date, isHighlighted, isMenstruating, currentDate)
 
-                                    userSelectedDate -> {
-                                        if (isHighlighted) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else if (isMenstrauting) {
-                                            //pink
-                                            Color(
-                                                0xFFE91E63
-                                            )
-                                        } else {
-                                            MaterialTheme.colorScheme.secondaryContainer
-                                        }
-                                    }
+    Box(
+        modifier = Modifier
+            .size(if (date == currentDate || date == LocalDate.now()) 10.dp else 8.dp)
+            .border(width = 1.dp, color = borderColor, shape = CircleShape)
+            .background(color = backgroundColor, shape = CircleShape)
+    )
+}
 
-                                    else -> {
-                                        if (isHighlighted) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else if (isMenstrauting) {
-                                            //pink
-                                            Color(0xFFE91E63)
-                                        } else {
-                                            Color.Gray
-                                        }
-                                    }
-                                },
-                                shape = CircleShape
-                            )
-                    )
-                }
+@Composable
+fun determineBorderColor(
+    date: LocalDate,
+    isHighlighted: Boolean,
+    isMenstruating: Boolean,
+    currentDate: LocalDate,
+): Color {
+    return when {
+        date == currentDate -> MaterialTheme.colorScheme.tertiary
+        date == LocalDate.now() -> MaterialTheme.colorScheme.onSecondaryContainer
+        else -> {
+            if (isHighlighted && !isMenstruating) {
+                MaterialTheme.colorScheme.primary
+            } else if (isMenstruating) {
+                Color(0xFFE91E63) // Pink
+            } else {
+                Color.Gray
             }
         }
     }
+}
+
+@Composable
+fun determineBackgroundColor(
+    date: LocalDate,
+    isHighlighted: Boolean,
+    isMenstruating: Boolean,
+    currentDate: LocalDate,
+): Color {
+    return when {
+        date == currentDate || date == LocalDate.now() -> {
+            if (isHighlighted) {
+                MaterialTheme.colorScheme.primary
+            } else if (isMenstruating) {
+                Color(0xFFE91E63) // Pink
+            } else {
+                MaterialTheme.colorScheme.secondaryContainer
+            }
+        }
+
+        else -> {
+            if (isHighlighted) {
+                MaterialTheme.colorScheme.primary
+            } else if (isMenstruating) {
+                Color(0xFFE91E63) // Pink
+            } else {
+                Color.Gray
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PrayerTrackerGrid2Preview() {
+    val progressForMonth = remember {
+        mutableStateOf(
+            listOf(
+                LocalPrayersTracker(
+                    date = LocalDate.of(2021, 1, 1),
+                    progress = 0,
+                    isMenstruating = true
+                )
+            )
+        )
+    }
+    val dateState = remember { mutableStateOf(LocalDate.now()) }
+    PrayerTrackerGrid(progressForMonth, dateState)
 }

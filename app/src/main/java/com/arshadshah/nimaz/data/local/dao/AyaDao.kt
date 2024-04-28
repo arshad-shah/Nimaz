@@ -1,8 +1,10 @@
 package com.arshadshah.nimaz.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.arshadshah.nimaz.data.local.models.LocalAya
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AyaDao {
@@ -17,7 +19,7 @@ interface AyaDao {
 
     //get all the ayas of a surah
     @Query("SELECT * FROM Aya WHERE suraNumber = :surahNumber")
-    fun getAyasOfSurah(surahNumber: Int): Flow<List<LocalAya>>
+    fun getAyasOfSurah(surahNumber: Int): List<LocalAya>
 
     //get all the ayas of a juz
     @Query("SELECT * FROM Aya WHERE juzNumber = :juzNumber")

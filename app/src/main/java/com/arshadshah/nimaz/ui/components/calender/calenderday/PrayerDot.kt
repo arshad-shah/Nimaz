@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 fun PrayerDot(isPrayed: Boolean?) {
     Box(
         modifier = Modifier
-            .size(4.dp)
+            .size(8.dp)
             .background(
                 color = if (isPrayed == true) MaterialTheme.colorScheme.primary
                 else Color.Transparent,

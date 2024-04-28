@@ -3,8 +3,8 @@ package com.arshadshah.nimaz.ui.components.trackers
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -35,17 +35,14 @@ fun FastTrackerCard(
 
     val formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy")
 
-    ElevatedCard(
+    Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(4.dp),
     ) {
         ToggleableItemColumn(
             enabled = !isMenstrauting,
@@ -77,7 +74,7 @@ fun FastTrackerCard(
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 .fillMaxWidth()
                 .placeholder(
-                    visible = false,
+                    visible = isLoading.value,
                     color = MaterialTheme.colorScheme.outline,
                     shape = RoundedCornerShape(4.dp),
                     highlight = PlaceholderHighlight.shimmer(

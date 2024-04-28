@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.utils.sunMoonUtils.utils
 
-import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonCords
-import com.arshadshah.nimaz.utils.sunMoonUtils.moon.SunCoords
 import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.J1970
 import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.J2000
 import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.dayMs
@@ -74,29 +72,6 @@ internal object MathUtils {
         val P = rad * 102.9372 // perihelion of the Earth
 
         return M + C + P + PI
-    }
-
-    fun getSunCoords(d: Double): SunCoords {
-        val M = solarMeanAnomaly(d)
-        val L = eclipticLongitude(M)
-
-        return SunCoords(declination(L, 0.0), rightAscension(L, 0.0))
-    }
-
-    fun getMoonCords(d: Double): MoonCords {
-        val L = rad * (218.316 + 13.176396 * d) // ecliptic longitude
-        val M = rad * (134.963 + 13.064993 * d) // mean anomaly
-        val F = rad * (93.272 + 13.229350 * d)  // mean distance
-
-        val l = L + rad * 6.289 * sin(M) // longitude
-        val b = rad * 5.128 * sin(F)     // latitude
-        val dt = 385001 - 20905 * cos(M)  // distance to the moon in km
-
-        return MoonCords(
-            rightAscension(l, b),
-            declination(l, b),
-            dt
-        )
     }
 
     fun hoursLater(date: LocalDateTime, hoursLater: Int): LocalDateTime =

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.tasbih
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,11 +25,12 @@ import es.dmoral.toasty.Toasty
 
 @Composable
 fun Editbutton(
-    count: MutableState<Int>,
-    context: Context,
+    count: State<Int>,
     showObjectiveDialog: MutableState<Boolean>,
-    objective: MutableState<String>,
+    objective: State<Int>,
 ) {
+
+    val context = LocalContext.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -38,8 +40,6 @@ fun Editbutton(
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
             onClick = {
                 //if the tasbih count is greater then show toast saying that the tasbih count must be 0 to edit the objective
@@ -59,7 +59,7 @@ fun Editbutton(
             ) {
                 Text(
                     modifier = Modifier.padding(8.dp),
-                    text = objective.value,
+                    text = objective.value.toString(),
                     style = MaterialTheme.typography.titleLarge,
                     fontSize = 26.sp
                 )

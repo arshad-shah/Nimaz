@@ -8,16 +8,29 @@ import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,8 +45,8 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.components.settings.state.BooleanPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.utils.FeatureThatRequiresLocationPermission
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
@@ -226,31 +239,18 @@ fun LocationSettings(isIntro: Boolean = false) {
                 ) {
                     Column {
                         ElevatedCard(
-                            colors = CardDefaults.elevatedCardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                    elevation = 32.dp
-                                ),
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.38f
-                                ),
-                                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                                    alpha = 0.38f
-                                ),
-                            ),
-                            shape = MaterialTheme.shapes.extraLarge,
                             modifier = Modifier
-                                .padding(8.dp)
+                                .padding(4.dp)
                                 .fillMaxWidth()
                         ) {
                             ManualLocationInput()
                         }
-                        CoordinatesView(
-                            longitudeState = longitudeState,
-                            latitudeState = latitudeState,
-                        )
                     }
                 }
+                CoordinatesView(
+                    longitudeState = longitudeState,
+                    latitudeState = latitudeState,
+                )
             }
         }
 
@@ -346,17 +346,9 @@ fun LocationToggleSwitch(
     }
 
     ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
-            .testTag("LocationSwitch")
     ) {
         SettingsSwitch(
             state = state,
@@ -506,11 +498,9 @@ fun LocationToggleSwitch(
         ElevatedCard(
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
+                    elevation = 8.dp
                 ),
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
             ),
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
@@ -538,7 +528,6 @@ fun LocationToggleSwitch(
                                 highlight = PlaceholderHighlight.shimmer(
                                     highlightColor = Color.White,
                                 )
-
                             ),
                         style = MaterialTheme.typography.bodyMedium
                     )

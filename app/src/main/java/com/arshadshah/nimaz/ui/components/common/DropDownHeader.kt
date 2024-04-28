@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,12 +41,12 @@ fun DropDownHeader(headerLeft: String, headerMiddle: String, headerRight: String
             style = MaterialTheme.typography.bodyMedium
         )
         //divider
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .width(1.dp)
                 .height(24.dp),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
             thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
         )
         //goal
         Text(
@@ -60,12 +60,12 @@ fun DropDownHeader(headerLeft: String, headerMiddle: String, headerRight: String
             style = MaterialTheme.typography.bodyMedium
         )
         //divider
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .width(1.dp)
                 .height(24.dp),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
             thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
         )
         //count
         Text(

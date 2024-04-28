@@ -5,10 +5,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -17,7 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
@@ -25,10 +32,9 @@ import com.arshadshah.nimaz.ui.components.calender.calenderday.DayTextGreg
 import com.arshadshah.nimaz.ui.components.calender.calenderday.HijriDateAndFastIndicator
 import com.arshadshah.nimaz.ui.components.calender.calenderday.ImportantDayDescriptionPopup
 import com.arshadshah.nimaz.ui.components.calender.calenderday.PrayerDots
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
-import java.time.YearMonth
+import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
 import kotlin.reflect.KFunction1
@@ -37,7 +43,7 @@ import kotlin.reflect.KFunction1
 @Composable
 fun CalenderDay(
     dayState: DayState<DynamicSelectionState>,
-    handleEvents: KFunction1<TrackerViewModel.TrackerEvent, Unit>?,
+    handleEvents: KFunction1<LocalDate, Unit>,
     progressForMonth: State<List<LocalPrayersTracker>>,
     fastProgressForMonth: State<List<LocalFastTracker>>,
 ) {
@@ -65,91 +71,39 @@ fun CalenderDay(
 
     Log.d("CalenderDay", "isFromCurrentMonth: $currentDate $isFromCurrentMonth")
 
-    ElevatedCard(
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = if (isFromCurrentMonth) 2.dp else 0.dp,
-        ),
+    Card(
         modifier = Modifier
-            .padding(2.dp)
-            .alpha(if (isFromCurrentMonth) 1f else 0.2f)
+            .height(100.dp)
+            .fillMaxWidth()
+            .alpha(if (isFromCurrentMonth) 1f else 0.4f)
             .border(
-                width = if (isSelectedDay || today) 2.dp else 0.75.dp,
-                color = when (importantDay.first) {
-                    false -> if (isSelectedDay && !today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (isMenstratingToday) Color(0xFFE91E63)
-                    else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
-
-                    true -> if (isSelectedDay && !today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(
-                        alpha = 0.5f
-                    )
-                    else if (isMenstratingToday) Color(0xFFE91E63)
-                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                },
-                shape = MaterialTheme.shapes.medium
-            ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = when (importantDay.first) {
-                false -> if (isSelectedDay && !today) MaterialTheme.colorScheme.tertiaryContainer
-                else if (today) MaterialTheme.colorScheme.secondaryContainer
-                else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp)
-
-                true -> if (isSelectedDay && !today) MaterialTheme.colorScheme.tertiaryContainer
-                else if (today) MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
+                width = if (isSelectedDay || today) 2.dp else 0.dp,
+                color = if (isSelectedDay && !today && !isMenstratingToday) MaterialTheme.colorScheme.tertiary.copy(
+                    alpha = 0.5f
                 )
-                else MaterialTheme.colorScheme.primaryContainer
-            }
-        )
+                else if (today && !isMenstratingToday) MaterialTheme.colorScheme.secondary.copy(
+                    alpha = 0.5f
+                )
+                else if (isMenstratingToday) Color(0xFFE91E63)
+                else MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
+                shape = MaterialTheme.shapes.medium
+            )
+            .clip(MaterialTheme.shapes.medium)
+            .combinedClickable(
+                enabled = isFromCurrentMonth,
+                onClick = {
+                    dayState.selectionState.onDateSelected(dayState.date)
+                    handleEvents(dayState.date)
+                },
+                onLongClick = {
+                    if (importantDay.first) {
+                        hasDescription.value = !hasDescription.value
+                    }
+                }
+            ),
     ) {
 
         Column(
-            modifier = Modifier
-                .combinedClickable(
-                    enabled = isFromCurrentMonth,
-                    onClick = {
-                        dayState.selectionState.onDateSelected(dayState.date)
-                        if (handleEvents == null) return@combinedClickable
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.SET_DATE(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_FAST_TRACKER_FOR_DATE(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-                                dayState.date
-                            )
-                        )
-                        handleEvents(
-                            TrackerViewModel.TrackerEvent.GET_FAST_PROGRESS_FOR_MONTH(
-                                YearMonth.from(dayState.date)
-                            )
-                        )
-                    },
-                    onLongClick = {
-                        if (importantDay.first) {
-                            hasDescription.value = !hasDescription.value
-                        }
-                    }
-                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DayTextGreg(
@@ -158,7 +112,6 @@ fun CalenderDay(
                 today = today,
                 importantDay = importantDay
             )
-            PrayerDots(todaysTracker = todaysTracker)
             HijriDateAndFastIndicator(
                 todaysFastTracker = todaysFastTracker,
                 isSelectedDay = isSelectedDay,
@@ -166,6 +119,52 @@ fun CalenderDay(
                 importantDay = importantDay,
                 hijriDay = hijriDay
             )
+
+            PrayerDots(todaysTracker = todaysTracker)
+
+            if (todaysFastTracker?.isFasting == true) {
+                Card(
+                    shape = RoundedCornerShape(2.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 1.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFCDDC39),
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Fasted",
+                        style = MaterialTheme.typography.labelSmall,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
+                    )
+                }
+            }
+
+            if (importantDay.first) {
+                Card(
+                    shape = RoundedCornerShape(2.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 1.dp),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = getImportantDayColor(importantDay),
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = importantDay.second,
+                        style = MaterialTheme.typography.labelSmall,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
+                    )
+                }
+            }
         }
 
     }
@@ -176,6 +175,15 @@ fun CalenderDay(
             hasDescription = hasDescription
         )
     }
+}
+
+
+fun getImportantDayColor(
+    importantDay: Pair<Boolean, String>,
+) = when (importantDay.first) {
+    true -> Color(0xFF4CAF50)
+
+    false -> Color.Transparent
 }
 
 //function to check if a day is an important day
