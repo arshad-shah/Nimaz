@@ -229,7 +229,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
         class UpdateSettings(val method: String) : SettingsEvent()
         class AutoParameters(val checked: Boolean) : SettingsEvent()
 
-        class CheckUpdate(val context: Context, val doUpdate: Boolean) : SettingsEvent()
+        class CheckUpdate(val context: Activity, val doUpdate: Boolean) : SettingsEvent()
 
         object LoadPrayerTimes : SettingsEvent()
     }
@@ -500,7 +500,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
                     _isUpdateAvailable.value = updateIsAvailable
                     if (event.doUpdate && updateIsAvailable) {
                         updateService.startUpdateFlowForResult(
-                            event.context.applicationContext as Activity,
+                            event.context,
                             APP_UPDATE_REQUEST_CODE
                         )
                     }
