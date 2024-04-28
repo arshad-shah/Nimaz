@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens
 
+import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,12 +39,12 @@ fun Dashboard(
     paddingValues: PaddingValues,
     onNavigateToTasbihListScreen: () -> Unit,
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
-    context: Context = LocalContext.current,
+    context: Activity,
 ) {
 
     val viewModel: DashboardViewmodel = viewModel(
         key = "dashboard_viewmodel",
-        initializer = { DashboardViewmodel(context) }
+        initializer = { DashboardViewmodel(context.applicationContext) }
     )
 
     LaunchedEffect(Unit) {
@@ -93,7 +94,7 @@ fun Dashboard(
         }
         item {
             if (updateAvailable.value) {
-                val sharedPref = PrivateSharedPreferences(context)
+                val sharedPref = PrivateSharedPreferences(context.applicationContext)
                 val bannerShownLastTime =
                     sharedPref.getData(
                         "Update Available-bannerIsOpen-time",

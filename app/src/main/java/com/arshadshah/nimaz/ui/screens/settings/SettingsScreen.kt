@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_TEST
 import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_TEST
@@ -91,6 +92,7 @@ fun SettingsScreen(
     onNavigateToWebViewScreen: (String) -> Unit,
     onNavigateToLicencesScreen: () -> Unit,
     onNavigateToDebugScreen: () -> Unit,
+    activity: MainActivity,
 ) {
     val context = LocalContext.current
     val viewModelSettings = viewModel(
@@ -101,7 +103,7 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.LoadSettings)
-        viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(context, false))
+        viewModelSettings.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(activity, false))
     }
 
     val themeState = viewModelSettings.theme.collectAsState()

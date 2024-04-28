@@ -106,7 +106,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
     val bookmarks = _bookmarks.asStateFlow()
 
     //initialize data
-    fun initializeData(context: Context) {
+    fun initializeData(context: Activity) {
         checkForUpdate(context, false)
         isFastingToday()
         getTodaysPrayerTracker(LocalDate.now())
@@ -117,7 +117,7 @@ class DashboardViewmodel(context: Context) : ViewModel() {
 
     sealed class DashboardEvent {
         object LoadLocation : DashboardEvent()
-        class CheckUpdate(val context: Context, val doUpdate: Boolean) : DashboardEvent()
+        class CheckUpdate(val context: Activity, val doUpdate: Boolean) : DashboardEvent()
 
         object IsFastingToday : DashboardEvent()
 
@@ -143,12 +143,12 @@ class DashboardViewmodel(context: Context) : ViewModel() {
         object GetRandomAya : DashboardEvent()
     }
 
-    fun checkForUpdate(context: Context, doUpdate: Boolean) {
+    fun checkForUpdate(context: Activity, doUpdate: Boolean) {
         updateService.checkForUpdate(doUpdate) { updateIsAvailable ->
             _isUpdateAvailable.value = updateIsAvailable
             if (doUpdate && updateIsAvailable) {
                 updateService.startUpdateFlowForResult(
-                    context.applicationContext as Activity,
+                    context,
                     AppConstants.APP_UPDATE_REQUEST_CODE
                 )
             }
