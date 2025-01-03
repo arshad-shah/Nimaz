@@ -65,7 +65,7 @@ fun QuranScreen(
                             .testTag("backButton")
                             .padding(start = 8.dp),
                         onClick = {
-                            navController.navigateUp()
+                            navController.popBackStack()
                         }) {
                         Icon(
                             modifier = Modifier.size(24.dp),

@@ -78,7 +78,7 @@ fun CustomTopBar(
                                     AppConstants.MAIN_ACTIVITY_TAG,
                                     "onCreate:  navigating to ${navController.previousBackStackEntry?.destination?.route}"
                                 )
-                                navController.navigateUp()
+                                navController.popBackStack()
                             }) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
