@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,6 +23,7 @@ fun MyQuranScreen(
     notes: State<List<LocalAya>>,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
     handleEvents: (QuranViewModel.AyaEvent) -> Unit,
+    isLoading: State<Boolean>,
 ) {
     val context = LocalContext.current
     val translation = remember {
@@ -90,14 +90,16 @@ fun MyQuranScreen(
                                     surah?.let {
                                         SurahCard(
                                             surah = it,
-                                        ) { _, _, _, _ ->
-                                            onNavigateToAyatScreen(
-                                                it.number.toString(),
-                                                true,
-                                                translation,
-                                                aya.ayaNumberInSurah
-                                            )
-                                        }
+                                            { _, _, _, _ ->
+                                                onNavigateToAyatScreen(
+                                                    it.number.toString(),
+                                                    true,
+                                                    translation,
+                                                    aya.ayaNumberInSurah
+                                                )
+                                            },
+                                            loading = isLoading.value
+                                        )
                                     }
                                 }
                             )
@@ -115,15 +117,17 @@ fun MyQuranScreen(
                 val surah = suraList.value.find { it.number == details.first.toInt() }
                 surah?.let {
                     SurahCard(
-                        surah = it
-                    ) { _, _, _, _ ->
-                        onNavigateToAyatScreen(
-                            details.first,
-                            true,
-                            translation,
-                            details.second
-                        )
-                    }
+                        surah = it,
+                        { _, _, _, _ ->
+                            onNavigateToAyatScreen(
+                                details.first,
+                                true,
+                                translation,
+                                details.second
+                            )
+                        },
+                        loading = isLoading.value
+                    )
                 }
             }
         )

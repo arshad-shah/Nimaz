@@ -18,9 +18,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
@@ -36,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
@@ -84,6 +89,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onNavigateToPrayerTimeCustomizationScreen: () -> Unit,
@@ -93,6 +99,7 @@ fun SettingsScreen(
     onNavigateToLicencesScreen: () -> Unit,
     onNavigateToDebugScreen: () -> Unit,
     activity: MainActivity,
+    navController: NavHostController,
 ) {
     val context = LocalContext.current
     val viewModelSettings = viewModel(
@@ -195,442 +202,360 @@ fun SettingsScreen(
                 isSelected = themeState.value == THEME_SYSTEM
             ),
         )
-
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState(), true)
-            .padding(paddingValues)
-            .testTag(AppConstants.TEST_TAG_SETTINGS)
-    ) {
-        LocationSettings()
-
-        SettingsGroup(title = { Text(text = "Prayer Times") }) {
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsMenuLink(
-                    title = { Text(text = "Prayer Times") },
-                    onClick = onNavigateToPrayerTimeCustomizationScreen,
-                    icon = {
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text = "Settings")
+            },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
                         Icon(
                             modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.settings_sliders_icon),
-                            contentDescription = "Prayer Times settings"
-                        )
-                    },
-                    action = {
-                        Icon(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(2.dp),
-                            painter = painterResource(id = R.drawable.angle_right_icon),
-                            contentDescription = "Update Available"
-                        )
-                    }
-                )
-            }
-
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsMenuLink(
-                    title = { Text(text = "Force Reset Alarms") },
-                    onClick = {
-                        sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, false)
-                        val alarmLock =
-                            sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
-                        if (!alarmLock) {
-                            CreateAlarms().exact(
-                                context,
-                                fajrTime!!,
-                                sunriseTime!!,
-                                dhuhrTime!!,
-                                asrTime!!,
-                                maghribTime!!,
-                                ishaTime!!,
-                            )
-                            sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
-                        }
-                        Toasty.success(context, "Alarms Reset", Toast.LENGTH_SHORT, true)
-                            .show()
-                    },
-                    icon = {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.alarm_clock_icon),
-                            contentDescription = "Notifications"
-                        )
-                    },
-                )
-            }
-
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsMenuLink(
-                    title = { Text(text = "Test Alarm") },
-                    //we are goping to set the alarm in next 10 seconds
-                    subtitle = { Text(text = "Alarm will be set in 10 seconds") },
-                    onClick = {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val zuharAdhan =
-                                "android.resource://" + context.packageName + "/" + R.raw.zuhar
-                            //create notification channels
-                            val notificationHelper = NotificationHelper()
-                            //test channel
-                            notificationHelper.createNotificationChannel(
-                                context,
-                                NotificationManager.IMPORTANCE_MAX,
-                                true,
-                                CHANNEL_TEST,
-                                CHANNEL_DESC_TEST,
-                                TEST_CHANNEL_ID,
-                                zuharAdhan
-                            )
-                            val currentTime = LocalDateTime.now()
-                            val timeToNotify =
-                                currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
-                                    .toInstant().toEpochMilli()
-                            val testPendingIntent = CreateAlarms().createPendingIntent(
-                                context,
-                                TEST_PI_REQUEST_CODE,
-                                TEST_NOTIFY_ID,
-                                timeToNotify,
-                                "Test Adhan",
-                                TEST_CHANNEL_ID
-                            )
-                            Alarms().setExactAlarm(context, timeToNotify, testPendingIntent)
-                        }
-                        Toasty.success(
-                            context,
-                            "Test Alarm set",
-                            Toast.LENGTH_SHORT,
-                            true
-                        )
-                            .show()
-                    },
-                    icon = {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.alarm_set_icon),
+                            painter = painterResource(id = R.drawable.back_icon),
                             contentDescription = "Back"
                         )
-                    },
-                )
-            }
-
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsMenuLink(
-                    title = { Text(text = "Notification Settings") },
-                    subtitle = { Text(text = "Settings for all the Adhan") },
-                    onClick = {
-                        //open the notification settings
-                        val intent = Intent()
-                        intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                        intent.putExtra(
-                            "android.provider.extra.APP_PACKAGE",
-                            context.packageName
-                        )
-                        context.startActivity(intent)
-                    },
-                    icon = {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.settings_icon),
-                            contentDescription = "Settings for notification"
-                        )
-                    },
-                    action = {
-                        Icon(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(2.dp),
-                            painter = painterResource(id = R.drawable.angle_right_icon),
-                            contentDescription = "Update Available"
-                        )
                     }
-                )
-            }
-
-        }
-        val stateOfTheme =
-            rememberPreferenceStringSettingState(key = THEME, defaultValue = themeState.value)
-
-        stateOfTheme.value = themeState.value
-
-        val stateDarkMode =
-            rememberPreferenceBooleanSettingState(
-                DARK_MODE,
-                false
+                },
             )
-        stateDarkMode.value = isDarkMode.value
-
-        SettingsGroup(
-            title = { Text(text = "Appearance") },
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState(), true)
+                .padding(it)
+                .testTag(AppConstants.TEST_TAG_SETTINGS)
         ) {
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                //switch for theme mode dark/light when its not dynamic
-                SettingsSwitch(
-                    state = stateDarkMode,
-                    title = { Text(text = if (stateDarkMode.value) "Dark Mode" else "Light Mode") },
-                    onCheckedChange = {
-                        viewModelSettings.handleEvent(
-                            SettingsViewModel.SettingsEvent.DarkMode(
-                                it
+            LocationSettings()
+
+            SettingsGroup(title = { Text(text = "Prayer Times") }) {
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsMenuLink(
+                        title = { Text(text = "Prayer Times") },
+                        onClick = onNavigateToPrayerTimeCustomizationScreen,
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(id = R.drawable.settings_sliders_icon),
+                                contentDescription = "Prayer Times settings"
                             )
-                        )
-                    },
-                    icon = {
-                        Crossfade(
-                            targetState = stateDarkMode.value,
-                            label = "themeModeChange"
-                        ) { darkMode ->
-                            if (darkMode) {
-                                Icon(
-                                    modifier = Modifier.size(24.dp),
-                                    painter = painterResource(id = R.drawable.dark_icon),
-                                    contentDescription = "Dark Mode"
-                                )
-                            } else {
-                                Icon(
-                                    modifier = Modifier.size(24.dp),
-                                    painter = painterResource(id = R.drawable.light_icon),
-                                    contentDescription = "Light Mode"
-                                )
-                            }
+                        },
+                        action = {
+                            Icon(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(2.dp),
+                                painter = painterResource(id = R.drawable.angle_right_icon),
+                                contentDescription = "Update Available"
+                            )
                         }
-                    }
-                )
-            }
-            //theme
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-
-                ThemeGrid(
-                    themeOptions = themeOptionsList,
-                    onThemeOptionSelected = {
-                        //set current selected theme to false
-                        isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
-                        isSelectedTheme.value = themeOptionsList[themeOptionsList.indexOf(it)]
-                        isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
-                        viewModelSettings.handleEvent(
-                            SettingsViewModel.SettingsEvent.Theme(
-                                isSelectedTheme.value.themeKey
-                            )
-                        )
-                    }
-                )
-            }
-        }
-
-        SettingsGroup(title = { Text(text = "Permissions") }) {
-
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                NotificationScreenUI()
-            }
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                BatteryExemptionUI()
-            }
-        }
-
-        SettingsGroup(title = { Text(text = "Legal") }) {
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsMenuLink(
-                    title = { Text(text = "Privacy Policy") },
-                    onClick = {
-                        onNavigateToWebViewScreen("privacy_policy")
-                    },
-                    icon = {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.privacy_policy_icon),
-                            contentDescription = "Privacy Policy"
-                        )
-                    },
-                    action = {
-                        Icon(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(2.dp),
-                            painter = painterResource(id = R.drawable.angle_right_icon),
-                            contentDescription = "Update Available"
-                        )
-                    }
-                )
-            }
-
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsMenuLink(
-                    title = { Text(text = "Terms and Conditions") },
-                    onClick = {
-                        onNavigateToWebViewScreen("terms_of_service")
-                    },
-                    icon = {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.document_icon),
-                            contentDescription = "Privacy Policy"
-                        )
-                    },
-                    action = {
-                        Icon(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(2.dp),
-                            painter = painterResource(id = R.drawable.angle_right_icon),
-                            contentDescription = "Update Available"
-                        )
-                    }
-                )
-            }
-        }
-        SettingsGroup(title = { Text(text = "Other") }) {
-            Option(
-                title = { Text(text = "Help") },
-                onClick = {
-                    onNavigateToWebViewScreen("help")
-                },
-                icon = painterResource(id = R.drawable.help_icon),
-                iconDescription = "Help documentation",
-                testTag = TEST_TAG_ABOUT
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(2.dp),
-                    painter = painterResource(id = R.drawable.angle_right_icon),
-                    contentDescription = "Update Available"
-                )
-            }
-
-            Option(
-                title = {
-                    Text(
-                        text = "License & Acknowledgements",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
                     )
-                },
-                subtitle = { Text(text = "Open source libraries") },
-                onClick = { onNavigateToLicencesScreen() },
-                icon = painterResource(id = R.drawable.license_icon),
-                iconDescription = "License & Acknowledgements",
-                testTag = TEST_TAG_ABOUT
-            ) {
-                Icon(
+                }
+
+                ElevatedCard(
                     modifier = Modifier
-                        .size(24.dp)
-                        .padding(2.dp),
-                    painter = painterResource(id = R.drawable.angle_right_icon),
-                    contentDescription = "Update Available"
-                )
-            }
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsMenuLink(
+                        title = { Text(text = "Force Reset Alarms") },
+                        onClick = {
+                            sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, false)
+                            val alarmLock =
+                                sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
+                            if (!alarmLock) {
+                                CreateAlarms().exact(
+                                    context,
+                                    fajrTime!!,
+                                    sunriseTime!!,
+                                    dhuhrTime!!,
+                                    asrTime!!,
+                                    maghribTime!!,
+                                    ishaTime!!,
+                                )
+                                sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
+                            }
+                            Toasty.success(context, "Alarms Reset", Toast.LENGTH_SHORT, true)
+                                .show()
+                        },
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(id = R.drawable.alarm_clock_icon),
+                                contentDescription = "Notifications"
+                            )
+                        },
+                    )
+                }
 
-            Option(
-                title = { Text(text = "Rate Nimaz") },
-                onClick = {
-                    val manager = ReviewManagerFactory.create(context)
-                    val request = manager.requestReviewFlow()
-                    request.addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            manager.launchReviewFlow(context as Activity, task.result)
-                                .addOnCompleteListener { _ ->
-
-                                }
-                        } else {
-                            // There was some problem, log or handle the error code.
-                            Toasty.error(
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsMenuLink(
+                        title = { Text(text = "Test Alarm") },
+                        //we are goping to set the alarm in next 10 seconds
+                        subtitle = { Text(text = "Alarm will be set in 10 seconds") },
+                        onClick = {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val zuharAdhan =
+                                    "android.resource://" + context.packageName + "/" + R.raw.zuhar
+                                //create notification channels
+                                val notificationHelper = NotificationHelper()
+                                //test channel
+                                notificationHelper.createNotificationChannel(
+                                    context,
+                                    NotificationManager.IMPORTANCE_MAX,
+                                    true,
+                                    CHANNEL_TEST,
+                                    CHANNEL_DESC_TEST,
+                                    TEST_CHANNEL_ID,
+                                    zuharAdhan
+                                )
+                                val currentTime = LocalDateTime.now()
+                                val timeToNotify =
+                                    currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
+                                        .toInstant().toEpochMilli()
+                                val testPendingIntent = CreateAlarms().createPendingIntent(
+                                    context,
+                                    TEST_PI_REQUEST_CODE,
+                                    TEST_NOTIFY_ID,
+                                    timeToNotify,
+                                    "Test Adhan",
+                                    TEST_CHANNEL_ID
+                                )
+                                Alarms().setExactAlarm(context, timeToNotify, testPendingIntent)
+                            }
+                            Toasty.success(
                                 context,
-                                task.exception?.message ?: "Error",
-                                Toast.LENGTH_SHORT
+                                "Test Alarm set",
+                                Toast.LENGTH_SHORT,
+                                true
                             )
                                 .show()
-                        }
-                    }
-                },
-                icon = painterResource(id = R.drawable.rating_icon),
-                iconDescription = "Rate Nimaz",
-                testTag = TEST_TAG_ABOUT
-            )
+                        },
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(id = R.drawable.alarm_set_icon),
+                                contentDescription = "Back"
+                            )
+                        },
+                    )
+                }
 
-            Option(
-                title = { Text(text = "Share Nimaz") },
-                onClick = {
-                    val shareIntent = Intent(Intent.ACTION_SEND)
-                    shareIntent.type = "text/plain"
-                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Nimaz")
-                    var shareMessage = "\nCheck out this app\n\n"
-                    shareMessage = """
-								${shareMessage}https://play.google.com/store/apps/details?id=${
-                        getAppID(
-                            context
-                        )
-                    }
-								
-								""".trimIndent()
-                    shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
-                    context.startActivity(Intent.createChooser(shareIntent, "choose one"))
-                },
-                icon = painterResource(id = R.drawable.share_icon),
-                iconDescription = "Share Nimaz",
-                testTag = TEST_TAG_ABOUT
-            )
-
-            Option(
-                title = { Text(text = "About") },
-                subtitle = { Text(text = updateAvailableText) },
-                onClick = { onNavigateToAboutScreen() },
-                icon = painterResource(id = R.drawable.info_icon),
-                iconDescription = "About",
-                testTag = TEST_TAG_ABOUT
-            ) {
-                if (updateAvailabile.value) {
-                    Button(
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsMenuLink(
+                        title = { Text(text = "Notification Settings") },
+                        subtitle = { Text(text = "Settings for all the Adhan") },
                         onClick = {
+                            //open the notification settings
+                            val intent = Intent()
+                            intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                            intent.putExtra(
+                                "android.provider.extra.APP_PACKAGE",
+                                context.packageName
+                            )
+                            context.startActivity(intent)
+                        },
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(id = R.drawable.settings_icon),
+                                contentDescription = "Settings for notification"
+                            )
+                        },
+                        action = {
+                            Icon(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(2.dp),
+                                painter = painterResource(id = R.drawable.angle_right_icon),
+                                contentDescription = "Update Available"
+                            )
+                        }
+                    )
+                }
+
+            }
+            val stateOfTheme =
+                rememberPreferenceStringSettingState(key = THEME, defaultValue = themeState.value)
+
+            stateOfTheme.value = themeState.value
+
+            val stateDarkMode =
+                rememberPreferenceBooleanSettingState(
+                    DARK_MODE,
+                    false
+                )
+            stateDarkMode.value = isDarkMode.value
+
+            SettingsGroup(
+                title = { Text(text = "Appearance") },
+            ) {
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    //switch for theme mode dark/light when its not dynamic
+                    SettingsSwitch(
+                        state = stateDarkMode,
+                        title = { Text(text = if (stateDarkMode.value) "Dark Mode" else "Light Mode") },
+                        onCheckedChange = {
                             viewModelSettings.handleEvent(
-                                SettingsViewModel.SettingsEvent.CheckUpdate(
-                                    context,
-                                    true
+                                SettingsViewModel.SettingsEvent.DarkMode(
+                                    it
                                 )
                             )
                         },
-                    ) {
-                        Text(text = "Update")
-                    }
-                } else {
+                        icon = {
+                            Crossfade(
+                                targetState = stateDarkMode.value,
+                                label = "themeModeChange"
+                            ) { darkMode ->
+                                if (darkMode) {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        painter = painterResource(id = R.drawable.dark_icon),
+                                        contentDescription = "Dark Mode"
+                                    )
+                                } else {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        painter = painterResource(id = R.drawable.light_icon),
+                                        contentDescription = "Light Mode"
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+                //theme
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+
+                    ThemeGrid(
+                        themeOptions = themeOptionsList,
+                        onThemeOptionSelected = {
+                            //set current selected theme to false
+                            isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
+                            isSelectedTheme.value = themeOptionsList[themeOptionsList.indexOf(it)]
+                            isSelectedTheme.value.isSelected = !isSelectedTheme.value.isSelected
+                            viewModelSettings.handleEvent(
+                                SettingsViewModel.SettingsEvent.Theme(
+                                    isSelectedTheme.value.themeKey
+                                )
+                            )
+                        }
+                    )
+                }
+            }
+
+            SettingsGroup(title = { Text(text = "Permissions") }) {
+
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    NotificationScreenUI()
+                }
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    BatteryExemptionUI()
+                }
+            }
+
+            SettingsGroup(title = { Text(text = "Legal") }) {
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsMenuLink(
+                        title = { Text(text = "Privacy Policy") },
+                        onClick = {
+                            onNavigateToWebViewScreen("privacy_policy")
+                        },
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(id = R.drawable.privacy_policy_icon),
+                                contentDescription = "Privacy Policy"
+                            )
+                        },
+                        action = {
+                            Icon(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(2.dp),
+                                painter = painterResource(id = R.drawable.angle_right_icon),
+                                contentDescription = "Update Available"
+                            )
+                        }
+                    )
+                }
+
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsMenuLink(
+                        title = { Text(text = "Terms and Conditions") },
+                        onClick = {
+                            onNavigateToWebViewScreen("terms_of_service")
+                        },
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(id = R.drawable.document_icon),
+                                contentDescription = "Privacy Policy"
+                            )
+                        },
+                        action = {
+                            Icon(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(2.dp),
+                                painter = painterResource(id = R.drawable.angle_right_icon),
+                                contentDescription = "Update Available"
+                            )
+                        }
+                    )
+                }
+            }
+            SettingsGroup(title = { Text(text = "Other") }) {
+                Option(
+                    title = { Text(text = "Help") },
+                    onClick = {
+                        onNavigateToWebViewScreen("help")
+                    },
+                    icon = painterResource(id = R.drawable.help_icon),
+                    iconDescription = "Help documentation",
+                    testTag = TEST_TAG_ABOUT
+                ) {
                     Icon(
                         modifier = Modifier
                             .size(24.dp)
@@ -639,38 +564,143 @@ fun SettingsScreen(
                         contentDescription = "Update Available"
                     )
                 }
-            }
 
-            if (isDebugMode) {
                 Option(
-                    title = { Text(text = "Debug Tools") },
-                    subtitle = { Text(text = "For testing purposes only") },
-                    onClick = { onNavigateToDebugScreen() },
-                    icon = painterResource(id = R.drawable.debug_icon),
-                    iconDescription = "Debug Tools",
-                    testTag = TEST_TAG_ABOUT,
-                    action = {
+                    title = {
+                        Text(
+                            text = "License & Acknowledgements",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    subtitle = { Text(text = "Open source libraries") },
+                    onClick = { onNavigateToLicencesScreen() },
+                    icon = painterResource(id = R.drawable.license_icon),
+                    iconDescription = "License & Acknowledgements",
+                    testTag = TEST_TAG_ABOUT
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .padding(2.dp),
+                        painter = painterResource(id = R.drawable.angle_right_icon),
+                        contentDescription = "Update Available"
+                    )
+                }
+
+                Option(
+                    title = { Text(text = "Rate Nimaz") },
+                    onClick = {
+                        val manager = ReviewManagerFactory.create(context)
+                        val request = manager.requestReviewFlow()
+                        request.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                manager.launchReviewFlow(context as Activity, task.result)
+                                    .addOnCompleteListener { _ ->
+
+                                    }
+                            } else {
+                                // There was some problem, log or handle the error code.
+                                Toasty.error(
+                                    context,
+                                    task.exception?.message ?: "Error",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                        }
+                    },
+                    icon = painterResource(id = R.drawable.rating_icon),
+                    iconDescription = "Rate Nimaz",
+                    testTag = TEST_TAG_ABOUT
+                )
+
+                Option(
+                    title = { Text(text = "Share Nimaz") },
+                    onClick = {
+                        val shareIntent = Intent(Intent.ACTION_SEND)
+                        shareIntent.type = "text/plain"
+                        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Nimaz")
+                        var shareMessage = "\nCheck out this app\n\n"
+                        shareMessage = """
+								${shareMessage}https://play.google.com/store/apps/details?id=${
+                            getAppID(
+                                context
+                            )
+                        }
+								
+								""".trimIndent()
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                        context.startActivity(Intent.createChooser(shareIntent, "choose one"))
+                    },
+                    icon = painterResource(id = R.drawable.share_icon),
+                    iconDescription = "Share Nimaz",
+                    testTag = TEST_TAG_ABOUT
+                )
+
+                Option(
+                    title = { Text(text = "About") },
+                    subtitle = { Text(text = updateAvailableText) },
+                    onClick = { onNavigateToAboutScreen() },
+                    icon = painterResource(id = R.drawable.info_icon),
+                    iconDescription = "About",
+                    testTag = TEST_TAG_ABOUT
+                ) {
+                    if (updateAvailabile.value) {
+                        Button(
+                            onClick = {
+                                viewModelSettings.handleEvent(
+                                    SettingsViewModel.SettingsEvent.CheckUpdate(
+                                        context,
+                                        true
+                                    )
+                                )
+                            },
+                        ) {
+                            Text(text = "Update")
+                        }
+                    } else {
                         Icon(
                             modifier = Modifier
                                 .size(24.dp)
                                 .padding(2.dp),
                             painter = painterResource(id = R.drawable.angle_right_icon),
-                            contentDescription = "Go to Debug Tools"
+                            contentDescription = "Update Available"
                         )
                     }
-                )
-            }
-        }
+                }
 
-        //get the current year
-        val currentYear = LocalDateTime.now().year
-        Text(
-            text = "© $currentYear Nimaz " + getAppVersion(context),
-            modifier = Modifier
-                .padding(8.dp)
-                .align(Alignment.CenterHorizontally),
-            style = MaterialTheme.typography.bodyLarge
-        )
+                if (isDebugMode) {
+                    Option(
+                        title = { Text(text = "Debug Tools") },
+                        subtitle = { Text(text = "For testing purposes only") },
+                        onClick = { onNavigateToDebugScreen() },
+                        icon = painterResource(id = R.drawable.debug_icon),
+                        iconDescription = "Debug Tools",
+                        testTag = TEST_TAG_ABOUT,
+                        action = {
+                            Icon(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(2.dp),
+                                painter = painterResource(id = R.drawable.angle_right_icon),
+                                contentDescription = "Go to Debug Tools"
+                            )
+                        }
+                    )
+                }
+            }
+
+            //get the current year
+            val currentYear = LocalDateTime.now().year
+            Text(
+                text = "© $currentYear Nimaz " + getAppVersion(context),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .align(Alignment.CenterHorizontally),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }
 

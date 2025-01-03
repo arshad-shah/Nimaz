@@ -150,7 +150,7 @@ fun NavigationGraph(
         composable(BottomNavItem.QuranScreen.screen_route) {
             QuranScreen(
                 context = context,
-                paddingValues = paddingValues,
+                navController = navController,
                 onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int? ->
                     if (scrollToAya != null) {
                         navController.navigate(
@@ -412,6 +412,7 @@ fun NavigationGraph(
         composable(BottomNavItem.SettingsScreen.screen_route) {
             SettingsScreen(
                 activity = context,
+                navController = navController,
                 onNavigateToPrayerTimeCustomizationScreen = {
                     navController.navigate(
                         PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
@@ -447,12 +448,12 @@ fun NavigationGraph(
         composable(WEB_VIEW_SCREEN_ROUTE) {
             WebViewScreen(
                 url = it.arguments?.getString("url")!!,
-                paddingValues = paddingValues
+                navController = navController
             )
         }
         composable(ABOUT_SCREEN_ROUTE) {
             About(
-                paddingValues
+                navController = navController
             )
             //navigate to the debug screen
             {
@@ -460,10 +461,12 @@ fun NavigationGraph(
             }
         }
         composable(LICENCES_SCREEN_ROUTE) {
-            LicensesScreen(paddingValues)
+            LicensesScreen(
+                navController = navController,
+            )
         }
         composable(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
-            PrayerTimesCustomizations(paddingValues)
+            PrayerTimesCustomizations(navController)
         }
 
         composable(DEBUG_MODE) {

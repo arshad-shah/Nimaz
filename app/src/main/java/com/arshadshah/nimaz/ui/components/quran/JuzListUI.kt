@@ -26,6 +26,9 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.ui.components.common.QuranItemNumber
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
@@ -49,13 +52,6 @@ fun JuzListUI(
                 translatedName = juz[index].tname,
                 navigateToAyatScreen = onNavigateToAyatScreen
             )
-            //if its not the last item, add a divider
-            if (index != juz.size - 1) {
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.background,
-                    thickness = 2.dp,
-                )
-            }
         }
     }
 }
@@ -99,13 +95,17 @@ fun JuzListItem(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
-                QuranItemNumber(number = juzNumber)
+                QuranItemNumber(number = juzNumber, loading = isLoading)
 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "Juz $juzNumber",
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.placeholder(
+                            visible = isLoading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        )
                     )
 
                     Text(
@@ -113,7 +113,11 @@ fun JuzListItem(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.placeholder(
+                            visible = isLoading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        )
                     )
                 }
             }
@@ -123,16 +127,11 @@ fun JuzListItem(
                 fontFamily = utmaniQuranFont,
                 fontSize = 32.sp,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 16.dp).placeholder(
+                    visible = isLoading,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
             )
         }
-    }
-
-    if (isLoading) {
-        LinearProgressIndicator(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        )
     }
 }

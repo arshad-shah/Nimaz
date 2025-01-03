@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.QuranUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -213,6 +214,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
                 val dataStore = LocalDataStore.getDataStore()
                 val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<LocalSurah>
                 _surahListState.value = surahList
+                delay(1000)
                 _loadingState.value = false
                 _errorState.value = ""
             } catch (e: Exception) {
@@ -231,6 +233,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
                 val dataStore = LocalDataStore.getDataStore()
                 val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<LocalJuz>
                 _juzListState.value = juzList
+                delay(1000)
                 _loadingState.value = false
                 _errorState.value = ""
             } catch (e: Exception) {
@@ -257,6 +260,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
                         surahNumber
                     )
                 _ayaListState.value = newList
+                delay(1000)
                 _loadingState.value = false
                 _errorState.value = ""
             } catch (e: Exception) {
@@ -342,6 +346,7 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
                     dataStore.getAyasOfJuz(juzNumber) as ArrayList<LocalAya>
                 val newList = addBismillahInJuz(juzNumber, languageConverted, listOfJuzAyat)
                 _ayaListState.value = newList
+                delay(1000)
                 _loadingState.value = false
                 _errorState.value = ""
 

@@ -27,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.DASHBOARD_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
+import com.arshadshah.nimaz.constants.AppConstants.MORE_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
@@ -163,9 +164,7 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         if (route.value.toString() !== "Intro") {
                             AnimatedVisibility(
-                                visible = if (route.value.toString() === DASHBOARD_SCREEN || route.value.toString() === PRAYER_TIMES_SCREEN_ROUTE) true else !checkRoute(
-                                    route.value.toString()
-                                ),
+                                visible = route.value.toString() === DASHBOARD_SCREEN || route.value.toString() === PRAYER_TIMES_SCREEN_ROUTE || route.value.toString() === MORE_SCREEN_ROUTE,
                                 enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION),
                                 exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit),
                                 content = {

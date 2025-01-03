@@ -33,8 +33,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -45,13 +48,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_ABOUT_PAGE
 import com.arshadshah.nimaz.ui.screens.settings.getAppVersion
@@ -61,50 +64,78 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun About(paddingValues: PaddingValues, onImageClicked: () -> Unit) {
+fun About(
+    navController: NavHostController,
+    onImageClicked: () -> Unit,
+) {
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text = "About me")
+            },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(paddingValues)
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .testTag(TEST_TAG_ABOUT_PAGE),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            EnhancedAppDetails(onImageClicked)
-            AuthorDetails()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
 
-        // Scroll to top button
-        AnimatedVisibility(
-            visible = scrollState.value > 100,
+        Box(
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            enter = fadeIn() + slideInVertically(),
-            exit = fadeOut() + slideOutVertically()
+                .padding(it)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            FloatingActionButton(
-                onClick = { scope.launch { scrollState.animateScrollTo(0) } },
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .testTag(TEST_TAG_ABOUT_PAGE),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(id = R.drawable.arrow_up_icon),
-                    contentDescription = "Scroll to top",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+                EnhancedAppDetails(onImageClicked)
+                AuthorDetails()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Scroll to top button
+            AnimatedVisibility(
+                visible = scrollState.value > 100,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                FloatingActionButton(
+                    onClick = { scope.launch { scrollState.animateScrollTo(0) } },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.arrow_up_icon),
+                        contentDescription = "Scroll to top",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
     }

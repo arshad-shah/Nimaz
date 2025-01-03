@@ -97,7 +97,6 @@ fun SurahHeader(
                         .fillMaxWidth()
                         .placeholderWithShimmer(
                             visible = loading,
-                            shape = RoundedCornerShape(8.dp)
                         )
                 )
             }
@@ -122,7 +121,6 @@ fun SurahHeader(
                         .fillMaxWidth()
                         .placeholderWithShimmer(
                             visible = loading,
-                            shape = RoundedCornerShape(12.dp)
                         )
                 )
             }
@@ -141,7 +139,6 @@ fun SurahHeader(
                     .padding(horizontal = 8.dp)
                     .placeholderWithShimmer(
                         visible = loading,
-                        shape = RoundedCornerShape(8.dp)
                     )
             )
 
@@ -177,7 +174,6 @@ fun SurahHeader(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.placeholderWithShimmer(
                             visible = loading,
-                            shape = RoundedCornerShape(6.dp)
                         )
                     )
                 }
@@ -189,13 +185,9 @@ fun SurahHeader(
 @Composable
 private fun Modifier.placeholderWithShimmer(
     visible: Boolean,
-    shape: Shape = RoundedCornerShape(4.dp)
 ) = this.placeholder(
     visible = visible,
-    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-    shape = shape,
     highlight = PlaceholderHighlight.shimmer(
-        highlightColor = MaterialTheme.colorScheme.surface
     )
 )
 @Preview

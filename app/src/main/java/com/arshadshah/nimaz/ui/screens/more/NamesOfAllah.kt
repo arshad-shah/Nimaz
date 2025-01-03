@@ -174,7 +174,7 @@ fun NamesOfAllah(paddingValues: PaddingValues, navController: NavHostController)
         Card(
             modifier = Modifier
                 .padding(16.dp)
-                .padding(paddingValues)
+                .padding(it)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
@@ -187,7 +187,6 @@ fun NamesOfAllah(paddingValues: PaddingValues, navController: NavHostController)
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag(TEST_TAG_NAMES_OF_ALLAH),
-                contentPadding = it
             ) {
                 items(englishNames.size) { index ->
                     NamesOfAllahRow(

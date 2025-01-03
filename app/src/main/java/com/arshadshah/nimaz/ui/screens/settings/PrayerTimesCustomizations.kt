@@ -16,7 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FAJR_ANGLE
@@ -46,8 +52,9 @@ import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
+fun PrayerTimesCustomizations(navController: NavController) {
     val context = LocalContext.current
     val sharedPreferences = PrivateSharedPreferences(context)
 
@@ -167,154 +174,74 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
     asrAdjustment.value = asrAdjustmentValue.value
     maghribAdjustment.value = maghribAdjustmentValue.value
     ishaAdjustment.value = ishaAdjustmentValue.value
-
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState(), true)
-            .padding(paddingValues)
-            .testTag(AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION)
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text = "Prayer Times Settings")
+            },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
     ) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState(), true)
+                .padding(it)
+                .testTag(AppConstants.TEST_TAG_PRAYER_TIMES_CUSTOMIZATION)
+        ) {
 
-        SettingsGroup(title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "Prayer Parameters")
-                ToolTip(
-                    icon = painterResource(id = R.drawable.info_icon),
-                    tipText = "Prayer times Calculation Parameters",
-                )
-            }
-        }) {
-            CalculationMethodUI()
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsList(
-                    valueState = madhabState,
-                    title = "Madhab",
-                    description = "The madhab used to calculate the asr prayer times.",
-                    items = mapOfMadhabs,
-                    icon = {
-                        Image(
-                            modifier = Modifier
-                                .size(48.dp),
-                            painter = painterResource(id = R.drawable.school),
-                            contentDescription = "Madhab"
-                        )
-                    },
-                    subtitle = madhabState.value,
-                    height = 120.dp
-                ) { madhab: String ->
-                    settingViewModel.handleEvent(
-                        SettingsViewModel.SettingsEvent.Madhab(
-                            madhab
-                        )
-                    )
-                    viewModel.handleEvent(
-                        PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                            getParams(context)
-                        )
-                    )
-                    viewModel.handleEvent(
-                        PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                            context
-                        )
-                    )
-                    PrivateSharedPreferences(context).saveDataBoolean(
-                        AppConstants.ALARM_LOCK,
-                        false
+            SettingsGroup(title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Prayer Parameters")
+                    ToolTip(
+                        icon = painterResource(id = R.drawable.info_icon),
+                        tipText = "Prayer times Calculation Parameters",
                     )
                 }
-            }
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsList(
-                    valueState = highLatitudeRuleState,
-                    title = "High Latitude Rule",
-                    description = "The high latitude rule used to calculate the prayer times.",
-                    items = mapOfHighLatitudeRules,
-                    icon = {
-                        Image(
-                            modifier = Modifier
-                                .size(48.dp),
-                            painter = painterResource(id = R.drawable.high_latitude),
-                            contentDescription = "High Latitude Rule"
-                        )
-                    },
-                    subtitle = highLatitudeRuleState.value,
-                    height = 180.dp
-                ) { highLatRule: String ->
-                    settingViewModel.handleEvent(
-                        SettingsViewModel.SettingsEvent.HighLatitude(
-                            highLatRule
-                        )
-                    )
-                    viewModel.handleEvent(
-                        PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                            getParams(context)
-                        )
-                    )
-                    viewModel.handleEvent(
-                        PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                            context
-                        )
-                    )
-                    PrivateSharedPreferences(context).saveDataBoolean(
-                        AppConstants.ALARM_LOCK,
-                        false
-                    )
-                }
-            }
-        }
-
-        SettingsGroup(title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "Prayer Angles")
-                ToolTip(
-                    icon = painterResource(id = R.drawable.info_icon),
-                    tipText = "Angles of the sun used to calculate Fair and Isha prayer times",
-                )
-            }
-        }) {
-
-            ElevatedCard(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-            ) {
-                SettingsNumberPickerDialog(
-                    title = "Fajr Angle",
-                    subtitle = {
-                        Text(text = fajrAngleState.value)
-                    },
-                    description = "The angle of the sun at which the Fajr prayer begins",
-                    items = (0..50).map { (it - 25) },
-                    icon = {
-                        Image(
-                            modifier = Modifier
-                                .size(48.dp),
-                            painter = painterResource(id = R.drawable.fajr_angle),
-                            contentDescription = "Fajr Angle"
-                        )
-                    },
-                    valueState = fajrAngleState,
-                    height = 150.dp,
-                    onChange = { angle: Int ->
+            }) {
+                CalculationMethodUI()
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsList(
+                        valueState = madhabState,
+                        title = "Madhab",
+                        description = "The madhab used to calculate the asr prayer times.",
+                        items = mapOfMadhabs,
+                        icon = {
+                            Image(
+                                modifier = Modifier
+                                    .size(48.dp),
+                                painter = painterResource(id = R.drawable.school),
+                                contentDescription = "Madhab"
+                            )
+                        },
+                        subtitle = madhabState.value,
+                        height = 120.dp
+                    ) { madhab: String ->
                         settingViewModel.handleEvent(
-                            SettingsViewModel.SettingsEvent.FajrAngle(
-                                angle.toString()
+                            SettingsViewModel.SettingsEvent.Madhab(
+                                madhab
                             )
                         )
                         viewModel.handleEvent(
@@ -332,33 +259,90 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                             false
                         )
                     }
-                )
+                }
+                ElevatedCard(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                ) {
+                    SettingsList(
+                        valueState = highLatitudeRuleState,
+                        title = "High Latitude Rule",
+                        description = "The high latitude rule used to calculate the prayer times.",
+                        items = mapOfHighLatitudeRules,
+                        icon = {
+                            Image(
+                                modifier = Modifier
+                                    .size(48.dp),
+                                painter = painterResource(id = R.drawable.high_latitude),
+                                contentDescription = "High Latitude Rule"
+                            )
+                        },
+                        subtitle = highLatitudeRuleState.value,
+                        height = 180.dp
+                    ) { highLatRule: String ->
+                        settingViewModel.handleEvent(
+                            SettingsViewModel.SettingsEvent.HighLatitude(
+                                highLatRule
+                            )
+                        )
+                        viewModel.handleEvent(
+                            PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                getParams(context)
+                            )
+                        )
+                        viewModel.handleEvent(
+                            PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                context
+                            )
+                        )
+                        PrivateSharedPreferences(context).saveDataBoolean(
+                            AppConstants.ALARM_LOCK,
+                            false
+                        )
+                    }
+                }
             }
-            if (ishaaAngleVisible.value) {
+
+            SettingsGroup(title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Prayer Angles")
+                    ToolTip(
+                        icon = painterResource(id = R.drawable.info_icon),
+                        tipText = "Angles of the sun used to calculate Fair and Isha prayer times",
+                    )
+                }
+            }) {
+
                 ElevatedCard(
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth()
                 ) {
                     SettingsNumberPickerDialog(
-                        title = "Isha Angle",
-                        description = "The angle of the sun at which the Isha prayer begins",
-                        items = (0..50).map { (it - 25) },
+                        title = "Fajr Angle",
                         subtitle = {
-                            Text(text = ishaAngleState.value)
+                            Text(text = fajrAngleState.value)
                         },
+                        description = "The angle of the sun at which the Fajr prayer begins",
+                        items = (0..50).map { (it - 25) },
                         icon = {
                             Image(
                                 modifier = Modifier
                                     .size(48.dp),
-                                painter = painterResource(id = R.drawable.isha_angle),
-                                contentDescription = "Isha Angle"
+                                painter = painterResource(id = R.drawable.fajr_angle),
+                                contentDescription = "Fajr Angle"
                             )
                         },
-                        valueState = ishaAngleState,
+                        valueState = fajrAngleState,
+                        height = 150.dp,
                         onChange = { angle: Int ->
                             settingViewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.IshaAngle(
+                                SettingsViewModel.SettingsEvent.FajrAngle(
                                     angle.toString()
                                 )
                             )
@@ -376,326 +360,363 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 AppConstants.ALARM_LOCK,
                                 false
                             )
-                        },
-                        height = 150.dp,
+                        }
                     )
                 }
-            } else {
-                ElevatedCard(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                ) {
-                    SettingsMenuLink(
-                        modifier = Modifier.padding(8.dp),
-                        title = { Text(text = "Isha Interval of ${ishaIntervalState.value} Minutes") },
-                        subtitle = { Text(text = "The interval of time after Maghrib at which the Isha prayer begins") },
-                        onClick = { },
-                    )
+                if (ishaaAngleVisible.value) {
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsNumberPickerDialog(
+                            title = "Isha Angle",
+                            description = "The angle of the sun at which the Isha prayer begins",
+                            items = (0..50).map { (it - 25) },
+                            subtitle = {
+                                Text(text = ishaAngleState.value)
+                            },
+                            icon = {
+                                Image(
+                                    modifier = Modifier
+                                        .size(48.dp),
+                                    painter = painterResource(id = R.drawable.isha_angle),
+                                    contentDescription = "Isha Angle"
+                                )
+                            },
+                            valueState = ishaAngleState,
+                            onChange = { angle: Int ->
+                                settingViewModel.handleEvent(
+                                    SettingsViewModel.SettingsEvent.IshaAngle(
+                                        angle.toString()
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                        getParams(context)
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                        context
+                                    )
+                                )
+                                PrivateSharedPreferences(context).saveDataBoolean(
+                                    AppConstants.ALARM_LOCK,
+                                    false
+                                )
+                            },
+                            height = 150.dp,
+                        )
+                    }
+                } else {
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsMenuLink(
+                            modifier = Modifier.padding(8.dp),
+                            title = { Text(text = "Isha Interval of ${ishaIntervalState.value} Minutes") },
+                            subtitle = { Text(text = "The interval of time after Maghrib at which the Isha prayer begins") },
+                            onClick = { },
+                        )
+                    }
                 }
             }
+
+
+
+            SettingsGroup(
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Prayer Time")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        ToolTip(
+                            icon = painterResource(id = R.drawable.info_icon),
+                            tipText = "Manual adjustment of prayer times",
+                        )
+                    }
+                },
+                content = {
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsNumberPickerDialog(
+                            title = "Fajr Time",
+                            description = "Adjust the time of the Fajr prayer",
+                            items = (0..120).map { (it - 60) },
+                            icon = {
+                                Image(
+                                    modifier = Modifier
+                                        .size(48.dp),
+                                    painter = painterResource(id = R.drawable.fajr_icon),
+                                    contentDescription = "Fajr Time"
+                                )
+                            },
+                            subtitle = {
+                                Text(text = fajrAdjustment.value)
+                            },
+                            valueState = fajrAdjustment,
+                            onChange = { adjustment: Int ->
+                                settingViewModel.handleEvent(
+                                    SettingsViewModel.SettingsEvent.FajrOffset(
+                                        adjustment.toString()
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                        getParams(context)
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                        context
+                                    )
+                                )
+                                PrivateSharedPreferences(context).saveDataBoolean(
+                                    AppConstants.ALARM_LOCK,
+                                    false
+                                )
+                            },
+                            height = 150.dp,
+                        )
+                    }
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsNumberPickerDialog(
+                            title = "Sunrise Time",
+                            description = "Adjust the time of the Sunrise prayer",
+                            items = (0..120).map { (it - 60) },
+                            icon = {
+                                Image(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(CircleShape),
+                                    painter = painterResource(id = R.drawable.sunrise_icon),
+                                    contentDescription = "Sunrise Time"
+                                )
+                            },
+                            subtitle = {
+                                Text(text = sunriseAdjustment.value)
+                            },
+                            valueState = sunriseAdjustment,
+                            onChange = { adjustment: Int ->
+                                settingViewModel.handleEvent(
+                                    SettingsViewModel.SettingsEvent.SunriseOffset(
+                                        adjustment.toString()
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                        getParams(context)
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                        context
+                                    )
+                                )
+                                PrivateSharedPreferences(context).saveDataBoolean(
+                                    AppConstants.ALARM_LOCK,
+                                    false
+                                )
+                            },
+                            height = 150.dp,
+                        )
+                    }
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsNumberPickerDialog(
+                            title = "Dhuhr Time",
+                            description = "Adjust the time of the Dhuhr prayer",
+                            items = (0..120).map { (it - 60) },
+                            icon = {
+                                Image(
+                                    modifier = Modifier
+                                        .size(48.dp),
+                                    painter = painterResource(id = R.drawable.dhuhr_icon),
+                                    contentDescription = "Dhuhr Time"
+                                )
+                            },
+                            subtitle = {
+                                Text(text = dhuhrAdjustment.value)
+                            },
+                            valueState = dhuhrAdjustment,
+                            onChange = { adjustment: Int ->
+                                settingViewModel.handleEvent(
+                                    SettingsViewModel.SettingsEvent.DhuhrOffset(
+                                        adjustment.toString()
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                        getParams(context)
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                        context
+                                    )
+                                )
+                                PrivateSharedPreferences(context).saveDataBoolean(
+                                    AppConstants.ALARM_LOCK,
+                                    false
+                                )
+                            },
+                            height = 150.dp,
+                        )
+                    }
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsNumberPickerDialog(
+                            title = "Asr Time",
+                            description = "Adjust the time of the Asr prayer",
+                            items = (0..120).map { (it - 60) },
+                            icon = {
+                                Image(
+                                    modifier = Modifier
+                                        .size(48.dp),
+                                    painter = painterResource(id = R.drawable.asr_icon),
+                                    contentDescription = "Asr Time"
+                                )
+                            },
+                            subtitle = {
+                                Text(text = asrAdjustment.value)
+                            },
+                            valueState = asrAdjustment,
+                            onChange = { adjustment: Int ->
+                                settingViewModel.handleEvent(
+                                    SettingsViewModel.SettingsEvent.AsrOffset(
+                                        adjustment.toString()
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                        getParams(context)
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                        context
+                                    )
+                                )
+                                PrivateSharedPreferences(context).saveDataBoolean(
+                                    AppConstants.ALARM_LOCK,
+                                    false
+                                )
+                            },
+                            height = 150.dp,
+                        )
+                    }
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsNumberPickerDialog(
+                            title = "Maghrib Time",
+                            description = "Adjust the time of the Maghrib prayer",
+                            items = (0..120).map { (it - 60) },
+                            icon = {
+                                Image(
+                                    modifier = Modifier
+                                        .size(48.dp),
+                                    painter = painterResource(id = R.drawable.maghrib_icon),
+                                    contentDescription = "Maghrib Time"
+                                )
+                            },
+                            subtitle = {
+                                Text(text = maghribAdjustment.value)
+                            },
+                            valueState = maghribAdjustment,
+                            onChange = { adjustment: Int ->
+                                settingViewModel.handleEvent(
+                                    SettingsViewModel.SettingsEvent.MaghribOffset(
+                                        adjustment.toString()
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                        getParams(context)
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                        context
+                                    )
+                                )
+                                PrivateSharedPreferences(context).saveDataBoolean(
+                                    AppConstants.ALARM_LOCK,
+                                    false
+                                )
+                            },
+                            height = 150.dp,
+                        )
+                    }
+                    ElevatedCard(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SettingsNumberPickerDialog(
+                            title = "Isha Time",
+                            description = "Adjust the time of the Isha prayer",
+                            items = (0..120).map { (it - 60) },
+                            icon = {
+                                Image(
+                                    modifier = Modifier
+                                        .size(48.dp),
+                                    painter = painterResource(id = R.drawable.isha_icon),
+                                    contentDescription = "Isha Time"
+                                )
+                            },
+                            subtitle = {
+                                Text(text = ishaAdjustment.value)
+                            },
+                            valueState = ishaAdjustment,
+                            onChange = { adjustment: Int ->
+                                Log.d("SettingsScreen", "ishaAdjustment: $adjustment")
+                                settingViewModel.handleEvent(
+                                    SettingsViewModel.SettingsEvent.IshaOffset(
+                                        adjustment.toString()
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                                        getParams(context)
+                                    )
+                                )
+                                viewModel.handleEvent(
+                                    PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
+                                        context
+                                    )
+                                )
+                                PrivateSharedPreferences(context).saveDataBoolean(
+                                    AppConstants.ALARM_LOCK,
+                                    false
+                                )
+                            },
+                            height = 150.dp,
+                        )
+                    }
+                }
+            )
         }
-
-
-
-        SettingsGroup(
-            title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "Prayer Time")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    ToolTip(
-                        icon = painterResource(id = R.drawable.info_icon),
-                        tipText = "Manual adjustment of prayer times",
-                    )
-                }
-            },
-            content = {
-                ElevatedCard(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                ) {
-                    SettingsNumberPickerDialog(
-                        title = "Fajr Time",
-                        description = "Adjust the time of the Fajr prayer",
-                        items = (0..120).map { (it - 60) },
-                        icon = {
-                            Image(
-                                modifier = Modifier
-                                    .size(48.dp),
-                                painter = painterResource(id = R.drawable.fajr_icon),
-                                contentDescription = "Fajr Time"
-                            )
-                        },
-                        subtitle = {
-                            Text(text = fajrAdjustment.value)
-                        },
-                        valueState = fajrAdjustment,
-                        onChange = { adjustment: Int ->
-                            settingViewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.FajrOffset(
-                                    adjustment.toString()
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                    getParams(context)
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                    context
-                                )
-                            )
-                            PrivateSharedPreferences(context).saveDataBoolean(
-                                AppConstants.ALARM_LOCK,
-                                false
-                            )
-                        },
-                        height = 150.dp,
-                    )
-                }
-                ElevatedCard(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                ) {
-                    SettingsNumberPickerDialog(
-                        title = "Sunrise Time",
-                        description = "Adjust the time of the Sunrise prayer",
-                        items = (0..120).map { (it - 60) },
-                        icon = {
-                            Image(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape),
-                                painter = painterResource(id = R.drawable.sunrise_icon),
-                                contentDescription = "Sunrise Time"
-                            )
-                        },
-                        subtitle = {
-                            Text(text = sunriseAdjustment.value)
-                        },
-                        valueState = sunriseAdjustment,
-                        onChange = { adjustment: Int ->
-                            settingViewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.SunriseOffset(
-                                    adjustment.toString()
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                    getParams(context)
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                    context
-                                )
-                            )
-                            PrivateSharedPreferences(context).saveDataBoolean(
-                                AppConstants.ALARM_LOCK,
-                                false
-                            )
-                        },
-                        height = 150.dp,
-                    )
-                }
-                ElevatedCard(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                ) {
-                    SettingsNumberPickerDialog(
-                        title = "Dhuhr Time",
-                        description = "Adjust the time of the Dhuhr prayer",
-                        items = (0..120).map { (it - 60) },
-                        icon = {
-                            Image(
-                                modifier = Modifier
-                                    .size(48.dp),
-                                painter = painterResource(id = R.drawable.dhuhr_icon),
-                                contentDescription = "Dhuhr Time"
-                            )
-                        },
-                        subtitle = {
-                            Text(text = dhuhrAdjustment.value)
-                        },
-                        valueState = dhuhrAdjustment,
-                        onChange = { adjustment: Int ->
-                            settingViewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.DhuhrOffset(
-                                    adjustment.toString()
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                    getParams(context)
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                    context
-                                )
-                            )
-                            PrivateSharedPreferences(context).saveDataBoolean(
-                                AppConstants.ALARM_LOCK,
-                                false
-                            )
-                        },
-                        height = 150.dp,
-                    )
-                }
-                ElevatedCard(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                ) {
-                    SettingsNumberPickerDialog(
-                        title = "Asr Time",
-                        description = "Adjust the time of the Asr prayer",
-                        items = (0..120).map { (it - 60) },
-                        icon = {
-                            Image(
-                                modifier = Modifier
-                                    .size(48.dp),
-                                painter = painterResource(id = R.drawable.asr_icon),
-                                contentDescription = "Asr Time"
-                            )
-                        },
-                        subtitle = {
-                            Text(text = asrAdjustment.value)
-                        },
-                        valueState = asrAdjustment,
-                        onChange = { adjustment: Int ->
-                            settingViewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.AsrOffset(
-                                    adjustment.toString()
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                    getParams(context)
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                    context
-                                )
-                            )
-                            PrivateSharedPreferences(context).saveDataBoolean(
-                                AppConstants.ALARM_LOCK,
-                                false
-                            )
-                        },
-                        height = 150.dp,
-                    )
-                }
-                ElevatedCard(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                ) {
-                    SettingsNumberPickerDialog(
-                        title = "Maghrib Time",
-                        description = "Adjust the time of the Maghrib prayer",
-                        items = (0..120).map { (it - 60) },
-                        icon = {
-                            Image(
-                                modifier = Modifier
-                                    .size(48.dp),
-                                painter = painterResource(id = R.drawable.maghrib_icon),
-                                contentDescription = "Maghrib Time"
-                            )
-                        },
-                        subtitle = {
-                            Text(text = maghribAdjustment.value)
-                        },
-                        valueState = maghribAdjustment,
-                        onChange = { adjustment: Int ->
-                            settingViewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.MaghribOffset(
-                                    adjustment.toString()
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                    getParams(context)
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                    context
-                                )
-                            )
-                            PrivateSharedPreferences(context).saveDataBoolean(
-                                AppConstants.ALARM_LOCK,
-                                false
-                            )
-                        },
-                        height = 150.dp,
-                    )
-                }
-                ElevatedCard(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                ) {
-                    SettingsNumberPickerDialog(
-                        title = "Isha Time",
-                        description = "Adjust the time of the Isha prayer",
-                        items = (0..120).map { (it - 60) },
-                        icon = {
-                            Image(
-                                modifier = Modifier
-                                    .size(48.dp),
-                                painter = painterResource(id = R.drawable.isha_icon),
-                                contentDescription = "Isha Time"
-                            )
-                        },
-                        subtitle = {
-                            Text(text = ishaAdjustment.value)
-                        },
-                        valueState = ishaAdjustment,
-                        onChange = { adjustment: Int ->
-                            Log.d("SettingsScreen", "ishaAdjustment: $adjustment")
-                            settingViewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.IshaOffset(
-                                    adjustment.toString()
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                    getParams(context)
-                                )
-                            )
-                            viewModel.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                    context
-                                )
-                            )
-                            PrivateSharedPreferences(context).saveDataBoolean(
-                                AppConstants.ALARM_LOCK,
-                                false
-                            )
-                        },
-                        height = 150.dp,
-                    )
-                }
-            }
-        )
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    NimazTheme {
-        PrayerTimesCustomizations(paddingValues = PaddingValues(16.dp))
     }
 }

@@ -113,15 +113,17 @@ fun DashboardQuranTracker(
                                 val filteredSurah =
                                     suraList.filter { it.number == aya.suraNumber }.distinct()[0]
                                 SurahCard(
-                                    surah = filteredSurah
-                                ) { suraNumber: String, isSurah: Boolean, translation: String, ayaNumber: Int? ->
-                                    onNavigateToAyatScreen(
-                                        suraNumber,
-                                        isSurah,
-                                        translation,
-                                        ayaNumber ?: 0
-                                    )
-                                }
+                                    surah = filteredSurah,
+                                    { suraNumber: String, isSurah: Boolean, translation: String, ayaNumber: Int? ->
+                                        onNavigateToAyatScreen(
+                                            suraNumber,
+                                            isSurah,
+                                            translation,
+                                            ayaNumber ?: 0
+                                        )
+                                    },
+                                    loading = isLoading.value
+                                )
                             }
                         )
                     })

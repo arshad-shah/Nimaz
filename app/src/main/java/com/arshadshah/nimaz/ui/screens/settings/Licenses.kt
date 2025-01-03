@@ -16,14 +16,15 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.text.HtmlCompat
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
@@ -36,7 +37,7 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun LicensesScreen(paddingValues: PaddingValues) {
+fun LicensesScreen(navController: NavHostController) {
     val stateOfLazyList = rememberLazyListState()
     val libraryToShow = remember { mutableStateOf<Library?>(null) }
     val openDialog = remember { mutableStateOf(false) }
@@ -51,19 +52,36 @@ fun LicensesScreen(paddingValues: PaddingValues) {
     }
 
     val uniqueLibs = libraries.value?.libraries?.distinctBy { it.name }
-
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text = "Open Source Libraries")
+            },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
+    ) {
     Box(
         modifier = Modifier
+            .padding(it)
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(
-                top = paddingValues.calculateTopPadding() + 16.dp,
-                bottom = paddingValues.calculateBottomPadding() + 16.dp,
-                start = 16.dp,
-                end = 16.dp
-            ),
             state = stateOfLazyList,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -124,6 +142,7 @@ fun LicensesScreen(paddingValues: PaddingValues) {
             }
         )
     }
+}
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

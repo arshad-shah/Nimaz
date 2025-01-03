@@ -7,21 +7,32 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.common.CustomTabs
 import com.arshadshah.nimaz.ui.components.quran.*
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuranScreen(
-    paddingValues: PaddingValues,
     context: MainActivity,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
-    viewModel: QuranViewModel = viewModel(key = QURAN_VIEWMODEL_KEY, viewModelStoreOwner = context),
+    navController: NavHostController,
 ) {
+    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
+    val viewModel = viewModel(
+        key = QURAN_VIEWMODEL_KEY,
+        initializer = { QuranViewModel(sharedPreferencesRepository) },
+        viewModelStoreOwner = context
+    )
     val pages = listOf(
         QuranPage("Sura") {
             SuraContent(viewModel, onNavigateToAyatScreen)
@@ -41,18 +52,45 @@ fun QuranScreen(
         viewModel.getJuzList()
     }
 
-    Column(modifier = Modifier.padding(paddingValues)) {
-        CustomTabs(
-            pagerState = pagerState,
-            titles = pages.map { it.title }
-        )
 
-        HorizontalPager(
-            pageSize = PageSize.Fill,
-            state = pagerState,
-        ) { page ->
-            QuranCard {
-                pages[page].content()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text= "Quran")
+            },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.navigateUp()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
+    ) {
+
+        Column(modifier = Modifier.padding(it)) {
+            CustomTabs(
+                pagerState = pagerState,
+                titles = pages.map { it.title }
+            )
+
+            HorizontalPager(
+                pageSize = PageSize.Fill,
+                state = pagerState,
+            ) { page ->
+                QuranCard {
+                    pages[page].content()
+                }
             }
         }
     }
@@ -113,13 +151,15 @@ private fun MyQuranContent(
     viewModel: QuranViewModel,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit
 ) {
+    val isLoading = viewModel.loadingState.collectAsState()
     MyQuranScreen(
         bookmarks = viewModel.bookmarks.collectAsState(),
         favorites = viewModel.favorites.collectAsState(),
         notes = viewModel.notes.collectAsState(),
         suraList = viewModel.surahListState.collectAsState(),
         onNavigateToAyatScreen = onNavigateToAyatScreen,
-        handleEvents = viewModel::handleAyaEvent
+        handleEvents = viewModel::handleAyaEvent,
+        isLoading = isLoading
     )
 }
 

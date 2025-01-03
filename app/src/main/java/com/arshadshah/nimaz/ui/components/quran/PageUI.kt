@@ -93,7 +93,7 @@ fun Page(
                             aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
                             aya.suraNumber == 9 && aya.ayaNumberInSurah == 1
                         ) {
-                            viewModel.getSurahById(aya.suraNumber)
+                            viewModel.handleAyaEvent((QuranViewModel.AyaEvent.getSurahById(aya.suraNumber)))
                             SurahHeader(
                                 surah = surah.value,
                                 loading = loading,

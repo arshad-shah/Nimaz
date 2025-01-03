@@ -79,6 +79,11 @@ fun AyatFeatures(
             Text(
                 text = aya.ayaNumberInSurah.toString(),
                 style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.placeholder(
+                    visible = isLoading,
+                    highlight = PlaceholderHighlight.shimmer(
+                    )
+                )
             )
         }
         Row(
@@ -164,16 +169,13 @@ fun AyatFeatures(
                         .size(20.dp)
                         .placeholder(
                             visible = isLoading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
                             highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
                             )
                         )
                 )
             }
             IconButton(
-                modifier = Modifier.size(52.dp),
+                modifier = Modifier.size(52.dp).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                 onClick = {
                     //share the aya
                     val shareIntent = Intent(Intent.ACTION_SEND)
@@ -201,7 +203,7 @@ fun AyatFeatures(
             }
             if (aya.audioFileLocation.isEmpty()) {
                 IconButton(
-                    modifier = Modifier.size(52.dp),
+                    modifier = Modifier.size(52.dp).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                     onClick = {
                         downloadFile()
                     },
@@ -224,7 +226,7 @@ fun AyatFeatures(
                 onPlayClicked = { playFile() },
                 onPauseClicked = { pauseFile() },
                 onStopClicked = { stopFile() },
-                isLoading = false,
+                isLoading = isLoading,
             )
         }
     }
