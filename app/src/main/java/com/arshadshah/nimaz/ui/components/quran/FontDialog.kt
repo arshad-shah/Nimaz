@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +36,16 @@ import com.arshadshah.nimaz.ui.components.settings.state.FloatPreferenceSettingV
 import com.arshadshah.nimaz.ui.components.settings.state.StringPreferenceSettingValueState
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import kotlin.math.roundToInt
+
+import androidx.compose.animation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.PopupProperties
 
 
 @Composable
@@ -71,9 +82,6 @@ fun FontSizeDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(text = "Arabic Size", style = MaterialTheme.typography.bodyMedium)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    //round this value to make it clean and easy to read
-                    Text(text = arabicFontSizeState.value.roundToInt().toString())
                 }
                 SliderWithIcons(
                     value = arabicFontSizeState.value,
@@ -97,12 +105,6 @@ fun FontSizeDialog(
                         )
                     },
                     valueRange = if (fontStyleState.value == "IndoPak") 32f..60f else 24f..46f,
-                    leadingIcon = painterResource(id = R.drawable.arabic_font_size_icon),
-                    leadingIconSize = 24.dp,
-                    trailaingIcon = painterResource(id = R.drawable.arabic_font_size_icon),
-                    trailingIconSize = 32.dp,
-                    contentDescription1 = "Decrease Arabic Font Size",
-                    contentDescription2 = "Increase Arabic Font Size"
                 )
 
 
@@ -117,9 +119,6 @@ fun FontSizeDialog(
                         text = "Translation Size",
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    //a text to show the font value of the translation
-                    //round this value to make it clean and easy to read
-                    Text(text = translationFontSizeState.value.roundToInt().toString())
                 }
 
                 SliderWithIcons(
@@ -135,12 +134,6 @@ fun FontSizeDialog(
                         )
                     },
                     valueRange = 16f..40f,
-                    leadingIcon = painterResource(id = R.drawable.english_font_size_icon),
-                    leadingIconSize = 16.dp,
-                    trailaingIcon = painterResource(id = R.drawable.english_font_size_icon),
-                    trailingIconSize = 24.dp,
-                    contentDescription1 = "Decrease Translation Font Size",
-                    contentDescription2 = "Increase Translation Font Size"
                 )
 
                 LabelWithDropdownMenu(
@@ -177,7 +170,7 @@ fun FontSizeDialog(
         })
 }
 
-//label with a dropdown menu at the end
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LabelWithDropdownMenu(
     label: String,
@@ -185,101 +178,152 @@ fun LabelWithDropdownMenu(
     selectedItem: String,
     onItemSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
-    val expanded = remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+
     Row(
         modifier = modifier
-            .padding(vertical = 4.dp)
+            .padding(vertical = 8.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
-        ElevatedCard(
-            modifier = Modifier
-                .width(120.dp)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            color = if (enabled)
+                MaterialTheme.colorScheme.onBackground
+            else
+                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+        )
+
+        Card(
+            modifier = Modifier.width(140.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (enabled)
+                    MaterialTheme.colorScheme.surfaceVariant
+                else
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp,
+                focusedElevation = 4.dp
+            )
         ) {
-            //an elevation card that shows the text and icon
-            ElevatedCard(
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        expanded.value = !expanded.value
-                    },
-                content = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        //find the font style from the list of font styles
-                        //and then show it in the text
-                        Text(
-                            text = items[items.indexOf(selectedItem)],
-                            modifier = Modifier.padding(start = 8.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Crossfade(
-                            targetState = expanded.value,
-                            animationSpec = tween(durationMillis = 300)
-                        ) { expanded ->
-                            if (expanded) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.arrow_up_icon),
-                                    contentDescription = "dropdown icon",
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp)
-                                        .size(18.dp)
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.arrow_down_icon),
-                                    contentDescription = "dropdown icon",
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp)
-                                        .size(18.dp)
-                                )
-                            }
-                        }
-                    }
-                    DropdownMenu(
-                        offset = DpOffset(5.dp, 0.dp),
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .wrapContentHeight(),
-                        expanded = expanded.value,
-                        onDismissRequest = {
-                            expanded.value = false
-                        },
-                        content = {
-                            items.forEach { item ->
-                                DropdownMenuItem(
-                                    onClick = {
-                                        onItemSelected(item)
-                                        expanded.value = false
-                                    },
-                                    text = {
-                                        Text(
-                                            text = item,
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    }
-                                )
-                                if (item != items.last()) {
-                                    HorizontalDivider()
-                                }
-                            }
-                        }
+                    .clip(RoundedCornerShape(12.dp)),
+                onClick = { if (enabled) expanded = true },
+                enabled = enabled,
+                interactionSource = interactionSource
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = selectedItem,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (enabled)
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
+
+                    AnimatedContent(
+                        targetState = expanded,
+                        transitionSpec = {
+                            rotateAnimation().using(SizeTransform(clip = false))
+                        },
+                        label = "Dropdown Arrow"
+                    ) { isExpanded ->
+                        Icon(
+                            painter = painterResource(
+                                id = if (isExpanded)
+                                    R.drawable.arrow_up_icon
+                                else
+                                    R.drawable.arrow_down_icon
+                            ),
+                            contentDescription = if (isExpanded)
+                                "Collapse menu"
+                            else
+                                "Expand menu",
+                            modifier = Modifier.size(20.dp),
+                            tint = if (enabled)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        )
+                    }
                 }
-            )
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .widthIn(max = 200.dp)
+                    .heightIn(max = 300.dp),
+                offset = DpOffset(0.dp, 4.dp),
+                properties = PopupProperties(
+                    focusable = true,
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = true
+                )
+            ) {
+                items.forEachIndexed { index, item ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = item,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        onClick = {
+                            onItemSelected(item)
+                            expanded = false
+                        },
+                        trailingIcon = if (item == selectedItem) {
+                            {
+                                Icon(
+                                    modifier = Modifier.size(16.dp),
+                                    painter = painterResource(id = R.drawable.check_icon),
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        } else null
+                    )
+
+                    if (index < items.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
+private fun rotateAnimation(
+    duration: Int = 300
+): ContentTransform =
+    (slideInVertically { height -> height } + fadeIn()).togetherWith(slideOutVertically { height -> -height } + fadeOut())
 fun setFontBasedOnFontStyle(
     fontStyle: String,
     arabicFontSizeState: FloatPreferenceSettingValueState,

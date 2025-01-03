@@ -91,7 +91,7 @@ fun LocationSettings(isIntro: Boolean = false) {
 
     LaunchedEffect(locationNameState.value, latitudeState.value, longitudeState.value) {
         viewModelPrayerTimes.handleEvent(
-            context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+            PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                 PrayerTimesParamMapper.getParams(context)
             )
         )
@@ -179,13 +179,12 @@ fun LocationSettings(isIntro: Boolean = false) {
 
 
             viewModelPrayerTimes.handleEvent(
-                context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                     PrayerTimesParamMapper.getParams(context)
                 )
             )
 
             viewModelPrayerTimes.handleEvent(
-                context,
                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                     context
                 )
@@ -309,13 +308,11 @@ fun LocationToggleSwitch(
                                 )
                             )
                             viewModelPrayerTimes.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     PrayerTimesParamMapper.getParams(context)
                                 )
                             )
                             viewModelPrayerTimes.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )
@@ -417,13 +414,11 @@ fun LocationToggleSwitch(
                             )
                         )
                         viewModelPrayerTimes.handleEvent(
-                            context,
                             PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                 PrayerTimesParamMapper.getParams(context)
                             )
                         )
                         viewModelPrayerTimes.handleEvent(
-                            context,
                             PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                 context
                             )
@@ -443,13 +438,11 @@ fun LocationToggleSwitch(
                         )
                     )
                     viewModelPrayerTimes.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                             PrayerTimesParamMapper.getParams(context)
                         )
                     )
                     viewModelPrayerTimes.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                             context
                         )

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
+import PrayerTrackerGrid
+import SevenDayTrend
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -36,8 +38,6 @@ import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.ui.components.calender.PrayersTrackerCard
 import com.arshadshah.nimaz.ui.components.trackers.DateSelector
 import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
-import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerGrid
-import com.arshadshah.nimaz.ui.components.trackers.SevenDayTrend
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import es.dmoral.toasty.Toasty
 import java.time.LocalDate
@@ -126,10 +126,7 @@ fun PrayerTracker(
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 modifier = Modifier.padding(
-                    top = 4.dp,
-                    bottom = 8.dp,
-                    start = 0.dp,
-                    end = 0.dp
+                    6.dp,
                 ),
             ) {
                 Column {
@@ -163,11 +160,7 @@ fun PrayerTracker(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
-                modifier = Modifier.padding(
-                    top = 4.dp,
-                    bottom = 8.dp,
-                    start = 0.dp,
-                    end = 0.dp
+                modifier = Modifier.padding( 6.dp,
                 ),
             ) {
                 //the data
@@ -179,10 +172,7 @@ fun PrayerTracker(
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 modifier = Modifier.padding(
-                    top = 4.dp,
-                    bottom = 8.dp,
-                    start = 0.dp,
-                    end = 0.dp
+                    6.dp,
                 ),
             ) {
                 PrayerTrackerGrid(progressForMonth, dateState)

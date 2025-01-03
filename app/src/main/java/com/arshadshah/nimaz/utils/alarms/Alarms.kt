@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.utils.alarms
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Context.ALARM_SERVICE
 import android.util.Log
 import androidx.activity.ComponentActivity
 import java.time.Instant
@@ -22,7 +23,7 @@ class Alarms {
      * */
     fun setExactAlarm(context: Context, timeToNotify: Long, pendingIntent: PendingIntent) {
         // get alarm manager
-        val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
+        val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
         alarmManager.setAlarmClock(
             AlarmManager.AlarmClockInfo(timeToNotify, pendingIntent),
             pendingIntent

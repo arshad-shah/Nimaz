@@ -30,55 +30,52 @@ fun FastTrackerCard(
     handleEvent: (LocalDate, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
-    val dateForTracker = dateState.value
-    val isAfterToday = dateForTracker.isAfter(LocalDate.now())
-
-    val formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy")
+    val date = dateState.value
+    val isAfterToday = date.isAfter(LocalDate.now())
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
 
     Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp),
+            .padding(4.dp)
     ) {
         ToggleableItemColumn(
-            enabled = !isMenstrauting,
-            text = if (dateForTracker.isBefore(LocalDate.now())) "Did not fast"
-            else "Not Fasting",
-            //if date state is in the fast then shoow the date
-            // like this:
-            // Fasted on 2021-09-01
-            selectedText = if (dateForTracker.isBefore(LocalDate.now())) "Fasted on ${
-                formatter.format(
-                    dateForTracker
-                )
-            }" else "Fasting Today",
+            enabled = !isMenstrauting && !isAfterToday,
+            text = when {
+                date.isBefore(LocalDate.now()) -> "Did not fast"
+                else -> "Not fasting today"
+            },
+            selectedText = when {
+                date.isBefore(LocalDate.now()) -> "Fasted on ${formatter.format(date)}"
+                else -> "Fasting today"
+            },
             checked = isFastingToday.value,
-            onCheckedChange = {
-                //if the date is after today then don't allow the user to change the value
+            onCheckedChange = { isChecked ->
                 if (isAfterToday) {
-                    Toasty.info(
+                    Toasty.warning(
                         context,
-                        "Oops! you cant update the tracker for a date in the future",
-                        Toasty.LENGTH_SHORT,
-                        true
+                        "Cannot track fasting for future dates",
+                        Toasty.LENGTH_SHORT
                     ).show()
                     return@ToggleableItemColumn
                 }
-                handleEvent(dateState.value, it)
+                handleEvent(date, isChecked)
             },
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
                 .placeholder(
                     visible = isLoading.value,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.small,
                     highlight = PlaceholderHighlight.shimmer(
-                        highlightColor = Color.White,
+                        highlightColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
                     )
                 ),
         )

@@ -10,12 +10,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
-import com.arshadshah.nimaz.ui.components.common.DropdownPlaceholder
+import com.arshadshah.nimaz.ui.components.common.EmptyStateCard
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.tasbih.DeleteDialog
 import com.arshadshah.nimaz.ui.components.tasbih.GoalEditDialog
 import com.arshadshah.nimaz.ui.components.tasbih.TasbihDropdownItem
-import com.arshadshah.nimaz.viewModel.DashboardViewmodel
+import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
@@ -24,7 +24,7 @@ fun DashboardTasbihTracker(
     onNavigateToTasbihScreen: (String, String, String, String) -> Unit,
     onNavigateToTasbihListScreen: () -> Unit,
     tasbihList: List<LocalTasbih>,
-    handleEvents: KFunction1<DashboardViewmodel.DashboardEvent, Unit>,
+    handleEvents: KFunction1<DashboardViewModel.DashboardEvent, Unit>,
     isLoading: State<Boolean>,
 
     ) {
@@ -35,7 +35,7 @@ fun DashboardTasbihTracker(
                 onNavigateToTasbihListScreen()
             }
         ) {
-            DropdownPlaceholder(text = "No Tasbih found")
+            EmptyStateCard(text = "No Tasbih found")
         }
     } else {
         val showTasbihDialog = remember {
@@ -59,7 +59,7 @@ fun DashboardTasbihTracker(
         }
 
         FeaturesDropDown(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
             //the list of tasbih for the date at the index
             items = tasbihList,
             label = "Tasbih",

@@ -2,10 +2,6 @@ package com.arshadshah.nimaz.ui.components.common
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,12 +16,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -42,9 +35,6 @@ import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
-import java.time.LocalDate
-import java.time.chrono.HijrahDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,71 +104,6 @@ fun CustomTopBar(
                             getAllAyats = if (isSurah) viewModelQuran::getAllAyaForSurah else viewModelQuran::getAllAyaForJuz
                         )
                     } else {
-                        if (route.value == AppConstants.DASHBOARD_SCREEN || route.value == AppConstants.PRAYER_TIMES_SCREEN_ROUTE) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 2.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-
-                                Column(
-                                    verticalArrangement = Arrangement.SpaceBetween,
-                                    horizontalAlignment = Alignment.Start
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(2.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.current_location_icon),
-                                            contentDescription = "Current Location",
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Text(
-                                            modifier = Modifier.padding(start = 4.dp),
-                                            text = if (isLoading.value) "Loading..." else locationName.value,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                    Row(
-                                        modifier = Modifier.padding(2.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.current_date_icon),
-                                            contentDescription = "Current Location",
-                                            modifier = Modifier.size(14.dp)
-                                        )
-
-                                        Text(
-                                            modifier = Modifier.padding(start = 4.dp),
-                                            textAlign = TextAlign.Start,
-                                            text = "${
-                                                LocalDate.now().format(
-                                                    DateTimeFormatter.ofPattern(
-                                                        "dd MMMM yyyy"
-                                                    )
-                                                )
-                                            }, ${
-                                                HijrahDate.from(
-                                                    LocalDate.now()
-                                                )
-                                                    .format(
-                                                        DateTimeFormatter.ofPattern("dd MMMM yyyy")
-                                                    )
-                                            }",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
                             Text(
                                 modifier = Modifier
                                     .testTag("topAppBarText")
@@ -189,7 +114,6 @@ fun CustomTopBar(
                                 ),
                                 style = MaterialTheme.typography.titleLarge
                             )
-                        }
                     }
                 },
                 navigationIcon = {
@@ -320,6 +244,8 @@ fun checkRouteForNotShow(route: String): Boolean {
         AppConstants.PRAYER_TRACKER_SCREEN_ROUTE,
         AppConstants.TASBIH_SCREEN_ROUTE,
         AppConstants.TASBIH_SCREEN_ROUTE,
+        AppConstants.DASHBOARD_SCREEN,
+        AppConstants.PRAYER_TIMES_SCREEN_ROUTE,
         "Intro"
     )
     return list.none { it == route }

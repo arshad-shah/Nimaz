@@ -22,27 +22,37 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CHAPTERS
-import com.arshadshah.nimaz.ui.components.tasbih.ChapterListItem
 import com.arshadshah.nimaz.ui.screens.tasbih.SharedPreferencesUtil.getLastVisibleItemIndex
 import com.arshadshah.nimaz.ui.screens.tasbih.SharedPreferencesUtil.saveLastVisibleItemIndex
 import com.arshadshah.nimaz.viewModel.DuaViewModel
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import com.arshadshah.nimaz.data.local.models.LocalChapter
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterList(
-    viewModel: DuaViewModel = viewModel(
-        key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY
-    ),
+    viewModel: DuaViewModel = viewModel(key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY),
     paddingValues: PaddingValues,
     onNavigateToChapter: (Int, String) -> Unit,
     categoryId: String
 ) {
     val context = LocalContext.current
     val chapterState = viewModel.chapters.collectAsState()
-
     val listState = rememberLazyListState()
-    val lastVisibleItemIndexState = remember {
-        mutableIntStateOf(getLastVisibleItemIndex(context))
-    }
+    val lastVisibleItemIndexState = remember { mutableIntStateOf(getLastVisibleItemIndex(context)) }
 
     LaunchedEffect(categoryId) {
         viewModel.getChapters(categoryId.toInt())
@@ -62,27 +72,92 @@ fun ChapterList(
     Card(
         modifier = Modifier
             .padding(paddingValues)
-            .padding(8.dp)
-            .fillMaxWidth()
+            .padding(16.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        )
     ) {
         LazyColumn(
             modifier = Modifier.testTag(TEST_TAG_CHAPTERS),
-            state = listState
+            state = listState,
+            contentPadding = PaddingValues(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            items(chapterState.value.size) {
+            items(chapterState.value.size) { index ->
                 ChapterListItem(
-                    chapter = chapterState.value[it],
+                    chapter = chapterState.value[index],
                     onNavigateToChapter = onNavigateToChapter,
-                    loading = false
+                    loading = false,
+                    isLastItem = index == chapterState.value.size - 1
                 )
-                if (it != chapterState.value.size - 1) {
-                    // Add a divider if it's not the last item
+
+                if (chapterState.value[index] != chapterState.value.last()) {
                     HorizontalDivider(
-                        color = MaterialTheme.colorScheme.background,
-                        thickness = 2.dp,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ChapterListItem(
+    chapter: LocalChapter,
+    onNavigateToChapter: (Int, String) -> Unit,
+    loading: Boolean,
+    isLastItem: Boolean
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        onClick = { onNavigateToChapter(chapter._id, chapter.english_title) },
+        enabled = !loading,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.1f)
+                        )
+                    )
+                )
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp)
+            ) {
+                Text(
+                    text = chapter.english_title,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = "Navigate to ${chapter.english_title}",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }

@@ -240,12 +240,12 @@ class PrayerTimesService(
 }
 
 data class PrayerTimesData(
-    val fajr: LocalDateTime?,
-    val sunrise: LocalDateTime?,
-    val dhuhr: LocalDateTime?,
-    val asr: LocalDateTime?,
-    val maghrib: LocalDateTime?,
-    val isha: LocalDateTime?
+    val fajr: LocalDateTime? = null,
+    val sunrise: LocalDateTime? = null,
+    val dhuhr: LocalDateTime? = null,
+    val asr: LocalDateTime? = null,
+    val maghrib: LocalDateTime? = null,
+    val isha: LocalDateTime? = null
 )
 
 data class CurrentAndNextPrayer(

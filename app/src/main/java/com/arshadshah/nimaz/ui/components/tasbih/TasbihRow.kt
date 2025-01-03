@@ -31,7 +31,14 @@ import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import java.time.LocalDate
 
-
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.*
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun TasbihRow(
     arabicName: String,
@@ -40,23 +47,19 @@ fun TasbihRow(
     onNavigateToTasbihScreen: ((String, String, String, String) -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val viewModel = viewModel(
+    val viewModel = viewModel<TasbihViewModel>(
         key = AppConstants.TASBIH_VIEWMODEL_KEY,
         initializer = { TasbihViewModel(context) },
         viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
     )
-    val tasbih = remember {
-        viewModel.tasbihCreated
-    }.collectAsState()
 
-    val navigateToTasbihScreen = remember {
-        mutableStateOf(false)
-    }
+    val tasbih = remember { viewModel.tasbihCreated }.collectAsState()
+    val navigateToTasbihScreen = remember { mutableStateOf(false) }
+    val showTasbihDialog = remember { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = navigateToTasbihScreen.value) {
+    LaunchedEffect(navigateToTasbihScreen.value) {
         if (navigateToTasbihScreen.value) {
             viewModel.getTasbih(tasbih.value.id)
-            //navigate to tasbih screen
             onNavigateToTasbihScreen?.invoke(
                 tasbih.value.id.toString(),
                 tasbih.value.arabicName,
@@ -66,66 +69,98 @@ fun TasbihRow(
             navigateToTasbihScreen.value = false
         }
     }
-    val showTasbihDialog = remember {
-        mutableStateOf(false)
-    }
-    Row(
+
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(
-                //disable it if onNavigateToTasbihScreen has no implementation
-                enabled = onNavigateToTasbihScreen != null,
-            ) {
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(enabled = onNavigateToTasbihScreen != null) {
                 if (onNavigateToTasbihScreen != null) {
                     showTasbihDialog.value = true
                 }
             },
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
-                .weight(0.80f),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center,
+                .padding(16.dp)
         ) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                Text(
-                    text = arabicName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = 28.sp,
-                    fontFamily = utmaniQuranFont,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+            // Arabic Text Section
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp)),
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+            ) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = arabicName,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = utmaniQuranFont,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp, horizontal = 16.dp)
+                    )
+                }
             }
-            Text(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth(),
-                text = englishName,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth(),
-                text = translationName,
-                fontFamily = englishQuranTranslation,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // English and Translation Section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = englishName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = translationName,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = englishQuranTranslation
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (onNavigateToTasbihScreen != null) {
+                    IconButton(
+                        onClick = { showTasbihDialog.value = true },
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Timer,
+                            contentDescription = "Start Tasbih",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
         }
     }
 
-    val goal = remember {
-        mutableStateOf("")
-    }
+    val goal = remember { mutableStateOf("") }
 
     TasbihGoalDialog(
         state = goal,
@@ -137,12 +172,12 @@ fun TasbihRow(
                     translationName = translationName,
                     goal = it.toInt(),
                     count = 0,
-                    date = LocalDate.now(),
+                    date = LocalDate.now()
                 )
             )
             navigateToTasbihScreen.value = true
         },
-        isOpen = showTasbihDialog,
+        isOpen = showTasbihDialog
     )
 }
 

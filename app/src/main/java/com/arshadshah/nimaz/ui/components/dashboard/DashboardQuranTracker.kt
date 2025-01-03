@@ -21,13 +21,13 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.common.DropdownPlaceholder
-import com.arshadshah.nimaz.ui.components.common.FeatureDropdownItem
+import com.arshadshah.nimaz.ui.components.common.DropdownListItem
+import com.arshadshah.nimaz.ui.components.common.EmptyStateCard
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
-import com.arshadshah.nimaz.ui.components.quran.SuraListItem
+import com.arshadshah.nimaz.ui.components.quran.SurahCard
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.DashboardViewmodel
+import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +36,7 @@ fun DashboardQuranTracker(
     suraList: List<LocalSurah>,
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
     quranBookmarks: State<List<LocalAya>>,
-    handleEvents: KFunction1<DashboardViewmodel.DashboardEvent, Unit>,
+    handleEvents: KFunction1<DashboardViewModel.DashboardEvent, Unit>,
     isLoading: State<Boolean>
 ) {
 
@@ -69,11 +69,11 @@ fun DashboardQuranTracker(
                 onNavigateToAyatScreen(1.toString(), true, translation, 1)
             }
         ) {
-            DropdownPlaceholder(text = "No Bookmarks Found")
+            EmptyStateCard(text = "No Bookmarks Found")
         }
     } else {
         FeaturesDropDown(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
             label = "Quran Bookmarks",
             items = quranBookmarks.value,
             dropDownItem = { LocalAya ->
@@ -99,7 +99,7 @@ fun DashboardQuranTracker(
                         SwipeBackground(dismissState = dismissState)
                     },
                     content = {
-                        FeatureDropdownItem(
+                        DropdownListItem(
                             item = LocalAya,
                             onClick = { aya ->
                                 onNavigateToAyatScreen(
@@ -109,18 +109,11 @@ fun DashboardQuranTracker(
                                     aya.ayaNumberInSurah
                                 )
                             },
-                            itemContent = { aya ->
+                            content = { aya ->
                                 val filteredSurah =
                                     suraList.filter { it.number == aya.suraNumber }.distinct()[0]
-                                SuraListItem(
-                                    suraNumber = filteredSurah.number,
-                                    englishName = filteredSurah.englishName,
-                                    transliteration = filteredSurah.englishNameTranslation,
-                                    isLoading = false,
-                                    arabicName = filteredSurah.name,
-                                    verseCount = filteredSurah.numberOfAyahs,
-                                    verseNumber = aya.ayaNumberInSurah,
-                                    revelationType = filteredSurah.revelationType
+                                SurahCard(
+                                    surah = filteredSurah
                                 ) { suraNumber: String, isSurah: Boolean, translation: String, ayaNumber: Int? ->
                                     onNavigateToAyatScreen(
                                         suraNumber,
@@ -158,7 +151,7 @@ fun DashboardQuranTracker(
             dismissButtonText = "No, Cancel",
             onConfirm = {
                 handleEvents(
-                    DashboardViewmodel.DashboardEvent.DeleteBookmarkFromAya(
+                    DashboardViewModel.DashboardEvent.DeleteBookmarkFromAya(
                         itemToDelete.value!!.ayaNumberInSurah,
                         itemToDelete.value!!.suraNumber,
                         itemToDelete.value!!.ayaNumberInSurah

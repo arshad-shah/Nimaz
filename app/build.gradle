@@ -14,14 +14,14 @@ apply plugin: 'com.mikepenz.aboutlibraries.plugin'
 
 android {
     namespace 'com.arshadshah.nimaz'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
-        targetSdk 33
+        targetSdk 35
         versionCode 159
-        versionName '2.3.2'
+        versionName '2.4.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -68,6 +68,7 @@ android {
 }
 
 dependencies {
+    implementation libs.androidx.appcompat
     coreLibraryDesugaring libs.desugar.jdk.libs
     implementation libs.androidx.monitor
     implementation libs.androidx.junit.ktx
@@ -103,6 +104,7 @@ dependencies {
     implementation libs.androidx.compose.ui.tooling.preview
     implementation libs.androidx.compose.ui.graphics
     implementation libs.androidx.compose.material3
+    implementation libs.androidx.material.icons.extended
     debugImplementation libs.androidx.compose.ui.tooling
     debugImplementation libs.androidx.compose.ui.test.manifest
 

@@ -31,110 +31,187 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.Placeholde
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.viewModel.DuaViewModel
+import androidx.compose.animation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Categories(
-    viewModel: DuaViewModel = viewModel(
-        key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY
-    ),
+    viewModel: DuaViewModel = viewModel(key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY),
     paddingValues: PaddingValues,
     onNavigateToChapterListScreen: (String, Int) -> Unit,
 ) {
-    LaunchedEffect(true) { // If getCategories should be called only once, use a more meaningful key
+    LaunchedEffect(true) {
         viewModel.getCategories()
     }
 
     val categories = viewModel.categories.collectAsState()
     val loading = viewModel.isLoading.collectAsState()
-
-    // Determine the item count and content based on loading state
     val itemCount = if (loading.value) 5 else categories.value.size
-    val itemContent: @Composable (Int) -> Unit = { index ->
-        if (loading.value) {
-            Category(
-                title = "Category $index",
-                onClicked = {},
-                loading = true,
-                number = index
-            )
-        } else {
-            Category(
-                number = index + 1,
-                title = categories.value[index].name,
-                loading = false,
-                onClicked = {
-                    onNavigateToChapterListScreen(
-                        categories.value[index].name,
-                        categories.value[index].id
-                    )
-                }
-            )
-        }
-    }
 
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ),
         modifier = Modifier
             .padding(paddingValues)
-            .padding(8.dp)
+            .padding(16.dp)
             .fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        )
     ) {
-        LazyColumn {
-            items(itemCount) {
-                itemContent(it)
-                //if (it < itemCount - 1) Divider()
-                if (it < itemCount - 1) {
-                    HorizontalDivider()
+        LazyColumn(
+            contentPadding = PaddingValues(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            items(itemCount) { index ->
+                if (loading.value) {
+                    CategoryItem(
+                        title = "Loading category...",
+                        number = index + 1,
+                        loading = true,
+                        onClicked = {}
+                    )
+                } else {
+                    val category = categories.value[index]
+                    CategoryItem(
+                        title = category.name,
+                        number = index + 1,
+                        loading = false,
+                        onClicked = {
+                            onNavigateToChapterListScreen(category.name, category.id)
+                        }
+                    )
+                }
+
+                if (index < itemCount - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
                 }
             }
         }
     }
 }
 
-
 @Composable
-fun Category(
+fun CategoryItem(
     title: String,
-    icon: Int? = null,
-    description: String = "",
-    onClicked: () -> Unit = {},
-    loading: Boolean,
     number: Int,
+    loading: Boolean,
+    onClicked: () -> Unit,
+    icon: Int? = null,
+    description: String = ""
 ) {
-    Row(
+    Surface(
         modifier = Modifier
-            .padding(8.dp)
-            .clip(MaterialTheme.shapes.medium)
             .fillMaxWidth()
-            .clickable(onClick = onClicked, enabled = !loading)
-            .placeholder(
-                visible = loading,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(4.dp),
-                highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+            .animateContentSize()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        onClick = { if (!loading) onClicked() },
+        enabled = !loading,
+        shape = RoundedCornerShape(16.dp),
+        color = Color.Transparent
     ) {
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text = "${number}.",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        icon?.let {
-            Image(
-                painter = painterResource(id = it),
-                contentDescription = description,
-                modifier = Modifier.size(32.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = if (!loading) {
+                            listOf(
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+                            )
+                        } else {
+                            listOf(Color.Transparent, Color.Transparent)
+                        }
+                    )
+                )
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Category Number
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = if (!loading)
+                    MaterialTheme.colorScheme.primaryContainer
+                else
+                    MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier
+                    .size(40.dp)
+                    .placeholder(
+                        visible = loading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = number.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Category Title
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 4.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.placeholder(
+                        visible = loading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    )
+                )
+                if (description.isNotEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .placeholder(
+                                visible = loading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                    )
+                }
+            }
+
+            // Navigation Icon
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = "Navigate to category",
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = if (loading) 0.5f else 1f),
+                modifier = Modifier
+                    .size(24.dp)
+                    .placeholder(
+                        visible = loading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    )
             )
         }
     }

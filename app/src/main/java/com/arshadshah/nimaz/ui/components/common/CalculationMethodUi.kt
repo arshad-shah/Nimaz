@@ -131,13 +131,11 @@ fun CalculationMethodUI() {
                     )
                 )
                 viewModel.handleEvent(
-                    context,
                     PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                         PrayerTimesParamMapper.getParams(context)
                     )
                 )
                 viewModel.handleEvent(
-                    context,
                     PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                         context
                     )
@@ -184,13 +182,11 @@ fun CalculationMethodUI() {
                         )
                     )
                     viewModel.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                             PrayerTimesParamMapper.getParams(context)
                         )
                     )
                     viewModel.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                             context
                         )

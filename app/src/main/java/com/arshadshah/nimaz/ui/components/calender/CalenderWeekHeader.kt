@@ -13,39 +13,33 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.DayOfWeek
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun CalenderWeekHeader(
     weekState: List<DayOfWeek>,
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.Center
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        weekState.forEach { dayOfWeek ->
+        weekState.forEach { day ->
             Text(
-                text = dayOfWeek.name.substring(0, 3),
-                style = MaterialTheme.typography.titleSmall,
-                color = if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+                text = day.name.take(3),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY)
                     MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp)
+                else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
             )
         }
     }
 }
-
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun CalenderWeekHeaderPreview() {
     CalenderWeekHeader(

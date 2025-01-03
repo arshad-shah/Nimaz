@@ -7,8 +7,17 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import es.dmoral.toasty.Toasty
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class SensorDataManager(context: Context) : SensorEventListener {
 
@@ -92,3 +101,30 @@ data class SensorData(
     val pitch: Float,
     val yaw: Float,
 )
+
+
+@Composable
+fun rememberSensorData(
+    context: Context,
+    scope: CoroutineScope
+): SensorData? {
+    var sensorData by remember { mutableStateOf<SensorData?>(null) }
+
+    DisposableEffect(Unit) {
+        val dataManager = SensorDataManager(context)
+        dataManager.init(context)
+
+        val job = scope.launch {
+            dataManager.data
+                .receiveAsFlow()
+                .collect { sensorData = it }
+        }
+
+        onDispose {
+            dataManager.cancel()
+            job.cancel()
+        }
+    }
+
+    return sensorData
+}

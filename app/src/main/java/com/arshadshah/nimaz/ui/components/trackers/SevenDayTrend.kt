@@ -1,55 +1,75 @@
-package com.arshadshah.nimaz.ui.components.trackers
-
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
 import java.time.LocalDate
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
-//composable to show the prayers for this week using 7 circular progress indicators
 @Composable
-fun SevenDayTrend(trackersForWeek: State<List<LocalPrayersTracker>>, dateState: State<LocalDate>) {
-
-    Column(
-        modifier = Modifier.padding(
-            vertical = 8.dp,
-            horizontal = 4.dp
-        ),
+fun SevenDayTrend(
+    trackersForWeek: State<List<LocalPrayersTracker>>,
+    dateState: State<LocalDate>
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            trackersForWeek.value.forEachIndexed { index, prayerTracker ->
+            Text(
+                text = "Weekly Progress",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-                ProgressBarCustom(
-                    progress = prayerTracker.progress.toFloat(),
-                    progressColor = if (prayerTracker.progress == 0 && !prayerTracker.isMenstruating) Color.Gray
-                    else if (prayerTracker.isMenstruating) Color(0xFFE91E63)
-                    else MaterialTheme.colorScheme.primary,
-                    radius = 20.dp,
-                    label = prayerTracker.date.dayOfWeek.name.first().toString(),
-                    strokeWidth = 6.dp,
-                    strokeBackgroundWidth = 3.dp,
-                    startDelay = 0,
-                    labelColor = if (prayerTracker.progress == 0 && !prayerTracker.isMenstruating) Color.Gray
-                    else if (prayerTracker.isMenstruating) Color(0xFFE91E63)
-                    else MaterialTheme.colorScheme.primary
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                trackersForWeek.value.forEachIndexed { index, prayerTracker ->
+                    ProgressBarCustom(
+                        progress = prayerTracker.progress.toFloat(),
+                        progressColor = determineColor(prayerTracker),
+                        radius = 24.dp,
+                        label = prayerTracker.date.dayOfWeek.name.take(3),
+                        strokeWidth = 6.dp,
+                        strokeBackgroundWidth = 3.dp
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun determineColor(prayerTracker: LocalPrayersTracker): Color {
+    return when {
+        prayerTracker.progress == 0 && !prayerTracker.isMenstruating ->
+            MaterialTheme.colorScheme.surfaceVariant
+        prayerTracker.isMenstruating -> Color(0xFFE91E63)
+        else -> MaterialTheme.colorScheme.primary
     }
 }

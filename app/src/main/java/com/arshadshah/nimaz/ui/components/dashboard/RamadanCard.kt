@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,140 +29,98 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 
 @Composable
 fun RamadanCard(onNavigateToCalender: () -> Unit) {
-    //a card that shows the time left for ramadan
-    //it should only show when 40 days are left for ramadan
-    //it should show the time left for ramadan in days, hours, minutes and seconds
-    val ramadanTimeLeft = remember { mutableLongStateOf(0L) }
-
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
-    val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, 1)
-    //find last day of ramadan
-    val ramadanMonthLength = ramadanStart.lengthOfMonth()
-    val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR], 9, ramadanMonthLength)
-    //get date of ramadan start in gregorian
-    val ramadanStartGregorian = LocalDate.from(ramadanStart)
-    val ramadanEndGregorian = LocalDate.from(ramadanEnd)
-    //format the date to show day and month and year
-    //wednesday, 1st of september 2021
-    val formatter = java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
-    val ramadanStartFormatted = ramadanStartGregorian.format(formatter)
-    val ramadanEndFormatted = ramadanEndGregorian.format(formatter)
+    val currentYear = todayHijri[ChronoField.YEAR]
 
-    val isAfterRamadanStart = todayHijri.isAfter(ramadanStart)
-    if (isAfterRamadanStart) {
-        if (todayHijri.isBefore(ramadanEnd)) {
-            ramadanTimeLeft.longValue = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
-        }
+    val ramadanStart = HijrahDate.of(currentYear, 9, 1)
+    val ramadanEnd = HijrahDate.of(currentYear, 9, ramadanStart.lengthOfMonth())
+
+    val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
+    val isRamadanStarted = todayHijri.isAfter(ramadanStart)
+
+    val daysLeft = if (isRamadanStarted) {
+        ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
     } else {
-        val diff = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
-        ramadanTimeLeft.longValue = diff
+        ramadanStart.toEpochDay() - todayHijri.toEpochDay()
     }
 
-    //list of images to pick from
-    //we will pick a random image from the list
-    val imagesToShow =
-        listOf(
-            R.drawable.ramadan,
-            R.drawable.ramadan2,
-            R.drawable.ramadan3,
-            R.drawable.ramadan4,
-            R.drawable.ramadan5
-        )
-    //pick a random image
-    val randomImage = imagesToShow.random()
-    //save the image to show in the card
-    val imageToShow = remember { mutableIntStateOf(randomImage) }
+    val images = remember { listOf(R.drawable.ramadan, R.drawable.ramadan2, R.drawable.ramadan3, R.drawable.ramadan4, R.drawable.ramadan5) }
+    val selectedImage = remember { mutableIntStateOf(images.random()) }
 
-    //show card if its before month 10 and 40 days are left for ramadan
-    val showCard = todayHijri[ChronoField.MONTH_OF_YEAR] < 10 && ramadanTimeLeft.longValue < 40
-
-    //is ramadan time left less than 40 days
-    //if yes then show the card
-    if (showCard) {
-        //show the card
+    if (todayHijri[ChronoField.MONTH_OF_YEAR] < 10 && daysLeft < 40) {
         Card(
             colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                contentColor = MaterialTheme.colorScheme.onSurface
             ),
+            shape = MaterialTheme.shapes.medium,
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .clip(MaterialTheme.shapes.medium)
-                .clickable { onNavigateToCalender() },
+                .clickable { onNavigateToCalender() }
+                .animateContentSize()
         ) {
             Column(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 && todayHijri[ChronoField.MONTH_OF_YEAR] == 9) {
-                    Text(text = "Ramadan Mubarak", style = MaterialTheme.typography.titleLarge)
-                } else {
-                    Text(text = "Ramadan", style = MaterialTheme.typography.titleLarge)
-                }
+                Text(
+                    text = if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 && todayHijri[ChronoField.MONTH_OF_YEAR] == 9)
+                        "Ramadan Mubarak" else "Ramadan",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Box(
+                    Image(
+                        painter = painterResource(id = selectedImage.intValue),
+                        contentDescription = "Ramadan Icon",
                         modifier = Modifier
-                            .clip(MaterialTheme.shapes.extraLarge)
-                            .padding(4.dp)
+                            .padding(8.dp)
                             .size(80.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = imageToShow.intValue),
-                            contentDescription = "Moon",
-                            modifier = Modifier
-                                .size(80.dp)
-                        )
-                    }
+                            .clip(MaterialTheme.shapes.extraLarge)
+                    )
+
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        if (isAfterRamadanStart) {
-                            //estimated end
-                            Text(
-                                text = "Estimated end",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        } else {
-                            //estimated start
-                            Text(
-                                text = "Estimated start",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                        //if ramaadan time left is 1 then show that it ends today if its 2 then show that it ends tomorrow
                         Text(
-                            text = if (ramadanTimeLeft.longValue == 0L) "Today" else if (ramadanTimeLeft.value == 1L) "Tomorrow" else "In ${ramadanTimeLeft.value} days",
-                            style = MaterialTheme.typography.headlineMedium
+                            text = if (isRamadanStarted) "Estimated end" else "Estimated start",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (isAfterRamadanStart) {
-                            //estimated end
-                            Text(
-                                text = ramadanEndFormatted.toString(),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        } else {
-                            //estimated start
-                            Text(
-                                text = ramadanStartFormatted.toString(),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
+
+                        Text(
+                            text = when(daysLeft) {
+                                0L -> "Today"
+                                1L -> "Tomorrow"
+                                else -> "In $daysLeft days"
+                            },
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Text(
+                            text = LocalDate.from(if (isRamadanStarted) ramadanEnd else ramadanStart)
+                                .format(formatter),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }

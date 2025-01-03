@@ -45,263 +45,200 @@ import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import kotlinx.coroutines.launch
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.window.PopupProperties
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBarMenu(number: Int, isSurah: Boolean, getAllAyats: (Int, String) -> Unit) {
-
-    val translationType =
-        PrivateSharedPreferences(LocalContext.current).getData(
-            key = AppConstants.TRANSLATION_LANGUAGE,
-            s = "English"
-        )
+fun TopBarMenu(
+    number: Int,
+    isSurah: Boolean,
+    getAllAyats: (Int, String) -> Unit
+) {
+    val translationType = PrivateSharedPreferences(LocalContext.current)
+        .getData(key = AppConstants.TRANSLATION_LANGUAGE, s = "English")
     val translation = when (translationType) {
         "English" -> "english"
         "Urdu" -> "urdu"
         else -> "english"
     }
 
-    //create a list with numbers from 1 to 114
-    //its expensive to create a list every time the composable is recomposed
-    //so we use remember to create the list only once
-    val surahList = remember { mutableListOf<Int>() }
-    val juzList = remember { mutableListOf<Int>() }
-    val (selectedSurah, setSelectedSurah) = remember { mutableIntStateOf(number) }
-
-    //create the list using a coroutine
-    val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            if (isSurah) {
-                for (i in 1..114) {
-                    surahList.add(i)
-                }
-            } else {
-                for (i in 1..30) {
-                    juzList.add(i)
-                }
-            }
-        }
+    val list = remember {
+        if (isSurah) (1..114).toList() else (1..30).toList()
     }
 
-    val label = when (isSurah) {
-        true -> "Surah"
-        false -> "Juz"
-    }
+    var selectedNumber by remember { mutableIntStateOf(number) }
+    var expanded by remember { mutableStateOf(false) }
+    val label = if (isSurah) "Surah" else "Juz"
 
-    val list = when (isSurah) {
-        true -> surahList
-        false -> juzList
-    }
-
-    val expanded = remember { mutableStateOf(false) }
-    ElevatedCard(
+    Card(
         modifier = Modifier
             .width(160.dp)
-            .height(48.dp)
+            .height(52.dp)
             .padding(start = 8.dp)
             .clip(MaterialTheme.shapes.medium)
-            .clickable {
-                expanded.value = !expanded.value
-            },
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { expanded = !expanded },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp,
+            focusedElevation = 6.dp
+        )
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(),
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            //the text
             Text(
-                modifier = Modifier
-                    .padding(8.dp),
                 text = label,
-                textAlign = TextAlign.Start,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
             )
+
             Badge(
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            )
-            {
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
                 Text(
-                    text = selectedSurah.toString(),
+                    text = selectedNumber.toString(),
                     style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 4.dp)
                 )
             }
-            Crossfade(
-                targetState = expanded.value,
-                animationSpec = tween(durationMillis = 300), label = ""
-            ) { expanded ->
-                if (expanded) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow_up_icon),
-                        contentDescription = "dropdown icon",
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(24.dp)
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow_down_icon),
-                        contentDescription = "dropdown icon",
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(24.dp)
-                    )
-                }
+
+            AnimatedContent(
+                targetState = expanded,
+                transitionSpec = {
+                    rotateAnimation().using(SizeTransform(clip = false))
+                },
+                label = "Dropdown Arrow"
+            ) { isExpanded ->
+                Icon(
+                    painter = painterResource(
+                        id = if (isExpanded) R.drawable.arrow_up_icon
+                        else R.drawable.arrow_down_icon
+                    ),
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
 
-    if (expanded.value) {
-
+    if (expanded) {
         Popup(
-            alignment = Alignment.BottomEnd,
-            onDismissRequest = { expanded.value = false },
+            alignment = Alignment.TopStart,
+            onDismissRequest = { expanded = false },
+            properties = PopupProperties(focusable = true)
         ) {
-            DropdownMenuQuranSection(
-                getAllAyats = getAllAyats,
-                selectedSurah = selectedSurah,
-                setSelectedSurah = setSelectedSurah,
-                expanded = expanded,
+            QuranSectionDropdown(
                 list = list,
-                translation = translation,
-                label = label
+                label = label,
+                selectedNumber = selectedNumber,
+                onNumberSelected = { number ->
+                    selectedNumber = number
+                    getAllAyats(number, translation)
+                    expanded = false
+                }
             )
         }
     }
 }
 
-//drop down menu
 @Composable
-fun DropdownMenuQuranSection(
-    getAllAyats: (Int, String) -> Unit,
-    expanded: MutableState<Boolean>,
-    translation: String,
-    label: String,
+private fun QuranSectionDropdown(
     list: List<Int>,
-    setSelectedSurah: (Int) -> Unit,
-    selectedSurah: Int,
+    label: String,
+    selectedNumber: Int,
+    onNumberSelected: (Int) -> Unit
 ) {
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = (selectedNumber - 1).coerceAtLeast(0)
+    )
 
-    val scope = rememberCoroutineScope()
-    val onSelected = { surah: Int ->
-        scope.launch {
-            setSelectedSurah(surah)
-            getAllAyats(surah, translation)
-            expanded.value = false
-        }
-    }
-
-    val listState = rememberLazyListState(selectedSurah, -500)
-
-    ElevatedCard(
+    Card(
         modifier = Modifier
-            .width(150.dp)
-            .height(300.dp)
-            .shadow(12.dp, MaterialTheme.shapes.medium)
+            .width(160.dp)
+            .height(320.dp)
+            .shadow(elevation = 8.dp, shape = MaterialTheme.shapes.medium)
             .clip(MaterialTheme.shapes.medium),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         LazyColumn(
             state = listState,
+            contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             items(list.size) { index ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            vertical = if (index == 0 || index == list.size - 1) 3.dp else 1.dp,
-                            horizontal = 3.dp
-                        )
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable {
-                            onSelected(list[index])
-                        }
-                        .size(48.dp)
-                        .border(
-                            width = 2.dp,
-                            color = if (list[index] == selectedSurah) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                64.dp
-                            ),
-                            shape = MaterialTheme.shapes.medium
-                        )
-                        .background(
-                            color = if (list[index] == selectedSurah) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
-                            }
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "$label ${list[index]}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .padding(horizontal = 18.dp)
-                            .fillMaxWidth(),
-                        fontWeight = if (list[index] == selectedSurah) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (list[index] == selectedSurah) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                QuranSectionItem(
+                    number = list[index],
+                    label = label,
+                    isSelected = list[index] == selectedNumber,
+                    onClick = { onNumberSelected(list[index]) }
+                )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun DropdownMenuSurahPreview() {
-    DropdownMenuQuranSection(
-        getAllAyats = { _, _ -> },
-        expanded = remember { mutableStateOf(false) },
-        translation = "english",
-        label = "Surah",
-        list = (1..114).toList(),
-        setSelectedSurah = { },
-        selectedSurah = 1
-    )
+private fun QuranSectionItem(
+    number: Int,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+
+    val textColor = if (isSelected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clip(MaterialTheme.shapes.small)
+            .background(backgroundColor)
+            .clickable(onClick = onClick)
+            .padding(12.dp)
+    ) {
+        Text(
+            text = "$label $number",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = textColor,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DropdownMenuJuzPreview() {
-    DropdownMenuQuranSection(
-        getAllAyats = { _, _ -> },
-        expanded = remember { mutableStateOf(false) },
-        translation = "english",
-        label = "Juz",
-        list = (1..30).toList(),
-        setSelectedSurah = { },
-        selectedSurah = 1
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DropdownMenuTogglerPreview() {
-    TopBarMenu(number = 114, isSurah = true, getAllAyats = { _, _ -> })
-}
+@OptIn(ExperimentalAnimationApi::class)
+private fun rotateAnimation(
+    duration: Int = 300
+): ContentTransform =
+    (slideInVertically { height -> height } + fadeIn()).togetherWith(slideOutVertically { height -> -height } + fadeOut())

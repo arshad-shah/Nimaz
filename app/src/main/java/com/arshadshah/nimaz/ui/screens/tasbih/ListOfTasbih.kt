@@ -20,6 +20,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -61,7 +62,7 @@ fun ListOfTasbih(
     val selected =
         remember { mutableStateOf(sharedPref.getBoolean("selected", false)) }
     val indexSelected =
-        remember { mutableStateOf(sharedPref.getInt("indexSelected", -1)) }
+        remember { mutableIntStateOf(sharedPref.getInt("indexSelected", -1)) }
     //if user leaves tis activity or the app, the selected item and indexSelected will be saved
     //buit if the count is 0, the selected item and indexSelected will be reset
     LaunchedEffect(

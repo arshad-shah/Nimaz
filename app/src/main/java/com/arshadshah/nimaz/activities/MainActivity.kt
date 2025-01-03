@@ -38,6 +38,7 @@ import com.arshadshah.nimaz.ui.theme.rememberSystemUiController
 import com.arshadshah.nimaz.utils.AutoLocationUtils
 import com.arshadshah.nimaz.utils.CustomAnimation
 import com.arshadshah.nimaz.utils.FirebaseLogger
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.NetworkChecker
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.RouteUtils.checkRoute
@@ -61,6 +62,10 @@ class MainActivity : ComponentActivity() {
             if (!AutoLocationUtils.isInitialized()) {
                 AutoLocationUtils.init(this)
                 Log.d(MAIN_ACTIVITY_TAG, "onResume:  location is initialized")
+            }
+            if(!LocalDataStore.isInitialized()){
+                LocalDataStore.init(this)
+                Log.d(MAIN_ACTIVITY_TAG, "onResume:  data store is initialized")
             }
             AutoLocationUtils.startLocationUpdates()
         }

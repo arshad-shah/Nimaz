@@ -95,9 +95,7 @@ fun BannerSmall(
             modifier = modifier
                 .padding(paddingValues ?: PaddingValues(8.dp))
                 .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
                     enabled = true,
-                    indication = if (onClick != {}) rememberRipple() else null,
                     role = Role.Button,
                     onClickLabel = "$title Banner",
                     onClick = {
@@ -221,9 +219,7 @@ fun BannerLarge(
             modifier = modifier
                 .padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp)
                 .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
                     enabled = true,
-                    indication = if (onClick != {}) rememberRipple() else null,
                     role = Role.Button,
                     onClickLabel = "$title Banner",
                     onClick = {

@@ -677,7 +677,7 @@ fun SettingsScreen(
 fun getAppVersion(context: Context): String {
     return try {
         val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-        pInfo.versionName // Or use versionCode based on your need
+        pInfo.versionName.toString() // Or use versionCode based on your need
     } catch (e: PackageManager.NameNotFoundException) {
         "Unknown"
     }

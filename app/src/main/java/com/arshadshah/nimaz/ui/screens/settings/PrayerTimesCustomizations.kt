@@ -216,13 +216,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                         )
                     )
                     viewModel.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                             getParams(context)
                         )
                     )
                     viewModel.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                             context
                         )
@@ -260,13 +258,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                         )
                     )
                     viewModel.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                             getParams(context)
                         )
                     )
                     viewModel.handleEvent(
-                        context,
                         PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                             context
                         )
@@ -322,13 +318,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                             )
                         )
                         viewModel.handleEvent(
-                            context,
                             PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                 getParams(context)
                             )
                         )
                         viewModel.handleEvent(
-                            context,
                             PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                 context
                             )
@@ -369,13 +363,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     getParams(context)
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )
@@ -450,13 +442,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     getParams(context)
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )
@@ -498,13 +488,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     getParams(context)
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )
@@ -545,13 +533,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     getParams(context)
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )
@@ -592,13 +578,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     getParams(context)
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )
@@ -639,13 +623,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     getParams(context)
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )
@@ -687,13 +669,11 @@ fun PrayerTimesCustomizations(paddingValues: PaddingValues) {
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
                                     getParams(context)
                                 )
                             )
                             viewModel.handleEvent(
-                                context,
                                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                                     context
                                 )

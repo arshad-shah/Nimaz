@@ -45,141 +45,180 @@ import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 
+import androidx.compose.animation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.*
+import androidx.compose.ui.draw.clip
+
 @Composable
 fun HadithList(
     paddingValues: PaddingValues,
     bookId: String?,
     chapterId: String?,
-    viewModel: HadithViewModel = viewModel(
-        key = AppConstants.HADITH_VIEW_MODEL,
-    )
+    viewModel: HadithViewModel = viewModel(key = AppConstants.HADITH_VIEW_MODEL)
 ) {
-
     LaunchedEffect(Unit) {
         if (bookId != null && chapterId != null) {
             viewModel.getAllHadithForChapter(bookId.toInt(), chapterId.toInt())
         }
     }
+
     val hadithList by viewModel.hadithForAChapter.collectAsState()
     val loading by viewModel.loading.collectAsState()
 
-    if (loading) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(60.dp),
-                strokeWidth = 10.dp,
-                strokeCap = StrokeCap.Round,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Loading...", style = MaterialTheme.typography.bodyLarge)
-        }
-    } else {
-        val cardColors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        )
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(8.dp),
-            colors = cardColors,
-        ) {
-            LazyColumn {
-                items(hadithList.size) { row ->
-                    HadithItem(hadithList[row]) { id: Int, isFavourite: Boolean ->
-                        viewModel.updateFavouriteStatus(
-                            bookId = hadithList[row].bookId,
-                            chapterId = hadithList[row].chapterId,
-                            id = id,
-                            favouriteStatus = isFavourite
-                        )
-                    }
-                    if (row != hadithList.size - 1) {
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.background,
-                            thickness = 2.dp,
-                        )
-                    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(paddingValues)
+    ) {
+        if (loading) {
+            LoadingState()
+        } else {
+            HadithContent(
+                hadithList = hadithList,
+                onFavoriteToggle = { hadith, isFavorite ->
+                    viewModel.updateFavouriteStatus(
+                        bookId = hadith.bookId,
+                        chapterId = hadith.chapterId,
+                        id = hadith.id,
+                        favouriteStatus = isFavorite
+                    )
                 }
-            }
+            )
         }
     }
-
 }
 
 @Composable
-fun HadithItem(hadith: HadithEntity, updateFavouriteStatus: (Int, Boolean) -> Unit) {
-    val reusableModifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)
+private fun LoadingState() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
+            color = MaterialTheme.colorScheme.primary,
+            strokeWidth = 4.dp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Loading Hadith...",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
 
-    Column(modifier = Modifier.padding(8.dp)) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-        ) {
+@Composable
+private fun HadithContent(
+    hadithList: List<HadithEntity>,
+    onFavoriteToggle: (HadithEntity, Boolean) -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(hadithList.size) { index ->
+            HadithCard(
+                hadith = hadithList[index],
+                onFavoriteToggle = onFavoriteToggle
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HadithCard(
+    hadith: HadithEntity,
+    onFavoriteToggle: (HadithEntity, Boolean) -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header with number and favorite
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Badge(
-                    modifier = Modifier
-                        .size(52.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                // Hadith number badge
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.padding(end = 8.dp)
                 ) {
                     Text(
                         text = hadith.id.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
 
-                IconToggleButton(checked = hadith.favourite, onCheckedChange = { isChecked ->
-                    // Handle favorite toggle here
-                    updateFavouriteStatus(hadith.id, isChecked)
-                }) {
+                // Favorite button
+                IconButton(
+                    onClick = { onFavoriteToggle(hadith, !hadith.favourite) },
+                    modifier = Modifier.size(40.dp)
+                ) {
                     Icon(
-                        modifier = Modifier.size(16.dp),
-                        painter = if (hadith.favourite) painterResource(id = R.drawable.favorite_icon) else painterResource(
-                            id = R.drawable.favorite_icon_unseletced
-                        ),
-                        contentDescription = "Favorite"
+                        imageVector = if (hadith.favourite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = if (hadith.favourite) "Remove from favorites" else "Add to favorites",
+                        tint = if (hadith.favourite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-        }
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Arabic text
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp)),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = hadith.arabic,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = utmaniQuranFont,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Narrator
             Text(
-                text = hadith.arabic,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = utmaniQuranFont,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                textAlign = TextAlign.Start,
-                modifier = reusableModifier
+                text = hadith.narrator_english,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontStyle = FontStyle.Italic
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // English translation
+            Text(
+                text = hadith.text_english,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        val annotatedString = AnnotatedString(
-            text = "${hadith.narrator_english} ${hadith.text_english}"
-        )
-        Text(
-            text = annotatedString,
-            style = MaterialTheme.typography.bodySmall,
-            fontStyle = FontStyle.Italic
-        )
     }
 }

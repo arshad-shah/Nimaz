@@ -17,7 +17,7 @@ fun Calender(
     SelectableCalendar(
         horizontalSwipeEnabled = false,
         dayContent = { state ->
-            CalenderDay(
+            CalendarDay(
                 dayState = state,
                 handleEvents = handleEvents,
                 progressForMonth = progressForMonth,

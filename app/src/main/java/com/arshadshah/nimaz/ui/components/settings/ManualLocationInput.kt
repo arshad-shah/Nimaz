@@ -119,7 +119,6 @@ fun ManualLocationInput() {
                 )
             )
             viewModelPrayerTimes.handleEvent(
-                context,
                 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
                     context
                 )

@@ -5,7 +5,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,11 +22,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -43,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 // a dropdown item for each tasbih
 //to contain annimated visibility delete button and the tasbih name, goal and count
@@ -72,106 +77,97 @@ fun TasbihDropdownItem(
             SwipeBackground(dismissState = dismissState)
         },
         content = {
-            Card(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        32.dp
-                    ),
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 0.38f
-                    ),
-                    disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                        alpha = 0.38f
-                    ),
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier
-                    .padding(
-                        bottom = 4.dp,
-                        start = 8.dp,
-                        end = 8.dp,
-                        top = 4.dp
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                        shape = MaterialTheme.shapes.extraLarge
-                    )
-                    .clickable { onClick(currentItem.value) }
-            ) {
+            TasbihCard(
+                tasbih = item,
+                onClick = onClick
+            )
+        }
+    )
+}
 
-                //a row to contain the tasbih name, goal and count and the delete button
+@Composable
+fun TasbihCard(
+    tasbih: LocalTasbih,
+    onClick: (LocalTasbih) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                shape = MaterialTheme.shapes.extraLarge
+            )
+            .clickable(onClick = { onClick(tasbih) })
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = tasbih.englishName,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = tasbih.arabicName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontFamily = utmaniQuranFont,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            VerticalDivider(
+                modifier = Modifier.height(36.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Row(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (currentItem.value.count == currentItem.value.goal) {
+                    Text(
+                        text = "${tasbih.count}/${tasbih.goal}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    if (tasbih.count >= tasbih.goal) {
                         Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Completed",
-                            modifier = Modifier
-                                .size(24.dp)
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                    //name
-                    Text(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(8.dp),
-                        text = currentItem.value.englishName,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    //divider
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(24.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.08f
-                        )
-                    )
-                    //goal
-                    Text(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(8.dp),
-                        text = currentItem.value.goal.toString(),
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    //divider
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(24.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.08f
-                        )
-                    )
-                    //count
-                    Text(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(8.dp),
-                        text = currentItem.value.count.toString(),
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
-                    )
                 }
+
+                LinearProgressIndicator(
+                    progress = { (tasbih.count.toFloat() / tasbih.goal).coerceIn(0f, 1f) },
+                    modifier = Modifier.width(80.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
             }
-        })
+        }
+    }
 }
 
 @Composable

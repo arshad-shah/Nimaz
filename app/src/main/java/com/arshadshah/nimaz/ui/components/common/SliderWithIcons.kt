@@ -19,81 +19,130 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextAlign
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
-//custom slider encased in a card to make it look better and two icons before and after the slider
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SliderWithIcons(
     value: Float,
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
     modifier: Modifier = Modifier,
-    leadingIcon: Painter,
-    trailaingIcon: Painter,
-    contentDescription1: String,
-    contentDescription2: String,
-    trailingIconSize: Dp = 24.dp,
-    leadingIconSize: Dp = 24.dp,
+    steps: Int = 0,
+    enabled: Boolean = true,
+    showLabel: Boolean = true,
+    label: (Float) -> String = { it.toInt().toString() }
 ) {
-    ElevatedCard(
+    val haptic = LocalHapticFeedback.current
+    val animatedValue by animateFloatAsState(targetValue = value, label = "")
+
+    Card(
         modifier = modifier
-            .padding(vertical = 8.dp)
+            .padding(2.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
-        content = {
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (showLabel) {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Text(
+                        text = label(value),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
+
+                // Slider
+                Box(
                     modifier = Modifier
-                        .padding(start = 4.dp)
-                        .size(leadingIconSize)
-                        .weight(0.1f)
-                        .clickable {
-                            onValueChange(value - 1)
+                        .weight(1f)
+                        .padding(horizontal = 12.dp)
+                ) {
+                    val interactionSource = remember { MutableInteractionSource() }
+                    val isPressed by interactionSource.collectIsPressedAsState()
+
+                    Slider(
+                        value = animatedValue,
+                        onValueChange = { newValue ->
+                            if (isPressed) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }
+                            onValueChange(newValue)
                         },
-                    painter = leadingIcon,
-                    contentDescription = contentDescription1
-                )
-                Slider(
-                    value = value,
-                    onValueChange = onValueChange,
-                    valueRange = valueRange,
-                    modifier = Modifier.weight(0.8f)
-                )
-                //click on this icon increses the font size
-                Icon(
-                    modifier = Modifier
-                        .padding(end = 4.dp)
-                        .size(trailingIconSize)
-                        .weight(0.1f)
-                        .clickable {
-                            onValueChange(value + 1)
-                        },
-                    painter = trailaingIcon,
-                    contentDescription = contentDescription2
-                )
+                        valueRange = valueRange,
+                        steps = steps,
+                        enabled = enabled,
+                        interactionSource = interactionSource,
+                        modifier = Modifier.scale(1.1f),
+                        thumb = {
+                            SliderDefaults.Thumb(
+                                interactionSource = interactionSource,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
+                        }
+                    )
+                }
             }
         }
-    )
+    }
 }
 
-//preview
-@Preview
 @Composable
+@Preview(showBackground = true)
 fun SliderWithIconsPreview() {
-    SliderWithIcons(
-        value = 1f,
-        onValueChange = { },
-        valueRange = 0f..10f,
-        leadingIcon = painterResource(id = R.drawable.english_font_size_icon),
-        trailaingIcon = painterResource(id = R.drawable.english_font_size_icon),
-        contentDescription1 = "decrease font size",
-        contentDescription2 = "increase font size",
-        trailingIconSize = 24.dp,
-        leadingIconSize = 16.dp,
-    )
+    var value by remember { mutableFloatStateOf(5f) }
+    NimazTheme {
+        SliderWithIcons(
+            value = value,
+            onValueChange = { value = it },
+            valueRange = 0f..10f,
+            steps = 10,
+            showLabel = true
+        )
+    }
 }

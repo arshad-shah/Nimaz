@@ -61,6 +61,7 @@ fun TasbihScreen(
     val objective = viewModel.objective.collectAsState()
     val lap = viewModel.lap.collectAsState()
     val lapCounter = viewModel.lapCounter.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -83,11 +84,8 @@ fun TasbihScreen(
                 },
                 actions = {
                     TopBarActionsTasbih(
-                        rOrl,
                         vibrationAllowed,
-                        viewModel::toggleOrientation,
                         viewModel::toggleVibration,
-                        viewModel::resetTasbih,
                     )
                 }
             )
@@ -123,29 +121,17 @@ fun TasbihScreen(
                     resetTasbihState = viewModel::resetTasbih,
                     getTasbih = viewModel::getTasbih,
                 )
-                LazyColumn(content = {
-                    item {
-                        TasbihRow(
-                            englishName = tasbihEnglish,
-                            arabicName = tasbihArabic,
-                            translationName = tasbihTranslitration,
-                        )
-                    }
-                })
             } else {
                 Counter(
                     paddingValues,
                     resetTasbih = resetButtonState,
                     count = counter,
-                    tasbih = tasbihCreated,
-                    rOrl = rOrl,
                     lap = lap,
                     lapCounter = lapCounter,
                     objective = objective,
                     vibrationAllowed = vibrationAllowed,
                     increment = viewModel::incrementCounter,
                     decrement = viewModel::decrementCounter,
-                    updateTasbih = viewModel::updateTasbih,
                     setCounter = viewModel::setCounter,
                     setObjective = viewModel::setObjective,
                     setLap = viewModel::setLap,
@@ -159,28 +145,9 @@ fun TasbihScreen(
 
 @Composable
 fun TopBarActionsTasbih(
-    rOrl: State<Boolean>,
     vibrationAllowed: State<Boolean>,
-    updateOrientationButtonState: KFunction0<Unit>,
     updateVibrationButtonState: KFunction0<Unit>,
-    updateResetButtonState: KFunction0<Unit>,
 ) {
-    //icon button to change the position of the button for right or left
-    IconButton(onClick = {
-        updateOrientationButtonState()
-    }) {
-        Icon(
-            modifier = Modifier.size(
-                24.dp
-            ),
-            painter = if (rOrl.value)
-                painterResource(
-                    id = R.drawable.corner_right_down_icon
-                )
-            else painterResource(id = R.drawable.corner_left_down_icon),
-            contentDescription = "Change the position of the button"
-        )
-    }
     //vibration toggle button for tasbih to provide feedback
     IconButton(onClick = {
         updateVibrationButtonState()
@@ -196,21 +163,6 @@ fun TopBarActionsTasbih(
                 id = R.drawable.phone_vibration_on_icon
             ),
             contentDescription = "Vibration"
-        )
-    }
-
-    //a reset button to reset the count
-    IconButton(onClick = {
-        updateResetButtonState()
-    }) {
-        Icon(
-            modifier = Modifier.size(
-                24.dp
-            ),
-            painter = painterResource(
-                id = R.drawable.refresh_icon
-            ),
-            contentDescription = "Reset",
         )
     }
 }

@@ -1,9 +1,20 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,8 +46,7 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.Placeholde
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 
-//toggelable item variant rowed
-//overloaded function
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ToggleableItemRow(
     text: String,
@@ -44,89 +54,67 @@ fun ToggleableItemRow(
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
     modifier: Modifier,
+    iconTint: Color = MaterialTheme.colorScheme.primary
 ) {
-
-    Crossfade(
-        targetState = checked,
-        animationSpec = tween(durationMillis = 300), label = ""
-    ) { targetState ->
-
-        Column(
-            modifier = modifier
-                .clip(MaterialTheme.shapes.medium)
-                .clickable(
-                    enabled = enabled,
-                ) {
-                    onCheckedChange(!targetState)
-                },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
+            .animateContentSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedIconToggleButton(
+            enabled = enabled,
+            colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                checkedContainerColor = iconTint,
+                checkedContentColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.errorContainer,
+                disabledContentColor = MaterialTheme.colorScheme.error
+            ),
+            checked = checked,
+            onCheckedChange = { onCheckedChange(it) },
+            border = BorderStroke(
+                1.dp,
+                if (checked) iconTint else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
         ) {
-            //a icon button to toggle the state of the toggleable item
-            OutlinedIconToggleButton(
-                enabled = enabled,
-                colors = IconButtonDefaults.outlinedIconToggleButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    checkedContainerColor = MaterialTheme.colorScheme.primary,
-                    checkedContentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContentColor = Color(0xFFE91E63),
-                    disabledContainerColor = Color(0x1FE91E63),
-                ),
-                checked = targetState,
-                onCheckedChange = {
-                    Log.d("ToggleableItem", "onCheckedChange: $it")
-                    onCheckedChange(it)
-                },
-            ) {
-                if (!targetState) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.cross_icon),
-                        contentDescription = "Uncheck",
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .alpha(0.4f)
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.check_icon),
-                        contentDescription = "Check",
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }
-
-
-            Crossfade(
+            AnimatedContent(
                 targetState = checked,
-                animationSpec = tween(durationMillis = 300), label = ""
-            ) { targetState ->
-                if (!targetState) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
-                            0xFFE91E63
-                        )
-                    )
-                } else {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (enabled) MaterialTheme.colorScheme.primary else Color(
-                            0xFFE91E63
-                        )
-                    )
-                }
+                transitionSpec = { (fadeIn() + scaleIn()).togetherWith(fadeOut() + scaleOut()) },
+                label = "Toggle Animation"
+            ) { isChecked ->
+                Icon(
+                    painter = painterResource(
+                        id = if (isChecked) R.drawable.check_icon else R.drawable.cross_icon
+                    ),
+                    contentDescription = if (isChecked) "Checked" else "Unchecked",
+                    modifier = Modifier.padding(if (isChecked) 8.dp else 10.dp)
+                )
             }
+        }
+
+        AnimatedContent(
+            targetState = checked,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "Text Animation"
+        ) { isChecked ->
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = when {
+                    !enabled -> MaterialTheme.colorScheme.error
+                    isChecked -> iconTint
+                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                },
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }
 
-//toggelable item variant columned
-//overloaded function
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ToggleableItemColumn(
@@ -136,87 +124,72 @@ fun ToggleableItemColumn(
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
     modifier: Modifier,
+    iconTint: Color = MaterialTheme.colorScheme.primary
 ) {
-    Crossfade(
-        targetState = checked,
-        animationSpec = tween(durationMillis = 300)
-    ) { targetState ->
-        Row(
-            modifier = modifier
-                .clip(MaterialTheme.shapes.medium)
-                .fillMaxWidth()
-                .clickable(
-                    enabled = enabled,
-                ) {
-                    onCheckedChange(!targetState)
-                },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+    Row(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth()
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
+            .animateContentSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        OutlinedIconToggleButton(
+            enabled = enabled,
+            colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                checkedContainerColor = iconTint,
+                checkedContentColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.errorContainer,
+                disabledContentColor = MaterialTheme.colorScheme.error
+            ),
+            checked = checked,
+            onCheckedChange = { onCheckedChange(it) },
+            border = BorderStroke(
+                1.dp,
+                if (checked) iconTint else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
         ) {
-            //a icon button to toggle the state of the toggleable item
-            OutlinedIconToggleButton(
-                enabled = enabled,
-                colors = IconButtonDefaults.outlinedIconToggleButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    checkedContainerColor = MaterialTheme.colorScheme.primary,
-                    checkedContentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContentColor = Color(0xFFE91E63),
-                    disabledContainerColor = Color(0x1FE91E63),
-                ),
-                checked = targetState,
-                onCheckedChange = {
-                    Log.d("ToggleableItem", "onCheckedChange: $it")
-                    onCheckedChange(it)
-                },
-            ) {
-                if (!targetState) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.cross_icon),
-                        contentDescription = "Close",
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .alpha(0.6f)
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.check_icon),
-                        contentDescription = "Check",
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }
-
-            Crossfade(
+            AnimatedContent(
                 targetState = checked,
-                animationSpec = tween(durationMillis = 300)
-            ) { targetState ->
-                if (!targetState) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = text,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
-                            0xFFE91E63
-                        )
-                    )
-                } else {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = selectedText ?: text,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = if (enabled) MaterialTheme.colorScheme.primary else Color(
-                            0xFFE91E63
-                        )
-                    )
-                }
+                transitionSpec = { fadeIn() + scaleIn() with fadeOut() + scaleOut() },
+                label = "Toggle Animation"
+            ) { isChecked ->
+                Icon(
+                    painter = painterResource(
+                        id = if (isChecked) R.drawable.check_icon else R.drawable.cross_icon
+                    ),
+                    contentDescription = if (isChecked) "Checked" else "Unchecked",
+                    modifier = Modifier.padding(if (isChecked) 8.dp else 10.dp)
+                )
             }
+        }
+
+        AnimatedContent(
+            targetState = checked,
+            transitionSpec = {
+                (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
+            },
+            label = "Text Animation"
+        ) { isChecked ->
+            Text(
+                text = if (isChecked) selectedText ?: text else text,
+                style = MaterialTheme.typography.titleLarge,
+                color = when {
+                    !enabled -> MaterialTheme.colorScheme.error
+                    isChecked -> iconTint
+                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
         }
     }
 }
 
 
-@Preview(showBackground = true, device = "id:S20 Fe")
+@Preview(showBackground = true)
 @Composable
 fun ToggleableItemRowPreview() {
     val items = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")

@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.ui.components.common
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,67 +25,80 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.arshadshah.nimaz.constants.AppConstants
 import kotlinx.coroutines.launch
 
-/**
- * Custom Tabs Component for Nimaz App
- * @param pagerState [PagerState]
- * @param titles [List] of [String]
- * */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CustomTabs(pagerState: PagerState, titles: List<String>) {
+fun CustomTabs(
+    pagerState: PagerState,
+    titles: List<String>,
+    modifier: Modifier = Modifier
+) {
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        modifier = Modifier
-            .padding(4.dp)
-            .clip(MaterialTheme.shapes.medium),
-        containerColor = MaterialTheme.colorScheme.primary,
-        indicator = { tabPositions: List<TabPosition> ->
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        containerColor = Color.Transparent,
+        indicator = { tabPositions ->
             TabIndicator(
                 pagerState = pagerState,
                 tabPositions = tabPositions
             )
         },
-        divider = { }
+        divider = {}
     ) {
-        TabsList(
-            pagerState = pagerState,
-            titles = titles
-        )
+        TabsList(pagerState = pagerState, titles = titles)
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TabsList(
+private fun TabsList(
     pagerState: PagerState,
     titles: List<String>
 ) {
     val scope = rememberCoroutineScope()
+
     titles.forEachIndexed { index, title ->
         val selected = pagerState.currentPage == index
+
+        val alpha by animateFloatAsState(
+            targetValue = if (selected) 1f else 0.7f,
+            animationSpec = tween(300),
+            label = "tabAlpha"
+        )
+
+        val scale by animateFloatAsState(
+            targetValue = if (selected) 1.05f else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            ),
+            label = "tabScale"
+        )
+
         Tab(
             modifier = Modifier
-                .padding(4.dp)
+                .padding(2.dp)
                 .zIndex(2f)
-                .clip(MaterialTheme.shapes.small)
-                .testTag(
-                    AppConstants.TEST_TAG_QURAN_TAB.replace(
-                        "{number}",
-                        index.toString()
-                    )
-                ),
-            selected = pagerState.currentPage == index,
+                .clip(MaterialTheme.shapes.medium)
+                .scale(scale),
+            selected = selected,
             onClick = {
                 scope.launch {
-                    pagerState.animateScrollToPage(index)
+                    pagerState.animateScrollToPage(
+                        page = index,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )
                 }
             },
             text = {
@@ -92,57 +107,60 @@ fun TabsList(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (selected) FontWeight.ExtraBold
-                    else FontWeight.Normal,
-                    color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
-                    else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (selected)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
                 )
             }
         )
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TabIndicator(
+private fun TabIndicator(
     pagerState: PagerState,
     tabPositions: List<TabPosition>
 ) {
     val transition = updateTransition(pagerState.currentPage, label = "indicatorTransition")
+
     val indicatorStart by transition.animateDp(
         transitionSpec = {
-            if (initialState < targetState) {
-                spring(dampingRatio = 1f, stiffness = 50f)
-            } else {
-                spring(dampingRatio = 1f, stiffness = 1000f)
-            }
-        }, label = "tabIndicatorStart"
-    ) {
-        tabPositions[it].left
-    }
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = if (initialState < targetState)
+                    Spring.StiffnessVeryLow
+                else
+                    Spring.StiffnessMedium
+            )
+        },
+        label = "indicatorStart"
+    ) { page -> tabPositions[page].left }
 
     val indicatorEnd by transition.animateDp(
         transitionSpec = {
-            if (initialState < targetState) {
-                spring(dampingRatio = 1f, stiffness = 1000f)
-            } else {
-                spring(dampingRatio = 1f, stiffness = 50f)
-            }
-        }, label = "tabIndicatorEnd"
-    ) {
-        tabPositions[it].right
-    }
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = if (initialState < targetState)
+                    Spring.StiffnessMedium
+                else
+                    Spring.StiffnessVeryLow
+            )
+        },
+        label = "indicatorEnd"
+    ) { page -> tabPositions[page].right }
 
     Box(
-        Modifier
+        modifier = Modifier
             .offset(x = indicatorStart)
             .wrapContentSize(align = Alignment.BottomStart)
             .width(indicatorEnd - indicatorStart)
             .padding(4.dp)
             .fillMaxSize()
             .background(
-                color = MaterialTheme.colorScheme.onPrimary,
-                MaterialTheme.shapes.small
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = MaterialTheme.shapes.medium
             )
             .zIndex(1f)
     )

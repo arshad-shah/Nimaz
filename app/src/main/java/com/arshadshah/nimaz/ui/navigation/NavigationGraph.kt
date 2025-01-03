@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.ui.navigation
 
+import About
+import LicensesScreen
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -39,13 +41,11 @@ import com.arshadshah.nimaz.ui.screens.hadith.HadithList
 import com.arshadshah.nimaz.ui.screens.introduction.IntroPage1
 import com.arshadshah.nimaz.ui.screens.more.MoreScreen
 import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
-import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
+import com.arshadshah.nimaz.ui.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
-import com.arshadshah.nimaz.ui.screens.settings.About
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
-import com.arshadshah.nimaz.ui.screens.settings.Licences
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.settings.WebViewScreen
@@ -459,7 +459,7 @@ fun NavigationGraph(
             }
         }
         composable(LICENCES_SCREEN_ROUTE) {
-            Licences(paddingValues)
+            LicensesScreen(paddingValues)
         }
         composable(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
             PrayerTimesCustomizations(paddingValues)

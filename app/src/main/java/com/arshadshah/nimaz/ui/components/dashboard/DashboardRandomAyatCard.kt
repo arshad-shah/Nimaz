@@ -1,18 +1,19 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
+import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,153 +30,213 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LiveData
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.DashboardViewmodel
+import com.arshadshah.nimaz.viewModel.DashboardViewModel
 
 @Composable
 fun DashboardRandomAyatCard(
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
-    randomAya: LiveData<DashboardViewmodel.RandomAyaState>
+    randomAya: DashboardViewModel.RandomAyaState?,
+    isLoading: Boolean
 ) {
     val context = LocalContext.current
-
-    val translationSelected = PrivateSharedPreferences(context).getData(
+    val translationLanguage = PrivateSharedPreferences(context).getData(
         AppConstants.TRANSLATION_LANGUAGE,
         "English"
     )
+    val aya = randomAya?.randomAya
+    val surah = randomAya?.surah
+
+    Log.d("DashboardRandomAya", "Random Aya: $randomAya - Surah: $surah - IsLoading: $isLoading")
 
     Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(2.dp),
         modifier = Modifier
-            .padding(4.dp)
             .fillMaxWidth()
-            .clickable {
-                randomAya.value?.randomAya?.let {
-                    onNavigateToAyatScreen(
-                        //number : String , isSurah : Boolean , language : String , scrollToAya : Int?
-                        randomAya.value?.surah?.number.toString(),
-                        true,
-                        PrivateSharedPreferences(context).getData(
-                            AppConstants.TRANSLATION_LANGUAGE,
-                            "English"
-                        ),
-                        it.ayaNumberInSurah
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header with badge and actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.quran_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Verse of the Day",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
-            },
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = "${randomAya.value?.randomAya?.ayaNumberInSurah} : ${randomAya.value?.randomAya?.suraNumber}")
-            IconButton(
-                onClick = {
-                    //share the aya
-                    val shareIntent = Intent(Intent.ACTION_SEND)
-                    shareIntent.type = "text/plain"
-                    //create the share message
-                    //with the aya text, aya translation
-                    //the sura number followed by the aya number
-                    shareIntent.putExtra(
-                        Intent.EXTRA_TEXT,
-                        "Aya of the Day - Chapter ${randomAya.value?.randomAya?.suraNumber}: Verse ${randomAya.value?.randomAya?.ayaNumberInSurah}\n\n" +
-                                "${randomAya.value?.randomAya?.ayaArabic} \n\n" +
-                                "${if (translationSelected == "Urdu") randomAya.value?.randomAya?.translationUrdu else randomAya.value?.randomAya?.translationEnglish} " +
-                                "\n\n${randomAya.value?.randomAya?.suraNumber}:${randomAya.value?.randomAya?.ayaNumberInSurah}" +
-                                "\n\nDownload the app to read more: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
-                    )
-                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Aya of the Day")
 
-                    //start the share intent
-                    context.startActivity(
-                        Intent.createChooser(
-                            shareIntent,
-                            "Share Ramadan Times"
-                        )
+                IconButton(
+                    onClick = { shareAya(context, translationLanguage, aya) }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.share_icon),
+                        contentDescription = "Share",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-                }, modifier = Modifier.size(32.dp)
+                }
+            }
+
+            // Reference number with divider
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(id = R.drawable.share_icon),
-                    contentDescription = "Share Ramadan Times",
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = surah?.englishNameTranslation ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "${aya?.ayaNumberInSurah} : ${aya?.suraNumber}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                 )
             }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-        ) {
 
-            Column(
-                modifier = Modifier
-                    .weight(0.90f)
-            ) {
-                SelectionContainer {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        randomAya.value?.randomAya?.ayaArabic.let {
-                            if (it != null) {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontSize = 26.sp,
-                                    fontFamily = utmaniQuranFont,
-                                    textAlign = if (randomAya.value?.randomAya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(4.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                if (translationSelected == "Urdu") {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            // Arabic Text
+            SelectionContainer {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    aya?.ayaArabic?.let { arabicText ->
                         Text(
-                            text = "${randomAya.value?.randomAya?.translationUrdu} ۔",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontSize = 16.sp,
-                            fontFamily = urduFont,
-                            textAlign = if (randomAya.value?.randomAya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 4.dp)
+                            text = arabicText,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = 26.sp,
+                                fontFamily = utmaniQuranFont,
+                                lineHeight = 46.sp
+                            ),
+                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
-                if (translationSelected == "English") {
-                    randomAya.value?.randomAya?.translationEnglish.let {
-                        if (it != null) {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontSize = 16.sp,
-                                fontFamily = englishQuranTranslation,
-                                textAlign = if (randomAya.value?.randomAya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 4.dp)
+            }
+
+            // Translation
+            when (translationLanguage) {
+                "Urdu" -> CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = "${aya?.translationUrdu} ۔",
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontSize = 16.sp,
+                            fontFamily = urduFont,
+                            lineHeight = 28.sp
+                        ),
+                        textAlign = if (aya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                "English" -> aya?.translationEnglish?.let { englishText ->
+                    Text(
+                        text = englishText,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 16.sp,
+                            fontFamily = englishQuranTranslation,
+                            lineHeight = 24.sp
+                        ),
+                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        aya?.let {
+                            onNavigateToAyatScreen(
+                                surah?.number.toString(),
+                                true,
+                                translationLanguage,
+                                it.ayaNumberInSurah
                             )
                         }
                     }
-                }
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.quran_icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Read Full Surah",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
         }
     }
+}
+private fun shareAya(
+    context: Context,
+    translationLanguage: String,
+    aya: LocalAya?
+) {
+    val shareText = buildString {
+        append("Aya of the Day - Chapter ${aya?.suraNumber}: Verse ${aya?.ayaNumberInSurah}\n\n")
+        append("${aya?.ayaArabic}\n\n")
+        append(if (translationLanguage == "Urdu") aya?.translationUrdu else aya?.translationEnglish)
+        append("\n\n${aya?.suraNumber}:${aya?.ayaNumberInSurah}")
+        append("\n\nDownload the app to read more: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+    }
 
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        putExtra(Intent.EXTRA_SUBJECT, "Aya of the Day")
+    }
+
+    context.startActivity(Intent.createChooser(intent, "Share Aya"))
 }

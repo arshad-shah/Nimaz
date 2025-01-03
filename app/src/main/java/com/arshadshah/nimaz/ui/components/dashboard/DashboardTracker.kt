@@ -26,75 +26,70 @@ import com.arshadshah.nimaz.ui.components.common.ToggleableItemRow
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.viewModel.DashboardViewmodel
+import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
 fun DashboardPrayerTracker(
-    dashboardPrayerTracker: DashboardViewmodel.DashboardTrackerState,
-    handleEvents: (DashboardViewmodel.DashboardEvent) -> Unit,
+    dashboardPrayerTracker: DashboardViewModel.DashboardTrackerState,
+    handleEvents: (DashboardViewModel.DashboardEvent) -> Unit,
     isLoading: State<Boolean>
 ) {
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val updateWidgetTracker =
-        { scope.launch { PrayerTimesTrackerWorker.enqueue(context, force = true) } }
+    val updateWidget = { scope.launch { PrayerTimesTrackerWorker.enqueue(context, force = true) } }
 
-    val prayerNames = listOf(
-        PRAYER_NAME_FAJR,
-        PRAYER_NAME_DHUHR,
-        PRAYER_NAME_ASR,
-        PRAYER_NAME_MAGHRIB,
-        PRAYER_NAME_ISHA
-    )
-    val prayerStatuses = listOf(
-        dashboardPrayerTracker.fajr,
-        dashboardPrayerTracker.dhuhr,
-        dashboardPrayerTracker.asr,
-        dashboardPrayerTracker.maghrib,
-        dashboardPrayerTracker.isha
+    val prayers = listOf(
+        PRAYER_NAME_FAJR to dashboardPrayerTracker.fajr,
+        PRAYER_NAME_DHUHR to dashboardPrayerTracker.dhuhr,
+        PRAYER_NAME_ASR to dashboardPrayerTracker.asr,
+        PRAYER_NAME_MAGHRIB to dashboardPrayerTracker.maghrib,
+        PRAYER_NAME_ISHA to dashboardPrayerTracker.isha
     )
 
     Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
-            .padding(4.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
-                .padding(4.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            prayerNames.forEachIndexed { index, prayerName ->
+            prayers.forEach { (name, status) ->
                 ToggleableItemRow(
                     enabled = !dashboardPrayerTracker.isMenstruating,
-                    text = prayerName,
-                    checked = prayerStatuses[index],
-                    onCheckedChange = {
+                    text = name,
+                    checked = status,
+                    onCheckedChange = { isChecked ->
                         handleEvents(
-                            DashboardViewmodel.DashboardEvent.UpdatePrayerTracker(
+                            DashboardViewModel.DashboardEvent.UpdatePrayerTracker(
                                 date = LocalDate.now(),
-                                prayerName = prayerName,
-                                prayerDone = it
+                                prayerName = name,
+                                prayerDone = isChecked
                             )
                         )
-                        updateWidgetTracker()
+                        updateWidget()
                     },
                     modifier = Modifier.placeholder(
                         visible = isLoading.value,
-                        color = MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(4.dp),
-                        highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
-                    )
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = MaterialTheme.shapes.small,
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                        )
+                    ),
                 )
             }
         }
