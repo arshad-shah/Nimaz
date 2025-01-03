@@ -1,12 +1,12 @@
 package com.arshadshah.nimaz.ui.screens.more
 
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,15 +31,20 @@ import androidx.compose.material.icons.outlined.Source
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,53 +55,154 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NAMES_OF_ALLAH
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NamesOfAllah(paddingValues: PaddingValues) {
+fun NamesOfAllah(paddingValues: PaddingValues, navController: NavHostController) {
+
+    val context = LocalContext.current
+
+    val viewModelNames = viewModel(
+        key = AppConstants.NAMES_OF_ALLAH_VIEWMODEL_KEY,
+        initializer = { NamesOfAllahViewModel() },
+        viewModelStoreOwner = context as ComponentActivity
+    )
+    val playBackState = viewModelNames.playbackState.collectAsState()
     val resources = LocalContext.current.resources
     val englishNames = resources.getStringArray(R.array.English)
     val arabicNames = resources.getStringArray(R.array.Arabic)
     val translationNames = resources.getStringArray(R.array.translation)
 
-    Card(
-        modifier = Modifier
-            .padding(16.dp)
-            .padding(paddingValues)
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = MaterialTheme.shapes.large
+
+    Scaffold(
+        topBar = {
+            TopAppBar(title = {
+                Text(text = "Names of Allah")
+            },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.navigateUp()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    if (
+                        playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING
+                        ||
+                        playBackState.value == NamesOfAllahViewModel.PlaybackState.PAUSED
+                    ) {
+                        IconButton(onClick = {
+                            viewModelNames.handleAudioEvent(
+                                NamesOfAllahViewModel.AudioEvent.Stop
+                            )
+                        }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(
+                                    24.dp
+                                ),
+                                painter = painterResource(
+                                    id = R.drawable.stop_icon
+                                ),
+                                contentDescription = "Stop playing"
+                            )
+                        }
+                    }
+                    IconButton(onClick = {
+                        if (playBackState.value != NamesOfAllahViewModel.PlaybackState.PLAYING) {
+                            viewModelNames.handleAudioEvent(
+                                NamesOfAllahViewModel.AudioEvent.Play(
+                                    context
+                                )
+                            )
+                        } else {
+                            viewModelNames.handleAudioEvent(
+                                NamesOfAllahViewModel.AudioEvent.Pause
+                            )
+                        }
+                    }
+                    ) {
+                        if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING) {
+                            Icon(
+                                modifier = Modifier.size(
+                                    24.dp
+                                ),
+                                painter = painterResource(
+                                    id = R.drawable.pause_icon
+                                ),
+                                contentDescription = "Pause playing"
+                            )
+                        } else {
+                            Icon(
+                                modifier = Modifier.size(
+                                    24.dp
+                                ),
+                                painter = painterResource(
+                                    id = R.drawable.play_icon
+                                ),
+                                contentDescription = "Play"
+                            )
+                        }
+                    }
+                }
+            )
+        },
     ) {
-        LazyColumn(
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .testTag(TEST_TAG_NAMES_OF_ALLAH),
+                .padding(16.dp)
+                .padding(paddingValues)
+                .fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            ),
+            elevation = CardDefaults.cardElevation(4.dp),
+            shape = MaterialTheme.shapes.large
         ) {
-            items(englishNames.size) { index ->
-                NamesOfAllahRow(
-                    index,
-                    englishNames[index],
-                    arabicNames[index],
-                    translationNames[index]
-                )
-                if (index < englishNames.size - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        thickness = 1.dp
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(TEST_TAG_NAMES_OF_ALLAH),
+                contentPadding = it
+            ) {
+                items(englishNames.size) { index ->
+                    NamesOfAllahRow(
+                        index,
+                        englishNames[index],
+                        arabicNames[index],
+                        translationNames[index]
                     )
+                    if (index < englishNames.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            thickness = 1.dp
+                        )
+                    }
                 }
             }
         }

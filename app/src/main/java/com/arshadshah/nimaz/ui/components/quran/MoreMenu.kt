@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import androidx.activity.ComponentActivity
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -13,39 +12,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.settings.SettingValueState
 import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 import es.dmoral.toasty.Toasty
+import kotlin.reflect.KFunction1
 
 @Composable
 fun MoreMenu(
     menuOpen: Boolean = false,
     setMenuOpen: (Boolean) -> Unit,
     state: SettingValueState<Int> = rememberIntSettingState(),
+    handleEvents: KFunction1<QuranViewModel.QuranMenuEvents, Unit>,
 ) {
 
     val context = LocalContext.current
     val items2: List<String> = listOf("English", "Urdu")
     val items3: List<String> = listOf("Default", "Quranme", "Hidayat", "Amiri", "IndoPak")
-    val (showDialog1, setShowDialog1) = remember { mutableStateOf(false) }
     val (showDialog2, setShowDialog2) = remember { mutableStateOf(false) }
 
     //a dialog with two sliders to control the font size of quran
     val (showDialog3, setShowDialog3) = remember { mutableStateOf(false) }
-    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
-    val viewModel = viewModel(
-        key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(sharedPreferencesRepository) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-
-    viewModel.handleQuranMenuEvents(QuranViewModel.QuranMenuEvents.Initialize_Quran)
-
     val pageTypeState =
         rememberPreferenceStringSettingState(AppConstants.PAGE_TYPE, "List")
     val translationState =
@@ -113,7 +102,7 @@ fun MoreMenu(
             state = state,
             valueState = translationState
         ) {
-            viewModel.handleQuranMenuEvents(
+            handleEvents(
                 QuranViewModel.QuranMenuEvents.Change_Translation(
                     it
                 )
@@ -126,7 +115,7 @@ fun MoreMenu(
             translationFontSizeState,
             fontStyleState,
             items3,
-            viewModel::handleQuranMenuEvents
+            handleEvents
         )
     } else {
         return

@@ -1,7 +1,8 @@
 package com.arshadshah.nimaz.ui.components.prayerTimes
 
-import android.util.Log
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,25 +11,33 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.*
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.LocalDateTime
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 private const val FULL_ARC_ANGLE = 180f
 private const val START_ANGLE = 180f
@@ -45,7 +54,6 @@ fun AnimatedArcView(
     state: ArcViewState,
     modifier: Modifier = Modifier
 ) {
-    Log.d("ArcView - state", state.toString())
     val currentPhase = remember(state.timePoints) {
         getCurrentPhase(state.timePoints)
     }
@@ -164,7 +172,6 @@ fun AnimatedArcView(
                 size.width / 2,
                 size.width / 2
             )
-            Log.d("ArcView - sun position", sunPosition.toString())
 
             // Enhanced sun drawing with glow effect
             drawCircle(
@@ -224,8 +231,6 @@ private fun calculateInitialPosition(
 private fun calculateDynamicPositions(timePoints: List<LocalDateTime?>): List<Float> {
     val validTimePoints = timePoints.filterNotNull()
     if (validTimePoints.size < 2) return emptyList()
-
-    Log.d("ArcView - timePoints", timePoints.toString())
 
     val totalDuration = Duration.between(validTimePoints.first(), validTimePoints.last()).toMillis().toFloat()
 

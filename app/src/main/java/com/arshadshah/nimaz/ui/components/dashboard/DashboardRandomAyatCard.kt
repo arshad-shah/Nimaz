@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -33,6 +34,9 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
@@ -84,17 +88,19 @@ fun DashboardRandomAyatCard(
                     Icon(
                         painter = painterResource(R.drawable.quran_icon),
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(16.dp).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = "Verse of the Day",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                     )
                 }
 
                 IconButton(
+                    modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                     onClick = { shareAya(context, translationLanguage, aya) }
                 ) {
                     Icon(
@@ -117,11 +123,13 @@ fun DashboardRandomAyatCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
+                        modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                         text = surah?.englishNameTranslation ?: "",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
+                        modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                         text = "${aya?.ayaNumberInSurah} : ${aya?.suraNumber}",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
@@ -146,7 +154,7 @@ fun DashboardRandomAyatCard(
                                 lineHeight = 46.sp
                             ),
                             textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                         )
                     }
                 }
@@ -163,7 +171,7 @@ fun DashboardRandomAyatCard(
                             lineHeight = 28.sp
                         ),
                         textAlign = if (aya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                     )
                 }
                 "English" -> aya?.translationEnglish?.let { englishText ->
@@ -175,7 +183,7 @@ fun DashboardRandomAyatCard(
                             lineHeight = 24.sp
                         ),
                         textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                     )
                 }
             }
@@ -188,8 +196,16 @@ fun DashboardRandomAyatCard(
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    modifier = Modifier.placeholder(
+                        isLoading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    ),
+                    onClick = {
                         aya?.let {
                             onNavigateToAyatScreen(
                                 surah?.number.toString(),
@@ -198,23 +214,22 @@ fun DashboardRandomAyatCard(
                                 it.ayaNumberInSurah
                             )
                         }
-                    }
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.quran_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "Read Full Surah",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+                    },
+                    enabled = !isLoading,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.quran_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Read Full Surah",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
             }
         }
     }

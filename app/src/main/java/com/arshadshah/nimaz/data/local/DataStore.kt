@@ -150,6 +150,8 @@ class DataStore(db: AppDatabase) {
     //get allAyas
     suspend fun getAllAyat() = ayaDao.getAllAyas()
 
+    suspend fun getAyatByAyaNumberInSurah(number: Int) = ayaDao.getAyatByAyaNumberInSurah(number)
+
     //deleteAllAyas
     suspend fun deleteAllAyat() = ayaDao.deleteAllAyas()
 

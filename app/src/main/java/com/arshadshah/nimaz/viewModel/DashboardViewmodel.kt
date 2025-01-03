@@ -46,10 +46,8 @@ class DashboardViewModel(context: Context) : ViewModel() {
     val trackerState = states.trackerState.asStateFlow()
     val bookmarks = states.bookmarks.asStateFlow()
     val surahList = states.surahList.asStateFlow()
-    val randomAyaState: LiveData<RandomAyaState> = states.randomAyaState
+    val randomAyaState = states.randomAyaState.asStateFlow()
     val error = states.error.asStateFlow()
-    val currentPrayerName = states.currentPrayerName.asStateFlow()
-    val currentPrayerTime = states.currentPrayerTime.asStateFlow()
     val nextPrayerName = states.nextPrayerName.asStateFlow()
     val nextPrayerTime = states.nextPrayerTime.asStateFlow()
     val countDownTime = states.countDownTime.asStateFlow()
@@ -361,31 +359,67 @@ class DashboardViewModel(context: Context) : ViewModel() {
     private suspend fun getRandomAya() = withContext(Dispatchers.IO) {
         safeOperation(
             operation = {
-                val ayas = dataStore.countAllAyat()
-                if (ayas > 0) {
-                    var randomAya = dataStore.getRandomAya()
-                    while (randomAya.ayaNumberInSurah <= 1) {
-                        randomAya = dataStore.getRandomAya()
+                val totalAyas = dataStore.countAllAyat()
+                if (totalAyas > 0) {
+                    val lastFetchedAyaNumber = sharedPreferences.getDataInt(AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED)
+                    val timeOfDay = LocalDateTime.now().hour
+
+                    // Get random verse based on criteria
+                    val randomAya = when (// Dawn/Morning (5-11): Prefer verses from Juz 1-10
+                        timeOfDay) {
+                        in 5..11 -> dataStore.getRandomAya().let { aya ->
+                            if (aya.juzNumber > 10) getAlternativeAya(1..10) else aya
+                        }
+
+                        // Noon/Afternoon (12-17): Prefer verses from Juz 11-20
+                        in 12..17 -> dataStore.getRandomAya().let { aya ->
+                            if (aya.juzNumber < 11 || aya.juzNumber > 20) getAlternativeAya(11..20) else aya
+                        }
+
+                        // Evening/Night (18-4): Prefer verses from Juz 21-30
+                        else -> dataStore.getRandomAya().let { aya ->
+                            if (aya.juzNumber < 21) getAlternativeAya(21..30) else aya
+                        }
                     }
 
-                    val surah = dataStore.getSurahById(randomAya.suraNumber)
-                    val juz = dataStore.getJuzById(randomAya.juzNumber)
+                    // Skip verses that were recently shown
+                    val finalAya = if (randomAya.ayaNumberInQuran == lastFetchedAyaNumber) {
+                        dataStore.getRandomAya()
+                    } else randomAya
 
-                    states.randomAyaState.postValue(RandomAyaState(
-                        randomAya = randomAya,
+                    val surah = dataStore.getSurahById(finalAya.suraNumber)
+                    val juz = dataStore.getJuzById(finalAya.juzNumber)
+
+                    Log.d(TAG, "getRandomAya: $finalAya")
+
+                    // Prepare verse data
+                    states.randomAyaState.value = RandomAyaState(
+                        randomAya = finalAya,
                         surah = surah,
-                        juz = juz
-                    ))
-                    Log.d("RandomAya", "Random Aya: ${states.randomAyaState.value}")
+                        juz = juz,
+                    )
 
+                    // Save for future reference
                     sharedPreferences.saveDataInt(
                         AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED,
-                        randomAya.ayaNumberInSurah
+                        finalAya.ayaNumberInQuran
                     )
                 }
             },
             errorMessage = "Error fetching random aya"
         )
+    }
+
+    private suspend fun getAlternativeAya(juzRange: IntRange): LocalAya {
+        var attempts = 0
+        var aya: LocalAya
+
+        do {
+            aya = dataStore.getRandomAya()
+            attempts++
+        } while (aya.juzNumber !in juzRange && attempts < 3)
+
+        return aya
     }
 
     private suspend fun safeOperation(
@@ -428,7 +462,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
         ))
         val bookmarks = MutableStateFlow(listOf<LocalAya>())
         val surahList = MutableStateFlow(listOf<LocalSurah>())
-        val randomAyaState = MutableLiveData<RandomAyaState>()
+        val randomAyaState = MutableStateFlow<RandomAyaState?>(null)
         val countDownTime: MutableStateFlow<CountDownTime> = MutableStateFlow(CountDownTime(0, 0, 0))
         val prayerTimes: MutableStateFlow<PrayerTimesData> = MutableStateFlow(PrayerTimesData())
     }

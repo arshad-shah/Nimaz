@@ -14,8 +14,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -25,16 +23,10 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.quran.MoreMenu
-import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.utils.CustomAnimation
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.RouteUtils.checkRoute
 import com.arshadshah.nimaz.utils.RouteUtils.processPageTitle
 import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.viewModel.QuranViewModel
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,40 +36,12 @@ fun CustomTopBar(
     context: MainActivity
 ) {
 
-    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
-    val viewModelQuran = viewModel(
-        key = AppConstants.QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(sharedPreferencesRepository) },
-        viewModelStoreOwner = context
-    )
-
     val viewModelNames = viewModel(
         key = AppConstants.NAMES_OF_ALLAH_VIEWMODEL_KEY,
         initializer = { NamesOfAllahViewModel() },
         viewModelStoreOwner = context
     )
-    val settingViewModel = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context
-    )
-
-    val viewModel = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel(context) },
-        viewModelStoreOwner = context
-    )
-
-    val (menuOpen, setMenuOpen) = remember { mutableStateOf(false) }
-
-
     val playBackState = viewModelNames.playbackState.collectAsState()
-
-    val isLoading = viewModel.isLoading.collectAsState()
-
-    val locationName = settingViewModel.locationName.collectAsState()
-
-
     AnimatedVisibility(
         visible = checkRoute(route.value.toString()) && checkRouteForNotShow(route.value.toString()),
         enter = CustomAnimation.fadeIn(duration = AppConstants.SCREEN_ANIMATION_DURATION),
@@ -88,22 +52,6 @@ fun CustomTopBar(
 
                     .testTag("topAppBar"),
                 title = {
-                    if (route.value == AppConstants.MY_QURAN_SCREEN_ROUTE || route.value == AppConstants.QURAN_AYA_SCREEN_ROUTE) {
-                        val isSurah =
-                            navController.currentBackStackEntry?.arguments?.getString(
-                                "isSurah"
-                            )
-                                .toBoolean()
-                        val number =
-                            navController.currentBackStackEntry?.arguments?.getString(
-                                "number"
-                            )
-                        TopBarMenu(
-                            number = number!!.toInt(),
-                            isSurah = isSurah,
-                            getAllAyats = if (isSurah) viewModelQuran::getAllAyaForSurah else viewModelQuran::getAllAyaForJuz
-                        )
-                    } else {
                             Text(
                                 modifier = Modifier
                                     .testTag("topAppBarText")
@@ -114,7 +62,6 @@ fun CustomTopBar(
                                 ),
                                 style = MaterialTheme.typography.titleLarge
                             )
-                    }
                 },
                 navigationIcon = {
                     if (route.value.toString() != AppConstants.DASHBOARD_SCREEN && route.value.toString() != AppConstants.PRAYER_TIMES_SCREEN_ROUTE) {
@@ -144,90 +91,9 @@ fun CustomTopBar(
                 actions = {
                     //only show the menu button if the title is Quran
                     when (route.value) {
-                        AppConstants.QURAN_AYA_SCREEN_ROUTE,
-                        AppConstants.MY_QURAN_SCREEN_ROUTE,
-                        -> {
-                            //open the menu
-                            IconButton(onClick = {
-                                setMenuOpen(
-                                    true
-                                )
-                            }) {
-                                Icon(
-                                    modifier = Modifier.size(
-                                        24.dp
-                                    ),
-                                    painter = painterResource(
-                                        id = R.drawable.settings_sliders_icon
-                                    ),
-                                    contentDescription = "Menu"
-                                )
-                            }
-                            MoreMenu(
-                                menuOpen = menuOpen,
-                                setMenuOpen = setMenuOpen,
-                            )
-                        }
 
                         AppConstants.NAMESOFALLAH_SCREEN_ROUTE -> {
-                            if (
-                                playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING
-                                ||
-                                playBackState.value == NamesOfAllahViewModel.PlaybackState.PAUSED
-                            ) {
-                                IconButton(onClick = {
-                                    viewModelNames.handleAudioEvent(
-                                        NamesOfAllahViewModel.AudioEvent.Stop
-                                    )
-                                }
-                                ) {
-                                    Icon(
-                                        modifier = Modifier.size(
-                                            24.dp
-                                        ),
-                                        painter = painterResource(
-                                            id = R.drawable.stop_icon
-                                        ),
-                                        contentDescription = "Stop playing"
-                                    )
-                                }
-                            }
-                            IconButton(onClick = {
-                                if (playBackState.value != NamesOfAllahViewModel.PlaybackState.PLAYING) {
-                                    viewModelNames.handleAudioEvent(
-                                        NamesOfAllahViewModel.AudioEvent.Play(
-                                            context
-                                        )
-                                    )
-                                } else {
-                                    viewModelNames.handleAudioEvent(
-                                        NamesOfAllahViewModel.AudioEvent.Pause
-                                    )
-                                }
-                            }
-                            ) {
-                                if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING) {
-                                    Icon(
-                                        modifier = Modifier.size(
-                                            24.dp
-                                        ),
-                                        painter = painterResource(
-                                            id = R.drawable.pause_icon
-                                        ),
-                                        contentDescription = "Pause playing"
-                                    )
-                                } else {
-                                    Icon(
-                                        modifier = Modifier.size(
-                                            24.dp
-                                        ),
-                                        painter = painterResource(
-                                            id = R.drawable.play_icon
-                                        ),
-                                        contentDescription = "Play"
-                                    )
-                                }
-                            }
+
 
                         }
                     }

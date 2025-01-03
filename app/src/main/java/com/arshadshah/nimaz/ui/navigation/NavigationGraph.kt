@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.MainActivity
@@ -201,14 +200,16 @@ fun NavigationGraph(
                 number = it.arguments?.getString("number")!!,
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
-                scrollToAya = it.arguments?.getString("scrollTo")!!.toInt(),
                 paddingValues = paddingValues,
-                context = context
+                scrollToAya = it.arguments?.getString("scrollTo")!!.toInt(),
+                context = context,
+                navController = navController
             )
         }
 
         composable(QURAN_AYA_SCREEN_ROUTE) {
             AyatScreen(
+                navController = navController,
                 number = it.arguments?.getString("number")!!,
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
@@ -356,7 +357,7 @@ fun NavigationGraph(
         }
 
         composable(NAMESOFALLAH_SCREEN_ROUTE) {
-            NamesOfAllah(paddingValues = paddingValues)
+            NamesOfAllah(paddingValues = paddingValues, navController = navController)
         }
 
         composable(AppConstants.CATEGORY_SCREEN_ROUTE) {

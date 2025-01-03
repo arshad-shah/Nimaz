@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.widgets.prayertimesthin
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -28,8 +30,14 @@ import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.widgets.NimazWidgetColorScheme
 import com.arshadshah.nimaz.widgets.prayertimesthin.components.WidgetPrayerTimeRowList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class NimazWidget : GlanceAppWidget() {
+    companion object {
+        private val updateFlow = MutableStateFlow(0L)
+    }
+
 
     override val stateDefinition = PrayerTimesStateDefinition
 
@@ -45,6 +53,17 @@ class NimazWidget : GlanceAppWidget() {
                 else
                     NimazWidgetColorScheme.colors
             ) {
+
+                // Collect update flow to trigger recomposition
+                updateFlow.collectAsState()
+
+                // Start background update job
+                LaunchedEffect(Unit) {
+                    while(true) {
+                        delay(10000)
+                        updateFlow.value = System.currentTimeMillis()
+                    }
+                }
 
                 when (prayerTimes) {
                     is PrayerTimesWidget.Loading -> {

@@ -71,7 +71,7 @@ fun Dashboard(
             val nextPrayerNameValue by nextPrayerName.collectAsState()
             val nextPrayerTimeValue by nextPrayerTime.collectAsState()
             val countDownTimer by countDownTime.collectAsState()
-            val randomAya = randomAyaState
+            val randomAya = randomAyaState.collectAsState()
         }
     }
 
@@ -86,7 +86,6 @@ fun Dashboard(
             LocationTopBar(dashboardState.location, dashboardState.isLoadingData)
         }
         item {
-            Log.d("Dashboard", "Dashboard Composable recomposed ${dashboardState.countDownTimer}")
             DashboardPrayerTimesCard(
                 nextPrayerName = dashboardState.nextPrayerNameValue,
                 nextPrayerTime = dashboardState.nextPrayerTimeValue,
@@ -168,11 +167,12 @@ fun Dashboard(
         }
 
         item {
-            Log.d("RandomAyaState", "Random Aya State: ${dashboardState.randomAya.value}")
+            Log.d("Nimaz: RandomAyaState", "Random Aya State: ${dashboardState.randomAya.value}")
             DashboardRandomAyatCard(
                 onNavigateToAyatScreen = onNavigateToAyatScreen,
                 randomAya = dashboardState.randomAya.value,
                 isLoading = dashboardState.isLoadingData
+//                isLoading = true
             )
         }
     }

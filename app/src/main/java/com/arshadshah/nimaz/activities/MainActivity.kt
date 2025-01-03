@@ -160,13 +160,6 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.testTag("mainActivity"),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
-                    topBar = {
-                        CustomTopBar(
-                            route = route,
-                            navController = navController,
-                            context = this@MainActivity
-                        )
-                    },
                     bottomBar = {
                         if (route.value.toString() !== "Intro") {
                             AnimatedVisibility(

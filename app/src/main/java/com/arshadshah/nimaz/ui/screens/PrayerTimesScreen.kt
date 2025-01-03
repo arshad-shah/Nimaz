@@ -36,27 +36,7 @@ fun PrayerTimesScreen(paddingValues: PaddingValues) {
 
     LaunchedEffect(Unit) {
         viewModel.apply {
-            handleEvent(PrayerTimesViewModel.PrayerTimesEvent.LOAD_LOCATION)
-            handleEvent(PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
-        }
-    }
-
-    LaunchedEffect(prayerTimesState.locationName, prayerTimesState.latitude, prayerTimesState.longitude) {
-        viewModel.apply {
-            handleEvent(PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                PrayerTimesParamMapper.getParams(context)
-            ))
-            handleEvent(PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(context))
-            val timeToNextPrayerLong =
-                prayerTimesState.nextPrayerTime.atZone(ZoneId.systemDefault())
-                    ?.toInstant()
-                    ?.toEpochMilli()
-            val currentTime =
-                LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
-                    .toEpochMilli()
-
-            val difference = timeToNextPrayerLong?.minus(currentTime)
-            handleEvent(PrayerTimesViewModel.PrayerTimesEvent.Start(difference!!))
+            handleEvent(PrayerTimesViewModel.PrayerTimesEvent.Init(context))
         }
     }
 
@@ -76,7 +56,7 @@ fun PrayerTimesScreen(paddingValues: PaddingValues) {
                 PrayerTimesHeader(
                     prayerTimesState = prayerTimesState,
                     showArc = screenWidth > SCREEN_WIDTH_THRESHOLD,
-                    isLoading = isLoading
+                    isLoading = false
                 )
             }
         }

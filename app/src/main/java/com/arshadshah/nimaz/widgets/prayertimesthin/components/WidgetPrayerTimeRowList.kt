@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
-    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
+    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm")
     val currentDateTime = LocalDateTime.now()
 
     // Adjust Isha time if needed
