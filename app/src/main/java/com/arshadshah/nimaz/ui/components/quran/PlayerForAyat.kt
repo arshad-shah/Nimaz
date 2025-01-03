@@ -48,7 +48,8 @@ fun PlayerForAyat(
                     onClick = { onPlayClicked() },
                     enabled = !isLoading,
                     modifier = Modifier
-                        .align(Alignment.CenterVertically).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
+                        .align(Alignment.CenterVertically)
+                        .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.play_icon),
@@ -75,7 +76,8 @@ fun PlayerForAyat(
                     onClick = { onPauseClicked() },
                     enabled = true,
                     modifier = Modifier
-                        .align(Alignment.CenterVertically).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
+                        .align(Alignment.CenterVertically)
+                        .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.pause_icon),
@@ -94,7 +96,8 @@ fun PlayerForAyat(
                     onClick = { onStopClicked() },
                     enabled = true,
                     modifier = Modifier
-                        .align(Alignment.CenterVertically).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
+                        .align(Alignment.CenterVertically)
+                        .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.stop_icon),

@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.tasbih
 
 import android.content.Context
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.background
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction1
 

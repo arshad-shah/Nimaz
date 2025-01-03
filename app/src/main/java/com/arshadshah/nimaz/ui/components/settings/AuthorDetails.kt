@@ -25,7 +25,6 @@ import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -120,7 +119,7 @@ fun AuthorDetails() {
                     )
 
                     ProfessionalDetail(
-                        icon ={
+                        icon = {
                             Icon(
                                 imageVector = Icons.Rounded.School,
                                 contentDescription = null,

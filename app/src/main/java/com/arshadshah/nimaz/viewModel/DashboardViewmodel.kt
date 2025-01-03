@@ -4,18 +4,33 @@ import android.app.Activity
 import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.local.models.*
-import com.arshadshah.nimaz.repositories.*
-import com.arshadshah.nimaz.services.*
-import com.arshadshah.nimaz.utils.*
+import com.arshadshah.nimaz.data.local.models.CountDownTime
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
+import com.arshadshah.nimaz.data.local.models.LocalJuz
+import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
+import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
+import com.arshadshah.nimaz.services.LocationService
+import com.arshadshah.nimaz.services.PrayerTimesData
+import com.arshadshah.nimaz.services.PrayerTimesService
+import com.arshadshah.nimaz.services.UpdateService
+import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -77,12 +92,19 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 is DashboardEvent.IsFastingToday -> isFastingToday()
                 is DashboardEvent.UpdatePrayerTracker ->
                     updatePrayerTrackerForToday(event.date, event.prayerName, event.prayerDone)
+
                 is DashboardEvent.GetTrackerForToday -> getTodaysPrayerTracker(event.date)
                 is DashboardEvent.UpdateFastTracker ->
                     updateFastingTracker(event.date, event.isFasting)
+
                 is DashboardEvent.GetBookmarksOfQuran -> getBookmarksOfQuran()
                 is DashboardEvent.DeleteBookmarkFromAya ->
-                    deleteBookmarkFromAya(event.ayaNumber, event.surahNumber, event.ayaNumberInSurah)
+                    deleteBookmarkFromAya(
+                        event.ayaNumber,
+                        event.surahNumber,
+                        event.ayaNumberInSurah
+                    )
+
                 is DashboardEvent.RecreateTasbih -> recreateTasbih(event.date)
                 is DashboardEvent.GetRandomAya -> getRandomAya()
                 is DashboardEvent.StartTimer -> startTimer(event.timeToNextPrayer)
@@ -91,6 +113,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
             }
         }
     }
+
     private fun PrayerTimesData.areAllTimesAvailable(): Boolean {
         return fajr != null &&
                 sunrise != null &&
@@ -117,7 +140,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
             startTimer(difference)
         }
         val arePrayerTimesAvailable = prayerTimes.value.areAllTimesAvailable()
-        if(arePrayerTimesAvailable){
+        if (arePrayerTimesAvailable) {
             CreateAlarms().exact(
                 context,
                 prayerTimes.value.fajr!!,
@@ -130,7 +153,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
         }
     }
 
-    private suspend fun loadPrayerTimes() = withContext(Dispatchers.IO){
+    private suspend fun loadPrayerTimes() = withContext(Dispatchers.IO) {
         safeOperation(
             operation = {
                 val prayerTimes = prayerTimesService.getPrayerTimes()
@@ -146,7 +169,10 @@ class DashboardViewModel(context: Context) : ViewModel() {
         updateService.checkForUpdate(doUpdate) { updateIsAvailable ->
             states.isUpdateAvailable.value = updateIsAvailable
             if (doUpdate && updateIsAvailable) {
-                updateService.startUpdateFlowForResult(context, AppConstants.APP_UPDATE_REQUEST_CODE)
+                updateService.startUpdateFlowForResult(
+                    context,
+                    AppConstants.APP_UPDATE_REQUEST_CODE
+                )
             }
         }
     }
@@ -261,16 +287,18 @@ class DashboardViewModel(context: Context) : ViewModel() {
                     prayerName,
                     prayerDone
                 )
-                states.trackerState.update { it.copy(
-                    date = updatedTracker.date,
-                    fajr = updatedTracker.fajr,
-                    dhuhr = updatedTracker.dhuhr,
-                    asr = updatedTracker.asr,
-                    maghrib = updatedTracker.maghrib,
-                    isha = updatedTracker.isha,
-                    progress = updatedTracker.progress,
-                    isMenstruating = updatedTracker.isMenstruating
-                )}
+                states.trackerState.update {
+                    it.copy(
+                        date = updatedTracker.date,
+                        fajr = updatedTracker.fajr,
+                        dhuhr = updatedTracker.dhuhr,
+                        asr = updatedTracker.asr,
+                        maghrib = updatedTracker.maghrib,
+                        isha = updatedTracker.isha,
+                        progress = updatedTracker.progress,
+                        isMenstruating = updatedTracker.isMenstruating
+                    )
+                }
             },
             errorMessage = "Error updating prayer tracker"
         )
@@ -280,16 +308,18 @@ class DashboardViewModel(context: Context) : ViewModel() {
         PrayerTrackerRepository.getPrayersForDate(date)
             .catch { emit(LocalPrayersTracker()) }
             .collect { tracker ->
-                states.trackerState.update { it.copy(
-                    date = tracker.date,
-                    fajr = tracker.fajr,
-                    dhuhr = tracker.dhuhr,
-                    asr = tracker.asr,
-                    maghrib = tracker.maghrib,
-                    isha = tracker.isha,
-                    progress = tracker.progress,
-                    isMenstruating = tracker.isMenstruating
-                )}
+                states.trackerState.update {
+                    it.copy(
+                        date = tracker.date,
+                        fajr = tracker.fajr,
+                        dhuhr = tracker.dhuhr,
+                        asr = tracker.asr,
+                        maghrib = tracker.maghrib,
+                        isha = tracker.isha,
+                        progress = tracker.progress,
+                        isMenstruating = tracker.isMenstruating
+                    )
+                }
             }
     }
 
@@ -316,9 +346,12 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 states.longitude.value = location.longitude
             },
             onError = { error ->
-                states.latitude.value = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-                states.longitude.value = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                states.locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
+                states.latitude.value =
+                    sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+                states.longitude.value =
+                    sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+                states.locationName.value =
+                    sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
                 states.isError.value = error.isNotEmpty()
             }
         )
@@ -338,11 +371,13 @@ class DashboardViewModel(context: Context) : ViewModel() {
                     }
 
                     if (!exists) {
-                        dataStore.saveTasbih(yesterdayTasbih.copy(
-                            id = 0,
-                            count = 0,
-                            date = date
-                        ))
+                        dataStore.saveTasbih(
+                            yesterdayTasbih.copy(
+                                id = 0,
+                                count = 0,
+                                date = date
+                            )
+                        )
                     }
                 }
 
@@ -361,7 +396,8 @@ class DashboardViewModel(context: Context) : ViewModel() {
             operation = {
                 val totalAyas = dataStore.countAllAyat()
                 if (totalAyas > 0) {
-                    val lastFetchedAyaNumber = sharedPreferences.getDataInt(AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED)
+                    val lastFetchedAyaNumber =
+                        sharedPreferences.getDataInt(AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED)
                     val timeOfDay = LocalDateTime.now().hour
 
                     // Get random verse based on criteria
@@ -445,9 +481,11 @@ class DashboardViewModel(context: Context) : ViewModel() {
         val isLoading = MutableStateFlow(false)
         val isError = MutableStateFlow(false)
         val error = MutableStateFlow("")
-        val locationName = MutableStateFlow(sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
+        val locationName =
+            MutableStateFlow(sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
         val latitude = MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LATITUDE, 0.0))
-        val longitude = MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LONGITUDE, 0.0))
+        val longitude =
+            MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LONGITUDE, 0.0))
         val isFasting = MutableStateFlow(false)
         val fajrTime = MutableStateFlow(LocalDateTime.now())
         val maghribTime = MutableStateFlow(LocalDateTime.now())
@@ -456,14 +494,17 @@ class DashboardViewModel(context: Context) : ViewModel() {
         val nextPrayerName = MutableStateFlow("")
         val nextPrayerTime = MutableStateFlow(LocalDateTime.now())
         val tasbihList = MutableStateFlow(listOf<LocalTasbih>())
-        val trackerState = MutableStateFlow(DashboardTrackerState(
-            LocalDate.now(), false, false, false,
-            false, false, 0, false
-        ))
+        val trackerState = MutableStateFlow(
+            DashboardTrackerState(
+                LocalDate.now(), false, false, false,
+                false, false, 0, false
+            )
+        )
         val bookmarks = MutableStateFlow(listOf<LocalAya>())
         val surahList = MutableStateFlow(listOf<LocalSurah>())
         val randomAyaState = MutableStateFlow<RandomAyaState?>(null)
-        val countDownTime: MutableStateFlow<CountDownTime> = MutableStateFlow(CountDownTime(0, 0, 0))
+        val countDownTime: MutableStateFlow<CountDownTime> =
+            MutableStateFlow(CountDownTime(0, 0, 0))
         val prayerTimes: MutableStateFlow<PrayerTimesData> = MutableStateFlow(PrayerTimesData())
     }
 
@@ -493,21 +534,24 @@ class DashboardViewModel(context: Context) : ViewModel() {
             val prayerName: String,
             val prayerDone: Boolean
         ) : DashboardEvent()
+
         data class GetTrackerForToday(val date: LocalDate) : DashboardEvent()
         data class UpdateFastTracker(
             val date: LocalDate,
             val isFasting: Boolean
         ) : DashboardEvent()
+
         data object GetBookmarksOfQuran : DashboardEvent()
         data class DeleteBookmarkFromAya(
             val ayaNumber: Int,
             val surahNumber: Int,
             val ayaNumberInSurah: Int,
         ) : DashboardEvent()
+
         data class RecreateTasbih(val date: LocalDate) : DashboardEvent()
         data object GetRandomAya : DashboardEvent()
         data class StartTimer(val timeToNextPrayer: Long) : DashboardEvent()
-        data object GetCurrentAndNextPrayer: DashboardEvent()
-        data class CreateAlarms(val context: Context): DashboardEvent()
+        data object GetCurrentAndNextPrayer : DashboardEvent()
+        data class CreateAlarms(val context: Context) : DashboardEvent()
     }
 }

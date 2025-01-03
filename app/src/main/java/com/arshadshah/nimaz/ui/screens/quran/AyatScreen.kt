@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -130,36 +129,36 @@ fun AyatScreen(
             )
         },
     ) {
-                if (error.value != "") {
-                    BannerSmall(title = "Error", message = error.value, variant = BannerVariant.Error)
-                }
+        if (error.value != "") {
+            BannerSmall(title = "Error", message = error.value, variant = BannerVariant.Error)
+        }
 
-                if (pageMode.value == "List") {
-                    AyaListUI(
-                        ayaList = ayat.value,
-                        paddingValues = it,
-                        loading = loading.value,
-                        type = if (isSurah.toBoolean()) "surah" else "juz",
-                        number = number.toInt(),
-                        scrollToAya = scrollToAya,
-                        surah = surah.value,
-                        arabicFontSize = arabicFontSize.value,
-                        arabicFont = arabicFont.value,
-                        translationFontSize = translationFontSize.value,
-                        translation = translation.value,
-                        scrollToVerse = scrollToVerse.value,
-                        handleAyaEvents = viewModel::handleAyaEvent,
-                        handleQuranMenuEvents = viewModel::handleQuranMenuEvents,
-                        downloadAyaAudioFile = { surahNumber, ayaNumberInSurah, downloadCallback ->
-                            spaceFilesRepository.downloadAyaFile(
-                                surahNumber,
-                                ayaNumberInSurah,
-                                downloadCallback
-                            )
-                        },
+        if (pageMode.value == "List") {
+            AyaListUI(
+                ayaList = ayat.value,
+                paddingValues = it,
+                loading = loading.value,
+                type = if (isSurah.toBoolean()) "surah" else "juz",
+                number = number.toInt(),
+                scrollToAya = scrollToAya,
+                surah = surah.value,
+                arabicFontSize = arabicFontSize.value,
+                arabicFont = arabicFont.value,
+                translationFontSize = translationFontSize.value,
+                translation = translation.value,
+                scrollToVerse = scrollToVerse.value,
+                handleAyaEvents = viewModel::handleAyaEvent,
+                handleQuranMenuEvents = viewModel::handleQuranMenuEvents,
+                downloadAyaAudioFile = { surahNumber, ayaNumberInSurah, downloadCallback ->
+                    spaceFilesRepository.downloadAyaFile(
+                        surahNumber,
+                        ayaNumberInSurah,
+                        downloadCallback
                     )
-                } else {
-                    Page(ayat.value, paddingValues, loading.value)
-                }
+                },
+            )
+        } else {
+            Page(ayat.value, paddingValues, loading.value)
+        }
     }
 }

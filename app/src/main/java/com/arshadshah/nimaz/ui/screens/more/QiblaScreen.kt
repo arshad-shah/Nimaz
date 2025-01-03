@@ -96,7 +96,8 @@ fun QiblaScreen(paddingValues: PaddingValues) {
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val sharedPreferences = PrivateSharedPreferences(context)
-    val selectedImageIndex = remember { mutableStateOf(sharedPreferences.getDataInt("QiblaImageIndex")) }
+    val selectedImageIndex =
+        remember { mutableStateOf(sharedPreferences.getDataInt("QiblaImageIndex")) }
     val compassImage = painterResource(qiblaImages[selectedImageIndex.value] ?: R.drawable.qibla1)
 
     LaunchedEffect(Unit) {
@@ -233,7 +234,8 @@ private fun QiblaCompass(
     val target = (bearing - degree).toFloat()
     val rotateAnim = remember { Animatable(0f) }
     val pointingToQibla = abs(target) < 5f
-    val vibrator = remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
+    val vibrator =
+        remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
     val directionState = remember { mutableStateOf(QiblaDirection.getDirection(target)) }
 
     LaunchedEffect(target) {
@@ -241,9 +243,11 @@ private fun QiblaCompass(
         if (pointingToQibla) {
             rotateAnim.animateTo(0f, tween(100))
             rotateAnim.stop()
-            vibrator.vibrate(CombinedVibration.createParallel(
-                VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
-            ))
+            vibrator.vibrate(
+                CombinedVibration.createParallel(
+                    VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
+                )
+            )
         } else {
             rotateAnim.animateTo(target, tween(200))
             vibrator.cancel()

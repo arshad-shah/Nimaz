@@ -160,7 +160,8 @@ fun PrayerTracker(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
-                modifier = Modifier.padding( 6.dp,
+                modifier = Modifier.padding(
+                    6.dp,
                 ),
             ) {
                 //the data

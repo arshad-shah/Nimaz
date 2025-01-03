@@ -67,30 +67,30 @@ fun PrayersTrackerCard(
             .fillMaxWidth()
             .padding(4.dp)
     ) {
-    Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        prayerNames.forEachIndexed { index, prayerName ->
-            ToggleableItemRow(
-                enabled = !prayerTrackerState.value.isMenstruating,
-                text = prayerName,
-                checked = prayerStatuses[index],
-                onCheckedChange = {
-                    updateTracker(dateState.value, prayerName, it)
-                    updateWidgetTracker()
-                },
-                modifier = Modifier.placeholder(
-                    visible = isLoading.value,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp),
-                    highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            prayerNames.forEachIndexed { index, prayerName ->
+                ToggleableItemRow(
+                    enabled = !prayerTrackerState.value.isMenstruating,
+                    text = prayerName,
+                    checked = prayerStatuses[index],
+                    onCheckedChange = {
+                        updateTracker(dateState.value, prayerName, it)
+                        updateWidgetTracker()
+                    },
+                    modifier = Modifier.placeholder(
+                        visible = isLoading.value,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(4.dp),
+                        highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
+                    )
                 )
-            )
+            }
         }
     }
-}
 }

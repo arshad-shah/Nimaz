@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.components.dashboard
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -88,19 +87,27 @@ fun DashboardRandomAyatCard(
                     Icon(
                         painter = painterResource(R.drawable.quran_icon),
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
+                        modifier = Modifier
+                            .size(16.dp)
+                            .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = "Verse of the Day",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
+                        modifier = Modifier.placeholder(
+                            isLoading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        )
                     )
                 }
 
                 IconButton(
-                    modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
+                    modifier = Modifier.placeholder(
+                        isLoading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    ),
                     onClick = { shareAya(context, translationLanguage, aya) }
                 ) {
                     Icon(
@@ -123,13 +130,19 @@ fun DashboardRandomAyatCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
+                        modifier = Modifier.placeholder(
+                            isLoading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        ),
                         text = surah?.englishNameTranslation ?: "",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        modifier = Modifier.placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
+                        modifier = Modifier.placeholder(
+                            isLoading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        ),
                         text = "${aya?.ayaNumberInSurah} : ${aya?.suraNumber}",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
@@ -154,7 +167,9 @@ fun DashboardRandomAyatCard(
                                 lineHeight = 46.sp
                             ),
                             textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                         )
                     }
                 }
@@ -171,9 +186,12 @@ fun DashboardRandomAyatCard(
                             lineHeight = 28.sp
                         ),
                         textAlign = if (aya?.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                     )
                 }
+
                 "English" -> aya?.translationEnglish?.let { englishText ->
                     Text(
                         text = englishText,
@@ -183,7 +201,9 @@ fun DashboardRandomAyatCard(
                             lineHeight = 24.sp
                         ),
                         textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                     )
                 }
             }
@@ -234,6 +254,7 @@ fun DashboardRandomAyatCard(
         }
     }
 }
+
 private fun shareAya(
     context: Context,
     translationLanguage: String,

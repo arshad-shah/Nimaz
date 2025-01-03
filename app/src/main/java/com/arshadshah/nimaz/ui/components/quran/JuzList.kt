@@ -3,14 +3,8 @@ package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.local.models.LocalJuz
 
 @Composable

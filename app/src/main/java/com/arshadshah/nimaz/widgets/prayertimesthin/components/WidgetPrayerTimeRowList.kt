@@ -1,6 +1,3 @@
-
-
-
 package com.arshadshah.nimaz.widgets.prayertimesthin.components
 
 import android.util.Log
@@ -15,7 +12,14 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
-import androidx.glance.layout.*
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxHeight
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -92,7 +96,8 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
 
             if (currentPrayer.time != null && nextPrayer.time != null) {
                 if (currentTime.isAfter(currentPrayer.time) &&
-                    currentTime.isBefore(nextPrayer.time)) {
+                    currentTime.isBefore(nextPrayer.time)
+                ) {
                     return currentPrayer.name
                 }
             }
@@ -125,6 +130,7 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
         }
     }
 }
+
 @Composable
 fun WidgetPrayerTimeColumn(
     name: String,
@@ -180,7 +186,7 @@ fun WidgetPrayerTimeColumn(
                     .cornerRadius(2.dp)
                     .padding(bottom = 4.dp),
                 contentAlignment = Alignment.Center,
-                content ={
+                content = {
                     Text(
                         text = "Now",
                         style = TextStyle(

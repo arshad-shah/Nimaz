@@ -1,8 +1,17 @@
 package com.arshadshah.nimaz.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -11,11 +20,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.LocationTopBar
 import com.arshadshah.nimaz.ui.components.dashboard.getTimerText
-import com.arshadshah.nimaz.ui.components.prayerTimes.*
-import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
+import com.arshadshah.nimaz.ui.components.prayerTimes.AnimatedArcView
+import com.arshadshah.nimaz.ui.components.prayerTimes.ArcViewState
+import com.arshadshah.nimaz.ui.components.prayerTimes.NextPrayerTimerText
+import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val SCREEN_WIDTH_THRESHOLD = 720

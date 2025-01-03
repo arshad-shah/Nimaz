@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.screens.settings
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,14 +29,17 @@ fun WebViewScreen(url: String, navController: NavHostController) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = when (url) {
-                    "privacy_policy" -> "Privacy Policy"
-                    "terms_of_service" -> "Terms of Service"
-                    "help" -> "Help"
-                    else -> ""
-                })
-            },
+            TopAppBar(
+                title = {
+                    Text(
+                        text = when (url) {
+                            "privacy_policy" -> "Privacy Policy"
+                            "terms_of_service" -> "Terms of Service"
+                            "help" -> "Help"
+                            else -> ""
+                        }
+                    )
+                },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier

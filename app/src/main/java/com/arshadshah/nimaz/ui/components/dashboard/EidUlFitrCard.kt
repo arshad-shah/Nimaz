@@ -46,13 +46,15 @@ fun EidUlFitrCard(onNavigateToCalender: () -> Unit) {
         eidStart.toEpochDay() - todayHijri.toEpochDay()
     }
 
-    val images = remember { listOf(
-        R.drawable.eid,
-        R.drawable.eid2,
-        R.drawable.eid3,
-        R.drawable.eid4,
-        R.drawable.eid5
-    )}
+    val images = remember {
+        listOf(
+            R.drawable.eid,
+            R.drawable.eid2,
+            R.drawable.eid3,
+            R.drawable.eid4,
+            R.drawable.eid5
+        )
+    }
     val selectedImage = remember { mutableIntStateOf(images.random()) }
 
     if (!(daysLeft <= 3 && (!isEidStarted || daysLeft > 0))) return

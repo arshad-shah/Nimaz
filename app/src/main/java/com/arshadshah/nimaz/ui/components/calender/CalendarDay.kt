@@ -4,11 +4,30 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,8 +42,8 @@ import io.github.boguszpawlowski.composecalendar.day.DayState
 import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
-import java.time.temporal.ChronoField
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
 import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -63,7 +82,10 @@ fun CalendarDay(
         isSelectedDay -> MaterialTheme.colorScheme.primaryContainer
         today -> MaterialTheme.colorScheme.secondaryContainer
         isMenstruatingToday -> Color(0xFFFFE4E8)
-        importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+        importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer.copy(
+            alpha = 0.3f
+        )
+
         else -> MaterialTheme.colorScheme.surface
     }
 
@@ -71,7 +93,10 @@ fun CalendarDay(
         isSelectedDay && !today && !isMenstruatingToday -> MaterialTheme.colorScheme.primary
         today && !isMenstruatingToday -> MaterialTheme.colorScheme.secondary
         isMenstruatingToday -> Color(0xFFE91E63)
-        importanceLevel == ImportanceLevel.HIGH -> IslamicCalendarHelper.getImportantDayColor(importantDay)
+        importanceLevel == ImportanceLevel.HIGH -> IslamicCalendarHelper.getImportantDayColor(
+            importantDay
+        )
+
         else -> Color.Transparent
     }
 
@@ -152,14 +177,19 @@ fun CalendarDay(
                                     when (index) {
                                         0 -> if (tracker.fajr) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.outline
+
                                         1 -> if (tracker.dhuhr) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.outline
+
                                         2 -> if (tracker.asr) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.outline
+
                                         3 -> if (tracker.maghrib) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.outline
+
                                         4 -> if (tracker.isha) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.outline
+
                                         else -> MaterialTheme.colorScheme.outline
                                     }
                                 )
@@ -274,23 +304,28 @@ object IslamicCalendarHelper {
                 10 -> Pair(true, "Day of Ashura")
                 else -> Pair(false, "")
             }
+
             3 -> when (day) { // Rabi' al-Awwal
                 12 -> Pair(true, "Mawlid an-Nabi ﷺ")
                 else -> Pair(false, "")
             }
+
             7 -> when (day) { // Rajab
                 27 -> Pair(true, "Al-Isra' wal-Mi'raj")
                 else -> Pair(false, "")
             }
+
             8 -> when (day) { // Sha'ban
                 15 -> Pair(true, "Laylat al-Bara'at")
                 else -> Pair(false, "")
             }
+
             9 -> getRamadanDay(day) // Ramadan
             10 -> when (day) { // Shawwal
                 1 -> Pair(true, "Eid al-Fitr")
                 else -> Pair(false, "")
             }
+
             12 -> getDhulHijjahDay(day) // Dhul Hijjah
             else -> Pair(false, "")
         }
@@ -305,6 +340,7 @@ object IslamicCalendarHelper {
                 21, 23, 25, 27, 29 -> Pair(true, "Laylatul Qadr")
                 else -> Pair(true, "Last 10 Days of Ramadan")
             }
+
             else -> Pair(false, "")
         }
     }

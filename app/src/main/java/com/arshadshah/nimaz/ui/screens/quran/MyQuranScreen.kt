@@ -1,14 +1,30 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.local.models.*
-import com.arshadshah.nimaz.ui.components.common.*
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.DropdownListItem
+import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.quran.SurahCard
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -178,11 +194,16 @@ private fun getDeleteEvent(state: DialogState): QuranViewModel.AyaEvent {
     val aya = state.item
     return when (state.type) {
         DeleteType.BOOKMARK -> QuranViewModel.AyaEvent.deleteBookmarkFromAya(
-            aya.ayaNumberInSurah, aya.suraNumber, aya.ayaNumberInSurah)
+            aya.ayaNumberInSurah, aya.suraNumber, aya.ayaNumberInSurah
+        )
+
         DeleteType.FAVORITE -> QuranViewModel.AyaEvent.deleteFavoriteFromAya(
-            aya.ayaNumberInSurah, aya.suraNumber, aya.ayaNumberInSurah)
+            aya.ayaNumberInSurah, aya.suraNumber, aya.ayaNumberInSurah
+        )
+
         DeleteType.NOTE -> QuranViewModel.AyaEvent.deleteNoteFromAya(
-            aya.ayaNumberInSurah, aya.suraNumber, aya.ayaNumberInSurah)
+            aya.ayaNumberInSurah, aya.suraNumber, aya.ayaNumberInSurah
+        )
     }
 }
 

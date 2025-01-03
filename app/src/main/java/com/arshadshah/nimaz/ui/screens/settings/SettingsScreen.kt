@@ -204,9 +204,10 @@ fun SettingsScreen(
         )
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = "Settings")
-            },
+            TopAppBar(
+                title = {
+                    Text(text = "Settings")
+                },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier

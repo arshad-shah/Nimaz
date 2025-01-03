@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Context.ALARM_SERVICE
 import android.util.Log
-import androidx.activity.ComponentActivity
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId

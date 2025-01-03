@@ -2,9 +2,7 @@ package com.arshadshah.nimaz.viewModel
 
 import android.content.Context
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
@@ -18,8 +16,16 @@ import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -33,7 +39,8 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
         _isLoading.value = false
     }
     private val viewModelJob = SupervisorJob()
-    private val viewModelScope = CoroutineScope(Dispatchers.Main + viewModelJob + coroutineExceptionHandler)
+    private val viewModelScope =
+        CoroutineScope(Dispatchers.Main + viewModelJob + coroutineExceptionHandler)
 
     data class PrayerTimesState(
         val currentPrayerName: String = "Loading...",
@@ -85,7 +92,7 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
         }
     }
 
-    private fun init(context: Context){
+    private fun init(context: Context) {
         viewModelScope.launch {
             handleEvent(PrayerTimesEvent.SET_LOADING(true))
             handleEvent(PrayerTimesEvent.LOAD_LOCATION)
@@ -94,7 +101,13 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
 
             _prayerTimesState.collect { state ->
                 if (state.locationName != "Loading..." && state.latitude != 0.0 && state.longitude != 0.0) {
-                    handleEvent(PrayerTimesEvent.UPDATE_PRAYERTIMES(PrayerTimesParamMapper.getParams(context)))
+                    handleEvent(
+                        PrayerTimesEvent.UPDATE_PRAYERTIMES(
+                            PrayerTimesParamMapper.getParams(
+                                context
+                            )
+                        )
+                    )
                     handleEvent(PrayerTimesEvent.UPDATE_WIDGET(context))
 
                     val timeToNextPrayer = state.nextPrayerTime
@@ -189,14 +202,16 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
             }
 
             if (prayerTimes != null) {
-                updatePrayerTimesState(LocalPrayerTimes(
-                    fajr = prayerTimes.fajr,
-                    sunrise = prayerTimes.sunrise,
-                    dhuhr = prayerTimes.dhuhr,
-                    asr = prayerTimes.asr,
-                    maghrib = prayerTimes.maghrib,
-                    isha = prayerTimes.isha,
-                ))
+                updatePrayerTimesState(
+                    LocalPrayerTimes(
+                        fajr = prayerTimes.fajr,
+                        sunrise = prayerTimes.sunrise,
+                        dhuhr = prayerTimes.dhuhr,
+                        asr = prayerTimes.asr,
+                        maghrib = prayerTimes.maghrib,
+                        isha = prayerTimes.isha,
+                    )
+                )
             } else {
                 _error.value = "Failed to load prayer times"
             }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,7 +30,6 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_TASBIH
 import com.arshadshah.nimaz.ui.components.tasbih.Counter
 import com.arshadshah.nimaz.ui.components.tasbih.CustomCounter
-import com.arshadshah.nimaz.ui.components.tasbih.TasbihRow
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import kotlin.reflect.KFunction0
 

@@ -59,7 +59,7 @@ class NimazWidget : GlanceAppWidget() {
 
                 // Start background update job
                 LaunchedEffect(Unit) {
-                    while(true) {
+                    while (true) {
                         delay(10000)
                         updateFlow.value = System.currentTimeMillis()
                     }

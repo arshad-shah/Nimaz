@@ -288,19 +288,19 @@ fun NamesOfAllahRow(
                     }
 
 
-                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                            Text(
-                                text = arabicName,
-                                textAlign = TextAlign.Start,
-                                fontFamily = utmaniQuranFont,
-                                fontSize = 42.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                            )
-                        }
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        Text(
+                            text = arabicName,
+                            textAlign = TextAlign.Start,
+                            fontFamily = utmaniQuranFont,
+                            fontSize = 42.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    }
 
                     // English Transliteration with icon
                     Row(

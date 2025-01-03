@@ -175,7 +175,9 @@ fun AyatFeatures(
                 )
             }
             IconButton(
-                modifier = Modifier.size(52.dp).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
+                modifier = Modifier
+                    .size(52.dp)
+                    .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                 onClick = {
                     //share the aya
                     val shareIntent = Intent(Intent.ACTION_SEND)
@@ -203,7 +205,9 @@ fun AyatFeatures(
             }
             if (aya.audioFileLocation.isEmpty()) {
                 IconButton(
-                    modifier = Modifier.size(52.dp).placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
+                    modifier = Modifier
+                        .size(52.dp)
+                        .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer()),
                     onClick = {
                         downloadFile()
                     },

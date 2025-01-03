@@ -16,32 +16,32 @@ fun SurahList(
 ) {
 
     if (loading) {
-            val listState = rememberLazyListState()
+        val listState = rememberLazyListState()
 
-            val surah = LocalSurah(
-                number = 1,
-                name = "Al-Fatiha",
-                englishName = "Al-Fatiha",
-                englishNameTranslation = "Al-Fatiha",
-                numberOfAyahs = 7,
-                revelationType = "Meccan",
-                startAya = 2,
-                revelationOrder = 5,
-                rukus = 2
-            )
+        val surah = LocalSurah(
+            number = 1,
+            name = "Al-Fatiha",
+            englishName = "Al-Fatiha",
+            englishNameTranslation = "Al-Fatiha",
+            numberOfAyahs = 7,
+            revelationType = "Meccan",
+            startAya = 2,
+            revelationOrder = 5,
+            rukus = 2
+        )
 
-            LazyColumn(
-                state = listState,
-                userScrollEnabled = false,
-            ) {
-                items(6) { _ ->
-                    SurahCard(
-                        surah = surah,
-                        loading = true,
-                        onNavigate = onNavigateToAyatScreen
-                    )
-                }
+        LazyColumn(
+            state = listState,
+            userScrollEnabled = false,
+        ) {
+            items(6) { _ ->
+                SurahCard(
+                    surah = surah,
+                    loading = true,
+                    onNavigate = onNavigateToAyatScreen
+                )
             }
+        }
     } else if (error.isNotEmpty()) {
         SurahListUI(
             surahs = ArrayList(114),

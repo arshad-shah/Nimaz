@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +31,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -46,7 +44,6 @@ import com.arshadshah.nimaz.ui.components.settings.SettingsList
 import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
 import com.arshadshah.nimaz.ui.components.settings.SettingsNumberPickerDialog
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper.getParams
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
@@ -176,9 +173,10 @@ fun PrayerTimesCustomizations(navController: NavController) {
     ishaAdjustment.value = ishaAdjustmentValue.value
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = "Prayer Times Settings")
-            },
+            TopAppBar(
+                title = {
+                    Text(text = "Prayer Times Settings")
+                },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier

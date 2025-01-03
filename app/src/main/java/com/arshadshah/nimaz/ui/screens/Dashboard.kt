@@ -82,7 +82,7 @@ fun Dashboard(
         modifier = Modifier.testTag(TEST_TAG_HOME),
         contentPadding = paddingValues
     ) {
-        item{
+        item {
             LocationTopBar(dashboardState.location, dashboardState.isLoadingData)
         }
         item {
@@ -145,7 +145,7 @@ fun Dashboard(
         }
 
         item {
-            if(dashboardState.quranBookmarks.isNotEmpty()){
+            if (dashboardState.quranBookmarks.isNotEmpty()) {
                 DashboardQuranTracker(
                     suraList = dashboardState.suraList,
                     onNavigateToAyatScreen = onNavigateToAyatScreen,
@@ -155,7 +155,7 @@ fun Dashboard(
                 )
             }
 
-            if(dashboardState.tasbihListData.isNotEmpty()){
+            if (dashboardState.tasbihListData.isNotEmpty()) {
                 DashboardTasbihTracker(
                     onNavigateToTasbihScreen = onNavigateToTasbihScreen,
                     onNavigateToTasbihListScreen = onNavigateToTasbihListScreen,

@@ -1,12 +1,21 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,19 +25,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants.ALARM_LOCK
 import com.arshadshah.nimaz.data.local.models.CountDownTime
-import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.DashboardViewModel
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlin.reflect.KFunction1
 
 @Composable
 fun DashboardPrayerTimesCard(

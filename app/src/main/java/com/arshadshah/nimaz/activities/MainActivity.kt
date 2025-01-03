@@ -31,7 +31,6 @@ import com.arshadshah.nimaz.constants.AppConstants.MORE_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
 import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
-import com.arshadshah.nimaz.ui.components.common.CustomTopBar
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -42,7 +41,6 @@ import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.NetworkChecker
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.RouteUtils.checkRoute
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -64,7 +62,7 @@ class MainActivity : ComponentActivity() {
                 AutoLocationUtils.init(this)
                 Log.d(MAIN_ACTIVITY_TAG, "onResume:  location is initialized")
             }
-            if(!LocalDataStore.isInitialized()){
+            if (!LocalDataStore.isInitialized()) {
                 LocalDataStore.init(this)
                 Log.d(MAIN_ACTIVITY_TAG, "onResume:  data store is initialized")
             }

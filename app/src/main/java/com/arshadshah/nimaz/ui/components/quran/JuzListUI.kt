@@ -9,8 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,7 +64,10 @@ fun JuzListItem(
 ) {
     val context = LocalContext.current
     val translationType = remember {
-        when (PrivateSharedPreferences(context).getData(AppConstants.TRANSLATION_LANGUAGE, "English")) {
+        when (PrivateSharedPreferences(context).getData(
+            AppConstants.TRANSLATION_LANGUAGE,
+            "English"
+        )) {
             "Urdu" -> "urdu"
             else -> "english"
         }
@@ -127,10 +128,12 @@ fun JuzListItem(
                 fontFamily = utmaniQuranFont,
                 fontSize = 32.sp,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                modifier = Modifier.padding(start = 16.dp).placeholder(
-                    visible = isLoading,
-                    highlight = PlaceholderHighlight.shimmer()
-                )
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .placeholder(
+                        visible = isLoading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    )
             )
         }
     }

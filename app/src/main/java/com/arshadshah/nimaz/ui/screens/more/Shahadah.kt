@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+
 @Composable
 fun ShahadahScreen(paddingValues: PaddingValues) {
     Box(
@@ -62,7 +62,9 @@ fun ShahadahScreen(paddingValues: PaddingValues) {
                         colors = CardDefaults.elevatedCardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.medium)
                     ) {
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                             Text(
@@ -144,7 +146,8 @@ private fun TranslationCard(
     }
 }
 
-@Preview(showBackground = true, heightDp = 800,
+@Preview(
+    showBackground = true, heightDp = 800,
     device = "spec:width=411dp,height=891dp,cutout=corner",
     uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
 )

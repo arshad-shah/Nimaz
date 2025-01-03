@@ -30,7 +30,7 @@ fun DashboardFastTracker(
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
         modifier = Modifier.padding(
-           horizontal = 16.dp, vertical = 6.dp
+            horizontal = 16.dp, vertical = 6.dp
         ),
     ) {
         FastTrackerCard(

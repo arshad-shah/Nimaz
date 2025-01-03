@@ -9,12 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.DayOfWeek
-import java.time.format.TextStyle
-import java.util.Locale
 
 @Composable
 fun CalenderWeekHeader(
@@ -39,6 +36,7 @@ fun CalenderWeekHeader(
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun CalenderWeekHeaderPreview() {

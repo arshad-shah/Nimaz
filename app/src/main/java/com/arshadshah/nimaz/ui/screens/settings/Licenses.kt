@@ -1,14 +1,53 @@
 import android.content.Intent
 import android.net.Uri
 import android.widget.TextView
-import androidx.compose.animation.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,9 +93,10 @@ fun LicensesScreen(navController: NavHostController) {
     val uniqueLibs = libraries.value?.libraries?.distinctBy { it.name }
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = "Open Source Libraries")
-            },
+            TopAppBar(
+                title = {
+                    Text(text = "Open Source Libraries")
+                },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier
@@ -75,74 +115,74 @@ fun LicensesScreen(navController: NavHostController) {
             )
         },
     ) {
-    Box(
-        modifier = Modifier
-            .padding(it)
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        LazyColumn(
-            state = stateOfLazyList,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            items(
-                count = uniqueLibs?.size ?: 0,
-                key = { index -> uniqueLibs?.get(index)?.uniqueId ?: index }
-            ) { index ->
-                uniqueLibs?.get(index)?.let { library ->
-                    EnhancedLibraryItem(
-                        library = library,
-                        showAuthor = true,
-                        showVersion = true,
-                        showLicenseBadges = true,
-                        onClick = {
-                            libraryToShow.value = uniqueLibs[index]
-                            openDialog.value = true
-                        },
-                        modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
+            LazyColumn(
+                state = stateOfLazyList,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(
+                    count = uniqueLibs?.size ?: 0,
+                    key = { index -> uniqueLibs?.get(index)?.uniqueId ?: index }
+                ) { index ->
+                    uniqueLibs?.get(index)?.let { library ->
+                        EnhancedLibraryItem(
+                            library = library,
+                            showAuthor = true,
+                            showVersion = true,
+                            showLicenseBadges = true,
+                            onClick = {
+                                libraryToShow.value = uniqueLibs[index]
+                                openDialog.value = true
+                            },
+                            modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
+                        )
+                    }
+                }
+            }
+
+            // Floating scroll to top button
+            AnimatedVisibility(
+                visible = remember { derivedStateOf { stateOfLazyList.firstVisibleItemIndex } }.value > 5,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut()
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier.size(56.dp),
+                    onClick = {
+                        scope.launch {
+                            stateOfLazyList.animateScrollToItem(0)
+                        }
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.arrow_up_icon),
+                        contentDescription = "Scroll to top",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
         }
 
-        // Floating scroll to top button
-        AnimatedVisibility(
-            visible = remember { derivedStateOf { stateOfLazyList.firstVisibleItemIndex } }.value > 5,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut()
-        ) {
-            FloatingActionButton(
-                modifier = Modifier.size(56.dp),
-                onClick = {
-                    scope.launch {
-                        stateOfLazyList.animateScrollToItem(0)
-                    }
-                },
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(id = R.drawable.arrow_up_icon),
-                    contentDescription = "Scroll to top",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
+        if (openDialog.value) {
+            LicenseDialog(
+                library = libraryToShow.value,
+                onDismiss = {
+                    openDialog.value = false
+                    libraryToShow.value = null
+                }
+            )
         }
     }
-
-    if (openDialog.value) {
-        LicenseDialog(
-            library = libraryToShow.value,
-            onDismiss = {
-                openDialog.value = false
-                libraryToShow.value = null
-            }
-        )
-    }
-}
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -290,7 +330,8 @@ fun LicenseDialog(
                     .fillMaxWidth()
                     .height(400.dp)
             ) {
-                val isLicenseEmpty = library.licenses.firstOrNull()?.htmlReadyLicenseContent.isNullOrEmpty()
+                val isLicenseEmpty =
+                    library.licenses.firstOrNull()?.htmlReadyLicenseContent.isNullOrEmpty()
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),

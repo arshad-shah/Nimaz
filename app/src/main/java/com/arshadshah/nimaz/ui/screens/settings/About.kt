@@ -13,7 +13,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -73,9 +72,10 @@ fun About(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = "About me")
-            },
+            TopAppBar(
+                title = {
+                    Text(text = "About me")
+                },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier
@@ -197,15 +197,19 @@ fun EnhancedAppDetails(onImageClicked: () -> Unit) {
                                 )
                             }
                             if (clickCount.intValue == 5) {
-                                Toasty.success(context, "Debug Mode Enabled").show()
+                                Toasty
+                                    .success(context, "Debug Mode Enabled")
+                                    .show()
                                 sharedPref.saveDataBoolean("debug", true)
                                 onImageClicked()
                             } else {
                                 clickCount.intValue++
-                                Toasty.info(
-                                    context,
-                                    "Click ${6 - clickCount.intValue} more times to enable debug mode"
-                                ).show()
+                                Toasty
+                                    .info(
+                                        context,
+                                        "Click ${6 - clickCount.intValue} more times to enable debug mode"
+                                    )
+                                    .show()
                             }
                         },
                         onLongClick = {
@@ -219,7 +223,9 @@ fun EnhancedAppDetails(onImageClicked: () -> Unit) {
                                     spring(dampingRatio = Spring.DampingRatioMediumBouncy)
                                 )
                             }
-                            Toasty.info(context, "Debug Mode Disabled").show()
+                            Toasty
+                                .info(context, "Debug Mode Disabled")
+                                .show()
                             sharedPref.saveDataBoolean("debug", false)
                             clickCount.intValue = 0
                         }
@@ -228,7 +234,10 @@ fun EnhancedAppDetails(onImageClicked: () -> Unit) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "App Logo",
-                    modifier = Modifier.clip(CircleShape).scale(1.4f).fillMaxSize(),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .scale(1.4f)
+                        .fillMaxSize(),
                 )
             }
 

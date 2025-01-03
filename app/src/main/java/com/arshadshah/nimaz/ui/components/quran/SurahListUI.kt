@@ -1,23 +1,31 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.QuranItemNumber
-import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
@@ -33,11 +41,11 @@ fun SurahListUI(
         userScrollEnabled = !loading,
     ) {
         items(surahs.size) { index ->
-                SurahCard(
-                    surah = surahs[index],
-                    loading = loading,
-                    onNavigate = onNavigateToAyatScreen
-                )
+            SurahCard(
+                surah = surahs[index],
+                loading = loading,
+                onNavigate = onNavigateToAyatScreen
+            )
         }
     }
 }
@@ -60,7 +68,7 @@ fun SurahCard(
 
     Card(
         onClick = {
-            if(!loading){
+            if (!loading) {
                 onNavigate(surah.number.toString(), true, language, 0)
             }
         },
@@ -127,10 +135,12 @@ fun SurahCard(
                 fontFamily = utmaniQuranFont,
                 fontSize = 32.sp,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                modifier = Modifier.padding(start = 16.dp).placeholder(
-                    visible = loading,
-                    highlight = PlaceholderHighlight.shimmer()
-                )
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .placeholder(
+                        visible = loading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    )
             )
         }
     }

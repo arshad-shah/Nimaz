@@ -1,11 +1,25 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -16,7 +30,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.common.CustomTabs
-import com.arshadshah.nimaz.ui.components.quran.*
+import com.arshadshah.nimaz.ui.components.quran.JuzList
+import com.arshadshah.nimaz.ui.components.quran.SurahList
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
@@ -56,9 +71,10 @@ fun QuranScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text= "Quran")
-            },
+            TopAppBar(
+                title = {
+                    Text(text = "Quran")
+                },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier

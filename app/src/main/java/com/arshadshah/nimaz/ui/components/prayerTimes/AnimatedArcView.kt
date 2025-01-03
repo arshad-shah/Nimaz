@@ -232,11 +232,13 @@ private fun calculateDynamicPositions(timePoints: List<LocalDateTime?>): List<Fl
     val validTimePoints = timePoints.filterNotNull()
     if (validTimePoints.size < 2) return emptyList()
 
-    val totalDuration = Duration.between(validTimePoints.first(), validTimePoints.last()).toMillis().toFloat()
+    val totalDuration =
+        Duration.between(validTimePoints.first(), validTimePoints.last()).toMillis().toFloat()
 
     return timePoints.mapNotNull { timePoint ->
         timePoint?.let {
-            val durationFromStart = Duration.between(validTimePoints.first(), it).toMillis().toFloat()
+            val durationFromStart =
+                Duration.between(validTimePoints.first(), it).toMillis().toFloat()
             (durationFromStart / totalDuration) * PI.toFloat()
         }
     }
@@ -314,7 +316,7 @@ fun ArcViewPreview() {
         countDownTime = countDownTime,
     )
 
-    NimazTheme{
+    NimazTheme {
         Box(
             modifier = Modifier
                 .fillMaxWidth()

@@ -1,12 +1,14 @@
 package com.arshadshah.nimaz.ui.components.common
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -32,10 +34,12 @@ fun QuranItemNumber(
             painter = painterResource(id = R.drawable.number_back_icon),
             contentDescription = "Number $number background",
             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-            modifier = Modifier.matchParentSize().placeholder(
-                visible = loading,
-                highlight = PlaceholderHighlight.shimmer()
-            )
+            modifier = Modifier
+                .matchParentSize()
+                .placeholder(
+                    visible = loading,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
         )
 
         Text(
@@ -43,10 +47,12 @@ fun QuranItemNumber(
             style = style,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(4.dp).placeholder(
-                visible = loading,
-                highlight = PlaceholderHighlight.shimmer()
-            )
+            modifier = Modifier
+                .padding(4.dp)
+                .placeholder(
+                    visible = loading,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
         )
     }
 }
