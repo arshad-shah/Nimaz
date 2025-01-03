@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +28,6 @@ import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.quran.MoreMenu
-import com.arshadshah.nimaz.ui.components.quran.Page
 import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
@@ -40,7 +38,6 @@ fun AyatScreen(
     number: String,
     isSurah: String,
     language: String,
-    paddingValues: PaddingValues,
     scrollToAya: Int? = null,
     context: MainActivity,
     spaceFilesRepository: SpacesFileRepository = SpacesFileRepository(context), // Pass repository directly
@@ -157,8 +154,6 @@ fun AyatScreen(
                     )
                 },
             )
-        } else {
-            Page(ayat.value, paddingValues, loading.value)
         }
     }
 }

@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -94,7 +93,6 @@ import java.time.ZoneId
 fun SettingsScreen(
     onNavigateToPrayerTimeCustomizationScreen: () -> Unit,
     onNavigateToAboutScreen: () -> Unit,
-    paddingValues: PaddingValues,
     onNavigateToWebViewScreen: (String) -> Unit,
     onNavigateToLicencesScreen: () -> Unit,
     onNavigateToDebugScreen: () -> Unit,

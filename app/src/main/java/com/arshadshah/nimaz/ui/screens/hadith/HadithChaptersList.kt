@@ -22,27 +22,35 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HadithChaptersList(
-    paddingValues: PaddingValues,
     bookId: String?,
     viewModel: HadithViewModel = viewModel(key = AppConstants.HADITH_VIEW_MODEL),
-    onNavigateToAChapter: (Int, Int) -> Unit
+    onNavigateToAChapter: (Int, Int) -> Unit,
+    navController: NavHostController
 ) {
     LaunchedEffect(Unit) {
         bookId?.let { viewModel.getAllChaptersForABook(it.toInt()) }
@@ -50,44 +58,73 @@ fun HadithChaptersList(
 
     val chaptersList by viewModel.chaptersForABook.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        // Header Section
-        Text(
-            text = "Chapters",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(16.dp),
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        // Chapters List
-        ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
-        ) {
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                items(chaptersList.size) { index ->
-                    ChapterItem(
-                        chapter = chaptersList[index],
-                        isLast = index == chaptersList.size - 1,
-                        onClick = {
-                            onNavigateToAChapter(
-                                chaptersList[index].bookId,
-                                chaptersList[index].chapterId
-                            )
-                        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = navController.currentBackStackEntry?.arguments?.getString("bookName")
+                            ?: "Hadith Book List"
                     )
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            // Header Section
+            Text(
+                text = "Chapters",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            // Chapters List
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+            ) {
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    items(chaptersList.size) { index ->
+                        ChapterItem(
+                            chapter = chaptersList[index],
+                            isLast = index == chaptersList.size - 1,
+                            onClick = {
+                                onNavigateToAChapter(
+                                    chaptersList[index].bookId,
+                                    chaptersList[index].chapterId
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

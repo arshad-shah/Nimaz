@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.tracker
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -45,7 +44,6 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalenderScreen(
-    paddingValues: PaddingValues,
     viewModel: TrackerViewModel = viewModel(
         key = TRACKING_VIEWMODEL_KEY,
         viewModelStoreOwner = LocalContext.current as MainActivity

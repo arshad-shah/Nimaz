@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,7 +52,6 @@ import kotlin.reflect.KFunction1
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Counter(
-    paddingValues: PaddingValues,
     increment: KFunction0<Unit>,
     resetTasbih: State<Boolean>,
     count: State<Int>,
@@ -85,7 +83,6 @@ fun Counter(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(paddingValues)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

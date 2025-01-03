@@ -21,8 +21,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,10 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
@@ -44,7 +51,7 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 @Composable
 fun Categories(
     viewModel: DuaViewModel = viewModel(key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY),
-    paddingValues: PaddingValues,
+    navController: NavHostController,
     onNavigateToChapterListScreen: (String, Int) -> Unit,
 ) {
     LaunchedEffect(true) {
@@ -55,46 +62,71 @@ fun Categories(
     val loading = viewModel.isLoading.collectAsState()
     val itemCount = if (loading.value) 5 else categories.value.size
 
-    Card(
-        modifier = Modifier
-            .padding(paddingValues)
-            .padding(16.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Hisnul Muslim")
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
     ) {
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+        Card(
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp
+            )
         ) {
-            items(itemCount) { index ->
-                if (loading.value) {
-                    CategoryItem(
-                        title = "Loading category...",
-                        number = index + 1,
-                        loading = true,
-                        onClicked = {}
-                    )
-                } else {
-                    val category = categories.value[index]
-                    CategoryItem(
-                        title = category.name,
-                        number = index + 1,
-                        loading = false,
-                        onClicked = {
-                            onNavigateToChapterListScreen(category.name, category.id)
-                        }
-                    )
-                }
+            LazyColumn(
+                contentPadding = PaddingValues(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(itemCount) { index ->
+                    if (loading.value) {
+                        CategoryItem(
+                            title = "Loading category...",
+                            number = index + 1,
+                            loading = true,
+                            onClicked = {}
+                        )
+                    } else {
+                        val category = categories.value[index]
+                        CategoryItem(
+                            title = category.name,
+                            number = index + 1,
+                            loading = false,
+                            onClicked = {
+                                onNavigateToChapterListScreen(category.name, category.id)
+                            }
+                        )
+                    }
 
-                if (index < itemCount - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
+                    if (index < itemCount - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                    }
                 }
             }
         }

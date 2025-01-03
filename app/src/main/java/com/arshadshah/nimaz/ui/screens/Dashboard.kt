@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
@@ -29,20 +33,26 @@ import com.arshadshah.nimaz.ui.components.dashboard.EidUlAdhaCard
 import com.arshadshah.nimaz.ui.components.dashboard.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
+import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
+import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import java.time.LocalDateTime
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Dashboard(
-    onNavigateToTracker: () -> Unit,
     onNavigateToCalender: () -> Unit,
     onNavigateToTasbihScreen: (String, String, String, String) -> Unit,
-    paddingValues: PaddingValues,
     onNavigateToTasbihListScreen: () -> Unit,
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
     context: Activity,
+    navController: NavHostController,
 ) {
+    if (!LocalDataStore.isInitialized()) {
+        LocalDataStore.init(context)
+        Log.d(MAIN_ACTIVITY_TAG, "onResume:  data store is initialized")
+    }
     val viewModel: DashboardViewModel = viewModel(
         key = "dashboard_viewmodel",
         initializer = { DashboardViewModel(context.applicationContext) }
@@ -76,104 +86,114 @@ fun Dashboard(
     }
 
     val stateScroll = rememberLazyListState()
-
-    LazyColumn(
-        state = stateScroll,
-        modifier = Modifier.testTag(TEST_TAG_HOME),
-        contentPadding = paddingValues
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                navController
+            )
+        }
     ) {
-        item {
-            LocationTopBar(dashboardState.location, dashboardState.isLoadingData)
-        }
-        item {
-            DashboardPrayerTimesCard(
-                nextPrayerName = dashboardState.nextPrayerNameValue,
-                nextPrayerTime = dashboardState.nextPrayerTimeValue,
-                countDownTimer = dashboardState.countDownTimer,
-            )
-        }
-        item {
-            val isOpen = remember {
-                mutableStateOf(dashboardState.isErrored)
+        LazyColumn(
+            state = stateScroll,
+            modifier = Modifier.testTag(TEST_TAG_HOME),
+            contentPadding = it
+        ) {
+            item {
+                LocationTopBar(dashboardState.location, dashboardState.isLoadingData)
             }
-            BannerLarge(
-                variant = BannerVariant.Error,
-                title = "Error",
-                message = dashboardState.errorMessage,
-                isOpen = isOpen,
-                showFor = 0,
-                onDismiss = {
-                    isOpen.value = false
-                },
-            )
-        }
-
-        item {
-            RamadanTimesCard(
-                isFasting = dashboardState.isFastingToday,
-                location = dashboardState.location,
-                fajrTime = dashboardState.fajrPrayerTime,
-                maghribTime = dashboardState.maghribPrayerTime
-            )
-        }
-
-        item {
-            if (dashboardState.updateAvailable) {
-                UpdateBanner(
-                    context = context,
-                    onUpdateClick = {
-                        viewModel.handleEvent(
-                            DashboardViewModel.DashboardEvent.CheckUpdate(context, true)
-                        )
-                    }
+            item {
+                DashboardPrayerTimesCard(
+                    nextPrayerName = dashboardState.nextPrayerNameValue,
+                    nextPrayerTime = dashboardState.nextPrayerTimeValue,
+                    countDownTimer = dashboardState.countDownTimer,
                 )
             }
-        }
+            item {
+                val isOpen = remember {
+                    mutableStateOf(dashboardState.isErrored)
+                }
+                BannerLarge(
+                    variant = BannerVariant.Error,
+                    title = "Error",
+                    message = dashboardState.errorMessage,
+                    isOpen = isOpen,
+                    showFor = 0,
+                    onDismiss = {
+                        isOpen.value = false
+                    },
+                )
+            }
 
-        item {
-            RamadanCard(onNavigateToCalender)
-            EidUlFitrCard(onNavigateToCalender)
-            EidUlAdhaCard(onNavigateToCalender)
-        }
+            item {
+                RamadanTimesCard(
+                    isFasting = dashboardState.isFastingToday,
+                    location = dashboardState.location,
+                    fajrTime = dashboardState.fajrPrayerTime,
+                    maghribTime = dashboardState.maghribPrayerTime
+                )
+            }
 
-        item {
-            DashboardPrayerTracker(
-                handleEvents = viewModel::handleEvent,
-                isLoading = remember { mutableStateOf(dashboardState.isLoadingData) },
-                dashboardPrayerTracker = dashboardState.prayerTracker
-            )
-        }
+            item {
+                if (dashboardState.updateAvailable) {
+                    UpdateBanner(
+                        context = context,
+                        onUpdateClick = {
+                            viewModel.handleEvent(
+                                DashboardViewModel.DashboardEvent.CheckUpdate(context, true)
+                            )
+                        }
+                    )
+                }
+            }
 
-        item {
-            if (dashboardState.quranBookmarks.isNotEmpty()) {
-                DashboardQuranTracker(
-                    suraList = dashboardState.suraList,
+            item {
+                RamadanCard(onNavigateToCalender)
+                EidUlFitrCard(onNavigateToCalender)
+                EidUlAdhaCard(onNavigateToCalender)
+            }
+
+            item {
+                DashboardPrayerTracker(
+                    handleEvents = viewModel::handleEvent,
+                    isLoading = remember { mutableStateOf(dashboardState.isLoadingData) },
+                    dashboardPrayerTracker = dashboardState.prayerTracker
+                )
+            }
+
+            item {
+                if (dashboardState.quranBookmarks.isNotEmpty()) {
+                    DashboardQuranTracker(
+                        suraList = dashboardState.suraList,
+                        onNavigateToAyatScreen = onNavigateToAyatScreen,
+                        quranBookmarks = remember { mutableStateOf(dashboardState.quranBookmarks) },
+                        handleEvents = viewModel::handleEvent,
+                        isLoading = remember { mutableStateOf(dashboardState.isLoadingData) }
+                    )
+                }
+
+                if (dashboardState.tasbihListData.isNotEmpty()) {
+                    DashboardTasbihTracker(
+                        onNavigateToTasbihScreen = onNavigateToTasbihScreen,
+                        onNavigateToTasbihListScreen = onNavigateToTasbihListScreen,
+                        tasbihList = dashboardState.tasbihListData,
+                        handleEvents = viewModel::handleEvent,
+                        isLoading = remember { mutableStateOf(dashboardState.isLoadingData) }
+                    )
+                }
+            }
+
+            item {
+                Log.d(
+                    "Nimaz: RandomAyaState",
+                    "Random Aya State: ${dashboardState.randomAya.value}"
+                )
+                DashboardRandomAyatCard(
                     onNavigateToAyatScreen = onNavigateToAyatScreen,
-                    quranBookmarks = remember { mutableStateOf(dashboardState.quranBookmarks) },
-                    handleEvents = viewModel::handleEvent,
-                    isLoading = remember { mutableStateOf(dashboardState.isLoadingData) }
-                )
-            }
-
-            if (dashboardState.tasbihListData.isNotEmpty()) {
-                DashboardTasbihTracker(
-                    onNavigateToTasbihScreen = onNavigateToTasbihScreen,
-                    onNavigateToTasbihListScreen = onNavigateToTasbihListScreen,
-                    tasbihList = dashboardState.tasbihListData,
-                    handleEvents = viewModel::handleEvent,
-                    isLoading = remember { mutableStateOf(dashboardState.isLoadingData) }
-                )
-            }
-        }
-
-        item {
-            Log.d("Nimaz: RandomAyaState", "Random Aya State: ${dashboardState.randomAya.value}")
-            DashboardRandomAyatCard(
-                onNavigateToAyatScreen = onNavigateToAyatScreen,
-                randomAya = dashboardState.randomAya.value,
-                isLoading = dashboardState.isLoadingData
+                    randomAya = dashboardState.randomAya.value,
+                    isLoading = dashboardState.isLoadingData
 //                isLoading = true
-            )
+                )
+            }
         }
     }
 }

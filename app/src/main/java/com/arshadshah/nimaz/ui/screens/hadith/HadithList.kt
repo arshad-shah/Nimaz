@@ -24,8 +24,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -35,23 +38,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HadithList(
-    paddingValues: PaddingValues,
     bookId: String?,
     chapterId: String?,
-    viewModel: HadithViewModel = viewModel(key = AppConstants.HADITH_VIEW_MODEL)
+    viewModel: HadithViewModel = viewModel(key = AppConstants.HADITH_VIEW_MODEL),
+    navController: NavHostController
 ) {
     LaunchedEffect(Unit) {
         if (bookId != null && chapterId != null) {
@@ -62,26 +70,51 @@ fun HadithList(
     val hadithList by viewModel.hadithForAChapter.collectAsState()
     val loading by viewModel.loading.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(paddingValues)
-    ) {
-        if (loading) {
-            LoadingState()
-        } else {
-            HadithContent(
-                hadithList = hadithList,
-                onFavoriteToggle = { hadith, isFavorite ->
-                    viewModel.updateFavouriteStatus(
-                        bookId = hadith.bookId,
-                        chapterId = hadith.chapterId,
-                        id = hadith.id,
-                        favouriteStatus = isFavorite
-                    )
-                }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "HadithList")
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
             )
+        },
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(it)
+        ) {
+            if (loading) {
+                LoadingState()
+            } else {
+                HadithContent(
+                    hadithList = hadithList,
+                    onFavoriteToggle = { hadith, isFavorite ->
+                        viewModel.updateFavouriteStatus(
+                            bookId = hadith.bookId,
+                            chapterId = hadith.chapterId,
+                            id = hadith.id,
+                            favouriteStatus = isFavorite
+                        )
+                    }
+                )
+            }
         }
     }
 }

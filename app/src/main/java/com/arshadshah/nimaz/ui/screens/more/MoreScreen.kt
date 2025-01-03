@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,12 +26,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 
 @Composable
 fun MoreScreen(
-    paddingValues: PaddingValues,
     onNavigateToTasbihScreen: (String, String, String, String) -> Unit,
     onNavigateToNames: () -> Unit,
     onNavigateToListOfTasbeeh: () -> Unit,
@@ -41,6 +43,7 @@ fun MoreScreen(
     onNavigateToQibla: () -> Unit,
     onNavigateToTasbihListScreen: () -> Unit,
     onNavigateToHadithShelf: () -> Unit,
+    navController: NavHostController,
 ) {
     val features = listOf(
         FeatureItem(
@@ -98,23 +101,30 @@ fun MoreScreen(
             onClick = onNavigateToShadah
         )
     )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(paddingValues)
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                navController
+            )
+        }
     ) {
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .testTag(AppConstants.TEST_TAG_MORE)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(it)
         ) {
-            items(features.size) { index ->
-                FeatureCard(features[index])
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(AppConstants.TEST_TAG_MORE)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 16.dp)
+            ) {
+                items(features.size) { index ->
+                    FeatureCard(features[index])
+                }
             }
         }
     }

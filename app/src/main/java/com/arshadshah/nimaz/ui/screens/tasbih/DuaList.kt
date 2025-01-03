@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,8 +21,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -39,16 +44,19 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.DuaViewModel
 import java.util.regex.Pattern
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DuaList(
     chapterId: String,
-    paddingValues: PaddingValues
+    navController: NavHostController,
 ) {
     val context = LocalContext.current
     val viewModel = viewModel<DuaViewModel>(
@@ -61,35 +69,59 @@ fun DuaList(
     LaunchedEffect(Unit) {
         viewModel.getDuas(chapterId.toInt())
     }
-
-    Card(
-        modifier = Modifier
-            .padding(paddingValues)
-            .padding(16.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Supplications")
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
     ) {
-        LazyColumn(
-            modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER),
-            state = listState,
-            contentPadding = PaddingValues(vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Card(
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            items(duaState.value.size) { index ->
-                DuaListItem(
-                    dua = duaState.value[index],
-                    isLastItem = index == duaState.value.size - 1
-                )
-
-                if (index < duaState.value.size - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+            LazyColumn(
+                modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER),
+                state = listState,
+                contentPadding = PaddingValues(vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(duaState.value.size) { index ->
+                    DuaListItem(
+                        dua = duaState.value[index],
+                        isLastItem = index == duaState.value.size - 1
                     )
+
+                    if (index < duaState.value.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        )
+                    }
                 }
             }
         }

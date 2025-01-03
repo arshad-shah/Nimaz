@@ -20,8 +20,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,10 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CHAPTERS
 import com.arshadshah.nimaz.data.local.models.LocalChapter
@@ -48,7 +54,7 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 @Composable
 fun ChapterList(
     viewModel: DuaViewModel = viewModel(key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY),
-    paddingValues: PaddingValues,
+    navController: NavHostController,
     onNavigateToChapter: (Int, String) -> Unit,
     categoryId: String
 ) {
@@ -71,37 +77,61 @@ fun ChapterList(
             lastVisibleItemIndexState.intValue = -1
         }
     }
-
-    Card(
-        modifier = Modifier
-            .padding(paddingValues)
-            .padding(16.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Chapters")
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
     ) {
-        LazyColumn(
-            modifier = Modifier.testTag(TEST_TAG_CHAPTERS),
-            state = listState,
-            contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+        Card(
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp
+            )
         ) {
-            items(chapterState.value.size) { index ->
-                ChapterListItem(
-                    chapter = chapterState.value[index],
-                    onNavigateToChapter = onNavigateToChapter,
-                    loading = false,
-                    isLastItem = index == chapterState.value.size - 1
-                )
-
-                if (chapterState.value[index] != chapterState.value.last()) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            LazyColumn(
+                modifier = Modifier.testTag(TEST_TAG_CHAPTERS),
+                state = listState,
+                contentPadding = PaddingValues(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(chapterState.value.size) { index ->
+                    ChapterListItem(
+                        chapter = chapterState.value[index],
+                        onNavigateToChapter = onNavigateToChapter,
+                        loading = false,
+                        isLastItem = index == chapterState.value.size - 1
                     )
+
+                    if (chapterState.value[index] != chapterState.value.last()) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                    }
                 }
             }
         }

@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.screens.tasbih
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +35,6 @@ import kotlin.reflect.KFunction0
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihScreen(
-    paddingValues: PaddingValues,
     tasbihId: String = "",
     tasbihArabic: String = "",
     tasbihEnglish: String = "",
@@ -121,7 +119,6 @@ fun TasbihScreen(
                 )
             } else {
                 Counter(
-                    paddingValues,
                     resetTasbih = resetButtonState,
                     count = counter,
                     lap = lap,

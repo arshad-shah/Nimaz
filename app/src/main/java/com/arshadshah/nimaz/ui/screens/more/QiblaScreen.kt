@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.screens.qibla
+package com.arshadshah.nimaz.ui.screens.more
 
 import android.content.Context
 import android.os.Build
@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -47,10 +46,14 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,6 +75,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_INPUT
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_VIEWMODEL_KEY
@@ -82,9 +86,10 @@ import com.arshadshah.nimaz.viewModel.QiblaViewModel
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun QiblaScreen(paddingValues: PaddingValues) {
+fun QiblaScreen(navController: NavHostController) {
     val context = LocalContext.current
     val viewModel = viewModel(
         key = QIBLA_VIEWMODEL_KEY,
@@ -104,40 +109,66 @@ fun QiblaScreen(paddingValues: PaddingValues) {
         viewModel.loadQibla(context)
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Qibla")
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
     ) {
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .testTag(TEST_TAG_QIBLA)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            QiblaHeader(qiblaState, isLoading, errorMessage)
 
-            AnimatedVisibility(
-                visible = !isLoading && errorMessage.isEmpty(),
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .verticalScroll(rememberScrollState())
+                    .testTag(TEST_TAG_QIBLA)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                QiblaCompass(qiblaState, isLoading, errorMessage, compassImage)
+                QiblaHeader(qiblaState, isLoading, errorMessage)
+
+                AnimatedVisibility(
+                    visible = !isLoading && errorMessage.isEmpty(),
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    QiblaCompass(qiblaState, isLoading, errorMessage, compassImage)
+                }
+
+                QiblaImageSelector(
+                    selectedIndex = selectedImageIndex.value,
+                    onImageSelected = { index ->
+                        selectedImageIndex.value = index
+                        sharedPreferences.saveDataInt("QiblaImageIndex", index)
+                    }
+                )
             }
 
-            QiblaImageSelector(
-                selectedIndex = selectedImageIndex.value,
-                onImageSelected = { index ->
-                    selectedImageIndex.value = index
-                    sharedPreferences.saveDataInt("QiblaImageIndex", index)
-                }
-            )
-        }
-
-        if (isLoading) {
-            LoadingOverlay()
+            if (isLoading) {
+                LoadingOverlay()
+            }
         }
     }
 }

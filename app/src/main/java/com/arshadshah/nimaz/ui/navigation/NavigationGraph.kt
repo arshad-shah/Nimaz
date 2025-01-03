@@ -5,7 +5,6 @@ import LicensesScreen
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -40,8 +39,8 @@ import com.arshadshah.nimaz.ui.screens.hadith.HadithList
 import com.arshadshah.nimaz.ui.screens.introduction.IntroPage1
 import com.arshadshah.nimaz.ui.screens.more.MoreScreen
 import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
+import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
-import com.arshadshah.nimaz.ui.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
@@ -60,7 +59,6 @@ import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
 @Composable
 fun NavigationGraph(
     navController: NavController,
-    paddingValues: PaddingValues,
     context: MainActivity,
     isFirstInstall: Boolean,
 ) {
@@ -77,13 +75,10 @@ fun NavigationGraph(
 
         composable(BottomNavItem.Dashboard.screen_route) {
             Dashboard(
+                navController = navController,
                 context = context,
-                paddingValues = paddingValues,
                 onNavigateToCalender = {
                     navController.navigate(CALENDER_SCREEN_ROUTE)
-                },
-                onNavigateToTracker = {
-                    navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
                 },
                 onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int ->
                     navController.navigate(
@@ -136,16 +131,16 @@ fun NavigationGraph(
         composable(BottomNavItem.PrayerTimesScreen.screen_route)
         {
             PrayerTimesScreen(
-                paddingValues = paddingValues
+                navController = navController,
             )
         }
 
         composable(CALENDER_SCREEN_ROUTE) {
-            CalenderScreen(paddingValues, navController = navController)
+            CalenderScreen(navController = navController)
         }
 
         composable(QIBLA_SCREEN_ROUTE) {
-            QiblaScreen(paddingValues)
+            QiblaScreen(navController)
         }
         composable(BottomNavItem.QuranScreen.screen_route) {
             QuranScreen(
@@ -200,7 +195,6 @@ fun NavigationGraph(
                 number = it.arguments?.getString("number")!!,
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
-                paddingValues = paddingValues,
                 scrollToAya = it.arguments?.getString("scrollTo")!!.toInt(),
                 context = context,
                 navController = navController
@@ -213,7 +207,6 @@ fun NavigationGraph(
                 number = it.arguments?.getString("number")!!,
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
-                paddingValues = paddingValues,
                 context = context
             )
         }
@@ -221,7 +214,7 @@ fun NavigationGraph(
 
         composable(BottomNavItem.MoreScreen.screen_route) {
             MoreScreen(
-                paddingValues,
+                navController = navController,
                 onNavigateToTasbihScreen = { id: String, arabic: String, translation: String, transliteration: String ->
                     navController.navigate(
                         TASBIH_SCREEN_ROUTE
@@ -274,7 +267,7 @@ fun NavigationGraph(
         }
 
         composable(HADITH_SHELF_SCREEN_ROUTE) {
-            BookShelf(paddingValues = paddingValues,
+            BookShelf(navController = navController,
                 onNavigateToChapterFromFavourite = { bookId: Int, chapterId: Int ->
                     navController.navigate(
                         HADITH_LIST_SCREEN_ROUTE.replace(
@@ -295,20 +288,21 @@ fun NavigationGraph(
 
         composable(HADITH_CHAPTERS_LIST_SCREEN_ROUTE) {
             HadithChaptersList(
-                paddingValues = paddingValues,
-                bookId = it.arguments?.getString("bookId")
-            ) { bookId: Int, chapterId: Int ->
-                navController.navigate(
-                    HADITH_LIST_SCREEN_ROUTE.replace(
-                        "{bookId}", bookId.toString()
-                    ).replace("{chapterId}", chapterId.toString())
-                )
-            }
+                navController = navController,
+                bookId = it.arguments?.getString("bookId"),
+                onNavigateToAChapter = { bookId: Int, chapterId: Int ->
+                    navController.navigate(
+                        HADITH_LIST_SCREEN_ROUTE.replace(
+                            "{bookId}", bookId.toString()
+                        ).replace("{chapterId}", chapterId.toString())
+                    )
+                }
+            )
         }
 
         composable(HADITH_LIST_SCREEN_ROUTE) {
             HadithList(
-                paddingValues,
+                navController = navController,
                 bookId = it.arguments?.getString("bookId"),
                 chapterId = it.arguments?.getString("chapterId")
             )
@@ -316,7 +310,7 @@ fun NavigationGraph(
 
 
         composable(TASBIH_LIST_SCREEN) {
-            ListOfTasbih(paddingValues) { id: String, arabic: String, translation: String, transliteration: String ->
+            ListOfTasbih(navController = navController) { id: String, arabic: String, translation: String, transliteration: String ->
                 //replace the placeholder with the actual route TASBIH_SCREEN_ROUTE
                 //tasbih_screen/{arabic}/{translation}/{transliteration}
                 navController.navigate(
@@ -351,18 +345,17 @@ fun NavigationGraph(
                 tasbihArabic = it.arguments?.getString("arabic")!!,
                 tasbihEnglish = it.arguments?.getString("translation")!!,
                 tasbihTranslitration = it.arguments?.getString("transliteration")!!,
-                paddingValues = paddingValues,
                 navController = navController
             )
         }
 
         composable(NAMESOFALLAH_SCREEN_ROUTE) {
-            NamesOfAllah(paddingValues = paddingValues, navController = navController)
+            NamesOfAllah(navController = navController)
         }
 
         composable(AppConstants.CATEGORY_SCREEN_ROUTE) {
             Categories(
-                paddingValues = paddingValues,
+                navController = navController,
             )
             //pass the category name to the next screen
             { category: String, id: Int ->
@@ -381,7 +374,7 @@ fun NavigationGraph(
         composable(CHAPTERS_SCREEN_ROUTE) {
             ChapterList(
                 categoryId = it.arguments?.getString("id")!!,
-                paddingValues = paddingValues,
+                navController = navController,
                 onNavigateToChapter = { chapterId: Int, categoryName: String ->
                     navController.navigate(
                         CHAPTER_SCREEN_ROUTE
@@ -401,12 +394,12 @@ fun NavigationGraph(
         composable(CHAPTER_SCREEN_ROUTE) {
             DuaList(
                 chapterId = it.arguments?.getString("chapterId")!!,
-                paddingValues = paddingValues
+                navController = navController
             )
         }
 
         composable(SHAHADAH_SCREEN_ROUTE) {
-            ShahadahScreen(paddingValues)
+            ShahadahScreen(navController)
         }
 
         composable(BottomNavItem.SettingsScreen.screen_route) {
@@ -442,7 +435,6 @@ fun NavigationGraph(
                         DEBUG_MODE
                     )
                 },
-                paddingValues = paddingValues
             )
         }
         composable(WEB_VIEW_SCREEN_ROUTE) {
@@ -470,7 +462,9 @@ fun NavigationGraph(
         }
 
         composable(DEBUG_MODE) {
-            DebugScreen(paddingValues)
+            DebugScreen(
+                navController = navController,
+            )
         }
     }
 }

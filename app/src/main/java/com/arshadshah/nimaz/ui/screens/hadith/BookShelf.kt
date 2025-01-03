@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -22,10 +23,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -35,12 +41,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.HADITH_VIEW_MODEL
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
@@ -48,13 +58,13 @@ import com.arshadshah.nimaz.ui.components.common.CustomTabs
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BookShelf(
     viewModel: HadithViewModel = viewModel(key = HADITH_VIEW_MODEL),
-    paddingValues: PaddingValues,
     onNavigateToChaptersList: (id: Int, title: String) -> Unit,
-    onNavigateToChapterFromFavourite: (Int, Int) -> Unit
+    onNavigateToChapterFromFavourite: (Int, Int) -> Unit,
+    navController: NavHostController
 ) {
     val metadataList by viewModel.allHadithBooks.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -63,28 +73,55 @@ fun BookShelf(
     val titles = listOf("Books", "Favourites")
     val pagerState = rememberPagerState { titles.size }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .background(MaterialTheme.colorScheme.background)
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Hadith Shelf")
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
     ) {
 
-        CustomTabs(pagerState, titles)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
 
-        HorizontalPager(
-            pageSize = PageSize.Fill,
-            state = pagerState,
-            modifier = Modifier.fillMaxSize()
-        ) { page ->
-            when (page) {
-                0 -> BooksTab(metadataList, onNavigateToChaptersList)
-                1 -> FavouritesTab(
-                    loading = loading,
-                    allFavourites = allFavourites,
-                    onNavigateToChapterFromFavourite = onNavigateToChapterFromFavourite,
-                    viewModel = viewModel
-                )
+            CustomTabs(pagerState, titles)
+
+            HorizontalPager(
+                pageSize = PageSize.Fill,
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> BooksTab(metadataList, onNavigateToChaptersList)
+                    1 -> FavouritesTab(
+                        loading = loading,
+                        allFavourites = allFavourites,
+                        onNavigateToChapterFromFavourite = onNavigateToChapterFromFavourite,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }

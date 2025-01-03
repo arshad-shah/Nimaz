@@ -6,44 +6,26 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.DASHBOARD_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
-import com.arshadshah.nimaz.constants.AppConstants.MORE_SCREEN_ROUTE
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_SCREEN_ROUTE
-import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION
-import com.arshadshah.nimaz.constants.AppConstants.SCREEN_ANIMATION_DURATION_Exit
-import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.rememberSystemUiController
 import com.arshadshah.nimaz.utils.AutoLocationUtils
-import com.arshadshah.nimaz.utils.CustomAnimation
 import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.LocalDataStore
-import com.arshadshah.nimaz.utils.NetworkChecker
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -137,47 +119,11 @@ class MainActivity : ComponentActivity() {
                     route.value = destination.route
                 }
 
-                val snackbarHostState = remember { SnackbarHostState() }
-                val scope = rememberCoroutineScope()
-
-                //check for network connection
-                val networkConnection =
-                    remember { mutableStateOf(NetworkChecker().networkCheck(this@MainActivity)) }
-
-                LaunchedEffect(networkConnection.value) {
-                    if (!networkConnection.value) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                "No internet connection",
-                                duration = SnackbarDuration.Indefinite,
-                                withDismissAction = true
-                            )
-                        }
-                    }
-                }
-
-                Scaffold(
-                    modifier = Modifier.testTag("mainActivity"),
-                    snackbarHost = { SnackbarHost(snackbarHostState) },
-                    bottomBar = {
-                        if (route.value.toString() !== "Intro") {
-                            AnimatedVisibility(
-                                visible = route.value.toString() === DASHBOARD_SCREEN || route.value.toString() === PRAYER_TIMES_SCREEN_ROUTE || route.value.toString() === MORE_SCREEN_ROUTE,
-                                enter = CustomAnimation.fadeIn(duration = SCREEN_ANIMATION_DURATION),
-                                exit = CustomAnimation.fadeOut(duration = SCREEN_ANIMATION_DURATION_Exit),
-                                content = {
-                                    BottomNavigationBar(navController = navController)
-                                })
-                        }
-                    }
-                ) {
-                    NavigationGraph(
-                        navController = navController,
-                        it,
-                        context = this@MainActivity,
-                        isFirstInstall = firstTime
-                    )
-                }
+                NavigationGraph(
+                    navController = navController,
+                    context = this@MainActivity,
+                    isFirstInstall = firstTime
+                )
             }
         }
     }
