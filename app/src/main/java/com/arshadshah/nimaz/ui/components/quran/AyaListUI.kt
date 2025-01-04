@@ -733,7 +733,7 @@ fun AyaCard(
             SelectionContainer {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Text(
-                        text = cleanString(aya.ayaArabic),
+                        text = aya.ayaArabic.cleanTextFromBackslash(),
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
                         fontFamily = when (arabicFont) {
@@ -777,7 +777,7 @@ fun AyaCard(
             if (translation == "Urdu") {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Text(
-                        text = "${cleanString(aya.translationUrdu)} ۔",
+                        text = "${aya.translationUrdu.cleanTextFromBackslash()} ۔",
                         style = MaterialTheme.typography.titleSmall,
                         fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
                         fontFamily = urduFont,
@@ -795,7 +795,7 @@ fun AyaCard(
             }
             if (translation == "English") {
                 Text(
-                    text = cleanString(aya.translationEnglish),
+                    text = aya.translationEnglish.cleanTextFromBackslash(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontFamily = englishQuranTranslation,
                     fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
@@ -814,7 +814,12 @@ fun AyaCard(
     }
 }
 
-// function to remove \ from the arabic text
-fun cleanString(text: String): String {
-    return text.replace("\\\"", "\"")
+
+fun String.cleanTextFromBackslash(): String {
+    return this
+        .replace("\\\"", "\"")  // Handle escaped quotes first
+        .replace("\\\\", "\\")  // Then handle double backslashes
+        .replace("\\n", "\n")   // Handle newlines
+        .replace("\\t", "\t")   // Handle tabs
+        .replace("\\", "")      // Finally remove any remaining single backslashes
 }

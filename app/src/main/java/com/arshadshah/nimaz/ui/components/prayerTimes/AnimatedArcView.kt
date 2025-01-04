@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -28,11 +27,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.CountDownTime
-import com.arshadshah.nimaz.ui.theme.NimazTheme
-import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.math.PI
@@ -62,13 +58,17 @@ fun AnimatedArcView(
         calculateDynamicPositions(state.timePoints)
     }
 
-    // Calculate initial position based on current time
+    // Validate positions before proceeding
+    if (dynamicPositions.isEmpty()) {
+        return // Early return if no valid positions
+    }
+
+    // Calculate initial position with safety checks
     val initialPosition = remember(state.timePoints, currentPhase) {
         calculateInitialPosition(state.timePoints, currentPhase)
     }
 
     var currentAnimationPhase by remember { mutableIntStateOf(currentPhase) }
-    // Initialize animatable with calculated initial position
     val animatablePosition = remember { Animatable(initialPosition) }
 
     val getNextPosition = { phase: Int ->
@@ -91,19 +91,25 @@ fun AnimatedArcView(
     val accentColor = MaterialTheme.colorScheme.tertiary
 
     LaunchedEffect(state.countDownTime, currentAnimationPhase) {
-        val (nextPosition, nextPhase) = getNextPosition(currentAnimationPhase)
+        try {
+            val (nextPosition, nextPhase) = getNextPosition(currentAnimationPhase)
 
-        animatablePosition.animateTo(
-            targetValue = nextPosition,
-            animationSpec = tween(
-                durationMillis = durationMillis.toInt(),
-                easing = LinearEasing
-            )
-        )
-        // Update the phase after animation completes
-        currentAnimationPhase = nextPhase
+            // Ensure we're not animating to/from NaN values
+            if (!nextPosition.isNaN() && !animatablePosition.value.isNaN()) {
+                animatablePosition.animateTo(
+                    targetValue = nextPosition,
+                    animationSpec = tween(
+                        durationMillis = durationMillis.toInt(),
+                        easing = LinearEasing
+                    )
+                )
+                currentAnimationPhase = nextPhase
+            }
+        } catch (e: IllegalStateException) {
+            // Handle animation errors gracefully
+            println("Animation error: ${e.message}")
+        }
     }
-
 
     Box(
         modifier = modifier
@@ -144,7 +150,7 @@ fun AnimatedArcView(
 
             // Draw prayer time indicators
             state.timePoints.filterNotNull().forEachIndexed { index, _ ->
-                val position = dynamicPositions[index]
+                val position = dynamicPositions.getOrNull(index) ?: return@forEachIndexed
                 val point = calculatePointOnArc(
                     position,
                     size.width / 2,
@@ -166,28 +172,30 @@ fun AnimatedArcView(
                 )
             }
 
-            // Draw animated sun
-            val sunPosition = calculatePointOnArc(
-                animatablePosition.value,
-                size.width / 2,
-                size.width / 2
-            )
+            // Draw animated sun with safety checks
+            if (!animatablePosition.value.isNaN()) {
+                val sunPosition = calculatePointOnArc(
+                    animatablePosition.value,
+                    size.width / 2,
+                    size.width / 2
+                )
 
-            // Enhanced sun drawing with glow effect
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFFFFE4B5),
-                        Color(0xFFFFD700),
-                        Color(0xFFFFA500)
+                // Enhanced sun drawing with glow effect
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFFFFE4B5),
+                            Color(0xFFFFD700),
+                            Color(0xFFFFA500)
+                        ),
+                        center = sunPosition,
+                        radius = 18.dp.toPx()
                     ),
+                    radius = 16.dp.toPx(),
                     center = sunPosition,
-                    radius = 18.dp.toPx()
-                ),
-                radius = 16.dp.toPx(),
-                center = sunPosition,
-                style = Fill
-            )
+                    style = Fill
+                )
+            }
         }
     }
 }
@@ -208,13 +216,16 @@ private fun calculateInitialPosition(
     }
 
     val totalDuration = Duration.between(currentPoint, nextPoint).toMillis().toFloat()
+
     val elapsedDuration = Duration.between(currentPoint, now).toMillis().toFloat()
 
-    // Calculate progress between current and next point
+    // Calculate progress between current and next point with safety checks
     val progress = (elapsedDuration / totalDuration).coerceIn(0f, 1f)
 
     // Get the positions on the arc
     val positions = calculateDynamicPositions(timePoints)
+    if (positions.isEmpty()) return 0f
+
     val currentPos = positions[currentPhase]
     val nextPos = if (currentPhase + 1 < positions.size) {
         positions[currentPhase + 1]
@@ -222,24 +233,24 @@ private fun calculateInitialPosition(
         positions[0]
     }
 
-    // Interpolate between current and next position
-    return currentPos + (nextPos - currentPos) * progress
+    // Interpolate between current and next position with safety checks
+    return (currentPos + (nextPos - currentPos) * progress)
 }
 
-
-// Helper functions remain the same
 private fun calculateDynamicPositions(timePoints: List<LocalDateTime?>): List<Float> {
     val validTimePoints = timePoints.filterNotNull()
     if (validTimePoints.size < 2) return emptyList()
 
-    val totalDuration =
-        Duration.between(validTimePoints.first(), validTimePoints.last()).toMillis().toFloat()
+    val firstTime = validTimePoints.first()
+    val lastTime = validTimePoints.last()
+
+    // Ensure we don't have zero duration
+    val totalDuration = Duration.between(firstTime, lastTime).toMillis().toFloat()
 
     return timePoints.mapNotNull { timePoint ->
         timePoint?.let {
-            val durationFromStart =
-                Duration.between(validTimePoints.first(), it).toMillis().toFloat()
-            (durationFromStart / totalDuration) * PI.toFloat()
+            val durationFromStart = Duration.between(firstTime, it).toMillis().toFloat()
+            ((durationFromStart / totalDuration) * PI.toFloat())
         }
     }
 }
@@ -264,74 +275,6 @@ private fun getCurrentPhase(timePoints: List<LocalDateTime?>): Int {
         else -> {
             val nextPointIndex = validTimePoints.indexOfFirst { it.isAfter(now) }
             if (nextPointIndex == -1) validTimePoints.size - 1 else maxOf(0, nextPointIndex - 1)
-        }
-    }
-}
-
-
-@Preview(
-    showBackground = false,
-    widthDp = 360,
-    heightDp = 400, showSystemUi = false
-)
-@Composable
-fun ArcViewPreview() {
-    var elapsedSeconds by remember { mutableIntStateOf(0) }
-
-    // Create test time points spread across 2 minutes (120 seconds)
-    val baseTime = LocalDateTime.now()
-    val timePoints = listOf(
-        baseTime,                      // Start (0s)
-        baseTime.plusSeconds(24),      // 24s
-        baseTime.plusSeconds(48),      // 48s
-        baseTime.plusSeconds(72),      // 72s
-        baseTime.plusSeconds(96),      // 96s
-        baseTime.plusSeconds(120)      // 120s (2 minutes)
-    )
-
-    // Update timer every second
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(1000)
-            elapsedSeconds = (elapsedSeconds + 1) % 121 // Reset after 120 seconds
-        }
-    }
-
-    // Calculate remaining time until next prayer
-    val currentTime = baseTime.plusSeconds(elapsedSeconds.toLong())
-    val nextPrayerIndex = timePoints.indexOfFirst { it.isAfter(currentTime) }
-    val countDownTime = if (nextPrayerIndex != -1) {
-        val remainingSeconds = Duration.between(currentTime, timePoints[nextPrayerIndex]).seconds
-        CountDownTime(
-            hours = (remainingSeconds / 3600),
-            minutes = ((remainingSeconds % 3600) / 60),
-            seconds = (remainingSeconds % 60)
-        )
-    } else {
-        CountDownTime(0, 0, 0)
-    }
-
-    val state = ArcViewState(
-        timePoints = timePoints,
-        countDownTime = countDownTime,
-    )
-
-    NimazTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            AnimatedArcView(state = state)
-
-            // Display timer for demo purposes
-            Text(
-                text = "Demo Time: ${elapsedSeconds}s / 120s",
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
     }
 }

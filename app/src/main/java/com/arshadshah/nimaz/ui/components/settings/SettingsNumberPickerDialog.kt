@@ -105,7 +105,6 @@ fun SettingsNumberPickerDialog(
                         .toInt() else valueState.value.toInt(),
                     onValueChange = onSelected,
                     list = items,
-                    dividersColor = MaterialTheme.colorScheme.outline,
                     textStyle = MaterialTheme.typography.titleLarge,
                     label = {
                         if (items.size == 51)

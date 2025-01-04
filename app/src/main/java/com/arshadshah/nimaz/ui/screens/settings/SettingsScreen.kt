@@ -28,6 +28,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,8 +64,8 @@ import com.arshadshah.nimaz.ui.components.settings.Option
 import com.arshadshah.nimaz.ui.components.settings.SettingsGroup
 import com.arshadshah.nimaz.ui.components.settings.SettingsMenuLink
 import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
-import com.arshadshah.nimaz.ui.components.settings.ThemeGrid
 import com.arshadshah.nimaz.ui.components.settings.ThemeOption
+import com.arshadshah.nimaz.ui.components.settings.ThemeSelector
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
 import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_dark_primary
@@ -161,45 +162,7 @@ fun SettingsScreen(
     }
 
 
-    val themeOptionsList =
-        listOf(
-            ThemeOption(
-                themeName = "Forest Green",
-                themeKey = THEME_DEFAULT,
-                themeColor = if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary,
-                isSelected = themeState.value == THEME_DEFAULT
-            ),
-            ThemeOption(
-                themeName = "Raisin Black",
-                themeKey = THEME_RAISIN_BLACK,
-                themeColor = if (isDarkMode.value) raison_black_md_theme_light_primary else raison_black_md_theme_dark_primary,
-                isSelected = themeState.value == THEME_RAISIN_BLACK
-            ),
-            ThemeOption(
-                themeName = "Burgundy",
-                themeKey = THEME_DARK_RED,
-                themeColor = if (isDarkMode.value) Dark_Red_md_theme_dark_primary else Dark_Red_md_theme_light_primary,
-                isSelected = themeState.value == THEME_DARK_RED
-            ),
-            ThemeOption(
-                themeName = "Rustic Brown",
-                themeKey = THEME_RUSTIC_BROWN,
-                themeColor = if (isDarkMode.value) rustic_md_theme_dark_primary else rustic_md_theme_light_primary,
-                isSelected = themeState.value == THEME_RUSTIC_BROWN
-            ),
-            ThemeOption(
-                themeName = "System",
-                themeKey = THEME_SYSTEM,
-                themeColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (isDarkMode.value) dynamicDarkColorScheme(context).primary else dynamicLightColorScheme(
-                        context
-                    ).primary
-                } else {
-                    if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary
-                },
-                isSelected = themeState.value == THEME_SYSTEM
-            ),
-        )
+    val themeOptionsList = getThemeOptions(context, isDarkMode, themeState)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -451,7 +414,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                 ) {
 
-                    ThemeGrid(
+                    ThemeSelector(
                         themeOptions = themeOptionsList,
                         onThemeOptionSelected = {
                             //set current selected theme to false
@@ -720,4 +683,70 @@ fun getAppID(context: Context): String {
     } catch (e: PackageManager.NameNotFoundException) {
         "Unknown"
     }
+}
+
+// Theme options with descriptions and dynamic colors
+@Composable
+fun getThemeOptions(
+    context: Context,
+    isDarkMode: State<Boolean>,
+    themeState: State<String>
+): List<ThemeOption> {
+    return listOf(
+        ThemeOption(
+            themeName = "Forest Green",
+            themeKey = THEME_DEFAULT,
+            themeColor = if (isDarkMode.value) md_theme_dark_primary else md_theme_light_primary,
+            isSelected = themeState.value == THEME_DEFAULT,
+            description = "A calming forest green theme inspired by nature's tranquility"
+        ),
+        ThemeOption(
+            themeName = "Raisin Black",
+            themeKey = THEME_RAISIN_BLACK,
+            themeColor = if (isDarkMode.value)
+                raison_black_md_theme_light_primary
+            else
+                raison_black_md_theme_dark_primary,
+            isSelected = themeState.value == THEME_RAISIN_BLACK,
+            description = "An elegant darker theme with sophisticated raisin black tones"
+        ),
+        ThemeOption(
+            themeName = "Burgundy",
+            themeKey = THEME_DARK_RED,
+            themeColor = if (isDarkMode.value)
+                Dark_Red_md_theme_dark_primary
+            else
+                Dark_Red_md_theme_light_primary,
+            isSelected = themeState.value == THEME_DARK_RED,
+            description = "Rich burgundy tones for a classic and timeless appearance"
+        ),
+        ThemeOption(
+            themeName = "Rustic Brown",
+            themeKey = THEME_RUSTIC_BROWN,
+            themeColor = if (isDarkMode.value)
+                rustic_md_theme_dark_primary
+            else
+                rustic_md_theme_light_primary,
+            isSelected = themeState.value == THEME_RUSTIC_BROWN,
+            description = "Warm rustic brown hues reminiscent of natural earth tones"
+        ),
+        ThemeOption(
+            themeName = "System",
+            themeKey = THEME_SYSTEM,
+            themeColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (isDarkMode.value)
+                    dynamicDarkColorScheme(context).primary
+                else
+                    dynamicLightColorScheme(context).primary
+            } else {
+                if (isDarkMode.value)
+                    md_theme_dark_primary
+                else
+                    md_theme_light_primary
+                md_theme_light_primary
+            },
+            isSelected = themeState.value == THEME_SYSTEM,
+            description = "Automatically matches your system's theme preferences"
+        )
+    )
 }

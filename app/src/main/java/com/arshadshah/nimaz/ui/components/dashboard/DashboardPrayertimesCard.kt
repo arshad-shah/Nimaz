@@ -101,7 +101,7 @@ fun DashboardPrayerTimesCard(
                                 text = getTimerText(countDownTimer),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                modifier = Modifier.padding(8.dp)
                             )
                         }
                     }

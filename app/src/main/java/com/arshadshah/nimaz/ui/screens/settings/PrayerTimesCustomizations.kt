@@ -212,6 +212,7 @@ fun PrayerTimesCustomizations(navController: NavController) {
                     ToolTip(
                         icon = painterResource(id = R.drawable.info_icon),
                         tipText = "Prayer times Calculation Parameters",
+                        contentDescription = "Information",
                     )
                 }
             }) {
@@ -312,6 +313,7 @@ fun PrayerTimesCustomizations(navController: NavController) {
                     ToolTip(
                         icon = painterResource(id = R.drawable.info_icon),
                         tipText = "Angles of the sun used to calculate Fair and Isha prayer times",
+                        contentDescription = "Information",
                     )
                 }
             }) {
@@ -437,6 +439,7 @@ fun PrayerTimesCustomizations(navController: NavController) {
                         ToolTip(
                             icon = painterResource(id = R.drawable.info_icon),
                             tipText = "Manual adjustment of prayer times",
+                            contentDescription = "Information",
                         )
                     }
                 },

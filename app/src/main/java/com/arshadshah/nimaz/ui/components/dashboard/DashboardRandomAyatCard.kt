@@ -36,6 +36,7 @@ import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
+import com.arshadshah.nimaz.ui.components.quran.cleanTextFromBackslash
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
@@ -160,7 +161,7 @@ fun DashboardRandomAyatCard(
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     aya?.ayaArabic?.let { arabicText ->
                         Text(
-                            text = arabicText,
+                            text = arabicText.cleanTextFromBackslash(),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = 26.sp,
                                 fontFamily = utmaniQuranFont,

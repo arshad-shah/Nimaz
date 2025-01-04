@@ -16,10 +16,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.common.LocationTopBar
 import com.arshadshah.nimaz.ui.components.dashboard.getTimerText
 import com.arshadshah.nimaz.ui.components.prayerTimes.AnimatedArcView
@@ -28,6 +30,7 @@ import com.arshadshah.nimaz.ui.components.prayerTimes.NextPrayerTimerText
 import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 private const val SCREEN_WIDTH_THRESHOLD = 720
@@ -67,7 +70,7 @@ fun PrayerTimesScreen(navController: NavHostController) {
             LocationTopBar(prayerTimesState.locationName, isLoading)
             Box(
                 modifier = Modifier
-                    .weight(3f)
+                    .weight(2f)
                     .fillMaxWidth()
             ) {
                 if (!isLoading) {
@@ -123,7 +126,7 @@ private fun PrayerTimesHeader(
 
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = Alignment.BottomEnd
         ) {
             NextPrayerTimerText(
                 prayerNameDisplay = prayerTimesState.nextPrayerName,
@@ -136,4 +139,26 @@ private fun PrayerTimesHeader(
             )
         }
     }
+}
+
+
+@Preview
+@Composable
+fun PrayerTimesHeaderPreview() {
+    PrayerTimesHeader(
+        prayerTimesState = PrayerTimesViewModel.PrayerTimesState(
+            fajrTime = LocalDateTime.now(),
+            sunriseTime = LocalDateTime.now().plusHours(2),
+            dhuhrTime = LocalDateTime.now().plusHours(3),
+            asrTime = LocalDateTime.now().plusHours(4),
+            maghribTime = LocalDateTime.now().plusHours(5),
+            ishaTime = LocalDateTime.now().plusHours(6),
+            nextPrayerName = "Maghrib",
+            nextPrayerTime = LocalDateTime.now().plusHours(7),
+            locationName = "Karachi",
+            countDownTime = CountDownTime(1, 2, 5)
+        ),
+        showArc = true,
+        isLoading = false,
+    )
 }

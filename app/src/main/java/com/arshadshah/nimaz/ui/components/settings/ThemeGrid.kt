@@ -1,5 +1,8 @@
 package com.arshadshah.nimaz.ui.components.settings
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,155 +10,222 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
-class ThemeOption(
-    var themeName: String,
-    var themeKey: String,
-    var themeColor: Color,
+data class ThemeOption(
+    val themeName: String,
+    val themeKey: String,
+    val themeColor: Color,
     var isSelected: Boolean,
+    val description: String = "" // Added description field
 )
 
 @Composable
-fun ThemeGrid(
+fun ThemeSelector(
     themeOptions: List<ThemeOption>,
     onThemeOptionSelected: (ThemeOption) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
-        //the row
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            themeOptions.forEachIndexed { index, themeOption ->
-                //the theme item
-                ToggleableCustomThemeItem(
-                    checked = themeOption.isSelected,
-                    onCheckedChange = {
-                        onThemeOptionSelected(themeOption)
-                    },
-                    color = themeOption.themeColor,
-                    //if the thtme key is SYSTEM then show the system icon
-                    icon = if (themeOption.themeKey == "SYSTEM") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                themeOptions.forEach { themeOption ->
+                    EnhancedThemeItem(
+                        themeOption = themeOption,
+                        onSelected = { onThemeOptionSelected(themeOption) }
+                    )
+                }
+            }
 
-                        @Composable {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(id = R.drawable.system_icon),
-                                contentDescription = "System",
-                                tint = MaterialTheme.colorScheme.surface
-                            )
-                        }
-                    } else {
-                        null
-                    }
-                )
+            // Current theme info
+            themeOptions.find { it.isSelected }?.let { selectedTheme ->
+                ThemeInfo(themeOption = selectedTheme)
             }
         }
     }
 }
 
-//a theme toggle item with a circle that gets highlighted witha  thick border when selected
 @Composable
-fun ToggleableCustomThemeItem(
-    modifier: Modifier = Modifier,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    color: Color = MaterialTheme.colorScheme.primary,
-    icon: @Composable (() -> Unit)? = null,
+private fun EnhancedThemeItem(
+    themeOption: ThemeOption,
+    onSelected: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .border(
-                width = 2.dp,
-                color = if (checked) Color.Gray else Color.Transparent,
-                shape = CircleShape
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        //the circle
-        Box(
+    val borderColor by animateColorAsState(
+        targetValue = if (themeOption.isSelected)
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        else
+            Color.Transparent,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "border color"
+    )
 
-            modifier = modifier
-                .padding(6.dp)
-                .size(48.dp)
-                .clip(CircleShape)
-                .clickable {
-                    onCheckedChange(!checked)
-                }
-                .background(
-                    color = color,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .border(
+                    width = 3.dp,
+                    color = borderColor,
                     shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
+                )
+                .padding(3.dp)
         ) {
-            //the icon
-            icon?.invoke()
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(themeOption.themeColor)
+                    .clickable(onClick = onSelected),
+                contentAlignment = Alignment.Center
+            ) {
+                if (themeOption.themeKey == "SYSTEM") {
+                    Icon(
+                        painter = painterResource(id = R.drawable.system_icon),
+                        contentDescription = "System Theme",
+                        tint = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = themeOption.themeName,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = if (themeOption.isSelected) FontWeight.Bold else FontWeight.Normal
+            ),
+            color = if (themeOption.isSelected)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun ThemeInfo(
+    themeOption: ThemeOption,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(themeOption.themeColor)
+            )
+
+            Column {
+                Text(
+                    text = "${themeOption.themeName} Theme",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                if (themeOption.description.isNotEmpty()) {
+                    Text(
+                        text = themeOption.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
 
+// Helper function to determine contrasting color for icons
+private fun getContrastColor(backgroundColor: Color): Color {
+    val luminance = (0.299 * backgroundColor.red +
+            0.587 * backgroundColor.green +
+            0.114 * backgroundColor.blue)
+    return if (luminance > 0.5f) Color.Black else Color.White
+}
 
 @Preview(showBackground = true)
 @Composable
-//preview of the theme grid
-fun ThemeGridPreview() {
-    ThemeGrid(
-        themeOptions = listOf(
-            ThemeOption("Light", "light", Color.White, true),
-            ThemeOption("Dark", "dark", Color.Black, false),
-            ThemeOption("Red", "red", Color.Red, false),
-            ThemeOption("Green", "green", Color.Green, false),
-            ThemeOption("Blue", "blue", Color.Blue, false),
-        ),
-        onThemeOptionSelected = {}
-    )
-}
-
-//preview of ToggleableItemRow
-@Preview(showBackground = true, name = "Theme Toggle Selected", group = "Theme Toggle")
-@Composable
-fun ToggleableItemRowPreview() {
-    ToggleableCustomThemeItem(
-        checked = true,
-        onCheckedChange = {},
-        color = Color.Red,
-        icon = {
-            Icon(
-                modifier = Modifier
-                    .size(24.dp),
-                painter = painterResource(id = R.drawable.settings_icon),
-                contentDescription = "Selected"
-            )
-        }
-    )
-}
-
-@Preview(showBackground = true, name = "Theme Toggle Unselected", group = "Theme Toggle")
-@Composable
-fun ToggleableItemRowPreview2() {
-    ToggleableCustomThemeItem(
-        checked = false,
-        onCheckedChange = {},
-        color = Color.Red
-    )
+fun EnhancedThemeSelectorPreview() {
+    NimazTheme {
+        ThemeSelector(
+            themeOptions = listOf(
+                ThemeOption(
+                    themeName = "Light",
+                    themeKey = "LIGHT",
+                    themeColor = Color(0xFFF8F9FA),
+                    isSelected = true,
+                    description = "Perfect for daytime use with clean, bright visuals"
+                ),
+                ThemeOption(
+                    themeName = "Dark",
+                    themeKey = "DARK",
+                    themeColor = Color(0xFF202124),
+                    isSelected = false,
+                    description = "Easy on the eyes in low-light conditions"
+                ),
+                ThemeOption(
+                    themeName = "System",
+                    themeKey = "SYSTEM",
+                    themeColor = Color(0xFF607D8B),
+                    isSelected = false,
+                    description = "Automatically matches your system theme"
+                ),
+                ThemeOption(
+                    themeName = "Blue",
+                    themeKey = "BLUE",
+                    themeColor = Color(0xFF1976D2),
+                    isSelected = false,
+                    description = "Calming blue theme for a soothing experience"
+                )
+            ),
+            onThemeOptionSelected = {}
+        )
+    }
 }
