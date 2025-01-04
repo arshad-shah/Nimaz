@@ -68,18 +68,17 @@ fun PrayerTimesScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             LocationTopBar(prayerTimesState.locationName, isLoading)
+
             Box(
                 modifier = Modifier
-                    .weight(2f)
+                    .weight(3f)
                     .fillMaxWidth()
             ) {
-                if (!isLoading) {
-                    PrayerTimesHeader(
-                        prayerTimesState = prayerTimesState,
-                        showArc = screenWidth > SCREEN_WIDTH_THRESHOLD,
-                        isLoading = false
-                    )
-                }
+                PrayerTimesHeader(
+                    prayerTimesState = prayerTimesState,
+                    showArc = screenWidth > SCREEN_WIDTH_THRESHOLD,
+                    isLoading = isLoading
+                )
             }
 
             LazyColumn(

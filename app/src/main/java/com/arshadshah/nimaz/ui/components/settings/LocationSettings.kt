@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -28,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -488,12 +486,6 @@ fun LocationToggleSwitch(
             }
         }
         ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 8.dp
-                ),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .padding(8.dp)
@@ -515,11 +507,7 @@ fun LocationToggleSwitch(
                             .padding(16.dp)
                             .placeholder(
                                 visible = isLoading.value,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(4.dp),
-                                highlight = PlaceholderHighlight.shimmer(
-                                    highlightColor = Color.White,
-                                )
+                                highlight = PlaceholderHighlight.shimmer()
                             ),
                         style = MaterialTheme.typography.bodyMedium
                     )

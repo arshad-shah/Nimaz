@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,12 +28,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LocationTopBar(locationName: String, isLoading: Boolean) {
     Surface(
@@ -77,6 +78,10 @@ fun LocationTopBar(locationName: String, isLoading: Boolean) {
                         }
                     ) { text ->
                         Text(
+                            modifier = Modifier.placeholder(
+                                visible = isLoading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            ),
                             text = text,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.SemiBold
@@ -112,6 +117,10 @@ fun LocationTopBar(locationName: String, isLoading: Boolean) {
                     }
 
                     Text(
+                        modifier = Modifier.placeholder(
+                            visible = isLoading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        ),
                         text = currentDate,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Normal

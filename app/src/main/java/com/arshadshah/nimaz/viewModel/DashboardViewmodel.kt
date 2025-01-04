@@ -124,33 +124,38 @@ class DashboardViewModel(context: Context) : ViewModel() {
     }
 
     private suspend fun setAlarms(context: Context) {
-        loadLocation()
-        loadPrayerTimes()
-        getCurrentAndNextPrayerTimes()
-        val timeToNextPrayerLong =
-            nextPrayerTime.value.atZone(ZoneId.systemDefault())
-                ?.toInstant()
-                ?.toEpochMilli()
-        val currentTime =
-            LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
-                .toEpochMilli()
+        safeOperation(
+            operation = {
+                loadLocation()
+                loadPrayerTimes()
+                getCurrentAndNextPrayerTimes()
+                val timeToNextPrayerLong =
+                    nextPrayerTime.value.atZone(ZoneId.systemDefault())
+                        ?.toInstant()
+                        ?.toEpochMilli()
+                val currentTime =
+                    LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
+                        .toEpochMilli()
 
-        val difference = timeToNextPrayerLong?.minus(currentTime)
-        if (difference != null) {
-            startTimer(difference)
-        }
-        val arePrayerTimesAvailable = prayerTimes.value.areAllTimesAvailable()
-        if (arePrayerTimesAvailable) {
-            CreateAlarms().exact(
-                context,
-                prayerTimes.value.fajr!!,
-                prayerTimes.value.sunrise!!,
-                prayerTimes.value.dhuhr!!,
-                prayerTimes.value.asr!!,
-                prayerTimes.value.maghrib!!,
-                prayerTimes.value.isha!!,
-            )
-        }
+                val difference = timeToNextPrayerLong?.minus(currentTime)
+                if (difference != null) {
+                    startTimer(difference)
+                }
+                val arePrayerTimesAvailable = prayerTimes.value.areAllTimesAvailable()
+                if (arePrayerTimesAvailable) {
+                    CreateAlarms().exact(
+                        context,
+                        prayerTimes.value.fajr!!,
+                        prayerTimes.value.sunrise!!,
+                        prayerTimes.value.dhuhr!!,
+                        prayerTimes.value.asr!!,
+                        prayerTimes.value.maghrib!!,
+                        prayerTimes.value.isha!!,
+                    )
+                }
+            },
+            errorMessage = "An error occurred when creating alarms"
+        )
     }
 
     private suspend fun loadPrayerTimes() = withContext(Dispatchers.IO) {
@@ -227,15 +232,17 @@ class DashboardViewModel(context: Context) : ViewModel() {
         safeOperation(
             operation = {
                 val prayerTimes = prayerTimesService.getPrayerTimes()
-                val currentAndNextPrayer = prayerTimes?.let {
-                    prayerTimesService.getCurrentAndNextPrayer(
-                        it
-                    )
+                if (prayerTimes != null) {
+                    val currentAndNextPrayer = prayerTimes.let {
+                        prayerTimesService.getCurrentAndNextPrayer(
+                            it
+                        )
+                    }
+                    states.currentPrayerName.value = currentAndNextPrayer.currentPrayer
+                    states.currentPrayerTime.value = currentAndNextPrayer.currentPrayerTime
+                    states.nextPrayerName.value = currentAndNextPrayer.nextPrayer
+                    states.nextPrayerTime.value = currentAndNextPrayer.nextPrayerTime
                 }
-                states.currentPrayerName.value = currentAndNextPrayer?.currentPrayer.toString()
-                states.currentPrayerTime.value = currentAndNextPrayer?.currentPrayerTime
-                states.nextPrayerName.value = currentAndNextPrayer?.nextPrayer.toString()
-                states.nextPrayerTime.value = currentAndNextPrayer?.nextPrayerTime
             },
             errorMessage = "Error fetching prayer times"
         )
@@ -489,9 +496,9 @@ class DashboardViewModel(context: Context) : ViewModel() {
         val isFasting = MutableStateFlow(false)
         val fajrTime = MutableStateFlow(LocalDateTime.now())
         val maghribTime = MutableStateFlow(LocalDateTime.now())
-        val currentPrayerName = MutableStateFlow("")
+        val currentPrayerName = MutableStateFlow("Loading...")
         val currentPrayerTime = MutableStateFlow(LocalDateTime.now())
-        val nextPrayerName = MutableStateFlow("")
+        val nextPrayerName = MutableStateFlow("Loading...")
         val nextPrayerTime = MutableStateFlow(LocalDateTime.now())
         val tasbihList = MutableStateFlow(listOf<LocalTasbih>())
         val trackerState = MutableStateFlow(

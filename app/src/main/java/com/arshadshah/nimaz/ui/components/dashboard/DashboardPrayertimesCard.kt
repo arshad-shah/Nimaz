@@ -27,6 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.CountDownTime
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -35,6 +38,7 @@ fun DashboardPrayerTimesCard(
     nextPrayerName: String,
     countDownTimer: CountDownTime,
     nextPrayerTime: LocalDateTime,
+    isLoading: Boolean,
 ) {
     val context = LocalContext.current
 
@@ -84,13 +88,21 @@ fun DashboardPrayerTimesCard(
                             text = formatPrayerName(nextPrayerName),
                             style = MaterialTheme.typography.displaySmall,
                             color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.placeholder(
+                                visible = isLoading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
                         )
 
                         Text(
                             text = nextPrayerTime.format(formatter),
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                            modifier = Modifier.placeholder(
+                                visible = isLoading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
                         )
 
                         Surface(
@@ -101,7 +113,12 @@ fun DashboardPrayerTimesCard(
                                 text = getTimerText(countDownTimer),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(8.dp)
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .placeholder(
+                                        visible = isLoading,
+                                        highlight = PlaceholderHighlight.shimmer()
+                                    )
                             )
                         }
                     }

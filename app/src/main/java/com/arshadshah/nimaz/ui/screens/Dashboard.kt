@@ -84,7 +84,6 @@ fun Dashboard(
             val randomAya = randomAyaState.collectAsState()
         }
     }
-
     val stateScroll = rememberLazyListState()
     Scaffold(
         bottomBar = {
@@ -106,6 +105,7 @@ fun Dashboard(
                     nextPrayerName = dashboardState.nextPrayerNameValue,
                     nextPrayerTime = dashboardState.nextPrayerTimeValue,
                     countDownTimer = dashboardState.countDownTimer,
+                    isLoading = dashboardState.isLoadingData
                 )
             }
             item {

@@ -8,12 +8,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.WbSunny
@@ -116,15 +116,13 @@ fun PrayerTimesList(
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
+            shape = MaterialTheme.shapes.large,
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(vertical = 4.dp)
-            ) {
+            Column {
                 prayerTimes.forEachIndexed { index, prayerTime ->
                     PrayerTimeRow(
                         prayerTime = prayerTime,
@@ -155,12 +153,20 @@ fun PrayerTimeRow(
         else -> MaterialTheme.colorScheme.onSurface
     }
 
+    val screensize = LocalContext.current.resources.displayMetrics.widthPixels
+
+    val paddingByScreenSize = if (screensize > 720) {
+        PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+    } else {
+        PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+    }
+
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(backgroundColor)
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(paddingByScreenSize),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -178,6 +184,10 @@ fun PrayerTimeRow(
 
                 Column {
                     Text(
+                        modifier = Modifier.placeholder(
+                            visible = loading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        ),
                         text = prayerTime.name.replaceFirstChar {
                             if (it.isLowerCase()) it.titlecase(Locale.getDefault())
                             else it.toString()
