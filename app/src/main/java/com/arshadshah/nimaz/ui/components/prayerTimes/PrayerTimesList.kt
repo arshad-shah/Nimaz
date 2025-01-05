@@ -156,7 +156,7 @@ fun PrayerTimeRow(
     val screensize = LocalContext.current.resources.displayMetrics.widthPixels
 
     val paddingByScreenSize = if (screensize > 720) {
-        PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+        PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     } else {
         PaddingValues(horizontal = 8.dp, vertical = 2.dp)
     }

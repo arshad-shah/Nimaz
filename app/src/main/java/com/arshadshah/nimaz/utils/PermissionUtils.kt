@@ -19,14 +19,14 @@ import com.google.accompanist.permissions.shouldShowRationale
 @Composable
 fun FeatureThatRequiresLocationPermission(
     locationPermissionState: MultiplePermissionsState,
-    checked: BooleanPreferenceSettingValueState,
+    state: BooleanPreferenceSettingValueState,
 ) {
 
     val descToShow = remember { mutableStateOf("") }
     val showDialog = remember { mutableStateOf(false) }
     //check if location permission is granted
     if (locationPermissionState.allPermissionsGranted) {
-        checked.value = true
+        state.value = true
     } else {
         if (locationPermissionState.shouldShowRationale) {
             showDialog.value = true

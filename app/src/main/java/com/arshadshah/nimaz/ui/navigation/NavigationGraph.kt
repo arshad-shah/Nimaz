@@ -36,7 +36,7 @@ import com.arshadshah.nimaz.ui.screens.PrayerTimesScreen
 import com.arshadshah.nimaz.ui.screens.hadith.BookShelf
 import com.arshadshah.nimaz.ui.screens.hadith.HadithChaptersList
 import com.arshadshah.nimaz.ui.screens.hadith.HadithList
-import com.arshadshah.nimaz.ui.screens.introduction.IntroPage1
+import com.arshadshah.nimaz.ui.screens.introduction.IntroPage
 import com.arshadshah.nimaz.ui.screens.more.MoreScreen
 import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
 import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
@@ -70,7 +70,7 @@ fun NavigationGraph(
         startDestination = startDestination,
     ) {
         composable("Intro") {
-            IntroPage1(navController = navController)
+            IntroPage(navController = navController)
         }
 
         composable(BottomNavItem.Dashboard.screen_route) {

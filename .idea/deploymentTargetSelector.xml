@@ -11,11 +11,6 @@
                 <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\shaha\.android\avd\Medium_Phone_API_35.avd" />
               </handle>
             </Target>
-            <Target type="DEFAULT_BOOT">
-              <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\shaha\.android\avd\Small_Phone_API_35.avd" />
-              </handle>
-            </Target>
           </targets>
         </DialogSelection>
       </SelectionState>

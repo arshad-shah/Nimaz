@@ -20,8 +20,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 35
-        versionCode 162
-        versionName '2.4.2'
+        versionCode 163
+        versionName '2.4.3'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -34,6 +34,9 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
         }
         debug {
             minifyEnabled false
@@ -164,5 +167,6 @@ dependencies {
 
     implementation libs.hilt.android
     ksp libs.hilt.android.compiler
+    implementation libs.androidx.hilt.navigation.compose
 
 }

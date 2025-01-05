@@ -2,6 +2,9 @@ package com.arshadshah.nimaz.ui.components.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -72,7 +75,7 @@ internal class InMemoryBooleanSettingValueState(private val defaultValue: Boolea
 internal class InMemoryFloatSettingValueState(private val defaultValue: Float) :
     SettingValueState<Float> {
 
-    override var value: Float by mutableStateOf(defaultValue)
+    override var value: Float by mutableFloatStateOf(defaultValue)
     override fun reset() {
         value = defaultValue
     }
@@ -82,7 +85,7 @@ internal class InMemoryFloatSettingValueState(private val defaultValue: Float) :
 internal class InMemoryDoubleSettingValueState(private val defaultValue: Double) :
     SettingValueState<Double> {
 
-    override var value: Double by mutableStateOf(defaultValue)
+    override var value: Double by mutableDoubleStateOf(defaultValue)
     override fun reset() {
         value = defaultValue
     }
@@ -91,7 +94,7 @@ internal class InMemoryDoubleSettingValueState(private val defaultValue: Double)
 internal class InMemoryIntSettingValueState(private val defaultValue: Int) :
     SettingValueState<Int> {
 
-    override var value: Int by mutableStateOf(defaultValue)
+    override var value: Int by mutableIntStateOf(defaultValue)
     override fun reset() {
         value = defaultValue
     }
