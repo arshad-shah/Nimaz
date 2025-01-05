@@ -5,15 +5,16 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
@@ -31,6 +32,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val settingsViewModel: SettingsViewModel by viewModels()
 
     @Inject
     lateinit var sharedPref: PrivateSharedPreferences
@@ -89,28 +92,23 @@ class MainActivity : ComponentActivity() {
         //this is used to show the full activity on the screen
         setContent {
 
-            val mainViewModel = viewModel(
-                key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-                initializer = { SettingsViewModel(this@MainActivity) },
-                viewModelStoreOwner = this@MainActivity
-            )
-            val darkTheme = mainViewModel.isDarkMode.collectAsState()
-            val themeName = mainViewModel.theme.collectAsState()
+            val uiState by settingsViewModel.uiState.collectAsState()
+            val themeName = uiState.theme
 
 
             NimazTheme(
-                darkTheme = darkTheme.value,
-                themeName = themeName.value
+                darkTheme = uiState.isDarkMode,
+                themeName = themeName
             ) {
                 val systemUiController = rememberSystemUiController()
 
                 systemUiController.setStatusBarColor(
                     color = MaterialTheme.colorScheme.background,
-                    darkIcons = !darkTheme.value,
+                    darkIcons = !uiState.isDarkMode,
                 )
                 systemUiController.setNavigationBarColor(
                     color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-                    darkIcons = !darkTheme.value,
+                    darkIcons = !uiState.isDarkMode,
                 )
                 val navController = rememberNavController()
                 val route =
@@ -122,7 +120,8 @@ class MainActivity : ComponentActivity() {
                 NavigationGraph(
                     navController = navController,
                     context = this@MainActivity,
-                    isFirstInstall = firstTime
+                    isFirstInstall = firstTime,
+                    settingsViewModel = settingsViewModel
                 )
             }
         }

@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.repositories.LocationRepository
-import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -27,13 +26,11 @@ import javax.inject.Inject
 @HiltViewModel
 class IntroductionViewModel @Inject constructor(
     private val sharedPreferences: PrivateSharedPreferences,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val prayerTimesService: PrayerTimesService,
+    private val locationRepository: LocationRepository,
+    private val locationService: LocationService
 ) : ViewModel() {
-
-    private val locationRepository = LocationRepository(context)
-    private val locationService = LocationService(context, locationRepository)
-    private val prayerTimesService = PrayerTimesService(context, PrayerTimesRepository)
-
 
     // Existing state management
     private val _isLoading = MutableStateFlow(false)
@@ -268,15 +265,6 @@ class IntroductionViewModel @Inject constructor(
                 }
             }
 
-            is IntroEvent.UpdateBatteryOptimization -> {
-                viewModelScope.launch {
-                    safeOperation("update battery optimization") {
-                        _batteryOptimizationExempted.value = event.exempted
-                        sharedPreferences.saveDataBoolean("battery_optimization", event.exempted)
-                    }
-                }
-            }
-
             is IntroEvent.UpdateCalculationMethod -> {
                 handleMethodSelection(event.method)
             }
@@ -425,21 +413,28 @@ class IntroductionViewModel @Inject constructor(
     private fun loadLocation(isAuto: Boolean) {
         viewModelScope.launch {
             safeOperation("load location") {
-                locationService.loadLocation(
-                    isAuto,
-                    onSuccess = { location ->
+                locationService.loadLocation(isAuto)
+                    .onSuccess { location ->
                         _locationName.value = location.locationName
                         _latitude.value = location.latitude
                         _longitude.value = location.longitude
+                        // Reload prayer times with new location
                         updatePrayerTimes()
-                    },
-                    onError = { errorMessage ->
-                        handleError("load location", Exception(errorMessage))
                     }
-                )
+                    .onFailure { throwable ->
+                        handleError("load location", Exception(throwable.message))
+                        loadFallbackLocation()
+                    }
             }
         }
     }
+
+    private suspend fun loadFallbackLocation() {
+        _latitude.value = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+        _longitude.value = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+        _locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
+    }
+
 
     private fun handleAutoParams(enabled: Boolean) {
         viewModelScope.launch {

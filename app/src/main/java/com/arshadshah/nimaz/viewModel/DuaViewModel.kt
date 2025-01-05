@@ -7,12 +7,15 @@ import com.arshadshah.nimaz.data.local.models.LocalCategory
 import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.repositories.DuaRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class DuaViewModel : ViewModel() {
+@HiltViewModel
+class DuaViewModel @Inject constructor() : ViewModel() {
 
     private val _categories = MutableStateFlow<List<LocalCategory>>(emptyList())
     val categories: StateFlow<List<LocalCategory>> = _categories.asStateFlow()

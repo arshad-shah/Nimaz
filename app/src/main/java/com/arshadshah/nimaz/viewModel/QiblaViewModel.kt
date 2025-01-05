@@ -6,12 +6,17 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.Qibla
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class QiblaViewModel(context: Context) : ViewModel() {
+@HiltViewModel
+class QiblaViewModel @Inject constructor(@ApplicationContext private val context: Context) :
+    ViewModel() {
 
     private var _qiblaState = MutableStateFlow(0.0)
     val qiblaState = _qiblaState.asStateFlow()
@@ -22,7 +27,12 @@ class QiblaViewModel(context: Context) : ViewModel() {
     private var _errorMessage = MutableStateFlow("")
     val errorMessage = _errorMessage.asStateFlow()
 
-    fun loadQibla(context: Context) {
+
+    init {
+        loadQibla()
+    }
+
+    private fun loadQibla() {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             try {

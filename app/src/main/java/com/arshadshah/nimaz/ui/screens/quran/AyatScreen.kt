@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
@@ -29,7 +29,6 @@ import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.quran.AyaListUI
 import com.arshadshah.nimaz.ui.components.quran.MoreMenu
 import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,16 +41,8 @@ fun AyatScreen(
     context: MainActivity,
     spaceFilesRepository: SpacesFileRepository = SpacesFileRepository(context), // Pass repository directly
     navController: NavHostController,
+    viewModel: QuranViewModel = hiltViewModel()
 ) {
-
-
-    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
-    val viewModel = viewModel(
-        key = AppConstants.QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(sharedPreferencesRepository) },
-        viewModelStoreOwner = context
-    )
-
     // LaunchedEffect should depend on both number and isSurah
     LaunchedEffect(Unit) {
         Log.d(AppConstants.QURAN_SCREEN_TAG, "Update occurred on Ayat screen: $number")

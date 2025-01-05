@@ -8,12 +8,15 @@ import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
 import com.arshadshah.nimaz.utils.LocalDataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HadithViewModel : ViewModel() {
+@HiltViewModel
+class HadithViewModel @Inject constructor() : ViewModel() {
     private var _allHadithBooks = MutableStateFlow(listOf<HadithMetadata>())
     val allHadithBooks = _allHadithBooks.asStateFlow()
 
@@ -99,6 +102,7 @@ class HadithViewModel : ViewModel() {
 
                 val hadithForAChapter = dataStore.getAllHadithsForABook(bookId, chapterId)
                 _hadithForAChapter.value = hadithForAChapter
+                getAllFavourites()
             } catch (e: Exception) {
                 Log.d("updateFavouriteStatus", e.message ?: "Unknown error")
                 _error.value = e.message ?: "Unknown error"

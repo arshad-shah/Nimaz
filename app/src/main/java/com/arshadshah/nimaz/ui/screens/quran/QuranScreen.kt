@@ -19,35 +19,25 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.constants.AppConstants.QURAN_VIEWMODEL_KEY
 import com.arshadshah.nimaz.ui.components.common.CustomTabs
 import com.arshadshah.nimaz.ui.components.quran.JuzList
 import com.arshadshah.nimaz.ui.components.quran.SurahList
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuranScreen(
-    context: MainActivity,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
     navController: NavHostController,
+    viewModel: QuranViewModel = hiltViewModel()
 ) {
-    val sharedPreferencesRepository = remember { PrivateSharedPreferences(context) }
-    val viewModel = viewModel(
-        key = QURAN_VIEWMODEL_KEY,
-        initializer = { QuranViewModel(sharedPreferencesRepository) },
-        viewModelStoreOwner = context
-    )
     val pages = listOf(
         QuranPage("Sura") {
             SuraContent(viewModel, onNavigateToAyatScreen)

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -18,14 +17,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_TASBIH
 import com.arshadshah.nimaz.ui.components.tasbih.Counter
 import com.arshadshah.nimaz.ui.components.tasbih.CustomCounter
@@ -40,13 +37,8 @@ fun TasbihScreen(
     tasbihEnglish: String = "",
     tasbihTranslitration: String = "",
     navController: NavHostController,
+    viewModel: TasbihViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.TASBIH_VIEWMODEL_KEY,
-        initializer = { TasbihViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
 
     val rOrl = viewModel.orientationButtonState.collectAsState()
     val vibrationAllowed = viewModel.vibrationButtonState.collectAsState()

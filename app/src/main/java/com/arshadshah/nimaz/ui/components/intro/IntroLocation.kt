@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -65,6 +66,14 @@ fun IntroLocation(
     val error = viewModel.error.collectAsState()
     val isLoading = viewModel.isLoading.collectAsState()
     val autoParams = viewModel.autoParams.collectAsState()
+
+    Log.d("IntroLocation", "locationNameState: ${locationNameState.value}")
+    Log.d("IntroLocation", "locationAuto: ${locationAuto.value}")
+    Log.d("IntroLocation", "latitudeState: ${latitudeState.value}")
+    Log.d("IntroLocation", "longitudeState: ${longitudeState.value}")
+    Log.d("IntroLocation", "error: ${error.value}")
+    Log.d("IntroLocation", "isLoading: ${isLoading.value}")
+    Log.d("IntroLocation", "autoParams: ${autoParams.value}")
 
     if (error.value?.isNotBlank() == true) {
         Toasty.error(context, error.value!!, Toasty.LENGTH_SHORT).show()

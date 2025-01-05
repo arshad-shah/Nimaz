@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
@@ -35,7 +32,6 @@ import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBoole
 import com.arshadshah.nimaz.utils.FeatureThatRequiresNotificationPermission
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -43,20 +39,13 @@ import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun NotificationScreenUI() {
+fun NotificationScreenUI(
+    areNotificationsAllowed: Boolean,
+    onNotificationsAllowedChange: (Boolean) -> Unit
+) {
     val context = LocalContext.current
     //get shared preference
     val sharedpref = PrivateSharedPreferences(context)
-
-    val viewModel = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    val notificationAllowed = remember {
-        viewModel.areNotificationsAllowed
-    }.collectAsState()
-
     //battery optimization exemption
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -87,11 +76,7 @@ fun NotificationScreenUI() {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    viewModel.handleEvent(
-                        SettingsViewModel.SettingsEvent.NotificationsAllowed(
-                            notificationManager.areNotificationsEnabled()
-                        )
-                    )
+                    onNotificationsAllowedChange(notificationManager.areNotificationsEnabled())
                     state.value = notificationManager.areNotificationsEnabled()
                     isChecked.value = notificationManager.areNotificationsEnabled()
                 }
@@ -172,7 +157,7 @@ fun NotificationScreenUI() {
         },
         subtitle = {
             //if the permission is granted, show a checkmark and text saying "Allowed"
-            if (notificationAllowed.value) {
+            if (areNotificationsAllowed) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -209,7 +194,7 @@ fun NotificationScreenUI() {
         }
     )
 
-    if (!notificationAllowed.value) {
+    if (!areNotificationsAllowed) {
         BannerSmall(
             message = "Please enable notifications to receive Adhan notifications",
             showFor = BannerDuration.FOREVER.value

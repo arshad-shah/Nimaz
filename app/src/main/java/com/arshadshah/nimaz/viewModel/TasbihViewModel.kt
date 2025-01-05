@@ -1,18 +1,20 @@
 package com.arshadshah.nimaz.viewModel
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.utils.LocalDataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
-class TasbihViewModel(context: Context) : ViewModel() {
+@HiltViewModel
+class TasbihViewModel @Inject constructor() : ViewModel() {
 
     //state for the tasbih
     private var _tasbihLoading = MutableStateFlow(false)

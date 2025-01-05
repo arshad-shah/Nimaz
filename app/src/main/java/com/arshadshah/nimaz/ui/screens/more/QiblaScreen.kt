@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.CombinedVibration
 import android.os.VibrationEffect
 import android.os.VibratorManager
-import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -74,11 +73,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_INPUT
-import com.arshadshah.nimaz.constants.AppConstants.QIBLA_VIEWMODEL_KEY
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QIBLA
 import com.arshadshah.nimaz.ui.components.compass.rememberSensorData
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -89,13 +87,8 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun QiblaScreen(navController: NavHostController) {
+fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hiltViewModel()) {
     val context = LocalContext.current
-    val viewModel = viewModel(
-        key = QIBLA_VIEWMODEL_KEY,
-        initializer = { QiblaViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
 
     val qiblaState by viewModel.qiblaState.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -105,9 +98,6 @@ fun QiblaScreen(navController: NavHostController) {
         remember { mutableStateOf(sharedPreferences.getDataInt("QiblaImageIndex")) }
     val compassImage = painterResource(qiblaImages[selectedImageIndex.value] ?: R.drawable.qibla1)
 
-    LaunchedEffect(Unit) {
-        viewModel.loadQibla(context)
-    }
 
     Scaffold(
         topBar = {

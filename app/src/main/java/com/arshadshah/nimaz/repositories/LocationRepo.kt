@@ -3,8 +3,9 @@ package com.arshadshah.nimaz.repositories
 import android.content.Context
 import android.location.Geocoder
 import java.util.Locale
+import javax.inject.Inject
 
-class LocationRepository(context: Context) {
+class LocationRepository @Inject constructor(context: Context) {
     private val geocoder = Geocoder(context, Locale.getDefault())
 
     fun reverseGeocode(latitude: Double, longitude: Double): Result<Location> {

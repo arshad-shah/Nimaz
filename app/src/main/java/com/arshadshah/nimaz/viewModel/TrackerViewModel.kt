@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import com.arshadshah.nimaz.utils.LocalDataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +19,10 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
-class TrackerViewModel : ViewModel() {
+@HiltViewModel
+class TrackerViewModel @Inject constructor() : ViewModel() {
     //state of date
     private var _dateState = MutableStateFlow(LocalDate.now())
     val dateState = _dateState.asStateFlow()

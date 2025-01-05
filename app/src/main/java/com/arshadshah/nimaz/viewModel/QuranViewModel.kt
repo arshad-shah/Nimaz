@@ -11,14 +11,19 @@ import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.QuranUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
+import javax.inject.Inject
 
-class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : ViewModel() {
+@HiltViewModel
+class QuranViewModel @Inject constructor(
+    private val sharedPreferences: PrivateSharedPreferences,
+) : ViewModel() {
 
     //general state for error and loading
     private val _errorState = MutableStateFlow("")

@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.arshadshah.nimaz.ui.components.settings.state.BooleanPreferenceSettingValueState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionState
@@ -19,14 +18,14 @@ import com.google.accompanist.permissions.shouldShowRationale
 @Composable
 fun FeatureThatRequiresLocationPermission(
     locationPermissionState: MultiplePermissionsState,
-    state: BooleanPreferenceSettingValueState,
+    onLocationToggle: (Boolean) -> Unit,
 ) {
 
     val descToShow = remember { mutableStateOf("") }
     val showDialog = remember { mutableStateOf(false) }
     //check if location permission is granted
     if (locationPermissionState.allPermissionsGranted) {
-        state.value = true
+        onLocationToggle(true)
     } else {
         if (locationPermissionState.shouldShowRationale) {
             showDialog.value = true

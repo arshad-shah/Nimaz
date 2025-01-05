@@ -16,7 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
@@ -26,9 +26,7 @@ import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.common.LocationTopBar
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTimesCard
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
-import com.arshadshah.nimaz.ui.components.dashboard.DashboardQuranTracker
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardRandomAyatCard
-import com.arshadshah.nimaz.ui.components.dashboard.DashboardTasbihTracker
 import com.arshadshah.nimaz.ui.components.dashboard.EidUlAdhaCard
 import com.arshadshah.nimaz.ui.components.dashboard.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
@@ -48,19 +46,17 @@ fun Dashboard(
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
     context: Activity,
     navController: NavHostController,
+    viewModel: DashboardViewModel = hiltViewModel()
 ) {
+
     if (!LocalDataStore.isInitialized()) {
         LocalDataStore.init(context)
         Log.d(MAIN_ACTIVITY_TAG, "onResume:  data store is initialized")
     }
-    val viewModel: DashboardViewModel = viewModel(
-        key = "dashboard_viewmodel",
-        initializer = { DashboardViewModel(context.applicationContext) }
-    )
-
     // Initialize data when the composable is first launched
     LaunchedEffect(Unit) {
         viewModel.initializeData(context)
+        viewModel.handleEvent((DashboardViewModel.DashboardEvent.CheckUpdate(context)))
     }
 
     // Collect all states from ViewModel using collectAsState
@@ -139,7 +135,7 @@ fun Dashboard(
                         context = context,
                         onUpdateClick = {
                             viewModel.handleEvent(
-                                DashboardViewModel.DashboardEvent.CheckUpdate(context, true)
+                                DashboardViewModel.DashboardEvent.CheckUpdate(context)
                             )
                         }
                     )
@@ -158,28 +154,6 @@ fun Dashboard(
                     isLoading = remember { mutableStateOf(dashboardState.isLoadingData) },
                     dashboardPrayerTracker = dashboardState.prayerTracker
                 )
-            }
-
-            item {
-                if (dashboardState.quranBookmarks.isNotEmpty()) {
-                    DashboardQuranTracker(
-                        suraList = dashboardState.suraList,
-                        onNavigateToAyatScreen = onNavigateToAyatScreen,
-                        quranBookmarks = remember { mutableStateOf(dashboardState.quranBookmarks) },
-                        handleEvents = viewModel::handleEvent,
-                        isLoading = remember { mutableStateOf(dashboardState.isLoadingData) }
-                    )
-                }
-
-                if (dashboardState.tasbihListData.isNotEmpty()) {
-                    DashboardTasbihTracker(
-                        onNavigateToTasbihScreen = onNavigateToTasbihScreen,
-                        onNavigateToTasbihListScreen = onNavigateToTasbihListScreen,
-                        tasbihList = dashboardState.tasbihListData,
-                        handleEvents = viewModel::handleEvent,
-                        isLoading = remember { mutableStateOf(dashboardState.isLoadingData) }
-                    )
-                }
             }
 
             item {

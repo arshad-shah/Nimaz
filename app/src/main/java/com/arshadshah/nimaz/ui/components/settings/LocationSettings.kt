@@ -1,31 +1,19 @@
 package com.arshadshah.nimaz.ui.components.settings
 
 import android.Manifest
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -33,259 +21,85 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.ui.components.settings.state.BooleanPreferenceSettingValueState
-import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.utils.FeatureThatRequiresLocationPermission
-import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import es.dmoral.toasty.Toasty
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun LocationSettings(isIntro: Boolean = false) {
+fun LocationSettings(
+    locationState: SettingsViewModel.LocationState,
+    onToggleLocation: (Boolean) -> Unit,
+    onLocationInput: (String) -> Unit,
+    isLoading: Boolean
+) {
 
-    val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    val viewModelPrayerTimes = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-
-    val locationNameState = remember {
-        viewModel.locationName
-    }.collectAsState()
-
-    val latitudeState = remember {
-        viewModel.latitude
-    }.collectAsState()
-
-    val longitudeState = remember {
-        viewModel.longitude
-    }.collectAsState()
-
-    val isError = remember {
-        viewModel.isError
-    }.collectAsState()
-
-    LaunchedEffect(locationNameState.value, latitudeState.value, longitudeState.value) {
-        viewModelPrayerTimes.handleEvent(
-            PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                PrayerTimesParamMapper.getParams(context)
-            )
+    //location permission state
+    val locationPermissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
         )
+    )
+
+    if (locationState.isAuto) {
+        FeatureThatRequiresLocationPermission(locationPermissionState, onLocationToggle = {
+            onToggleLocation(it)
+        })
     }
-
-    if (isError.value.isNotBlank()) {
-        Toasty.error(context, isError.value, Toasty.LENGTH_SHORT).show()
-    } else {
-
-        //location permission state
-        val locationPermissionState = rememberMultiplePermissionsState(
-            permissions = listOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        )
-        //the state of the switch
-        val state =
-            rememberPreferenceBooleanSettingState(
-                AppConstants.LOCATION_TYPE,
-                false
-            )
-
-
-
-
-        if (state.value) {
-            FeatureThatRequiresLocationPermission(locationPermissionState, state)
-        }
-
-        val latitude = remember {
-            viewModel.latitude
-        }.collectAsState()
-        val longitude = remember {
-            viewModel.longitude
-        }.collectAsState()
-
-        val autoParams = remember {
-            viewModel.autoParams
-        }.collectAsState()
-
-        LaunchedEffect(
-            key1 = locationNameState.value,
-            key2 = latitudeState.value,
-            key3 = longitudeState.value
-        ) {
-
-            if (autoParams.value) {
-                //set method to other
-                viewModel.handleEvent(
-                    SettingsViewModel.SettingsEvent.CalculationMethod(
-                        "OTHER"
-                    )
-                )
-                //set fajr angle
-                viewModel.handleEvent(
-                    SettingsViewModel.SettingsEvent.FajrAngle(
-                        AutoAnglesCalc().calculateFajrAngle(
-                            context,
-                            latitude.value,
-                            longitude.value
-                        ).toString()
-                    )
-                )
-                //set ishaa angle
-                viewModel.handleEvent(
-                    SettingsViewModel.SettingsEvent.IshaAngle(
-                        AutoAnglesCalc().calculateIshaaAngle(
-                            context,
-                            latitude.value,
-                            longitude.value
-                        ).toString()
-                    )
-                )
-                //set high latitude method
-                viewModel.handleEvent(
-                    SettingsViewModel.SettingsEvent.HighLatitude(
-                        "TWILIGHT_ANGLE"
-                    )
-                )
-                viewModel.handleEvent(
-                    SettingsViewModel.SettingsEvent.LoadSettings
-                )
+    SettingsGroup(title = { Text(text = "Location") }) {
+        LocationToggleSwitch(
+            state = createBooleanState(locationState.isAuto),
+            locationPermissionState = locationPermissionState,
+            locationAuto = locationState.isAuto,
+            locationName = locationState.name,
+            onLocationToggle = {
+                onToggleLocation(it)
             }
-
-
-            viewModelPrayerTimes.handleEvent(
-                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                    PrayerTimesParamMapper.getParams(context)
-                )
-            )
-
-            viewModelPrayerTimes.handleEvent(
-                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                    context
-                )
-            )
-
-        }
-
-        if (isIntro) {
-            LocationToggleSwitch(
-                state = state,
-                locationPermissionState = locationPermissionState,
-                isIntro = true,
-            )
-            AnimatedVisibility(
-                visible = !state.value,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
+        )
+        AnimatedVisibility(
+            visible = !locationState.isAuto,
+            enter = expandVertically(),
+            exit = shrinkVertically()
+        ) {
+            Column {
                 ElevatedCard(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                            elevation = 8.dp
-                        ),
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
-                        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                            alpha = 0.38f
-                        ),
-                    ),
-                    shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth()
                 ) {
-                    ManualLocationInput()
+                    ManualLocationInput(
+                        locationName = locationState.name,
+                        onLocationInput = onLocationInput,
+                        isLoading
+                    )
                 }
-            }
-        } else {
-            SettingsGroup(title = { Text(text = "Location") }) {
-                LocationToggleSwitch(
-                    state = state,
-                    locationPermissionState = locationPermissionState,
-                    isIntro = false,
-                )
-                AnimatedVisibility(
-                    visible = !state.value,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
-                ) {
-                    Column {
-                        ElevatedCard(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .fillMaxWidth()
-                        ) {
-                            ManualLocationInput()
-                        }
-                    }
-                }
-                CoordinatesView(
-                    longitudeState = longitudeState,
-                    latitudeState = latitudeState,
-                )
             }
         }
-
-
+        CoordinatesView(
+            longitudeState = locationState.longitude,
+            latitudeState = locationState.latitude,
+        )
     }
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun LocationToggleSwitch(
-    state: BooleanPreferenceSettingValueState,
+    state: SettingValueState<Boolean>,
     locationPermissionState: MultiplePermissionsState,
-    isIntro: Boolean,
+    onLocationToggle: (Boolean) -> Unit,
+    locationAuto: Boolean,
+    locationName: String,
 ) {
     val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    val viewModelPrayerTimes = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-    val isLocationAuto = remember {
-        viewModel.isLocationAuto
-    }.collectAsState()
-    val locationNameState = remember {
-        viewModel.locationName
-    }.collectAsState()
-    val isLoading = remember {
-        viewModel.isLoading
-    }.collectAsState()
-
-    val isChecked = remember {
-        mutableStateOf(isLocationAuto.value)
-    }
-
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
@@ -298,31 +112,9 @@ fun LocationToggleSwitch(
                             false
                         )
                         if (isLocationAutoInPref) {
-                            viewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.LocationToggle(
-                                    context,
-                                    true
-                                )
-                            )
-                            viewModelPrayerTimes.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                    PrayerTimesParamMapper.getParams(context)
-                                )
-                            )
-                            viewModelPrayerTimes.handleEvent(
-                                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                    context
-                                )
-                            )
-                            isChecked.value = true
+                            onLocationToggle(true)
                         } else {
-                            viewModel.handleEvent(
-                                SettingsViewModel.SettingsEvent.LocationToggle(
-                                    context,
-                                    false
-                                )
-                            )
-                            isChecked.value = false
+                            onLocationToggle(false)
                         }
                     }
                 }
@@ -354,137 +146,36 @@ fun LocationToggleSwitch(
                 )
             },
             title = {
-                if (isIntro) {
-                    Text(text = "Enable Auto Location")
+                if (state.value) {
+                    Text(text = "Automatic")
                 } else {
-                    if (state.value) {
-                        Text(text = "Automatic")
-                    } else {
-                        Text(text = "Manual")
-                    }
+                    Text(text = "Manual")
                 }
             },
             subtitle = {
-                //if the permission is granted, show a checkmark and text saying "Allowed"
-                if (isIntro) {
-                    if (isChecked.value) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .padding(end = 4.dp),
-                                painter = painterResource(id = R.drawable.checkbox_icon),
-                                contentDescription = "Location Allowed"
-                            )
-                            Text(text = "Enabled")
-                        }
-                    } else {
-                        //if the permission is not granted, show a notification icon and text saying "Not Allowed"
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .padding(end = 4.dp),
-                                painter = painterResource(id = R.drawable.cross_circle_icon),
-                                contentDescription = "Location Not Allowed"
-                            )
-                            Text(text = "Disabled")
-                        }
-                    }
-                } else {
-                    if (isLocationAuto.value) {
-                        Text(text = locationNameState.value)
-                    }
+                if (locationAuto) {
+                    Text(text = locationName)
                 }
             },
             onCheckedChange = {
                 if (it) {
                     if (locationPermissionState.allPermissionsGranted) {
-                        viewModel.handleEvent(
-                            SettingsViewModel.SettingsEvent.LocationToggle(
-                                context,
-                                true
-                            )
-                        )
-                        viewModelPrayerTimes.handleEvent(
-                            PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                                PrayerTimesParamMapper.getParams(context)
-                            )
-                        )
-                        viewModelPrayerTimes.handleEvent(
-                            PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                                context
-                            )
-                        )
-                        PrivateSharedPreferences(context).saveDataBoolean(
-                            AppConstants.ALARM_LOCK,
-                            false
-                        )
+                        onLocationToggle(true)
                     } else {
                         locationPermissionState.launchMultiplePermissionRequest()
                     }
                 } else {
-                    viewModel.handleEvent(
-                        SettingsViewModel.SettingsEvent.LocationToggle(
-                            context,
-                            it
-                        )
-                    )
-                    viewModelPrayerTimes.handleEvent(
-                        PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                            PrayerTimesParamMapper.getParams(context)
-                        )
-                    )
-                    viewModelPrayerTimes.handleEvent(
-                        PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                            context
-                        )
-                    )
+                    onLocationToggle(false)
                     PrivateSharedPreferences(context).saveDataBoolean(
                         AppConstants.ALARM_LOCK,
                         false
                     )
-                    isChecked.value = false
-                    if (isIntro) {
-                        Toasty.info(
-                            context,
-                            "Please disable location permission for Nimaz in \n Permissions -> Location -> Don't Allow",
-                            Toasty.LENGTH_LONG
-                        ).show()
-                        //send the user to the location settings of the app
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        with(intent) {
-                            data = Uri.fromParts("package", context.packageName, null)
-                            addCategory(Intent.CATEGORY_DEFAULT)
-                            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                        }
-
-                        context.startActivity(intent)
-                    }
                 }
             }
         )
     }
 
-    if (state.value && isIntro) {
-        //if locationNameState is longer than 10 characters, than add an ellipsis
-        val locationName = if (locationNameState.value.length > 15) {
-            if (isLoading.value) {
-                "Loading..."
-            } else {
-                locationNameState.value.substring(0, 15) + "..."
-            }
-        } else {
-            if (isLoading.value) {
-                "Loading..."
-            } else {
-                locationNameState.value
-            }
-        }
+    if (state.value) {
         ElevatedCard(
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
@@ -504,11 +195,7 @@ fun LocationToggleSwitch(
                         textAlign = TextAlign.Center,
                         text = locationName,
                         modifier = Modifier
-                            .padding(16.dp)
-                            .placeholder(
-                                visible = isLoading.value,
-                                highlight = PlaceholderHighlight.shimmer()
-                            ),
+                            .padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }) {
@@ -516,4 +203,9 @@ fun LocationToggleSwitch(
             }
         }
     }
+}
+
+private fun createBooleanState(value: Boolean) = object : SettingValueState<Boolean> {
+    override var value: Boolean = value
+    override fun reset() {}
 }

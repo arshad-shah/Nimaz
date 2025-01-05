@@ -14,9 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,9 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
-fun CoordinatesView(latitudeState: State<Double>, longitudeState: State<Double>) {
-    val latitudeRounded = String.format("%.4f", latitudeState.value)
-    val longitudeRounded = String.format("%.4f", longitudeState.value)
+fun CoordinatesView(latitudeState: Double, longitudeState: Double) {
+    val latitudeRounded = String.format("%.4f", latitudeState)
+    val longitudeRounded = String.format("%.4f", longitudeState)
 
     ElevatedCard(
         modifier = Modifier
@@ -98,9 +95,7 @@ fun CoordinatesViewPreview() {
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.background
         ) {
-            val latitude = remember { mutableStateOf(53.4) }
-            val longitude = remember { mutableStateOf(-7.3) }
-            CoordinatesView(latitude, longitude)
+            CoordinatesView(53.4, -7.3)
         }
     }
 }

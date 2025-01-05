@@ -18,9 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.common.LocationTopBar
 import com.arshadshah.nimaz.ui.components.dashboard.getTimerText
@@ -37,13 +36,11 @@ private const val SCREEN_WIDTH_THRESHOLD = 720
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrayerTimesScreen(navController: NavHostController) {
+fun PrayerTimesScreen(
+    navController: NavHostController,
+    viewModel: PrayerTimesViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
-    )
 
     val prayerTimesState by viewModel.prayerTimesState.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()

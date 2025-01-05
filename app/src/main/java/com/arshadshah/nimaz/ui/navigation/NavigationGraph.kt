@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.navigation
 
-import About
 import LicensesScreen
 import android.os.Build
 import android.util.Log
@@ -43,6 +42,7 @@ import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
+import com.arshadshah.nimaz.ui.screens.settings.About
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
@@ -54,6 +54,7 @@ import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.ui.screens.tracker.CalenderScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
+import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -61,6 +62,7 @@ fun NavigationGraph(
     navController: NavController,
     context: MainActivity,
     isFirstInstall: Boolean,
+    settingsViewModel: SettingsViewModel,
 ) {
 
     val startDestination = if (isFirstInstall) "Intro" else BottomNavItem.Dashboard.screen_route
@@ -144,7 +146,6 @@ fun NavigationGraph(
         }
         composable(BottomNavItem.QuranScreen.screen_route) {
             QuranScreen(
-                context = context,
                 navController = navController,
                 onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int? ->
                     if (scrollToAya != null) {
@@ -406,6 +407,7 @@ fun NavigationGraph(
             SettingsScreen(
                 activity = context,
                 navController = navController,
+                viewModelSettings = settingsViewModel,
                 onNavigateToPrayerTimeCustomizationScreen = {
                     navController.navigate(
                         PRAYER_TIMES_SETTINGS_SCREEN_ROUTE

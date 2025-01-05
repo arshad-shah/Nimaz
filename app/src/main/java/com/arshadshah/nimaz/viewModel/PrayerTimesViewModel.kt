@@ -2,12 +2,15 @@ package com.arshadshah.nimaz.viewModel
 
 import android.content.Context
 import android.os.CountDownTimer
+import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.Parameters
-import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesData
@@ -16,10 +19,8 @@ import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,20 +29,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.ZoneId
+import javax.inject.Inject
 
-class PrayerTimesViewModel(context: Context) : ViewModel() {
-    private val sharedPreferences = PrivateSharedPreferences(context)
-    private val locationService = LocationService(context, LocationRepository(context))
-    private val prayerTimesService = PrayerTimesService(context, PrayerTimesRepository)
-    private var countDownTimer: CountDownTimer? = null
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        _error.value = throwable.message ?: "An unknown error occurred"
-        _isLoading.value = false
-    }
-    private val viewModelJob = SupervisorJob()
-    private val viewModelScope =
-        CoroutineScope(Dispatchers.Main + viewModelJob + coroutineExceptionHandler)
+@HiltViewModel
+class PrayerTimesViewModel @Inject constructor(
+    private val prayerTimesService: PrayerTimesService,
+    private val locationService: LocationService,
+    private val sharedPreferences: PrivateSharedPreferences
+) : ViewModel() {
 
+    // State definitions remain the same for API compatibility
     data class PrayerTimesState(
         val currentPrayerName: String = "Loading...",
         val currentPrayerTime: LocalDateTime = LocalDateTime.now(),
@@ -79,106 +76,162 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    fun handleEvent(event: PrayerTimesEvent) {
-        when (event) {
-            is PrayerTimesEvent.Start -> startTimer(event.timeToNextPrayer)
-            is PrayerTimesEvent.RELOAD -> loadPrayerTimes()
-            is PrayerTimesEvent.UPDATE_PRAYERTIMES -> updatePrayerTimes(event.mapOfParameters)
-            is PrayerTimesEvent.UPDATE_WIDGET -> updateWidget(event.context)
-            is PrayerTimesEvent.SET_LOADING -> _isLoading.value = event.isLoading
-            is PrayerTimesEvent.SET_ALARMS -> setAlarms(event.context)
-            is PrayerTimesEvent.LOAD_LOCATION -> loadLocation()
-            is PrayerTimesEvent.Init -> init(event.context)
-        }
+    private var countDownTimer: CountDownTimer? = null
+
+    companion object {
+        private const val TAG = "PrayerTimesVM"
     }
 
-    private fun init(context: Context) {
+
+    init {
+        Log.d(TAG, "ViewModel initialized")
+    }
+
+    fun handleEvent(event: PrayerTimesEvent) {
+        Log.d(TAG, "Handling event: $event")
         viewModelScope.launch {
-            handleEvent(PrayerTimesEvent.SET_LOADING(true))
-            handleEvent(PrayerTimesEvent.LOAD_LOCATION)
-            handleEvent(PrayerTimesEvent.RELOAD)
-            handleEvent(PrayerTimesEvent.SET_LOADING(false))
+            try {
+                when (event) {
+                    is PrayerTimesEvent.Start -> {
+                        Log.d(TAG, "Starting timer with duration: ${event.timeToNextPrayer}ms")
+                        withContext(Dispatchers.Main) {
+                            startTimer(event.timeToNextPrayer)
+                        }
+                    }
 
-            _prayerTimesState.collect { state ->
-                if (state.locationName != "Loading..." && state.latitude != 0.0 && state.longitude != 0.0) {
-                    handleEvent(
-                        PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                            PrayerTimesParamMapper.getParams(
-                                context
-                            )
-                        )
-                    )
-                    handleEvent(PrayerTimesEvent.UPDATE_WIDGET(context))
+                    is PrayerTimesEvent.RELOAD -> {
+                        Log.d(TAG, "Reloading prayer times")
+                        loadPrayerTimes()
+                    }
 
-                    val timeToNextPrayer = state.nextPrayerTime
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()
-                    val currentTime = LocalDateTime.now()
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()
+                    is PrayerTimesEvent.UPDATE_PRAYERTIMES -> {
+                        Log.d(TAG, "Updating prayer times with params: ${event.mapOfParameters}")
+                        updatePrayerTimes(event.mapOfParameters)
+                    }
 
-                    handleEvent(PrayerTimesEvent.Start(timeToNextPrayer - currentTime))
+                    is PrayerTimesEvent.UPDATE_WIDGET -> {
+                        Log.d(TAG, "Updating widget")
+                        updateWidget(event.context)
+                    }
+
+                    is PrayerTimesEvent.SET_LOADING -> {
+                        Log.d(TAG, "Setting loading state to: ${event.isLoading}")
+                        setLoading(event.isLoading)
+                    }
+
+                    is PrayerTimesEvent.SET_ALARMS -> {
+                        Log.d(TAG, "Setting alarms")
+                        setAlarms(event.context)
+                    }
+
+                    is PrayerTimesEvent.LOAD_LOCATION -> {
+                        Log.d(TAG, "Loading location")
+                        loadLocation()
+                    }
+
+                    is PrayerTimesEvent.Init -> {
+                        Log.d(TAG, "Initializing with context")
+                        initialize(event.context)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling event: ${e.message}", e)
+                _error.value = e.message ?: "An unknown error occurred"
+                _isLoading.value = false
             }
         }
     }
 
-    private fun setAlarms(context: Context) = viewModelScope.launch {
+    private suspend fun initialize(context: Context) = withContext(Dispatchers.Default) {
+        Log.d(TAG, "Starting initialization")
+        setLoading(true)
+        try {
+            loadLocation()
+            loadPrayerTimes()
+
+            prayerTimesState.value.let { state ->
+                if (state.isValidLocation()) {
+                    Log.d(TAG, "Location valid, proceeding with initialization")
+                    updatePrayerTimes(PrayerTimesParamMapper.getParams(context))
+                    updateWidget(context)
+                    withContext(Dispatchers.Main) {
+                        calculateAndStartTimer(state)
+                    }
+                } else {
+                    Log.w(TAG, "Invalid location during initialization: $state")
+                }
+            }
+        } finally {
+            setLoading(false)
+            Log.d(TAG, "Initialization completed")
+        }
+    }
+
+    private suspend fun setAlarms(context: Context) {
+        Log.d(TAG, "Setting alarms - loading prayer times first")
         loadPrayerTimes()
         withContext(Dispatchers.Default) {
-            CreateAlarms().exact(
-                context,
-                _prayerTimesState.value.fajrTime,
-                _prayerTimesState.value.sunriseTime,
-                _prayerTimesState.value.dhuhrTime,
-                _prayerTimesState.value.asrTime,
-                _prayerTimesState.value.maghribTime,
-                _prayerTimesState.value.ishaTime,
-            )
+            _prayerTimesState.value.let { state ->
+                Log.d(
+                    TAG,
+                    "Creating alarms with times: Fajr=${state.fajrTime}, Dhuhr=${state.dhuhrTime}"
+                )
+                CreateAlarms().exact(
+                    context,
+                    state.fajrTime,
+                    state.sunriseTime,
+                    state.dhuhrTime,
+                    state.asrTime,
+                    state.maghribTime,
+                    state.ishaTime,
+                )
+                Log.d(TAG, "Alarms set successfully")
+            }
         }
     }
 
-    private fun updateWidget(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private suspend fun updateWidget(context: Context) {
+        Log.d(TAG, "Updating widget")
+        withContext(Dispatchers.IO) {
             PrayerTimeWorker.enqueue(context, true)
+            Log.d(TAG, "Widget update enqueued")
         }
     }
 
-    private fun updatePrayerTimes(parameters: Parameters) = viewModelScope.launch {
+    private suspend fun updatePrayerTimes(parameters: Parameters) {
+        Log.d(TAG, "Updating prayer times with parameters: $parameters")
         try {
             _error.value = null
-
             val response = withContext(Dispatchers.IO) {
                 PrayerTimesRepository.updatePrayerTimes(parameters)
             }
+            Log.d(TAG, "Prayer times update response received: ${response.data != null}")
 
-            response.data?.let { data ->
-                updatePrayerTimesState(data)
+            response.data?.let {
+                Log.d(TAG, "Updating prayer times state with new data")
+                updatePrayerTimesState(it)
             } ?: run {
+                Log.e(TAG, "Failed to update prayer times - null data received")
                 _error.value = "Failed to update prayer times. Data is null."
             }
-        } finally {
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating prayer times: ${e.message}", e)
+            _error.value = e.message
         }
     }
 
     private suspend fun updatePrayerTimesState(data: LocalPrayerTimes) {
+        Log.d(TAG, "Updating prayer times state with data: $data")
         val currentAndNextPrayertimes = withContext(Dispatchers.Default) {
-            prayerTimesService.getCurrentAndNextPrayer(
-                PrayerTimesData(
-                    fajr = data.fajr ?: LocalDateTime.now(),
-                    sunrise = data.sunrise ?: LocalDateTime.now(),
-                    dhuhr = data.dhuhr ?: LocalDateTime.now(),
-                    asr = data.asr ?: LocalDateTime.now(),
-                    maghrib = data.maghrib ?: LocalDateTime.now(),
-                    isha = data.isha ?: LocalDateTime.now()
-                )
-            )
+            prayerTimesService.getCurrentAndNextPrayer(data.toPrayerTimesData())
         }
+        Log.d(
+            TAG,
+            "Current prayer: ${currentAndNextPrayertimes.currentPrayer}, Next prayer: ${currentAndNextPrayertimes.nextPrayer}"
+        )
 
-        _prayerTimesState.update {
-            it.copy(
+        _prayerTimesState.update { state ->
+            state.copy(
                 currentPrayerName = currentAndNextPrayertimes.currentPrayer,
                 currentPrayerTime = currentAndNextPrayertimes.currentPrayerTime,
                 nextPrayerName = currentAndNextPrayertimes.nextPrayer,
@@ -189,48 +242,69 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
                 asrTime = data.asr ?: LocalDateTime.now(),
                 maghribTime = data.maghrib ?: LocalDateTime.now(),
                 ishaTime = data.isha ?: LocalDateTime.now()
-            )
+            ).also {
+                Log.d(
+                    TAG,
+                    "Prayer times state updated: Current=${it.currentPrayerName}, Next=${it.nextPrayerName}"
+                )
+            }
         }
     }
 
-    fun loadPrayerTimes() = viewModelScope.launch {
+    private suspend fun loadPrayerTimes() {
+        Log.d(TAG, "Loading prayer times")
         try {
             _error.value = null
-
             val prayerTimes = withContext(Dispatchers.IO) {
                 prayerTimesService.getPrayerTimes()
             }
+            Log.d(TAG, "Prayer times loaded: ${prayerTimes != null}")
 
-            if (prayerTimes != null) {
-                updatePrayerTimesState(
-                    LocalPrayerTimes(
-                        fajr = prayerTimes.fajr,
-                        sunrise = prayerTimes.sunrise,
-                        dhuhr = prayerTimes.dhuhr,
-                        asr = prayerTimes.asr,
-                        maghrib = prayerTimes.maghrib,
-                        isha = prayerTimes.isha,
-                    )
-                )
-            } else {
+            prayerTimes?.let {
+                Log.d(TAG, "Updating state with loaded prayer times")
+                updatePrayerTimesState(it.toLocalPrayerTimes())
+            } ?: run {
+                Log.e(TAG, "Failed to load prayer times - null data received")
                 _error.value = "Failed to load prayer times"
             }
-        } finally {
-
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading prayer times: ${e.message}", e)
+            _error.value = e.message
         }
     }
 
     private fun startTimer(timeToNextPrayer: Long) {
-        countDownTimer?.cancel()
+        Log.d(TAG, "Starting countdown timer on thread: ${Thread.currentThread().name}")
+
+        // Ensure we're on the main thread
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Log.w(TAG, "Not on main thread, switching context")
+            viewModelScope.launch(Dispatchers.Main) {
+                createAndStartTimer(timeToNextPrayer)
+            }
+            return
+        }
+
+        createAndStartTimer(timeToNextPrayer)
+    }
+
+    private fun createAndStartTimer(timeToNextPrayer: Long) {
+        Log.d(TAG, "Creating new timer instance")
+        countDownTimer?.cancel() // Cancel any existing timer
+
         countDownTimer = object : CountDownTimer(timeToNextPrayer, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 updateCountdownState(millisUntilFinished)
             }
 
             override fun onFinish() {
-                loadPrayerTimes()
+                Log.d(TAG, "Timer finished, reloading prayer times")
+                viewModelScope.launch {
+                    loadPrayerTimes()
+                }
             }
         }.start()
+        Log.d(TAG, "New timer started successfully")
     }
 
     private fun updateCountdownState(millisUntilFinished: Long) {
@@ -239,39 +313,101 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
         val seconds = (millisUntilFinished % (60 * 1000)) / 1000
 
         _prayerTimesState.update {
-            it.copy(countDownTime = CountDownTime(hours, minutes, seconds))
+            it.copy(
+                countDownTime = CountDownTime(hours, minutes, seconds)
+            ).also {
+                if (seconds % 30 == 0L) { // Log every 30 seconds to avoid spam
+                    Log.v(TAG, "Countdown: ${hours}h ${minutes}m ${seconds}s")
+                }
+            }
         }
     }
 
-    private fun loadLocation() {
-        val isAutoLocation = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
-        locationService.loadLocation(
-            isAutoLocation,
-            onSuccess = { location ->
-                _prayerTimesState.update {
-                    it.copy(
-                        locationName = location.locationName,
-                        latitude = location.latitude,
-                        longitude = location.longitude
-                    )
+    private suspend fun loadLocation() {
+        val isAuto = sharedPreferences.getDataBoolean(LOCATION_TYPE, false)
+        Log.d(TAG, "Loading location (Auto: $isAuto)")
+        try {
+            locationService.loadLocation(isAuto)
+                .onSuccess { location ->
+                    Log.d(TAG, "Location loaded successfully: ${location.locationName}")
+                    _prayerTimesState.update {
+                        it.copy(
+                            locationName = location.locationName,
+                            latitude = location.latitude,
+                            longitude = location.longitude
+                        )
+                    }
                 }
-            },
-            onError = { errorMessage ->
-                _prayerTimesState.update {
-                    it.copy(
-                        locationName = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
-                        latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
-                        longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                    )
+                .onFailure { throwable ->
+                    Log.e(TAG, "Failed to load location: ${throwable.message}", throwable)
+                    _error.value = throwable.message
+                    loadFallbackLocation()
                 }
-                _error.value = errorMessage
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading location: ${e.message}", e)
+            _error.value = e.message
+            loadFallbackLocation()
+        }
+    }
+
+    private fun loadFallbackLocation() {
+        Log.d(TAG, "Loading fallback location")
+        _prayerTimesState.update {
+            it.copy(
+                locationName = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
+                latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
+                longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+            ).also { state ->
+                Log.d(
+                    TAG,
+                    "Fallback location loaded: ${state.locationName} (${state.latitude}, ${state.longitude})"
+                )
             }
-        )
+        }
     }
 
     override fun onCleared() {
+        Log.d(TAG, "ViewModel clearing")
         super.onCleared()
         countDownTimer?.cancel()
-        viewModelJob.cancel()
     }
+
+    private fun PrayerTimesState.isValidLocation() =
+        locationName != "Loading..." && latitude != 0.0 && longitude != 0.0
+
+    private fun calculateAndStartTimer(state: PrayerTimesState) {
+        val timeToNextPrayer = state.nextPrayerTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        val currentTime = LocalDateTime.now()
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        startTimer(timeToNextPrayer - currentTime)
+    }
+
+    private fun setLoading(loading: Boolean) {
+        _isLoading.value = loading
+    }
+
+    // Extension functions for data conversion
+    private fun PrayerTimesData.toLocalPrayerTimes() = LocalPrayerTimes(
+        fajr = fajr,
+        sunrise = sunrise,
+        dhuhr = dhuhr,
+        asr = asr,
+        maghrib = maghrib,
+        isha = isha
+    )
+
+    private fun LocalPrayerTimes.toPrayerTimesData() = PrayerTimesData(
+        fajr = fajr ?: LocalDateTime.now(),
+        sunrise = sunrise ?: LocalDateTime.now(),
+        dhuhr = dhuhr ?: LocalDateTime.now(),
+        asr = asr ?: LocalDateTime.now(),
+        maghrib = maghrib ?: LocalDateTime.now(),
+        isha = isha ?: LocalDateTime.now()
+    )
 }

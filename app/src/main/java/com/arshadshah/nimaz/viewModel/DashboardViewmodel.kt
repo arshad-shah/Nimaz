@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
@@ -14,7 +15,7 @@ import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
-import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.data.local.models.Parameters
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import com.arshadshah.nimaz.services.LocationService
@@ -22,8 +23,14 @@ import com.arshadshah.nimaz.services.PrayerTimesData
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
 import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,14 +41,17 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import javax.inject.Inject
 
-class DashboardViewModel(context: Context) : ViewModel() {
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val sharedPreferences: PrivateSharedPreferences,
+    private val updateService: UpdateService,
+    private val locationService: LocationService,
+    private val prayerTimesService: PrayerTimesService,
+) : ViewModel() {
     private val TAG = "DashboardViewModel"
-
-    private val sharedPreferences = PrivateSharedPreferences(context)
-    private val updateService = UpdateService(context)
-    private val locationService = LocationService(context, LocationRepository(context))
-    private val prayerTimesService = PrayerTimesService(context, PrayerTimesRepository)
     private val dataStore by lazy { LocalDataStore.getDataStore() }
 
     // State management using StateFlow
@@ -73,7 +83,6 @@ class DashboardViewModel(context: Context) : ViewModel() {
         viewModelScope.launch {
             withContext(Dispatchers.Main) {
                 launch { setAlarms(context) }
-                launch { checkForUpdate(context, false) }
                 launch { isFastingToday() }
                 launch { getCurrentAndNextPrayerTimes() }
                 launch { getTodaysPrayerTracker(LocalDate.now()) }
@@ -87,8 +96,17 @@ class DashboardViewModel(context: Context) : ViewModel() {
     fun handleEvent(event: DashboardEvent) {
         viewModelScope.launch {
             when (event) {
-                is DashboardEvent.CheckUpdate -> checkForUpdate(event.context, event.doUpdate)
-                is DashboardEvent.LoadLocation -> loadLocation()
+                is DashboardEvent.CheckUpdate -> handleCheckUpdate(event)
+                is DashboardEvent.StartUpdate -> handleStartUpdate(event)
+                is DashboardEvent.RegisterUpdateListener -> handleRegisterUpdateListener()
+                is DashboardEvent.UnregisterUpdateListener -> handleUnregisterUpdateListener()
+                is DashboardEvent.LoadLocation -> loadLocation(
+                    sharedPreferences.getDataBoolean(
+                        LOCATION_TYPE,
+                        false
+                    )
+                )
+
                 is DashboardEvent.IsFastingToday -> isFastingToday()
                 is DashboardEvent.UpdatePrayerTracker ->
                     updatePrayerTrackerForToday(event.date, event.prayerName, event.prayerDone)
@@ -114,6 +132,38 @@ class DashboardViewModel(context: Context) : ViewModel() {
         }
     }
 
+    private fun updateWidget(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            PrayerTimeWorker.enqueue(context, true)
+        }
+    }
+
+    private fun updatePrayerTimes(parameters: Parameters) = viewModelScope.launch {
+        try {
+            states.error.value = ""
+
+            val response = withContext(Dispatchers.IO) {
+                PrayerTimesRepository.updatePrayerTimes(parameters)
+            }
+
+            response.data?.let { data ->
+                states.prayerTimes.value = PrayerTimesData(
+                    fajr = data.fajr,
+                    sunrise = data.sunrise,
+                    dhuhr = data.dhuhr,
+                    asr = data.asr,
+                    maghrib = data.maghrib,
+                    isha = data.isha
+                )
+
+            } ?: run {
+                states.error.value = "Failed to update prayer times. Data is null."
+            }
+        } finally {
+        }
+    }
+
+
     private fun PrayerTimesData.areAllTimesAvailable(): Boolean {
         return fajr != null &&
                 sunrise != null &&
@@ -126,7 +176,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
     private suspend fun setAlarms(context: Context) {
         safeOperation(
             operation = {
-                loadLocation()
+                loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
                 loadPrayerTimes()
                 getCurrentAndNextPrayerTimes()
                 val timeToNextPrayerLong =
@@ -170,16 +220,106 @@ class DashboardViewModel(context: Context) : ViewModel() {
         )
     }
 
-    private fun checkForUpdate(context: Activity, doUpdate: Boolean) {
-        updateService.checkForUpdate(doUpdate) { updateIsAvailable ->
-            states.isUpdateAvailable.value = updateIsAvailable
-            if (doUpdate && updateIsAvailable) {
-                updateService.startUpdateFlowForResult(
-                    context,
-                    AppConstants.APP_UPDATE_REQUEST_CODE
-                )
+    private fun handleCheckUpdate(event: DashboardEvent.CheckUpdate) {
+        updateService.checkForUpdate(event.updateType) { result ->
+            result.onSuccess { isUpdateAvailable ->
+                states.isUpdateAvailable.value = isUpdateAvailable
+
+                // If update is available and it's an immediate update, start the flow
+                if (isUpdateAvailable && event.updateType == AppUpdateType.IMMEDIATE) {
+                    handleEvent(
+                        DashboardEvent.StartUpdate(
+                            activity = event.activity,
+                            updateType = event.updateType
+                        )
+                    )
+                }
+            }.onFailure { error ->
+                states.isUpdateAvailable.value = false
+                states.error.value = error.message ?: "Update check failed"
             }
         }
+    }
+
+    private suspend fun handleStartUpdate(event: DashboardEvent.StartUpdate) {
+        updateService.startUpdateFlow(
+            activity = event.activity,
+            requestCode = event.requestCode,
+            updateType = event.updateType
+        ) { result ->
+            result.onFailure { error ->
+                states.isUpdateAvailable.value = false
+                states.error.value = error.message ?: "Update start failed"
+            }
+        }
+    }
+
+    private fun handleRegisterUpdateListener() {
+        updateService.registerInstallStateListener { statusCode ->
+            when (statusCode.toString()) {
+                InstallStatus.PENDING.toString() -> {
+                    states.isLoading.value = true
+                    states.isUpdateAvailable.value = true
+                    states.isError.value = false
+                }
+
+                InstallStatus.DOWNLOADING.toString() -> {
+                    states.isUpdateAvailable.value = true
+                    states.isError.value = false
+                    states.isLoading.value = true
+                }
+
+                InstallStatus.DOWNLOADED.toString() -> {
+                    states.isUpdateAvailable.value = false
+                    states.isError.value = false
+                    states.isLoading.value = false
+                }
+
+                InstallStatus.INSTALLING.toString() -> {
+                    states.isLoading.value = true
+                    states.isError.value = false
+                    states.isUpdateAvailable.value = false
+                    states.error.value = ""
+                }
+
+                InstallStatus.INSTALLED.toString() -> {
+                    states.isUpdateAvailable.value = false
+                    states.isError.value = false
+                    states.isLoading.value = false
+                }
+
+                InstallStatus.FAILED.toString() -> {
+                    states.isUpdateAvailable.value = false
+                    states.isError.value = true
+                    states.isLoading.value = false
+                    states.error.value = "Update installation failed"
+                }
+
+                InstallStatus.CANCELED.toString() -> {
+                    states.isUpdateAvailable.value = false
+                    states.isError.value = false
+                    states.isLoading.value = false
+                    states.error.value = ""
+                }
+
+                else -> {
+                    states.isError.value = true
+                    states.isLoading.value = false
+                    states.error.value = "Unknown update status"
+                    states.isUpdateAvailable.value = false
+                    states.error.value = "Unknown update status"
+                }
+            }
+        }
+    }
+
+    private fun handleUnregisterUpdateListener() {
+        updateService.unregisterInstallStateListener()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        handleUnregisterUpdateListener()
     }
 
     private suspend fun getBookmarksOfQuran() = withContext(Dispatchers.IO) {
@@ -343,25 +483,36 @@ class DashboardViewModel(context: Context) : ViewModel() {
         )
     }
 
-    private fun loadLocation() {
-        val isAutoLocation = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
-        locationService.loadLocation(
-            isAutoLocation,
-            onSuccess = { location ->
-                states.locationName.value = location.locationName
-                states.latitude.value = location.latitude
-                states.longitude.value = location.longitude
-            },
-            onError = { error ->
-                states.latitude.value =
-                    sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-                states.longitude.value =
-                    sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                states.locationName.value =
-                    sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-                states.isError.value = error.isNotEmpty()
-            }
-        )
+    private suspend fun loadLocation(isAuto: Boolean) {
+        try {
+            states.isLoading.value = true
+
+            locationService.loadLocation(isAuto)
+                .onSuccess { location ->
+                    states.locationName.value = location.locationName
+                    states.latitude.value = location.latitude
+                    states.longitude.value = location.longitude
+                    updatePrayerTimes(PrayerTimesParamMapper.getParams(context = context))
+                    updateWidget(context)
+                    // Reload prayer times with new location
+                    loadPrayerTimes()
+                }
+                .onFailure { throwable ->
+                    states.error.value = throwable.message ?: "Failed to load location"
+                    loadFallbackLocation()
+                }
+        } catch (e: Exception) {
+            states.error.value = e.message ?: "Unknown error occurred"
+            loadFallbackLocation()
+        } finally {
+            states.isLoading.value = false
+        }
+    }
+
+    private suspend fun loadFallbackLocation() {
+        states.locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
+        states.latitude.value = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
+        states.longitude.value = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
     }
 
     private suspend fun recreateTasbih(date: LocalDate) = withContext(Dispatchers.IO) {
@@ -534,7 +685,6 @@ class DashboardViewModel(context: Context) : ViewModel() {
 
     sealed class DashboardEvent {
         data object LoadLocation : DashboardEvent()
-        data class CheckUpdate(val context: Activity, val doUpdate: Boolean) : DashboardEvent()
         data object IsFastingToday : DashboardEvent()
         data class UpdatePrayerTracker(
             val date: LocalDate,
@@ -560,5 +710,18 @@ class DashboardViewModel(context: Context) : ViewModel() {
         data class StartTimer(val timeToNextPrayer: Long) : DashboardEvent()
         data object GetCurrentAndNextPrayer : DashboardEvent()
         data class CreateAlarms(val context: Context) : DashboardEvent()
+        data class CheckUpdate(
+            val activity: Activity,
+            val updateType: Int = AppUpdateType.IMMEDIATE
+        ) : DashboardEvent()
+
+        data class StartUpdate(
+            val activity: Activity,
+            val requestCode: Int = AppConstants.APP_UPDATE_REQUEST_CODE,
+            val updateType: Int = AppUpdateType.IMMEDIATE
+        ) : DashboardEvent()
+
+        data object RegisterUpdateListener : DashboardEvent()
+        data object UnregisterUpdateListener : DashboardEvent()
     }
 }

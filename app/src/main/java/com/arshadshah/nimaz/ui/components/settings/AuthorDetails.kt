@@ -1,12 +1,21 @@
+package com.arshadshah.nimaz.ui.components.settings
+
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +29,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Android
+import androidx.compose.material.icons.rounded.Architecture
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,10 +51,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
@@ -48,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -58,145 +75,169 @@ fun AuthorDetails() {
             .fillMaxWidth()
             .padding(16.dp)
             .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(24.dp),
-                spotColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
-            ),
-        shape = RoundedCornerShape(24.dp),
+                elevation = 12.dp,
+                shape = RoundedCornerShape(28.dp),
+                spotColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+            )
+            .graphicsLayer {
+                clip = true
+                shape = RoundedCornerShape(28.dp)
+            },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.surface
+                        )
+                    )
+                )
         ) {
-            // Author Name Section
             Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Text(
-                    text = "Designed and Developed By",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "Arshad Shah",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            // Professional Details
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
+                // Author Name Section with enhanced design
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ProfessionalDetail(
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Work,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                        title = "Software Engineer",
-                        detail = "HMHco (Houghton Mifflin Harcourt)"
+                    Text(
+                        text = "Designed and Developed By",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.secondary
                     )
-
-                    ProfessionalDetail(
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.School,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                        title = "Education",
-                        detail = "BSc in Computer Science"
-                    )
-
-                    ProfessionalDetail(
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.LocationOn,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                        title = "Location",
-                        detail = "Dublin, Ireland"
+                    Text(
+                        text = "Arshad Shah",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-            }
 
-            // Project Description
-            Text(
-                buildAnnotatedString {
-                    withStyle(MaterialTheme.typography.bodyLarge.toSpanStyle()) {
-                        append("Nimaz is my passion project, born from a desire to create something meaningful for the Muslim community while expanding my Android development expertise. ")
-                        append("Starting as my final year project, it has evolved into a comprehensive prayer companion that I hope serves as a valuable resource for Muslims worldwide.")
+                // Professional Details with enhanced card
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = RoundedCornerShape(24.dp),
+                            spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        ),
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        EnhancedProfessionalDetail(
+                            icon = Icons.Rounded.Work,
+                            title = "Software Engineer",
+                            detail = "HMHco (Houghton Mifflin Harcourt)"
+                        )
+                        EnhancedProfessionalDetail(
+                            icon = Icons.Rounded.School,
+                            title = "Education",
+                            detail = "BSc in Computer Science"
+                        )
+                        EnhancedProfessionalDetail(
+                            icon = Icons.Rounded.LocationOn,
+                            title = "Location",
+                            detail = "Dublin, Ireland"
+                        )
                     }
-                },
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+                }
 
-            // Skills Section
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                maxItemsInEachRow = 3
-            ) {
-                TechnologyChip("Android")
-                TechnologyChip("Kotlin")
-                TechnologyChip("Jetpack Compose")
-                TechnologyChip("Material Design")
-                TechnologyChip("Clean Architecture")
+                // Project Description with enhanced styling
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+                ) {
+                    Text(
+                        buildAnnotatedString {
+                            withStyle(
+                                MaterialTheme.typography.bodyLarge.copy(
+                                    lineHeight = 24.sp
+                                ).toSpanStyle()
+                            ) {
+                                append("Nimaz is my passion project, born from a desire to create something meaningful for the Muslim community while expanding my Android development expertise. ")
+                                append("Starting as my final year project, it has evolved into a comprehensive prayer companion that I hope serves as a valuable resource for Muslims worldwide.")
+                            }
+                        },
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                        modifier = Modifier.padding(20.dp)
+                    )
+                }
+
+                // Enhanced Skills Section
+                EnhancedSkillsSection()
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .alpha(0.5f)
+                )
+
+                // Enhanced Social Links
+                AuthorLinks()
             }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            // Social Links
-            AuthorLinks()
         }
     }
 }
 
 @Composable
-private fun ProfessionalDetail(
+private fun EnhancedProfessionalDetail(
+    icon: ImageVector,
     title: String,
-    detail: String,
-    icon: @Composable () -> Unit
+    detail: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        icon()
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            modifier = Modifier.size(44.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(10.dp)
+                    .size(24.dp)
+            )
+        }
         Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
@@ -210,7 +251,30 @@ private fun ProfessionalDetail(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TechnologyChip(text: String) {
+private fun EnhancedSkillsSection() {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        maxItemsInEachRow = 3
+    ) {
+        listOf(
+            "Android" to Icons.Rounded.Android,
+            "Kotlin" to Icons.Rounded.Code,
+            "Jetpack Compose" to Icons.Rounded.Widgets,
+            "Material Design" to Icons.Rounded.Palette,
+            "Clean Architecture" to Icons.Rounded.Architecture
+        ).forEach { (text, icon) ->
+            EnhancedTechnologyChip(text, icon)
+        }
+    }
+}
+
+@Composable
+private fun EnhancedTechnologyChip(
+    text: String,
+    icon: ImageVector
+) {
     var isHovered by remember { mutableStateOf(false) }
 
     val backgroundColor by animateColorAsState(
@@ -222,69 +286,49 @@ private fun TechnologyChip(text: String) {
         label = "backgroundColor"
     )
 
+    val elevation by animateFloatAsState(
+        targetValue = if (isHovered) 8f else 4f,
+        label = "elevation"
+    )
+
     Surface(
-        modifier = Modifier.padding(horizontal = 4.dp),
+        modifier = Modifier
+            .padding(horizontal = 4.dp)
+            .shadow(elevation.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor,
         onClick = { isHovered = !isHovered }
     ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (isHovered)
-                MaterialTheme.colorScheme.onSecondary
-            else
-                MaterialTheme.colorScheme.onSecondaryContainer
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isHovered)
+                    MaterialTheme.colorScheme.onSecondary
+                else
+                    MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = if (isHovered)
+                    MaterialTheme.colorScheme.onSecondary
+                else
+                    MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
     }
 }
 
-object SocialPlatforms {
-    fun github(url: String) = SocialLinkData(
-        icon = R.drawable.github_icon,  // Representing GitHub with code icon
-        url = url,
-        description = "GitHub",
-        backgroundColor = Color(0xFF24292E)
-    )
-
-    fun linkedin(url: String) = SocialLinkData(
-        icon = R.drawable.linkedin_icon,  // Professional network icon
-        url = url,
-        description = "LinkedIn",
-        backgroundColor = Color(0xFF0A66C2)
-    )
-
-    fun email(email: String) = SocialLinkData(
-        icon = R.drawable.mail_icon,  // Email icon
-        url = "mailto:$email",
-        description = "Email",
-        backgroundColor = Color(0xFF4CAF50)
-    )
-
-    fun portfolio(url: String) = SocialLinkData(
-        icon = R.drawable.web,  // Portfolio/work icon
-        url = url,
-        description = "Portfolio",
-        backgroundColor = Color(0xFF9C27B0)
-    )
-
-    // Custom platform with specified icon
-    fun custom(
-        url: String,
-        icon: Int,
-        description: String,
-        backgroundColor: Color
-    ) = SocialLinkData(
-        icon = icon,
-        url = url,
-        description = description,
-        backgroundColor = backgroundColor
-    )
-}
-
 @Composable
-private fun AuthorLinks() {
+fun AuthorLinks() {
     val links = listOf(
         SocialPlatforms.github("https://github.com/arshad-shah"),
         SocialPlatforms.linkedin("https://www.linkedin.com/in/arshad-shah/"),
@@ -304,16 +348,27 @@ fun SocialLinks(
     links: List<SocialLinkData>,
     arrangement: Arrangement.Horizontal = Arrangement.Center
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = arrangement,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+        tonalElevation = 2.dp
     ) {
-        links.forEach { linkData ->
-            SocialLinkButton(
-                data = linkData,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = arrangement,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            links.forEach { linkData ->
+                SocialLinkButton(
+                    data = linkData,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
         }
     }
 }
@@ -326,10 +381,15 @@ fun SocialLinkButton(
     val context = LocalContext.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Animation states
+    // Enhanced animation states
     val scale by animateFloatAsState(
-        targetValue = if (isHovered) 1.1f else 1f,
+        targetValue = when {
+            isPressed -> 0.9f
+            isHovered -> 1.1f
+            else -> 1f
+        },
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -337,58 +397,106 @@ fun SocialLinkButton(
         label = "scale"
     )
 
+    val rotation by animateFloatAsState(
+        targetValue = if (isHovered) 8f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "rotation"
+    )
+
     val backgroundColor by animateColorAsState(
-        targetValue = if (isHovered)
-            data.backgroundColor
-        else
-            data.backgroundColor.copy(alpha = 0.8f),
+        targetValue = when {
+            isPressed -> data.backgroundColor.copy(alpha = 0.7f)
+            isHovered -> data.backgroundColor
+            else -> data.backgroundColor.copy(alpha = 0.8f)
+        },
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "backgroundColor"
     )
 
     val elevation by animateFloatAsState(
-        targetValue = if (isHovered) 8f else 4f,
+        targetValue = when {
+            isPressed -> 2f
+            isHovered -> 12f
+            else -> 6f
+        },
         label = "elevation"
     )
 
-    Surface(
-        onClick = {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(data.url))
-            context.startActivity(intent)
-        },
-        modifier = modifier
-            .size(56.dp)
-            .shadow(
-                elevation = elevation.dp,
-                shape = CircleShape,
-                spotColor = data.backgroundColor.copy(alpha = 0.5f)
-            )
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
-        shape = CircleShape,
-        color = backgroundColor,
+    val iconSize by animateFloatAsState(
+        targetValue = if (isHovered) 28f else 24f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "iconSize"
+    )
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+        Surface(
+            onClick = {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(data.url))
+                context.startActivity(intent)
+            },
+            interactionSource = interactionSource,
+            modifier = Modifier
+                .size(56.dp)
+                .shadow(
+                    elevation = elevation.dp,
+                    shape = CircleShape,
+                    spotColor = data.backgroundColor.copy(alpha = 0.3f),
+                    ambientColor = data.backgroundColor.copy(alpha = 0.1f)
+                )
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    rotationZ = rotation
+                },
+            shape = CircleShape,
+            color = backgroundColor,
+            border = if (isHovered) BorderStroke(2.dp, Color.White.copy(alpha = 0.2f)) else null
         ) {
-            Icon(
-                painter = painterResource(data.icon),
-                contentDescription = data.description,
-                tint = data.iconTint,
-                modifier = Modifier.size(24.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                data.backgroundColor.copy(alpha = 0.7f),
+                                data.backgroundColor
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(data.icon),
+                    contentDescription = data.description,
+                    tint = data.iconTint.copy(
+                        alpha = if (isHovered) 1f else 0.9f
+                    ),
+                    modifier = Modifier.size(iconSize.dp)
+                )
+            }
+        }
+
+        // Enhanced tooltip
+        AnimatedVisibility(
+            visible = isHovered,
+            enter = fadeIn() + slideInVertically { it },
+            exit = fadeOut() + slideOutVertically { it }
+        ) {
+            TooltipBox(
+                text = data.description,
+                backgroundColor = data.backgroundColor.copy(alpha = 0.9f),
+                textColor = data.iconTint
             )
         }
-    }
-
-    // Tooltip on hover
-    if (isHovered) {
-        TooltipBox(
-            text = data.description,
-            backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-            textColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
@@ -398,27 +506,80 @@ private fun TooltipBox(
     backgroundColor: Color,
     textColor: Color
 ) {
-    Box(
+    Surface(
         modifier = Modifier
-            .shadow(4.dp, CircleShape)
-            .clip(CircleShape)
-            .background(backgroundColor)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(top = 64.dp)
+            .shadow(8.dp, RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
+        color = backgroundColor,
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Medium
-            ),
-            color = textColor
-        )
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            backgroundColor.copy(alpha = 0.9f),
+                            backgroundColor
+                        )
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 0.5.sp
+                ),
+                color = textColor
+            )
+        }
     }
 }
 
+// Enhanced SocialLinkData with additional properties for better customization
 data class SocialLinkData(
     val icon: Int,
     val url: String,
     val description: String,
     val backgroundColor: Color,
-    val iconTint: Color = Color.White
+    val iconTint: Color = Color.White,
+    val hoverRotation: Float = 8f,
+    val pressScale: Float = 0.9f
 )
+
+// Enhanced platform definitions
+object SocialPlatforms {
+    fun github(url: String) = SocialLinkData(
+        icon = R.drawable.github_icon,
+        url = url,
+        description = "GitHub",
+        backgroundColor = Color(0xFF24292E),
+        hoverRotation = 12f
+    )
+
+    fun linkedin(url: String) = SocialLinkData(
+        icon = R.drawable.linkedin_icon,
+        url = url,
+        description = "LinkedIn",
+        backgroundColor = Color(0xFF0A66C2),
+        hoverRotation = -8f
+    )
+
+    fun email(email: String) = SocialLinkData(
+        icon = R.drawable.mail_icon,
+        url = "mailto:$email",
+        description = "Email",
+        backgroundColor = Color(0xFF4CAF50),
+        hoverRotation = 0f
+    )
+
+    fun portfolio(url: String) = SocialLinkData(
+        icon = R.drawable.web,
+        url = url,
+        description = "Portfolio",
+        backgroundColor = Color(0xFF9C27B0),
+        hoverRotation = 15f
+    )
+}

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.settings
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -11,59 +10,35 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManualLocationInput() {
-    val context = LocalContext.current
-    val viewModelPrayerTimes = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-    val viewModel = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-
-    val locationNameState = remember {
-        viewModel.locationName
-    }.collectAsState()
-    val isLoading = remember {
-        viewModel.isLoading
-    }.collectAsState()
-
+fun ManualLocationInput(
+    locationName: String,
+    onLocationInput: (String) -> Unit,
+    isLoading: Boolean
+) {
     val showDialog = remember { mutableStateOf(false) }
-    val name = remember {
-        mutableStateOf(locationNameState.value)
-    }
     //show manual location input
     //onclick open dialog
     SettingsMenuLink(
         title = { Text(text = "Edit Location") },
         subtitle = {
             Text(
-                text = locationNameState.value,
+                text = locationName,
                 modifier = Modifier.placeholder(
-                    visible = isLoading.value,
+                    visible = isLoading,
                     color = MaterialTheme.colorScheme.outline,
                     shape = RoundedCornerShape(4.dp),
                     highlight = PlaceholderHighlight.shimmer(
@@ -87,6 +62,7 @@ fun ManualLocationInput() {
 
     if (!showDialog.value) return
 
+    val input = remember { mutableStateOf("") }
     AlertDialogNimaz(
         cardContent = false,
         bottomDivider = false,
@@ -98,8 +74,8 @@ fun ManualLocationInput() {
         contentToShow = {
             OutlinedTextField(
                 shape = MaterialTheme.shapes.extraLarge,
-                value = name.value,
-                onValueChange = { name.value = it },
+                value = input.value,
+                onValueChange = { input.value = it },
                 label = { Text(text = "Location") },
                 singleLine = true,
                 maxLines = 1,
@@ -112,18 +88,7 @@ fun ManualLocationInput() {
             showDialog.value = false
         },
         onConfirm = {
-            viewModel.handleEvent(
-                SettingsViewModel.SettingsEvent.LocationInput(
-                    context,
-                    name.value
-                )
-            )
-            viewModelPrayerTimes.handleEvent(
-                PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                    context
-                )
-            )
-
+            onLocationInput(input.value)
             showDialog.value = false
 
         },

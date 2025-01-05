@@ -21,27 +21,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
-import com.arshadshah.nimaz.viewModel.TasbihViewModel
-import java.time.LocalDate
 
 @Composable
 fun TasbihRow(
@@ -49,30 +42,10 @@ fun TasbihRow(
     englishName: String,
     translationName: String,
     onNavigateToTasbihScreen: ((String, String, String, String) -> Unit)? = null,
+    onCreateTasbih: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    tasbihCreated: State<LocalTasbih>,
 ) {
-    val context = LocalContext.current
-    val viewModel = viewModel<TasbihViewModel>(
-        key = AppConstants.TASBIH_VIEWMODEL_KEY,
-        initializer = { TasbihViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
-    )
-
-    val tasbih = remember { viewModel.tasbihCreated }.collectAsState()
-    val navigateToTasbihScreen = remember { mutableStateOf(false) }
     val showTasbihDialog = remember { mutableStateOf(false) }
-
-    LaunchedEffect(navigateToTasbihScreen.value) {
-        if (navigateToTasbihScreen.value) {
-            viewModel.getTasbih(tasbih.value.id)
-            onNavigateToTasbihScreen?.invoke(
-                tasbih.value.id.toString(),
-                tasbih.value.arabicName,
-                tasbih.value.englishName,
-                tasbih.value.translationName
-            )
-            navigateToTasbihScreen.value = false
-        }
-    }
 
     ElevatedCard(
         modifier = Modifier
@@ -169,29 +142,21 @@ fun TasbihRow(
     TasbihGoalDialog(
         state = goal,
         onConfirm = {
-            viewModel.createTasbih(
-                LocalTasbih(
-                    arabicName = arabicName,
-                    englishName = englishName,
-                    translationName = translationName,
-                    goal = it.toInt(),
-                    count = 0,
-                    date = LocalDate.now()
-                )
+            onCreateTasbih(
+                arabicName,
+                englishName,
+                translationName,
+                goal.value,
             )
-            navigateToTasbihScreen.value = true
+            if (tasbihCreated.value.id != 0) {
+                onNavigateToTasbihScreen?.invoke(
+                    tasbihCreated.value.id.toString(),
+                    tasbihCreated.value.arabicName,
+                    tasbihCreated.value.englishName,
+                    tasbihCreated.value.translationName
+                )
+            }
         },
         isOpen = showTasbihDialog
-    )
-}
-
-@Preview
-@Composable
-fun TasbihRowPreview() {
-    TasbihRow(
-        englishName = "Tasbih",
-        arabicName = "تسبيح",
-        translationName = "Praise",
-        onNavigateToTasbihScreen = null
     )
 }

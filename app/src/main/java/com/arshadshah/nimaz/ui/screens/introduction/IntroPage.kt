@@ -80,6 +80,15 @@ fun IntroPage(
     val longitude = viewModel.longitude.collectAsState()
     val latitude = viewModel.latitude.collectAsState()
     val notificationsAllowed = viewModel.areNotificationsAllowed.collectAsState()
+    val setupCompleted = viewModel.isSetupComplete.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (setupCompleted.value) {
+            navController.navigate(BottomNavItem.Dashboard.screen_route) {
+                popUpTo("introPage") { inclusive = true }
+            }
+        }
+    }
 
     // Effect to handle navigation based on currentPage
     LaunchedEffect(currentPage.value) {
@@ -87,9 +96,11 @@ fun IntroPage(
     }
 
     Scaffold {
-        Box(modifier = Modifier
-            .padding(it)
-            .fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
             if (error.value != null) {
                 BannerLarge(
                     message = error.value,

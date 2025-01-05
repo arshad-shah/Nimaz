@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.prayerTimes
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -35,9 +36,11 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
+
 private const val FULL_ARC_ANGLE = 180f
 private const val START_ANGLE = 180f
 private const val ANIMATION_DURATION = 300
+private const val TAG = "Nimaz: AnimatedArcView"
 
 @Stable
 data class ArcViewState(
@@ -50,37 +53,97 @@ fun AnimatedArcView(
     state: ArcViewState,
     modifier: Modifier = Modifier
 ) {
+    Log.d(TAG, "Rendering with ${state.timePoints.size} time points")
+    Log.d(TAG, "Raw timePoints: ${state.timePoints}")
+
     val currentPhase = remember(state.timePoints) {
-        getCurrentPhase(state.timePoints)
+        Log.d(TAG, "Calculating current phase for time points: ${state.timePoints}")
+        getCurrentPhase(state.timePoints).also { phase ->
+            Log.d(TAG, "Calculated phase: $phase")
+        }
     }
 
     val dynamicPositions = remember(state.timePoints) {
-        calculateDynamicPositions(state.timePoints)
+        Log.d(TAG, "Calculating dynamic positions for time points: ${state.timePoints}")
+        calculateDynamicPositions(state.timePoints).also { positions ->
+            Log.d(TAG, "Calculated positions: $positions")
+        }
     }
 
     // Validate positions before proceeding
     if (dynamicPositions.isEmpty()) {
+        Log.w(TAG, "No valid positions calculated, returning early")
         return // Early return if no valid positions
     }
 
-    // Calculate initial position with safety checks
+    // Calculate initial position with safety checks and validation
     val initialPosition = remember(state.timePoints, currentPhase) {
-        calculateInitialPosition(state.timePoints, currentPhase)
+        Log.d(TAG, "Starting initial position calculation for phase $currentPhase")
+        val validTimePoints = state.timePoints.filterNotNull()
+        Log.d(TAG, "Valid time points for initial position: $validTimePoints")
+
+        if (currentPhase >= validTimePoints.size) {
+            Log.e(
+                TAG,
+                "Current phase ($currentPhase) is invalid for timepoints size (${validTimePoints.size})"
+            )
+            0f
+        } else {
+            calculateInitialPosition(state.timePoints, currentPhase).also { pos ->
+                if (pos.isNaN()) {
+                    Log.e(TAG, "Initial position calculation returned NaN!")
+                    Log.d(
+                        TAG,
+                        "Calculation details - Phase: $currentPhase, TimePoints: ${state.timePoints}"
+                    )
+                }
+                Log.d(TAG, "Calculated initial position: $pos")
+            }
+        }
     }
 
     var currentAnimationPhase by remember { mutableIntStateOf(currentPhase) }
-    val animatablePosition = remember { Animatable(initialPosition) }
+
+    // Debug initialization values
+    Log.d(TAG, "Before Animatable creation - Initial position value: $initialPosition")
+    Log.d(TAG, "Before Animatable creation - Current phase: $currentPhase")
+    Log.d(TAG, "Before Animatable creation - Dynamic positions: $dynamicPositions")
+
+    val animatablePosition = remember(initialPosition) {
+        Log.d(TAG, "Creating Animatable with initial position: $initialPosition")
+        if (initialPosition.isNaN()) {
+            Log.e(TAG, "Initial position is NaN - Defaulting to 0f")
+            Animatable(0f)
+        } else {
+            Animatable(initialPosition)
+        }
+    }
+
+    LaunchedEffect(initialPosition) {
+        Log.d(TAG, "Updating animatable position to: $initialPosition")
+        if (!initialPosition.isNaN() && initialPosition != animatablePosition.value) {
+            animatablePosition.snapTo(initialPosition)
+        }
+    }
+
+    Log.d(TAG, "Current animatable position value: ${animatablePosition.value}")
 
     val getNextPosition = { phase: Int ->
+        Log.d(TAG, "Getting next position for phase: $phase")
         if (phase + 1 < dynamicPositions.size) {
-            dynamicPositions[phase + 1] to (phase + 1)
+            val nextPhase = phase + 1
+            val nextPosition = dynamicPositions[nextPhase]
+            Log.d(TAG, "Moving to next phase: $nextPhase with position $nextPosition")
+            nextPosition to nextPhase
         } else {
+            Log.d(TAG, "Wrapping back to phase 0 with position ${dynamicPositions[0]}")
             dynamicPositions[0] to 0
         }
     }
 
     val durationMillis = remember(state.countDownTime) {
         with(state.countDownTime) {
+            Log.d(TAG, "Calculating duration for countdown: ${hours}h ${minutes}m ${seconds}s")
             (hours * 3600 + minutes * 60 + seconds) * 1000
         }
     }
@@ -93,9 +156,14 @@ fun AnimatedArcView(
     LaunchedEffect(state.countDownTime, currentAnimationPhase) {
         try {
             val (nextPosition, nextPhase) = getNextPosition(currentAnimationPhase)
+            Log.d(TAG, "Animation target: position=$nextPosition, phase=$nextPhase")
 
             // Ensure we're not animating to/from NaN values
             if (!nextPosition.isNaN() && !animatablePosition.value.isNaN()) {
+                Log.d(
+                    TAG,
+                    "Starting animation to position: $nextPosition with duration: ${durationMillis}ms"
+                )
                 animatablePosition.animateTo(
                     targetValue = nextPosition,
                     animationSpec = tween(
@@ -104,10 +172,15 @@ fun AnimatedArcView(
                     )
                 )
                 currentAnimationPhase = nextPhase
+                Log.d(TAG, "Animation completed, new phase: $nextPhase")
+            } else {
+                Log.w(
+                    TAG,
+                    "Invalid animation values detected - current: ${animatablePosition.value}, target: $nextPosition"
+                )
             }
         } catch (e: IllegalStateException) {
-            // Handle animation errors gracefully
-            println("Animation error: ${e.message}")
+            Log.e(TAG, "Animation error", e)
         }
     }
 
@@ -123,6 +196,8 @@ fun AnimatedArcView(
                 .fillMaxSize()
                 .testTag("EnhancedArcView")
         ) {
+            Log.v(TAG, "Canvas drawing - size: ${size.width}x${size.height}")
+
             // Draw main arc background with gradient
             drawArc(
                 brush = Brush.verticalGradient(
@@ -139,23 +214,31 @@ fun AnimatedArcView(
             )
 
             // Draw progress arc
+            val sweepAngle = animatablePosition.value * (FULL_ARC_ANGLE / PI.toFloat())
+            Log.v(TAG, "Drawing progress arc - sweep angle: $sweepAngle")
             drawArc(
                 color = primaryColor,
                 startAngle = START_ANGLE,
-                sweepAngle = animatablePosition.value * (FULL_ARC_ANGLE / PI.toFloat()),
+                sweepAngle = sweepAngle,
                 useCenter = false,
                 style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round),
                 size = Size(size.width, size.width)
             )
 
             // Draw prayer time indicators
-            state.timePoints.filterNotNull().forEachIndexed { index, _ ->
-                val position = dynamicPositions.getOrNull(index) ?: return@forEachIndexed
+            state.timePoints.filterNotNull().forEachIndexed { index, timePoint ->
+                Log.v(TAG, "Drawing indicator for timepoint[$index]: $timePoint")
+                val position = dynamicPositions.getOrNull(index)
+                if (position == null) {
+                    Log.w(TAG, "No position found for index $index")
+                    return@forEachIndexed
+                }
                 val point = calculatePointOnArc(
                     position,
                     size.width / 2,
                     size.width / 2
                 )
+                Log.v(TAG, "Indicator point for index $index: $point")
 
                 // Draw indicator circles with shadow
                 drawCircle(
@@ -179,6 +262,7 @@ fun AnimatedArcView(
                     size.width / 2,
                     size.width / 2
                 )
+                Log.v(TAG, "Drawing sun at position: $sunPosition")
 
                 // Enhanced sun drawing with glow effect
                 drawCircle(
@@ -204,8 +288,16 @@ private fun calculateInitialPosition(
     timePoints: List<LocalDateTime?>,
     currentPhase: Int
 ): Float {
+    Log.d(TAG, "calculateInitialPosition: phase=$currentPhase, timePoints=${timePoints.size}")
+    Log.d(TAG, "Raw timePoints: $timePoints")
+
     val validTimePoints = timePoints.filterNotNull()
-    if (validTimePoints.size < 2) return 0f
+    Log.d(TAG, "Valid timePoints: $validTimePoints")
+
+    if (validTimePoints.size < 2) {
+        Log.w(TAG, "Insufficient valid time points")
+        return 0f
+    }
 
     val now = LocalDateTime.now()
     val currentPoint = validTimePoints[currentPhase]
@@ -215,16 +307,40 @@ private fun calculateInitialPosition(
         validTimePoints[0]
     }
 
-    val totalDuration = Duration.between(currentPoint, nextPoint).toMillis().toFloat()
+    Log.d(TAG, "Current point: $currentPoint, Next point: $nextPoint, Now: $now")
 
+    val totalDuration = Duration.between(currentPoint, nextPoint).toMillis().toFloat()
     val elapsedDuration = Duration.between(currentPoint, now).toMillis().toFloat()
 
+    Log.d(TAG, "Duration calculation details:")
+    Log.d(TAG, "- Current point: $currentPoint")
+    Log.d(TAG, "- Next point: $nextPoint")
+    Log.d(TAG, "- Current time: $now")
+    Log.d(TAG, "- Total duration: $totalDuration")
+    Log.d(TAG, "- Elapsed duration: $elapsedDuration")
+
+    if (totalDuration <= 0) {
+        Log.e(TAG, "Total duration is zero or negative: $totalDuration")
+        return 0f
+    }
+
+    if (elapsedDuration < 0) {
+        Log.e(TAG, "Elapsed duration is negative: $elapsedDuration")
+        return 0f
+    }
+
     // Calculate progress between current and next point with safety checks
-    val progress = (elapsedDuration / totalDuration).coerceIn(0f, 1f)
+    val rawProgress = elapsedDuration / totalDuration
+    Log.d(TAG, "Raw progress before clamping: $rawProgress")
+    val progress = rawProgress.coerceIn(0f, 1f)
+    Log.d(TAG, "Progress calculation after clamping: $progress")
 
     // Get the positions on the arc
     val positions = calculateDynamicPositions(timePoints)
-    if (positions.isEmpty()) return 0f
+    if (positions.isEmpty()) {
+        Log.w(TAG, "No positions calculated")
+        return 0f
+    }
 
     val currentPos = positions[currentPhase]
     val nextPos = if (currentPhase + 1 < positions.size) {
@@ -233,24 +349,44 @@ private fun calculateInitialPosition(
         positions[0]
     }
 
+    Log.d(TAG, "Position calculation: current=$currentPos, next=$nextPos, progress=$progress")
+
     // Interpolate between current and next position with safety checks
-    return (currentPos + (nextPos - currentPos) * progress)
+    val result = (currentPos + (nextPos - currentPos) * progress)
+    Log.d(TAG, "Initial position calculated: $result")
+    return result
 }
 
 private fun calculateDynamicPositions(timePoints: List<LocalDateTime?>): List<Float> {
+    Log.d(TAG, "calculateDynamicPositions: input size=${timePoints.size}")
+    Log.d(TAG, "Raw timePoints for dynamic positions: $timePoints")
+
     val validTimePoints = timePoints.filterNotNull()
-    if (validTimePoints.size < 2) return emptyList()
+    Log.d(TAG, "Valid timePoints for dynamic positions: $validTimePoints")
+
+    if (validTimePoints.size < 2) {
+        Log.w(TAG, "Insufficient valid time points for dynamic positions")
+        return emptyList()
+    }
 
     val firstTime = validTimePoints.first()
     val lastTime = validTimePoints.last()
 
     // Ensure we don't have zero duration
     val totalDuration = Duration.between(firstTime, lastTime).toMillis().toFloat()
+    Log.d(TAG, "Total duration for positions: $totalDuration")
+
+    if (totalDuration <= 0) {
+        Log.w(TAG, "Warning: Total duration for dynamic positions is zero or negative")
+    }
 
     return timePoints.mapNotNull { timePoint ->
         timePoint?.let {
             val durationFromStart = Duration.between(firstTime, it).toMillis().toFloat()
-            ((durationFromStart / totalDuration) * PI.toFloat())
+            Log.v(TAG, "Duration from start for $timePoint: $durationFromStart")
+            val position = ((durationFromStart / totalDuration) * PI.toFloat())
+            Log.v(TAG, "Calculated position for $timePoint: $position")
+            position
         }
     }
 }
@@ -266,15 +402,30 @@ private fun calculatePointOnArc(
 }
 
 private fun getCurrentPhase(timePoints: List<LocalDateTime?>): Int {
+    Log.d(TAG, "getCurrentPhase: input size=${timePoints.size}")
+    Log.d(TAG, "Raw timePoints for phase calculation: $timePoints")
+
     val now = LocalDateTime.now()
     val validTimePoints = timePoints.filterNotNull()
+    Log.d(TAG, "Valid timePoints for phase calculation: $validTimePoints")
 
     return when {
-        validTimePoints.isEmpty() -> 0
-        now.isBefore(validTimePoints.first()) -> 0
+        validTimePoints.isEmpty() -> {
+            Log.w(TAG, "No valid time points, returning phase 0")
+            0
+        }
+
+        now.isBefore(validTimePoints.first()) -> {
+            Log.d(TAG, "Current time is before first point, returning phase 0")
+            0
+        }
+
         else -> {
             val nextPointIndex = validTimePoints.indexOfFirst { it.isAfter(now) }
-            if (nextPointIndex == -1) validTimePoints.size - 1 else maxOf(0, nextPointIndex - 1)
+            val result =
+                if (nextPointIndex == -1) validTimePoints.size - 1 else maxOf(0, nextPointIndex - 1)
+            Log.d(TAG, "Calculated current phase: $result")
+            result
         }
     }
 }

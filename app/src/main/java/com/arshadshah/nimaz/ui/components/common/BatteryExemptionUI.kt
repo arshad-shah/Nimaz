@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.PowerManager
 import android.provider.Settings
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,26 +23,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @SuppressLint("BatteryLife")
 @Composable
-fun BatteryExemptionUI() {
+fun BatteryExemptionUI(isBatteryExempt: Boolean, onBatteryExemptChange: (Boolean) -> Unit) {
     val context = LocalContext.current
-
-    val viewModel = viewModel(
-        key = AppConstants.SETTINGS_VIEWMODEL_KEY,
-        initializer = { SettingsViewModel(context) },
-        viewModelStoreOwner = context as ComponentActivity
-    )
-    val isBatteryExempt = remember {
-        viewModel.isBatteryExempt
-    }.collectAsState()
 
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
 
@@ -63,11 +50,9 @@ fun BatteryExemptionUI() {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    viewModel.handleEvent(
-                        SettingsViewModel.SettingsEvent.BatteryExempt(
-                            powerManager.isIgnoringBatteryOptimizations(
-                                context.packageName
-                            )
+                    onBatteryExemptChange(
+                        powerManager.isIgnoringBatteryOptimizations(
+                            context.packageName
                         )
                     )
                     state.value = powerManager.isIgnoringBatteryOptimizations(context.packageName)
@@ -111,7 +96,7 @@ fun BatteryExemptionUI() {
         },
         subtitle = {
             //if the permission is granted, show a checkmark and text saying "Allowed"
-            if (isBatteryExempt.value) {
+            if (isBatteryExempt) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -149,7 +134,7 @@ fun BatteryExemptionUI() {
         }
     )
 
-    if (!isBatteryExempt.value) {
+    if (!isBatteryExempt) {
         BannerSmall(
             message = "Exempt Nimaz from battery optimization to receive Adhan notifications on time",
             showFor = BannerDuration.FOREVER.value

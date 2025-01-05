@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
 import android.content.res.Configuration
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +34,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -56,16 +55,12 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ListOfTasbih(
     navController: NavHostController,
+    viewModel: TasbihViewModel = hiltViewModel(),
     onNavigateToTasbihScreen: (String, String, String, String) -> Unit,
 ) {
     val resources = LocalContext.current.resources
     val context = LocalContext.current
 
-    val viewModel = viewModel(
-        key = AppConstants.TASBIH_VIEWMODEL_KEY,
-        initializer = { TasbihViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
     val sharedPref = context.getSharedPreferences("tasbih", 0)
     val selected =
         remember { mutableStateOf(sharedPref.getBoolean("selected", false)) }
@@ -79,7 +74,6 @@ fun ListOfTasbih(
     ) {
         sharedPref.edit().putBoolean("selected", selected.value).apply()
         sharedPref.edit().putInt("indexSelected", indexSelected.value).apply()
-
     }
 
     //if a new item is selected, then scroll to that item
@@ -95,6 +89,8 @@ fun ListOfTasbih(
     val englishNames = resources.getStringArray(R.array.tasbeehTransliteration)
     val arabicNames = resources.getStringArray(R.array.tasbeeharabic)
     val translationNames = resources.getStringArray(R.array.tasbeehTranslation)
+
+    val tasbihCreated = viewModel.tasbihCreated.collectAsState()
 
     val titles = listOf("Tasbih List", "My Tasbih")
     val pagerState = rememberPagerState(
@@ -160,7 +156,20 @@ fun ListOfTasbih(
                                         arabicNames[index],
                                         englishNames[index],
                                         translationNames[index],
-                                        onNavigateToTasbihScreen
+                                        onNavigateToTasbihScreen,
+                                        tasbihCreated = tasbihCreated,
+                                        onCreateTasbih = { arabicName: String, englishName: String, translationName: String, goal: String ->
+                                            viewModel.createTasbih(
+                                                LocalTasbih(
+                                                    arabicName = arabicName,
+                                                    englishName = englishName,
+                                                    translationName = translationName,
+                                                    goal = goal.toInt(),
+                                                    count = 0,
+                                                    date = LocalDate.now()
+                                                )
+                                            )
+                                        }
                                     )
                                     if (index == englishNames.size - 1) {
                                         HorizontalDivider(
@@ -354,8 +363,31 @@ fun ListOfTasbih(
                                     }
                                 }
                             }
-                            GoalEditDialog(tasbihToEdit.value, showTasbihDialog)
-                            DeleteDialog(tasbih = tasbihToEdit.value, showDeleteDialog)
+                            GoalEditDialog(
+                                tasbih = tasbihToEdit.value,
+                                showTasbihDialog,
+                                onUpdateTasbih = { it: String ->
+                                    val tasbih = tasbihToEdit.value
+                                    //update the goal
+                                    viewModel.updateTasbih(
+                                        LocalTasbih(
+                                            id = tasbih.id,
+                                            arabicName = tasbih.arabicName,
+                                            englishName = tasbih.englishName,
+                                            translationName = tasbih.translationName,
+                                            goal = it.toInt(),
+                                            count = tasbih.count,
+                                            date = LocalDate.now(),
+                                        )
+                                    )
+                                })
+
+                            DeleteDialog(
+                                tasbih = tasbihToEdit.value,
+                                showDeleteDialog,
+                                onDeleteTasbih = { tasbih: LocalTasbih ->
+                                    viewModel.deleteTasbih(tasbih)
+                                })
                         }
                     }
 
