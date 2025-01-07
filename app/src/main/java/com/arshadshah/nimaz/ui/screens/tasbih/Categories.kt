@@ -38,10 +38,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -50,7 +49,7 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Categories(
-    viewModel: DuaViewModel = viewModel(key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY),
+    viewModel: DuaViewModel = hiltViewModel(),
     navController: NavHostController,
     onNavigateToChapterListScreen: (String, Int) -> Unit,
 ) {

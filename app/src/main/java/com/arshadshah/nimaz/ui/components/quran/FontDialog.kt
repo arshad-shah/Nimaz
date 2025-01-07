@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.ui.components.common.SliderWithIcons
+import com.arshadshah.nimaz.ui.components.common.NumberSelector
 import com.arshadshah.nimaz.ui.components.settings.state.FloatPreferenceSettingValueState
 import com.arshadshah.nimaz.ui.components.settings.state.StringPreferenceSettingValueState
 import com.arshadshah.nimaz.viewModel.QuranViewModel
@@ -61,11 +61,10 @@ fun FontSizeDialog(
     items3: List<String>,
     handleQuranEvents: (QuranViewModel.QuranMenuEvents) -> Unit,
 ) {
-
     AlertDialogNimaz(
         topDivider = false,
         bottomDivider = false,
-        contentHeight = 250.dp,
+        contentHeight = 300.dp,
         dismissButtonText = "Close",
         contentDescription = "Font Settings",
         title = "Font Settings",
@@ -75,103 +74,83 @@ fun FontSizeDialog(
                     .padding(4.dp)
                     .fillMaxWidth()
                     .wrapContentHeight(),
-                verticalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "Arabic Size", style = MaterialTheme.typography.bodyMedium)
-                }
-                SliderWithIcons(
-                    value = arabicFontSizeState.value,
-                    onValueChange = {
-                        //check if the value is in the range
-                        //if not then set it to the min or max value
-                        //this is to prevent the slider from going out of range
-                        if (fontStyleState.value == "IndoPak") {
-                            if (it < 32f) arabicFontSizeState.value = 32f
-                            if (it > 60f) arabicFontSizeState.value = 60f
-                            if (it in 32f..60f) arabicFontSizeState.value = it
-                        } else {
-                            if (it < 24f) arabicFontSizeState.value = 24f
-                            if (it > 46f) arabicFontSizeState.value = 46f
-                            if (it in 24f..46f) arabicFontSizeState.value = it
-                        }
-                        handleQuranEvents(
-                            QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(
-                                arabicFontSizeState.value
-                            )
-                        )
-                    },
-                    valueRange = if (fontStyleState.value == "IndoPak") 32f..60f else 24f..46f,
-                )
-
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                // Arabic Font Size Section
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Translation Size",
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "Arabic Size",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    NumberSelector(
+                        value = arabicFontSizeState.value,
+                        onValueChange = { newValue ->
+                            arabicFontSizeState.value = newValue
+                            handleQuranEvents(
+                                QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(
+                                    newValue
+                                )
+                            )
+                        },
+                        minValue = if (fontStyleState.value == "IndoPak") 32f else 24f,
+                        maxValue = if (fontStyleState.value == "IndoPak") 60f else 46f
                     )
                 }
 
-                SliderWithIcons(
-                    value = translationFontSizeState.value,
-                    onValueChange = {
-                        if (it < 16f) translationFontSizeState.value = 16f
-                        if (it > 40f) translationFontSizeState.value = 40f
-                        if (it in 16f..40f) translationFontSizeState.value = it
-                        handleQuranEvents(
-                            QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
-                                translationFontSizeState.value
-                            )
-                        )
-                    },
-                    valueRange = 16f..40f,
-                )
+                // Translation Font Size Section
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Translation Size",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
 
+                    NumberSelector(
+                        value = translationFontSizeState.value,
+                        onValueChange = { newValue ->
+                            translationFontSizeState.value = newValue
+                            handleQuranEvents(
+                                QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
+                                    newValue
+                                )
+                            )
+                        },
+                        minValue = 16f,
+                        maxValue = 40f
+                    )
+                }
+
+                // Font Style Dropdown
                 LabelWithDropdownMenu(
                     label = "Arabic Style",
                     items = items3,
                     selectedItem = fontStyleState.value,
-                    onItemSelected = {
-                        fontStyleState.value = it
+                    onItemSelected = { newStyle ->
+                        fontStyleState.value = newStyle
                         setFontBasedOnFontStyle(
-                            it,
+                            newStyle,
                             arabicFontSizeState,
                             translationFontSizeState
                         )
-                        handleQuranEvents(
-                            QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
-                                it
-                            )
-                        )
+                        handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Arabic_Font(newStyle))
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         },
-        onDismissRequest = {
-            showDialog3(false)
-        },
-        onConfirm = {
-            showDialog3(false)
-        },
-        onDismiss = {
-            showDialog3(false)
-        })
+        onDismissRequest = { showDialog3(false) },
+        onConfirm = { showDialog3(false) },
+        onDismiss = { showDialog3(false) }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -10,10 +10,6 @@ import com.arshadshah.nimaz.data.local.models.LocalDua
 @Dao
 interface DuaDao {
 
-    //get all the chapters
-    @Query("SELECT * FROM Chapter")
-    suspend fun getAllChapters(): List<LocalChapter>
-
     //get duas of a chapter by chapter id
     @Query("SELECT * FROM Dua WHERE chapter_id = :chapterId")
     suspend fun getDuasOfChapter(chapterId: Int): List<LocalDua>
@@ -25,10 +21,6 @@ interface DuaDao {
     //save a one chapter
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveDuas(duas: List<LocalDua>)
-
-    //get all duas
-    @Query("SELECT * FROM Dua")
-    suspend fun getAllDuas(): List<LocalDua>
 
     //count
     @Query("SELECT COUNT(*) FROM Chapter")

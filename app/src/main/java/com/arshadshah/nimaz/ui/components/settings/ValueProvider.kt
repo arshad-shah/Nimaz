@@ -16,16 +16,6 @@ fun rememberBooleanSettingState(defaultValue: Boolean = false): SettingValueStat
 }
 
 @Composable
-fun rememberDoubleSettingState(defaultValue: Double = 0.0): SettingValueState<Double> {
-    return remember { InMemoryDoubleSettingValueState(defaultValue) }
-}
-
-@Composable
-fun rememberFloatSettingState(defaultValue: Float = 0f): SettingValueState<Float> {
-    return remember { InMemoryFloatSettingValueState(defaultValue) }
-}
-
-@Composable
 fun rememberIntSettingState(defaultValue: Int = 0): SettingValueState<Int> {
     return remember { InMemoryIntSettingValueState(defaultValue) }
 }

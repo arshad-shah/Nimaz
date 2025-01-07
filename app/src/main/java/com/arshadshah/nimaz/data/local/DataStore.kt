@@ -10,8 +10,13 @@ import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class DataStore(db: AppDatabase) {
+@Singleton
+class DataStore @Inject constructor(
+    db: AppDatabase
+) {
     private val ayaDao = db.ayaDao
     private val juzDao = db.juz
     private val surahDao = db.surah
@@ -146,11 +151,6 @@ class DataStore(db: AppDatabase) {
 
     //countAllAyas
     suspend fun countAllAyat() = ayaDao.countAllAyas()
-
-    //get allAyas
-    suspend fun getAllAyat() = ayaDao.getAllAyas()
-
-    suspend fun getAyatByAyaNumberInSurah(number: Int) = ayaDao.getAyatByAyaNumberInSurah(number)
 
     //deleteAllAyas
     suspend fun deleteAllAyat() = ayaDao.deleteAllAyas()

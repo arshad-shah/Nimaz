@@ -15,7 +15,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DuaViewModel @Inject constructor() : ViewModel() {
+class DuaViewModel @Inject constructor(
+    private val duaRepository: DuaRepository
+) : ViewModel() {
 
     private val _categories = MutableStateFlow<List<LocalCategory>>(emptyList())
     val categories: StateFlow<List<LocalCategory>> = _categories.asStateFlow()
@@ -33,7 +35,7 @@ class DuaViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = DuaRepository.getCategories()
+                val response = duaRepository.getCategories()
                 _categories.value = response.data ?: emptyList()
             } catch (e: Exception) {
                 Log.e("DuaViewModel", "Error getting categories", e)
@@ -47,7 +49,7 @@ class DuaViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = DuaRepository.getChaptersByCategory(id)
+                val response = duaRepository.getChaptersByCategory(id)
                 _chapters.value = response.data ?: emptyList()
             } catch (e: Exception) {
                 Log.e("DuaViewModel", "Error getting chapters", e)
@@ -61,7 +63,7 @@ class DuaViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = DuaRepository.getDuasOfChapter(chapterId)
+                val response = duaRepository.getDuasOfChapter(chapterId)
                 _duas.value = response.data ?: emptyList()
             } catch (e: Exception) {
                 Log.e("DuaViewModel", "Error getting duas", e)

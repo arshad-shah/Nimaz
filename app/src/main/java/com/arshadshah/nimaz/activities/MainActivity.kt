@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
@@ -21,55 +20,20 @@ import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.rememberSystemUiController
-import com.arshadshah.nimaz.utils.AutoLocationUtils
 import com.arshadshah.nimaz.utils.FirebaseLogger
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
+import com.arshadshah.nimaz.utils.ThemeDataStore
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private val settingsViewModel: SettingsViewModel by viewModels()
-
     @Inject
     lateinit var sharedPref: PrivateSharedPreferences
 
-    override fun onResume() {
-        super.onResume()
-        Log.d(MAIN_ACTIVITY_TAG, "onResume:  called")
-
-        if (PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE, true)) {
-            if (!AutoLocationUtils.isInitialized()) {
-                AutoLocationUtils.init(this)
-                Log.d(MAIN_ACTIVITY_TAG, "onResume:  location is initialized")
-            }
-            if (!LocalDataStore.isInitialized()) {
-                LocalDataStore.init(this)
-                Log.d(MAIN_ACTIVITY_TAG, "onResume:  data store is initialized")
-            }
-            AutoLocationUtils.startLocationUpdates()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE, true)) {
-            AutoLocationUtils.stopLocationUpdates()
-            Log.d(MAIN_ACTIVITY_TAG, "onDestroy:  location is stopped")
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (PrivateSharedPreferences(this).getDataBoolean(AppConstants.LOCATION_TYPE, true)) {
-            AutoLocationUtils.stopLocationUpdates()
-            Log.d(MAIN_ACTIVITY_TAG, "onPause:  location is stopped")
-        }
-    }
+    @Inject
+    lateinit var themeDataStore: ThemeDataStore
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,36 +43,33 @@ class MainActivity : ComponentActivity() {
 
         if (!FirebaseLogger.isInitialized()) {
             FirebaseLogger.init()
-            Log.d(MAIN_ACTIVITY_TAG, "onCreate:  called and firebase logger initialized")
+            Log.d(MAIN_ACTIVITY_TAG, "onCreate: called and firebase logger initialized")
         }
-        splashScreen.setKeepOnScreenCondition {
-            false
-        }
+
+        splashScreen.setKeepOnScreenCondition { false }
 
         super.onCreate(savedInstanceState)
 
         val firstTime = sharedPref.getDataBoolean(AppConstants.IS_FIRST_INSTALL, true)
 
-        //this is used to show the full activity on the screen
         setContent {
-
-            val uiState by settingsViewModel.uiState.collectAsState()
-            val themeName = uiState.theme
-
+            // Collect theme preferences directly from ThemeDataStore
+            val isDarkMode by themeDataStore.darkModeFlow.collectAsState(initial = false)
+            val currentTheme by themeDataStore.themeFlow.collectAsState(initial = AppConstants.THEME_SYSTEM)
 
             NimazTheme(
-                darkTheme = uiState.isDarkMode,
-                themeName = themeName
+                darkTheme = isDarkMode,
+                themeName = currentTheme
             ) {
                 val systemUiController = rememberSystemUiController()
 
                 systemUiController.setStatusBarColor(
                     color = MaterialTheme.colorScheme.background,
-                    darkIcons = !uiState.isDarkMode,
+                    darkIcons = !isDarkMode,
                 )
                 systemUiController.setNavigationBarColor(
                     color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-                    darkIcons = !uiState.isDarkMode,
+                    darkIcons = !isDarkMode,
                 )
                 val navController = rememberNavController()
                 val route =
@@ -121,7 +82,6 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     context = this@MainActivity,
                     isFirstInstall = firstTime,
-                    settingsViewModel = settingsViewModel
                 )
             }
         }

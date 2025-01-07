@@ -3,10 +3,10 @@ package com.arshadshah.nimaz.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
-import com.arshadshah.nimaz.utils.LocalDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +22,10 @@ import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
-class TrackerViewModel @Inject constructor() : ViewModel() {
+class TrackerViewModel @Inject constructor(
+    private val dataStore: DataStore,
+    private val prayerTrackerRepository: PrayerTrackerRepository
+) : ViewModel() {
     //state of date
     private var _dateState = MutableStateFlow(LocalDate.now())
     val dateState = _dateState.asStateFlow()
@@ -134,7 +137,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
             noError()
             try {
                 val date = _dateState.value
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.updateIsMenstruating(date, menstruating)
                 getMenstruatingState(date)
                 finishLoading()
@@ -147,7 +149,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
 
     private fun getMenstruatingState(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
-            val dataStore = LocalDataStore.getDataStore()
             dataStore.getMenstruatingState(date).collect { isMenstruating ->
                 _isMenstruating.value = isMenstruating
             }
@@ -156,7 +157,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
 
     private fun getFastProgressForMonth(yearMonth: YearMonth) {
         viewModelScope.launch {
-            val dataStore = LocalDataStore.getDataStore()
             dataStore.getFastTrackersForMonth(
                 firstDay = yearMonth.atDay(1),
                 lastDay = yearMonth.atEndOfMonth()
@@ -168,7 +168,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun getProgressForMonth(date: LocalDate) {
-        val dataStore = LocalDataStore.getDataStore()
         val firstDayOfMonth = date.withDayOfMonth(1)
         val lastDayOfMonth =
             date.withDayOfMonth(date.lengthOfMonth())
@@ -182,7 +181,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun getProgressForWeek(date: LocalDate) {
-        val dataStore = LocalDataStore.getDataStore()
         viewModelScope.launch {
             val startDate = date.with(DayOfWeek.MONDAY)
             val endDate = date.with(DayOfWeek.SUNDAY)
@@ -207,7 +205,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
     fun updateFastTracker(tracker: LocalFastTracker) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val trackerExists = dataStore.fastTrackerExistsForDate(tracker.date)
                 if (!trackerExists) {
                     dataStore.saveFastTracker(tracker)
@@ -227,7 +224,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
     private fun isFastingToday(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.isFastingForDate(date)
                     .catch { emit(false) }
                     .collect {
@@ -242,7 +238,6 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
     private fun getFastTrackerForDate(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val trackerExists = dataStore.fastTrackerExistsForDate(date)
                 if (!trackerExists) {
                     val tracker = LocalFastTracker(date)
@@ -264,7 +259,7 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val updatedTracker =
-                    PrayerTrackerRepository.updateSpecificPrayer(date, prayerName, prayerDone)
+                    prayerTrackerRepository.updateSpecificPrayer(date, prayerName, prayerDone)
                 _prayerTrackerState.update {
                     it.copy(
                         date = updatedTracker.date,
@@ -287,7 +282,7 @@ class TrackerViewModel @Inject constructor() : ViewModel() {
     private fun getTrackerForDate(date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                PrayerTrackerRepository.getPrayersForDate(date)
+                prayerTrackerRepository.getPrayersForDate(date)
                     .catch { emit(LocalPrayersTracker()) }
                     .collect { prayerTrackerFromStorage ->
                         if (prayerTrackerFromStorage.date == _dateState.value) {

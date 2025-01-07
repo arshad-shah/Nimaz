@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_TYPE
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
@@ -19,10 +20,10 @@ import com.arshadshah.nimaz.data.local.models.Parameters
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
 import com.arshadshah.nimaz.services.LocationService
+import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.services.PrayerTimesData
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
@@ -50,9 +51,13 @@ class DashboardViewModel @Inject constructor(
     private val updateService: UpdateService,
     private val locationService: LocationService,
     private val prayerTimesService: PrayerTimesService,
+    private val prayerTimesRepository: PrayerTimesRepository,
+    private val prayerTrackerRepository: PrayerTrackerRepository,
+    private val dataStore: DataStore,
+    private val createAlarms: CreateAlarms,
+    private val locationStateManager: LocationStateManager,
 ) : ViewModel() {
     private val TAG = "DashboardViewModel"
-    private val dataStore by lazy { LocalDataStore.getDataStore() }
 
     // State management using StateFlow
     private val states = DashboardStates()
@@ -66,17 +71,15 @@ class DashboardViewModel @Inject constructor(
     val longitude = states.longitude.asStateFlow()
     val isFasting = states.isFasting.asStateFlow()
     var fajrTime = states.fajrTime.asStateFlow()
-    val maghribTime = states.maghribTime.asStateFlow()
-    val tasbihList = states.tasbihList.asStateFlow()
+    var maghribTime = states.maghribTime.asStateFlow()
     val trackerState = states.trackerState.asStateFlow()
-    val bookmarks = states.bookmarks.asStateFlow()
-    val surahList = states.surahList.asStateFlow()
     val randomAyaState = states.randomAyaState.asStateFlow()
     val error = states.error.asStateFlow()
     val nextPrayerName = states.nextPrayerName.asStateFlow()
     val nextPrayerTime = states.nextPrayerTime.asStateFlow()
     val countDownTime = states.countDownTime.asStateFlow()
     val prayerTimes = states.prayerTimes.asStateFlow()
+    val locationState = locationStateManager.locationState
 
     private var countDownTimer: CountDownTimer? = null
     fun initializeData(context: Activity) {
@@ -143,7 +146,7 @@ class DashboardViewModel @Inject constructor(
             states.error.value = ""
 
             val response = withContext(Dispatchers.IO) {
-                PrayerTimesRepository.updatePrayerTimes(parameters)
+                prayerTimesRepository.updatePrayerTimes(parameters)
             }
 
             response.data?.let { data ->
@@ -193,15 +196,26 @@ class DashboardViewModel @Inject constructor(
                 }
                 val arePrayerTimesAvailable = prayerTimes.value.areAllTimesAvailable()
                 if (arePrayerTimesAvailable) {
-                    CreateAlarms().exact(
-                        context,
-                        prayerTimes.value.fajr!!,
-                        prayerTimes.value.sunrise!!,
-                        prayerTimes.value.dhuhr!!,
-                        prayerTimes.value.asr!!,
-                        prayerTimes.value.maghrib!!,
-                        prayerTimes.value.isha!!,
-                    )
+                    if (!sharedPreferences.getDataBoolean(
+                            AppConstants.ALARM_LOCK,
+                            false
+                        )
+                    ) {
+
+                        createAlarms.exact(
+                            context,
+                            prayerTimes.value.fajr!!,
+                            prayerTimes.value.sunrise!!,
+                            prayerTimes.value.dhuhr!!,
+                            prayerTimes.value.asr!!,
+                            prayerTimes.value.maghrib!!,
+                            prayerTimes.value.isha!!,
+                        )
+                        sharedPreferences.saveDataBoolean(
+                            AppConstants.ALARM_LOCK,
+                            true
+                        )
+                    }
                 }
             },
             errorMessage = "An error occurred when creating alarms"
@@ -429,7 +443,7 @@ class DashboardViewModel @Inject constructor(
     ) = withContext(Dispatchers.IO) {
         safeOperation(
             operation = {
-                val updatedTracker = PrayerTrackerRepository.updateSpecificPrayer(
+                val updatedTracker = prayerTrackerRepository.updateSpecificPrayer(
                     date,
                     prayerName,
                     prayerDone
@@ -452,7 +466,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun getTodaysPrayerTracker(date: LocalDate) = withContext(Dispatchers.IO) {
-        PrayerTrackerRepository.getPrayersForDate(date)
+        prayerTrackerRepository.getPrayersForDate(date)
             .catch { emit(LocalPrayersTracker()) }
             .collect { tracker ->
                 states.trackerState.update {
@@ -494,11 +508,14 @@ class DashboardViewModel @Inject constructor(
                     states.longitude.value = location.longitude
                     updatePrayerTimes(PrayerTimesParamMapper.getParams(context = context))
                     updateWidget(context)
-                    // Reload prayer times with new location
                     loadPrayerTimes()
                 }
                 .onFailure { throwable ->
-                    states.error.value = throwable.message ?: "Failed to load location"
+                    locationStateManager.updateLocationState(
+                        LocationStateManager.LocationState.Error(
+                            throwable.message ?: "Failed to load location"
+                        )
+                    )
                     loadFallbackLocation()
                 }
         } catch (e: Exception) {

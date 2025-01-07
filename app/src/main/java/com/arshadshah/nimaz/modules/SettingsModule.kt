@@ -1,11 +1,13 @@
 package com.arshadshah.nimaz.modules
 
 import android.content.Context
-import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.repositories.AutoLocationRepository
+import com.arshadshah.nimaz.repositories.ManualLocationRepository
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.UpdateManager
 import com.arshadshah.nimaz.repositories.UpdateRepository
 import com.arshadshah.nimaz.services.LocationService
+import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -32,20 +34,36 @@ object SettingsModule {
 
     @Provides
     @Singleton
-    fun provideLocationRepository(
+    fun provideManualLocationRepository(
         @ApplicationContext context: Context
-    ): LocationRepository {
-        return LocationRepository(context)
+    ): ManualLocationRepository {
+        return ManualLocationRepository(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAutoLocationRepository(
+        @ApplicationContext context: Context
+    ): AutoLocationRepository {
+        return AutoLocationRepository(context)
     }
 
     @Provides
     @Singleton
     fun provideLocationService(
         @ApplicationContext context: Context,
-        locationRepository: LocationRepository,
-        sharedPreferences: PrivateSharedPreferences
+        manualLocationRepository: ManualLocationRepository,
+        autoLocationRepository: AutoLocationRepository,
+        sharedPreferences: PrivateSharedPreferences,
+        locationStateManager: LocationStateManager
     ): LocationService {
-        return LocationService(context, locationRepository, sharedPreferences)
+        return LocationService(
+            context,
+            manualLocationRepository,
+            autoLocationRepository,
+            sharedPreferences,
+            locationStateManager
+        )
     }
 
     @Provides

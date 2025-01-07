@@ -31,8 +31,12 @@
         android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
         <receiver
-            android:name=".utils.recievers.MissedPrayerReciever"
+            android:name=".utils.recievers.MissedPrayerReceiver"
             android:enabled="true"
             android:exported="false" />
 
@@ -64,7 +68,7 @@
                 android:resource="@xml/nimaz_app_tracker_widget_info" />
         </receiver>
         <receiver
-            android:name=".utils.recievers.BootReciever"
+            android:name=".utils.recievers.BootReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
@@ -74,7 +78,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".utils.recievers.AdhanReciever"
+            android:name=".utils.recievers.AdhanReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.POST_NOTIFICATIONS" />

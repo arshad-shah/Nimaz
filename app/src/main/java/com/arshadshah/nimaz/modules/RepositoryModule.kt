@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.modules
 
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import dagger.Module
 import dagger.Provides
@@ -14,7 +15,9 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun providePrayerTimesRepository(): PrayerTimesRepository {
-        return PrayerTimesRepository
+    fun providePrayerTimesRepository(
+        dataStore: DataStore
+    ): PrayerTimesRepository {
+        return PrayerTimesRepository(dataStore)
     }
 }

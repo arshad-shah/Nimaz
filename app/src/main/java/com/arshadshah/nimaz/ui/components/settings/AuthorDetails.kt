@@ -32,14 +32,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.Architecture
 import androidx.compose.material.icons.rounded.Code
-import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Widgets
-import androidx.compose.material.icons.rounded.Work
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -59,147 +52,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun AuthorDetails() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .shadow(
-                elevation = 12.dp,
-                shape = RoundedCornerShape(28.dp),
-                spotColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-            )
-            .graphicsLayer {
-                clip = true
-                shape = RoundedCornerShape(28.dp)
-            },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f),
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                // Author Name Section with enhanced design
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Designed and Developed By",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                    Text(
-                        text = "Arshad Shah",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                // Professional Details with enhanced card
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(24.dp),
-                            spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                        ),
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        EnhancedProfessionalDetail(
-                            icon = Icons.Rounded.Work,
-                            title = "Software Engineer",
-                            detail = "HMHco (Houghton Mifflin Harcourt)"
-                        )
-                        EnhancedProfessionalDetail(
-                            icon = Icons.Rounded.School,
-                            title = "Education",
-                            detail = "BSc in Computer Science"
-                        )
-                        EnhancedProfessionalDetail(
-                            icon = Icons.Rounded.LocationOn,
-                            title = "Location",
-                            detail = "Dublin, Ireland"
-                        )
-                    }
-                }
-
-                // Project Description with enhanced styling
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                ) {
-                    Text(
-                        buildAnnotatedString {
-                            withStyle(
-                                MaterialTheme.typography.bodyLarge.copy(
-                                    lineHeight = 24.sp
-                                ).toSpanStyle()
-                            ) {
-                                append("Nimaz is my passion project, born from a desire to create something meaningful for the Muslim community while expanding my Android development expertise. ")
-                                append("Starting as my final year project, it has evolved into a comprehensive prayer companion that I hope serves as a valuable resource for Muslims worldwide.")
-                            }
-                        },
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                        modifier = Modifier.padding(20.dp)
-                    )
-                }
-
-                // Enhanced Skills Section
-                EnhancedSkillsSection()
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .alpha(0.5f)
-                )
-
-                // Enhanced Social Links
-                AuthorLinks()
-            }
-        }
-    }
-}
 
 @Composable
 private fun EnhancedProfessionalDetail(

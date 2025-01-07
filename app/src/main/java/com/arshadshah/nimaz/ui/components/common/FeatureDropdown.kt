@@ -20,7 +20,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -144,31 +143,21 @@ fun <T> DropdownListItem(
     onClick: (T) -> Unit,
     content: @Composable (T) -> Unit,
     leadingIcon: (@Composable () -> Unit)? = null,
-    trailingIcon: (@Composable () -> Unit)? = {
-        Icon(
-            painter = painterResource(R.drawable.angle_small_right_icon),
-            contentDescription = "View Details",
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+    trailingIcon: (@Composable () -> Unit)? = {}
 ) {
-    OutlinedCard(
-        onClick = { onClick(item) },
-        shape = MaterialTheme.shapes.small,
+    Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(12.dp)
+            .clip(MaterialTheme.shapes.small)
+            .clickable {
+                onClick(item)
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            leadingIcon?.invoke()
-            Box(modifier = Modifier.weight(1f)) { content(item) }
-            trailingIcon?.invoke()
-        }
+        leadingIcon?.invoke()
+        Box(modifier = Modifier.weight(1f)) { content(item) }
+        trailingIcon?.invoke()
     }
 }
 

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,10 +36,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 
@@ -48,7 +46,7 @@ import com.arshadshah.nimaz.viewModel.HadithViewModel
 @Composable
 fun HadithChaptersList(
     bookId: String?,
-    viewModel: HadithViewModel = viewModel(key = AppConstants.HADITH_VIEW_MODEL),
+    viewModel: HadithViewModel = hiltViewModel(),
     onNavigateToAChapter: (Int, Int) -> Unit,
     navController: NavHostController
 ) {
@@ -191,28 +189,3 @@ fun ChapterItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ChapterItemLoadingShimmer() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            modifier = Modifier.size(40.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant
-        ) { }
-
-        Surface(
-            modifier = Modifier
-                .height(24.dp)
-                .fillMaxWidth(0.7f),
-            shape = RoundedCornerShape(4.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant
-        ) { }
-    }
-}

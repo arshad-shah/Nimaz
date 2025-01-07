@@ -15,10 +15,6 @@ object AppConstants {
     //Preferences file name
     const val PREFERENCES_FILE_NAME = "com.arshadshah.nimaz.SharedPreferences"
 
-    //animation duration
-    const val SCREEN_ANIMATION_DURATION = 500
-    const val SCREEN_ANIMATION_DURATION_Exit = 300
-
     //pref keys
     const val ARABIC_FONT_SIZE = "ArabicFontSize"
     const val TRANSLATION_FONT_SIZE = "TranslationFontSize"
@@ -54,16 +50,7 @@ object AppConstants {
     const val DEBUG_MODE: String = "debug"
 
 
-    //viewmodel keys
-    const val DUA_CHAPTERS_VIEWMODEL_KEY = "dua_chapters_viewmodel_key"
     const val NAMES_OF_ALLAH_VIEWMODEL_KEY = "names_of_allah_viewmodel_key"
-    const val PRAYER_TIMES_VIEWMODEL_KEY = "prayer_times_viewmodel_key"
-    const val QIBLA_VIEWMODEL_KEY = "qibla_viewmodel_key"
-    const val QURAN_VIEWMODEL_KEY = "quran_viewmodel_key"
-    const val SETTINGS_VIEWMODEL_KEY = "settings_viewmodel_key"
-    const val TASBIH_VIEWMODEL_KEY = "tasbih_viewmodel_key"
-    const val TRACKING_VIEWMODEL_KEY = "tracking_viewmodel_key"
-    const val HADITH_VIEW_MODEL = "hadith_viewmodel"
 
     //full quran downloaded
     const val FULL_QURAN_DOWNLOADED = "full_quran_downloaded"
@@ -120,9 +107,6 @@ object AppConstants {
     const val CHANNEL_DESC_MISSED_PRAYER = "Missed Prayer Notification"
 
 
-    //widget pending intent request codes
-    const val WIDGET_PENDING_INTENT_REQUEST_CODE = 9
-
     //notification pending intent request codes
     const val NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 8
 
@@ -168,21 +152,13 @@ object AppConstants {
     //Test tags
     //navigation tags
     const val TEST_TAG_HOME = "Home"
-    const val TEST_TAG_PRAYER_TIMES = "Prayer Times"
     const val TEST_TAG_QIBLA = "Qibla"
     const val TEST_TAG_QURAN = "Quran"
-    const val TEST_TAG_QURAN_TAB = "QURAN TAB {number}"
-    const val TEST_TAG_QURAN_SURAH = "QURAN SURAH"
     const val TEST_TAG_QURAN_JUZ = "QURAN JUZ"
-    const val TEST_TAG_SHAHADAH = "Shahadah"
 
     const val TEST_TAG_MORE = "More"
-    const val TEST_TAG_MORE_LINK = "More Link {title}"
 
 
-    const val TEST_TAG_SETTINGS = "Settings"
-    const val TEST_TAG_ABOUT = "About"
-    const val TEST_TAG_ABOUT_PAGE = "About page"
     const val TEST_TAG_PRAYER_TRACKER = "Prayer Tracker"
     const val TEST_TAG_CALENDER = "Calender"
     const val TEST_TAG_TASBIH_LIST = "Tasbih List"
@@ -190,54 +166,19 @@ object AppConstants {
     const val TEST_TAG_NAMES_OF_ALLAH = "Names of Allah"
     const val TEST_TAG_CHAPTERS = "Chapters"
     const val TEST_TAG_CHAPTER = "Chapter"
-    const val TEST_TAG_AYA = "Aya"
-    const val TEST_TAG_SURAH_ITEM = "surah item"
-    const val TEST_TAG_JUZ_ITEM = "juz item"
-    const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION_BUTTON = "Prayer times customization button"
-    const val TEST_TAG_PRAYER_TIMES_CUSTOMIZATION = "Prayer times customization screen"
-    const val TEST_TAG_HOME_PRAYER_TIMES_CARD = "Home prayer times card"
-
-    //TEST_TAG_EVENTS_CARD
-    const val TEST_TAG_EVENTS_CARD = "Events card"
-
-    //TEST_TAG_TRACKERS_CARD
-    const val TEST_TAG_TRACKERS_CARD = "Trackers card"
-
-    //TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
-    const val TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD = "Next prayer icon dashboard"
 
 
     //logging tags
     private const val TAG = "Nimaz"
 
-    //splash screen tag
-    const val SPLASH_SCREEN_TAG = "$TAG: SplashScreen"
-
     //main activity tag
     const val MAIN_ACTIVITY_TAG = "$TAG: MainActivity"
-
-    const val PRAYER_TIMES_SCREEN_TAG = "$TAG: PrayerTimesFragment"
-
-    //Qibla compass screen tag
-    const val QIBLA_COMPASS_SCREEN_TAG = "$TAG: QiblaCompassScreen"
 
     //Quran screen tag
     const val QURAN_SCREEN_TAG = "$TAG: QuranScreen"
 
-    //Quran screen tag
-    const val QURAN_SURAH_SCREEN_TAG = "$TAG: QuranSurahScreen"
-
-    //Quran screen tag
-    const val QURAN_JUZ_SCREEN_TAG = "$TAG: QuranJuzScreen"
-
-    //error detector tag
-    const val ERROR_DETECTOR_TAG = "$TAG: ErrorDetector"
-
     //notification Tag
     const val NOTIFICATION_TAG = "$TAG: Notification"
-
-    //data store tag
-    const val DATA_STORE_TAG = "$TAG: DataStore"
 
     //BootReciever
     const val BOOT_RECEIVER_TAG = "$TAG: BootReciever"

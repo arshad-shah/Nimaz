@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.ui.screens.more
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,10 +31,9 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Source
 import androidx.compose.material.icons.outlined.Translate
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -50,12 +52,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
@@ -72,9 +74,7 @@ import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NamesOfAllah(navController: NavHostController) {
-
     val context = LocalContext.current
-
     val viewModelNames = viewModel(
         key = AppConstants.NAMES_OF_ALLAH_VIEWMODEL_KEY,
         initializer = { NamesOfAllahViewModel() },
@@ -85,122 +85,100 @@ fun NamesOfAllah(navController: NavHostController) {
     val englishNames = resources.getStringArray(R.array.English)
     val arabicNames = resources.getStringArray(R.array.Arabic)
     val translationNames = resources.getStringArray(R.array.translation)
-
-
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = "Names of Allah")
-            },
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Names of Allah",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
                 navigationIcon = {
                     OutlinedIconButton(
-                        modifier = Modifier
-                            .testTag("backButton")
-                            .padding(start = 8.dp),
-                        onClick = {
-                            navController.popBackStack()
-                        }) {
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.testTag("backButton")
+                    ) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
                             painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
                 actions = {
-                    if (
-                        playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING
-                        ||
-                        playBackState.value == NamesOfAllahViewModel.PlaybackState.PAUSED
+                    AnimatedVisibility(
+                        visible = playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING
+                                || playBackState.value == NamesOfAllahViewModel.PlaybackState.PAUSED
                     ) {
-                        IconButton(onClick = {
-                            viewModelNames.handleAudioEvent(
-                                NamesOfAllahViewModel.AudioEvent.Stop
-                            )
-                        }
+                        IconButton(
+                            onClick = {
+                                viewModelNames.handleAudioEvent(
+                                    NamesOfAllahViewModel.AudioEvent.Stop
+                                )
+                            }
                         ) {
                             Icon(
-                                modifier = Modifier.size(
-                                    24.dp
-                                ),
-                                painter = painterResource(
-                                    id = R.drawable.stop_icon
-                                ),
-                                contentDescription = "Stop playing"
+                                painter = painterResource(id = R.drawable.stop_icon),
+                                contentDescription = "Stop playing",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
-                    IconButton(onClick = {
-                        if (playBackState.value != NamesOfAllahViewModel.PlaybackState.PLAYING) {
-                            viewModelNames.handleAudioEvent(
-                                NamesOfAllahViewModel.AudioEvent.Play(
-                                    context
+                    IconButton(
+                        onClick = {
+                            if (playBackState.value != NamesOfAllahViewModel.PlaybackState.PLAYING) {
+                                viewModelNames.handleAudioEvent(
+                                    NamesOfAllahViewModel.AudioEvent.Play(context)
                                 )
-                            )
-                        } else {
-                            viewModelNames.handleAudioEvent(
-                                NamesOfAllahViewModel.AudioEvent.Pause
-                            )
+                            } else {
+                                viewModelNames.handleAudioEvent(
+                                    NamesOfAllahViewModel.AudioEvent.Pause
+                                )
+                            }
                         }
-                    }
                     ) {
-                        if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING) {
-                            Icon(
-                                modifier = Modifier.size(
-                                    24.dp
-                                ),
-                                painter = painterResource(
-                                    id = R.drawable.pause_icon
-                                ),
-                                contentDescription = "Pause playing"
-                            )
-                        } else {
-                            Icon(
-                                modifier = Modifier.size(
-                                    24.dp
-                                ),
-                                painter = painterResource(
-                                    id = R.drawable.play_icon
-                                ),
-                                contentDescription = "Play"
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(
+                                id = if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING)
+                                    R.drawable.pause_icon else R.drawable.play_icon
+                            ),
+                            contentDescription = if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING)
+                                "Pause playing" else "Play",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             )
-        },
-    ) {
-        Card(
+        }
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .padding(it)
-                .fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-            elevation = CardDefaults.cardElevation(4.dp),
-            shape = MaterialTheme.shapes.large
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(paddingValues)
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag(TEST_TAG_NAMES_OF_ALLAH),
+                contentPadding = PaddingValues(16.dp)
             ) {
                 items(englishNames.size) { index ->
                     NamesOfAllahRow(
-                        index,
-                        englishNames[index],
-                        arabicNames[index],
-                        translationNames[index]
+                        index = index,
+                        englishName = englishNames[index],
+                        arabicName = arabicNames[index],
+                        translationName = translationNames[index],
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
-                    if (index < englishNames.size - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            thickness = 1.dp
-                        )
-                    }
                 }
             }
         }
@@ -216,84 +194,94 @@ fun NamesOfAllahRow(
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-
     val nameDetails = DivineNamesRepository.getNameDetails(index)
 
-    Box(
+    ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                if (index % 2 == 0)
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.03f)
-                else
-                    MaterialTheme.colorScheme.surface
-            )
-            .clickable { isExpanded = !isExpanded }
-            .animateContentSize()
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { isExpanded = !isExpanded }
                 .padding(16.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Decorated Number Circle
+                // Number indicator with gradient background
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .border(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        .size(48.dp)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                )
+                            ),
                             shape = CircleShape
                         )
-                        .background(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            CircleShape
-                        )
-                        .padding(8.dp),
+                        .border(
+                            width = 2.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                )
+                            ),
+                            shape = CircleShape
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "${index + 1}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
-                // Main Content
                 Column(
                     modifier = Modifier
-                        .padding(start = 16.dp)
-                        .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
                 ) {
-                    // Translation with subtle background
+                    // Translation name with subtle background
                     Surface(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
-                        shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.padding(end = 8.dp)
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(bottom = 8.dp)
                     ) {
                         Text(
                             text = translationName,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
 
-
+                    // Arabic name with custom styling
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         Text(
                             text = arabicName,
-                            textAlign = TextAlign.Start,
                             fontFamily = utmaniQuranFont,
-                            fontSize = 42.sp,
-                            fontWeight = FontWeight.Normal,
+                            fontSize = 48.sp,
+                            textAlign = TextAlign.Start,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -301,7 +289,7 @@ fun NamesOfAllahRow(
                         )
                     }
 
-                    // English Transliteration with icon
+                    // English transliteration
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -309,19 +297,17 @@ fun NamesOfAllahRow(
                         Icon(
                             imageVector = Icons.Outlined.Translate,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                            modifier = Modifier.size(16.dp)
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
                         )
                         Text(
                             text = englishName,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.Normal
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                         )
                     }
                 }
 
-                // Expand/Collapse Icon
                 IconButton(onClick = { isExpanded = !isExpanded }) {
                     Icon(
                         imageVector = if (isExpanded)
@@ -329,12 +315,12 @@ fun NamesOfAllahRow(
                         else
                             Icons.Outlined.KeyboardArrowDown,
                         contentDescription = if (isExpanded) "Show less" else "Show more",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            // Expanded Content
+            // Expanded content with animation
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = fadeIn() + expandVertically(),
@@ -343,24 +329,23 @@ fun NamesOfAllahRow(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 60.dp, top = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(start = 64.dp, top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Additional information when expanded
-                    InfoRow(
-                        title = "Root Word:",
-                        content = nameDetails.rootWord, // Add actual content
-                        icon = Icons.Outlined.Source
+                    DetailRow(
+                        icon = Icons.Outlined.Source,
+                        title = "Root Word",
+                        content = nameDetails.rootWord
                     )
-                    InfoRow(
-                        title = "Occurrence in Quran:",
-                        content = nameDetails.occurrence, // Add actual content
-                        icon = Icons.Outlined.Book
+                    DetailRow(
+                        icon = Icons.Outlined.Book,
+                        title = "Occurrence in Quran",
+                        content = nameDetails.occurrence
                     )
-                    InfoRow(
-                        title = "Significance:",
-                        content = nameDetails.significance, // Add actual content
-                        icon = Icons.Outlined.Info
+                    DetailRow(
+                        icon = Icons.Outlined.Info,
+                        title = "Significance",
+                        content = nameDetails.significance
                     )
                 }
             }
@@ -369,32 +354,33 @@ fun NamesOfAllahRow(
 }
 
 @Composable
-private fun InfoRow(
+private fun DetailRow(
+    icon: ImageVector,
     title: String,
-    content: String,
-    icon: ImageVector
+    content: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-            modifier = Modifier.size(18.dp)
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+            modifier = Modifier.size(20.dp)
         )
         Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = content,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }

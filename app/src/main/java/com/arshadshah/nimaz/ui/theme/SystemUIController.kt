@@ -52,17 +52,6 @@ interface SystemUiController {
     var isNavigationBarVisible: Boolean
 
     /**
-     * Property which holds the status & navigation bar visibility. If set to true, show both bars,
-     * otherwise hide both bars.
-     */
-    var isSystemBarsVisible: Boolean
-        get() = isNavigationBarVisible && isStatusBarVisible
-        set(value) {
-            isStatusBarVisible = value
-            isNavigationBarVisible = value
-        }
-
-    /**
      * Set the status bar color.
      *
      * @param color The **desired** [Color] to set. This may require modification if running on an
@@ -104,27 +93,6 @@ interface SystemUiController {
     )
 
     /**
-     * Set the status and navigation bars to [color].
-     *
-     * @see setStatusBarColor
-     * @see setNavigationBarColor
-     */
-    fun setSystemBarsColor(
-        color: Color,
-        darkIcons: Boolean = color.luminance() > 0.5f,
-        isNavigationBarContrastEnforced: Boolean = true,
-        transformColorForLightContent: (Color) -> Color = BlackScrimmed
-    ) {
-        setStatusBarColor(color, darkIcons, transformColorForLightContent)
-        setNavigationBarColor(
-            color,
-            darkIcons,
-            isNavigationBarContrastEnforced,
-            transformColorForLightContent
-        )
-    }
-
-    /**
      * Property which holds whether the status bar icons + content are 'dark' or not.
      */
     var statusBarDarkContentEnabled: Boolean
@@ -133,16 +101,6 @@ interface SystemUiController {
      * Property which holds whether the navigation bar icons + content are 'dark' or not.
      */
     var navigationBarDarkContentEnabled: Boolean
-
-    /**
-     * Property which holds whether the status & navigation bar icons + content are 'dark' or not.
-     */
-    var systemBarsDarkContentEnabled: Boolean
-        get() = statusBarDarkContentEnabled && navigationBarDarkContentEnabled
-        set(value) {
-            statusBarDarkContentEnabled = value
-            navigationBarDarkContentEnabled = value
-        }
 
     /**
      * Property which holds whether the system is ensuring that the navigation bar has enough

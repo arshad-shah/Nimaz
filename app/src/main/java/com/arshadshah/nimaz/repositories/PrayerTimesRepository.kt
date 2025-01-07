@@ -9,34 +9,25 @@ import com.arshadshah.nimaz.libs.prayertimes.calculationClasses.CalculationParam
 import com.arshadshah.nimaz.libs.prayertimes.enums.Prayer
 import com.arshadshah.nimaz.libs.prayertimes.objects.Coordinates
 import com.arshadshah.nimaz.utils.ApiResponse
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper.getParams
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object PrayerTimesRepository {
+@Singleton
+class PrayerTimesRepository @Inject constructor(
+    private val dataStore: DataStore
+) {
+    companion object;
 
-    /**
-     * Creates a map of prayer times parameters to be used in the API call
-     * all the parameters are taken from the user's settings
-     * returns an ApiResponse object of type PrayerTimes
-     * @param context the context of the application
-     * @return ApiResponse<PrayerTimes> the response from the API call see [ApiResponse]
-     * */
     suspend fun getPrayerTimes(
         context: Context,
         dateForTimes: String = LocalDate.now().toString(),
     ): ApiResponse<LocalPrayerTimes> {
-
-        //check if the local datastore has been initialized if not initialize it
-        if (!LocalDataStore.isInitialized()) {
-            LocalDataStore.init(context)
-        }
-        val dataStore = LocalDataStore.getDataStore()
-
         return try {
             val prayerTimesAvailable = dataStore.countPrayerTimes() > 0
             if (prayerTimesAvailable) {
@@ -51,15 +42,14 @@ object PrayerTimesRepository {
                 val dateYear = date.year
                 if (dateMonth != currentMonth || dateYear != currentYear) {
                     val prayerTimesResponse = getPrayerTimesForMonthCustom(getParams(context))
-                    val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
+                    val prayerTimesList = processPrayerTimes(prayerTimesResponse)
                     return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() }!!)
                 }
 
                 return ApiResponse.Success(prayerTimesLocal)
             } else {
-                val prayerTimesResponse =
-                    getPrayerTimesForMonthCustom(getParams(context))
-                val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
+                val prayerTimesResponse = getPrayerTimesForMonthCustom(getParams(context))
+                val prayerTimesList = processPrayerTimes(prayerTimesResponse)
                 return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() }!!)
             }
         } catch (e: IOException) {
@@ -67,17 +57,13 @@ object PrayerTimesRepository {
         }
     }
 
-
     suspend fun updatePrayerTimes(parameters: Parameters): ApiResponse<LocalPrayerTimes> {
-        val dataStore = LocalDataStore.getDataStore()
         val prayerTimesResponse = getPrayerTimesForMonthCustom(parameters)
-        val prayerTimesList = processPrayerTimes(dataStore, prayerTimesResponse)
+        val prayerTimesList = processPrayerTimes(prayerTimesResponse)
         return ApiResponse.Success(prayerTimesList.find { it.date == LocalDate.now() }!!)
     }
 
-
     private suspend fun processPrayerTimes(
-        dataStore: DataStore,
         prayerTimesResponse: List<LocalPrayerTimes>,
     ): MutableList<LocalPrayerTimes> {
         val prayerTimesList = mutableListOf<LocalPrayerTimes>()
@@ -91,42 +77,34 @@ object PrayerTimesRepository {
                 prayerTimes.maghrib,
                 prayerTimes.isha,
             )
-            //check if the day light saving is on or off
-            val isDayLightSaving =
-                ZoneId.systemDefault().rules.isDaylightSavings(Instant.now())
-            //check if its an add or subtract
+
+            // Timezone adjustment logic
+            val isDayLightSaving = ZoneId.systemDefault().rules.isDaylightSavings(Instant.now())
             val timezoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
             val timezoneOffsetHours = timezoneOffset.totalSeconds / 3600
-            //check if the offset is positive or negative
             val isPositive = timezoneOffsetHours > 0
             val isNegative = timezoneOffsetHours < 0
+
             if (isDayLightSaving && isPositive) {
-                prayerTime.fajr =
-                    prayerTime.fajr?.plusHours((timezoneOffsetHours.toLong()))
-                prayerTime.sunrise =
-                    prayerTime.sunrise?.plusHours((timezoneOffsetHours.toLong()))
-                prayerTime.dhuhr =
-                    prayerTime.dhuhr?.plusHours((timezoneOffsetHours.toLong()))
-                prayerTime.asr =
-                    prayerTime.asr?.plusHours((timezoneOffsetHours.toLong()))
-                prayerTime.maghrib =
-                    prayerTime.maghrib?.plusHours((timezoneOffsetHours.toLong()))
-                prayerTime.isha =
-                    prayerTime.isha?.plusHours((timezoneOffsetHours.toLong()))
+                prayerTime.apply {
+                    fajr = fajr?.plusHours(timezoneOffsetHours.toLong())
+                    sunrise = sunrise?.plusHours(timezoneOffsetHours.toLong())
+                    dhuhr = dhuhr?.plusHours(timezoneOffsetHours.toLong())
+                    asr = asr?.plusHours(timezoneOffsetHours.toLong())
+                    maghrib = maghrib?.plusHours(timezoneOffsetHours.toLong())
+                    isha = isha?.plusHours(timezoneOffsetHours.toLong())
+                }
             } else if (isDayLightSaving && isNegative) {
-                prayerTime.fajr =
-                    prayerTime.fajr?.minusHours((timezoneOffsetHours.toLong()))
-                prayerTime.sunrise =
-                    prayerTime.sunrise?.minusHours((timezoneOffsetHours.toLong()))
-                prayerTime.dhuhr =
-                    prayerTime.dhuhr?.minusHours((timezoneOffsetHours.toLong()))
-                prayerTime.asr =
-                    prayerTime.asr?.minusHours((timezoneOffsetHours.toLong()))
-                prayerTime.maghrib =
-                    prayerTime.maghrib?.minusHours((timezoneOffsetHours.toLong()))
-                prayerTime.isha =
-                    prayerTime.isha?.minusHours((timezoneOffsetHours.toLong()))
+                prayerTime.apply {
+                    fajr = fajr?.minusHours((-timezoneOffsetHours).toLong())
+                    sunrise = sunrise?.minusHours((-timezoneOffsetHours).toLong())
+                    dhuhr = dhuhr?.minusHours((-timezoneOffsetHours).toLong())
+                    asr = asr?.minusHours((-timezoneOffsetHours).toLong())
+                    maghrib = maghrib?.minusHours((-timezoneOffsetHours).toLong())
+                    isha = isha?.minusHours((-timezoneOffsetHours).toLong())
+                }
             }
+
             prayerTimesList.add(prayerTime)
             dataStore.saveAllPrayerTimes(prayerTime)
         }
@@ -135,55 +113,41 @@ object PrayerTimesRepository {
     }
 
     private fun getPrayerTimesForMonthCustom(params: Parameters): List<LocalPrayerTimes> {
-        //get the latitude and longitude from the parameters
-        val coordinates =
-            Coordinates(params.latitude, params.longitude)
-
+        val coordinates = Coordinates(params.latitude, params.longitude)
         val date = LocalDateTime.parse(params.date)
-        val calculationParameters =
-            CalculationParameters(
-                params.fajrAngle,
-                params.ishaAngle,
-                params.method
-            )
-        calculationParameters.madhab = params.madhab
-        calculationParameters.highLatitudeRule = params.highLatitudeRule
-        calculationParameters.adjustments.fajr = params.fajrAdjustment
-        calculationParameters.adjustments.sunrise = params.sunriseAdjustment
-        calculationParameters.adjustments.dhuhr = params.dhuhrAdjustment
-        calculationParameters.adjustments.asr = params.asrAdjustment
-        calculationParameters.adjustments.maghrib = params.maghribAdjustment
-        calculationParameters.adjustments.isha = params.ishaAdjustment
-        calculationParameters.coordinates = coordinates
 
-        //get the number of days in the month
+        val calculationParameters = CalculationParameters(
+            params.fajrAngle,
+            params.ishaAngle,
+            params.method
+        ).apply {
+            madhab = params.madhab
+            highLatitudeRule = params.highLatitudeRule
+            adjustments.apply {
+                fajr = params.fajrAdjustment
+                sunrise = params.sunriseAdjustment
+                dhuhr = params.dhuhrAdjustment
+                asr = params.asrAdjustment
+                maghrib = params.maghribAdjustment
+                isha = params.ishaAdjustment
+            }
+            this.coordinates = coordinates
+        }
+
         val daysInMonth = date.month.length(date.toLocalDate().isLeapYear)
+        return (1..daysInMonth).map { day ->
+            val newDate = LocalDateTime.of(date.year, date.month, day, 0, 0)
+            val prayertimes = PrayerTimesCalculated(coordinates, newDate, calculationParameters)
 
-        //create a list of Prayertimes objects
-        val prayertimesList = mutableListOf<LocalPrayerTimes>()
-        //loop through the days in the month
-        for (i in 1..daysInMonth) {
-            val newDate = LocalDateTime.of(date.year, date.month, i, 0, 0)
-            //get the prayer times for the day
-            val prayertimes = PrayerTimesCalculated(
-                coordinates,
-                newDate,
-                calculationParameters
-            )
-            //add the prayertimes object to the list
-            prayertimesList.add(
-                LocalPrayerTimes(
-                    newDate.toLocalDate(),
-                    prayertimes.timeForPrayer(Prayer.FAJR),
-                    prayertimes.timeForPrayer(Prayer.SUNRISE),
-                    prayertimes.timeForPrayer(Prayer.DHUHR),
-                    prayertimes.timeForPrayer(Prayer.ASR),
-                    prayertimes.timeForPrayer(Prayer.MAGHRIB),
-                    prayertimes.timeForPrayer(Prayer.ISHA)
-                )
+            LocalPrayerTimes(
+                newDate.toLocalDate(),
+                prayertimes.timeForPrayer(Prayer.FAJR),
+                prayertimes.timeForPrayer(Prayer.SUNRISE),
+                prayertimes.timeForPrayer(Prayer.DHUHR),
+                prayertimes.timeForPrayer(Prayer.ASR),
+                prayertimes.timeForPrayer(Prayer.MAGHRIB),
+                prayertimes.timeForPrayer(Prayer.ISHA)
             )
         }
-        //return the list
-        return prayertimesList
     }
 }

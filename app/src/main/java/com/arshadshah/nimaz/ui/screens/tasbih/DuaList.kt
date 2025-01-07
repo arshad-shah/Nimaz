@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -42,7 +40,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
@@ -55,12 +53,8 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 fun DuaList(
     chapterId: String,
     navController: NavHostController,
+    viewModel: DuaViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    val viewModel = viewModel<DuaViewModel>(
-        key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY,
-        viewModelStoreOwner = context as ComponentActivity
-    )
     val duaState = viewModel.duas.collectAsState()
     val listState = rememberLazyListState()
 

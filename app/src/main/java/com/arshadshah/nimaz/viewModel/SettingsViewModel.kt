@@ -1,20 +1,32 @@
 package com.arshadshah.nimaz.viewModel
 
 import android.app.Activity
+import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_DESC_TEST
+import com.arshadshah.nimaz.constants.AppConstants.CHANNEL_TEST
+import com.arshadshah.nimaz.constants.AppConstants.TEST_CHANNEL_ID
+import com.arshadshah.nimaz.constants.AppConstants.TEST_NOTIFY_ID
+import com.arshadshah.nimaz.constants.AppConstants.TEST_PI_REQUEST_CODE
 import com.arshadshah.nimaz.data.local.models.Parameters
-import com.arshadshah.nimaz.repositories.LocationRepository
+import com.arshadshah.nimaz.repositories.Location
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.UpdateState
 import com.arshadshah.nimaz.services.LocationService
+import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
+import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.ThemeDataStore
+import com.arshadshah.nimaz.utils.alarms.Alarms
+import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
@@ -22,25 +34,26 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sharedPreferences: PrivateSharedPreferences,
-    private val locationRepository: LocationRepository,
     private val locationService: LocationService,
+    private val themeDataStore: ThemeDataStore,
     private val updateService: UpdateService,
-    private val prayerTimesService: PrayerTimesService
+    private val prayerTimesService: PrayerTimesService,
+    private val prayerTimesRepository: PrayerTimesRepository,
+    private val locationStateManager: LocationStateManager,
+    private val createAlarms: CreateAlarms
 ) : ViewModel() {
 
     // UI State
@@ -48,17 +61,15 @@ class SettingsViewModel @Inject constructor(
         val isLoading: Boolean = false,
         val error: String = "",
         val updateAvailable: Boolean = false,
-        val isDarkMode: Boolean = false,
-        val theme: String = AppConstants.THEME_SYSTEM,
-        val updateState: UpdateState = UpdateState.Idle
+        val updateState: UpdateState = UpdateState.Idle,
+        val location: String = "",
+        val latitude: Double = 0.0,
+        val longitude: Double = 0.0
     )
 
     // Location State
-    data class LocationState(
+    data class LocationSettingsState(
         val isAuto: Boolean = false,
-        val name: String = "",
-        val latitude: Double = 0.0,
-        val longitude: Double = 0.0,
         val isBatteryExempt: Boolean = false,
         val areNotificationsAllowed: Boolean = false
     )
@@ -74,43 +85,30 @@ class SettingsViewModel @Inject constructor(
         val ishaTime: LocalDateTime = LocalDateTime.now()
     )
 
+    val themeName = themeDataStore.themeFlow
+    val isDarkMode = themeDataStore.darkModeFlow
+
     // StateFlows
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    val locationState = locationStateManager.locationState
 
-    private val _locationState = MutableStateFlow(LocationState())
-    val locationState: StateFlow<LocationState> = _locationState.asStateFlow()
+    private val _locationSettingsState = MutableStateFlow(LocationSettingsState())
+    val locationSettingsState: StateFlow<LocationSettingsState> =
+        _locationSettingsState.asStateFlow()
+
 
     private val _prayerTimesState = MutableStateFlow(PrayerTimesState())
-    val prayerTimesState: StateFlow<PrayerTimesState> = _prayerTimesState.asStateFlow()
-
-    val locationName = locationState.map { it.name }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
-    val latitude = locationState.map { it.latitude }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
-
-    val longitude = locationState.map { it.longitude }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
 
     // Initialize
     init {
-        loadInitialState()
         viewModelScope.launch {
+            loadSettings()
             updateService.updateState.collect { state ->
                 _uiState.update { it.copy(updateState = state) }
             }
         }
         Log.d("Nimaz: SettingsViewModel", "SettingsViewModel initialized ${this.hashCode()}")
-    }
-
-    private fun loadInitialState() {
-        viewModelScope.launch {
-            // Load all states
-            loadSettings()
-            loadLocation(sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, false))
-            loadPrayerTimes()
-        }
     }
 
 
@@ -120,9 +118,6 @@ class SettingsViewModel @Inject constructor(
         // Location Events
         data class LocationToggle(val context: Context, val checked: Boolean) : SettingsEvent()
         data class LocationInput(val context: Context, val location: String) : SettingsEvent()
-        data class Latitude(val context: Context, val latitude: Double) : SettingsEvent()
-        data class Longitude(val context: Context, val longitude: Double) : SettingsEvent()
-        data class LoadLocation(val context: Context) : SettingsEvent()
 
         // Permission and System Events
         data class BatteryExempt(val exempt: Boolean) : SettingsEvent()
@@ -148,6 +143,8 @@ class SettingsViewModel @Inject constructor(
 
         data object RegisterUpdateListener : SettingsEvent()
         data object UnregisterUpdateListener : SettingsEvent()
+        data object ForceResetAlarms : SettingsEvent()
+        data object SetTestAlarm : SettingsEvent()
     }
 
     fun handleEvent(event: SettingsEvent) {
@@ -159,9 +156,6 @@ class SettingsViewModel @Inject constructor(
                     // Location Events
                     is SettingsEvent.LocationToggle -> handleLocationToggle(event)
                     is SettingsEvent.LocationInput -> handleLocationInput(event)
-                    is SettingsEvent.Latitude -> handleLatitudeUpdate(event)
-                    is SettingsEvent.Longitude -> handleLongitudeUpdate(event)
-                    is SettingsEvent.LoadLocation -> handleLoadLocation(event)
 
                     // Permission Events
                     is SettingsEvent.BatteryExempt -> handleBatteryExempt(event)
@@ -180,12 +174,67 @@ class SettingsViewModel @Inject constructor(
                     // Loading Events
                     SettingsEvent.LoadSettings -> loadSettings()
                     SettingsEvent.LoadPrayerTimes -> loadPrayerTimes()
+                    SettingsEvent.ForceResetAlarms -> handleForceResetAlarms()
+                    SettingsEvent.SetTestAlarm -> handleSetTestAlarm()
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message ?: "Unknown error occurred") }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
+        }
+    }
+
+    private fun handleForceResetAlarms() {
+        viewModelScope.launch {
+            sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, false)
+            val alarmLock =
+                sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
+            loadPrayerTimes()
+            if (!alarmLock) {
+                createAlarms.exact(
+                    context,
+                    _prayerTimesState.value.fajrTime,
+                    _prayerTimesState.value.sunriseTime,
+                    _prayerTimesState.value.dhuhrTime,
+                    _prayerTimesState.value.asrTime,
+                    _prayerTimesState.value.maghribTime,
+                    _prayerTimesState.value.ishaTime
+                )
+                sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
+            }
+        }
+    }
+
+    private fun handleSetTestAlarm() {
+        viewModelScope.launch {
+            val zuharAdhan =
+                "android.resource://" + context.packageName + "/" + R.raw.zuhar
+            //create notification channels
+            val notificationHelper = NotificationHelper()
+            //test channel
+            notificationHelper.createNotificationChannel(
+                context,
+                NotificationManager.IMPORTANCE_MAX,
+                true,
+                CHANNEL_TEST,
+                CHANNEL_DESC_TEST,
+                TEST_CHANNEL_ID,
+                zuharAdhan
+            )
+            val currentTime = LocalDateTime.now()
+            val timeToNotify =
+                currentTime.plusSeconds(10).atZone(ZoneId.systemDefault())
+                    .toInstant().toEpochMilli()
+            val testPendingIntent = createAlarms.createPendingIntent(
+                context,
+                TEST_PI_REQUEST_CODE,
+                TEST_NOTIFY_ID,
+                timeToNotify,
+                "Test Adhan",
+                TEST_CHANNEL_ID
+            )
+            Alarms().setExactAlarm(context, timeToNotify, testPendingIntent)
         }
     }
 
@@ -307,95 +356,88 @@ class SettingsViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         handleUnregisterUpdateListener()
+        // Add location cleanup
+        viewModelScope.launch {
+            locationStateManager.cleanupRequest()
+        }
     }
 
     private suspend fun handleTheme(event: SettingsEvent.Theme) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                theme = event.theme
-            )
-        }
-        sharedPreferences.saveData(AppConstants.THEME, event.theme)
+        themeDataStore.updateTheme(event.theme)
     }
 
+    // Modify handleDarkMode
     private suspend fun handleDarkMode(event: SettingsEvent.DarkMode) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                isDarkMode = event.darkMode
-            )
-        }
-        sharedPreferences.saveDataBoolean(AppConstants.DARK_MODE, event.darkMode)
+        themeDataStore.updateDarkMode(event.darkMode)
     }
 
-    // Example implementation of a few event handlers
     private suspend fun handleLocationToggle(event: SettingsEvent.LocationToggle) {
         sharedPreferences.saveDataBoolean(AppConstants.LOCATION_TYPE, event.checked)
-        _locationState.update { it.copy(isAuto = event.checked) }
-        loadLocation(event.checked)
+        _locationSettingsState.update { it.copy(isAuto = event.checked) }
+        loadLocation(true)
+        val params = PrayerTimesParamMapper.getParams(context = context)
+        updatePrayerTimes(params)
+        handleForceResetAlarms()
+        updateWidget(context)
     }
 
     private suspend fun handleLocationInput(event: SettingsEvent.LocationInput) {
-        _locationState.update { it.copy(name = event.location) }
-        sharedPreferences.saveData(AppConstants.LOCATION_INPUT, event.location)
-
-        locationRepository.forwardGeocode(event.location)
-            .onSuccess { locationData ->
-                _locationState.update {
-                    it.copy(
-                        name = locationData.locationName,
-                        latitude = locationData.latitude,
-                        longitude = locationData.longitude
-                    )
-                }
-                // Save to preferences
-                with(sharedPreferences) {
-                    saveDataDouble(AppConstants.LATITUDE, locationData.latitude)
-                    saveDataDouble(AppConstants.LONGITUDE, locationData.longitude)
-                    saveData(AppConstants.LOCATION_INPUT, locationData.locationName)
-                }
+        try {
+            with(sharedPreferences) {
+                saveData(AppConstants.LOCATION_INPUT, event.location)
             }
-            .onFailure { error ->
-                _uiState.update { it.copy(error = error.message ?: "Failed to get location") }
-                // Load fallback values
-                _locationState.update {
-                    it.copy(
-                        latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
-                        longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                    )
+            locationService.loadLocation(false)
+                .onSuccess { locationData ->
+                    _uiState.update {
+                        it.copy(
+                            location = locationData.locationName,
+                            latitude = locationData.latitude,
+                            longitude = locationData.longitude
+                        )
+                    }
+                    with(sharedPreferences) {
+                        saveDataDouble(AppConstants.LATITUDE, locationData.latitude)
+                        saveDataDouble(AppConstants.LONGITUDE, locationData.longitude)
+                        saveData(AppConstants.LOCATION_INPUT, locationData.locationName)
+                    }
+                    val params = PrayerTimesParamMapper.getParams(context = context)
+                    updatePrayerTimes(params)
+                    updateWidget(context)
+                    handleForceResetAlarms()
                 }
-            }
+                .onFailure { error ->
+                    locationStateManager.updateLocationState(
+                        LocationStateManager.LocationState.Error(
+                            error.message ?: "Failed to update location"
+                        )
+                    )
+                    loadFallbackLocation()
+                }
+        } catch (e: Exception) {
+            locationStateManager.updateLocationState(
+                LocationStateManager.LocationState.Error(
+                    e.message ?: "Failed to update location"
+                )
+            )
+            loadFallbackLocation()
+        }
     }
 
-    private suspend fun handleLatitudeUpdate(event: SettingsEvent.Latitude) {
-        _locationState.update { it.copy(latitude = event.latitude) }
-        sharedPreferences.saveDataDouble(AppConstants.LATITUDE, event.latitude)
-        loadLocation(sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true))
-        updateWidget(context)
-        updatePrayerTimes(PrayerTimesParamMapper.getParams(context = context))
-        loadPrayerTimes()
-    }
 
-    private suspend fun handleLongitudeUpdate(event: SettingsEvent.Longitude) {
-        _locationState.update { it.copy(longitude = event.longitude) }
-        sharedPreferences.saveDataDouble(AppConstants.LONGITUDE, event.longitude)
-        loadLocation(sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true))
-        updateWidget(context)
-        updatePrayerTimes(PrayerTimesParamMapper.getParams(context = context))
-        loadPrayerTimes()
-    }
-
-    private suspend fun handleLoadLocation(event: SettingsEvent.LoadLocation) {
-        loadLocation(sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true))
-    }
-
-    private suspend fun handleBatteryExempt(event: SettingsEvent.BatteryExempt) {
-        _locationState.update { it.copy(isBatteryExempt = event.exempt) }
+    private fun handleBatteryExempt(event: SettingsEvent.BatteryExempt) {
+        _locationSettingsState.update { it.copy(isBatteryExempt = event.exempt) }
         sharedPreferences.saveDataBoolean(AppConstants.BATTERY_OPTIMIZATION, event.exempt)
     }
 
-    private suspend fun handleNotificationsAllowed(event: SettingsEvent.NotificationsAllowed) {
-        _locationState.update { it.copy(areNotificationsAllowed = event.allowed) }
+    private fun handleNotificationsAllowed(event: SettingsEvent.NotificationsAllowed) {
+        _locationSettingsState.update { it.copy(areNotificationsAllowed = event.allowed) }
         sharedPreferences.saveDataBoolean(AppConstants.NOTIFICATION_ALLOWED, event.allowed)
+        val channelLock =
+            sharedPreferences.getDataBoolean(AppConstants.CHANNEL_LOCK, false)
+        if (!channelLock) {
+            createAlarms.createAllNotificationChannels(context)
+            sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK, true)
+        }
     }
 
     private suspend fun loadSettings() {
@@ -416,12 +458,9 @@ class SettingsViewModel @Inject constructor(
     }
 
     private suspend fun loadLocationSettings() {
-        _locationState.update { currentState ->
+        _locationSettingsState.update { currentState ->
             currentState.copy(
                 isAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, false),
-                name = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
-                latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
-                longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603),
                 isBatteryExempt = sharedPreferences.getDataBoolean(
                     AppConstants.BATTERY_OPTIMIZATION,
                     false
@@ -434,55 +473,72 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadUiSettings() {
+    private fun loadUiSettings() {
         _uiState.update { currentState ->
             currentState.copy(
-                theme = sharedPreferences.getData(AppConstants.THEME, AppConstants.THEME_SYSTEM),
-                isDarkMode = sharedPreferences.getDataBoolean(AppConstants.DARK_MODE, false)
+                location = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
+                latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 0.0),
+                longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, 0.0)
             )
         }
     }
 
+
     private suspend fun loadLocation(isAuto: Boolean) {
         try {
-            _uiState.update { it.copy(isLoading = true) }
-
             locationService.loadLocation(isAuto)
                 .onSuccess { location ->
-                    _locationState.update { currentState ->
-                        currentState.copy(
-                            name = location.locationName,
+                    _uiState.update {
+                        it.copy(
+                            location = location.locationName,
                             latitude = location.latitude,
                             longitude = location.longitude
                         )
                     }
+                    ViewModelLogger.d(
+                        "Nimaz: SettingsViewModel",
+                        "inside sucess Updating location state: ${locationState.value}"
+                    )
                     updateWidget(context)
-                    // Reload prayer times with new location
-                    updatePrayerTimes(PrayerTimesParamMapper.getParams(context = context))
+                    val params = PrayerTimesParamMapper.getParams(context = context)
+                    updatePrayerTimes(params)
                     loadPrayerTimes()
                 }
-                .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            error = throwable.message ?: "Failed to load location"
+                .onFailure { error ->
+                    locationStateManager.updateLocationState(
+                        LocationStateManager.LocationState.Error(
+                            error.message ?: "Location fetch failed"
                         )
-                    }
+                    )
                     loadFallbackLocation()
                 }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message ?: "Unknown error occurred") }
+            locationStateManager.updateLocationState(
+                LocationStateManager.LocationState.Error(
+                    e.message ?: "Location fetch failed"
+                )
+            )
             loadFallbackLocation()
-        } finally {
-            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
+
     private suspend fun loadFallbackLocation() {
-        _locationState.update { currentState ->
-            currentState.copy(
-                latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
-                longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603),
-                name = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
+        val fallbackLocation = Location(
+            latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
+            longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603),
+            locationName = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
+        )
+        locationStateManager.updateLocationState(
+            LocationStateManager.LocationState.Success(
+                fallbackLocation
+            )
+        )
+        _uiState.update {
+            it.copy(
+                location = fallbackLocation.locationName,
+                latitude = fallbackLocation.latitude,
+                longitude = fallbackLocation.longitude
             )
         }
     }
@@ -519,10 +575,8 @@ class SettingsViewModel @Inject constructor(
 
     private fun updatePrayerTimes(parameters: Parameters) = viewModelScope.launch {
         try {
-            _uiState.update { it.copy(isLoading = true) }
-
             val response = withContext(Dispatchers.IO) {
-                PrayerTimesRepository.updatePrayerTimes(parameters)
+                prayerTimesRepository.updatePrayerTimes(parameters)
             }
 
             response.data?.let { data ->

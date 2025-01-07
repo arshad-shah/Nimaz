@@ -40,10 +40,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_CHAPTERS
 import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.ui.screens.tasbih.SharedPreferencesUtil.getLastVisibleItemIndex
@@ -53,7 +52,7 @@ import com.arshadshah.nimaz.viewModel.DuaViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterList(
-    viewModel: DuaViewModel = viewModel(key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY),
+    viewModel: DuaViewModel = hiltViewModel(),
     navController: NavHostController,
     onNavigateToChapter: (Int, String) -> Unit,
     categoryId: String

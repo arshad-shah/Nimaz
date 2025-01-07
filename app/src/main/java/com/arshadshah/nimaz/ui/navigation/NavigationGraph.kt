@@ -42,8 +42,8 @@ import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
-import com.arshadshah.nimaz.ui.screens.settings.About
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
+import com.arshadshah.nimaz.ui.screens.settings.EnhancedAboutScreen
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.settings.WebViewScreen
@@ -54,7 +54,6 @@ import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.ui.screens.tracker.CalenderScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
@@ -62,7 +61,6 @@ fun NavigationGraph(
     navController: NavController,
     context: MainActivity,
     isFirstInstall: Boolean,
-    settingsViewModel: SettingsViewModel,
 ) {
 
     val startDestination = if (isFirstInstall) "Intro" else BottomNavItem.Dashboard.screen_route
@@ -407,7 +405,6 @@ fun NavigationGraph(
             SettingsScreen(
                 activity = context,
                 navController = navController,
-                viewModelSettings = settingsViewModel,
                 onNavigateToPrayerTimeCustomizationScreen = {
                     navController.navigate(
                         PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
@@ -446,13 +443,10 @@ fun NavigationGraph(
             )
         }
         composable(ABOUT_SCREEN_ROUTE) {
-            About(
-                navController = navController
+            EnhancedAboutScreen(
+                navController = navController,
+                onImageClicked = { navController.navigate(DEBUG_MODE) }
             )
-            //navigate to the debug screen
-            {
-                navController.navigate(DEBUG_MODE)
-            }
         }
         composable(LICENCES_SCREEN_ROUTE) {
             LicensesScreen(

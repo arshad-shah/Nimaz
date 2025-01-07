@@ -23,7 +23,6 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.quran.AyaListUI
@@ -39,10 +38,10 @@ fun AyatScreen(
     language: String,
     scrollToAya: Int? = null,
     context: MainActivity,
-    spaceFilesRepository: SpacesFileRepository = SpacesFileRepository(context), // Pass repository directly
     navController: NavHostController,
     viewModel: QuranViewModel = hiltViewModel()
 ) {
+
     // LaunchedEffect should depend on both number and isSurah
     LaunchedEffect(Unit) {
         Log.d(AppConstants.QURAN_SCREEN_TAG, "Update occurred on Ayat screen: $number")
@@ -138,7 +137,7 @@ fun AyatScreen(
                 handleAyaEvents = viewModel::handleAyaEvent,
                 handleQuranMenuEvents = viewModel::handleQuranMenuEvents,
                 downloadAyaAudioFile = { surahNumber, ayaNumberInSurah, downloadCallback ->
-                    spaceFilesRepository.downloadAyaFile(
+                    viewModel.downloadAyaFile(
                         surahNumber,
                         ayaNumberInSurah,
                         downloadCallback

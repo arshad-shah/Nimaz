@@ -39,7 +39,6 @@ import kotlin.math.sin
 
 private const val FULL_ARC_ANGLE = 180f
 private const val START_ANGLE = 180f
-private const val ANIMATION_DURATION = 300
 private const val TAG = "Nimaz: AnimatedArcView"
 
 @Stable

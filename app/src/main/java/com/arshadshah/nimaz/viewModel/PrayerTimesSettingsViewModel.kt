@@ -10,10 +10,11 @@ import com.arshadshah.nimaz.data.local.models.Parameters
 import com.arshadshah.nimaz.libs.prayertimes.enums.CalculationMethod
 import com.arshadshah.nimaz.libs.prayertimes.enums.HighLatitudeRule
 import com.arshadshah.nimaz.libs.prayertimes.enums.Madhab
-import com.arshadshah.nimaz.repositories.PrayerTimesRepository.updatePrayerTimes
+import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
 import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
+import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +29,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PrayerTimesSettingsViewModel @Inject constructor(
     private val sharedPreferences: PrivateSharedPreferences,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val prayerTimesRepository: PrayerTimesRepository
 ) : ViewModel() {
 
     private val viewModelScopeRun = viewModelScope
@@ -140,7 +142,10 @@ class PrayerTimesSettingsViewModel @Inject constructor(
 
     private fun updateWidget(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
-            PrayerTimeWorker.enqueue(context, true)
+            safeOperation("updating parameters") {
+                PrayerTimeWorker.enqueue(context, true)
+                PrayerTimesTrackerWorker.enqueue(context, true)
+            }
         }
     }
 
@@ -148,7 +153,7 @@ class PrayerTimesSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             safeOperation("updating parameters") {
                 _parameters.value = createParameters()
-                updatePrayerTimes(createParameters())
+                prayerTimesRepository.updatePrayerTimes(createParameters())
                 updateWidget(context)
             }
         }
@@ -210,6 +215,10 @@ class PrayerTimesSettingsViewModel @Inject constructor(
                     else -> true
                 }
                 _ishaAngleVisibility.value = isNotAnIntervalMethod
+                sharedPreferences.saveDataBoolean(
+                    AppConstants.ALARM_LOCK,
+                    false
+                )
             }
         }
     }

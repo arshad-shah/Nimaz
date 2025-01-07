@@ -48,10 +48,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants.HADITH_VIEW_MODEL
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
 import com.arshadshah.nimaz.ui.components.common.CustomTabs
@@ -61,7 +60,7 @@ import com.arshadshah.nimaz.viewModel.HadithViewModel
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BookShelf(
-    viewModel: HadithViewModel = viewModel(key = HADITH_VIEW_MODEL),
+    viewModel: HadithViewModel = hiltViewModel(),
     onNavigateToChaptersList: (id: Int, title: String) -> Unit,
     onNavigateToChapterFromFavourite: (Int, Int) -> Unit,
     navController: NavHostController

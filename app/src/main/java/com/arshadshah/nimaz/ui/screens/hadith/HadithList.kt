@@ -45,10 +45,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
@@ -58,7 +57,7 @@ import com.arshadshah.nimaz.viewModel.HadithViewModel
 fun HadithList(
     bookId: String?,
     chapterId: String?,
-    viewModel: HadithViewModel = viewModel(key = AppConstants.HADITH_VIEW_MODEL),
+    viewModel: HadithViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
     LaunchedEffect(Unit) {

@@ -282,12 +282,6 @@ fun CalendarDay(
 }
 
 
-data class IslamicDay(
-    val name: String,
-    val description: String,
-    val importance: ImportanceLevel
-)
-
 enum class ImportanceLevel {
     HIGH, // For days like Eid, Laylatul Qadr
     MEDIUM, // For days like Ashura, Islamic New Year
@@ -460,22 +454,4 @@ object IslamicCalendarHelper {
         }
     }
 
-    // Helper function to get Hijri month name
-    fun getHijriMonthName(month: Int): String {
-        return when (month) {
-            1 -> "Muharram محرم"
-            2 -> "Safar صفر"
-            3 -> "Rabi' al-Awwal ربيع الأول"
-            4 -> "Rabi' al-Thani ربيع الثاني"
-            5 -> "Jumada al-Awwal جمادى الأول"
-            6 -> "Jumada al-Thani جمادى الثاني"
-            7 -> "Rajab رجب"
-            8 -> "Sha'ban شعبان"
-            9 -> "Ramadan رمضان"
-            10 -> "Shawwal شوال"
-            11 -> "Dhu al-Qadah ذو القعدة"
-            12 -> "Dhu al-Hijjah ذو الحجة"
-            else -> "Unknown"
-        }
-    }
 }

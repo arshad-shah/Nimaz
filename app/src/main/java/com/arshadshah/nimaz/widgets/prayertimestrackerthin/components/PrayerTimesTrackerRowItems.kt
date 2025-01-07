@@ -1,9 +1,7 @@
 package com.arshadshah.nimaz.widgets.prayertimestrackerthin.components
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -26,10 +24,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
-import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
-import kotlinx.coroutines.launch
-import java.time.LocalDate
+import kotlinx.coroutines.Job
 
 @Composable
 fun WidgetTogglableItem(
@@ -106,10 +101,10 @@ fun PrayerTimesTrackerRowItems(
     asrTime: MutableState<String>,
     maghribTime: MutableState<String>,
     ishaTime: MutableState<String>,
-    context: Context,
+    onUpdateTracker: (String, Boolean) -> Job,
 ) {
-    val scope = rememberCoroutineScope()
     val prayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+
 
     Row(
         modifier = GlanceModifier
@@ -148,14 +143,7 @@ fun PrayerTimesTrackerRowItems(
                         "Maghrib" -> maghrib.value = checked
                         "Isha" -> isha.value = checked
                     }
-                    scope.launch {
-                        PrayerTrackerRepository.updateSpecificPrayer(
-                            LocalDate.now(),
-                            prayer,
-                            checked
-                        )
-                        PrayerTimesTrackerWorker.enqueue(context, true)
-                    }
+                    onUpdateTracker(prayer, checked)
                 },
                 modifier = GlanceModifier.defaultWeight()
             )

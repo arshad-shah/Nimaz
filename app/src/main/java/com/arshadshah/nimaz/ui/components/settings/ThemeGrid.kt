@@ -48,32 +48,38 @@ fun ThemeSelector(
     onThemeOptionSelected: (ThemeOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = 1.dp
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                themeOptions.forEach { themeOption ->
-                    EnhancedThemeItem(
-                        themeOption = themeOption,
-                        onSelected = { onThemeOptionSelected(themeOption) }
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    themeOptions.forEach { themeOption ->
+                        EnhancedThemeItem(
+                            themeOption = themeOption,
+                            onSelected = { onThemeOptionSelected(themeOption) }
+                        )
+                    }
                 }
-            }
 
-            // Current theme info
-            themeOptions.find { it.isSelected }?.let { selectedTheme ->
-                ThemeInfo(themeOption = selectedTheme)
+                // Current theme info
+                themeOptions.find { it.isSelected }?.let { selectedTheme ->
+                    ThemeInfo(themeOption = selectedTheme)
+                }
             }
         }
     }
@@ -157,16 +163,10 @@ private fun ThemeInfo(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(themeOption.themeColor)
-            )
 
             Column {
                 Text(
-                    text = "${themeOption.themeName} Theme",
+                    text = themeOption.themeName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
@@ -180,14 +180,6 @@ private fun ThemeInfo(
             }
         }
     }
-}
-
-// Helper function to determine contrasting color for icons
-private fun getContrastColor(backgroundColor: Color): Color {
-    val luminance = (0.299 * backgroundColor.red +
-            0.587 * backgroundColor.green +
-            0.114 * backgroundColor.blue)
-    return if (luminance > 0.5f) Color.Black else Color.White
 }
 
 @Preview(showBackground = true)

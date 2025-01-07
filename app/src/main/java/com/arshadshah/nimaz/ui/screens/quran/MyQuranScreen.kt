@@ -213,5 +213,10 @@ private fun getFrequentlyReadSurahs() = mapOf(
     "Yaseen" to Triple("36", 1, "يس"),
     "Ar-Rahman" to Triple("55", 1, "الرَّحْمَٰن"),
     "Al-Mulk" to Triple("67", 1, "الْمُلْك"),
-    "Al-Kawthar" to Triple("108", 1, "الْكَوْثَر")
+    "Al-Kawthar" to Triple("108", 1, "الْكَوْثَر"),
+    "Al-Ikhlas" to Triple("112", 1, "الْإِخْلَاص"),
+    "Al-Falaq" to Triple("113", 1, "الْفَلَق"),
+    "An-Nas" to Triple("114", 1, "النَّاس"),
+    "Al-Kahf" to Triple("18", 1, "الْكَهْف")
+
 )

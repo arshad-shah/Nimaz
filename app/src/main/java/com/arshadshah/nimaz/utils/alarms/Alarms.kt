@@ -3,14 +3,16 @@ package com.arshadshah.nimaz.utils.alarms
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Context.ALARM_SERVICE
 import android.util.Log
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class Alarms {
+@Singleton
+class Alarms @Inject constructor() {
 
     /**
      * Sets a Exact alarm that is allowed in doze mode
@@ -22,7 +24,7 @@ class Alarms {
      * */
     fun setExactAlarm(context: Context, timeToNotify: Long, pendingIntent: PendingIntent) {
         // get alarm manager
-        val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.setAlarmClock(
             AlarmManager.AlarmClockInfo(timeToNotify, pendingIntent),
             pendingIntent
@@ -36,5 +38,5 @@ class Alarms {
             .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
         //logs
         Log.d("Nimaz: Alarms for Adhan", "Alarm for $time is successfully created")
-    } // end of alarm set
+    }
 }

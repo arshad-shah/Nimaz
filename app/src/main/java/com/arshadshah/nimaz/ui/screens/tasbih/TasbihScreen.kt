@@ -39,8 +39,6 @@ fun TasbihScreen(
     navController: NavHostController,
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
-
-    val rOrl = viewModel.orientationButtonState.collectAsState()
     val vibrationAllowed = viewModel.vibrationButtonState.collectAsState()
     val resetButtonState = viewModel.resetButtonState.collectAsState()
 
@@ -94,7 +92,6 @@ fun TasbihScreen(
                     resetTasbih = resetButtonState,
                     count = counter,
                     tasbih = tasbihCreated,
-                    rOrl = rOrl,
                     lap = lap,
                     lapCounter = lapCounter,
                     objective = objective,
@@ -107,7 +104,6 @@ fun TasbihScreen(
                     setLap = viewModel::setLap,
                     setLapCounter = viewModel::setLapCounter,
                     resetTasbihState = viewModel::resetTasbih,
-                    getTasbih = viewModel::getTasbih,
                 )
             } else {
                 Counter(

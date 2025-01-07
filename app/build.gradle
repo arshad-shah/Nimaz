@@ -27,16 +27,20 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField "String", "DO_ACCESS_KEY", "\"${getSecret("DO_ACCESS_KEY")}\""
+        buildConfigField "String", "DO_SECRET_KEY", "\"${getSecret("DO_SECRET_KEY")}\""
+        buildConfigField "String", "SPACE_NAME", "\"quran-audio\""
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 debugSymbolLevel 'FULL'
             }
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             minifyEnabled false
@@ -54,6 +58,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
@@ -68,6 +73,16 @@ android {
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
+}
+
+def getSecret(String key) {
+    def secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(secretsFile))
+        return props.getProperty(key)
+    }
+    return ""
 }
 
 dependencies {
@@ -168,5 +183,6 @@ dependencies {
     implementation libs.hilt.android
     ksp libs.hilt.android.compiler
     implementation libs.androidx.hilt.navigation.compose
+    implementation libs.androidx.hilt.work
 
 }

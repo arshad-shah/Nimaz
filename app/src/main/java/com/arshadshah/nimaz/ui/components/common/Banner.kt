@@ -45,8 +45,6 @@ sealed class BannerVariant {
 enum class BannerDuration(val value: Int) {
 
     SHORT_TIME(3000),
-    MEDIUM_TIME(5000),
-    LONG_TIME(7000),
     FOREVER(-1)
 }
 

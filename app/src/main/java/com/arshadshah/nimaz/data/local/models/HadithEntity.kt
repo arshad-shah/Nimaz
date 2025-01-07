@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
             parentColumns = ["id"],
             childColumns = ["bookId"]
         )
-    ]
+    ],
 )
 data class HadithEntity(
     @PrimaryKey val id: Int,

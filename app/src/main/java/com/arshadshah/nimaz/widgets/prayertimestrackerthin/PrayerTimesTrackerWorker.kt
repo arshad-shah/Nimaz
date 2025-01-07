@@ -6,6 +6,7 @@ import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -14,12 +15,18 @@ import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.data.local.models.PrayerTrackerWithTime
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import java.time.Duration
 import java.time.LocalDate
 
-class PrayerTimesTrackerWorker(private val context: Context, workerParams: WorkerParameters) :
-    CoroutineWorker(context, workerParams) {
-
+@HiltWorker
+class PrayerTimesTrackerWorker @AssistedInject constructor(
+    @Assisted private val context: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val prayerTimesRepository: PrayerTimesRepository,
+    private val prayerTrackerRepository: PrayerTrackerRepository,
+) : CoroutineWorker(context, workerParams) {
     companion object {
 
         private val uniqueWorkName = PrayerTimesTrackerWorker::class.java.simpleName
@@ -82,10 +89,10 @@ class PrayerTimesTrackerWorker(private val context: Context, workerParams: Worke
             // Update state to indicate loading
             setWidgetState(glanceIds, PrayerTimesTrackerWidget.Loading)
 
-            val tracker = PrayerTrackerRepository.getTrackerForDate(
+            val tracker = prayerTrackerRepository.getTrackerForDate(
                 LocalDate.now()
             )
-            val prayerTimes = PrayerTimesRepository.getPrayerTimes(context).data
+            val prayerTimes = prayerTimesRepository.getPrayerTimes(context).data
             Log.d("PrayerTimeTrackerWorker", "prayerTimes: $prayerTimes")
 
             if (

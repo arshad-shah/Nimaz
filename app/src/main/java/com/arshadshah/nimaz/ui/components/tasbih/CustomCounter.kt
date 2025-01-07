@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.ui.components.tasbih
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,14 +73,11 @@ fun CustomCounter(
     lap: State<Int>,
     lapCounter: State<Int>,
     resetTasbihState: () -> Unit,
-    rOrl: State<Boolean>,
     vibrationAllowed: State<Boolean>,
-    getTasbih: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val showObjectiveDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
-    Log.d("tasbihId", tasbih.value.toString())
     LaunchedEffect(Unit) {
         setObjective(tasbih.value.goal)
         setCounter(tasbih.value.count)

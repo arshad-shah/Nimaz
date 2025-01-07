@@ -3,10 +3,13 @@ package com.arshadshah.nimaz.ui.screens
 import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
+import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
@@ -32,7 +36,6 @@ import com.arshadshah.nimaz.ui.components.dashboard.EidUlFitrCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import java.time.LocalDateTime
@@ -48,11 +51,6 @@ fun Dashboard(
     navController: NavHostController,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
-
-    if (!LocalDataStore.isInitialized()) {
-        LocalDataStore.init(context)
-        Log.d(MAIN_ACTIVITY_TAG, "onResume:  data store is initialized")
-    }
     // Initialize data when the composable is first launched
     LaunchedEffect(Unit) {
         viewModel.initializeData(context)
@@ -69,17 +67,17 @@ fun Dashboard(
             val maghribPrayerTime by maghribTime.collectAsState()
             val prayerTracker by trackerState.collectAsState()
             val isLoadingData by isLoading.collectAsState()
-            val quranBookmarks by bookmarks.collectAsState()
-            val suraList by surahList.collectAsState()
-            val tasbihListData by tasbihList.collectAsState()
             val isErrored by isError.collectAsState()
             val errorMessage by error.collectAsState()
             val nextPrayerNameValue by nextPrayerName.collectAsState()
             val nextPrayerTimeValue by nextPrayerTime.collectAsState()
             val countDownTimer by countDownTime.collectAsState()
             val randomAya = randomAyaState.collectAsState()
+            val locationDataState by locationState.collectAsState()
         }
     }
+
+    Log.d(MAIN_ACTIVITY_TAG, "Dashboard: ${dashboardState.locationDataState}")
     val stateScroll = rememberLazyListState()
     Scaffold(
         bottomBar = {
@@ -94,7 +92,40 @@ fun Dashboard(
             contentPadding = it
         ) {
             item {
-                LocationTopBar(dashboardState.location, dashboardState.isLoadingData)
+                when (dashboardState.locationDataState) {
+                    is LocationStateManager.LocationState.Loading -> {
+                        LocationTopBar(
+                            locationName = "Loading location...",
+                            isLoading = true
+                        )
+                    }
+
+                    is LocationStateManager.LocationState.Success -> {
+                        LocationTopBar(
+                            locationName = (dashboardState.locationDataState as LocationStateManager.LocationState.Success).location.locationName,
+                            isLoading = false
+                        )
+                    }
+
+                    is LocationStateManager.LocationState.Error -> {
+                        LocationTopBar(
+                            locationName = "Location unavailable",
+                            isLoading = false
+                        )
+                        LocationRetryButton(
+                            onClick = {
+                                viewModel.handleEvent(DashboardViewModel.DashboardEvent.LoadLocation)
+                            }
+                        )
+                    }
+
+                    LocationStateManager.LocationState.Idle -> {
+                        LocationTopBar(
+                            locationName = dashboardState.location,
+                            isLoading = false
+                        )
+                    }
+                }
             }
             item {
                 DashboardPrayerTimesCard(
@@ -206,4 +237,14 @@ private fun UpdateBanner(
             end = 8.dp
         )
     )
+}
+
+@Composable
+fun LocationRetryButton(onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.padding(horizontal = 8.dp)
+    ) {
+        Text("Retry Location")
+    }
 }

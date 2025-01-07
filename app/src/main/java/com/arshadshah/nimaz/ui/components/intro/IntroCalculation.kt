@@ -4,97 +4,169 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.settings.SettingValueState
-import com.arshadshah.nimaz.ui.components.settings.SettingsList
-import com.arshadshah.nimaz.ui.components.settings.SettingsSwitch
+import com.arshadshah.nimaz.constants.AppConstants.getMethods
+import com.arshadshah.nimaz.ui.components.common.SettingsSelectionDialog
 import com.arshadshah.nimaz.viewModel.IntroductionViewModel
 
 @Composable
 fun IntroCalculation(
     viewModel: IntroductionViewModel = hiltViewModel()
 ) {
-    val calcAuto = viewModel.isAutoCalculation.collectAsState()
-    val calculationMethod = viewModel.calculationMethod.collectAsState()
-    val methods = viewModel.availableCalculationMethods.collectAsState()
+    val calculationSettingsState by viewModel.calculationSettingsState.collectAsState()
 
     ElevatedCard(
         modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth()
     ) {
-        SettingsSwitch(
-            state = createBooleanState(calcAuto.value),
-            title = {
-                if (calcAuto.value) {
-                    Text(text = "Auto Calculation")
-                } else {
-                    Text(text = "Manual Calculation")
-                }
-            },
-            subtitle = {
-                Text(text = "Auto angles are Experimental")
-            },
-            onCheckedChange = { enabled ->
+        // Auto Parameters Toggle
+        Surface(
+            onClick = {
                 viewModel.handleEvent(
-                    IntroductionViewModel.IntroEvent.ToggleAutoCalculation(enabled)
+                    IntroductionViewModel.IntroEvent.ToggleAutoCalculation(
+                        !calculationSettingsState.isAutoCalculation
+                    )
+                )
+            },
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(12.dp),
+            tonalElevation = 2.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.time_calculation),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column {
+                        Text(
+                            text = if (calculationSettingsState.isAutoCalculation) "Auto" else "Manual",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Experimental",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Switch(
+                    checked = calculationSettingsState.isAutoCalculation,
+                    onCheckedChange = {
+                        viewModel.handleEvent(
+                            IntroductionViewModel.IntroEvent.ToggleAutoCalculation(it)
+                        )
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                )
+            }
+        }
+    }
+
+    AnimatedVisibility(
+        visible = !calculationSettingsState.isAutoCalculation,
+        enter = expandVertically(),
+        exit = shrinkVertically()
+    ) {
+        CalculationMethodItem(
+            calculationMethod = calculationSettingsState.calculationMethod,
+            onCalculationMethodChange = { method ->
+                viewModel.handleEvent(
+                    IntroductionViewModel.IntroEvent.UpdateCalculationMethod(method)
                 )
             }
         )
     }
+}
 
-    AnimatedVisibility(
-        visible = !calcAuto.value,
-        enter = expandVertically(),
-        exit = shrinkVertically()
+
+@Composable
+private fun CalculationMethodItem(
+    calculationMethod: String,
+    onCalculationMethodChange: (String) -> Unit
+) {
+
+    val showDialog = remember { mutableStateOf(false) }
+    val methods = remember { getMethods() }
+    Surface(
+        onClick = { showDialog.value = true },
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = 2.dp
     ) {
-        ElevatedCard(
+        Row(
             modifier = Modifier
-                .padding(4.dp)
                 .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            SettingsList(
-                title = "Calculation Method",
-                subtitle = calculationMethod.value,
-                description = "The method used to calculate the prayer times.",
-                icon = {
-                    Image(
-                        modifier = Modifier.size(34.dp),
-                        painter = painterResource(id = R.drawable.time_calculation),
-                        contentDescription = "Calculation Method"
-                    )
-                },
-                items = methods.value,
-                valueState = createValueState(calculationMethod.value),
-                onChange = { method ->
-                    viewModel.handleEvent(
-                        IntroductionViewModel.IntroEvent.UpdateCalculationMethod(method)
-                    )
-                },
-                height = 300.dp
+            Image(
+                painter = painterResource(id = R.drawable.time_calculation),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
             )
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Calculation Method",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = calculationMethod,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
-}
 
-// Add these at the bottom of your file
-private fun createValueState(value: String) = object : SettingValueState<String> {
-    override var value: String = value
-    override fun reset() {}
-}
-
-private fun createBooleanState(value: Boolean) = object : SettingValueState<Boolean> {
-    override var value: Boolean = value
-    override fun reset() {}
+    SettingsSelectionDialog(
+        title = "Select Calculation Method",
+        options = methods,
+        selectedOption = calculationMethod,
+        onOptionSelected = onCalculationMethodChange,
+        onDismiss = { showDialog.value = false },
+        showDialog = showDialog.value
+    )
 }

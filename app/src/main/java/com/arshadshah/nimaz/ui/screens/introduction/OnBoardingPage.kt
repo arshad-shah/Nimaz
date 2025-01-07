@@ -45,16 +45,16 @@ object OnBoardingPages {
             extra = { IntroLocation() }
         ),
         OnBoardingPage(
-            image = R.drawable.time_calculation,
-            title = "Calculation Method",
-            description = "Nimaz uses the Muslim World League method by default in manual mode and uses altitude of the sun to calculate prayer times in automatic mode.",
-            extra = { IntroCalculation() }
-        ),
-        OnBoardingPage(
             image = R.drawable.battery,
             title = "Battery Exemption",
             description = "Battery optimization can cause issues with Adhan Notifications.",
             extra = { IntroBatteryExemption() }
+        ),
+        OnBoardingPage(
+            image = R.drawable.time_calculation,
+            title = "Calculation Method",
+            description = "Nimaz uses the Muslim World League method by default in manual mode and uses altitude of the sun to calculate prayer times in automatic mode.",
+            extra = { IntroCalculation() }
         ),
         OnBoardingPage(
             image = R.drawable.check_mark,
@@ -65,8 +65,5 @@ object OnBoardingPages {
 
     operator fun get(index: Int) = pages.getOrNull(index)
     val size get() = pages.size
-    fun getAll() = pages.toList()
 
-    // Extension function to get page number (1-based index)
-    fun OnBoardingPage.pageNumber() = pages.indexOf(this) + 1
 }

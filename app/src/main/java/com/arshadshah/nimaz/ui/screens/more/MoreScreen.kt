@@ -52,12 +52,12 @@ fun MoreScreen(
             color = MaterialTheme.colorScheme.primaryContainer,
             onClick = { onNavigateToTasbihScreen(" ", " ", " ", " ") }
         ),
-        FeatureItem(
-            title = "Tasbih List",
-            icon = R.drawable.tasbih,
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            onClick = onNavigateToTasbihListScreen
-        ),
+//        FeatureItem(
+//            title = "Tasbih List",
+//            icon = R.drawable.tasbih,
+//            color = MaterialTheme.colorScheme.secondaryContainer,
+//            onClick = onNavigateToTasbihListScreen
+//        ),
         FeatureItem(
             title = "Qibla",
             icon = R.drawable.qibla,

@@ -284,14 +284,4 @@ internal object ParametersUtils {
     }
 
 
-    /**
-     * Return all the Calculations methods and thier parameters
-     * */
-    fun getAllCalculationMethods(): List<CalculationParameters> {
-        val calculationParametersList = mutableListOf<CalculationParameters>()
-        for (method in CalculationMethod.values()) {
-            calculationParametersList.add(getParametersForMethod(method))
-        }
-        return calculationParametersList
-    }
 }

@@ -12,7 +12,7 @@ import androidx.room.ForeignKey
             parentColumns = ["id"],
             childColumns = ["bookId"]
         )
-    ]
+    ],
 )
 data class HadithChapter(
     val chapterId: Int,
