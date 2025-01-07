@@ -18,3 +18,4 @@ google-services.json
 *.apk
 /.idea/deploymentTargetDropDown.xml
 /*.html
+secrets.properties
