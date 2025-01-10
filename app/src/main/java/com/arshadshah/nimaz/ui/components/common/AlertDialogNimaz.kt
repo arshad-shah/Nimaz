@@ -1,18 +1,27 @@
 package com.arshadshah.nimaz.ui.components.common
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -21,14 +30,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -40,30 +53,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arshadshah.nimaz.R
 
-/**
- * A custom Alert dialog for the app, it is very flexible and allows usage in many different ways
- * it accepts booleans flags to show or hide certain elements of the dialog.
- * @param modifier Modifier to apply to the dialog
- * @param icon Icon to show in the dialog
- * @param action The action shown to right of title in the dialog
- * @param title The title of the dialog
- * @param contentDescription The content description for the dialog icon
- * @param description The description of the dialog
- * @param contentToShow The content to show in the dialog
- * @param contentHeight The height of the content to show in the dialog
- * @param cardContent Whether to show the content in a card or not
- * @param onDismissRequest The callback to be called when the dialog is dismissed
- * @param properties The properties of the dialog
- * @param topDivider Whether to show a top divider or not
- * @param bottomDivider Whether to show a bottom divider or not
- * @param showConfirmButton Whether to show the confirm button or not
- * @param showDismissButton Whether to show the dismiss button or not
- * @param onConfirm The callback to be called when the confirm button is clicked
- * @param confirmButtonText The text to show on the confirm button
- * @param onDismiss The callback to be called when the dismiss button is clicked
- * @param dismissButtonText The text to show on the dismiss button
- * @sample com.arshadshah.nimaz.ui.components.common.AlertDialogNimazPreviewWithAction
- * */
 @Composable
 fun AlertDialogNimaz(
     modifier: Modifier = Modifier,
@@ -89,172 +78,194 @@ fun AlertDialogNimaz(
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = properties,
+        properties = properties
     ) {
-        ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = 32.dp
-                ),
-                contentColor = MaterialTheme.colorScheme.onSurface,
+        val scale by animateFloatAsState(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
             ),
+            label = "scale"
+        )
+
+        ElevatedCard(
             modifier = modifier
                 .fillMaxWidth()
-                .wrapContentHeight(),
+                .wrapContentHeight()
+                .scale(scale),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 8.dp
+            ),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
         ) {
             Column(
                 modifier = Modifier
-                    .padding(top = 16.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
+                    .padding(20.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                // Header Section
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    if (icon != null) {
-                        Icon(
-                            painter = icon,
-                            contentDescription = contentDescription,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(32.dp)
-                        )
-                    }
-                    if (action != null) {
-                        Row(
-                            modifier
-                                .padding(bottom = 4.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (icon != null) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(
+                                    painter = icon,
+                                    contentDescription = contentDescription,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .size(32.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+
+                        if (action != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.weight(1f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                action()
+                            }
+                        } else {
                             Text(
                                 text = title,
                                 style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier
-                                    .weight(0.8f)
-                                    .padding(4.dp),
-                                textAlign = TextAlign.Start,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                softWrap = true
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                textAlign = TextAlign.Center
                             )
-                            action()
                         }
-                    } else {
+                    }
+                }
+
+                // Description Section
+                if (description != null) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
                         Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier
-                                .padding(8.dp)
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
 
-                Column {
-                    if (description != null) {
-                        Row(
-                            modifier
-                                .padding(bottom = 4.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Text(
-                                text = description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                        }
-                    }
-                    if (topDivider) HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                // Content Section
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.height(contentHeight)
+                ) {
                     if (cardContent) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                    elevation = 8.dp
-                                ),
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.38f
-                                ),
-                                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-                                    alpha = 0.38f
-                                ),
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Row(
-                                modifier
-                                    .height(contentHeight)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                LazyColumn(
-                                    state = scrollState,
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    item {
-                                        contentToShow()
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        Row(
-                            modifier
-                                .height(contentHeight)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surface
                         ) {
                             LazyColumn(
                                 state = scrollState,
+                                contentPadding = PaddingValues(8.dp),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                item {
-                                    contentToShow()
-                                }
+                                item { contentToShow() }
                             }
+                        }
+                    } else {
+                        LazyColumn(
+                            state = scrollState,
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            item { contentToShow() }
                         }
                     }
                 }
-                if (bottomDivider) HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(top = 16.dp, end = 8.dp, bottom = 0.dp),
-                    horizontalArrangement = Arrangement.End
+
+                // Buttons Section
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    if (showDismissButton) {
-                        TextButton(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            onClick = { onDismiss() },
-                            content = {
-                                Text(
-                                    text = dismissButtonText,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (showDismissButton) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                TextButton(
+                                    onClick = onDismiss,
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                ) {
+                                    Text(
+                                        text = dismissButtonText,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
-                        )
-                    }
-                    if (showConfirmButton) {
-                        Button(
-                            modifier = Modifier.padding(start = 8.dp),
-                            onClick = { onConfirm() },
-                            content = {
-                                Text(
-                                    text = confirmButtonText,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+                        }
+
+                        if (showConfirmButton) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Button(
+                                    onClick = onConfirm,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                ) {
+                                    Text(
+                                        text = confirmButtonText,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
                             }
-                        )
+                        }
                     }
                 }
             }

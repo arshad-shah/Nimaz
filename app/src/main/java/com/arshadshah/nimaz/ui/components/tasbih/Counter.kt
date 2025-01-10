@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
@@ -25,11 +26,13 @@ import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -83,223 +87,268 @@ fun Counter(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Top Stats Section
-            Row(
+            // Stats Card
+            ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
             ) {
-                StatCard(
-                    title = "Loop",
-                    value = lap.value.toString(),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                )
-                StatCard(
-                    title = "Target",
-                    value = if (objective.value > 0) objective.value.toString() else "-",
-                    color = MaterialTheme.colorScheme.tertiaryContainer
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Counter Circle
-            Box(
-                modifier = Modifier
-                    .size(280.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable {
-                        if (objective.value > 0 && count.value + 1 > objective.value) {
-                            setLap(lap.value + 1)
-                            setCounter(0)
-                            setLapCounter(lapCounter.value + 1)
-                            if (vibrationAllowed.value) {
-                                performHapticFeedback(context, true)
-                            }
-                        } else {
-                            increment()
-                            if (vibrationAllowed.value) {
-                                performHapticFeedback(context, true)
-                            }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatItem(
+                                title = "Loop",
+                                value = lap.value.toString(),
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                            StatItem(
+                                title = "Target",
+                                value = if (objective.value > 0) objective.value.toString() else "-",
+                                containerColor = MaterialTheme.colorScheme.tertiary
+                            )
                         }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = count.value.toString(),
-                        style = MaterialTheme.typography.displayLarge,
-                        fontSize = 72.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    if (objective.value > 0) {
-                        Text(
-                            text = "${((count.value.toFloat() / objective.value) * 100).toInt()}%",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Control Buttons
-            Row(
+            // Counter Card
+            ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
             ) {
-                IconButton(
-                    onClick = { decrement() },
+                Column(
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Remove,
-                        contentDescription = "Decrement",
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
+                    Surface(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .clickable {
+                                if (objective.value > 0 && count.value + 1 > objective.value) {
+                                    setLap(lap.value + 1)
+                                    setCounter(0)
+                                    setLapCounter(lapCounter.value + 1)
+                                    if (vibrationAllowed.value) {
+                                        performHapticFeedback(context, true)
+                                    }
+                                } else {
+                                    increment()
+                                    if (vibrationAllowed.value) {
+                                        performHapticFeedback(context, true)
+                                    }
+                                }
+                            },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = count.value.toString(),
+                                style = MaterialTheme.typography.displayLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            if (objective.value > 0) {
+                                Text(
+                                    text = "${((count.value.toFloat() / objective.value) * 100).toInt()}%",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
 
-                IconButton(
-                    onClick = { showObjectiveDialog.value = true },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.tertiaryContainer)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Edit,
-                        contentDescription = "Set Target",
-                        tint = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ActionButton(
+                            icon = Icons.Rounded.Remove,
+                            label = "Decrement",
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            onClick = decrement
+                        )
 
-                IconButton(
-                    onClick = { resetTasbihState() },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.errorContainer)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Refresh,
-                        contentDescription = "Reset",
-                        tint = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                        ActionButton(
+                            icon = Icons.Rounded.Edit,
+                            label = "Set Target",
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            onClick = { showObjectiveDialog.value = true }
+                        )
+
+                        ActionButton(
+                            icon = Icons.Rounded.Refresh,
+                            label = "Reset",
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            onClick = resetTasbihState
+                        )
+                    }
                 }
             }
         }
     }
 
-    // Dialogs
     if (resetTasbih.value) {
-        AlertDialog(
-            onDismissRequest = { resetTasbihState() },
-            title = { Text("Reset Counter") },
-            text = { Text("Are you sure you want to reset the counter?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    setCounter(0)
-                    setLap(0)
-                    setLapCounter(0)
-                    resetTasbihState()
-                }) {
-                    Text("Reset")
-                }
+        ResetDialog(
+            onConfirm = {
+                setCounter(0)
+                setLap(0)
+                setLapCounter(0)
+                resetTasbihState()
             },
-            dismissButton = {
-                TextButton(onClick = { resetTasbihState() }) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = resetTasbihState
         )
     }
 
     if (showObjectiveDialog.value) {
-        AlertDialog(
-            onDismissRequest = { showObjectiveDialog.value = false },
-            title = { Text("Set Target") },
-            text = {
-                OutlinedTextField(
-                    value = if (objective.value == 0) "" else objective.value.toString(),
-                    onValueChange = {
-                        if (it.isNotEmpty()) setObjective(it.toIntOrNull() ?: 0)
-                        else setObjective(0)
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    singleLine = true,
-                    label = { Text("Target Count") }
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { showObjectiveDialog.value = false }) {
-                    Text("Set")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showObjectiveDialog.value = false }) {
-                    Text("Cancel")
-                }
-            }
+        ObjectiveDialog(
+            currentObjective = objective.value,
+            onObjectiveSet = setObjective,
+            onDismiss = { showObjectiveDialog.value = false }
         )
     }
 }
 
 @Composable
-private fun StatCard(
+private fun StatItem(
     title: String,
     value: String,
-    color: Color
+    containerColor: Color,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = Modifier
-            .width(120.dp)
-            .height(80.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = color
-        )
+    Surface(
+        color = containerColor,
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
                 text = value,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
             )
         }
     }
 }
 
+@Composable
+private fun ActionButton(
+    icon: ImageVector,
+    label: String,
+    containerColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .size(64.dp)
+            .clickable(onClick = onClick),
+        shape = CircleShape,
+        color = containerColor
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            modifier = Modifier.padding(16.dp),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
+}
+
+@Composable
+private fun ObjectiveDialog(
+    currentObjective: Int,
+    onObjectiveSet: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Set Target") },
+        text = {
+            OutlinedTextField(
+                value = if (currentObjective == 0) "" else currentObjective.toString(),
+                onValueChange = { value ->
+                    if (value.isNotEmpty()) onObjectiveSet(value.toIntOrNull() ?: 0)
+                    else onObjectiveSet(0)
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                singleLine = true,
+                label = { Text("Target Count") }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Set") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+private fun ResetDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Reset Counter") },
+        text = { Text("Are you sure you want to reset the counter?") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("Reset") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
 private fun performHapticFeedback(context: Context, vibrationAllowed: Boolean) {
     if (!vibrationAllowed) return
-
     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
 }

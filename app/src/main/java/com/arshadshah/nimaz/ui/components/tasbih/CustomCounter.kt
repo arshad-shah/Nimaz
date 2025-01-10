@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
@@ -25,11 +26,13 @@ import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -78,72 +81,220 @@ fun CustomCounter(
 ) {
     val showObjectiveDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         setObjective(tasbih.value.goal)
         setCounter(tasbih.value.count)
+    }
+
+    LaunchedEffect(count.value) {
+        updateTasbih(tasbih.value.copy(count = count.value))
     }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp)
     ) {
-        LaunchedEffect(count.value) {
-            updateTasbih(tasbih.value.copy(count = count.value))
-        }
         Column(
             modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TasbihHeader(tasbih = tasbih.value)
-            Row(
+            // Tasbih Header Card
+            ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             ) {
-                StatCard(
-                    title = "Loop",
-                    value = lap.value.toString(),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                )
-                StatCard(
-                    title = "Target",
-                    value = if (objective.value > 0) objective.value.toString() else "-",
-                    color = MaterialTheme.colorScheme.tertiaryContainer
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            CounterCircle(
-                count = count.value,
-                objective = objective.value,
-                onClick = {
-                    if (objective.value > 0 && count.value + 1 > objective.value) {
-                        setLap(lap.value + 1)
-                        setCounter(0)
-                        setLapCounter(lapCounter.value + 1)
-                        if (vibrationAllowed.value) {
-                            performHapticFeedback(context)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = tasbih.value.englishName,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         }
-                    } else {
-                        increment()
-                        if (vibrationAllowed.value) {
-                            performHapticFeedback(context)
+                    }
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                Text(
+                                    text = tasbih.value.arabicName,
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontFamily = utmaniQuranFont,
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = tasbih.value.translationName,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
-            )
+            }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            // Stats Card
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatItem(
+                                title = "Loop",
+                                value = lap.value.toString(),
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                            StatItem(
+                                title = "Target",
+                                value = if (objective.value > 0) objective.value.toString() else "-",
+                                containerColor = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                }
+            }
 
-            ControlButtons(
-                onDecrement = decrement,
-                onSetObjective = { showObjectiveDialog.value = true },
-                onReset = resetTasbihState
-            )
+            // Counter Card
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .clickable {
+                                if (objective.value > 0 && count.value + 1 > objective.value) {
+                                    setLap(lap.value + 1)
+                                    setCounter(0)
+                                    setLapCounter(lapCounter.value + 1)
+                                    if (vibrationAllowed.value) {
+                                        performHapticFeedback(context)
+                                    }
+                                } else {
+                                    increment()
+                                    if (vibrationAllowed.value) {
+                                        performHapticFeedback(context)
+                                    }
+                                }
+                            },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = count.value.toString(),
+                                style = MaterialTheme.typography.displayLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            if (objective.value > 0) {
+                                Text(
+                                    text = "${((count.value.toFloat() / objective.value) * 100).toInt()}%",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ActionButton(
+                            icon = Icons.Rounded.Remove,
+                            label = "Decrement",
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            onClick = decrement
+                        )
+
+                        ActionButton(
+                            icon = Icons.Rounded.Edit,
+                            label = "Set Target",
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            onClick = { showObjectiveDialog.value = true }
+                        )
+
+                        ActionButton(
+                            icon = Icons.Rounded.Refresh,
+                            label = "Reset",
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            onClick = resetTasbihState
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -169,150 +320,60 @@ fun CustomCounter(
 }
 
 @Composable
-private fun CounterCircle(
-    count: Int,
-    objective: Int,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(280.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = count.toString(),
-                style = MaterialTheme.typography.displayLarge,
-                fontSize = 72.sp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            if (objective > 0) {
-                Text(
-                    text = "${((count.toFloat() / objective) * 100).toInt()}%",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ControlButtons(
-    onDecrement: () -> Unit,
-    onSetObjective: () -> Unit,
-    onReset: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        CircleIconButton(
-            icon = Icons.Rounded.Remove,
-            contentDescription = "Decrement",
-            backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            onClick = onDecrement
-        )
-
-        CircleIconButton(
-            icon = Icons.Rounded.Edit,
-            contentDescription = "Set Target",
-            backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-            onClick = onSetObjective
-        )
-
-        CircleIconButton(
-            icon = Icons.Rounded.Refresh,
-            contentDescription = "Reset",
-            backgroundColor = MaterialTheme.colorScheme.errorContainer,
-            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            onClick = onReset
-        )
-    }
-}
-
-@Composable
-private fun CircleIconButton(
-    icon: ImageVector,
-    contentDescription: String,
-    backgroundColor: Color,
-    contentColor: Color,
-    onClick: () -> Unit
-) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-            .size(56.dp)
-            .clip(CircleShape)
-            .background(backgroundColor)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = contentColor
-        )
-    }
-}
-
-@Composable
-private fun StatCard(
+private fun StatItem(
     title: String,
     value: String,
-    color: Color
+    containerColor: Color,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = Modifier
-            .width(120.dp)
-            .height(80.dp),
-        colors = CardDefaults.cardColors(containerColor = color)
+    Surface(
+        color = containerColor,
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
                 text = value,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
             )
         }
     }
 }
 
 @Composable
-private fun ResetDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+private fun ActionButton(
+    icon: ImageVector,
+    label: String,
+    containerColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Reset Counter") },
-        text = { Text("Are you sure you want to reset the counter?") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) { Text("Reset") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        }
-    )
+    Surface(
+        modifier = modifier
+            .size(64.dp)
+            .clickable(onClick = onClick),
+        shape = CircleShape,
+        color = containerColor
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            modifier = Modifier.padding(16.dp),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ObjectiveDialog(
     currentObjective: Int,
@@ -347,39 +408,21 @@ private fun ObjectiveDialog(
 }
 
 @Composable
-private fun TasbihHeader(tasbih: LocalTasbih) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Text(
-                text = tasbih.arabicName,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontFamily = utmaniQuranFont,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp, horizontal = 16.dp)
-            )
+private fun ResetDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Reset Counter") },
+        text = { Text("Are you sure you want to reset the counter?") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("Reset") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         }
-
-        Text(
-            text = tasbih.englishName,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = tasbih.translationName,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-        )
-    }
+    )
 }
 
 private fun performHapticFeedback(context: Context) {

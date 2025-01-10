@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -37,6 +38,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -44,7 +46,9 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Navigation
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -69,9 +73,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -89,41 +95,34 @@ import kotlin.math.roundToInt
 @Composable
 fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hiltViewModel()) {
     val context = LocalContext.current
-
     val qiblaState by viewModel.qiblaState.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val sharedPreferences = PrivateSharedPreferences(context)
-    val selectedImageIndex =
-        remember { mutableStateOf(sharedPreferences.getDataInt("QiblaImageIndex")) }
+    val selectedImageIndex = remember { mutableStateOf(sharedPreferences.getDataInt("QiblaImageIndex")) }
     val compassImage = painterResource(qiblaImages[selectedImageIndex.value] ?: R.drawable.qibla1)
-
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = "Qibla")
-                },
+                title = { Text(text = "Qibla") },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier
                             .testTag("backButton")
                             .padding(start = 8.dp),
-                        onClick = {
-                            navController.popBackStack()
-                        }) {
+                        onClick = { navController.popBackStack() }
+                    ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
                             painter = painterResource(id = R.drawable.back_icon),
                             contentDescription = "Back"
                         )
                     }
-                },
+                }
             )
-        },
-    ) {
-
+        }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -131,23 +130,23 @@ fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hi
         ) {
             Column(
                 modifier = Modifier
-                    .padding(it)
+                    .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .testTag(TEST_TAG_QIBLA)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                QiblaHeader(qiblaState, isLoading, errorMessage)
+                QiblaInfoCard(qiblaState, isLoading, errorMessage)
 
                 AnimatedVisibility(
                     visible = !isLoading && errorMessage.isEmpty(),
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    QiblaCompass(qiblaState, isLoading, errorMessage, compassImage)
+                    QiblaCompassCard(qiblaState, isLoading, errorMessage, compassImage)
                 }
 
-                QiblaImageSelector(
+                QiblaStyleSelector(
                     selectedIndex = selectedImageIndex.value,
                     onImageSelected = { index ->
                         selectedImageIndex.value = index
@@ -164,7 +163,7 @@ fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hi
 }
 
 @Composable
-private fun QiblaHeader(
+private fun QiblaInfoCard(
     qiblaState: Double,
     isLoading: Boolean,
     errorMessage: String
@@ -174,79 +173,131 @@ private fun QiblaHeader(
     val bearing = qiblaState.roundToInt()
     val compassDirection = bearingToCompassDirection(qiblaState.toFloat())
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 2.dp
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .padding(24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HeaderInfo(
-                title = "Location",
-                value = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else location,
-                icon = Icons.Rounded.LocationOn
-            )
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Current Location",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Icon(
+                        imageVector = Icons.Rounded.LocationOn,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
 
-            VerticalDivider(
-                modifier = Modifier
-                    .height(40.dp)
-                    .padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-            )
+            // Content Section
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Location Info
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else location,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
 
-            HeaderInfo(
-                title = "Heading",
-                value = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else "$bearing° $compassDirection",
-                icon = Icons.Rounded.Navigation
-            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else "$bearing°",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                            }
+
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else compassDirection,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    // Direction Icon Container
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.padding(start = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Navigation,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .size(32.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
         }
-    }
-}
-
-@Composable
-private fun HeaderInfo(
-    title: String,
-    value: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-private fun QiblaCompass(
+private fun QiblaCompassCard(
     bearing: Double,
     isLoading: Boolean,
     errorMessage: String,
-    compassImage: Painter,
-    modifier: Modifier = Modifier
+    compassImage: Painter
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -255,15 +306,13 @@ private fun QiblaCompass(
     val target = (bearing - degree).toFloat()
     val rotateAnim = remember { Animatable(0f) }
     val pointingToQibla = abs(target) < 5f
-    val vibrator =
-        remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
+    val vibrator = remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
     val directionState = remember { mutableStateOf(QiblaDirection.getDirection(target)) }
 
     LaunchedEffect(target) {
         directionState.value = QiblaDirection.getDirection(target)
         if (pointingToQibla) {
             rotateAnim.animateTo(0f, tween(100))
-            rotateAnim.stop()
             vibrator.vibrate(
                 CombinedVibration.createParallel(
                     VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
@@ -275,103 +324,131 @@ private fun QiblaCompass(
         }
     }
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 3.dp,
-        color = when {
-            pointingToQibla -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.surfaceVariant
-        }
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (pointingToQibla)
+                MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surface,
+            contentColor = if (pointingToQibla)
+                MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            DirectionIndicator(directionState.value, pointingToQibla)
-            Spacer(modifier = Modifier.height(24.dp))
-            CompassView(compassImage, rotateAnim.value, pointingToQibla)
-        }
-    }
-}
-
-@Composable
-private fun DirectionIndicator(direction: QiblaDirection, pointingToQibla: Boolean) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = direction.message,
-            style = MaterialTheme.typography.headlineMedium,
-            color = if (pointingToQibla)
-                MaterialTheme.colorScheme.onPrimaryContainer
-            else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (direction.icon != null) {
-            Spacer(Modifier.width(8.dp))
-            Icon(
-                imageVector = direction.icon,
-                contentDescription = null,
-                tint = if (pointingToQibla)
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun CompassView(
-    compassImage: Painter,
-    rotation: Float,
-    pointingToQibla: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(1f),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = compassImage,
-            contentDescription = "Qibla compass",
             modifier = Modifier
-                .fillMaxSize(0.9f)
-                .rotate(rotation)
-                .scale(
-                    animateFloatAsState(
-                        if (pointingToQibla) 1.1f else 1f,
-                        spring(stiffness = Spring.StiffnessLow)
-                    ).value
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Surface(
+                color = if (pointingToQibla)
+                    MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = directionState.value.message,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (pointingToQibla)
+                            MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    if (directionState.value.icon != null) {
+                        Icon(
+                            imageVector = directionState.value.icon!!,
+                            contentDescription = null,
+                            tint = if (pointingToQibla)
+                                MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = compassImage,
+                    contentDescription = "Qibla compass",
+                    modifier = Modifier
+                        .fillMaxSize(0.9f)
+                        .rotate(rotateAnim.value)
+                        .scale(
+                            animateFloatAsState(
+                                if (pointingToQibla) 1.1f else 1f,
+                                spring(stiffness = Spring.StiffnessLow)
+                            ).value
+                        )
                 )
-        )
+            }
+        }
     }
 }
 
 @Composable
-fun QiblaImageSelector(
+private fun QiblaStyleSelector(
     selectedIndex: Int,
-    onImageSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    onImageSelected: (Int) -> Unit
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 1.dp
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
-        LazyRow(
-            modifier = Modifier.padding(6.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(qiblaImages.toList()) { (index, imageRes) ->
-                QiblaImageOption(
-                    imageRes = imageRes,
-                    isSelected = index == selectedIndex,
-                    onSelected = { onImageSelected(index) }
-                )
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Compass Style",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                items(qiblaImages.toList()) { (index, imageRes) ->
+                    QiblaImageOption(
+                        imageRes = imageRes,
+                        isSelected = index == selectedIndex,
+                        onSelected = { onImageSelected(index) }
+                    )
+                }
             }
         }
     }
@@ -384,31 +461,33 @@ private fun QiblaImageOption(
     onSelected: () -> Unit
 ) {
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.0f else 0.8f,
+        targetValue = if (isSelected) 1.1f else 0.9f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         )
     )
 
-    Image(
-        painter = painterResource(imageRes),
-        contentDescription = "Compass style",
+    Surface(
         modifier = Modifier
-            .padding(start = 6.dp)
             .size(72.dp)
             .scale(scale)
-            .clip(CircleShape)
-            .clickable(
-                onClick = onSelected
-            )
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onSelected)
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else Color.Transparent,
-                shape = CircleShape
-            )
-    )
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = RoundedCornerShape(16.dp)
+            ),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Image(
+            painter = painterResource(imageRes),
+            contentDescription = "Compass style",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+    }
 }
 
 @Composable

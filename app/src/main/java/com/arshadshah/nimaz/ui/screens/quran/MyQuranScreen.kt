@@ -25,6 +25,7 @@ import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.DropdownListItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.quran.CompactSurahCard
 import com.arshadshah.nimaz.ui.components.quran.SurahCard
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
@@ -104,7 +105,7 @@ fun MyQuranScreen(
                                 content = {
                                     val surah = suraList.value.find { it.number == aya.suraNumber }
                                     surah?.let {
-                                        SurahCard(
+                                        CompactSurahCard(
                                             surah = it,
                                             { _, _, _, _ ->
                                                 onNavigateToAyatScreen(
@@ -132,7 +133,7 @@ fun MyQuranScreen(
             dropDownItem = { (name, details) ->
                 val surah = suraList.value.find { it.number == details.first.toInt() }
                 surah?.let {
-                    SurahCard(
+                    CompactSurahCard(
                         surah = it,
                         { _, _, _, _ ->
                             onNavigateToAyatScreen(

@@ -7,14 +7,21 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
@@ -39,22 +46,52 @@ fun CustomTabs(
     titles: List<String>,
     modifier: Modifier = Modifier
 ) {
-    TabRow(
-        selectedTabIndex = pagerState.currentPage,
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    ElevatedCard(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(MaterialTheme.shapes.large)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-        containerColor = Color.Transparent,
-        indicator = { tabPositions ->
-            TabIndicator(
-                pagerState = pagerState,
-                tabPositions = tabPositions
-            )
-        },
-        divider = {}
+            .scale(scale),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
-        TabsList(pagerState = pagerState, titles = titles)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                containerColor = Color.Transparent,
+                indicator = { tabPositions ->
+                    TabIndicator(
+                        pagerState = pagerState,
+                        tabPositions = tabPositions
+                    )
+                },
+                divider = {}
+            ) {
+                TabsList(pagerState = pagerState, titles = titles)
+            }
+        }
     }
 }
 
@@ -83,38 +120,45 @@ private fun TabsList(
             label = "tabScale"
         )
 
-        Tab(
+        Surface(
             modifier = Modifier
-                .padding(2.dp)
+                .padding(4.dp)
                 .zIndex(2f)
-                .clip(MaterialTheme.shapes.medium)
                 .scale(scale),
-            selected = selected,
-            onClick = {
-                scope.launch {
-                    pagerState.animateScrollToPage(
-                        page = index,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
+            color = if (selected)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                Color.Transparent,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Tab(
+                selected = selected,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(
+                            page = index,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
                         )
+                    }
+                },
+                text = {
+                    Text(
+                        text = title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (selected)
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
                     )
                 }
-            },
-            text = {
-                Text(
-                    text = title,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (selected)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
-                )
-            }
-        )
+            )
+        }
     }
 }
 
@@ -151,17 +195,17 @@ private fun TabIndicator(
         label = "indicatorEnd"
     ) { page -> tabPositions[page].right }
 
-    Box(
+    Surface(
         modifier = Modifier
             .offset(x = indicatorStart)
             .wrapContentSize(align = Alignment.BottomStart)
             .width(indicatorEnd - indicatorStart)
             .padding(4.dp)
             .fillMaxSize()
-            .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = MaterialTheme.shapes.medium
-            )
-            .zIndex(1f)
-    )
+            .zIndex(1f),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize())
+    }
 }

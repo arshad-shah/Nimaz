@@ -1,44 +1,37 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 
 @Composable
-fun RamadanCard(onNavigateToCalender: () -> Unit) {
+fun RamadanCard(
+    onNavigateToCalender: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
     val currentYear = todayHijri[ChronoField.YEAR]
 
     val ramadanStart = HijrahDate.of(currentYear, 9, 1)
     val ramadanEnd = HijrahDate.of(currentYear, 9, ramadanStart.lengthOfMonth())
-
     val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
     val isRamadanStarted = todayHijri.isAfter(ramadanStart)
 
@@ -60,84 +53,127 @@ fun RamadanCard(onNavigateToCalender: () -> Unit) {
     val selectedImage = remember { mutableIntStateOf(images.random()) }
 
     if (todayHijri[ChronoField.MONTH_OF_YEAR] < 10 && daysLeft < 40) {
-        Card(
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-                contentColor = MaterialTheme.colorScheme.onSurface
+        val scale by animateFloatAsState(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
             ),
-            shape = MaterialTheme.shapes.medium,
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            modifier = Modifier
+            label = "scale"
+        )
+
+        ElevatedCard(
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .clickable { onNavigateToCalender() }
-                .animateContentSize()
+                .padding(16.dp)
+                .scale(scale)
+                .clickable(onClick = onNavigateToCalender),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 && todayHijri[ChronoField.MONTH_OF_YEAR] == 9)
-                        "Ramadan Mubarak" else "Ramadan",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                // Header Section
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = selectedImage.intValue),
-                        contentDescription = "Ramadan Icon",
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .size(80.dp)
-                            .clip(MaterialTheme.shapes.extraLarge)
+                    Text(
+                        text = if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 &&
+                            todayHijri[ChronoField.MONTH_OF_YEAR] == 9)
+                            "Ramadan Mubarak"
+                        else
+                            "Ramadan is Coming",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                     )
+                }
 
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                // Content Section
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(
-                            text = if (isRamadanStarted) "Estimated end" else "Estimated start",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        // Image Container
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                            modifier = Modifier.size(100.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(selectedImage.value),
+                                contentDescription = "Ramadan",
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                            )
+                        }
 
-                        Text(
-                            text = when (daysLeft) {
-                                0L -> "Today"
-                                1L -> "Tomorrow"
-                                else -> "In $daysLeft days"
-                            },
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        // Countdown Section
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = if (isRamadanStarted) "Estimated end" else "Estimated start",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
 
-                        Text(
-                            text = LocalDate.from(if (isRamadanStarted) ramadanEnd else ramadanStart)
-                                .format(formatter),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                            // Days Counter
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiary,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = when (daysLeft) {
+                                        0L -> "Today"
+                                        1L -> "Tomorrow"
+                                        else -> "In $daysLeft days"
+                                    },
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onTertiary,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                            }
+
+                            // Date Display
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = LocalDate.from(
+                                        if (isRamadanStarted) ramadanEnd else ramadanStart
+                                    ).format(formatter),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RamadanCardPreview() {
-    NimazTheme {
-        RamadanCard(onNavigateToCalender = { })
     }
 }

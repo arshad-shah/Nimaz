@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.ui.components.quran
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,16 +11,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,68 +83,129 @@ fun JuzListItem(
         }
     }
 
-    Card(
-        onClick = { navigateToAyatScreen(juzNumber.toString(), false, translationType, 0) },
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    ElevatedCard(
         modifier = Modifier
-            .padding(4.dp)
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .scale(scale)
+            .clickable(
+                enabled = !isLoading,
+                onClick = { navigateToAyatScreen(juzNumber.toString(), false, translationType, 0) }
+            ),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
+            // Header with Juz number
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                QuranItemNumber(number = juzNumber, loading = isLoading)
-
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = "Juz $juzNumber",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.placeholder(
                             visible = isLoading,
                             highlight = PlaceholderHighlight.shimmer()
                         )
                     )
 
-                    Text(
-                        text = translatedName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.placeholder(
-                            visible = isLoading,
-                            highlight = PlaceholderHighlight.shimmer()
-                        )
+                    QuranItemNumber(
+                        number = juzNumber,
+                        loading = isLoading
                     )
                 }
             }
 
-            Text(
-                text = name,
-                fontFamily = utmaniQuranFont,
-                fontSize = 32.sp,
-                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .placeholder(
-                        visible = isLoading,
-                        highlight = PlaceholderHighlight.shimmer()
-                    )
-            )
+            // Content Section
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Info Container
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = translatedName,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .placeholder(
+                                        visible = isLoading,
+                                        highlight = PlaceholderHighlight.shimmer()
+                                    )
+                            )
+                        }
+                    }
+
+                    // Arabic Name Container
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.padding(start = 16.dp)
+                    ) {
+                        Text(
+                            text = name,
+                            fontFamily = utmaniQuranFont,
+                            fontSize = 32.sp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 16.dp)
+                                .placeholder(
+                                    visible = isLoading,
+                                    highlight = PlaceholderHighlight.shimmer()
+                                )
+                        )
+                    }
+                }
+            }
         }
     }
 }

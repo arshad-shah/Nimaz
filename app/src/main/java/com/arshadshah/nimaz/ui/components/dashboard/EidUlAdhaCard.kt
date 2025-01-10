@@ -1,26 +1,19 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import java.time.LocalDate
@@ -29,17 +22,18 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 
 @Composable
-fun EidUlAdhaCard(onNavigateToCalender: () -> Unit) {
+fun EidUlAdhaCard(
+    onNavigateToCalender: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val today = LocalDate.now()
     val todayHijri = HijrahDate.from(today)
     val currentYear = todayHijri[ChronoField.YEAR]
 
     val eidStart = HijrahDate.of(currentYear, 12, 9)
     val eidEnd = HijrahDate.of(currentYear, 12, 13)
-
     val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
     val isEidStarted = today.isAfter(LocalDate.from(eidStart))
-
     val daysLeft = if (isEidStarted) {
         eidEnd.toEpochDay() - todayHijri.toEpochDay()
     } else {
@@ -56,75 +50,119 @@ fun EidUlAdhaCard(onNavigateToCalender: () -> Unit) {
 
     if (!(daysLeft <= 3 && (!isEidStarted || daysLeft > 0))) return
 
-    Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
         ),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(2.dp),
+        label = "scale"
+    )
+
+    ElevatedCard(
+
         modifier = Modifier
-            .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth()
+            .scale(scale)
             .clickable(onClick = onNavigateToCalender)
+            ,
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = if (isEidStarted) "Eid Mubarak" else "Eid ul Adha is coming",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Header with title
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Image(
-                    painter = painterResource(selectedImage.value),
-                    contentDescription = "Eid Celebration",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(MaterialTheme.shapes.extraLarge)
-                        .padding(4.dp)
+                Text(
+                    text = if (isEidStarted) "Eid Mubarak" else "Eid ul Adha is coming",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                 )
+            }
 
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+            // Content Section
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = if (isEidStarted) "Ends in" else "Starts in",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Image Container
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.size(100.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(selectedImage.value),
+                            contentDescription = "Eid Celebration",
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                        )
+                    }
 
-                    Text(
-                        text = "${daysLeft.coerceAtLeast(0)} days",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    // Countdown Section
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = if (isEidStarted) "Ends in" else "Starts in",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
 
-                    Text(
-                        text = LocalDate.from(if (isEidStarted) eidEnd else eidStart)
-                            .format(formatter),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = "${daysLeft.coerceAtLeast(0)} days",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = LocalDate.from(if (isEidStarted) eidEnd else eidStart)
+                                    .format(formatter),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun EidUlAdhaCardPreview() {
-    EidUlAdhaCard(onNavigateToCalender = {})
 }

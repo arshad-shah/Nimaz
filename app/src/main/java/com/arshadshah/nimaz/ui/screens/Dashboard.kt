@@ -27,7 +27,7 @@ import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
-import com.arshadshah.nimaz.ui.components.common.LocationTopBar
+import com.arshadshah.nimaz.ui.components.common.CompactLocationTopBar
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTimesCard
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardRandomAyatCard
@@ -39,6 +39,7 @@ import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,21 +95,21 @@ fun Dashboard(
             item {
                 when (dashboardState.locationDataState) {
                     is LocationStateManager.LocationState.Loading -> {
-                        LocationTopBar(
+                        CompactLocationTopBar(
                             locationName = "Loading location...",
                             isLoading = true
                         )
                     }
 
                     is LocationStateManager.LocationState.Success -> {
-                        LocationTopBar(
+                        CompactLocationTopBar(
                             locationName = (dashboardState.locationDataState as LocationStateManager.LocationState.Success).location.locationName,
                             isLoading = false
                         )
                     }
 
                     is LocationStateManager.LocationState.Error -> {
-                        LocationTopBar(
+                        CompactLocationTopBar(
                             locationName = "Location unavailable",
                             isLoading = false
                         )
@@ -120,7 +121,7 @@ fun Dashboard(
                     }
 
                     LocationStateManager.LocationState.Idle -> {
-                        LocationTopBar(
+                        CompactLocationTopBar(
                             locationName = dashboardState.location,
                             isLoading = false
                         )
@@ -130,9 +131,10 @@ fun Dashboard(
             item {
                 DashboardPrayerTimesCard(
                     nextPrayerName = dashboardState.nextPrayerNameValue,
-                    nextPrayerTime = dashboardState.nextPrayerTimeValue,
                     countDownTimer = dashboardState.countDownTimer,
-                    isLoading = dashboardState.isLoadingData
+                    nextPrayerTime = dashboardState.nextPrayerTimeValue,
+                    isLoading = dashboardState.isLoadingData,
+                    timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
                 )
             }
             item {

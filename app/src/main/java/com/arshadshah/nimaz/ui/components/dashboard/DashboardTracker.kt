@@ -1,18 +1,19 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
@@ -20,7 +21,6 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
-import com.arshadshah.nimaz.ui.components.common.ToggleableItemRow
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
@@ -47,49 +47,205 @@ fun DashboardPrayerTracker(
         PRAYER_NAME_ISHA to dashboardPrayerTracker.isha
     )
 
-    Card(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            prayers.forEach { (name, status) ->
-                ToggleableItemRow(
-                    enabled = !dashboardPrayerTracker.isMenstruating,
-                    text = name,
-                    checked = status,
-                    onCheckedChange = { isChecked ->
-                        handleEvents(
-                            DashboardViewModel.DashboardEvent.UpdatePrayerTracker(
-                                date = LocalDate.now(),
-                                prayerName = name,
-                                prayerDone = isChecked
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Prayer Tracker",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                val completedCount = prayers.count { it.second }
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = CircleShape,
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text(
+                        text = "$completedCount/5",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                prayers.forEach { (name, status) ->
+                    EnhancedPrayerToggle(
+                        name = name,
+                        checked = status,
+                        enabled = !dashboardPrayerTracker.isMenstruating,
+                        onCheckedChange = { isChecked ->
+                            handleEvents(
+                                DashboardViewModel.DashboardEvent.UpdatePrayerTracker(
+                                    date = LocalDate.now(),
+                                    prayerName = name,
+                                    prayerDone = isChecked
+                                )
                             )
-                        )
-                        updateWidget()
-                    },
-                    modifier = Modifier.placeholder(
-                        visible = isLoading.value,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = MaterialTheme.shapes.small,
-                        highlight = PlaceholderHighlight.shimmer(
-                            highlightColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-                        )
-                    ),
+                            updateWidget()
+                        },
+                        isLoading = isLoading.value
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EnhancedPrayerToggle(
+    name: String,
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val transition = updateTransition(checked, label = "checked")
+
+    val scale by transition.animateFloat(
+        label = "scale",
+        transitionSpec = {
+            if (false isTransitioningTo true) {
+                spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            } else {
+                spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessLow
                 )
             }
+        }
+    ) { if (it) 1.2f else 1f }
+
+    val backgroundColor by transition.animateColor(
+        label = "backgroundColor",
+        transitionSpec = {
+            spring(stiffness = Spring.StiffnessLow)
+        }
+    ) {
+        when {
+            !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            it -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.surfaceVariant
+        }
+    }
+
+    val iconColor by transition.animateColor(
+        label = "iconColor",
+        transitionSpec = {
+            spring(stiffness = Spring.StiffnessLow)
+        }
+    ) {
+        if (it) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    }
+
+    Surface(
+        modifier = modifier
+            .placeholder(
+                visible = isLoading,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(16.dp),
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                )
+            ),
+        onClick = { if (enabled) onCheckedChange(!checked) },
+        enabled = enabled,
+        color = backgroundColor,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = iconColor,
+                modifier = Modifier
+                    .size(40.dp)
+                    .scale(scale),
+                tonalElevation = if (checked) 4.dp else 2.dp
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column {
+                        AnimatedVisibility(
+                            visible = checked,
+                            enter = scaleIn(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            ) + fadeIn(),
+                            exit = scaleOut() + fadeOut()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Check,
+                                contentDescription = "Completed",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = !checked,
+                            enter = scaleIn() + fadeIn(),
+                            exit = scaleOut() + fadeOut()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.RadioButtonUnchecked,
+                                contentDescription = "Not completed",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (checked)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

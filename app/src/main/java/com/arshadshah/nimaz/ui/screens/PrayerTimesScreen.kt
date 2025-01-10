@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.data.local.models.CountDownTime
-import com.arshadshah.nimaz.ui.components.common.LocationTopBar
-import com.arshadshah.nimaz.ui.components.dashboard.getTimerText
+import com.arshadshah.nimaz.ui.components.common.CompactLocationTopBar
+import com.arshadshah.nimaz.ui.components.dashboard.getEnhancedTimerText
 import com.arshadshah.nimaz.ui.components.prayerTimes.AnimatedArcView
 import com.arshadshah.nimaz.ui.components.prayerTimes.ArcViewState
 import com.arshadshah.nimaz.ui.components.prayerTimes.NextPrayerTimerText
@@ -62,7 +62,7 @@ fun PrayerTimesScreen(
                 .padding(it),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            LocationTopBar(prayerTimesState.locationName, isLoading)
+            CompactLocationTopBar(prayerTimesState.locationName, isLoading)
 
             Box(
                 modifier = Modifier
@@ -127,7 +127,7 @@ private fun PrayerTimesHeader(
                 nextPrayerTimeDisplay = prayerTimesState.nextPrayerTime.format(
                     DateTimeFormatter.ofPattern("HH:mm")
                 ),
-                timerText = getTimerText(prayerTimesState.countDownTime),
+                timerText = getEnhancedTimerText(prayerTimesState.countDownTime),
                 isLoading = isLoading,
                 horizontalPosition = Alignment.CenterHorizontally
             )

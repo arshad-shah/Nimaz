@@ -71,6 +71,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NAMES_OF_ALLAH
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.NamesOfAllahViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NamesOfAllah(navController: NavHostController) {
@@ -85,54 +86,29 @@ fun NamesOfAllah(navController: NavHostController) {
     val englishNames = resources.getStringArray(R.array.English)
     val arabicNames = resources.getStringArray(R.array.Arabic)
     val translationNames = resources.getStringArray(R.array.translation)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = "Names of Allah",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+                title = { Text(text = "Names of Allah") },
                 navigationIcon = {
                     OutlinedIconButton(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier.testTag("backButton")
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = { navController.popBackStack() }
                     ) {
                         Icon(
+                            modifier = Modifier.size(24.dp),
                             painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back",
-                            modifier = Modifier.size(24.dp)
+                            contentDescription = "Back"
                         )
                     }
                 },
                 actions = {
-                    AnimatedVisibility(
-                        visible = playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING
-                                || playBackState.value == NamesOfAllahViewModel.PlaybackState.PAUSED
-                    ) {
-                        IconButton(
-                            onClick = {
-                                viewModelNames.handleAudioEvent(
-                                    NamesOfAllahViewModel.AudioEvent.Stop
-                                )
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.stop_icon),
-                                contentDescription = "Stop playing",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                    IconButton(
-                        onClick = {
+                    AudioControls(
+                        playBackState = playBackState.value,
+                        onPlayPause = {
                             if (playBackState.value != NamesOfAllahViewModel.PlaybackState.PLAYING) {
                                 viewModelNames.handleAudioEvent(
                                     NamesOfAllahViewModel.AudioEvent.Play(context)
@@ -142,19 +118,13 @@ fun NamesOfAllah(navController: NavHostController) {
                                     NamesOfAllahViewModel.AudioEvent.Pause
                                 )
                             }
+                        },
+                        onStop = {
+                            viewModelNames.handleAudioEvent(
+                                NamesOfAllahViewModel.AudioEvent.Stop
+                            )
                         }
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING)
-                                    R.drawable.pause_icon else R.drawable.play_icon
-                            ),
-                            contentDescription = if (playBackState.value == NamesOfAllahViewModel.PlaybackState.PLAYING)
-                                "Pause playing" else "Play",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    )
                 }
             )
         }
@@ -162,22 +132,22 @@ fun NamesOfAllah(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .testTag(TEST_TAG_NAMES_OF_ALLAH),
-                contentPadding = PaddingValues(16.dp)
+                    .testTag(TEST_TAG_NAMES_OF_ALLAH)
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(englishNames.size) { index ->
-                    NamesOfAllahRow(
+                    NameCard(
                         index = index,
                         englishName = englishNames[index],
                         arabicName = arabicNames[index],
-                        translationName = translationNames[index],
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        translationName = translationNames[index]
                     )
                 }
             }
@@ -186,7 +156,56 @@ fun NamesOfAllah(navController: NavHostController) {
 }
 
 @Composable
-fun NamesOfAllahRow(
+private fun AudioControls(
+    playBackState: NamesOfAllahViewModel.PlaybackState,
+    onPlayPause: () -> Unit,
+    onStop: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AnimatedVisibility(
+            visible = playBackState == NamesOfAllahViewModel.PlaybackState.PLAYING
+                    || playBackState == NamesOfAllahViewModel.PlaybackState.PAUSED
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                IconButton(onClick = onStop) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.stop_icon),
+                        contentDescription = "Stop playing",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            IconButton(onClick = onPlayPause) {
+                Icon(
+                    painter = painterResource(
+                        id = if (playBackState == NamesOfAllahViewModel.PlaybackState.PLAYING)
+                            R.drawable.pause_icon else R.drawable.play_icon
+                    ),
+                    contentDescription = if (playBackState == NamesOfAllahViewModel.PlaybackState.PLAYING)
+                        "Pause playing" else "Play",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NameCard(
     index: Int,
     englishName: String,
     arabicName: String,
@@ -199,154 +218,152 @@ fun NamesOfAllahRow(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            ),
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
-        ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { isExpanded = !isExpanded }
-                .padding(16.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Header Section with Number
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                // Number indicator with gradient background
-                Box(
+                Row(
                     modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                        .border(
-                            width = 2.dp,
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                )
-                            ),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${index + 1}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        text = translationName,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    // Translation name with subtle background
                     Surface(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
                     ) {
                         Text(
-                            text = translationName,
+                            text = "${index + 1}",
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
-
-                    // Arabic name with custom styling
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        Text(
-                            text = arabicName,
-                            fontFamily = utmaniQuranFont,
-                            fontSize = 48.sp,
-                            textAlign = TextAlign.Start,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                        )
-                    }
-
-                    // English transliteration
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Translate,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = englishName,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-
-                IconButton(onClick = { isExpanded = !isExpanded }) {
-                    Icon(
-                        imageVector = if (isExpanded)
-                            Icons.Outlined.KeyboardArrowUp
-                        else
-                            Icons.Outlined.KeyboardArrowDown,
-                        contentDescription = if (isExpanded) "Show less" else "Show more",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
                 }
             }
 
-            // Expanded content with animation
+            // Content Section
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Arabic Name
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = arabicName,
+                            fontFamily = utmaniQuranFont,
+                            fontSize = 32.sp,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp)
+                        )
+                    }
+
+                    // English Name and Expand Button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = englishName,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            )
+                        }
+
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable { isExpanded = !isExpanded }
+                        ) {
+                            Icon(
+                                imageVector = if (isExpanded)
+                                    Icons.Outlined.KeyboardArrowUp
+                                else
+                                    Icons.Outlined.KeyboardArrowDown,
+                                contentDescription = if (isExpanded) "Show less" else "Show more",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Expanded Details
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 64.dp, top = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    DetailRow(
-                        icon = Icons.Outlined.Source,
-                        title = "Root Word",
-                        content = nameDetails.rootWord
-                    )
-                    DetailRow(
-                        icon = Icons.Outlined.Book,
-                        title = "Occurrence in Quran",
-                        content = nameDetails.occurrence
-                    )
-                    DetailRow(
-                        icon = Icons.Outlined.Info,
-                        title = "Significance",
-                        content = nameDetails.significance
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        DetailItem(
+                            icon = Icons.Outlined.Source,
+                            title = "Root Word",
+                            content = nameDetails.rootWord
+                        )
+                        DetailItem(
+                            icon = Icons.Outlined.Book,
+                            title = "Occurrence in Quran",
+                            content = nameDetails.occurrence
+                        )
+                        DetailItem(
+                            icon = Icons.Outlined.Info,
+                            title = "Significance",
+                            content = nameDetails.significance
+                        )
+                    }
                 }
             }
         }
@@ -354,38 +371,52 @@ fun NamesOfAllahRow(
 }
 
 @Composable
-private fun DetailRow(
+private fun DetailItem(
     icon: ImageVector,
     title: String,
     content: String
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.Top
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-            modifier = Modifier.size(20.dp)
-        )
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                modifier = Modifier.padding(top = 4.dp)
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }
-
 data class NameDetails(
     val rootWord: String,
     val occurrence: String,
@@ -948,16 +979,5 @@ object DivineNamesRepository {
             occurrence = "Occurrence information being verified",
             significance = "This blessed name represents one of Allah's perfect attributes, reflecting His divine nature and perfect qualities."
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NamesOfAllahRowPreview() {
-    MaterialTheme {
-        Column {
-            NamesOfAllahRow(1, "Al 'Aleem", "العليم", "The All Knowing")
-            NamesOfAllahRow(2, "Ar-Rahman", "الرحمن", "The Most Merciful")
-        }
     }
 }
