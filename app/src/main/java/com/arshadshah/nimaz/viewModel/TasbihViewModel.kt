@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.local.DataStore
@@ -184,14 +183,28 @@ class TasbihViewModel @Inject constructor(
     fun createTasbih(tasbih: LocalTasbih) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                ViewModelLogger.d(
+                    "Nimaz: TasbihViewModel",
+                    "createTasbih called with tasbih $tasbih"
+                )
                 _tasbihLoading.value = true
                 _tasbihError.value = ""
                 val idOfTasbih = datastore.saveTasbih(tasbih)
-                Log.d("Nimaz: TasbihViewModel", "id of tasbih is ${idOfTasbih.toInt()}")
+                ViewModelLogger.d("Nimaz: TasbihViewModel", "id of tasbih is ${idOfTasbih.toInt()}")
                 //get the tasbih that was just created
                 val tasbihJustCreated = datastore.getTasbihById(idOfTasbih.toInt())
+                ViewModelLogger.d(
+                    "Nimaz: TasbihViewModel",
+                    "tasbihJustCreated is $tasbihJustCreated"
+                )
+                //refresh the tasbih list
+                getTasbihList(tasbih.date)
                 //update the tasbih state on the main thread
                 _tasbihCreated.value = tasbihJustCreated
+                ViewModelLogger.d(
+                    "Nimaz: TasbihViewModel",
+                    "tasbihCreated is ${_tasbihCreated.value}"
+                )
                 _tasbihLoading.value = false
             } catch (e: Exception) {
                 _tasbihError.value = e.message.toString()
@@ -202,6 +215,10 @@ class TasbihViewModel @Inject constructor(
     fun updateTasbih(tasbih: LocalTasbih) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                ViewModelLogger.d(
+                    "Nimaz: TasbihViewModel",
+                    "updateTasbih called with tasbih $tasbih"
+                )
                 _tasbihLoading.value = true
                 _tasbihError.value = ""
                 datastore.updateTasbih(tasbih)
@@ -217,5 +234,26 @@ class TasbihViewModel @Inject constructor(
             }
         }
     }
+
+    fun getTasbihById(id: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                ViewModelLogger.d("Nimaz: TasbihViewModel", "getTasbihById called with id $id")
+                _tasbihLoading.value = true
+                _tasbihError.value = ""
+                val tasbih = datastore.getTasbihById(id)
+                _tasbihCreated.value = tasbih
+                //set values for the counter, objective, lap and lap counter
+                _counter.value = tasbih.count
+                _objective.value = tasbih.goal
+                _lap.value = tasbih.count / tasbih.goal
+                _lapCounter.value = tasbih.count % tasbih.goal
+                _tasbihLoading.value = false
+            } catch (e: Exception) {
+                _tasbihError.value = e.message.toString()
+            }
+        }
+    }
+
 
 }

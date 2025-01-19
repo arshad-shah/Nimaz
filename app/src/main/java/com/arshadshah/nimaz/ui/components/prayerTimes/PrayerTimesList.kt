@@ -3,10 +3,6 @@ package com.arshadshah.nimaz.ui.components.prayerTimes
 import android.text.format.DateFormat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -37,8 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
@@ -84,10 +82,11 @@ fun PrayerTimesList(
             isRamadan = isRamadan,
             description = "Dawn Prayer"
         ),
+        //R.drawable.ic_sunrise
         PrayerTime(
             PRAYER_NAME_SUNRISE,
             prayerTimesState.sunriseTime,
-            Icons.Default.WbSunny,
+            ImageVector.vectorResource(id = R.drawable.sunrise),
             description = ""
         ),
         PrayerTime(
@@ -121,7 +120,7 @@ fun PrayerTimesList(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 4.dp,
             pressedElevation = 8.dp
@@ -134,7 +133,7 @@ fun PrayerTimesList(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp)
+                .padding(vertical = 8.dp)
         ) {
             prayerTimes.forEachIndexed { index, prayerTime ->
                 PrayerTimeRow(

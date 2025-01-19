@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -192,6 +193,7 @@ fun AnimatedArcView(
     ) {
         Canvas(
             modifier = Modifier
+                .size(320.dp)
                 .fillMaxSize()
                 .testTag("EnhancedArcView")
         ) {
@@ -202,7 +204,7 @@ fun AnimatedArcView(
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         arcBackgroundColor,
-                        arcBackgroundColor.copy(alpha = 0.1f)
+                        arcBackgroundColor.copy(alpha = 0.6f)
                     )
                 ),
                 startAngle = START_ANGLE,
@@ -263,16 +265,20 @@ fun AnimatedArcView(
                 )
                 Log.v(TAG, "Drawing sun at position: $sunPosition")
 
-                // Enhanced sun drawing with glow effect
+                // Enhanced sun drawing with richer gradient and glow effect
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color(0xFFFFE4B5),
-                            Color(0xFFFFD700),
-                            Color(0xFFFFA500)
+                            Color(0xFFFFFFFF),  // Bright white core
+                            Color(0xFFFFF7E6),  // Warm white
+                            Color(0xFFFFE4B5),  // Light goldenrod
+                            Color(0xFFFFD700),  // Golden yellow
+                            Color(0xFFFFA500),  // Orange
+                            Color(0x99FF8C00),  // Semi-transparent dark orange
+                            Color(0x66FF4500)   // More transparent red-orange
                         ),
                         center = sunPosition,
-                        radius = 18.dp.toPx()
+                        radius = 22.dp.toPx()
                     ),
                     radius = 16.dp.toPx(),
                     center = sunPosition,

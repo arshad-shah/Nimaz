@@ -213,7 +213,7 @@ private fun getPrayerIcon(prayerName: String): Int {
     }
 }
 
-private fun formatPrayerName(name: String): String {
+fun formatPrayerName(name: String): String {
     return when (name.lowercase()) {
         "loading..." -> name
         else -> name.replaceFirstChar { it.uppercase() }

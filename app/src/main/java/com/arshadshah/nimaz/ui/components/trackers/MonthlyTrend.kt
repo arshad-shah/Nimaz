@@ -1,3 +1,5 @@
+package com.arshadshah.nimaz.ui.components.trackers
+
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -12,8 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,12 +24,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
@@ -48,100 +45,84 @@ fun PrayerTrackerGrid(
     progressForMonth: State<List<LocalPrayersTracker>>,
     dateState: State<LocalDate>
 ) {
-    val elevation = 4.dp
     val yearMonth = YearMonth.of(dateState.value.year, dateState.value.month)
     val daysInMonth = yearMonth.lengthOfMonth()
+    val completedDays = progressForMonth.value.count { it.progress > 0 }
 
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp)
-            .shadow(elevation = elevation, shape = RoundedCornerShape(16.dp)),
-        colors = CardDefaults.cardColors(
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = dateState.value.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.primary,
+            // Header
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = dateState.value.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
 
-            prayers
-                .forEach { prayer ->
-                    PrayerRow(
-                        prayer = prayer,
-                        yearMonth = yearMonth,
-                        daysInMonth = daysInMonth,
-                        currentDate = dateState.value,
-                        progressForMonth = progressForMonth
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "$completedDays/$daysInMonth days",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
-        }
-    }
-}
+            }
 
-@Composable
-fun PrayerRow(
-    prayer: String,
-    yearMonth: YearMonth,
-    daysInMonth: Int,
-    currentDate: LocalDate,
-    progressForMonth: State<List<LocalPrayersTracker>>
-) {
-    val prayerColor = when (prayer) {
-        AppConstants.PRAYER_NAME_FAJR -> Color(0xFF81D4FA)
-        AppConstants.PRAYER_NAME_DHUHR -> Color(0xFFFFB74D)
-        AppConstants.PRAYER_NAME_ASR -> Color(0xFF81C784)
-        AppConstants.PRAYER_NAME_MAGHRIB -> Color(0xFFE57373)
-        AppConstants.PRAYER_NAME_ISHA -> Color(0xFF9575CD)
-        else -> MaterialTheme.colorScheme.primary
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)),
-        color = prayerColor.copy(alpha = 0.1f),
-        tonalElevation = 2.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = prayer,
-                style = MaterialTheme.typography.labelMedium,
-                color = prayerColor,
-                modifier = Modifier.weight(0.2f)
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier.weight(0.7f)
+            // Prayer Grid
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                for (i in 0 until daysInMonth) {
-                    val date = yearMonth.atDay(i + 1)
-                    val prayerTracker = progressForMonth.value.find { it.date == date }
-                    DayDot(
-                        date = date,
-                        isHighlighted = prayerTracker?.isPrayerCompleted(prayer) == true,
-                        isMenstruating = prayerTracker?.isMenstruating == true,
-                        currentDate = currentDate,
-                        prayerColor = prayerColor
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    prayers.forEach { prayer ->
+                        PrayerRowRedesigned(
+                            prayer = prayer,
+                            yearMonth = yearMonth,
+                            daysInMonth = daysInMonth,
+                            currentDate = dateState.value,
+                            progressForMonth = progressForMonth
+                        )
+                    }
                 }
             }
         }
@@ -149,46 +130,116 @@ fun PrayerRow(
 }
 
 @Composable
-fun DayDot(
+private fun PrayerRowRedesigned(
+    prayer: String,
+    yearMonth: YearMonth,
+    daysInMonth: Int,
+    currentDate: LocalDate,
+    progressForMonth: State<List<LocalPrayersTracker>>
+) {
+    val prayerColor = getPrayerColor(prayer)
+    val completedCount = progressForMonth.value.count { it.isPrayerCompleted(prayer) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        // Prayer Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                color = prayerColor.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(6.dp)
+            ) {
+                Text(
+                    text = prayer,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = prayerColor,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
+            Surface(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "$completedCount/$daysInMonth",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+
+        // Dots Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            for (i in 0 until daysInMonth) {
+                val date = yearMonth.atDay(i + 1)
+                val prayerTracker = progressForMonth.value.find { it.date == date }
+                DayDotRedesigned(
+                    date = date,
+                    isHighlighted = prayerTracker?.isPrayerCompleted(prayer) == true,
+                    isMenstruating = prayerTracker?.isMenstruating == true,
+                    currentDate = currentDate,
+                    prayerColor = prayerColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DayDotRedesigned(
     date: LocalDate,
     isHighlighted: Boolean,
     isMenstruating: Boolean,
     currentDate: LocalDate,
     prayerColor: Color
 ) {
-    val isCurrentDay = date == currentDate || date == LocalDate.now()
+    val isCurrentDay = date == currentDate
     val dotSize by animateDpAsState(
-        targetValue = if (isCurrentDay) 10.dp else 7.dp,
+        targetValue = if (isCurrentDay) 8.dp else 6.dp,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
     )
-
-    val backgroundColor = when {
-        isMenstruating -> Color(0xFFE91E63)
-        isHighlighted -> prayerColor
-        isCurrentDay -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
 
     Box(
         modifier = Modifier
             .size(dotSize)
-            .shadow(
-                elevation = if (isHighlighted) 3.dp else 1.dp,
-                shape = CircleShape
-            )
             .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        backgroundColor,
-                        backgroundColor.copy(alpha = 0.7f)
-                    )
-                ),
+                color = when {
+                    isMenstruating -> Color(0xFFE91E63)
+                    isHighlighted -> prayerColor
+                    isCurrentDay -> MaterialTheme.colorScheme.secondary
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                },
                 shape = CircleShape
             )
             .border(
-                width = 1.dp,
-                color = backgroundColor.copy(alpha = 0.5f),
+                width = if (isCurrentDay) 1.5.dp else 0.dp,
+                color = if (isHighlighted)
+                    prayerColor.copy(alpha = 0.7f)
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant,
                 shape = CircleShape
             )
     )
+}
+
+@Composable
+private fun getPrayerColor(prayer: String): Color = when (prayer) {
+    AppConstants.PRAYER_NAME_FAJR -> Color(0xFF2196F3)    // Stronger blue
+    AppConstants.PRAYER_NAME_DHUHR -> Color(0xFFF57C00)   // Stronger orange
+    AppConstants.PRAYER_NAME_ASR -> Color(0xFF43A047)     // Stronger green
+    AppConstants.PRAYER_NAME_MAGHRIB -> Color(0xFFE53935) // Stronger red
+    AppConstants.PRAYER_NAME_ISHA -> Color(0xFF5E35B1)    // Stronger purple
+    else -> MaterialTheme.colorScheme.primary
 }

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.tasbih
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,12 +24,10 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -43,7 +41,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -54,7 +51,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
@@ -82,15 +78,14 @@ fun CustomCounter(
     val showObjectiveDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    Log.d("CustomCounter", "CustomCounter: $tasbihId")
+    //did we get the tasbih
+    Log.d("CustomCounter", "CustomCounter: $tasbih")
+
     LaunchedEffect(Unit) {
         setObjective(tasbih.value.goal)
         setCounter(tasbih.value.count)
     }
-
-    LaunchedEffect(count.value) {
-        updateTasbih(tasbih.value.copy(count = count.value))
-    }
-
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -237,11 +232,13 @@ fun CustomCounter(
                                     if (vibrationAllowed.value) {
                                         performHapticFeedback(context)
                                     }
+                                    updateTasbih(tasbih.value.copy(count = count.value))
                                 } else {
                                     increment()
                                     if (vibrationAllowed.value) {
                                         performHapticFeedback(context)
                                     }
+                                    updateTasbih(tasbih.value.copy(count = count.value))
                                 }
                             },
                         shape = CircleShape,
@@ -276,7 +273,10 @@ fun CustomCounter(
                             icon = Icons.Rounded.Remove,
                             label = "Decrement",
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            onClick = decrement
+                            onClick = {
+                                decrement()
+                                updateTasbih(tasbih.value.copy(count = count.value))
+                            }
                         )
 
                         ActionButton(

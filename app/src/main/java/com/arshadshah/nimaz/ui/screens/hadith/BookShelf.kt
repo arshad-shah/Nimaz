@@ -17,6 +17,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -39,6 +41,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +52,7 @@ import com.arshadshah.nimaz.data.local.models.HadithMetadata
 import com.arshadshah.nimaz.ui.components.common.CustomTabs
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
+import com.arshadshah.nimaz.viewModel.ViewState
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -58,11 +62,16 @@ fun BookShelf(
     onNavigateToChapterFromFavourite: (Int, Int) -> Unit,
     navController: NavHostController
 ) {
-    val metadataList by viewModel.allHadithBooks.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-    val allFavourites by viewModel.allFavourites.collectAsState()
+    val booksState by viewModel.booksState.collectAsState()
+    val favouritesState by viewModel.favouritesState.collectAsState()
     val titles = listOf("Books", "Favourites")
     val pagerState = rememberPagerState { titles.size }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage == 1) {
+            viewModel.getAllFavourites()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -91,7 +100,7 @@ fun BookShelf(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(paddingValues)
         ) {
-                CustomTabs(pagerState, titles)
+            CustomTabs(pagerState, titles)
 
             HorizontalPager(
                 pageSize = PageSize.Fill,
@@ -99,12 +108,22 @@ fun BookShelf(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> BooksTab(metadataList, onNavigateToChaptersList)
-                    1 -> FavouritesTab(
-                        loading = loading,
-                        allFavourites = allFavourites,
+                    0 -> BooksTabContent(
+                        booksState = booksState,
+                        onNavigateToChaptersList = onNavigateToChaptersList
+                    )
+
+                    1 -> FavouritesTabContent(
+                        favouritesState = favouritesState,
                         onNavigateToChapterFromFavourite = onNavigateToChapterFromFavourite,
-                        viewModel = viewModel
+                        onFavouriteClick = { bookId, chapterId, hadithId, favourite ->
+                            viewModel.updateFavouriteStatus(
+                                bookId = bookId,
+                                chapterId = chapterId,
+                                id = hadithId,
+                                favouriteStatus = favourite
+                            )
+                        }
                     )
                 }
             }
@@ -112,22 +131,29 @@ fun BookShelf(
     }
 }
 
+
 @Composable
-private fun BooksTab(
-    metadataList: List<HadithMetadata>,
+private fun BooksTabContent(
+    booksState: ViewState<List<HadithMetadata>>,
     onNavigateToChaptersList: (id: Int, title: String) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(metadataList.size) { index ->
-            BookCard(
-                metadata = metadataList[index],
-                onClick = onNavigateToChaptersList
-            )
+    when (booksState) {
+        is ViewState.Loading -> LoadingState()
+        is ViewState.Success -> {
+            if (booksState.data.isEmpty()) {
+                EmptyState(
+                    title = "No Books Found",
+                    subtitle = "The book collection appears to be empty"
+                )
+            } else {
+                BooksTab(
+                    metadataList = booksState.data,
+                    onNavigateToChaptersList = onNavigateToChaptersList
+                )
+            }
         }
+
+        is ViewState.Error -> ErrorState(message = booksState.message)
     }
 }
 
@@ -244,39 +270,147 @@ private fun BookCard(
 }
 
 @Composable
-private fun FavouritesTab(
-    loading: Boolean,
-    allFavourites: List<HadithFavourite>,
+private fun FavouritesTabContent(
+    favouritesState: ViewState<List<HadithFavourite>>,
     onNavigateToChapterFromFavourite: (Int, Int) -> Unit,
-    viewModel: HadithViewModel
+    onFavouriteClick: (Int, Int, Int, Boolean) -> Unit
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.getAllFavourites()
-    }
+    when (favouritesState) {
+        is ViewState.Loading -> LoadingState()
+        is ViewState.Success -> {
+            if (favouritesState.data.isEmpty()) {
+                EmptyState(
+                    title = "No Favourites Found",
+                    subtitle = "You haven't added any favourites yet"
+                )
+            } else {
+                FavouriteHadithList(
+                    loading = false,
+                    allFavourites = favouritesState.data,
+                    onNavigateToChapterFromFavourite = onNavigateToChapterFromFavourite,
+                    onFavouriteClick = onFavouriteClick
+                )
+            }
+        }
 
+        is ViewState.Error -> ErrorState(message = favouritesState.message)
+    }
+}
+
+
+@Composable
+private fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Loading...",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyState(
+    title: String,
+    subtitle: String
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        if (loading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = MaterialTheme.colorScheme.primary
-            )
-        } else {
-            FavouriteHadithList(
-                loading = loading,
-                allFavourites = allFavourites,
-                onNavigateToChapterFromFavourite = onNavigateToChapterFromFavourite,
-                onFavouriteClick = { bookId, chapterId, hadithId, favourite ->
-                    viewModel.updateFavouriteStatus(
-                        bookId = bookId,
-                        chapterId = chapterId,
-                        id = hadithId,
-                        favouriteStatus = favourite
-                    )
-                }
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorState(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Error,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(48.dp)
+                )
+                Text(
+                    text = "Error",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun BooksTab(
+    metadataList: List<HadithMetadata>,
+    onNavigateToChaptersList: (id: Int, title: String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(metadataList.size) { index ->
+            BookCard(
+                metadata = metadataList[index],
+                onClick = onNavigateToChaptersList
             )
         }
     }

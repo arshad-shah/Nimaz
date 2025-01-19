@@ -58,6 +58,12 @@ fun MoreScreen(
                     onClick = { onNavigateToTasbihScreen(" ", " ", " ", " ") }
                 ),
                 FeatureItem(
+                    title = "Tasbih List",
+                    description = "List of dhikr",
+                    icon = R.drawable.tasbih,
+                    onClick = onNavigateToTasbihListScreen
+                ),
+                FeatureItem(
                     title = "Qibla",
                     description = "Find prayer direction",
                     icon = R.drawable.qibla,
@@ -102,6 +108,12 @@ fun MoreScreen(
                     description = "Islamic calendar",
                     icon = R.drawable.calendar_icon,
                     onClick = onNavigateToCalender
+                ),
+                FeatureItem(
+                    title = "Zakat",
+                    description = "Calculate your zakat",
+                    icon = R.drawable.tracker_icon,
+                    onClick = onNavigateToZakat
                 ),
                 FeatureItem(
                     title = "Shahadah",

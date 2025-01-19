@@ -1,28 +1,34 @@
 package com.arshadshah.nimaz.ui.screens.hadith
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
@@ -33,24 +39,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
+import com.arshadshah.nimaz.viewModel.ViewState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,52 +78,139 @@ fun HadithList(
         }
     }
 
-    val hadithList by viewModel.hadithForAChapter.collectAsState()
-    val loading by viewModel.loading.collectAsState()
+    val hadithState by viewModel.hadithState.collectAsState()
+    val chapterState by viewModel.chaptersState.collectAsState()
+
+    val lazyListState = rememberLazyListState()
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "HadithList")
-                },
-                navigationIcon = {
-                    OutlinedIconButton(
-                        modifier = Modifier
-                            .testTag("backButton")
-                            .padding(start = 8.dp),
-                        onClick = {
-                            navController.popBackStack()
-                        }) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back"
-                        )
+            AnimatedTopBar(
+                lazyListState = lazyListState,
+                title = when (chapterState) {
+                    is ViewState.Success -> {
+                        val chapter =
+                            (chapterState as ViewState.Success<List<HadithChapter>>).data.firstOrNull()
+                        chapter?.title_english ?: "Hadith"
                     }
+
+                    else -> "Hadith"
                 },
+                navController = navController
             )
-        },
-    ) {
+        }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(it)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(paddingValues)
         ) {
-            if (loading) {
-                LoadingState()
-            } else {
-                HadithContent(
-                    hadithList = hadithList,
-                    onFavoriteToggle = { hadith, isFavorite ->
-                        viewModel.updateFavouriteStatus(
-                            bookId = hadith.bookId,
-                            chapterId = hadith.chapterId,
-                            id = hadith.id,
-                            favouriteStatus = isFavorite
+            when (hadithState) {
+                is ViewState.Loading -> LoadingState()
+                is ViewState.Success -> {
+                    val hadiths = (hadithState as ViewState.Success<List<HadithEntity>>).data
+                    if (hadiths.isEmpty()) {
+                        EmptyState()
+                    } else {
+                        HadithContent(
+                            lazyListState = lazyListState,
+                            hadiths = hadiths,
+                            onFavoriteToggle = { hadith, isFavorite ->
+                                viewModel.updateFavouriteStatus(
+                                    bookId = hadith.bookId,
+                                    chapterId = hadith.chapterId,
+                                    id = hadith.id,
+                                    favouriteStatus = isFavorite
+                                )
+                            }
                         )
                     }
+                }
+
+                is ViewState.Error -> ErrorState(message = (hadithState as ViewState.Error).message)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HadithContent(
+    hadiths: List<HadithEntity>,
+    lazyListState: LazyListState,
+    onFavoriteToggle: (HadithEntity, Boolean) -> Unit
+) {
+    LazyColumn(
+        state = lazyListState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        items(hadiths.size) { index ->
+            HadithCard(
+                hadith = hadiths[index],
+                onFavoriteToggle = onFavoriteToggle
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Loading Hadith...",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.quran_icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "No Hadith Found",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "This chapter appears to be empty",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -119,45 +218,44 @@ fun HadithList(
 }
 
 @Composable
-private fun LoadingState() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun ErrorState(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(48.dp),
-            color = MaterialTheme.colorScheme.primary,
-            strokeWidth = 4.dp
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Loading Hadith...",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
-
-@Composable
-private fun HadithContent(
-    hadithList: List<HadithEntity>,
-    onFavoriteToggle: (HadithEntity, Boolean) -> Unit
-) {
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(hadithList.size) { index ->
-            HadithCard(
-                hadith = hadithList[index],
-                onFavoriteToggle = onFavoriteToggle
-            )
+        Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Error,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(48.dp)
+                )
+                Text(
+                    text = "Error Loading Hadith",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HadithCard(
     hadith: HadithEntity,
@@ -166,83 +264,184 @@ private fun HadithCard(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(),
-        shape = RoundedCornerShape(16.dp),
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Header with number and favorite
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                // Hadith number badge
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.padding(end = 8.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = hadith.id.toString(),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        text = "Hadith ${hadith.idInBook}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                }
-
-                // Favorite button
-                IconButton(
-                    onClick = { onFavoriteToggle(hadith, !hadith.favourite) },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = if (hadith.favourite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = if (hadith.favourite) "Remove from favorites" else "Add to favorites",
-                        tint = if (hadith.favourite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    IconButton(
+                        onClick = { onFavoriteToggle(hadith, !hadith.favourite) }
+                    ) {
+                        Icon(
+                            imageVector = if (hadith.favourite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = if (hadith.favourite) "Remove from favorites" else "Add to favorites",
+                            tint = if (hadith.favourite) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Arabic text
+            // Arabic Text Container
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp)),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Text(
                         text = hadith.arabic,
-                        style = MaterialTheme.typography.headlineMedium.copy(
+                        style = MaterialTheme.typography.titleLarge.copy(
                             fontFamily = utmaniQuranFont,
                             fontWeight = FontWeight.SemiBold
                         ),
-                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Narrator Section
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = hadith.narrator_english,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontStyle = FontStyle.Italic
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
 
-            // Narrator
-            Text(
-                text = hadith.narrator_english,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontStyle = FontStyle.Italic
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // English translation
+            // English Translation
             Text(
                 text = hadith.text_english,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
         }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AnimatedTopBar(
+    lazyListState: LazyListState,
+    title: String,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    val isScrolled = remember { derivedStateOf { lazyListState.firstVisibleItemIndex > 0 } }.value
+
+    AnimatedVisibility(
+        visible = isScrolled,
+        enter = fadeIn(animationSpec = spring()),
+        exit = fadeOut(animationSpec = spring())
+    ) {
+        TopAppBar(
+            title = {
+                AnimatedTitle(
+                    text = title,
+                    scale = 1f
+                )
+            },
+            navigationIcon = {
+                OutlinedIconButton(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.testTag("back_button")
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.back_icon),
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            },
+            modifier = modifier
+        )
+    }
+
+    AnimatedVisibility(
+        visible = !isScrolled,
+        enter = fadeIn(animationSpec = spring()),
+        exit = fadeOut(animationSpec = spring())
+    ) {
+        LargeTopAppBar(
+            title = {
+                AnimatedTitle(
+                    text = title,
+                    scale = 1.5f
+                )
+            },
+            navigationIcon = {
+                OutlinedIconButton(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.testTag("back_button")
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.back_icon),
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            },
+            modifier = modifier
+        )
+    }
+
+}
+
+@Composable
+private fun AnimatedTitle(
+    text: String,
+    scale: Float,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    transformOrigin = TransformOrigin(0f, 0f)
+                },
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

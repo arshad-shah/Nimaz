@@ -11,11 +11,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -305,12 +301,6 @@ fun AyaLazyColumn(
                 downloadAyaAudioFile = downloadAyaAudioFile,
                 handleAyaEvents = handleAyaEvents
             )
-            if (index != ayaList.size - 1) {
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-            }
         }
     }
 }
@@ -719,7 +709,7 @@ fun AyaCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Features Section
@@ -759,7 +749,7 @@ fun AyaCard(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         // Arabic Text

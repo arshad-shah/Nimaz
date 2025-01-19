@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-01-07T18:11:00.274940900Z">
+        <DropdownSelection timestamp="2025-01-11T11:06:35.136885Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CW70D7QTR" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\shaha\.android\avd\Pixel_9_API_35.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -21,7 +21,10 @@
           </targets>
         </DialogSelection>
       </SelectionState>
-      <SelectionState runConfigName="ArcViewPreview">
+      <SelectionState runConfigName="Tests in 'com.arshadshah.nimaz'">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="DashboardPrayerTimesCardTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.navigation
 
-import LicensesScreen
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -40,10 +39,13 @@ import com.arshadshah.nimaz.ui.screens.more.MoreScreen
 import com.arshadshah.nimaz.ui.screens.more.NamesOfAllah
 import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
+import com.arshadshah.nimaz.ui.screens.more.ZakatCalculator
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
 import com.arshadshah.nimaz.ui.screens.settings.EnhancedAboutScreen
+import com.arshadshah.nimaz.ui.screens.settings.LibraryDetailScreen
+import com.arshadshah.nimaz.ui.screens.settings.LicensesScreen
 import com.arshadshah.nimaz.ui.screens.settings.PrayerTimesCustomizations
 import com.arshadshah.nimaz.ui.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.ui.screens.settings.WebViewScreen
@@ -52,7 +54,7 @@ import com.arshadshah.nimaz.ui.screens.tasbih.ChapterList
 import com.arshadshah.nimaz.ui.screens.tasbih.DuaList
 import com.arshadshah.nimaz.ui.screens.tasbih.ListOfTasbih
 import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
-import com.arshadshah.nimaz.ui.screens.tracker.CalenderScreen
+import com.arshadshah.nimaz.ui.screens.tracker.CalendarScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
 
 @RequiresApi(Build.VERSION_CODES.S)
@@ -136,7 +138,7 @@ fun NavigationGraph(
         }
 
         composable(CALENDER_SCREEN_ROUTE) {
-            CalenderScreen(navController = navController)
+            CalendarScreen(navController = navController)
         }
 
         composable(QIBLA_SCREEN_ROUTE) {
@@ -460,6 +462,17 @@ fun NavigationGraph(
         composable(DEBUG_MODE) {
             DebugScreen(
                 navController = navController,
+            )
+        }
+
+        composable("Zakat") {
+            ZakatCalculator(navController = navController)
+        }
+
+        composable("licenseDetail/{id}") {
+            LibraryDetailScreen(
+                uniqueLibId = it.arguments?.getString("id")!!,
+                onNavigateBack = { navController.popBackStack() },
             )
         }
     }

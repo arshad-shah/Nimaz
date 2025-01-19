@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.ui.components.quran
 
+import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -8,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -26,70 +29,39 @@ fun NoteInput(
     showNoteDialog: MutableState<Boolean>,
     onClick: () -> Unit,
     noteContent: MutableState<String>,
-    titleOfDialog: MutableState<String>,
+    titleOfDialog: String,
 ) {
     val context = LocalContext.current
+    val maxLength = 150
+
     AlertDialogNimaz(
         contentDescription = "Note",
-        title = titleOfDialog.value,
+        title = titleOfDialog,
         topDivider = false,
         bottomDivider = false,
         contentHeight = 200.dp,
-        action = {
-            IconButton(
-                onClick = {
-                    //remove note
-                    noteContent.value = ""
-                    onClick()
-                },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(24.dp),
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.delete_icon),
-                    contentDescription = "delete note",
-                )
-            }
-        },
         properties = DialogProperties(
             dismissOnBackPress = true,
             dismissOnClickOutside = true
         ),
+        action = {
+            DeleteNoteButton(
+                onClick = {
+                    noteContent.value = ""
+                    onClick()
+                }
+            )
+        },
         contentToShow = {
-            OutlinedTextField(
-                textStyle = MaterialTheme.typography.bodyLarge,
-                singleLine = false,
+            NoteTextField(
                 value = noteContent.value,
-                onValueChange = {
-                    if (it.length <= 150) {
-                        noteContent.value = it
+                maxLength = maxLength,
+                onValueChange = { newValue ->
+                    if (newValue.length <= maxLength) {
+                        noteContent.value = newValue
                     }
                 },
-                label = { Text(text = "Add a Note") },
-                isError = noteContent.value.length > 150,
-                supportingText = {
-                    Text(
-                        text = "${noteContent.value.length}/150",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                },
-                trailingIcon = {
-                    if (noteContent.value.isNotEmpty()) {
-                        Icon(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clip(CircleShape)
-                                .clickable {
-                                    noteContent.value = ""
-                                },
-                            painter = painterResource(id = R.drawable.cross_icon),
-                            contentDescription = "Clear note",
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-
-                },
+                onClear = { noteContent.value = "" }
             )
         },
         onDismissRequest = {
@@ -99,12 +71,7 @@ fun NoteInput(
         confirmButtonText = "Save",
         onConfirm = {
             if (noteContent.value.isEmpty()) {
-                //show toast message saying note is empty
-                Toasty.warning(
-                    context,
-                    "Note is empty. closing without save.",
-                    Toasty.LENGTH_SHORT
-                ).show()
+                showEmptyNoteWarning(context)
             } else {
                 onClick()
             }
@@ -113,7 +80,99 @@ fun NoteInput(
         onDismiss = {
             showNoteDialog.value = false
             onClick()
-        })
+        }
+    )
+}
 
+@Composable
+private fun DeleteNoteButton(onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .padding(8.dp)
+            .size(24.dp),
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.delete_icon),
+            contentDescription = "Delete note",
+            tint = MaterialTheme.colorScheme.error
+        )
+    }
+}
 
+@Composable
+private fun NoteTextField(
+    value: String,
+    maxLength: Int,
+    onValueChange: (String) -> Unit,
+    onClear: () -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = MaterialTheme.typography.bodyLarge,
+        singleLine = false,
+        label = { Text("Add a Note") },
+        isError = value.length > maxLength,
+        supportingText = {
+            CharacterCounter(
+                current = value.length,
+                max = maxLength
+            )
+        },
+        trailingIcon = {
+            ClearButton(
+                visible = value.isNotEmpty(),
+                onClick = onClear
+            )
+        },
+        modifier = Modifier.fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            errorBorderColor = MaterialTheme.colorScheme.error,
+        )
+    )
+}
+
+@Composable
+private fun CharacterCounter(
+    current: Int,
+    max: Int
+) {
+    Text(
+        text = "$current/$max",
+        style = MaterialTheme.typography.bodySmall,
+        color = if (current > max) {
+            MaterialTheme.colorScheme.error
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    )
+}
+
+@Composable
+private fun ClearButton(
+    visible: Boolean,
+    onClick: () -> Unit
+) {
+    if (visible) {
+        Icon(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onClick),
+            painter = painterResource(id = R.drawable.cross_icon),
+            contentDescription = "Clear note",
+            tint = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+private fun showEmptyNoteWarning(context: Context) {
+    Toasty.warning(
+        context,
+        "Note is empty. Closing without save.",
+        Toasty.LENGTH_SHORT
+    ).show()
 }

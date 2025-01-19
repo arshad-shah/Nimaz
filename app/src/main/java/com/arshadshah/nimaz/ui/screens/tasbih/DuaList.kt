@@ -2,19 +2,26 @@ package com.arshadshah.nimaz.ui.screens.tasbih
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
@@ -25,8 +32,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -43,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.DuaViewModel
@@ -55,63 +62,54 @@ fun DuaList(
     navController: NavHostController,
     viewModel: DuaViewModel = hiltViewModel()
 ) {
-    val duaState = viewModel.duas.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val duas by viewModel.duas.collectAsState()
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         viewModel.getDuas(chapterId.toInt())
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Supplications")
+                    val chapter = viewModel.getChapterById(chapterId.toInt())
+                    Text(text = chapter?.english_title ?: "Supplications")
                 },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier
                             .testTag("backButton")
                             .padding(start = 8.dp),
-                        onClick = {
-                            navController.popBackStack()
-                        }) {
+                        onClick = { navController.popBackStack() }
+                    ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
                             painter = painterResource(id = R.drawable.back_icon),
                             contentDescription = "Back"
                         )
                     }
-                },
+                }
             )
-        },
-    ) {
-        Card(
+        }
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
-                .padding(it)
-                .padding(16.dp)
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(paddingValues)
         ) {
-            LazyColumn(
-                modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER),
-                state = listState,
-                contentPadding = PaddingValues(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(duaState.value.size) { index ->
-                    DuaListItem(
-                        dua = duaState.value[index],
-                        isLastItem = index == duaState.value.size - 1
-                    )
-
-                    if (index < duaState.value.size - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+            when (uiState) {
+                is DuaViewModel.UiState.Loading -> LoadingState()
+                is DuaViewModel.UiState.Error -> ErrorState((uiState as DuaViewModel.UiState.Error).message)
+                is DuaViewModel.UiState.Success<*> -> {
+                    when {
+                        duas.isEmpty() -> EmptyState()
+                        else -> DuasContent(
+                            duas = duas,
+                            listState = listState,
+                            onFavoriteClick = { dua -> viewModel.toggleFavorite(dua) }
                         )
                     }
                 }
@@ -120,71 +118,247 @@ fun DuaList(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DuaListItem(
-    dua: LocalDua,
-    isLastItem: Boolean
-) {
-    Surface(
+private fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
+        )
+    }
+}
+
+@Composable
+private fun ErrorState(message: String) {
+    Box(
         modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Error,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = "Error",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DuasContent(
+    duas: List<LocalDua>,
+    listState: LazyListState,
+    onFavoriteClick: (LocalDua) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        item {
+            DuaGroupCard(
+                duas = duas,
+                onFavoriteClick = onFavoriteClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun DuaGroupCard(
+    duas: List<LocalDua>,
+    onFavoriteClick: (LocalDua) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-        tonalElevation = 1.dp
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.05f)
-                        )
-                    )
-                )
-                .padding(20.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                // Arabic Text
-                Text(
-                    text = dua.arabic_dua.cleanText(),
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = utmaniQuranFont,
-                        fontSize = 28.sp,
-                        lineHeight = 46.sp,
-                        textAlign = TextAlign.Start
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp),
-                    softWrap = true,  // Enable text wrapping
-                    overflow = TextOverflow.Visible  // Show all content
-                )
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Duas",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "${duas.size}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+            }
+
+            // Duas List
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                duas.forEach { dua ->
+                    DuaItem(
+                        dua = dua,
+                        onFavoriteClick = { onFavoriteClick(dua) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DuaItem(
+    dua: LocalDua,
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Favorite Button and Arabic Text Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (dua.favourite == 1)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    IconButton(
+                        onClick = onFavoriteClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(
+                                id = if (dua.favourite == 1)
+                                    R.drawable.favorite_icon
+                                else R.drawable.favorite_icon_unseletced
+                            ),
+                            contentDescription = if (dua.favourite == 1)
+                                "Remove from favorites"
+                            else "Add to favorites",
+                            tint = if (dua.favourite == 1)
+                                MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Arabic Text
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = dua.arabic_dua.cleanText(),
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = utmaniQuranFont,
+                            fontSize = 28.sp,
+                            lineHeight = 46.sp,
+                            textAlign = TextAlign.Start
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        softWrap = true,
+                        overflow = TextOverflow.Visible
+                    )
+                }
             }
 
             // Translation
-            Text(
-                text = dua.english_translation.cleanText(),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontStyle = FontStyle.Italic,
-                    lineHeight = 28.sp,
-                    letterSpacing = 0.3.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 16.dp),
-                softWrap = true,
-                overflow = TextOverflow.Visible
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = dua.english_translation.cleanText(),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontStyle = FontStyle.Italic,
+                        lineHeight = 28.sp,
+                        letterSpacing = 0.3.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp),
+                    softWrap = true,
+                    overflow = TextOverflow.Visible
+                )
+            }
 
             // Reference
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
-                modifier = Modifier.padding(top = 4.dp)
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
             ) {
                 Text(
                     text = buildAnnotatedString {
@@ -208,6 +382,45 @@ fun DuaListItem(
                         lineHeight = 20.sp
                     ),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.quran_icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "No Duas Found",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "This chapter appears to be empty",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
                 )
             }
         }

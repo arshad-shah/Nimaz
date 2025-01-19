@@ -184,9 +184,7 @@ fun ListOfTasbih(
 
                     1 -> {
                         viewModel.getAllTasbih()
-                        val listOfTasbih = remember {
-                            viewModel.tasbihList
-                        }.collectAsState()
+                        val listOfTasbih = viewModel.tasbihList.collectAsState()
                         //if the list is empty, show a message
                         if (listOfTasbih.value.isEmpty()) {
                             NoResultFound(

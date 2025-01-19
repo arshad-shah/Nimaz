@@ -13,7 +13,6 @@ import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalJuz
-import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.data.local.models.Parameters
@@ -443,45 +442,49 @@ class DashboardViewModel @Inject constructor(
     ) = withContext(Dispatchers.IO) {
         safeOperation(
             operation = {
-                val updatedTracker = prayerTrackerRepository.updateSpecificPrayer(
-                    date,
-                    prayerName,
-                    prayerDone
-                )
-                states.trackerState.update {
-                    it.copy(
-                        date = updatedTracker.date,
-                        fajr = updatedTracker.fajr,
-                        dhuhr = updatedTracker.dhuhr,
-                        asr = updatedTracker.asr,
-                        maghrib = updatedTracker.maghrib,
-                        isha = updatedTracker.isha,
-                        progress = updatedTracker.progress,
-                        isMenstruating = updatedTracker.isMenstruating
-                    )
-                }
+                prayerTrackerRepository.updateSpecificPrayer(date, prayerName, prayerDone)
+                prayerTrackerRepository.observePrayersForDate(date)
+                    .collect { tracker ->
+                        states.trackerState.update {
+                            it.copy(
+                                date = tracker.date,
+                                fajr = tracker.fajr,
+                                dhuhr = tracker.dhuhr,
+                                asr = tracker.asr,
+                                maghrib = tracker.maghrib,
+                                isha = tracker.isha,
+                                progress = tracker.progress,
+                                isMenstruating = tracker.isMenstruating
+                            )
+                        }
+                    }
             },
             errorMessage = "Error updating prayer tracker"
         )
     }
 
+    // Update existing getTodaysPrayerTracker to use new repository
     private suspend fun getTodaysPrayerTracker(date: LocalDate) = withContext(Dispatchers.IO) {
-        prayerTrackerRepository.getPrayersForDate(date)
-            .catch { emit(LocalPrayersTracker()) }
-            .collect { tracker ->
-                states.trackerState.update {
-                    it.copy(
-                        date = tracker.date,
-                        fajr = tracker.fajr,
-                        dhuhr = tracker.dhuhr,
-                        asr = tracker.asr,
-                        maghrib = tracker.maghrib,
-                        isha = tracker.isha,
-                        progress = tracker.progress,
-                        isMenstruating = tracker.isMenstruating
-                    )
-                }
-            }
+        safeOperation(
+            operation = {
+                prayerTrackerRepository.observePrayersForDate(date)
+                    .collect { tracker ->
+                        states.trackerState.update {
+                            it.copy(
+                                date = tracker.date,
+                                fajr = tracker.fajr,
+                                dhuhr = tracker.dhuhr,
+                                asr = tracker.asr,
+                                maghrib = tracker.maghrib,
+                                isha = tracker.isha,
+                                progress = tracker.progress,
+                                isMenstruating = tracker.isMenstruating
+                            )
+                        }
+                    }
+            },
+            errorMessage = "Error getting prayer tracker"
+        )
     }
 
     private suspend fun updateFastingTracker(

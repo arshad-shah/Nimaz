@@ -23,21 +23,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -57,7 +52,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -99,7 +93,8 @@ fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hi
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val sharedPreferences = PrivateSharedPreferences(context)
-    val selectedImageIndex = remember { mutableStateOf(sharedPreferences.getDataInt("QiblaImageIndex")) }
+    val selectedImageIndex =
+        remember { mutableStateOf(sharedPreferences.getDataInt("QiblaImageIndex")) }
     val compassImage = painterResource(qiblaImages[selectedImageIndex.value] ?: R.drawable.qibla1)
 
     Scaffold(
@@ -306,7 +301,8 @@ private fun QiblaCompassCard(
     val target = (bearing - degree).toFloat()
     val rotateAnim = remember { Animatable(0f) }
     val pointingToQibla = abs(target) < 5f
-    val vibrator = remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
+    val vibrator =
+        remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
     val directionState = remember { mutableStateOf(QiblaDirection.getDirection(target)) }
 
     LaunchedEffect(target) {

@@ -27,9 +27,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -47,7 +44,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,8 +63,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.constants.AppConstants.getAsrJuristic
+import com.arshadshah.nimaz.constants.AppConstants.getHighLatitudes
 import com.arshadshah.nimaz.constants.AppConstants.getMethods
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.SettingsSelectionDialog
 import com.arshadshah.nimaz.viewModel.PrayerTimesSettingsViewModel
 
@@ -137,8 +135,12 @@ private fun PrayerParametersSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -146,16 +148,29 @@ private fun PrayerParametersSection(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Prayer Parameters",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Prayer Parameters",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+
                 FilledIconButton(
                     onClick = { showInfoDialog.value = true },
                     colors = IconButtonDefaults.filledIconButtonColors(
@@ -189,11 +204,6 @@ private fun PrayerParametersSection(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.time_calculation),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
                         Column {
                             Text(
                                 text = if (autoParams) "Auto Calculation" else "Manual Calculation",
@@ -265,8 +275,12 @@ private fun PrayerAnglesSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -279,11 +293,23 @@ private fun PrayerAnglesSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Prayer Angles",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Prayer Angles",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+
                 FilledIconButton(
                     onClick = { showInfoDialog.value = true },
                     colors = IconButtonDefaults.filledIconButtonColors(
@@ -382,11 +408,19 @@ private fun AngleItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(12.dp)
+                )
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -437,11 +471,19 @@ private fun CalculationMethodItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.time_calculation),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.time_calculation),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(12.dp)
+                )
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -451,7 +493,7 @@ private fun CalculationMethodItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = calculationMethod,
+                    text = getMethods()[calculationMethod] ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -478,25 +520,21 @@ private fun InfoDialog(
     onDismiss: () -> Unit
 ) {
     if (showDialog) {
-        AlertDialog(
+        AlertDialogNimaz(
+            title = title,
+            contentDescription = "Information",
+            confirmButtonText = "Got it",
+            showDismissButton = false,
+            onDismiss = onDismiss,
+            onConfirm = onDismiss,
             onDismissRequest = onDismiss,
-            title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            text = {
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("Got it")
+            contentToShow = {
+                Column {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         )
@@ -519,8 +557,12 @@ private fun PrayerTimeAdjustmentsSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -533,11 +575,23 @@ private fun PrayerTimeAdjustmentsSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Prayer Time Adjustments",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Prayer Time Adjustments",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+
                 FilledIconButton(
                     onClick = { showInfoDialog.value = true },
                     colors = IconButtonDefaults.filledIconButtonColors(
@@ -614,13 +668,20 @@ private fun PrayerTimeAdjustmentItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                modifier = Modifier
-                    .size(48.dp)
-                    .then(if (name == "Sunrise") Modifier.clip(CircleShape) else Modifier),
-                painter = painterResource(id = icon),
-                contentDescription = "$name Time"
-            )
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(12.dp)
+                        .then(if (name == "Sunrise") Modifier.clip(CircleShape) else Modifier),
+                )
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -656,7 +717,7 @@ private fun MadhabItem(
     onMadhabChange: (String) -> Unit
 ) {
     val showDialog = remember { mutableStateOf(false) }
-    val madhabs = remember { AppConstants.getAsrJuristic() }
+    val madhabs = remember { getAsrJuristic() }
     Surface(
         onClick = { showDialog.value = true },
         color = MaterialTheme.colorScheme.surface,
@@ -670,11 +731,19 @@ private fun MadhabItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.school),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.school),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(12.dp),
+                )
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -684,7 +753,7 @@ private fun MadhabItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = madhab,
+                    text = getAsrJuristic()[madhab] ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -709,7 +778,7 @@ private fun HighLatitudeRuleItem(
 ) {
 
     val showDialog = remember { mutableStateOf(false) }
-    val rules = remember { AppConstants.getHighLatitudes() }
+    val rules = remember { getHighLatitudes() }
 
     Surface(
         onClick = { showDialog.value = true },
@@ -724,11 +793,19 @@ private fun HighLatitudeRuleItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.high_latitude),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.high_latitude),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(12.dp),
+                )
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -738,7 +815,7 @@ private fun HighLatitudeRuleItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = highLatitudeRule,
+                    text = getHighLatitudes()[highLatitudeRule] ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -948,37 +1025,23 @@ private fun NumberPickerDialog(
             mutableIntStateOf(currentValue.replace(valuePostfix, "").toIntOrNull() ?: neutralValue)
         }
 
-        BasicAlertDialog(
+        AlertDialogNimaz(
+            title = title,
+            description = "Select a value to $title",
+            contentDescription = "Adjust $title",
+            confirmButtonText = "Apply",
+            onDismiss = onDismiss,
+            onConfirm = {
+                onValueSelected(selectedValue)
+                onDismiss()
+            },
             onDismissRequest = onDismiss,
-            modifier = Modifier.fillMaxWidth(0.95f)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 16.dp
-            ) {
+            contentToShow = {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
+                        .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Header
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Adjust the value using the controls below",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
 
                     // Number display and quick controls
                     Row(
@@ -1067,38 +1130,9 @@ private fun NumberPickerDialog(
                             Text("Reset to $neutralValue$valuePostfix")
                         }
                     }
-
-                    // Action buttons
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-                    ) {
-                        // Cancel button
-                        TextButton(
-                            onClick = onDismiss,
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text("Cancel")
-                        }
-
-                        // Confirm button
-                        Button(
-                            onClick = {
-                                onValueSelected(selectedValue)
-                                onDismiss()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Text("Confirm")
-                        }
-                    }
                 }
+
             }
-        }
+        )
     }
 }

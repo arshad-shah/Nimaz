@@ -1,13 +1,11 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Surface
@@ -16,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
@@ -108,8 +105,12 @@ fun MoreMenu(
                         leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         trailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.5f
+                        ),
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.5f
+                        )
                     )
                 )
             }
@@ -142,23 +143,23 @@ fun MoreMenu(
     }
 
     if (showDialog2) {
-            CustomDialog(
-                title = "Translation",
-                items = items2,
-                setShowDialog = setShowDialog2,
-                state = state,
-                valueState = translationState
-            ) {
-                handleEvents(QuranViewModel.QuranMenuEvents.Change_Translation(it))
-            }
+        CustomDialog(
+            title = "Translation",
+            items = items2,
+            setShowDialog = setShowDialog2,
+            state = state,
+            valueState = translationState
+        ) {
+            handleEvents(QuranViewModel.QuranMenuEvents.Change_Translation(it))
+        }
     } else if (showDialog3) {
-            FontSizeDialog(
-                setShowDialog3,
-                arabicFontSizeState,
-                translationFontSizeState,
-                fontStyleState,
-                items3,
-                handleEvents
-            )
+        FontSizeDialog(
+            setShowDialog3,
+            arabicFontSizeState,
+            translationFontSizeState,
+            fontStyleState,
+            items3,
+            handleEvents
+        )
     }
 }

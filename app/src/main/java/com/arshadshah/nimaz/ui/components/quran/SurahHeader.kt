@@ -1,12 +1,9 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,9 +25,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
@@ -62,7 +55,7 @@ fun SurahHeader(
 
     Card(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(8.dp)
             .fillMaxWidth()
             .scale(scale),
         shape = RoundedCornerShape(24.dp),
@@ -78,8 +71,8 @@ fun SurahHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // English Name Section
             Surface(
@@ -94,7 +87,7 @@ fun SurahHeader(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(8.dp)
                         .placeholder(
                             visible = loading,
                             highlight = PlaceholderHighlight.shimmer()
@@ -116,7 +109,7 @@ fun SurahHeader(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                            .padding(8.dp)
                             .placeholder(
                                 visible = loading,
                                 highlight = PlaceholderHighlight.shimmer()
@@ -138,7 +131,7 @@ fun SurahHeader(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(8.dp)
                         .placeholder(
                             visible = loading,
                             highlight = PlaceholderHighlight.shimmer()
@@ -154,7 +147,7 @@ fun SurahHeader(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
@@ -209,11 +202,3 @@ fun SurahHeaderPreview() {
         loading = false
     )
 }
-@Composable
-private fun Modifier.placeholderWithShimmer(
-    visible: Boolean,
-) = this.placeholder(
-    visible = visible,
-    highlight = PlaceholderHighlight.shimmer(
-    )
-)

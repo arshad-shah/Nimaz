@@ -90,11 +90,57 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.settings.SocialLinkData
-import com.arshadshah.nimaz.ui.components.settings.SocialPlatforms
+import com.arshadshah.nimaz.ui.components.settings.getAppVersion
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
+
+
+// Enhanced SocialLinkData with additional properties for better customization
+data class SocialLinkData(
+    val icon: Int,
+    val url: String,
+    val description: String,
+    val backgroundColor: Color,
+    val iconTint: Color = Color.White,
+    val hoverRotation: Float = 8f,
+    val pressScale: Float = 0.9f
+)
+
+// Enhanced platform definitions
+object SocialPlatforms {
+    fun github(url: String) = SocialLinkData(
+        icon = R.drawable.github_icon,
+        url = url,
+        description = "GitHub",
+        backgroundColor = Color(0xFF24292E),
+        hoverRotation = 12f
+    )
+
+    fun linkedin(url: String) = SocialLinkData(
+        icon = R.drawable.linkedin_icon,
+        url = url,
+        description = "LinkedIn",
+        backgroundColor = Color(0xFF0A66C2),
+        hoverRotation = -8f
+    )
+
+    fun email(email: String) = SocialLinkData(
+        icon = R.drawable.mail_icon,
+        url = "mailto:$email",
+        description = "Email",
+        backgroundColor = Color(0xFF4CAF50),
+        hoverRotation = 0f
+    )
+
+    fun portfolio(url: String) = SocialLinkData(
+        icon = R.drawable.web,
+        url = url,
+        description = "Portfolio",
+        backgroundColor = Color(0xFF9C27B0),
+        hoverRotation = 15f
+    )
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)

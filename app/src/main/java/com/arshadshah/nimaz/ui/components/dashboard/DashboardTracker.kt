@@ -1,21 +1,32 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
@@ -33,7 +44,7 @@ import java.time.LocalDate
 fun DashboardPrayerTracker(
     dashboardPrayerTracker: DashboardViewModel.DashboardTrackerState,
     handleEvents: (DashboardViewModel.DashboardEvent) -> Unit,
-    isLoading: State<Boolean>
+    isLoading: State<Boolean>,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -49,13 +60,10 @@ fun DashboardPrayerTracker(
 
     ElevatedCard(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
-        ),
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -64,57 +72,81 @@ fun DashboardPrayerTracker(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Compact Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Prayer Tracker",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.tracker_icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "Daily Prayers",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
 
-                val completedCount = prayers.count { it.second }
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = CircleShape,
-                    modifier = Modifier.padding(end = 8.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "$completedCount/5",
+                        text = "${prayers.count { it.second }}/5",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
+            // Compact Prayer Items Grid
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                prayers.forEach { (name, status) ->
-                    EnhancedPrayerToggle(
-                        name = name,
-                        checked = status,
-                        enabled = !dashboardPrayerTracker.isMenstruating,
-                        onCheckedChange = { isChecked ->
-                            handleEvents(
-                                DashboardViewModel.DashboardEvent.UpdatePrayerTracker(
-                                    date = LocalDate.now(),
-                                    prayerName = name,
-                                    prayerDone = isChecked
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    prayers.forEach { (name, status) ->
+                        CompactPrayerItem(
+                            name = name,
+                            isCompleted = status,
+                            enabled = !dashboardPrayerTracker.isMenstruating,
+                            onStatusChange = { isChecked ->
+                                handleEvents(
+                                    DashboardViewModel.DashboardEvent.UpdatePrayerTracker(
+                                        date = LocalDate.now(),
+                                        prayerName = name,
+                                        prayerDone = isChecked
+                                    )
                                 )
-                            )
-                            updateWidget()
-                        },
-                        isLoading = isLoading.value
-                    )
+                                updateWidget()
+                            },
+                            isLoading = isLoading.value
+                        )
+                    }
                 }
             }
         }
@@ -122,129 +154,69 @@ fun DashboardPrayerTracker(
 }
 
 @Composable
-private fun EnhancedPrayerToggle(
+private fun CompactPrayerItem(
     name: String,
-    checked: Boolean,
+    isCompleted: Boolean,
     enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    onStatusChange: (Boolean) -> Unit,
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val transition = updateTransition(checked, label = "checked")
-
-    val scale by transition.animateFloat(
-        label = "scale",
-        transitionSpec = {
-            if (false isTransitioningTo true) {
-                spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            } else {
-                spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            }
-        }
-    ) { if (it) 1.2f else 1f }
-
-    val backgroundColor by transition.animateColor(
-        label = "backgroundColor",
-        transitionSpec = {
-            spring(stiffness = Spring.StiffnessLow)
-        }
-    ) {
-        when {
-            !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            it -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.surfaceVariant
-        }
-    }
-
-    val iconColor by transition.animateColor(
-        label = "iconColor",
-        transitionSpec = {
-            spring(stiffness = Spring.StiffnessLow)
-        }
-    ) {
-        if (it) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    }
-
     Surface(
+        onClick = { if (enabled) onStatusChange(!isCompleted) },
+        enabled = enabled,
+        color = when {
+            !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            isCompleted -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.surface
+        },
+        shape = RoundedCornerShape(12.dp),
         modifier = modifier
             .placeholder(
                 visible = isLoading,
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(12.dp),
                 highlight = PlaceholderHighlight.shimmer(
                     highlightColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
                 )
-            ),
-        onClick = { if (enabled) onCheckedChange(!checked) },
-        enabled = enabled,
-        color = backgroundColor,
-        shape = RoundedCornerShape(16.dp)
+            )
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Surface(
                 shape = CircleShape,
-                color = iconColor,
-                modifier = Modifier
-                    .size(40.dp)
-                    .scale(scale),
-                tonalElevation = if (checked) 4.dp else 2.dp
+                color = if (isCompleted)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(28.dp)
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column {
-                        AnimatedVisibility(
-                            visible = checked,
-                            enter = scaleIn(
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessLow
-                                )
-                            ) + fadeIn(),
-                            exit = scaleOut() + fadeOut()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Check,
-                                contentDescription = "Completed",
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        AnimatedVisibility(
-                            visible = !checked,
-                            enter = scaleIn() + fadeIn(),
-                            exit = scaleOut() + fadeOut()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.RadioButtonUnchecked,
-                                contentDescription = "Not completed",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(48.dp)
-                            )
-                        }
-                    }
-                }
+                Icon(
+                    imageVector = if (isCompleted)
+                        Icons.Rounded.Check
+                    else
+                        Icons.Rounded.RadioButtonUnchecked,
+                    contentDescription = if (isCompleted) "Completed" else "Not completed",
+                    tint = if (isCompleted)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(16.dp)
+                )
             }
 
             Text(
                 text = name,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (checked)
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isCompleted)
                     MaterialTheme.colorScheme.onPrimaryContainer
                 else
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                    MaterialTheme.colorScheme.onSurface,
             )
         }
     }

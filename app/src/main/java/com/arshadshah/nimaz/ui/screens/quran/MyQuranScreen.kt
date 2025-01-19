@@ -26,7 +26,6 @@ import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.DropdownListItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.quran.CompactSurahCard
-import com.arshadshah.nimaz.ui.components.quran.SurahCard
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel

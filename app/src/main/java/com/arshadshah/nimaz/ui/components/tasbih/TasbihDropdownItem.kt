@@ -11,23 +11,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -41,14 +41,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
-// a dropdown item for each tasbih
-//to contain annimated visibility delete button and the tasbih name, goal and count
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihDropdownItem(
@@ -75,7 +72,7 @@ fun TasbihDropdownItem(
             SwipeBackground(dismissState = dismissState)
         },
         content = {
-            TasbihCard(
+            CompactTasbihCard(
                 tasbih = item,
                 onClick = onClick
             )
@@ -84,35 +81,64 @@ fun TasbihDropdownItem(
 }
 
 @Composable
-fun TasbihCard(
+fun CompactTasbihCard(
     tasbih: LocalTasbih,
     onClick: (LocalTasbih) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
         ),
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = RoundedCornerShape(16.dp),
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
-                shape = MaterialTheme.shapes.extraLarge
+                shape = RoundedCornerShape(16.dp)
             )
             .clickable(onClick = { onClick(tasbih) })
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Left side - Progress indicator and completion status
+            Box(
+                modifier = Modifier.size(40.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    progress = { (tasbih.count.toFloat() / tasbih.goal).coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    strokeWidth = 3.dp
+                )
+                if (tasbih.count >= tasbih.goal) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = CircleShape
+                            )
+                            .padding(2.dp)
+                    )
+                }
+            }
+
+            // Middle - Names
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
                     text = tasbih.englishName,
@@ -122,46 +148,25 @@ fun TasbihCard(
                 )
                 Text(
                     text = tasbih.arabicName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontFamily = utmaniQuranFont,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = utmaniQuranFont
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
-            VerticalDivider(
-                modifier = Modifier.height(36.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            // Right - Counter
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp),
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${tasbih.count}/${tasbih.goal}",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    if (tasbih.count >= tasbih.goal) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                LinearProgressIndicator(
-                    progress = { (tasbih.count.toFloat() / tasbih.goal).coerceIn(0f, 1f) },
-                    modifier = Modifier.width(80.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                Text(
+                    text = "${tasbih.count}/${tasbih.goal}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
         }
@@ -169,10 +174,8 @@ fun TasbihCard(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
     val direction = dismissState.dismissDirection
-
     val color by animateColorAsState(
         when (dismissState.targetValue) {
             SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
@@ -198,18 +201,19 @@ fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
         SwipeToDismissBoxValue.Settled -> painterResource(id = R.drawable.edit_icon)
     }
     val scale by animateFloatAsState(
-        if (dismissState.targetValue == SwipeToDismissBoxValue.Settled) 0f else 1.2f, label = ""
+        if (dismissState.targetValue == SwipeToDismissBoxValue.Settled) 0f else 1.2f,
+        label = ""
     )
 
     val haptic = LocalHapticFeedback.current
-    LaunchedEffect(key1 = dismissState.targetValue, block = {
+    LaunchedEffect(key1 = dismissState.targetValue) {
         if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         }
-    })
+    }
 
     Box(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(color)
             .padding(horizontal = 20.dp),
@@ -223,38 +227,5 @@ fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
                 .size(24.dp),
             tint = iconTintColor
         )
-    }
-}
-
-
-@Preview(
-    showBackground = true
-)
-@Composable
-//MyTasbihDropDownItem
-fun TasbihDropDownItemPreview() {
-    //tasbih object
-    //val id: Int = 0,
-    //    val date: String = LocalDate.now().toString(),
-    //    val arabicName: String,
-    //    val englishName: String,
-    //    val translationName: String,
-    //    val goal: Int = 0,
-    //    val count: Int =
-    val tasbih = LocalTasbih(
-        arabicName = "الله أكبر",
-        englishName = "Allahu Akbar",
-        translationName = "God is the greatest",
-        goal = 33,
-        count = 0
-    )
-    TasbihDropdownItem(
-        item = tasbih,
-        onClick = { },
-        onDelete = { tasbih ->
-
-        },
-    ) { tasbih ->
-
     }
 }

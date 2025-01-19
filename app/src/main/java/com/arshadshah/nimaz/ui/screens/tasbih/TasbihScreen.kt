@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Vibration
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -13,19 +15,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_TASBIH
+import com.arshadshah.nimaz.ui.components.tasbih.CompactCustomCounter
 import com.arshadshah.nimaz.ui.components.tasbih.Counter
-import com.arshadshah.nimaz.ui.components.tasbih.CustomCounter
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
 import kotlin.reflect.KFunction0
 
@@ -39,6 +44,15 @@ fun TasbihScreen(
     navController: NavHostController,
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(
+        key1 = tasbihId,
+        block = {
+            if (tasbihId.isNotBlank()) {
+                viewModel.getTasbihById(tasbihId.toInt())
+            }
+        }
+    )
+
     val vibrationAllowed = viewModel.vibrationButtonState.collectAsState()
     val resetButtonState = viewModel.resetButtonState.collectAsState()
 
@@ -87,7 +101,7 @@ fun TasbihScreen(
             ) {
 
             if (tasbihArabic.isNotBlank() && tasbihEnglish.isNotBlank() && tasbihTranslitration.isNotBlank() && tasbihId.isNotBlank()) {
-                CustomCounter(
+                CompactCustomCounter(
                     tasbihId,
                     resetTasbih = resetButtonState,
                     count = counter,
@@ -136,16 +150,18 @@ fun TopBarActionsTasbih(
         updateVibrationButtonState()
     }) {
         Icon(
-            modifier = Modifier.size(
-                24.dp
-            ),
-            painter = if (vibrationAllowed.value) painterResource(
-                id = R.drawable.phone_vibration_off_icon
-            )
-            else painterResource(
-                id = R.drawable.phone_vibration_on_icon
-            ),
-            contentDescription = "Vibration"
+            imageVector = if (vibrationAllowed.value) {
+                Icons.Rounded.Vibration
+            } else {
+                ImageVector.vectorResource(id = R.drawable.phone_vibration_on_icon)
+            },
+            contentDescription = if (vibrationAllowed.value) {
+                "Disable vibration feedback"
+            } else {
+                "Enable vibration feedback"
+            },
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

@@ -3,20 +3,28 @@ package com.arshadshah.nimaz.ui.screens.settings
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -30,6 +38,7 @@ import com.arshadshah.nimaz.ui.components.common.MarkdownText
 @Composable
 fun WebViewScreen(url: String, navController: NavHostController) {
     val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -40,7 +49,8 @@ fun WebViewScreen(url: String, navController: NavHostController) {
                             "terms_of_service" -> "Terms of Service"
                             "help" -> "Help"
                             else -> ""
-                        }
+                        },
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 navigationIcon = {
@@ -48,264 +58,666 @@ fun WebViewScreen(url: String, navController: NavHostController) {
                         modifier = Modifier
                             .testTag("backButton")
                             .padding(start = 8.dp),
-                        onClick = {
-                            navController.popBackStack()
-                        }) {
+                        onClick = { navController.popBackStack() }
+                    ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
                             painter = painterResource(id = R.drawable.back_icon),
                             contentDescription = "Back"
                         )
                     }
-                },
-            )
-        },
-    ) {
-        LazyColumn(
-            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)),
-            content = {
-                item()
-                {
-                    when (url) {
-                        "privacy_policy" -> {
-                            val privacy1Text = """
-Arshad shah built the Nimaz app as a Free app. This SERVICE is provided by Arshad shah at no cost and is intended for use as is.
-
-This page is used to inform visitors regarding my policies with the collection, use, and disclosure of Personal Information if anyone decided to use my Service.
-
-If you choose to use my Service, then you agree to the collection and use of information in relation to this policy. The Personal Information that I collect is used for providing and improving the Service. I will not use or share your information with anyone except as described in this Privacy Policy.
-
-The terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, which are accessible at Nimaz unless otherwise defined in this Privacy Policy.
-
-**Information Collection and Use**
-
-For a better experience, while using our Service, I may require you to provide us with certain personally identifiable information. The information that I request will be retained on your device and is not collected by me in any way.
-
-The app does use third-party services that may collect information used to identify you.
-
-Link to the privacy policy of third-party service providers used by the app
-
-## Third-Party Services
-
-* [Google Play Services](https://policies.google.com/terms)  
-  Essential for core app functionality and updates
-
-* [Google Analytics for Firebase](https://firebase.google.com/terms/analytics)  
-  Helps us understand app usage and improve user experience
-
-* [Firebase Crashlytics](https://firebase.google.com/terms/crashlytics)  
-  Monitors app stability and helps identify technical issues
-
-**Log Data**
-
-I want to inform you that whenever you use my Service, in a case of an error in the app I collect data and information (through third-party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (“IP”) address, device name, operating system version, the configuration of the app when utilizing my Service, the time and date of your use of the Service, and other statistics.
-
-**Cookies**
-
-Cookies are files with a small amount of data that are commonly used as anonymous unique identifiers. These are sent to your browser from the websites that you visit and are stored on your device's internal memory.
-
-This Service does not use these “cookies” explicitly. However, the app may use third-party code and libraries that use “cookies” to collect information and improve their services. You have the option to either accept or refuse these cookies and know when a cookie is being sent to your device. If you choose to refuse our cookies, you may not be able to use some portions of this Service.
-
-**Service Providers**
-
-I may employ third-party companies and individuals due to the following reasons:
-
-*   To facilitate our Service;
-*   To provide the Service on our behalf;
-*   To perform Service-related services; or
-*   To assist us in analyzing how our Service is used.
-
-I want to inform users of this Service that these third parties have access to their Personal Information. The reason is to perform the tasks assigned to them on our behalf. However, they are obligated not to disclose or use the information for any other purpose.
-
-**Security**
-
-I value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and I cannot guarantee its absolute security.
-
-**Links to Other Sites**
-
-This Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by me. Therefore, I strongly advise you to review the Privacy Policy of these websites. I have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.
-
-**Children’s Privacy**
-
-These Services do not address anyone under the age of 13. I do not knowingly collect personally identifiable information from children under 13 years of age. In the case I discover that a child under 13 has provided me with personal information, I immediately delete this from our servers. If you are a parent or guardian and you are aware that your child has provided us with personal information, please contact me so that I will be able to do the necessary actions.
-
-**Changes to This Privacy Policy**
-
-I may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Privacy Policy on this page.
-
-This policy is effective as of 2023-04-14
-
-**Contact Us**
-
-If you have any questions or suggestions about my Privacy Policy, do not hesitate to contact me at info@arshadshah.com.
-
-This privacy policy page was created at [privacypolicytemplate.net](https://privacypolicytemplate.net) and modified/generated by [App Privacy Policy Generator](https://app-privacy-policy-generator.nisrulz.com/)
-							"""
-                            MarkdownText(
-                                markdown = privacy1Text,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                onLinkClicked = { url ->
-                                    // Handle link click
-                                    Log.d("MarkdownText", "Link clicked: $url")
-                                    //open github link
-                                    val urlIntent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(url)
-                                    )
-                                    context.startActivity(urlIntent)
-                                },
-                            )
-                        }
-
-                        "terms_of_service" -> {
-
-                            val TandCtext = """
-By downloading or using the app, these terms will automatically apply to you – you should make sure therefore that you read them carefully before using the app. You’re not allowed to copy or modify the app, any part of the app, or our trademarks in any way. You’re not allowed to attempt to extract the source code of the app, and you also shouldn’t try to translate the app into other languages or make derivative versions. The app itself, and all the trademarks, copyright, database rights, and other intellectual property rights related to it, still belong to Arshad shah.
-
-Arshad shah is committed to ensuring that the app is as useful and efficient as possible. For that reason, we reserve the right to make changes to the app or to charge for its services, at any time and for any reason. We will never charge you for the app or its services without making it very clear to you exactly what you’re paying for.
-
-The Nimaz app stores and processes personal data that you have provided to us, to provide my Service. It’s your responsibility to keep your phone and access to the app secure. We therefore recommend that you do not jailbreak or root your phone, which is the process of removing software restrictions and limitations imposed by the official operating system of your device. It could make your phone vulnerable to malware/viruses/malicious programs, compromise your phone’s security features and it could mean that the Nimaz app won’t work properly or at all.
-
-The app does use third-party services that declare their Terms and Conditions.
-
-Link to Terms and Conditions of third-party service providers used by the app
-
-## Third-Party Services
-
-* [Google Play Services](https://policies.google.com/terms)  
-  Essential for core app functionality and updates
-
-* [Google Analytics for Firebase](https://firebase.google.com/terms/analytics)  
-  Helps us understand app usage and improve user experience
-
-* [Firebase Crashlytics](https://firebase.google.com/terms/crashlytics)  
-  Monitors app stability and helps identify technical issues
-
-You should be aware that there are certain things that Arshad shah will not take responsibility for. Certain functions of the app will require the app to have an active internet connection. The connection can be Wi-Fi or provided by your mobile network provider, but Arshad shah cannot take responsibility for the app not working at full functionality if you don’t have access to Wi-Fi, and you don’t have any of your data allowance left.
-
-If you’re using the app outside of an area with Wi-Fi, you should remember that the terms of the agreement with your mobile network provider will still apply. As a result, you may be charged by your mobile provider for the cost of data for the duration of the connection while accessing the app, or other third-party charges. In using the app, you’re accepting responsibility for any such charges, including roaming data charges if you use the app outside of your home territory (i.e. region or country) without turning off data roaming. If you are not the bill payer for the device on which you’re using the app, please be aware that we assume that you have received permission from the bill payer for using the app.
-
-Along the same lines, Arshad shah cannot always take responsibility for the way you use the app i.e. You need to make sure that your device stays charged – if it runs out of battery and you can’t turn it on to avail the Service, Arshad shah cannot accept responsibility.
-
-With respect to Arshad shah’s responsibility for your use of the app, when you’re using the app, it’s important to bear in mind that although we endeavor to ensure that it is updated and correct at all times, we do rely on third parties to provide information to us so that we can make it available to you. Arshad shah accepts no liability for any loss, direct or indirect, you experience as a result of relying wholly on this functionality of the app.
-
-At some point, we may wish to update the app. The app is currently available on Android – the requirements for the system(and for any additional systems we decide to extend the availability of the app to) may change, and you’ll need to download the updates if you want to keep using the app. Arshad shah does not promise that it will always update the app so that it is relevant to you and/or works with the Android version that you have installed on your device. However, you promise to always accept updates to the application when offered to you, We may also wish to stop providing the app, and may terminate use of it at any time without giving notice of termination to you. Unless we tell you otherwise, upon any termination, (a) the rights and licenses granted to you in these terms will end; (b) you must stop using the app, and (if needed) delete it from your device.
-
-**Changes to This Terms and Conditions**
-
-I may update our Terms and Conditions from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Terms and Conditions on this page.
-
-These terms and conditions are effective as of 2023-04-14
-
-**Contact Us**
-
-If you have any questions or suggestions about my Terms and Conditions, do not hesitate to contact me at info@arshadshah.com.
-
-This Terms and Conditions page was generated by [App Privacy Policy Generator](https://app-privacy-policy-generator.nisrulz.com/)
-							"""
-                            MarkdownText(
-                                markdown = TandCtext,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                onLinkClicked = { url ->
-                                    // Handle link click
-                                    Log.d("MarkdownText", "Link clicked: $url")
-                                    //open github link
-                                    val urlIntent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(url)
-                                    )
-                                    context.startActivity(urlIntent)
-                                },
-                            )
-
-                        }
-
-                        "help" -> {
-                            val internettext = """ 
-**Introduction**
-
-Nimaz uses Mathematical formulae to find Prayer times based on the location of the sun in the horizon using the current location of your device.
-
-to achieve a high rate of accuracy some assumptions are made hence an acceptable error rate of 5 minutes can occur in the times.
-
-For this reason it is highly recommended to check the prayer times during critical periods such as ramadan with your local mosque and apply the corrections to Nimaz as appropriate.
-
-To facilitate this customization Nimaz provides complete control over the parameters used to calculate prayer times.
-
-Nimaz provides a number of features to facilitate your daily prayers and Quran recitation.
-
-**Prayer times Calculation**
-
-To Calculate prayer times Nimaz uses two methods:
-
-* **Automatic** - Nimaz uses the location of the sun in the horizon to calculate prayer times
-
-* **Manual** - Nimaz uses the Predefined angles for prayer times calculation
-
-	Manual Calculation provides a list of methods to choose from and allows you to customize the angles and times for each method.
-	* **MWL** - Muslim World League
-	* **EGYPTIAN** - Egyptian General Authority of Survey
-	* **KARACHI** - University of Islamic Sciences, Karachi
-	* **MAKKAH** - Umm al-Qura University, Makkah
-	* **DUBAI** - Dubai
-	* **ISNA** - Islamic Society of North America (ISNA)
-	* **KUWAIT** - Kuwait
-	* **TEHRAN** - Institute of Geophysics, University of Tehran
-	* **SHIA** - Shia Ithna Ashari, Leva Institute, Qum
-	* **GULF** - Gulf Region
-	* **QATAR** - Qatar
-	* **SINGAPORE** - Singapore
-	* **FRANCE** - France
-	* **TURKEY** - Turkey
-	* **RUSSIA** - Russia
-	* **MOONSIGHTING** - Moonsighting Committee
-	* **IRELAND** - Ireland
-	* **OTHER** - Other (Custom)
-	
-	The **Other** method allows you to create a custom method by specifying the angles and times for each prayer.
-	It defaults all values to 0 and you can change them to the values you want.
-	
-**Alarms and Notifications**
-
-All settings for alarms and notifications are available from the app settings screen.
-
-If the alarms do not work please check the following:
-* Make sure that the device is not in silent mode
-* Make sure that the device is not in Do not disturb mode
-* Make sure that the device is not in Airplane mode
-
-	**Troubleshooting**
-	
-	Nimaz provides a troubleshooting options for alarms and notifications.
-	All alarms can be reset from the troubleshooting screen. 
-	In addition to this a test alarm can be triggered to test the alarms.
-					"""
-
-                            MarkdownText(
-                                markdown = internettext,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                onLinkClicked = { url ->
-                                    // Handle link click
-                                    Log.d("MarkdownText", "Link clicked: $url")
-                                    //open github link
-                                    val urlIntent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(url)
-                                    )
-                                    context.startActivity(urlIntent)
-                                },
-                            )
-                        }
-                    }
-
                 }
-            }, contentPadding = PaddingValues(
-                top = it.calculateTopPadding(),
-                bottom = it.calculateBottomPadding(),
-                start = 16.dp,
-                end = 16.dp
             )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                when (url) {
+                    "privacy_policy" -> PrivacyPolicyContent()
+                    "terms_of_service" -> TermsContent()
+                    "help" -> HelpContent()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrivacyPolicyContent() {
+    ContentSection(
+        title = "Privacy Policy",
+        icon = R.drawable.privacy_policy_icon
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Project Information
+            SectionContent(
+                title = "About This App",
+                content = """
+## Personal Project Notice
+
+Nimaz is a free app created by Arshad Shah as a personal project. This service is:
+* Provided at no cost
+* Developed by an individual
+* Intended for use as-is
+* Made to serve the Muslim community
+
+Your privacy is a top priority in this personal project.
+
+---"""
+            )
+
+            // Basic Information
+            SectionContent(
+                title = "Overview",
+                content = """
+## Privacy Basics
+
+Key points about your privacy:
+
+* Most data stays on your device
+* No personal information is collected
+* No data is sold or shared
+* Third-party services are limited to essential functions
+
+By using Nimaz, you agree to the terms in this privacy policy.
+
+---"""
+            )
+
+            // Information Collection
+            SectionContent(
+                title = "Data Collection",
+                content = """
+## Information Usage
+
+### On-Device Data
+* Prayer time preferences
+* App settings
+* Location data (when permitted)
+* All stored locally on your device
+
+### Collected Information
+* Limited crash reports
+* Anonymous usage statistics
+* App performance data
+
+No personally identifiable information leaves your device except as described below.
+
+---"""
+            )
+
+            // Third Party Services
+            SectionContent(
+                title = "Third-Party Services",
+                content = """
+## External Services
+
+The app uses these essential services:
+
+* [Google Play Services](https://policies.google.com/terms)
+  * Core Android functionality
+  * App updates and security
+
+* [Firebase Analytics](https://firebase.google.com/terms/analytics)
+  * Anonymous usage data
+  * App improvement insights
+
+* [Firebase Crashlytics](https://firebase.google.com/terms/crashlytics)
+  * Crash reporting
+  * Bug identification
+
+Each service has its own privacy policy that you should review.
+
+---"""
+            )
+
+            // Log Data
+            SectionContent(
+                title = "Technical Data",
+                content = """
+## Log Information
+
+For app improvement, we may collect:
+
+* Device information
+  * Operating system version
+  * Device model
+  * App configuration
+
+* Error data
+  * Crash reports
+  * Performance metrics
+  * Technical diagnostics
+
+This data is:
+* Anonymized
+* Used only for app improvement
+* Handled securely
+* Never sold or shared
+
+---"""
+            )
+
+            // Security
+            SectionContent(
+                title = "Security Measures",
+                content = """
+## Data Protection
+
+While this is a personal project, I take security seriously:
+
+* Data is stored securely on your device
+* Standard security practices are followed
+* Third-party services are carefully selected
+* Regular security updates are provided
+
+However, please note that no method of internet transmission is 100% secure.
+
+---"""
+            )
+
+// Children's Privacy
+            SectionContent(
+                title = "Children's Privacy",
+                content = """
+## Young Users
+
+Nimaz is suitable for Muslims of all ages, including children. However, regarding privacy:
+
+* The app is designed to be family-friendly and safe
+* All prayer times, Quran, and Islamic content is appropriate for children
+* Most data (prayer times, settings, etc.) stays locally on the device
+* Location access requires device permissions (parental guidance recommended)
+* No personal information is collected from any users
+* Firebase analytics and crash reporting are anonymous
+* Parents/guardians should review app permissions
+
+For families:
+* Parents are encouraged to use the app together with young children
+* Supervise location permission settings
+* Help children understand prayer times and Islamic features
+* Guide them in building healthy spiritual habits
+
+For additional information or concerns about your child's use of the app, please contact us at info@arshadshah.com
+
+---"""
+            )
+
+            // External Links
+            SectionContent(
+                title = "External Sites",
+                content = """
+## Third-Party Links
+
+When using external links:
+
+* Links are provided for convenience
+* External sites have different policies
+* We're not responsible for external content
+* Review external privacy policies separately
+
+---"""
+            )
+
+            // Updates to Policy
+            SectionContent(
+                title = "Policy Updates",
+                content = """
+## Changes & Updates
+
+* Policy may be updated periodically
+* Changes will be posted here
+* Effective date: 2023-04-14
+* Check back for updates
+
+---"""
+            )
+
+            // Contact Information
+            SectionContent(
+                title = "Contact",
+                content = """
+## Questions?
+
+Get in touch:
+* 📧 Email: info@arshadshah.com
+* 🌐 GitHub: [Project Page](https://github.com/arshad-shah/nimaz)
+
+*Privacy policy template from [privacypolicytemplate.net](https://privacypolicytemplate.net) and modified via [App Privacy Policy Generator](https://app-privacy-policy-generator.nisrulz.com/)*
+
+---"""
+            )
+        }
+    }
+}
+
+@Composable
+private fun TermsContent() {
+    ContentSection(
+        title = "Terms of Service",
+        icon = R.drawable.document_icon // Assuming you have a document icon
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Personal Project Disclaimer
+            SectionContent(
+                title = "Project Information",
+                content = """
+## Personal Project Notice
+
+**Important**: Nimaz is a personal project created by Arshad Shah, developed as an individual initiative to serve the Muslim community. This is not a commercial product or service, and is provided free of charge.
+
+* This app is maintained by an individual developer
+* No commercial entity or organization is behind this project
+* The service is provided "as is" without warranty
+* Support is provided on a best-effort basis
+
+---"""
+            )
+
+            // Basic Terms
+            SectionContent(
+                title = "Basic Terms",
+                content = """
+## Terms of Use
+
+By downloading or using Nimaz, you agree to these terms:
+
+* The app is provided free of charge
+* You may not modify or redistribute the app
+* You may not extract or reverse engineer the code
+* All rights remain with the developer (Arshad Shah)
+
+The app and its trademarks, copyright, and other intellectual property rights belong to Arshad Shah.
+
+---"""
+            )
+
+            // App Updates & Changes
+            SectionContent(
+                title = "Updates and Modifications",
+                content = """
+## App Updates
+
+As a personal project, please note:
+
+* The app may be updated periodically
+* Features may change without notice
+* Updates are recommended but optional
+* The app is currently Android-only
+* Service may be discontinued at any time
+
+We strive to keep the app relevant and functional but make no guarantees about future updates or compatibility.
+
+---"""
+            )
+
+            // Data & Privacy
+            SectionContent(
+                title = "Data and Privacy",
+                content = """
+## Data Usage
+
+The app:
+* Stores minimal personal data
+* Uses data only for core functionality
+* Requires certain permissions to function
+
+### Security Recommendations
+* Keep your device secure
+* Avoid rooting/jailbreaking
+* Maintain latest version
+* Use official download sources
+
+---"""
+            )
+
+            // Third Party Services
+            SectionContent(
+                title = "Third-Party Services",
+                content = """
+## External Services
+
+The app utilizes these third-party services:
+
+* [Google Play Services](https://policies.google.com/terms)
+  * Core functionality
+  * Essential updates
+
+* [Firebase Analytics](https://firebase.google.com/terms/analytics)
+  * Usage insights
+  * App improvements
+
+* [Firebase Crashlytics](https://firebase.google.com/terms/crashlytics)
+  * Stability monitoring
+  * Issue identification
+
+Each service has its own terms and privacy policies.
+
+---"""
+            )
+
+            // Limitations
+            SectionContent(
+                title = "Limitations",
+                content = """
+## Service Limitations
+
+Please be aware:
+
+1. **Internet Requirements**
+   * Some features need internet
+   * Data charges may apply
+   * Wi-Fi recommended
+
+2. **Device Compatibility**
+   * Android version requirements
+   * Device-specific limitations
+   * Performance variations
+
+3. **No Liability**
+   * No warranty provided
+   * Use at your own risk
+   * No damage responsibility
+
+---"""
+            )
+
+            // Changes to Terms
+            SectionContent(
+                title = "Terms Updates",
+                content = """
+## Changes to Terms
+
+* Terms may be updated periodically
+* Changes will be posted here
+* Continued use implies acceptance
+* Last updated: 2023-04-14
+
+---"""
+            )
+
+            // Contact Information
+            SectionContent(
+                title = "Contact",
+                content = """
+## Questions or Concerns?
+
+Contact the developer:
+* 📧 Email: info@arshadshah.com
+* 🌐 GitHub: [Project Repository](https://github.com/arshad-shah/nimaz)
+
+Terms generated using [App Privacy Policy Generator](https://app-privacy-policy-generator.nisrulz.com/)
+
+---"""
+            )
+        }
+    }
+}
+
+@Composable
+private fun HelpContent() {
+    ContentSection(
+        title = "Help & Support",
+        icon = R.drawable.help_icon
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Introduction Section
+            SectionContent(
+                title = "Introduction",
+                content = """
+## Getting Started
+
+Nimaz is your companion for accurate prayer times and Islamic guidance. Here's what you need to know:
+
+* Nimaz uses mathematical formulas based on the sun's position to calculate prayer times
+* Location data is used to ensure accuracy within 5 minutes
+* During Ramadan, verify times with your local mosque
+* Full customization options are available for precise adjustments
+
+---"""
+            )
+
+            // Prayer Times Calculation Section
+            SectionContent(
+                title = "Prayer Times Calculation",
+                content = """
+## Calculation Methods
+
+Nimaz offers two primary calculation methods:
+
+1. **Automatic Method**
+   * Uses sun position for calculations
+   * Requires location access
+   * Most accurate for standard locations
+
+2. **Manual Method**
+   * Uses predefined calculation angles
+   * Customizable for local preferences
+   * Perfect for matching mosque timings
+
+---"""
+            )
+
+            // Available Methods Section
+            SectionContent(
+                title = "Available Methods",
+                content = """
+## Standard Methods
+
+Choose from these widely-accepted calculation methods:
+
+* **MWL** - Muslim World League
+* **EGYPTIAN** - Egyptian General Authority of Survey
+* **KARACHI** - University of Islamic Sciences, Karachi
+* **MAKKAH** - Umm al-Qura University, Makkah
+* **ISNA** - Islamic Society of North America
+* **KUWAIT** - Kuwait Standard Method
+* **QATAR** - Qatar Standard Method
+* **SINGAPORE** - Singapore Standard Method
+* **FRANCE** - French Muslims Method
+* **TURKEY** - Turkish Diyanet Method
+* **RUSSIA** - Russian Muslims Method
+* **MOONSIGHTING** - Moonsighting Committee
+* **IRELAND** - Irish Muslims Method
+
+## Custom Method
+The **Other** option allows full customization:
+* Set custom angles for each prayer
+* Adjust individual prayer times
+* Fine-tune for your specific location
+
+---"""
+            )
+
+            // Notifications Section
+            SectionContent(
+                title = "Alarms & Notifications",
+                content = """
+## Prayer Time Alerts
+
+Configure your notifications in Settings:
+
+### Troubleshooting Checklist
+If alerts aren't working, verify:
+* ✓ Silent mode is off
+* ✓ Do Not Disturb is disabled
+* ✓ Airplane mode is off
+* ✓ App notifications are enabled
+
+### Quick Actions
+1. **Reset Alarms**: Reconfigure all prayer notifications
+2. **Test Notification**: Send a test alert
+3. **System Settings**: Adjust system-level permissions
+
+---"""
+            )
+
+            // Quick Guide Section
+            SectionContent(
+                title = "Quick Guide",
+                content = """
+## 5-Minute Setup
+
+1. **Grant Permissions**
+   * Allow location access
+   * Enable notifications
+   
+2. **Choose Method**
+   * Select calculation method
+   * Verify with local mosque
+   
+3. **Configure Alerts**
+   * Set notification style
+   * Choose adhan sound
+   * Adjust volume levels
+
+4. **Fine-tune Settings**
+   * Set time adjustments
+   * Configure Jumuah times
+   * Set Ramadan preferences
+
+---"""
+            )
+
+            // FAQ Section
+            SectionContent(
+                title = "FAQ",
+                content = """
+## Common Questions
+
+**Q: Why do prayer times vary from my mosque?**
+* Local conventions may differ
+* Use manual adjustments to match
+* Contact mosque for official times
+
+**Q: How accurate is the app?**
+* Within 5 minutes typically
+* Accuracy depends on location
+* Verify during daylight savings
+
+**Q: Can I use custom settings?**
+* Yes, use "Other" method
+* Adjust individual prayers
+* Save presets for later
+
+---"""
+            )
+
+            // Support Section
+            SectionContent(
+                title = "Get Help",
+                content = """
+## Need Assistance?
+
+### Contact Us
+* 📧 [info@arshadshah.com](mailto:info@arshadshah.com)
+* 🌐 [Visit Website](https://nimaz.arshadshah.com)
+* 📱 [Rate on Play Store](https://play.google.com/store/apps/details?id=com.arshadshah.nimaz)
+
+### Community
+* Follow updates on [GitHub](https://github.com/arshad-shah/nimaz)
+
+---"""
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionContent(
+    title: String,
+    content: String
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        MarkdownText(
+            markdown = content,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            onLinkClicked = { url ->
+                // Handle link click
+                Log.d("MarkdownText", "Link clicked: $url")
+                val urlIntent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(url)
+                )
+                context.startActivity(urlIntent)
+            }
         )
     }
+}
 
+
+@Composable
+private fun ContentSection(
+    title: String,
+    icon: Int,
+    content: @Composable () -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            // Content Section
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .5f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(modifier = Modifier.padding(16.dp)) {
+                    content()
+                }
+            }
+        }
+    }
 }

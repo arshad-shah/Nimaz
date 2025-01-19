@@ -1,23 +1,21 @@
 package com.arshadshah.nimaz.ui.components.trackers
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -48,58 +46,63 @@ fun DateSelector(
         hijrahDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
     }
 
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        ),
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp)
-    ) {
-        // Decorative top pattern
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .background(MaterialTheme.colorScheme.primary)
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
-
-        Row(
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Previous Day Button
-            DateChangeButton(
-                iconId = R.drawable.angle_left_icon,
-                description = "Previous Day",
-                onClick = { updateDate(date, -1, updateDate) }
-            )
 
-            // Date Display
-            DateDisplay(
-                date = date,
-                formattedDate = formattedDate,
-                formattedHijrahDate = formattedHijrahDate,
-                onClick = {
-                    date.value = LocalDate.now()
-                    updateDate(date, 0, updateDate)
+            // Date Controls
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Previous Day Button
+                    DateChangeButton(
+                        iconId = R.drawable.angle_left_icon,
+                        description = "Previous Day",
+                        onClick = { updateDate(date, -1, updateDate) }
+                    )
+
+                    // Date Display
+                    DateDisplay(
+                        date = date,
+                        formattedDate = formattedDate,
+                        formattedHijrahDate = formattedHijrahDate,
+                        onClick = {
+                            date.value = LocalDate.now()
+                            updateDate(date, 0, updateDate)
+                        }
+                    )
+
+                    // Next Day Button
+                    DateChangeButton(
+                        iconId = R.drawable.angle_right_icon,
+                        description = "Next Day",
+                        onClick = { updateDate(date, 1, updateDate) }
+                    )
                 }
-            )
-
-            // Next Day Button
-            DateChangeButton(
-                iconId = R.drawable.angle_right_icon,
-                description = "Next Day",
-                onClick = { updateDate(date, 1, updateDate) }
-            )
+            }
         }
     }
 }
@@ -108,14 +111,15 @@ fun DateSelector(
 private fun DateChangeButton(iconId: Int, description: String, onClick: () -> Unit) {
     FilledIconButton(
         onClick = onClick,
-        modifier = Modifier.size(40.dp),
+        modifier = Modifier.size(36.dp),
         colors = IconButtonDefaults.filledIconButtonColors(
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
             contentColor = MaterialTheme.colorScheme.primary
-        )
+        ),
+        shape = RoundedCornerShape(8.dp)
     ) {
         Icon(
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(18.dp),
             painter = painterResource(id = iconId),
             contentDescription = description,
         )
@@ -135,12 +139,11 @@ private fun DateDisplay(
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable { onClick() }
-            .padding(vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         if (isToday || showFutureIcon || showPastIcon) {
             TodayIndicator(isToday, showFutureIcon, showPastIcon)
@@ -148,65 +151,65 @@ private fun DateDisplay(
 
         Text(
             text = formattedDate,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
 
         Text(
             text = formattedHijrahDate,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
 }
 
 @Composable
 private fun TodayIndicator(isToday: Boolean, showFutureIcon: Boolean, showPastIcon: Boolean) {
-    Row(
-        modifier = Modifier
-            .background(
-                color = if (isToday)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+    Surface(
+        color = if (isToday)
+            MaterialTheme.colorScheme.primary
+        else
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(6.dp)
     ) {
-        if (showFutureIcon) {
-            Icon(
-                modifier = Modifier.size(14.dp),
-                painter = painterResource(id = R.drawable.angle_small_left_icon),
-                contentDescription = "Previous Day",
-                tint = if (isToday)
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (showFutureIcon) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    painter = painterResource(id = R.drawable.angle_small_left_icon),
+                    contentDescription = "Previous Day",
+                    tint = if (isToday)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Text(
+                text = if (isToday) "Today" else "Return to Today",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isToday)
                     MaterialTheme.colorScheme.onPrimary
                 else
-                    MaterialTheme.colorScheme.primary
+                    MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
-        }
 
-        Text(
-            text = if (isToday) "Today" else "Return to Today",
-            style = MaterialTheme.typography.labelMedium,
-            color = if (isToday)
-                MaterialTheme.colorScheme.onPrimary
-            else
-                MaterialTheme.colorScheme.primary
-        )
-
-        if (showPastIcon) {
-            Icon(
-                modifier = Modifier.size(14.dp),
-                painter = painterResource(id = R.drawable.angle_small_right_icon),
-                contentDescription = "Next Day",
-                tint = if (isToday)
-                    MaterialTheme.colorScheme.onPrimary
-                else
-                    MaterialTheme.colorScheme.primary
-            )
+            if (showPastIcon) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    painter = painterResource(id = R.drawable.angle_small_right_icon),
+                    contentDescription = "Next Day",
+                    tint = if (isToday)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }

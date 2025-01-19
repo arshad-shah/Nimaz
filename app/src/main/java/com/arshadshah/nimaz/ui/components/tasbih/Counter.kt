@@ -9,13 +9,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,18 +20,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -42,14 +35,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction1
 
@@ -302,30 +294,33 @@ private fun ObjectiveDialog(
     onObjectiveSet: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
+    AlertDialogNimaz(
+        title = "Set Target",
+        contentDescription = "Set the target count for the tasbih",
+        contentToShow = {
+            Column {
+                OutlinedTextField(
+                    value = if (currentObjective == 0) "" else currentObjective.toString(),
+                    onValueChange = { value ->
+                        if (value.isNotEmpty()) onObjectiveSet(value.toIntOrNull() ?: 0)
+                        else onObjectiveSet(0)
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    singleLine = true,
+                    label = { Text("Target Count") }
+                )
+            }
+        },
+        contentHeight = 100.dp,
+        cardContent = true,
         onDismissRequest = onDismiss,
-        title = { Text("Set Target") },
-        text = {
-            OutlinedTextField(
-                value = if (currentObjective == 0) "" else currentObjective.toString(),
-                onValueChange = { value ->
-                    if (value.isNotEmpty()) onObjectiveSet(value.toIntOrNull() ?: 0)
-                    else onObjectiveSet(0)
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-                singleLine = true,
-                label = { Text("Target Count") }
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Set") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        }
+        onConfirm = onDismiss,
+        confirmButtonText = "Set",
+        onDismiss = onDismiss,
+        dismissButtonText = "Cancel",
     )
 }
 
@@ -334,16 +329,23 @@ private fun ResetDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Reset Counter") },
-        text = { Text("Are you sure you want to reset the counter?") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) { Text("Reset") }
+    AlertDialogNimaz(
+        title = "Reset Counter",
+        contentDescription = "Are you sure you want to reset the counter?",
+        contentToShow = {
+            Column {
+                Text("Are you sure you want to reset the counter?")
+            }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        }
+        contentHeight = 100.dp,
+        cardContent = true,
+        onDismissRequest = onDismiss,
+        onConfirm = {
+            onConfirm()
+        },
+        confirmButtonText = "Reset",
+        onDismiss = onDismiss,
+        dismissButtonText = "Cancel",
     )
 }
 

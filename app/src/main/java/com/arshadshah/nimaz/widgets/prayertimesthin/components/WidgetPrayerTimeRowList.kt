@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.widgets.prayertimesthin.components
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -43,34 +42,34 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
     data class PrayerInfo(
         val name: String,
         val time: LocalDateTime?,
-        val displayTime: String
+        val displayTime: String,
     )
 
     val prayerTimes = listOf(
         PrayerInfo(
             "Fajr",
             data.fajr,
-            data.fajr?.format(timeFormatter) ?: ""
+            data.fajr?.format(timeFormatter) ?: "",
         ),
         PrayerInfo(
             "Dhuhr",
             data.dhuhr,
-            data.dhuhr?.format(timeFormatter) ?: ""
+            data.dhuhr?.format(timeFormatter) ?: "",
         ),
         PrayerInfo(
             "Asr",
             data.asr,
-            data.asr?.format(timeFormatter) ?: ""
+            data.asr?.format(timeFormatter) ?: "",
         ),
         PrayerInfo(
             "Maghrib",
             data.maghrib,
-            data.maghrib?.format(timeFormatter) ?: ""
+            data.maghrib?.format(timeFormatter) ?: "",
         ),
         PrayerInfo(
             "Isha",
             adjustedIshaTime,
-            adjustedIshaTime?.format(timeFormatter) ?: ""
+            adjustedIshaTime?.format(timeFormatter) ?: "",
         )
     )
 
@@ -78,18 +77,14 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
         val validPrayers = prayers.filter { it.time != null }
         if (validPrayers.isEmpty()) return ""
 
-        // Handle case before first prayer of the day
         if (currentTime.isBefore(validPrayers.first().time)) {
-            // If before Fajr, consider Isha from previous day as active
             return "Isha"
         }
 
-        // Handle case after last prayer of the day
         if (currentTime.isAfter(validPrayers.last().time)) {
             return validPrayers.last().name
         }
 
-        // Find the next prayer time
         for (i in 0 until validPrayers.size - 1) {
             val currentPrayer = validPrayers[i]
             val nextPrayer = validPrayers[i + 1]
@@ -103,20 +98,18 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
             }
         }
 
-        Log.d("WidgetPrayerTimeRowList", "No active prayer found for current time: $currentTime")
         return ""
     }
 
     val activePrayer = determineActivePrayer(currentDateTime, prayerTimes)
-    Log.d("WidgetPrayerTimeRowList", "Active prayer: $activePrayer")
 
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
             .background(GlanceTheme.colors.surface)
-            .padding(4.dp)
-            .cornerRadius(20.dp)
+            .padding(8.dp)
+            .cornerRadius(24.dp)
             .clickable(onClick = actionStartActivity<MainActivity>()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -141,7 +134,7 @@ fun WidgetPrayerTimeColumn(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .padding(horizontal = 2.dp, vertical = 4.dp)
+            .padding(horizontal = 4.dp, vertical = 8.dp)
             .background(
                 if (isActive)
                     GlanceTheme.colors.primaryContainer
@@ -152,8 +145,24 @@ fun WidgetPrayerTimeColumn(
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        // Prayer Name
         Text(
             text = name,
+            style = TextStyle(
+                color = if (isActive)
+                    GlanceTheme.colors.onPrimaryContainer
+                else
+                    GlanceTheme.colors.onSecondaryContainer,
+                fontSize = TextUnit(12F, TextUnitType.Sp),
+                fontWeight = FontWeight.Medium
+            ),
+            modifier = GlanceModifier.padding(top = 4.dp)
+        )
+
+        // Prayer Time
+        Text(
+            text = time,
             style = TextStyle(
                 color = if (isActive)
                     GlanceTheme.colors.onPrimaryContainer
@@ -162,41 +171,19 @@ fun WidgetPrayerTimeColumn(
                 fontSize = TextUnit(14F, TextUnitType.Sp),
                 fontWeight = FontWeight.Bold
             ),
-            modifier = GlanceModifier.padding(top = 8.dp)
+            modifier = GlanceModifier.padding(vertical = 2.dp)
         )
 
-        Text(
-            text = time,
-            style = TextStyle(
-                color = if (isActive)
-                    GlanceTheme.colors.onPrimaryContainer
-                else
-                    GlanceTheme.colors.onSecondaryContainer,
-                fontSize = TextUnit(16F, TextUnitType.Sp),
-                fontWeight = FontWeight.Medium
-            ),
-            modifier = GlanceModifier.padding(vertical = 4.dp)
-        )
-
+        // Active Prayer Indicator
         if (isActive) {
             Box(
                 modifier = GlanceModifier
+                    .padding(top = 4.dp)
                     .size(4.dp)
                     .background(GlanceTheme.colors.primary)
-                    .cornerRadius(2.dp)
-                    .padding(bottom = 4.dp),
-                contentAlignment = Alignment.Center,
-                content = {
-                    Text(
-                        text = "Now",
-                        style = TextStyle(
-                            color = GlanceTheme.colors.onPrimary,
-                            fontSize = TextUnit(10F, TextUnitType.Sp),
-                            fontWeight = FontWeight.Medium
-                        ),
-                    )
-                }
-            )
+                    .cornerRadius(2.dp),
+                contentAlignment = Alignment.Center
+            ) {}
         }
     }
 }

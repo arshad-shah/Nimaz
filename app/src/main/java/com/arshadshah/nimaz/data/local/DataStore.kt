@@ -4,6 +4,8 @@ import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
+import com.arshadshah.nimaz.data.local.models.LocalChapter
+import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
@@ -258,4 +260,62 @@ class DataStore @Inject constructor(
     fun getMenstruatingState(date: LocalDate): Flow<Boolean> {
         return prayerTrackerDao.getMenstruatingState(date)
     }
+
+
+    suspend fun getFavoriteDuas() = duaDao.getFavoriteDuas()
+
+    fun getFavoriteDuasFlow() = duaDao.getFavoriteDuasFlow()
+
+    suspend fun updateDua(dua: LocalDua) = duaDao.updateDua(dua)
+
+    // Search
+    suspend fun searchDuas(query: String) = duaDao.searchDuas(query)
+
+    suspend fun searchDuasAdvanced(
+        query: String = "",
+        chapterId: Int? = null,
+        isFavorite: Int? = null
+    ) = duaDao.searchDuasAdvanced(query, chapterId, isFavorite)
+
+    // Single item retrieval
+    suspend fun getDuaById(duaId: Int) = duaDao.getDuaById(duaId)
+
+    suspend fun getChapterById(chapterId: Int) = duaDao.getChapterById(chapterId)
+
+    // Related content
+    suspend fun getRelatedDuas(chapterId: Int, currentDuaId: Int) =
+        duaDao.getRelatedDuas(chapterId, currentDuaId)
+
+    // Bulk operations
+    suspend fun deleteAllDuas() = duaDao.deleteAllDuas()
+
+    suspend fun deleteAllChapters() = duaDao.deleteAllChapters()
+
+    // Statistics
+    suspend fun countFavoriteDuas() = duaDao.countFavoriteDuas()
+
+    suspend fun countDuasInChapter(chapterId: Int) = duaDao.countDuasInChapter(chapterId)
+
+    // Last accessed
+    suspend fun getLastAccessedDua() = duaDao.getLastAccessedDua()
+
+    // Bulk replace operations
+    suspend fun replaceDuas(duas: List<LocalDua>) = duaDao.replaceDuas(duas)
+
+    suspend fun replaceChapters(chapters: List<LocalChapter>) = duaDao.replaceChapters(chapters)
+
+    // Random duas
+    suspend fun getRandomDua() = duaDao.getRandomDua()
+
+    suspend fun getRandomFavoriteDua() = duaDao.getRandomFavoriteDua()
+
+    // Save operations that were missing from original
+    suspend fun saveDuas(duas: List<LocalDua>) = duaDao.saveDuas(duas)
+
+    suspend fun saveChapters(chapters: List<LocalChapter>) = duaDao.saveChapters(chapters)
+
+    // Count operations that were missing from original
+    suspend fun countChapters() = duaDao.countChapters()
+
+    suspend fun countDuas() = duaDao.countDuas()
 }

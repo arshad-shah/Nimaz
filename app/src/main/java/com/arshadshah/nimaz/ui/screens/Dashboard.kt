@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.ui.screens
 
 import android.app.Activity
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,7 +42,7 @@ import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun Dashboard(
     onNavigateToCalender: () -> Unit,

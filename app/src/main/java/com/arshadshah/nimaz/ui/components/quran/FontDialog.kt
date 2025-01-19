@@ -21,11 +21,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -43,13 +41,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.NumberSelector
@@ -75,98 +71,104 @@ fun FontSizeDialog(
         contentDescription = "Font Settings",
         title = "Font Settings",
         contentToShow = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Arabic Font Size Section
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    // Arabic Font Size Section
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(16.dp)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Text(
-                                text = "Arabic Size",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                        Text(
+                            text = "Arabic Size",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
 
-                            NumberSelector(
-                                value = arabicFontSizeState.value,
-                                onValueChange = { newValue ->
-                                    arabicFontSizeState.value = newValue
-                                    handleQuranEvents(
-                                        QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(newValue)
-                                    )
-                                },
-                                minValue = if (fontStyleState.value == "IndoPak") 32f else 24f,
-                                maxValue = if (fontStyleState.value == "IndoPak") 60f else 46f
-                            )
-                        }
-                    }
-
-                    // Translation Font Size Section
-                    Surface(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Text(
-                                text = "Translation Size",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-
-                            NumberSelector(
-                                value = translationFontSizeState.value,
-                                onValueChange = { newValue ->
-                                    translationFontSizeState.value = newValue
-                                    handleQuranEvents(
-                                        QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(newValue)
-                                    )
-                                },
-                                minValue = 16f,
-                                maxValue = 40f
-                            )
-                        }
-                    }
-
-                    // Font Style Dropdown
-                    Surface(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        LabelWithDropdownMenu(
-                            label = "Arabic Style",
-                            items = items3,
-                            selectedItem = fontStyleState.value,
-                            onItemSelected = { newStyle ->
-                                fontStyleState.value = newStyle
-                                setFontBasedOnFontStyle(
-                                    newStyle,
-                                    arabicFontSizeState,
-                                    translationFontSizeState
+                        NumberSelector(
+                            value = arabicFontSizeState.value,
+                            onValueChange = { newValue ->
+                                arabicFontSizeState.value = newValue
+                                handleQuranEvents(
+                                    QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(newValue)
                                 )
-                                handleQuranEvents(QuranViewModel.QuranMenuEvents.Change_Arabic_Font(newStyle))
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
+                            minValue = if (fontStyleState.value == "IndoPak") 32f else 24f,
+                            maxValue = if (fontStyleState.value == "IndoPak") 60f else 46f
                         )
                     }
                 }
+
+                // Translation Font Size Section
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Translation Size",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+
+                        NumberSelector(
+                            value = translationFontSizeState.value,
+                            onValueChange = { newValue ->
+                                translationFontSizeState.value = newValue
+                                handleQuranEvents(
+                                    QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
+                                        newValue
+                                    )
+                                )
+                            },
+                            minValue = 16f,
+                            maxValue = 40f
+                        )
+                    }
+                }
+
+                // Font Style Dropdown
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    LabelWithDropdownMenu(
+                        label = "Arabic Style",
+                        items = items3,
+                        selectedItem = fontStyleState.value,
+                        onItemSelected = { newStyle ->
+                            fontStyleState.value = newStyle
+                            setFontBasedOnFontStyle(
+                                newStyle,
+                                arabicFontSizeState,
+                                translationFontSizeState
+                            )
+                            handleQuranEvents(
+                                QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
+                                    newStyle
+                                )
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
+            }
         },
         onDismissRequest = { showDialog3(false) },
         onConfirm = { showDialog3(false) },
@@ -373,18 +375,22 @@ fun setFontBasedOnFontStyle(
             arabicFontSizeState.value = 26f
             translationFontSizeState.value = 16f
         }
+
         "Quranme" -> {
             arabicFontSizeState.value = 24f
             translationFontSizeState.value = 16f
         }
+
         "Hidayat" -> {
             arabicFontSizeState.value = 24f
             translationFontSizeState.value = 16f
         }
+
         "Amiri" -> {
             arabicFontSizeState.value = 24f
             translationFontSizeState.value = 16f
         }
+
         "IndoPak" -> {
             arabicFontSizeState.value = 32f
             translationFontSizeState.value = 16f

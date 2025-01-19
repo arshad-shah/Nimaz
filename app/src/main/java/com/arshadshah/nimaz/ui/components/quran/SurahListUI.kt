@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -94,7 +93,7 @@ fun SurahCard(
 
     ElevatedCard(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
             .scale(scale)
             .clickable(
@@ -114,7 +113,7 @@ fun SurahCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header with Surah number and name
@@ -124,7 +123,7 @@ fun SurahCard(
             ) {
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                        .padding(8.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -136,7 +135,7 @@ fun SurahCard(
                         modifier = Modifier.placeholder(
                             visible = loading,
                             highlight = PlaceholderHighlight.shimmer()
-                        )
+                        ).padding(start = 8.dp)
                     )
 
                     QuranItemNumber(
@@ -155,13 +154,13 @@ fun SurahCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Info Container
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).padding(start = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(

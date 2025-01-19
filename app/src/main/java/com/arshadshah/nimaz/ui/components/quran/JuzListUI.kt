@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
@@ -94,7 +94,7 @@ fun JuzListItem(
 
     ElevatedCard(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(8.dp)
             .fillMaxWidth()
             .scale(scale)
             .clickable(
@@ -114,7 +114,7 @@ fun JuzListItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header with Juz number
@@ -124,7 +124,7 @@ fun JuzListItem(
             ) {
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                        .padding(8.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -136,7 +136,7 @@ fun JuzListItem(
                         modifier = Modifier.placeholder(
                             visible = isLoading,
                             highlight = PlaceholderHighlight.shimmer()
-                        )
+                        ).padding(start = 8.dp)
                     )
 
                     QuranItemNumber(
@@ -155,7 +155,7 @@ fun JuzListItem(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -208,4 +208,16 @@ fun JuzListItem(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun JuzListItemPreview() {
+    JuzListItem(
+        juzNumber = 1,
+        isLoading = false,
+        name = "الفاتحة",
+        translatedName = "Al-Fatihah",
+        navigateToAyatScreen = { _, _, _, _ -> }
+    )
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+import com.arshadshah.nimaz.viewModel.ViewModelLogger
 
 @Composable
 fun TasbihRow(
@@ -149,6 +150,10 @@ fun TasbihRow(
                 goal.value,
             )
             if (tasbihCreated.value.id != 0) {
+                ViewModelLogger.d(
+                    "Nimaz: TasbihRow",
+                    "Navigating to tasbih screen with tasbih ${tasbihCreated.value}"
+                )
                 onNavigateToTasbihScreen?.invoke(
                     tasbihCreated.value.id.toString(),
                     tasbihCreated.value.arabicName,

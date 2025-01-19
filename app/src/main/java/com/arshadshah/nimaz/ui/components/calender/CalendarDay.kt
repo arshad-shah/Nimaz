@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.ui.components.calender
 
+
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,20 +12,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,254 +29,295 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import io.github.boguszpawlowski.composecalendar.day.DayState
-import io.github.boguszpawlowski.composecalendar.selection.DynamicSelectionState
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
-import kotlin.reflect.KFunction1
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarDay(
-    dayState: DayState<DynamicSelectionState>,
-    handleEvents: KFunction1<LocalDate, Unit>,
-    progressForMonth: State<List<LocalPrayersTracker>>,
-    fastProgressForMonth: State<List<LocalFastTracker>>,
+    date: LocalDate,
+    isSelected: Boolean,
+    isToday: Boolean,
+    isFromCurrentMonth: Boolean,
+    tracker: LocalPrayersTracker?,
+    isMenstruating: Boolean,
+    isFasting: Boolean,
+    onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Get Hijri date information
-    val hijriDay = HijrahDate.from(dayState.date)
-    val currentDate = dayState.date
-    val today = dayState.isCurrentDay
-    val isSelectedDay = dayState.selectionState.isDateSelected(currentDate)
-    val hasDescription = remember { mutableStateOf(false) }
-
-    // Get Hijri calendar specific data
-    val hijriMonth = hijriDay[ChronoField.MONTH_OF_YEAR]
-    val hijriDayOfMonth = hijriDay[ChronoField.DAY_OF_MONTH]
-
-    // Check for important Islamic day
-    val importantDay = IslamicCalendarHelper.isImportantDay(hijriDayOfMonth, hijriMonth)
-    val importanceLevel = IslamicCalendarHelper.getImportanceLevel(importantDay.second)
-
-    // Get tracking information
-    val todaysTracker = progressForMonth.value.find { it.date == currentDate }
-    val todaysFastTracker = fastProgressForMonth.value.find { it.date == currentDate }
-    val isMenstruatingToday = todaysTracker?.isMenstruating ?: false
-    val isFromCurrentMonth = dayState.isFromCurrentMonth
-
-    // Determine card styling based on state
-    val cardColor = when {
-        !isFromCurrentMonth -> MaterialTheme.colorScheme.surface
-        isSelectedDay -> MaterialTheme.colorScheme.primaryContainer
-        today -> MaterialTheme.colorScheme.secondaryContainer
-        isMenstruatingToday -> Color(0xFFFFE4E8)
-        importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer.copy(
-            alpha = 0.3f
-        )
-
-        else -> MaterialTheme.colorScheme.surface
+    val hijriDate = remember(date) {
+        HijrahDate.from(date)
     }
 
-    val borderColor = when {
-        isSelectedDay && !today && !isMenstruatingToday -> MaterialTheme.colorScheme.primary
-        today && !isMenstruatingToday -> MaterialTheme.colorScheme.secondary
-        isMenstruatingToday -> Color(0xFFE91E63)
-        importanceLevel == ImportanceLevel.HIGH -> IslamicCalendarHelper.getImportantDayColor(
-            importantDay
-        )
-
-        else -> Color.Transparent
+    val hijriDay = remember(hijriDate) {
+        hijriDate[ChronoField.DAY_OF_MONTH]
     }
 
-    val elevation = when {
-        isSelectedDay || today -> 4.dp
-        importanceLevel == ImportanceLevel.HIGH -> 3.dp
-        importanceLevel == ImportanceLevel.MEDIUM -> 2.dp
-        else -> 1.dp
+    val hijriMonth = remember(hijriDate) {
+        hijriDate[ChronoField.MONTH_OF_YEAR]
     }
 
-    Card(
+    val importantDay = remember(hijriDay, hijriMonth) {
+        IslamicCalendarHelper.isImportantDay(hijriDay, hijriMonth)
+    }
+
+    val importanceLevel = remember(importantDay.second) {
+        IslamicCalendarHelper.getImportanceLevel(importantDay.second)
+    }
+
+    val showDialog = remember { mutableStateOf(false) }
+
+    ElevatedCard(
         modifier = modifier
-            .aspectRatio(0.6f)
+            .aspectRatio(0.7f)
+            .clip(RoundedCornerShape(16.dp))
             .padding(2.dp)
-            .border(
-                width = if (isSelectedDay || today || importanceLevel == ImportanceLevel.HIGH) 2.dp else 0.dp,
-                color = borderColor,
-                shape = MaterialTheme.shapes.small
-            )
-            .clip(MaterialTheme.shapes.small)
             .combinedClickable(
                 enabled = isFromCurrentMonth,
-                onClick = {
-                    dayState.selectionState.onDateSelected(dayState.date)
-                    handleEvents(dayState.date)
-                },
+                onClick = { onDateClick(date) },
                 onLongClick = {
                     if (importantDay.first) {
-                        hasDescription.value = !hasDescription.value
+                        showDialog.value = true
                     }
                 }
             ),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = when {
+                !isFromCurrentMonth -> MaterialTheme.colorScheme.surfaceVariant
+                isSelected -> MaterialTheme.colorScheme.primaryContainer
+                isToday -> MaterialTheme.colorScheme.secondaryContainer
+                isMenstruating -> Color(0xFFFFBCC2)
+                importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer
+                else -> MaterialTheme.colorScheme.surface
+            }
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = when {
+                isSelected -> 8.dp
+                isToday -> 4.dp
+                else -> 1.dp
+            }
+        )
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            contentAlignment = Alignment.Center
         ) {
-            // Gregorian Date
-            Text(
-                text = dayState.date.dayOfMonth.toString(),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = if (today || isSelectedDay || importanceLevel == ImportanceLevel.HIGH)
-                        FontWeight.Bold else FontWeight.Normal
-                ),
-                color = when {
-                    isSelectedDay -> MaterialTheme.colorScheme.onPrimaryContainer
-                    today -> MaterialTheme.colorScheme.onSecondaryContainer
-                    else -> MaterialTheme.colorScheme.onSurface
-                }
-            )
-
-            // Hijri Date
-            Text(
-                text = hijriDay.format(DateTimeFormatter.ofPattern("d")),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Prayer Indicators
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                todaysTracker?.let { tracker ->
-                    repeat(5) { index ->
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .padding(1.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    when (index) {
-                                        0 -> if (tracker.fajr) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.outline
-
-                                        1 -> if (tracker.dhuhr) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.outline
-
-                                        2 -> if (tracker.asr) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.outline
-
-                                        3 -> if (tracker.maghrib) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.outline
-
-                                        4 -> if (tracker.isha) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.outline
-
-                                        else -> MaterialTheme.colorScheme.outline
-                                    }
-                                )
-                        )
-                    }
-                }
-            }
-
-            // Fast Indicator
-            if (todaysFastTracker?.isFasting == true) {
-                Card(
-                    shape = RoundedCornerShape(4.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFCDDC39).copy(alpha = 0.8f)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Fasted",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        textAlign = TextAlign.Center,
-                        color = Color.Black
+                if (importantDay.first || isFasting) {
+                    StatusIndicators(
+                        importantDay = importantDay,
+                        isFasting = isFasting
                     )
                 }
-            }
 
-            // Important Day Indicator
-            if (importantDay.first) {
-                Card(
-                    shape = RoundedCornerShape(4.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = IslamicCalendarHelper.getImportantDayColor(importantDay)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = importantDay.second,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                DateDisplay(
+                    date = date,
+                    hijriDate = hijriDate,
+                    isSelected = isSelected,
+                    isToday = isToday
+                )
+
+                if (tracker != null) {
+                    PrayerProgressIndicators(tracker = tracker)
                 }
             }
         }
     }
 
-    // Important Day Description Dialog
-    if (hasDescription.value) {
-        BasicAlertDialog(
-            onDismissRequest = { hasDescription.value = false }
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = importantDay.second,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = IslamicCalendarHelper.getImportantDayDescription(importantDay),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TextButton(
-                        onClick = { hasDescription.value = false },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text("Close")
-                    }
-                }
-            }
+    if (showDialog.value) {
+        ImportantDayDialog(
+            title = importantDay.second,
+            onDismiss = { showDialog.value = false }
+        )
+    }
+}
+
+@Composable
+private fun StatusIndicators(
+    importantDay: Pair<Boolean, String>,
+    isFasting: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        if (importantDay.first) {
+            StatusChip(
+                text = importantDay.second,
+                color = IslamicCalendarHelper.getImportantDayColor(importantDay),
+                modifier = Modifier.weight(1f)
+            )
+        }
+        if (isFasting) {
+            StatusChip(
+                text = "Fasted",
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
 
+@Composable
+private fun DateDisplay(
+    date: LocalDate,
+    hijriDate: HijrahDate,
+    isSelected: Boolean,
+    isToday: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Surface(
+            color = if (isSelected)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.secondaryContainer,
+            shape = CircleShape,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = date.dayOfMonth.toString(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = if (isToday || isSelected)
+                            FontWeight.Bold else FontWeight.Normal
+                    ),
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+
+        Text(
+            text = hijriDate.format(DateTimeFormatter.ofPattern("d")),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun PrayerProgressIndicators(
+    tracker: LocalPrayersTracker,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PrayerDot(completed = tracker.fajr)
+        PrayerDot(completed = tracker.dhuhr)
+        PrayerDot(completed = tracker.asr)
+        PrayerDot(completed = tracker.maghrib)
+        PrayerDot(completed = tracker.isha)
+    }
+}
+
+@Composable
+private fun PrayerDot(completed: Boolean) {
+    Surface(
+        color = if (completed)
+            MaterialTheme.colorScheme.primary
+        else
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(4.dp),
+        modifier = Modifier.size(width = 4.dp, height = 4.dp),
+        tonalElevation = if (completed) 2.dp else 0.dp
+    ) {
+        Spacer(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+private fun ImportantDayDialog(
+    title: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialogNimaz(
+        title = title,
+        onDismissRequest = onDismiss,
+        contentDescription = "Important Day Description",
+        confirmButtonText = "Close",
+        showDismissButton = false,
+        onConfirm = onDismiss,
+        onDismiss = {},
+        contentToShow = {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = IslamicCalendarHelper.getImportantDayDescription(
+                            Pair(true, title)
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun StatusChip(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = color.copy(alpha = 0.2f),
+        shape = RoundedCornerShape(4.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = color.copy(alpha = 0.3f)
+        ),
+        modifier = modifier
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = color.copy(alpha = 0.8f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
 
 enum class ImportanceLevel {
     HIGH, // For days like Eid, Laylatul Qadr
