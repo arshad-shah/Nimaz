@@ -51,7 +51,7 @@ fun RamadanTimesCard(
     if (isRamadan || isFasting) {
         ElevatedCard(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(8.dp)
                 .fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             elevation = CardDefaults.elevatedCardElevation(
@@ -66,7 +66,7 @@ fun RamadanTimesCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Header Section

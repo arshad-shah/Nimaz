@@ -33,7 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.NimazApplication
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
@@ -129,7 +131,7 @@ fun CompactLocationTopBar(
                 tonalElevation = 2.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -167,7 +169,7 @@ fun CompactLocationTopBar(
 @Preview(showBackground = true)
 @Composable
 fun CompactLocationTopBarPreview() {
-    MaterialTheme {
+    NimazTheme  {
         CompactLocationTopBar(
             locationName = "London, United Kingdom",
             isLoading = false

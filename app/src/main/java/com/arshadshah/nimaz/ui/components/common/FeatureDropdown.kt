@@ -19,6 +19,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -63,7 +66,7 @@ fun <T> FeaturesDropDown(
 
     ElevatedCard(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(8.dp)
             .fillMaxWidth()
             .scale(scale),
         shape = shape,
@@ -79,7 +82,7 @@ fun <T> FeaturesDropDown(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Section
@@ -123,16 +126,13 @@ fun <T> FeaturesDropDown(
                         }
 
                         Surface(
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Icon(
-                                painter = painterResource(
-                                    if (isExpanded) R.drawable.arrow_up_icon
-                                    else R.drawable.arrow_down_icon
-                                ),
+                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                 contentDescription = if (isExpanded) "Collapse" else "Expand",
-                                tint = MaterialTheme.colorScheme.secondary,
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
                                 modifier = Modifier
                                     .padding(8.dp)
                                     .size(20.dp)

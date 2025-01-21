@@ -78,7 +78,7 @@ fun RamadanCard(
         ElevatedCard(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp)
                 .scale(scale)
                 .clickable(onClick = onNavigateToCalender),
             shape = RoundedCornerShape(24.dp),
@@ -91,12 +91,12 @@ fun RamadanCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Header Section
                 Surface(
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    color = MaterialTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
@@ -106,10 +106,10 @@ fun RamadanCard(
                             "Ramadan Mubarak"
                         else
                             "Ramadan is Coming",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                        modifier = Modifier.padding(8.dp)
                     )
                 }
 
@@ -129,7 +129,7 @@ fun RamadanCard(
                         // Image Container
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
                             modifier = Modifier.size(100.dp)
                         ) {
                             Image(
@@ -154,7 +154,7 @@ fun RamadanCard(
 
                             // Days Counter
                             Surface(
-                                color = MaterialTheme.colorScheme.tertiary,
+                                color = MaterialTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
@@ -164,7 +164,7 @@ fun RamadanCard(
                                         else -> "In $daysLeft days"
                                     },
                                     style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.onTertiary,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
@@ -172,7 +172,7 @@ fun RamadanCard(
 
                             // Date Display
                             Surface(
-                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                color = MaterialTheme.colorScheme.primaryContainer,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
@@ -180,7 +180,7 @@ fun RamadanCard(
                                         if (isRamadanStarted) ramadanEnd else ramadanStart
                                     ).format(formatter),
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                 )
                             }

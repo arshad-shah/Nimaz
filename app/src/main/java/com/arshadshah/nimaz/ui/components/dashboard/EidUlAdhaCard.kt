@@ -75,7 +75,7 @@ fun EidUlAdhaCard(
     ElevatedCard(
 
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(8.dp)
             .fillMaxWidth()
             .scale(scale)
             .clickable(onClick = onNavigateToCalender),
@@ -92,7 +92,7 @@ fun EidUlAdhaCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header with title
@@ -102,7 +102,7 @@ fun EidUlAdhaCard(
             ) {
                 Text(
                     text = if (isEidStarted) "Eid Mubarak" else "Eid ul Adha is coming",
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                 )

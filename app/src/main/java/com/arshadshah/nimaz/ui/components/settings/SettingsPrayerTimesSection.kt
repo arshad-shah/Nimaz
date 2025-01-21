@@ -127,7 +127,7 @@ fun SettingsPrayerTimesSection(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.angle_right_icon),
+                            painter = painterResource(id = R.drawable.angle_small_right_icon),
                             contentDescription = "Open",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
@@ -244,7 +244,7 @@ private fun QuickActionButton(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.angle_right_icon),
+                        painter = painterResource(id = R.drawable.angle_small_right_icon),
                         contentDescription = "Open",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier

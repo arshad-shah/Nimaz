@@ -108,6 +108,7 @@ private fun QuranCard(content: @Composable () -> Unit) {
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface

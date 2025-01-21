@@ -29,6 +29,8 @@ val provider = GoogleFont.Provider(
 val nunitoFont = GoogleFont("Nunito")
 val robotoFlexFont = GoogleFont("Roboto Flex")
 val jetbrainsMono = GoogleFont("JetBrains Mono")
+val ibmPlexSerifFont = GoogleFont("IBM Plex Serif")
+
 
 // Google Font Families
 val nunitoFamily = FontFamily(
@@ -85,14 +87,51 @@ val monoFontFamily = FontFamily(
     )
 )
 
+val amiriGoogleFont = GoogleFont("Amiri")
+
+// Add this with your other FontFamily declarations
+val amiri = FontFamily(
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = amiriGoogleFont,
+        fontProvider = provider,
+        weight = FontWeight.Normal
+    ),
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = amiriGoogleFont,
+        fontProvider = provider,
+        weight = FontWeight.Bold
+    ),
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = amiriGoogleFont,
+        fontProvider = provider,
+        weight = FontWeight.Medium
+    )
+)
+
 // Existing Special Fonts
 val quranFont = FontFamily(Font(R.font.quran_font))
 val utmaniQuranFont = FontFamily(Font(R.font.uthman))
 val hidayat = FontFamily(Font(R.font.noorehidayat))
-val amiri = FontFamily(Font(R.font.amiri))
 val almajeed = FontFamily(Font(R.font.almajeed))
 val urduFont = FontFamily(Font(R.font.urdu))
-val englishQuranTranslation = FontFamily(Font(R.font.english_translation))
+val englishQuranTranslation = FontFamily(
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = ibmPlexSerifFont,
+        fontProvider = provider,
+        weight = FontWeight.Normal
+    ),
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = ibmPlexSerifFont,
+        fontProvider = provider,
+        weight = FontWeight.Medium
+    ),
+    androidx.compose.ui.text.googlefonts.Font(
+        googleFont = ibmPlexSerifFont,
+        fontProvider = provider,
+        weight = FontWeight.SemiBold
+    )
+)
+
 
 // Material Typography
 val TypographyMain = Typography(
