@@ -4,7 +4,6 @@
     android:description="@string/app_widget_description"
     android:initialKeyguardLayout="@drawable/nimaz_widget"
     android:previewImage="@drawable/nimaz_widget"
-    android:previewLayout="@drawable/nimaz_widget"
     android:resizeMode="horizontal"
     android:minWidth="350dp"
     android:updatePeriodMillis="7200000"

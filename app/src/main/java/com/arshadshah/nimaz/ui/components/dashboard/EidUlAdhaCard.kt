@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import java.time.LocalDate
@@ -73,7 +72,6 @@ fun EidUlAdhaCard(
     )
 
     ElevatedCard(
-
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
@@ -95,20 +93,18 @@ fun EidUlAdhaCard(
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header with title
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
                     text = if (isEidStarted) "Eid Mubarak" else "Eid ul Adha is coming",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                 )
             }
 
-            // Content Section
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(16.dp),
@@ -121,7 +117,6 @@ fun EidUlAdhaCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Image Container
                     Surface(
                         shape = RoundedCornerShape(16.dp),
                         color = MaterialTheme.colorScheme.secondaryContainer,
@@ -136,14 +131,13 @@ fun EidUlAdhaCard(
                         )
                     }
 
-                    // Countdown Section
                     Column(
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
                             text = if (isEidStarted) "Ends in" else "Starts in",
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
@@ -153,9 +147,8 @@ fun EidUlAdhaCard(
                         ) {
                             Text(
                                 text = "${daysLeft.coerceAtLeast(0)} days",
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.onPrimary,
-                                fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
                         }

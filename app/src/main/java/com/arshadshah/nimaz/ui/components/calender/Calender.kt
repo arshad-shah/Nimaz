@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.calendar
+package com.arshadshah.nimaz.ui.components.calender
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,18 +14,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.ui.components.calender.CalendarDay
-import com.arshadshah.nimaz.ui.components.calender.CalendarHeader
-import com.arshadshah.nimaz.ui.components.calender.CalendarWeekHeader
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
-import java.util.Locale
 
 @Composable
 fun Calendar(
@@ -38,9 +33,7 @@ fun Calendar(
     isFastingProvider: (LocalDate) -> Boolean,
     modifier: Modifier = Modifier
 ) {
-    val configuration = LocalConfiguration.current
-    val locale = remember { Locale.getDefault() }
-    val weekFields = remember(locale) { WeekFields.of(locale) }
+    val weekFields = remember { WeekFields.ISO }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -54,7 +47,7 @@ fun Calendar(
         )
 
         // Week days header
-        CalendarWeekHeader(locale = locale)
+        CalendarWeekHeader()
 
         // Days grid
         val days = remember(currentMonth, weekFields) {
@@ -69,7 +62,7 @@ fun Calendar(
             columns = GridCells.Fixed(7),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(max(100.dp, 400.dp)),
+                .height(max(100.dp, 500.dp)),
             contentPadding = PaddingValues(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -90,12 +83,12 @@ fun Calendar(
     }
 }
 
-private data class DayInfo(
+data class DayInfo(
     val date: LocalDate,
     val isFromCurrentMonth: Boolean
 )
 
-private fun generateDaysForMonth(
+fun generateDaysForMonth(
     yearMonth: YearMonth,
     weekFields: WeekFields
 ): List<DayInfo> {

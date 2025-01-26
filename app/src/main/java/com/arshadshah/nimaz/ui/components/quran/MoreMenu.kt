@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.quran
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -57,24 +56,21 @@ fun MoreMenu(
     )
 
     ElevatedCard(
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
-        )
     ) {
         DropdownMenu(
+            shape = MaterialTheme.shapes.medium,
             expanded = menuOpen,
             onDismissRequest = { setMenuOpen(false) }
         ) {
             // Translation Option
             Surface(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier.padding(6.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
                 DropdownMenuItem(
                     onClick = {
@@ -117,8 +113,8 @@ fun MoreMenu(
 
             // Font Option
             Surface(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier.padding(6.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
                 DropdownMenuItem(
                     onClick = {

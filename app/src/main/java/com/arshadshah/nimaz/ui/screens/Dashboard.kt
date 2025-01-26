@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.screens
 
 import android.app.Activity
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -22,9 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
-import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
@@ -38,6 +35,7 @@ import com.arshadshah.nimaz.ui.components.dashboard.RamadanCard
 import com.arshadshah.nimaz.ui.components.dashboard.RamadanTimesCard
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.viewModel.DashboardEvent
 import com.arshadshah.nimaz.viewModel.DashboardViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -53,123 +51,101 @@ fun Dashboard(
     navController: NavHostController,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
-    // Initialize data when the composable is first launched
     LaunchedEffect(Unit) {
         viewModel.initializeData(context)
-        viewModel.handleEvent((DashboardViewModel.DashboardEvent.CheckUpdate(context)))
+        viewModel.handleEvent(DashboardEvent.CheckUpdate(context))
     }
 
-    // Collect all states from ViewModel using collectAsState
-    val dashboardState = with(viewModel) {
-        object {
-            val isFastingToday by isFasting.collectAsState()
-            val updateAvailable by isUpdateAvailable.collectAsState()
-            val location by locationName.collectAsState()
-            val fajrPrayerTime by fajrTime.collectAsState()
-            val maghribPrayerTime by maghribTime.collectAsState()
-            val prayerTracker by trackerState.collectAsState()
-            val isLoadingData by isLoading.collectAsState()
-            val isErrored by isError.collectAsState()
-            val errorMessage by error.collectAsState()
-            val nextPrayerNameValue by nextPrayerName.collectAsState()
-            val nextPrayerTimeValue by nextPrayerTime.collectAsState()
-            val countDownTimer by countDownTime.collectAsState()
-            val randomAya = randomAyaState.collectAsState()
-            val locationDataState by locationState.collectAsState()
-        }
-    }
+    val locationState by viewModel.locationState.collectAsState()
+    val prayerTimesState by viewModel.prayerTimesState.collectAsState()
+    val trackerState by viewModel.trackerState.collectAsState()
+    val updateState by viewModel.updateState.collectAsState()
+    val quranState by viewModel.quranState.collectAsState()
 
-    Log.d(MAIN_ACTIVITY_TAG, "Dashboard: ${dashboardState.locationDataState}")
     val stateScroll = rememberLazyListState()
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                navController
-            )
-        }
-    ) {
+
+    Scaffold(bottomBar = { BottomNavigationBar(navController) }) {
         LazyColumn(
             state = stateScroll,
             modifier = Modifier.testTag(TEST_TAG_HOME),
             contentPadding = it
         ) {
             item {
-                when (dashboardState.locationDataState) {
-                    is LocationStateManager.LocationState.Loading -> {
-                        CompactLocationTopBar(
-                            locationName = "Loading location...",
-                            isLoading = true
-                        )
-                    }
+                // Location Section
+                when (locationState.isLoading) {
+                    true -> CompactLocationTopBar(
+                        locationName = "Loading location...",
+                        isLoading = true
+                    )
 
-                    is LocationStateManager.LocationState.Success -> {
-                        CompactLocationTopBar(
-                            locationName = (dashboardState.locationDataState as LocationStateManager.LocationState.Success).location.locationName,
-                            isLoading = false
-                        )
-                    }
+                    false -> CompactLocationTopBar(
+                        locationName = locationState.locationName.ifEmpty { "Location unavailable" },
+                        isLoading = false
+                    )
+                }
 
-                    is LocationStateManager.LocationState.Error -> {
-                        CompactLocationTopBar(
-                            locationName = "Location unavailable",
-                            isLoading = false
-                        )
-                        LocationRetryButton(
-                            onClick = {
-                                viewModel.handleEvent(DashboardViewModel.DashboardEvent.LoadLocation)
-                            }
-                        )
-                    }
-
-                    LocationStateManager.LocationState.Idle -> {
-                        CompactLocationTopBar(
-                            locationName = dashboardState.location,
-                            isLoading = false
-                        )
+                if (locationState.error != null) {
+                    LocationRetryButton {
+                        viewModel.handleEvent(DashboardEvent.LoadLocation)
                     }
                 }
             }
+
             item {
+                // Prayer Times Card
                 DashboardPrayerTimesCard(
-                    nextPrayerName = dashboardState.nextPrayerNameValue,
-                    countDownTimer = dashboardState.countDownTimer,
-                    nextPrayerTime = dashboardState.nextPrayerTimeValue,
-                    isLoading = dashboardState.isLoadingData,
+                    nextPrayerName = prayerTimesState.nextPrayer,
+                    countDownTimer = prayerTimesState.countDownTime,
+                    nextPrayerTime = prayerTimesState.nextPrayerTime,
+                    isLoading = prayerTimesState.isLoading,
                     timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
                 )
             }
-            item {
-                val isOpen = remember {
-                    mutableStateOf(dashboardState.isErrored)
+
+            // Error Banner
+            if (prayerTimesState.error != null || trackerState.error != null ||
+                locationState.error != null || updateState.error != null ||
+                quranState.error != null
+            ) {
+                item {
+                    val isOpen = remember { mutableStateOf(true) }
+                    BannerLarge(
+                        variant = BannerVariant.Error,
+                        title = "Error",
+                        message = listOfNotNull(
+                            prayerTimesState.error,
+                            trackerState.error,
+                            locationState.error,
+                            updateState.error,
+                            quranState.error
+                        ).first(),
+                        isOpen = isOpen,
+                        showFor = 0,
+                        onDismiss = {
+                            isOpen.value = false
+                            viewModel.clearError()
+                        }
+                    )
                 }
-                BannerLarge(
-                    variant = BannerVariant.Error,
-                    title = "Error",
-                    message = dashboardState.errorMessage,
-                    isOpen = isOpen,
-                    showFor = 0,
-                    onDismiss = {
-                        isOpen.value = false
-                    },
-                )
             }
 
             item {
                 RamadanTimesCard(
-                    isFasting = dashboardState.isFastingToday,
-                    location = dashboardState.location,
-                    fajrTime = dashboardState.fajrPrayerTime,
-                    maghribTime = dashboardState.maghribPrayerTime
+                    isFasting = trackerState.isFasting,
+                    location = locationState.locationName,
+                    fajrTime = trackerState.fajrTime,
+                    maghribTime = trackerState.maghribTime
                 )
             }
 
-            item {
-                if (dashboardState.updateAvailable) {
+            // Update Banner
+            if (updateState.isUpdateAvailable) {
+                item {
                     UpdateBanner(
                         context = context,
                         onUpdateClick = {
                             viewModel.handleEvent(
-                                DashboardViewModel.DashboardEvent.CheckUpdate(context)
+                                DashboardEvent.CheckUpdate(context)
                             )
                         }
                     )
@@ -185,21 +161,16 @@ fun Dashboard(
             item {
                 DashboardPrayerTracker(
                     handleEvents = viewModel::handleEvent,
-                    isLoading = remember { mutableStateOf(dashboardState.isLoadingData) },
-                    dashboardPrayerTracker = dashboardState.prayerTracker
+                    isLoading = remember { mutableStateOf(trackerState.isLoading) },
+                    dashboardPrayerTracker = trackerState
                 )
             }
 
             item {
-                Log.d(
-                    "Nimaz: RandomAyaState",
-                    "Random Aya State: ${dashboardState.randomAya.value}"
-                )
                 DashboardRandomAyatCard(
                     onNavigateToAyatScreen = onNavigateToAyatScreen,
-                    randomAya = dashboardState.randomAya.value,
-                    isLoading = dashboardState.isLoadingData
-//                isLoading = true
+                    randomAya = quranState.randomAyaState,
+                    isLoading = quranState.isLoading
                 )
             }
         }
@@ -243,7 +214,7 @@ private fun UpdateBanner(
 }
 
 @Composable
-fun LocationRetryButton(onClick: () -> Unit) {
+private fun LocationRetryButton(onClick: () -> Unit) {
     TextButton(
         onClick = onClick,
         modifier = Modifier.padding(horizontal = 8.dp)

@@ -26,7 +26,7 @@ val provider = GoogleFont.Provider(
 )
 
 // Google Fonts
-val nunitoFont = GoogleFont("Nunito")
+val nunitoFont = GoogleFont("Nunito Sans")
 val robotoFlexFont = GoogleFont("Roboto Flex")
 val jetbrainsMono = GoogleFont("JetBrains Mono")
 val ibmPlexSerifFont = GoogleFont("IBM Plex Serif")
@@ -34,16 +34,6 @@ val ibmPlexSerifFont = GoogleFont("IBM Plex Serif")
 
 // Google Font Families
 val nunitoFamily = FontFamily(
-    androidx.compose.ui.text.googlefonts.Font(
-        googleFont = nunitoFont,
-        fontProvider = provider,
-        weight = FontWeight.Normal
-    ),
-    androidx.compose.ui.text.googlefonts.Font(
-        googleFont = nunitoFont,
-        fontProvider = provider,
-        weight = FontWeight.Medium
-    ),
     androidx.compose.ui.text.googlefonts.Font(
         googleFont = nunitoFont,
         fontProvider = provider,

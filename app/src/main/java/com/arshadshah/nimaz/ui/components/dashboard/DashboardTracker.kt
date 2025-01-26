@@ -35,15 +35,17 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.viewModel.DashboardViewModel
+import com.arshadshah.nimaz.viewModel.DashboardEvent
+import com.arshadshah.nimaz.viewModel.TrackerState
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.reflect.KFunction1
 
 @Composable
 fun DashboardPrayerTracker(
-    dashboardPrayerTracker: DashboardViewModel.DashboardTrackerState,
-    handleEvents: (DashboardViewModel.DashboardEvent) -> Unit,
+    handleEvents: KFunction1<DashboardEvent, Unit>,
+    dashboardPrayerTracker: TrackerState,
     isLoading: State<Boolean>,
 ) {
     val context = LocalContext.current
@@ -62,7 +64,7 @@ fun DashboardPrayerTracker(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -75,7 +77,6 @@ fun DashboardPrayerTracker(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Compact Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -97,7 +98,7 @@ fun DashboardPrayerTracker(
                         )
                         Text(
                             text = "Daily Prayers",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -109,14 +110,13 @@ fun DashboardPrayerTracker(
                 ) {
                     Text(
                         text = "${prayers.count { it.second }}/5",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             }
 
-            // Compact Prayer Items Grid
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(12.dp),
@@ -136,7 +136,7 @@ fun DashboardPrayerTracker(
                             enabled = !dashboardPrayerTracker.isMenstruating,
                             onStatusChange = { isChecked ->
                                 handleEvents(
-                                    DashboardViewModel.DashboardEvent.UpdatePrayerTracker(
+                                    DashboardEvent.UpdatePrayerTracker(
                                         date = LocalDate.now(),
                                         prayerName = name,
                                         prayerDone = isChecked
@@ -212,7 +212,7 @@ private fun CompactPrayerItem(
 
             Text(
                 text = name,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = if (isCompleted)
                     MaterialTheme.colorScheme.onPrimaryContainer
                 else

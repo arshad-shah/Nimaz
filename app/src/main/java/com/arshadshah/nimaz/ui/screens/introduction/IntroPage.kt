@@ -90,9 +90,9 @@ fun IntroPage(
                                     ),
                                     shape = CircleShape,
                                     color = if (pagerState.currentPage == index)
-                                        MaterialTheme.colorScheme.primary
+                                        MaterialTheme.colorScheme.onPrimaryContainer
                                     else
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
                                 ) {}
                             }
                         }

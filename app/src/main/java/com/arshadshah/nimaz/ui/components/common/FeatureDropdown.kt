@@ -35,12 +35,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.quran.CompactSurahCard
 

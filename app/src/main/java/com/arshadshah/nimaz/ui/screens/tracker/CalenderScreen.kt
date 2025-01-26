@@ -50,8 +50,8 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.ui.components.calendar.Calendar
-import com.arshadshah.nimaz.ui.components.calendar.rememberCalendarState
+import com.arshadshah.nimaz.ui.components.calender.Calendar
+import com.arshadshah.nimaz.ui.components.calender.rememberCalendarState
 import com.arshadshah.nimaz.ui.components.common.BannerDuration
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerVariant

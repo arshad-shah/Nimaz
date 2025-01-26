@@ -3,21 +3,25 @@ package com.arshadshah.nimaz.ui.components.calender
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,13 +34,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
+import java.time.temporal.WeekFields
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -73,11 +82,23 @@ fun CalendarDay(
 
     val showDialog = remember { mutableStateOf(false) }
 
-    ElevatedCard(
+    Surface(
         modifier = modifier
             .aspectRatio(0.7f)
-            .clip(RoundedCornerShape(16.dp))
-            .padding(2.dp)
+            .clip(MaterialTheme.shapes.small)
+            .padding(1.dp)
+            .border(
+                width = 3.dp,
+                color = when {
+                    !isFromCurrentMonth -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                    isSelected -> MaterialTheme.colorScheme.primaryContainer
+                    isToday -> MaterialTheme.colorScheme.secondaryContainer
+                    isMenstruating -> Color(0xFFFFBCC2)
+                    importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer
+                    else -> MaterialTheme.colorScheme.surface
+                },
+                shape = MaterialTheme.shapes.small
+            )
             .combinedClickable(
                 enabled = isFromCurrentMonth,
                 onClick = { onDateClick(date) },
@@ -87,24 +108,15 @@ fun CalendarDay(
                     }
                 }
             ),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = when {
-                !isFromCurrentMonth -> MaterialTheme.colorScheme.surfaceVariant
-                isSelected -> MaterialTheme.colorScheme.primaryContainer
-                isToday -> MaterialTheme.colorScheme.secondaryContainer
-                isMenstruating -> Color(0xFFFFBCC2)
-                importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer
-                else -> MaterialTheme.colorScheme.surface
-            }
-        ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = when {
-                isSelected -> 8.dp
-                isToday -> 4.dp
-                else -> 1.dp
-            }
-        )
+        shape = MaterialTheme.shapes.small,
+        contentColor = when {
+            !isFromCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+            isSelected -> MaterialTheme.colorScheme.onPrimary
+            isToday -> MaterialTheme.colorScheme.onSecondaryContainer
+            isMenstruating -> Color(0xFFFFBCC2)
+            importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.onTertiaryContainer
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        },
     ) {
         Box(
             modifier = Modifier
@@ -217,7 +229,11 @@ private fun DateDisplay(
         Text(
             text = hijriDate.format(DateTimeFormatter.ofPattern("d")),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = when {
+                isSelected -> MaterialTheme.colorScheme.primary
+                isToday -> MaterialTheme.colorScheme.secondary
+                else -> MaterialTheme.colorScheme.onSurface
+            }
         )
     }
 }
@@ -491,4 +507,42 @@ object IslamicCalendarHelper {
         }
     }
 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CalendarDayPreview() {
+    val weekFields = remember { WeekFields.ISO }
+    val days = remember { generateDaysForMonth(YearMonth.now(), weekFields) }
+    NimazTheme {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(7),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(max(100.dp, 500.dp)),
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(days, key = { it.date.toString() }) { dayInfo ->
+                CalendarDay(
+                    date = dayInfo.date,
+                    isSelected = dayInfo.date == LocalDate.now(),
+                    isToday = dayInfo.date == LocalDate.now(),
+                    isFromCurrentMonth = dayInfo.isFromCurrentMonth,
+                    tracker = LocalPrayersTracker(
+                        date = dayInfo.date,
+                        fajr = true,
+                        dhuhr = true,
+                        asr = true,
+                        maghrib = true,
+                        isha = true
+                    ),
+                    isMenstruating = false,
+                    isFasting = true,
+                    onDateClick = {},
+                )
+            }
+        }
+    }
 }

@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.CountDownTime
@@ -71,7 +69,6 @@ fun DashboardPrayerTimesCard(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Header section with prayer name and time
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -93,9 +90,8 @@ fun DashboardPrayerTimesCard(
                         ) {
                             Text(
                                 text = formatPrayerName(nextPrayerName),
-                                style = MaterialTheme.typography.headlineMedium,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.displaySmall,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
 
@@ -105,7 +101,7 @@ fun DashboardPrayerTimesCard(
                         ) {
                             Text(
                                 text = nextPrayerTime.format(timeFormat),
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
@@ -113,7 +109,6 @@ fun DashboardPrayerTimesCard(
                     }
                 }
 
-                // Countdown timer section
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
                     shape = RoundedCornerShape(20.dp),
@@ -126,18 +121,11 @@ fun DashboardPrayerTimesCard(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.fajr_icon),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(24.dp)
-                        )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = getEnhancedTimerText(countDownTimer),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
                 }

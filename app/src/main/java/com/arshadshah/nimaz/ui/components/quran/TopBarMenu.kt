@@ -5,8 +5,11 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -16,7 +19,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +30,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Badge
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,21 +51,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import kotlin.reflect.KFunction2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarMenu(
     number: Int,
     isSurah: Boolean,
-    getAllAyats: KFunction2<Int, String, Unit>
+    getAllAyats: (Int, String) -> Unit
 ) {
     val translationType = PrivateSharedPreferences(LocalContext.current)
         .getData(key = AppConstants.TRANSLATION_LANGUAGE, s = "English")
@@ -111,7 +117,7 @@ fun TopBarMenu(
                     .fillMaxSize()
                     .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = label,
@@ -143,10 +149,7 @@ fun TopBarMenu(
                         label = "Dropdown Arrow"
                     ) { isExpanded ->
                         Icon(
-                            painter = painterResource(
-                                id = if (isExpanded) R.drawable.arrow_up_icon
-                                else R.drawable.arrow_down_icon
-                            ),
+                            imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                             contentDescription = if (isExpanded) "Collapse" else "Expand",
                             modifier = Modifier
                                 .padding(4.dp)
@@ -185,7 +188,6 @@ fun TopBarMenu(
 
                     LazyColumn(
                         state = listState,
-                        contentPadding = PaddingValues(vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         items(list.size) { index ->
@@ -214,48 +216,67 @@ private fun QuranSectionItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val transition = updateTransition(isSelected, label = "selection")
+    val elevation by transition.animateDp { selected ->
+        if (selected) 4.dp else 1.dp
+    }
+    val scale by transition.animateFloat { selected ->
+        if (selected) 1.02f else 1f
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(4.dp)
+            .scale(scale)
             .clickable(onClick = onClick),
         color = if (isSelected)
             MaterialTheme.colorScheme.primaryContainer
         else
             MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(8.dp)
+        shape = MaterialTheme.shapes.medium,
+        shadowElevation = elevation,
+        tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (isSelected)
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                else
-                    MaterialTheme.colorScheme.onSurface
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurface
+                )
+            }
 
-            Surface(
-                color = if (isSelected)
+            Badge(
+                containerColor = if (isSelected)
                     MaterialTheme.colorScheme.primary
                 else
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(6.dp)
+                    MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = if (isSelected)
+                    MaterialTheme.colorScheme.onPrimary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+
             ) {
                 Text(
                     text = number.toString(),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     color = if (isSelected)
                         MaterialTheme.colorScheme.onPrimary
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                 )
             }
         }
@@ -268,3 +289,14 @@ private fun rotateAnimation(
 ): ContentTransform =
     (slideInVertically { height -> height } + fadeIn())
         .togetherWith(slideOutVertically { height -> -height } + fadeOut())
+
+
+@Preview
+@Composable
+fun TopBarMenuPreview() {
+    TopBarMenu(
+        number = 1,
+        isSurah = true,
+        getAllAyats = { _, _ -> }
+    )
+}

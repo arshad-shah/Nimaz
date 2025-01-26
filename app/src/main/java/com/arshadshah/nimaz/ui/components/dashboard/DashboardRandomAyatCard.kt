@@ -42,12 +42,12 @@ import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.viewModel.DashboardViewModel
+import com.arshadshah.nimaz.viewModel.RandomAyaState
 
 @Composable
 fun DashboardRandomAyatCard(
+    randomAya: RandomAyaState?,
     onNavigateToAyatScreen: (String, Boolean, String, Int) -> Unit,
-    randomAya: DashboardViewModel.RandomAyaState?,
     isLoading: Boolean
 ) {
     val context = LocalContext.current
@@ -75,7 +75,6 @@ fun DashboardRandomAyatCard(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Compact Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -98,7 +97,7 @@ fun DashboardRandomAyatCard(
                         )
                         Text(
                             text = "Verse of the Day",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -120,7 +119,6 @@ fun DashboardRandomAyatCard(
                 }
             }
 
-            // Surah Info Surface
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(12.dp),
@@ -136,12 +134,12 @@ fun DashboardRandomAyatCard(
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
                             text = surah?.englishNameTranslation ?: "",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = surah?.englishName ?: "",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     }
@@ -151,7 +149,7 @@ fun DashboardRandomAyatCard(
                     ) {
                         Text(
                             text = "${aya?.ayaNumberInSurah} : ${aya?.suraNumber}",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
@@ -159,7 +157,6 @@ fun DashboardRandomAyatCard(
                 }
             }
 
-            // Arabic Text Surface
             SelectionContainer {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Surface(
@@ -170,8 +167,7 @@ fun DashboardRandomAyatCard(
                         aya?.ayaArabic?.let { arabicText ->
                             Text(
                                 text = arabicText.cleanTextFromBackslash(),
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontSize = 22.sp,
+                                style = MaterialTheme.typography.headlineSmall.copy(
                                     fontFamily = utmaniQuranFont,
                                     lineHeight = 40.sp
                                 ),
@@ -183,7 +179,6 @@ fun DashboardRandomAyatCard(
                 }
             }
 
-            // Translation Surface
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(12.dp),
@@ -194,7 +189,6 @@ fun DashboardRandomAyatCard(
                         Text(
                             text = "${aya?.translationUrdu} ۔",
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 14.sp,
                                 fontFamily = urduFont,
                                 lineHeight = 24.sp
                             ),
@@ -207,7 +201,6 @@ fun DashboardRandomAyatCard(
                         Text(
                             text = englishText,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 14.sp,
                                 fontFamily = englishQuranTranslation,
                                 lineHeight = 20.sp
                             ),
@@ -218,7 +211,6 @@ fun DashboardRandomAyatCard(
                 }
             }
 
-            // Action Button
             Button(
                 onClick = {
                     aya?.let {
@@ -247,7 +239,7 @@ fun DashboardRandomAyatCard(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Read Full Surah",
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
         }

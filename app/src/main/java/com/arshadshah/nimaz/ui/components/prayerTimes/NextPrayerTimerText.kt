@@ -11,13 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun NextPrayerTimerText(
@@ -27,6 +27,7 @@ fun NextPrayerTimerText(
     isLoading: Boolean = false,
     horizontalPosition: Alignment.Horizontal = Alignment.CenterHorizontally
 ) {
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -39,35 +40,31 @@ fun NextPrayerTimerText(
         ) {
             Text(
                 text = prayerNameDisplay,
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.placeholder(
                     visible = isLoading,
                     highlight = PlaceholderHighlight.shimmer()
                 )
             )
 
-            // Next Prayer Time
             Text(
                 text = nextPrayerTimeDisplay,
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
                 modifier = Modifier.placeholder(
                     visible = isLoading,
                     highlight = PlaceholderHighlight.shimmer()
                 )
             )
 
-            // Timer Badge
             Surface(
                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
                 shape = MaterialTheme.shapes.large,
             ) {
                 Text(
                     text = timerText,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -85,7 +82,7 @@ fun NextPrayerTimerText(
 @Preview(showBackground = true)
 @Composable
 fun NextPrayerTimerTextPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column {
             NextPrayerTimerText(
                 prayerNameDisplay = "Asr",

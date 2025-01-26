@@ -21,13 +21,12 @@ import java.util.Locale
 @Composable
 fun CalendarWeekHeader(
     modifier: Modifier = Modifier,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY // Default to Sunday as first day
+    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY
 ) {
-    val daysOfWeek = remember(locale, firstDayOfWeek) {
+    val daysOfWeek = remember(firstDayOfWeek) {
         (0..6).map { i ->
             val day = firstDayOfWeek.plus(i.toLong())
-            day to day.getDisplayName(TextStyle.SHORT, locale)
+            day to day.getDisplayName(TextStyle.SHORT, Locale.getDefault())
         }
     }
 

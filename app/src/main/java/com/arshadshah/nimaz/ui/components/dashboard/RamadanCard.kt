@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import java.time.LocalDate
@@ -81,7 +80,7 @@ fun RamadanCard(
                 .padding(8.dp)
                 .scale(scale)
                 .clickable(onClick = onNavigateToCalender),
-            shape = RoundedCornerShape(24.dp),
+            shape = MaterialTheme.shapes.extraLarge,
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -94,7 +93,6 @@ fun RamadanCard(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header Section
                 Surface(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(16.dp)
@@ -106,14 +104,12 @@ fun RamadanCard(
                             "Ramadan Mubarak"
                         else
                             "Ramadan is Coming",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
 
-                // Content Section
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(16.dp),
@@ -126,7 +122,6 @@ fun RamadanCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Image Container
                         Surface(
                             shape = RoundedCornerShape(16.dp),
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
@@ -141,18 +136,16 @@ fun RamadanCard(
                             )
                         }
 
-                        // Countdown Section
                         Column(
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
                                 text = if (isRamadanStarted) "Estimated end" else "Estimated start",
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
-                            // Days Counter
                             Surface(
                                 color = MaterialTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(12.dp)
@@ -163,14 +156,12 @@ fun RamadanCard(
                                         1L -> "Tomorrow"
                                         else -> "In $daysLeft days"
                                     },
-                                    style = MaterialTheme.typography.headlineMedium,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     color = MaterialTheme.colorScheme.onPrimary,
-                                    fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
                             }
 
-                            // Date Display
                             Surface(
                                 color = MaterialTheme.colorScheme.primaryContainer,
                                 shape = RoundedCornerShape(8.dp)

@@ -29,7 +29,13 @@ class PrayerTrackerRepository @Inject constructor(
         return dataStore.getTrackerForDate(date)
     }
 
-    fun observePrayersForDate(date: LocalDate): Flow<LocalPrayersTracker> {
+    suspend fun observePrayersForDate(date: LocalDate): Flow<LocalPrayersTracker> {
+        if (!dataStore.checkIfTrackerExists(date)) {
+            val tracker = LocalPrayersTracker(date)
+            dataStore.saveTracker(tracker)
+            return dataStore.getPrayersForDate(date)
+                .distinctUntilChanged()
+        }
         return dataStore.getPrayersForDate(date)
             .distinctUntilChanged()
     }

@@ -119,7 +119,8 @@ fun AyatFeatures(
                         }
                     },
                     onNoteClick = {
-                        dialogState.titleOfDialog = if (aya.note.isNotEmpty()) "Edit Note" else "Add Note"
+                        dialogState.titleOfDialog =
+                            if (aya.note.isNotEmpty()) "Edit Note" else "Add Note"
                         showNoteDialog.value = true
                     },
                     onShareClick = {

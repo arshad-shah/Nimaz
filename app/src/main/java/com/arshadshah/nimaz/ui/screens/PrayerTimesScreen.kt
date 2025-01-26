@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,9 +45,6 @@ fun PrayerTimesScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val screenWidth = context.resources.displayMetrics.widthPixels
 
-    Log.d("PrayerTimesScreen", "prayerTimesState: $prayerTimesState")
-    Log.d("PrayerTimesScreen", "isLoading: $isLoading")
-    Log.d("PrayerTimesScreen", "screenWidth: $screenWidth")
     Scaffold(
         bottomBar = {
             BottomNavigationBar(

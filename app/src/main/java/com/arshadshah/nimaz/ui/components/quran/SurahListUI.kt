@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.ui.components.common.QuranItemNumber
@@ -130,12 +129,14 @@ fun SurahCard(
                 ) {
                     Text(
                         text = surah.englishName,
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.placeholder(
-                            visible = loading,
-                            highlight = PlaceholderHighlight.shimmer()
-                        ).padding(start = 8.dp)
+                        modifier = Modifier
+                            .placeholder(
+                                visible = loading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                            .padding(start = 8.dp)
                     )
 
                     QuranItemNumber(
@@ -160,12 +161,14 @@ fun SurahCard(
                 ) {
                     // Info Container
                     Column(
-                        modifier = Modifier.weight(1f).padding(start = 8.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
                             text = surah.englishNameTranslation,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -181,7 +184,7 @@ fun SurahCard(
                         ) {
                             Text(
                                 text = "${surah.numberOfAyahs} Verses",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier
@@ -220,7 +223,7 @@ fun SurahCard(
                         Text(
                             text = surah.name,
                             fontFamily = utmaniQuranFont,
-                            fontSize = 32.sp,
+                            style = MaterialTheme.typography.displaySmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -299,6 +302,8 @@ fun CompactSurahCard(
                     contentAlignment = Alignment.Center
                 ) {
                     QuranItemNumber(
+                        modifier = Modifier.size(48.dp),
+                        style = MaterialTheme.typography.labelSmall,
                         number = surah.number,
                         loading = loading,
                     )
@@ -317,7 +322,7 @@ fun CompactSurahCard(
                 ) {
                     Text(
                         text = surah.englishName,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -354,7 +359,7 @@ fun CompactSurahCard(
                 ) {
                     Text(
                         text = surah.englishNameTranslation,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -400,7 +405,7 @@ fun CompactSurahCard(
                     Text(
                         text = surah.name,
                         fontFamily = utmaniQuranFont,
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.placeholder(
                             visible = loading,

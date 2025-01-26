@@ -23,10 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -67,6 +65,10 @@ import com.arshadshah.nimaz.constants.AppConstants.getAsrJuristic
 import com.arshadshah.nimaz.constants.AppConstants.getHighLatitudes
 import com.arshadshah.nimaz.constants.AppConstants.getMethods
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.BannerDuration
+import com.arshadshah.nimaz.ui.components.common.BannerSmall
+import com.arshadshah.nimaz.ui.components.common.BannerVariant
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
 import com.arshadshah.nimaz.ui.components.common.SettingsSelectionDialog
 import com.arshadshah.nimaz.viewModel.PrayerTimesSettingsViewModel
 
@@ -135,7 +137,7 @@ private fun PrayerParametersSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -145,7 +147,7 @@ private fun PrayerParametersSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
@@ -154,22 +156,13 @@ private fun PrayerParametersSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Prayer Parameters",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
+
+                HeaderWithIcon(
+                    title = "Prayer Parameters",
+                    contentDescription = "Prayer Parameters",
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
 
                 FilledIconButton(
                     onClick = { showInfoDialog.value = true },
@@ -196,7 +189,7 @@ private fun PrayerParametersSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -275,7 +268,7 @@ private fun PrayerAnglesSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -285,7 +278,7 @@ private fun PrayerAnglesSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
@@ -398,13 +391,13 @@ private fun AngleItem(
     Surface(
         onClick = { showDialog.value = true },
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -461,13 +454,13 @@ private fun CalculationMethodItem(
     Surface(
         onClick = { showDialog.value = true },
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -557,7 +550,7 @@ private fun PrayerTimeAdjustmentsSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -567,7 +560,7 @@ private fun PrayerTimeAdjustmentsSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
@@ -658,13 +651,13 @@ private fun PrayerTimeAdjustmentItem(
     Surface(
         onClick = { showDialog.value = true },
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -721,13 +714,13 @@ private fun MadhabItem(
     Surface(
         onClick = { showDialog.value = true },
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -783,13 +776,13 @@ private fun HighLatitudeRuleItem(
     Surface(
         onClick = { showDialog.value = true },
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -887,11 +880,12 @@ fun PrayerTimesCustomizations(
 
             // Show error banner if needed
             if (error.value != null) {
-                ErrorBanner(
-                    error = error.value ?: "",
-                    onDismiss = {
-                        viewModel.handleEvent(PrayerTimesSettingsViewModel.SettingsEvent.ClearError)
-                    }
+                BannerSmall(
+                    variant = BannerVariant.Error,
+                    title = "Error",
+                    message = error.value ?: "",
+                    dismissable = true,
+                    showFor = BannerDuration.FOREVER.value
                 )
             }
 
@@ -965,45 +959,6 @@ fun PrayerTimesCustomizations(
 
             // Add some bottom padding
             Spacer(modifier = Modifier.padding(bottom = 16.dp))
-        }
-    }
-}
-
-@Composable
-private fun ErrorBanner(
-    error: String,
-    onDismiss: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        color = MaterialTheme.colorScheme.errorContainer,
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error
-            )
-            Text(
-                text = error,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = onDismiss) {
-                Icon(
-                    imageVector = Icons.Rounded.Close,
-                    contentDescription = "Dismiss",
-                    tint = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
         }
     }
 }

@@ -25,11 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QURAN_JUZ
 import com.arshadshah.nimaz.data.local.models.LocalJuz
@@ -131,12 +129,14 @@ fun JuzListItem(
                 ) {
                     Text(
                         text = "Juz $juzNumber",
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.placeholder(
-                            visible = isLoading,
-                            highlight = PlaceholderHighlight.shimmer()
-                        ).padding(start = 8.dp)
+                        modifier = Modifier
+                            .placeholder(
+                                visible = isLoading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                            .padding(start = 8.dp)
                     )
 
                     QuranItemNumber(
@@ -170,9 +170,8 @@ fun JuzListItem(
                         ) {
                             Text(
                                 text = translatedName,
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onPrimary,
-                                fontWeight = FontWeight.Bold,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier
@@ -194,7 +193,7 @@ fun JuzListItem(
                         Text(
                             text = name,
                             fontFamily = utmaniQuranFont,
-                            fontSize = 32.sp,
+                            style = MaterialTheme.typography.displaySmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)

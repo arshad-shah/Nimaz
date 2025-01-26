@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
@@ -224,12 +223,8 @@ fun PrayerTimeRow(
                             if (it.isLowerCase()) it.titlecase(Locale.getDefault())
                             else it.toString()
                         },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = contentColor,
-                        fontWeight = if (prayerTime.isHighlighted)
-                            FontWeight.Bold
-                        else
-                            FontWeight.Medium
+                        style = MaterialTheme.typography.titleSmall,
+                        color = contentColor
                     )
 
                     AnimatedVisibility(
@@ -251,9 +246,8 @@ fun PrayerTimeRow(
                         ) {
                             Text(
                                 text = "Ramadan",
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -261,7 +255,6 @@ fun PrayerTimeRow(
                 }
             }
 
-            // Time
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 color = if (prayerTime.isHighlighted)
@@ -278,15 +271,11 @@ fun PrayerTimeRow(
                                 "hh:mm a"
                         )
                     ) ?: "",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = if (prayerTime.isHighlighted)
                         MaterialTheme.colorScheme.onPrimary
                     else
                         contentColor,
-                    fontWeight = if (prayerTime.isHighlighted)
-                        FontWeight.Bold
-                    else
-                        FontWeight.Medium,
                     modifier = Modifier
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                         .placeholder(

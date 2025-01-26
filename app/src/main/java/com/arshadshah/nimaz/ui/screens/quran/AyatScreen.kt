@@ -72,7 +72,13 @@ fun AyatScreen(
                 TopBarMenu(
                     number = number.toInt(),
                     isSurah = isSurah.toBoolean(),
-                    getAllAyats = if (isSurah.toBoolean()) viewModel::getAllAyaForSurah else viewModel::getAllAyaForJuz
+                    getAllAyats = { itemNumber: Int, language: String ->
+                        if (isSurah.toBoolean()) {
+                            viewModel.getAllAyaForSurah(itemNumber, language)
+                        } else {
+                            viewModel.getAllAyaForJuz(itemNumber, language)
+                        }
+                    },
                 )
             },
                 navigationIcon = {

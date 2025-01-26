@@ -21,10 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.ArrowRight
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
@@ -49,49 +53,34 @@ fun SettingsPrayerTimesSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header Section
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.alarm_clock_icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = "Prayer Times",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
+
+            HeaderWithIcon(
+                icon = ImageVector.vectorResource(id = R.drawable.alarm_clock_icon),
+                title = "Prayer Times",
+                contentDescription = "Prayer Times Icon",
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
 
             // Settings Button
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onNavigateToPrayerSettings() }
-                        .padding(16.dp),
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = MaterialTheme.shapes.medium,
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.size(56.dp)
                     ) {
@@ -121,37 +110,27 @@ fun SettingsPrayerTimesSection(
                         )
                     }
 
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.angle_small_right_icon),
-                            contentDescription = "Open",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(6.dp)
-                                .fillMaxSize()
-                        )
-                    }
+                    ArrowRight()
                 }
             }
 
             // Quick Actions
             Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Quick Actions",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                    //quick actions header
+                    HeaderWithIcon(
+                        icon = ImageVector.vectorResource(id = R.drawable.settings_icon),
+                        title = "Quick Actions",
+                        contentDescription = "Quick Actions Icon",
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                     )
 
                     QuickActionButton(
@@ -238,20 +217,7 @@ private fun QuickActionButton(
             }
 
             if (showArrow) {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.angle_small_right_icon),
-                        contentDescription = "Open",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(6.dp)
-                            .fillMaxSize()
-                    )
-                }
+                ArrowRight()
             }
         }
     }

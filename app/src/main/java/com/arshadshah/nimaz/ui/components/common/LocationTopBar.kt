@@ -29,11 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.NimazApplication
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
@@ -56,31 +54,27 @@ fun CompactLocationTopBar(
                     stiffness = Spring.StiffnessLow
                 )
             ),
-        shape = RoundedCornerShape(16.dp),
-        // Increased elevation for better depth perception
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 6.dp,
-        // Using surface container highest for better contrast with content
         color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp), // Increased padding for better spacing
+                .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Location Section
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp), // Increased spacing
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                // Location Icon Container with higher contrast background
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    // Using primary for better contrast
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(40.dp) // Increased size for better visibility
+                    modifier = Modifier.size(40.dp)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -89,7 +83,6 @@ fun CompactLocationTopBar(
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Location",
-                            // Using onPrimary for guaranteed contrast
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -110,22 +103,18 @@ fun CompactLocationTopBar(
                     ) { text ->
                         Text(
                             text = text,
-                            // Using larger text style for better readability
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
+                            // Updated to use titleLarge for main location text
+                            style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            // Using on surface for maximum contrast
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
             }
 
-            // Date Chip with improved contrast
+            // Date Chip
             Surface(
-                // Using secondary container for better distinction
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 shape = RoundedCornerShape(12.dp),
                 tonalElevation = 2.dp
@@ -138,7 +127,6 @@ fun CompactLocationTopBar(
                     Icon(
                         painter = painterResource(id = R.drawable.current_date_icon),
                         contentDescription = "Calendar",
-                        // Using onSecondaryContainer for guaranteed contrast
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.size(16.dp)
                     )
@@ -154,10 +142,8 @@ fun CompactLocationTopBar(
 
                     Text(
                         text = "$currentDate • $hijriDate",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        // Using onSecondaryContainer for guaranteed contrast
+                        // Updated to use labelLarge for date text
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
@@ -169,7 +155,7 @@ fun CompactLocationTopBar(
 @Preview(showBackground = true)
 @Composable
 fun CompactLocationTopBarPreview() {
-    NimazTheme  {
+    NimazTheme {
         CompactLocationTopBar(
             locationName = "London, United Kingdom",
             isLoading = false

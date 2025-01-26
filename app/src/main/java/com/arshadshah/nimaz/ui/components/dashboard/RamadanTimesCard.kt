@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.WbTwilight
+import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
@@ -23,9 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import java.time.LocalDate
@@ -69,7 +74,6 @@ fun RamadanTimesCard(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header Section
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,7 +89,7 @@ fun RamadanTimesCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.current_date_icon),
+                                imageVector = Icons.Rounded.CalendarMonth,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -93,12 +97,11 @@ fun RamadanTimesCard(
                             Text(
                                 text = "Fasting Times Today",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
 
-                    // Share Button
                     FilledIconButton(
                         onClick = {
                             shareRamadanTimes(
@@ -115,14 +118,13 @@ fun RamadanTimesCard(
                         )
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.share_icon),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.share_icon),
                             contentDescription = "Share",
                             modifier = Modifier.size(20.dp)
                         )
                     }
                 }
 
-                // Times Section
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(16.dp),
@@ -139,14 +141,14 @@ fun RamadanTimesCard(
                         FastingTimeRow(
                             title = "Fajr (Imsak)",
                             time = formatter.format(fajrTime),
-                            iconId = R.drawable.fajr_icon,
+                            icon = Icons.Default.NightsStay,
                             color = MaterialTheme.colorScheme.primary
                         )
 
                         FastingTimeRow(
                             title = "Maghrib (Iftar)",
                             time = formatter.format(maghribTime),
-                            iconId = R.drawable.maghrib_icon,
+                            icon = Icons.Default.WbTwilight,
                             color = MaterialTheme.colorScheme.tertiary
                         )
                     }
@@ -160,8 +162,8 @@ fun RamadanTimesCard(
 private fun FastingTimeRow(
     title: String,
     time: String,
-    iconId: Int,
-    color: androidx.compose.ui.graphics.Color
+    icon: ImageVector,
+    color: Color
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -172,7 +174,6 @@ private fun FastingTimeRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon Container
             Surface(
                 shape = RoundedCornerShape(8.dp),
                 color = color.copy(alpha = 0.2f),
@@ -183,7 +184,7 @@ private fun FastingTimeRow(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(iconId),
+                        imageVector = icon,
                         contentDescription = null,
                         tint = color,
                         modifier = Modifier.size(20.dp)
@@ -193,9 +194,8 @@ private fun FastingTimeRow(
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -205,9 +205,8 @@ private fun FastingTimeRow(
         ) {
             Text(
                 text = time,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.bodyMedium,
                 color = color,
-                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }

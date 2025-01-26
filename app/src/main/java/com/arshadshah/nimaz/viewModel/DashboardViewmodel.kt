@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.viewModel
 import android.app.Activity
 import android.content.Context
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
@@ -34,7 +33,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,6 +40,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
+
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -57,80 +56,74 @@ class DashboardViewModel @Inject constructor(
     private val locationStateManager: LocationStateManager,
 ) : ViewModel() {
     private val TAG = "DashboardViewModel"
-
-    // State management using StateFlow
-    private val states = DashboardStates()
-
-    // Public StateFlow exposures
-    val isUpdateAvailable = states.isUpdateAvailable.asStateFlow()
-    val isLoading = states.isLoading.asStateFlow()
-    val isError = states.isError.asStateFlow()
-    val locationName = states.locationName.asStateFlow()
-    val latitude = states.latitude.asStateFlow()
-    val longitude = states.longitude.asStateFlow()
-    val isFasting = states.isFasting.asStateFlow()
-    var fajrTime = states.fajrTime.asStateFlow()
-    var maghribTime = states.maghribTime.asStateFlow()
-    val trackerState = states.trackerState.asStateFlow()
-    val randomAyaState = states.randomAyaState.asStateFlow()
-    val error = states.error.asStateFlow()
-    val nextPrayerName = states.nextPrayerName.asStateFlow()
-    val nextPrayerTime = states.nextPrayerTime.asStateFlow()
-    val countDownTime = states.countDownTime.asStateFlow()
-    val prayerTimes = states.prayerTimes.asStateFlow()
-    val locationState = locationStateManager.locationState
-
     private var countDownTimer: CountDownTimer? = null
-    fun initializeData(context: Activity) {
-        viewModelScope.launch {
-            withContext(Dispatchers.Main) {
-                launch { setAlarms(context) }
-                launch { isFastingToday() }
-                launch { getCurrentAndNextPrayerTimes() }
-                launch { getTodaysPrayerTracker(LocalDate.now()) }
-                launch { getBookmarksOfQuran() }
-                launch { recreateTasbih(LocalDate.now()) }
-                launch { getRandomAya() }
+
+    // Feature States
+    private val _locationState = MutableStateFlow(LocationState())
+    val locationState = _locationState.asStateFlow()
+
+    private val _prayerTimesState = MutableStateFlow(PrayerTimesState())
+    val prayerTimesState = _prayerTimesState.asStateFlow()
+
+    private val _trackerState = MutableStateFlow(TrackerState())
+    val trackerState = _trackerState.asStateFlow()
+
+    private val _updateState = MutableStateFlow(UpdateState())
+    val updateState = _updateState.asStateFlow()
+
+    private val _quranState = MutableStateFlow(QuranState())
+    val quranState = _quranState.asStateFlow()
+
+    private val _tasbihState = MutableStateFlow(TasbihState())
+    val tasbihState = _tasbihState.asStateFlow()
+
+
+    // Location Related Functions
+    private suspend fun loadLocation(isAuto: Boolean) {
+        _locationState.update { it.copy(isLoading = true, error = null) }
+        try {
+            locationService.loadLocation(isAuto)
+                .onSuccess { location ->
+                    _locationState.update { state ->
+                        state.copy(
+                            locationName = location.locationName,
+                            latitude = location.latitude,
+                            longitude = location.longitude,
+                            isLoading = false
+                        )
+                    }
+                    // Update dependent features
+                    updatePrayerTimes(PrayerTimesParamMapper.getParams(context))
+                    updateWidget(context)
+                    loadPrayerTimes()
+                }
+                .onFailure { throwable ->
+                    locationStateManager.updateLocationState(
+                        LocationStateManager.LocationState.Error(
+                            throwable.message ?: "Failed to load location"
+                        )
+                    )
+                    loadFallbackLocation()
+                }
+        } catch (e: Exception) {
+            _locationState.update {
+                it.copy(
+                    isLoading = false,
+                    error = e.message ?: "Unknown error occurred"
+                )
             }
+            loadFallbackLocation()
         }
     }
 
-    fun handleEvent(event: DashboardEvent) {
-        viewModelScope.launch {
-            when (event) {
-                is DashboardEvent.CheckUpdate -> handleCheckUpdate(event)
-                is DashboardEvent.StartUpdate -> handleStartUpdate(event)
-                is DashboardEvent.RegisterUpdateListener -> handleRegisterUpdateListener()
-                is DashboardEvent.UnregisterUpdateListener -> handleUnregisterUpdateListener()
-                is DashboardEvent.LoadLocation -> loadLocation(
-                    sharedPreferences.getDataBoolean(
-                        LOCATION_TYPE,
-                        false
-                    )
-                )
-
-                is DashboardEvent.IsFastingToday -> isFastingToday()
-                is DashboardEvent.UpdatePrayerTracker ->
-                    updatePrayerTrackerForToday(event.date, event.prayerName, event.prayerDone)
-
-                is DashboardEvent.GetTrackerForToday -> getTodaysPrayerTracker(event.date)
-                is DashboardEvent.UpdateFastTracker ->
-                    updateFastingTracker(event.date, event.isFasting)
-
-                is DashboardEvent.GetBookmarksOfQuran -> getBookmarksOfQuran()
-                is DashboardEvent.DeleteBookmarkFromAya ->
-                    deleteBookmarkFromAya(
-                        event.ayaNumber,
-                        event.surahNumber,
-                        event.ayaNumberInSurah
-                    )
-
-                is DashboardEvent.RecreateTasbih -> recreateTasbih(event.date)
-                is DashboardEvent.GetRandomAya -> getRandomAya()
-                is DashboardEvent.StartTimer -> startTimer(event.timeToNextPrayer)
-                is DashboardEvent.GetCurrentAndNextPrayer -> getCurrentAndNextPrayerTimes()
-                is DashboardEvent.CreateAlarms -> setAlarms(event.context)
-            }
+    private suspend fun loadFallbackLocation() {
+        _locationState.update { state ->
+            state.copy(
+                locationName = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
+                latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
+                longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603),
+                isLoading = false
+            )
         }
     }
 
@@ -140,267 +133,148 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun updatePrayerTimes(parameters: Parameters) = viewModelScope.launch {
+    // Prayer Times Related Functions
+    private suspend fun updatePrayerTimes(parameters: Parameters) {
+        _prayerTimesState.update { it.copy(isLoading = true, error = null) }
         try {
-            states.error.value = ""
-
             val response = withContext(Dispatchers.IO) {
                 prayerTimesRepository.updatePrayerTimes(parameters)
             }
 
             response.data?.let { data ->
-                states.prayerTimes.value = PrayerTimesData(
-                    fajr = data.fajr,
-                    sunrise = data.sunrise,
-                    dhuhr = data.dhuhr,
-                    asr = data.asr,
-                    maghrib = data.maghrib,
-                    isha = data.isha
-                )
-
+                _prayerTimesState.update { state ->
+                    state.copy(
+                        prayerTimes = PrayerTimesData(
+                            fajr = data.fajr,
+                            sunrise = data.sunrise,
+                            dhuhr = data.dhuhr,
+                            asr = data.asr,
+                            maghrib = data.maghrib,
+                            isha = data.isha
+                        ),
+                        isLoading = false
+                    )
+                }
             } ?: run {
-                states.error.value = "Failed to update prayer times. Data is null."
+                _prayerTimesState.update {
+                    it.copy(
+                        error = "Failed to update prayer times. Data is null.",
+                        isLoading = false
+                    )
+                }
             }
-        } finally {
+        } catch (e: Exception) {
+            _prayerTimesState.update {
+                it.copy(
+                    error = e.message ?: "Failed to update prayer times",
+                    isLoading = false
+                )
+            }
         }
-    }
-
-
-    private fun PrayerTimesData.areAllTimesAvailable(): Boolean {
-        return fajr != null &&
-                sunrise != null &&
-                dhuhr != null &&
-                asr != null &&
-                maghrib != null &&
-                isha != null
-    }
-
-    private suspend fun setAlarms(context: Context) {
-        safeOperation(
-            operation = {
-                loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
-                loadPrayerTimes()
-                getCurrentAndNextPrayerTimes()
-                val timeToNextPrayerLong =
-                    nextPrayerTime.value.atZone(ZoneId.systemDefault())
-                        ?.toInstant()
-                        ?.toEpochMilli()
-                val currentTime =
-                    LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
-                        .toEpochMilli()
-
-                val difference = timeToNextPrayerLong?.minus(currentTime)
-                if (difference != null) {
-                    startTimer(difference)
-                }
-                val arePrayerTimesAvailable = prayerTimes.value.areAllTimesAvailable()
-                if (arePrayerTimesAvailable) {
-                    if (!sharedPreferences.getDataBoolean(
-                            AppConstants.ALARM_LOCK,
-                            false
-                        )
-                    ) {
-
-                        createAlarms.exact(
-                            context,
-                            prayerTimes.value.fajr!!,
-                            prayerTimes.value.sunrise!!,
-                            prayerTimes.value.dhuhr!!,
-                            prayerTimes.value.asr!!,
-                            prayerTimes.value.maghrib!!,
-                            prayerTimes.value.isha!!,
-                        )
-                        sharedPreferences.saveDataBoolean(
-                            AppConstants.ALARM_LOCK,
-                            true
-                        )
-                    }
-                }
-            },
-            errorMessage = "An error occurred when creating alarms"
-        )
     }
 
     private suspend fun loadPrayerTimes() = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                val prayerTimes = prayerTimesService.getPrayerTimes()
-                if (prayerTimes != null) {
-                    states.prayerTimes.value = prayerTimes
-                }
-            },
-            errorMessage = "Error fetching prayer times"
-        )
-    }
-
-    private fun handleCheckUpdate(event: DashboardEvent.CheckUpdate) {
-        updateService.checkForUpdate(event.updateType) { result ->
-            result.onSuccess { isUpdateAvailable ->
-                states.isUpdateAvailable.value = isUpdateAvailable
-
-                // If update is available and it's an immediate update, start the flow
-                if (isUpdateAvailable && event.updateType == AppUpdateType.IMMEDIATE) {
-                    handleEvent(
-                        DashboardEvent.StartUpdate(
-                            activity = event.activity,
-                            updateType = event.updateType
-                        )
+        _prayerTimesState.update { it.copy(isLoading = true, error = null) }
+        try {
+            val prayerTimes = prayerTimesService.getPrayerTimes()
+            if (prayerTimes != null) {
+                _prayerTimesState.update { state ->
+                    state.copy(
+                        prayerTimes = prayerTimes,
+                        isLoading = false
                     )
                 }
-            }.onFailure { error ->
-                states.isUpdateAvailable.value = false
-                states.error.value = error.message ?: "Update check failed"
+            }
+        } catch (e: Exception) {
+            _prayerTimesState.update {
+                it.copy(
+                    error = "Error fetching prayer times: ${e.message}",
+                    isLoading = false
+                )
             }
         }
-    }
-
-    private suspend fun handleStartUpdate(event: DashboardEvent.StartUpdate) {
-        updateService.startUpdateFlow(
-            activity = event.activity,
-            requestCode = event.requestCode,
-            updateType = event.updateType
-        ) { result ->
-            result.onFailure { error ->
-                states.isUpdateAvailable.value = false
-                states.error.value = error.message ?: "Update start failed"
-            }
-        }
-    }
-
-    private fun handleRegisterUpdateListener() {
-        updateService.registerInstallStateListener { statusCode ->
-            when (statusCode.toString()) {
-                InstallStatus.PENDING.toString() -> {
-                    states.isLoading.value = true
-                    states.isUpdateAvailable.value = true
-                    states.isError.value = false
-                }
-
-                InstallStatus.DOWNLOADING.toString() -> {
-                    states.isUpdateAvailable.value = true
-                    states.isError.value = false
-                    states.isLoading.value = true
-                }
-
-                InstallStatus.DOWNLOADED.toString() -> {
-                    states.isUpdateAvailable.value = false
-                    states.isError.value = false
-                    states.isLoading.value = false
-                }
-
-                InstallStatus.INSTALLING.toString() -> {
-                    states.isLoading.value = true
-                    states.isError.value = false
-                    states.isUpdateAvailable.value = false
-                    states.error.value = ""
-                }
-
-                InstallStatus.INSTALLED.toString() -> {
-                    states.isUpdateAvailable.value = false
-                    states.isError.value = false
-                    states.isLoading.value = false
-                }
-
-                InstallStatus.FAILED.toString() -> {
-                    states.isUpdateAvailable.value = false
-                    states.isError.value = true
-                    states.isLoading.value = false
-                    states.error.value = "Update installation failed"
-                }
-
-                InstallStatus.CANCELED.toString() -> {
-                    states.isUpdateAvailable.value = false
-                    states.isError.value = false
-                    states.isLoading.value = false
-                    states.error.value = ""
-                }
-
-                else -> {
-                    states.isError.value = true
-                    states.isLoading.value = false
-                    states.error.value = "Unknown update status"
-                    states.isUpdateAvailable.value = false
-                    states.error.value = "Unknown update status"
-                }
-            }
-        }
-    }
-
-    private fun handleUnregisterUpdateListener() {
-        updateService.unregisterInstallStateListener()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        handleUnregisterUpdateListener()
-    }
-
-    private suspend fun getBookmarksOfQuran() = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                val bookmarks = dataStore.getBookmarkedAyas()
-                val surahList = bookmarks.map { dataStore.getSurahById(it.suraNumber) }
-                states.surahList.value = surahList
-                states.bookmarks.value = bookmarks
-            },
-            errorMessage = "Error fetching bookmarks"
-        )
-    }
-
-    private suspend fun deleteBookmarkFromAya(
-        ayaNumber: Int,
-        surahNumber: Int,
-        ayaNumberInSurah: Int
-    ) = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                dataStore.deleteBookmarkFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
-                states.bookmarks.value = dataStore.getBookmarkedAyas()
-            },
-            errorMessage = "Error deleting bookmark"
-        )
-    }
-
-    private suspend fun isFastingToday() = withContext(Dispatchers.IO) {
-        dataStore.isFastingForDate(LocalDate.now())
-            .catch { states.isFasting.value = false }
-            .collect { isFasting ->
-                states.isFasting.value = isFasting
-                if (isFasting) fajrAndMaghribTimes()
-            }
-    }
-
-    private suspend fun fajrAndMaghribTimes() = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                val prayerTimes = prayerTimesService.getPrayerTimes()
-                states.fajrTime.value = prayerTimes?.fajr
-                states.maghribTime.value = prayerTimes?.maghrib
-            },
-            errorMessage = "Error fetching prayer times"
-        )
     }
 
     private suspend fun getCurrentAndNextPrayerTimes() = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                val prayerTimes = prayerTimesService.getPrayerTimes()
-                if (prayerTimes != null) {
-                    val currentAndNextPrayer = prayerTimes.let {
-                        prayerTimesService.getCurrentAndNextPrayer(
-                            it
-                        )
-                    }
-                    states.currentPrayerName.value = currentAndNextPrayer.currentPrayer
-                    states.currentPrayerTime.value = currentAndNextPrayer.currentPrayerTime
-                    states.nextPrayerName.value = currentAndNextPrayer.nextPrayer
-                    states.nextPrayerTime.value = currentAndNextPrayer.nextPrayerTime
+        _prayerTimesState.update { it.copy(isLoading = true, error = null) }
+        try {
+            val prayerTimes = prayerTimesService.getPrayerTimes()
+            if (prayerTimes != null) {
+                val currentAndNextPrayer = prayerTimes.let {
+                    prayerTimesService.getCurrentAndNextPrayer(it)
                 }
-            },
-            errorMessage = "Error fetching prayer times"
-        )
+                _prayerTimesState.update { state ->
+                    state.copy(
+                        currentPrayer = currentAndNextPrayer.currentPrayer,
+                        currentPrayerTime = currentAndNextPrayer.currentPrayerTime,
+                        nextPrayer = currentAndNextPrayer.nextPrayer,
+                        nextPrayerTime = currentAndNextPrayer.nextPrayerTime,
+                        isLoading = false
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            _prayerTimesState.update {
+                it.copy(
+                    error = "Error fetching current/next prayer times: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
     }
 
+    //function to clear error message for all states
+    fun clearError() {
+        _locationState.update { it.copy(error = null) }
+        _prayerTimesState.update { it.copy(error = null) }
+        _trackerState.update { it.copy(error = null) }
+        _updateState.update { it.copy(error = null) }
+        _quranState.update { it.copy(error = null) }
+        _tasbihState.update { it.copy(error = null) }
+    }
+
+    private suspend fun setAlarms(context: Context) {
+        _prayerTimesState.update { it.copy(isLoading = true, error = null) }
+        try {
+            loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
+            loadPrayerTimes()
+            getCurrentAndNextPrayerTimes()
+
+            val timeToNextPrayerLong = prayerTimesState.value.nextPrayerTime
+                .atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+            val currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault())
+                .toInstant().toEpochMilli()
+
+            timeToNextPrayerLong?.minus(currentTime)?.let { difference ->
+                startTimer(difference)
+            }
+
+            if (prayerTimesState.value.prayerTimes.areAllTimesAvailable() &&
+                !sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
+            ) {
+                with(prayerTimesState.value.prayerTimes) {
+                    createAlarms.exact(
+                        context,
+                        fajr!!,
+                        sunrise!!,
+                        dhuhr!!,
+                        asr!!,
+                        maghrib!!,
+                        isha!!,
+                    )
+                }
+                sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
+            }
+            _prayerTimesState.update { it.copy(isLoading = false) }
+        } catch (e: Exception) {
+            _prayerTimesState.update {
+                it.copy(
+                    error = "Error setting alarms: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
+    }
 
     private fun startTimer(timeToNextPrayer: Long) {
         countDownTimer?.cancel()
@@ -418,13 +292,14 @@ class DashboardViewModel @Inject constructor(
                 diff %= minutesInMilli
 
                 val elapsedSeconds = diff / secondsInMilli
-                diff %= secondsInMilli
 
-                states.countDownTime.update {
-                    it.copy(
-                        hours = elapsedHours,
-                        minutes = elapsedMinutes,
-                        seconds = elapsedSeconds
+                _prayerTimesState.update { state ->
+                    state.copy(
+                        countDownTime = CountDownTime(
+                            hours = elapsedHours,
+                            minutes = elapsedMinutes,
+                            seconds = elapsedSeconds
+                        )
                     )
                 }
             }
@@ -435,313 +310,616 @@ class DashboardViewModel @Inject constructor(
         }.start()
     }
 
+    private fun PrayerTimesData.areAllTimesAvailable(): Boolean {
+        return fajr != null && sunrise != null && dhuhr != null &&
+                asr != null && maghrib != null && isha != null
+    }
+
+    // Tracker Related Functions
+    private suspend fun isFastingToday() = withContext(Dispatchers.IO) {
+        _trackerState.update { it.copy(isLoading = true, error = null) }
+        try {
+            dataStore.isFastingForDate(LocalDate.now())
+                .collect { isFasting ->
+                    _trackerState.update { state ->
+                        state.copy(
+                            isFasting = isFasting,
+                            isLoading = false
+                        )
+                    }
+                    if (isFasting) fajrAndMaghribTimes()
+                }
+        } catch (e: Exception) {
+            _trackerState.update {
+                it.copy(
+                    isFasting = false,
+                    error = "Error checking fasting status: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    private suspend fun fajrAndMaghribTimes() = withContext(Dispatchers.IO) {
+        _trackerState.update { it.copy(isLoading = true, error = null) }
+        try {
+            val prayerTimes = prayerTimesService.getPrayerTimes()
+            _trackerState.update { state ->
+                state.copy(
+                    fajrTime = prayerTimes?.fajr ?: LocalDateTime.now(),
+                    maghribTime = prayerTimes?.maghrib ?: LocalDateTime.now(),
+                    isLoading = false
+                )
+            }
+        } catch (e: Exception) {
+            _trackerState.update {
+                it.copy(
+                    error = "Error fetching prayer times: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
+    }
+
     private suspend fun updatePrayerTrackerForToday(
         date: LocalDate,
         prayerName: String,
         prayerDone: Boolean
     ) = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                prayerTrackerRepository.updateSpecificPrayer(date, prayerName, prayerDone)
-                prayerTrackerRepository.observePrayersForDate(date)
-                    .collect { tracker ->
-                        states.trackerState.update {
-                            it.copy(
-                                date = tracker.date,
-                                fajr = tracker.fajr,
-                                dhuhr = tracker.dhuhr,
-                                asr = tracker.asr,
-                                maghrib = tracker.maghrib,
-                                isha = tracker.isha,
-                                progress = tracker.progress,
-                                isMenstruating = tracker.isMenstruating
-                            )
-                        }
+        _trackerState.update { it.copy(isLoading = true, error = null) }
+        try {
+            prayerTrackerRepository.updateSpecificPrayer(date, prayerName, prayerDone)
+            prayerTrackerRepository.observePrayersForDate(date)
+                .collect { tracker ->
+                    _trackerState.update { state ->
+                        state.copy(
+                            date = tracker.date,
+                            fajr = tracker.fajr,
+                            dhuhr = tracker.dhuhr,
+                            asr = tracker.asr,
+                            maghrib = tracker.maghrib,
+                            isha = tracker.isha,
+                            progress = tracker.progress,
+                            isMenstruating = tracker.isMenstruating,
+                            isLoading = false
+                        )
                     }
-            },
-            errorMessage = "Error updating prayer tracker"
-        )
+                }
+        } catch (e: Exception) {
+            _trackerState.update {
+                it.copy(
+                    error = "Error updating prayer tracker: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
     }
 
-    // Update existing getTodaysPrayerTracker to use new repository
     private suspend fun getTodaysPrayerTracker(date: LocalDate) = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                prayerTrackerRepository.observePrayersForDate(date)
-                    .collect { tracker ->
-                        states.trackerState.update {
-                            it.copy(
-                                date = tracker.date,
-                                fajr = tracker.fajr,
-                                dhuhr = tracker.dhuhr,
-                                asr = tracker.asr,
-                                maghrib = tracker.maghrib,
-                                isha = tracker.isha,
-                                progress = tracker.progress,
-                                isMenstruating = tracker.isMenstruating
-                            )
-                        }
+        _trackerState.update { it.copy(isLoading = true, error = null) }
+        try {
+            prayerTrackerRepository.observePrayersForDate(date)
+                .collect { tracker ->
+                    _trackerState.update { state ->
+                        state.copy(
+                            date = tracker.date,
+                            fajr = tracker.fajr,
+                            dhuhr = tracker.dhuhr,
+                            asr = tracker.asr,
+                            maghrib = tracker.maghrib,
+                            isha = tracker.isha,
+                            progress = tracker.progress,
+                            isMenstruating = tracker.isMenstruating,
+                            isLoading = false
+                        )
                     }
-            },
-            errorMessage = "Error getting prayer tracker"
-        )
+                }
+        } catch (e: Exception) {
+            _trackerState.update {
+                it.copy(
+                    error = "Error getting prayer tracker: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
     }
 
     private suspend fun updateFastingTracker(
         date: LocalDate,
         isFasting: Boolean
     ) = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                dataStore.updateFastTracker(LocalFastTracker(date = date, isFasting = isFasting))
-                isFastingToday()
-            },
-            errorMessage = "Error updating fasting tracker"
-        )
-    }
-
-    private suspend fun loadLocation(isAuto: Boolean) {
+        _trackerState.update { it.copy(isLoading = true, error = null) }
         try {
-            states.isLoading.value = true
-
-            locationService.loadLocation(isAuto)
-                .onSuccess { location ->
-                    states.locationName.value = location.locationName
-                    states.latitude.value = location.latitude
-                    states.longitude.value = location.longitude
-                    updatePrayerTimes(PrayerTimesParamMapper.getParams(context = context))
-                    updateWidget(context)
-                    loadPrayerTimes()
-                }
-                .onFailure { throwable ->
-                    locationStateManager.updateLocationState(
-                        LocationStateManager.LocationState.Error(
-                            throwable.message ?: "Failed to load location"
-                        )
-                    )
-                    loadFallbackLocation()
-                }
+            dataStore.updateFastTracker(LocalFastTracker(date = date, isFasting = isFasting))
+            isFastingToday()
+            _trackerState.update { it.copy(isLoading = false) }
         } catch (e: Exception) {
-            states.error.value = e.message ?: "Unknown error occurred"
-            loadFallbackLocation()
-        } finally {
-            states.isLoading.value = false
+            _trackerState.update {
+                it.copy(
+                    error = "Error updating fasting tracker: ${e.message}",
+                    isLoading = false
+                )
+            }
         }
     }
 
-    private suspend fun loadFallbackLocation() {
-        states.locationName.value = sharedPreferences.getData(AppConstants.LOCATION_INPUT, "")
-        states.latitude.value = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498)
-        states.longitude.value = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+    // Update Related Functions
+    private fun handleCheckUpdate(event: DashboardEvent.CheckUpdate) {
+        _updateState.update { it.copy(isLoading = true, error = null) }
+        updateService.checkForUpdate(event.updateType) { result ->
+            result.onSuccess { isUpdateAvailable ->
+                _updateState.update { state ->
+                    state.copy(
+                        isUpdateAvailable = isUpdateAvailable,
+                        isLoading = false
+                    )
+                }
+                if (isUpdateAvailable && event.updateType == AppUpdateType.IMMEDIATE) {
+                    handleEvent(
+                        DashboardEvent.StartUpdate(
+                            activity = event.activity,
+                            updateType = event.updateType
+                        )
+                    )
+                }
+            }.onFailure { error ->
+                //if error code is -6 then do not show error message
+                if (error.message?.contains("-6") == false) {
+                    _updateState.update { state ->
+                        state.copy(
+                            isUpdateAvailable = false,
+                            error = error.message ?: "Update check failed",
+                            isLoading = false
+                        )
+                    }
+                }
+            }
+        }
     }
 
-    private suspend fun recreateTasbih(date: LocalDate) = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                val tasbihList = dataStore.getAllTasbih()
-                val yesterdayTasbihList = tasbihList.filter { it.date == date.minusDays(1) }
-                val todayTasbihList = tasbihList.filter { it.date == date }
+    private suspend fun handleStartUpdate(event: DashboardEvent.StartUpdate) {
+        _updateState.update { it.copy(isLoading = true, error = null) }
+        updateService.startUpdateFlow(
+            activity = event.activity,
+            requestCode = event.requestCode,
+            updateType = event.updateType
+        ) { result ->
+            result.onFailure { error ->
+                _updateState.update { state ->
+                    state.copy(
+                        isUpdateAvailable = false,
+                        error = error.message ?: "Update start failed",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
 
-                yesterdayTasbihList.forEach { yesterdayTasbih ->
-                    val exists = todayTasbihList.any {
-                        it.arabicName == yesterdayTasbih.arabicName ||
-                                it.goal == yesterdayTasbih.goal
-                    }
-
-                    if (!exists) {
-                        dataStore.saveTasbih(
-                            yesterdayTasbih.copy(
-                                id = 0,
-                                count = 0,
-                                date = date
-                            )
+    private fun handleRegisterUpdateListener() {
+        updateService.registerInstallStateListener { statusCode ->
+            when (statusCode.toString()) {
+                InstallStatus.PENDING.toString() -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = true,
+                            isUpdateAvailable = true,
+                            error = null
                         )
                     }
                 }
 
-                getTasbihList(date)
-            },
-            errorMessage = "Error recreating tasbih"
-        )
+                InstallStatus.DOWNLOADING.toString() -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = true,
+                            isUpdateAvailable = true,
+                            error = null
+                        )
+                    }
+                }
+
+                InstallStatus.DOWNLOADED.toString() -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isUpdateAvailable = false,
+                            error = null
+                        )
+                    }
+                }
+
+                InstallStatus.INSTALLING.toString() -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = true,
+                            isUpdateAvailable = false,
+                            error = null
+                        )
+                    }
+                }
+
+                InstallStatus.INSTALLED.toString() -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isUpdateAvailable = false,
+                            error = null
+                        )
+                    }
+                }
+
+                InstallStatus.FAILED.toString() -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isUpdateAvailable = false,
+                            error = "Update installation failed"
+                        )
+                    }
+                }
+
+                InstallStatus.CANCELED.toString() -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isUpdateAvailable = false,
+                            error = null
+                        )
+                    }
+                }
+
+                else -> {
+                    _updateState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isUpdateAvailable = false,
+                            error = "Unknown update status"
+                        )
+                    }
+                }
+            }
+        }
     }
 
-    private fun getTasbihList(date: LocalDate) {
-        states.tasbihList.value = dataStore.getTasbihForDate(date)
+    private fun handleUnregisterUpdateListener() {
+        updateService.unregisterInstallStateListener()
+    }
+
+    // Quran Related Functions
+    private suspend fun getBookmarksOfQuran() = withContext(Dispatchers.IO) {
+        _quranState.update { it.copy(isLoading = true, error = null) }
+        try {
+            val bookmarks = dataStore.getBookmarkedAyas()
+            val surahList = bookmarks.map { dataStore.getSurahById(it.suraNumber) }
+            _quranState.update { state ->
+                state.copy(
+                    bookmarks = bookmarks,
+                    surahList = surahList,
+                    isLoading = false
+                )
+            }
+        } catch (e: Exception) {
+            _quranState.update {
+                it.copy(
+                    error = "Error fetching bookmarks: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
+    }
+
+    private suspend fun deleteBookmarkFromAya(
+        ayaNumber: Int,
+        surahNumber: Int,
+        ayaNumberInSurah: Int
+    ) = withContext(Dispatchers.IO) {
+        _quranState.update { it.copy(isLoading = true, error = null) }
+        try {
+            dataStore.deleteBookmarkFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
+            val bookmarks = dataStore.getBookmarkedAyas()
+            _quranState.update { state ->
+                state.copy(
+                    bookmarks = bookmarks,
+                    isLoading = false
+                )
+            }
+        } catch (e: Exception) {
+            _quranState.update {
+                it.copy(
+                    error = "Error deleting bookmark: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
     }
 
     private suspend fun getRandomAya() = withContext(Dispatchers.IO) {
-        safeOperation(
-            operation = {
-                val totalAyas = dataStore.countAllAyat()
-                if (totalAyas > 0) {
-                    val lastFetchedAyaNumber =
-                        sharedPreferences.getDataInt(AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED)
-                    val timeOfDay = LocalDateTime.now().hour
+        _quranState.update { it.copy(isLoading = true, error = null) }
+        try {
+            val totalAyas = dataStore.countAllAyat()
+            if (totalAyas > 0) {
+                val lastFetchedAyaNumber = sharedPreferences.getDataInt(
+                    AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED
+                )
+                val timeOfDay = LocalDateTime.now().hour
 
-                    // Get random verse based on criteria
-                    val randomAya = when (// Dawn/Morning (5-11): Prefer verses from Juz 1-10
-                        timeOfDay) {
-                        in 5..11 -> dataStore.getRandomAya().let { aya ->
-                            if (aya.juzNumber > 10) getAlternativeAya(1..10) else aya
-                        }
-
-                        // Noon/Afternoon (12-17): Prefer verses from Juz 11-20
-                        in 12..17 -> dataStore.getRandomAya().let { aya ->
-                            if (aya.juzNumber < 11 || aya.juzNumber > 20) getAlternativeAya(11..20) else aya
-                        }
-
-                        // Evening/Night (18-4): Prefer verses from Juz 21-30
-                        else -> dataStore.getRandomAya().let { aya ->
-                            if (aya.juzNumber < 21) getAlternativeAya(21..30) else aya
-                        }
+                val randomAya = when (timeOfDay) {
+                    in 5..11 -> dataStore.getRandomAya().let { aya ->
+                        if (aya.juzNumber > 10) getAlternativeAya(1..10) else aya
                     }
 
-                    // Skip verses that were recently shown
-                    val finalAya = if (randomAya.ayaNumberInQuran == lastFetchedAyaNumber) {
-                        dataStore.getRandomAya()
-                    } else randomAya
+                    in 12..17 -> dataStore.getRandomAya().let { aya ->
+                        if (aya.juzNumber < 11 || aya.juzNumber > 20)
+                            getAlternativeAya(11..20) else aya
+                    }
 
-                    val surah = dataStore.getSurahById(finalAya.suraNumber)
-                    val juz = dataStore.getJuzById(finalAya.juzNumber)
+                    else -> dataStore.getRandomAya().let { aya ->
+                        if (aya.juzNumber < 21) getAlternativeAya(21..30) else aya
+                    }
+                }
 
-                    Log.d(TAG, "getRandomAya: $finalAya")
+                val finalAya = if (randomAya.ayaNumberInQuran == lastFetchedAyaNumber) {
+                    dataStore.getRandomAya()
+                } else randomAya
 
-                    // Prepare verse data
-                    states.randomAyaState.value = RandomAyaState(
-                        randomAya = finalAya,
-                        surah = surah,
-                        juz = juz,
-                    )
+                val surah = dataStore.getSurahById(finalAya.suraNumber)
+                val juz = dataStore.getJuzById(finalAya.juzNumber)
 
-                    // Save for future reference
-                    sharedPreferences.saveDataInt(
-                        AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED,
-                        finalAya.ayaNumberInQuran
+                _quranState.update { state ->
+                    state.copy(
+                        randomAyaState = RandomAyaState(
+                            randomAya = finalAya,
+                            surah = surah,
+                            juz = juz
+                        ),
+                        isLoading = false
                     )
                 }
-            },
-            errorMessage = "Error fetching random aya"
-        )
+
+                sharedPreferences.saveDataInt(
+                    AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED,
+                    finalAya.ayaNumberInQuran
+                )
+            }
+        } catch (e: Exception) {
+            _quranState.update {
+                it.copy(
+                    error = "Error fetching random aya: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
     }
 
     private suspend fun getAlternativeAya(juzRange: IntRange): LocalAya {
         var attempts = 0
         var aya: LocalAya
-
         do {
             aya = dataStore.getRandomAya()
             attempts++
         } while (aya.juzNumber !in juzRange && attempts < 3)
-
         return aya
     }
 
-    private suspend fun safeOperation(
-        operation: suspend () -> Unit,
-        errorMessage: String
-    ) {
+    // Tasbih Related Functions
+    private suspend fun recreateTasbih(date: LocalDate) = withContext(Dispatchers.IO) {
+        _tasbihState.update { it.copy(isLoading = true, error = null) }
         try {
-            states.isError.value = false
-            states.isLoading.value = true
-            operation()
-            states.isLoading.value = false
+            val tasbihList = dataStore.getAllTasbih()
+            val yesterdayTasbihList = tasbihList.filter { it.date == date.minusDays(1) }
+            val todayTasbihList = tasbihList.filter { it.date == date }
+
+            yesterdayTasbihList.forEach { yesterdayTasbih ->
+                val exists = todayTasbihList.any {
+                    it.arabicName == yesterdayTasbih.arabicName ||
+                            it.goal == yesterdayTasbih.goal
+                }
+
+                if (!exists) {
+                    dataStore.saveTasbih(
+                        yesterdayTasbih.copy(
+                            id = 0,
+                            count = 0,
+                            date = date
+                        )
+                    )
+                }
+            }
+
+            getTasbihList(date)
+            _tasbihState.update { it.copy(isLoading = false) }
         } catch (e: Exception) {
-            Log.e(TAG, "$errorMessage: ${e.message}")
-            states.isError.value = true
-            states.error.value = errorMessage
-            states.isLoading.value = false
+            _tasbihState.update {
+                it.copy(
+                    error = "Error recreating tasbih: ${e.message}",
+                    isLoading = false
+                )
+            }
         }
     }
 
-    // Helper class to manage all StateFlow instances
-    private inner class DashboardStates {
-        val isUpdateAvailable = MutableStateFlow(false)
-        val isLoading = MutableStateFlow(false)
-        val isError = MutableStateFlow(false)
-        val error = MutableStateFlow("")
-        val locationName =
-            MutableStateFlow(sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""))
-        val latitude = MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LATITUDE, 0.0))
-        val longitude =
-            MutableStateFlow(sharedPreferences.getDataDouble(AppConstants.LONGITUDE, 0.0))
-        val isFasting = MutableStateFlow(false)
-        val fajrTime = MutableStateFlow(LocalDateTime.now())
-        val maghribTime = MutableStateFlow(LocalDateTime.now())
-        val currentPrayerName = MutableStateFlow("Loading...")
-        val currentPrayerTime = MutableStateFlow(LocalDateTime.now())
-        val nextPrayerName = MutableStateFlow("Loading...")
-        val nextPrayerTime = MutableStateFlow(LocalDateTime.now())
-        val tasbihList = MutableStateFlow(listOf<LocalTasbih>())
-        val trackerState = MutableStateFlow(
-            DashboardTrackerState(
-                LocalDate.now(), false, false, false,
-                false, false, 0, false
+    private fun getTasbihList(date: LocalDate) {
+        _tasbihState.update { state ->
+            state.copy(
+                tasbihList = dataStore.getTasbihForDate(date),
+                isLoading = false
             )
-        )
-        val bookmarks = MutableStateFlow(listOf<LocalAya>())
-        val surahList = MutableStateFlow(listOf<LocalSurah>())
-        val randomAyaState = MutableStateFlow<RandomAyaState?>(null)
-        val countDownTime: MutableStateFlow<CountDownTime> =
-            MutableStateFlow(CountDownTime(0, 0, 0))
-        val prayerTimes: MutableStateFlow<PrayerTimesData> = MutableStateFlow(PrayerTimesData())
+        }
     }
 
-    data class DashboardTrackerState(
-        val date: LocalDate,
-        val fajr: Boolean,
-        val dhuhr: Boolean,
-        val asr: Boolean,
-        val maghrib: Boolean,
-        val isha: Boolean,
-        val progress: Int,
-        val isMenstruating: Boolean
-    )
+    // Event Handler and Initialization
+    fun handleEvent(event: DashboardEvent) {
+        viewModelScope.launch {
+            when (event) {
+                is DashboardEvent.LoadLocation ->
+                    loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
 
-    data class RandomAyaState(
-        val randomAya: LocalAya,
-        val surah: LocalSurah,
-        val juz: LocalJuz
-    )
+                is DashboardEvent.GetCurrentAndNextPrayer -> getCurrentAndNextPrayerTimes()
+                is DashboardEvent.StartTimer -> startTimer(event.timeToNextPrayer)
+                is DashboardEvent.CreateAlarms -> setAlarms(event.context)
 
-    sealed class DashboardEvent {
-        data object LoadLocation : DashboardEvent()
-        data object IsFastingToday : DashboardEvent()
-        data class UpdatePrayerTracker(
-            val date: LocalDate,
-            val prayerName: String,
-            val prayerDone: Boolean
-        ) : DashboardEvent()
+                is DashboardEvent.IsFastingToday -> isFastingToday()
+                is DashboardEvent.UpdatePrayerTracker ->
+                    updatePrayerTrackerForToday(event.date, event.prayerName, event.prayerDone)
 
-        data class GetTrackerForToday(val date: LocalDate) : DashboardEvent()
-        data class UpdateFastTracker(
-            val date: LocalDate,
-            val isFasting: Boolean
-        ) : DashboardEvent()
+                is DashboardEvent.GetTrackerForToday -> getTodaysPrayerTracker(event.date)
+                is DashboardEvent.UpdateFastTracker ->
+                    updateFastingTracker(event.date, event.isFasting)
 
-        data object GetBookmarksOfQuran : DashboardEvent()
-        data class DeleteBookmarkFromAya(
-            val ayaNumber: Int,
-            val surahNumber: Int,
-            val ayaNumberInSurah: Int,
-        ) : DashboardEvent()
+                is DashboardEvent.CheckUpdate -> handleCheckUpdate(event)
+                is DashboardEvent.StartUpdate -> handleStartUpdate(event)
+                is DashboardEvent.RegisterUpdateListener -> handleRegisterUpdateListener()
+                is DashboardEvent.UnregisterUpdateListener -> handleUnregisterUpdateListener()
 
-        data class RecreateTasbih(val date: LocalDate) : DashboardEvent()
-        data object GetRandomAya : DashboardEvent()
-        data class StartTimer(val timeToNextPrayer: Long) : DashboardEvent()
-        data object GetCurrentAndNextPrayer : DashboardEvent()
-        data class CreateAlarms(val context: Context) : DashboardEvent()
-        data class CheckUpdate(
-            val activity: Activity,
-            val updateType: Int = AppUpdateType.IMMEDIATE
-        ) : DashboardEvent()
+                is DashboardEvent.GetBookmarksOfQuran -> getBookmarksOfQuran()
+                is DashboardEvent.DeleteBookmarkFromAya ->
+                    deleteBookmarkFromAya(
+                        event.ayaNumber,
+                        event.surahNumber,
+                        event.ayaNumberInSurah
+                    )
 
-        data class StartUpdate(
-            val activity: Activity,
-            val requestCode: Int = AppConstants.APP_UPDATE_REQUEST_CODE,
-            val updateType: Int = AppUpdateType.IMMEDIATE
-        ) : DashboardEvent()
+                is DashboardEvent.GetRandomAya -> getRandomAya()
 
-        data object RegisterUpdateListener : DashboardEvent()
-        data object UnregisterUpdateListener : DashboardEvent()
+                is DashboardEvent.RecreateTasbih -> recreateTasbih(event.date)
+            }
+        }
     }
+
+    fun initializeData(context: Activity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.Main) {
+                launch { setAlarms(context) }
+                launch { isFastingToday() }
+                launch { getCurrentAndNextPrayerTimes() }
+                launch { getTodaysPrayerTracker(LocalDate.now()) }
+                launch { getBookmarksOfQuran() }
+                launch { recreateTasbih(LocalDate.now()) }
+                launch { getRandomAya() }
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        handleUnregisterUpdateListener()
+    }
+
 }
+
+sealed class DashboardEvent {
+    // Location Events
+    data object LoadLocation : DashboardEvent()
+
+    // Prayer Times Events
+    data object GetCurrentAndNextPrayer : DashboardEvent()
+    data class StartTimer(val timeToNextPrayer: Long) : DashboardEvent()
+    data class CreateAlarms(val context: Context) : DashboardEvent()
+
+    // Tracker Events
+    data object IsFastingToday : DashboardEvent()
+    data class UpdatePrayerTracker(
+        val date: LocalDate,
+        val prayerName: String,
+        val prayerDone: Boolean
+    ) : DashboardEvent()
+
+    data class GetTrackerForToday(val date: LocalDate) : DashboardEvent()
+    data class UpdateFastTracker(val date: LocalDate, val isFasting: Boolean) : DashboardEvent()
+
+    // Update Events
+    data class CheckUpdate(
+        val activity: Activity,
+        val updateType: Int = AppUpdateType.IMMEDIATE
+    ) : DashboardEvent()
+
+    data class StartUpdate(
+        val activity: Activity,
+        val requestCode: Int = AppConstants.APP_UPDATE_REQUEST_CODE,
+        val updateType: Int = AppUpdateType.IMMEDIATE
+    ) : DashboardEvent()
+
+    data object RegisterUpdateListener : DashboardEvent()
+    data object UnregisterUpdateListener : DashboardEvent()
+
+    // Quran Events
+    data object GetBookmarksOfQuran : DashboardEvent()
+    data class DeleteBookmarkFromAya(
+        val ayaNumber: Int,
+        val surahNumber: Int,
+        val ayaNumberInSurah: Int,
+    ) : DashboardEvent()
+
+    data object GetRandomAya : DashboardEvent()
+
+    // Tasbih Events
+    data class RecreateTasbih(val date: LocalDate) : DashboardEvent()
+}
+
+data class LocationState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val locationName: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0
+)
+
+data class PrayerTimesState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val currentPrayer: String = "",
+    val nextPrayer: String = "",
+    val currentPrayerTime: LocalDateTime = LocalDateTime.now(),
+    val nextPrayerTime: LocalDateTime = LocalDateTime.now(),
+    val countDownTime: CountDownTime = CountDownTime(0, 0, 0),
+    val prayerTimes: PrayerTimesData = PrayerTimesData()
+)
+
+data class TrackerState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val date: LocalDate = LocalDate.now(),
+    val fajr: Boolean = false,
+    val dhuhr: Boolean = false,
+    val asr: Boolean = false,
+    val maghrib: Boolean = false,
+    val isha: Boolean = false,
+    val progress: Int = 0,
+    val isMenstruating: Boolean = false,
+    val isFasting: Boolean = false,
+    val fajrTime: LocalDateTime = LocalDateTime.now(),
+    val maghribTime: LocalDateTime = LocalDateTime.now()
+)
+
+data class UpdateState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isUpdateAvailable: Boolean = false
+)
+
+data class QuranState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val bookmarks: List<LocalAya> = emptyList(),
+    val surahList: List<LocalSurah> = emptyList(),
+    val randomAyaState: RandomAyaState? = null
+)
+
+data class TasbihState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val tasbihList: List<LocalTasbih> = emptyList()
+)
+
+data class CountDownTime(
+    val hours: Long,
+    val minutes: Long,
+    val seconds: Long
+)
+
+data class RandomAyaState(
+    val randomAya: LocalAya,
+    val surah: LocalSurah,
+    val juz: LocalJuz
+)

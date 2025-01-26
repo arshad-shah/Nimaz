@@ -4,27 +4,28 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.filled.Colorize
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,12 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 data class ThemeOption(
     val themeName: String,
@@ -61,15 +64,16 @@ fun CompactThemeSelector(
 
     Column(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(12.dp),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Choose your theme",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 4.dp)
+
+        HeaderWithIcon(
+            title = "Choose your theme",
+            icon = Icons.Default.Colorize,
+            contentDescription = "Theme selection section",
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
         )
 
         FlowRow(
@@ -103,72 +107,88 @@ private fun CompactThemeCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.animateContentSize(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
+        modifier = modifier
+            .border(
+                width = 2.dp,
+                color = if (themeOption.isSelected)
+                    themeOption.themeColor.copy(alpha = 0.5f)
+                else Color.Transparent,
+                shape = MaterialTheme.shapes.small
             )
-        ),
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            ),
         colors = CardDefaults.cardColors(
             containerColor = if (themeOption.isSelected)
-                MaterialTheme.colorScheme.secondaryContainer
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
             else MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.small,
         onClick = onCardClick
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Theme Preview Circle
-                Box(
+                Surface(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(themeOption.themeColor)
+                        .size(48.dp)
                         .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            width = 2.dp,
+                            color = themeOption.themeColor.copy(alpha = 0.1f),
                             shape = CircleShape
                         ),
-                    contentAlignment = Alignment.Center
+                    shape = CircleShape,
+                    color = themeOption.themeColor
                 ) {
                     themeOption.icon?.let { iconRes ->
                         Icon(
                             painter = painterResource(id = iconRes),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.surface,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .fillMaxSize()
                         )
                     }
                 }
 
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = themeOption.themeName,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        if (themeOption.isSelected) {
-                            Icon(
-                                imageVector = Icons.Rounded.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
+                    Text(
+                        text = themeOption.themeName,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = if (themeOption.isSelected)
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+
+                    if (!isExpanded) {
+                        Surface(
+                            color = if (themeOption.isSelected)
+                                MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = if (themeOption.isSelected) "Active" else "Tap to expand",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (themeOption.isSelected)
+                                    MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
                     }
@@ -176,29 +196,46 @@ private fun CompactThemeCard(
             }
 
             if (isExpanded) {
-                Text(
-                    text = themeOption.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = themeOption.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
 
-                themeOption.supportingText?.let { supportingText ->
-                    Text(
-                        text = supportingText,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        themeOption.supportingText?.let { supportingText ->
+                            Text(
+                                text = supportingText,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
                 }
 
-                FilledTonalButton(
+                Button(
                     onClick = onSelectClick,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !themeOption.isSelected,
-                    contentPadding = PaddingValues(8.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    contentPadding = PaddingValues(vertical = 16.dp)
                 ) {
                     Text(
-                        text = if (themeOption.isSelected) "Current" else "Select",
-                        style = MaterialTheme.typography.labelMedium
+                        text = if (themeOption.isSelected) "Current Theme" else "Select Theme",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        )
                     )
                 }
             }
@@ -209,7 +246,7 @@ private fun CompactThemeCard(
 @Preview(showBackground = true)
 @Composable
 fun CompactThemeSelectorPreview() {
-    MaterialTheme {
+    NimazTheme {
         CompactThemeSelector(
             themeOptions = listOf(
                 ThemeOption(
