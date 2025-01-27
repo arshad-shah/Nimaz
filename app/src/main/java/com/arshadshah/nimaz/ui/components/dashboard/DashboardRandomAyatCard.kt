@@ -27,9 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
 import com.arshadshah.nimaz.ui.components.quran.cleanTextFromBackslash
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
 import com.arshadshah.nimaz.ui.theme.urduFont
@@ -62,7 +65,7 @@ fun DashboardRandomAyatCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -72,7 +75,7 @@ fun DashboardRandomAyatCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
@@ -80,28 +83,14 @@ fun DashboardRandomAyatCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.quran_icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Text(
-                            text = "Verse of the Day",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
+
+                HeaderWithIcon(
+                    title = "Verse of the Day",
+                    icon = ImageVector.vectorResource(id = R.drawable.quran_icon),
+                    contentDescription = "Quran Icon",
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
 
                 FilledIconButton(
                     onClick = { shareAya(context, translationLanguage, aya) },
@@ -199,7 +188,7 @@ fun DashboardRandomAyatCard(
 
                     "English" -> aya?.translationEnglish?.let { englishText ->
                         Text(
-                            text = englishText,
+                            text = englishText.cleanTextFromBackslash(),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontFamily = englishQuranTranslation,
                                 lineHeight = 20.sp
@@ -224,8 +213,8 @@ fun DashboardRandomAyatCard(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                shape = MaterialTheme.shapes.medium,
+                contentPadding = PaddingValues(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary

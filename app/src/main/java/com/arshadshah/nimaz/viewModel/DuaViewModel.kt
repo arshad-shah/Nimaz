@@ -148,8 +148,8 @@ class DuaViewModel @Inject constructor(
     }
 
     // Get chapter by ID
-    fun getChapterById(chapterId: Int): LocalChapter? {
-        return _chapters.value.find { it._id == chapterId }
+    suspend fun getChapterById(chapterId: Int): LocalChapter? {
+        return duaRepository.getChapterById(chapterId).data
     }
 
     // Get category by ID

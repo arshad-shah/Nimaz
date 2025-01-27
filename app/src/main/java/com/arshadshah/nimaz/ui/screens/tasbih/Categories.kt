@@ -112,20 +112,24 @@ fun Categories(
             navController = navController,
             paddingValues = paddingValues,
             onDuaClick = { dua ->
-                //get category name
-                val chapter = viewModel.getChapterById(dua.chapter_id)
-                val category = viewModel.getCategoryById(chapter?.category_id ?: 0)
-                navController.navigate(
-                    CHAPTER_SCREEN_ROUTE
-                        .replace(
-                            "{chapterId}",
-                            dua.chapter_id.toString()
-                        )
-                        .replace(
-                            "{categoryName}",
-                            category?.name ?: "Uncategorized"
-                        )
-                )
+                scope.launch {
+                    // Handle suspending functions in a coroutine
+                    val chapter = viewModel.getChapterById(dua.chapter_id)
+                    val category = viewModel.getCategoryById(chapter?.category_id ?: 0)
+
+                    // Navigate after getting the data
+                    navController.navigate(
+                        CHAPTER_SCREEN_ROUTE
+                            .replace(
+                                "{chapterId}",
+                                dua.chapter_id.toString()
+                            )
+                            .replace(
+                                "{categoryName}",
+                                category?.name ?: "Uncategorized"
+                            )
+                    )
+                }
             },
             onNavigateToChapterListScreen = onNavigateToChapterListScreen
         )

@@ -140,7 +140,7 @@ fun MoreScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag(AppConstants.TEST_TAG_MORE),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(6.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 features.forEach { group ->
@@ -174,7 +174,7 @@ private fun FeatureGroupCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -184,7 +184,7 @@ private fun FeatureGroupCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Section

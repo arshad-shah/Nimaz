@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,10 +16,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +38,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,7 +46,10 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
-import com.arshadshah.nimaz.ui.components.common.CustomTabs
+import com.arshadshah.nimaz.ui.components.common.CustomTabsWithPager
+import com.arshadshah.nimaz.ui.components.common.NoResultFound
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
+import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 import com.arshadshah.nimaz.viewModel.ViewState
@@ -100,7 +100,7 @@ fun BookShelf(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(paddingValues)
         ) {
-            CustomTabs(pagerState, titles)
+            CustomTabsWithPager(pagerState, titles)
 
             HorizontalPager(
                 pageSize = PageSize.Fill,
@@ -138,10 +138,10 @@ private fun BooksTabContent(
     onNavigateToChaptersList: (id: Int, title: String) -> Unit
 ) {
     when (booksState) {
-        is ViewState.Loading -> LoadingState()
+        is ViewState.Loading -> PageLoading()
         is ViewState.Success -> {
             if (booksState.data.isEmpty()) {
-                EmptyState(
+                NoResultFound(
                     title = "No Books Found",
                     subtitle = "The book collection appears to be empty"
                 )
@@ -153,7 +153,7 @@ private fun BooksTabContent(
             }
         }
 
-        is ViewState.Error -> ErrorState(message = booksState.message)
+        is ViewState.Error -> PageErrorState(message = booksState.message)
     }
 }
 
@@ -165,9 +165,8 @@ private fun BookCard(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
             .clickable { onClick(metadata.id, metadata.title_english) },
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -176,24 +175,25 @@ private fun BookCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Title Section
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(16.dp)
+                shape = MaterialTheme.shapes.medium
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
+                        modifier = Modifier.padding(4.dp),
                         text = metadata.title_english,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Surface(
@@ -201,7 +201,7 @@ private fun BookCard(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "${metadata.length}",
+                            text = "${metadata.id}",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -213,12 +213,12 @@ private fun BookCard(
             // Content Section
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(16.dp)
+                shape = MaterialTheme.shapes.medium
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -228,13 +228,17 @@ private fun BookCard(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Start,
                             text = metadata.author_english,
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Surface(
                             color = MaterialTheme.colorScheme.tertiaryContainer,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = MaterialTheme.shapes.medium
                         ) {
                             Text(
                                 text = "${metadata.length} Ahadith",
@@ -247,7 +251,7 @@ private fun BookCard(
 
                     // Arabic Title
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = MaterialTheme.shapes.medium,
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.padding(start = 16.dp)
                     ) {
@@ -259,7 +263,7 @@ private fun BookCard(
                                     fontWeight = FontWeight.SemiBold
                                 ),
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                                modifier = Modifier.padding(8.dp)
                             )
                         }
                     }
@@ -269,6 +273,24 @@ private fun BookCard(
     }
 }
 
+@Preview(device = "id:small_phone", showBackground = true, name = "Book card small phone")
+@Composable
+fun BookCardPreview() {
+    BookCard(
+        metadata = HadithMetadata(
+            id = 1,
+            title_english = "Sunan Abi Dawood",
+            title_arabic = "سنن أبي داود",
+            author_english = "Imam Sulaiman bin Ash'ath abu Dawood al-Sijistani",
+            author_arabic = "الإمام سليمان بن أشعث أبو داود السجستاني",
+            length = 5274,
+            introduction_arabic = "سنن أبي داود",
+            introduction_english = "Sunan Abi Dawood"
+        )
+    ) { _, _ -> }
+}
+
+
 @Composable
 private fun FavouritesTabContent(
     favouritesState: ViewState<List<HadithFavourite>>,
@@ -276,10 +298,10 @@ private fun FavouritesTabContent(
     onFavouriteClick: (Int, Int, Int, Boolean) -> Unit
 ) {
     when (favouritesState) {
-        is ViewState.Loading -> LoadingState()
+        is ViewState.Loading -> PageLoading()
         is ViewState.Success -> {
             if (favouritesState.data.isEmpty()) {
-                EmptyState(
+                NoResultFound(
                     title = "No Favourites Found",
                     subtitle = "You haven't added any favourites yet"
                 )
@@ -293,106 +315,7 @@ private fun FavouritesTabContent(
             }
         }
 
-        is ViewState.Error -> ErrorState(message = favouritesState.message)
-    }
-}
-
-
-@Composable
-private fun LoadingState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Loading...",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
-private fun EmptyState(
-    title: String,
-    subtitle: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ErrorState(message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.errorContainer,
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Error,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(48.dp)
-                )
-                Text(
-                    text = "Error",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+        is ViewState.Error -> PageErrorState(message = favouritesState.message)
     }
 }
 
@@ -404,7 +327,7 @@ private fun BooksTab(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(metadataList.size) { index ->

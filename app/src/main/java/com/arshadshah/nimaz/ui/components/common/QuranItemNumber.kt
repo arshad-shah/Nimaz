@@ -12,11 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun QuranItemNumber(
@@ -33,7 +35,7 @@ fun QuranItemNumber(
         Icon(
             painter = painterResource(id = R.drawable.number_back_icon),
             contentDescription = "Number $number background",
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+            tint = MaterialTheme.colorScheme.inversePrimary,
             modifier = Modifier
                 .matchParentSize()
                 .placeholder(
@@ -55,4 +57,17 @@ fun QuranItemNumber(
                 )
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun QuranItemNumberPreview() {
+    NimazTheme { QuranItemNumber(number = 1) }
+}
+
+//dark mode1
+@Preview(showBackground = true)
+@Composable
+fun QuranItemNumberPreviewDark() {
+    NimazTheme(darkTheme = true) { QuranItemNumber(number = 1) }
 }

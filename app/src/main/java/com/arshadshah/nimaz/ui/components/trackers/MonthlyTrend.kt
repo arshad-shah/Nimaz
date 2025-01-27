@@ -21,13 +21,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
+import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.ThemeDataStore
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -53,7 +61,7 @@ fun PrayerTrackerGrid(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -72,22 +80,12 @@ fun PrayerTrackerGrid(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = dateState.value.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
+                HeaderWithIcon(
+                    title = dateState.value.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                    contentDescription = "Monthly Progress",
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
 
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
@@ -105,13 +103,13 @@ fun PrayerTrackerGrid(
             // Prayer Grid
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp),
+                        .padding(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     prayers.forEach { prayer ->
@@ -151,8 +149,8 @@ private fun PrayerRowRedesigned(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                color = prayerColor.copy(alpha = 0.15f),
-                shape = RoundedCornerShape(6.dp)
+                color = prayerColor.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
                     text = prayer,
@@ -235,11 +233,57 @@ private fun DayDotRedesigned(
 }
 
 @Composable
-private fun getPrayerColor(prayer: String): Color = when (prayer) {
-    AppConstants.PRAYER_NAME_FAJR -> Color(0xFF2196F3)    // Stronger blue
-    AppConstants.PRAYER_NAME_DHUHR -> Color(0xFFF57C00)   // Stronger orange
-    AppConstants.PRAYER_NAME_ASR -> Color(0xFF43A047)     // Stronger green
-    AppConstants.PRAYER_NAME_MAGHRIB -> Color(0xFFE53935) // Stronger red
-    AppConstants.PRAYER_NAME_ISHA -> Color(0xFF5E35B1)    // Stronger purple
-    else -> MaterialTheme.colorScheme.primary
+private fun getPrayerColor(prayer: String): Color {
+    val context = LocalContext.current
+    val themeDataStore = ThemeDataStore(context)
+    val isDarkMode by themeDataStore.darkModeFlow.collectAsState(initial = false)
+
+    return when (prayer) {
+        AppConstants.PRAYER_NAME_FAJR -> if (isDarkMode)
+            Color(0xFF90CAF9) // Light blue for dark theme
+        else
+            Color(0xFF1976D2) // Darker blue for light theme
+
+        AppConstants.PRAYER_NAME_DHUHR -> if (isDarkMode)
+            Color(0xFFFFB74D) // Light orange for dark theme
+        else
+            Color(0xFFE65100) // Darker orange for light theme
+
+        AppConstants.PRAYER_NAME_ASR -> if (isDarkMode)
+            Color(0xFF81C784) // Light green for dark theme
+        else
+            Color(0xFF2E7D32) // Darker green for light theme
+
+        AppConstants.PRAYER_NAME_MAGHRIB -> if (isDarkMode)
+            Color(0xFFEF9A9A) // Light red for dark theme
+        else
+            Color(0xFFC62828) // Darker red for light theme
+
+        AppConstants.PRAYER_NAME_ISHA -> if (isDarkMode)
+            Color(0xFFB39DDB) // Light purple for dark theme
+        else
+            Color(0xFF512DA8) // Darker purple for light theme
+
+        else -> MaterialTheme.colorScheme.primary
+    }
+}
+
+@Preview
+@Composable
+fun PrayerTrackerGridPreview() {
+    val prayerTracker = LocalPrayersTracker(LocalDate.now(), true, true, true, true, true, 100)
+    val progress = remember {
+        listOf(
+            prayerTracker
+        )
+    }
+
+    NimazTheme(
+        darkTheme = false
+    ) {
+        PrayerTrackerGrid(
+            progressForMonth = remember { mutableStateOf(progress) },
+            dateState = remember { mutableStateOf(LocalDate.now()) }
+        )
+    }
 }

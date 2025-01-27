@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,6 +61,7 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.data.local.models.HadithEntity
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 import com.arshadshah.nimaz.viewModel.ViewState
@@ -265,7 +267,7 @@ private fun HadithCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -275,18 +277,18 @@ private fun HadithCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Header Section
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(16.dp)
+                shape = MaterialTheme.shapes.medium,
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -328,27 +330,52 @@ private fun HadithCard(
 
             // Narrator Section
             Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(12.dp)
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(
                     text = hadith.narrator_english,
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontStyle = FontStyle.Italic
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
 
             // English Translation
-            Text(
-                text = hadith.text_english,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Text(
+                    text = hadith.text_english,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
         }
+    }
+}
+
+@Preview
+@Composable
+fun HadithCardPreview() {
+    NimazTheme {
+        HadithCard(
+            hadith = HadithEntity(
+                id = 1,
+                bookId = 1,
+                chapterId = 1,
+                idInBook = 1,
+                arabic = "الحمد لله",
+                text_english = "Praise be to Allah the Almighty and the Most Merciful of all",
+                narrator_english = "Narrated by Bukhari",
+                favourite = false
+            ),
+            onFavoriteToggle = { _, _ -> }
+        )
     }
 }
 
@@ -401,7 +428,7 @@ fun AnimatedTopBar(
             title = {
                 AnimatedTitle(
                     text = title,
-                    scale = 1.5f
+                    scale = 1.2f
                 )
             },
             navigationIcon = {

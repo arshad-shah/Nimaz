@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.more
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,17 +22,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,18 +62,17 @@ fun ShahadahScreen(navController: NavHostController) {
             )
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(paddingValues)
-                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
         ) {
             ElevatedCard(
                 modifier = Modifier
+                    .padding(paddingValues)
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(24.dp),
+                    .padding(8.dp),
+                shape = MaterialTheme.shapes.extraLarge,
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                 colors = CardDefaults.elevatedCardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -82,13 +82,13 @@ fun ShahadahScreen(navController: NavHostController) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Header Section
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(16.dp)
+                        shape = MaterialTheme.shapes.large,
                     ) {
                         Row(
                             modifier = Modifier
@@ -113,12 +113,12 @@ fun ShahadahScreen(navController: NavHostController) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             Surface(
-                                shape = RoundedCornerShape(16.dp),
+                                shape = MaterialTheme.shapes.large,
                                 color = MaterialTheme.colorScheme.secondaryContainer,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -135,7 +135,7 @@ fun ShahadahScreen(navController: NavHostController) {
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(vertical = 24.dp, horizontal = 16.dp)
+                                            .padding(8.dp)
                                     )
                                 }
                             }
@@ -163,17 +163,18 @@ fun ShahadahScreen(navController: NavHostController) {
                     // Translation Section
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = MaterialTheme.shapes.large,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
-                            modifier = Modifier.padding(16.dp),
+                            modifier = Modifier.padding(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = "Translation",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary
+                            HeaderWithIcon(
+                                title = "Translation",
+                                contentDescription = "Translation of the Shahadah",
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
@@ -188,7 +189,7 @@ fun ShahadahScreen(navController: NavHostController) {
                                     ),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(16.dp)
+                                    modifier = Modifier.padding(8.dp)
                                 )
                             }
                         }
@@ -196,5 +197,22 @@ fun ShahadahScreen(navController: NavHostController) {
                 }
             }
         }
+
     }
+}
+
+@Preview(device = "id:small_phone")
+@Composable
+fun ShahadahScreenPreview() {
+    val context = LocalContext.current
+    val navController = NavHostController(context)
+    ShahadahScreen(navController = navController)
+}
+
+@Preview(device = "spec:width=411dp,height=891dp")
+@Composable
+fun ShahadahScreenLargePreview() {
+    val context = LocalContext.current
+    val navController = NavHostController(context)
+    ShahadahScreen(navController = navController)
 }

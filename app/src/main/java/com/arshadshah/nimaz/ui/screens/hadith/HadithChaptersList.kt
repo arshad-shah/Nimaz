@@ -39,12 +39,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.HadithChapter
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.HadithViewModel
 import com.arshadshah.nimaz.viewModel.ViewState
@@ -245,7 +247,7 @@ private fun ChapterGroupCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -255,13 +257,13 @@ private fun ChapterGroupCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Header Section
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(16.dp)
+                shape = MaterialTheme.shapes.medium,
             ) {
                 Row(
                     modifier = Modifier
@@ -319,13 +321,13 @@ private fun ChapterItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Chapter Number Container
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier.size(56.dp)
             ) {
@@ -381,5 +383,49 @@ private fun ChapterItem(
                 )
             }
         }
+    }
+}
+
+
+//small screen preview
+@Preview
+@Composable
+fun HadithChapterGroupCardPreview() {
+    val chapter = HadithChapter(
+        bookId = 1,
+        chapterId = 1,
+        title_english = "Chapter 1",
+        title_arabic = "الفاتحة"
+    )
+    NimazTheme {
+        ChapterGroupCard(
+            chaptersList = listOf(
+                chapter, HadithChapter(
+                    bookId = 1,
+                    chapterId = 2,
+                    title_english = "Chapter 2 - The Cow is a long chapter",
+                    title_arabic = "البقرة"
+                ), chapter
+            ),
+            onChapterClick = { _, _ -> }
+        )
+    }
+}
+
+
+@Preview
+@Composable
+fun ChapterItemPreview() {
+    val chapter = HadithChapter(
+        bookId = 1,
+        chapterId = 1,
+        title_english = "Chapter 1",
+        title_arabic = "الفاتحة"
+    )
+    NimazTheme {
+        ChapterItem(
+            chapter = chapter,
+            onClick = { }
+        )
     }
 }

@@ -56,7 +56,7 @@ fun CompactLocationTopBar(
             ),
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 6.dp,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
             modifier = Modifier
@@ -155,7 +155,9 @@ fun CompactLocationTopBar(
 @Preview(showBackground = true)
 @Composable
 fun CompactLocationTopBarPreview() {
-    NimazTheme {
+    NimazTheme(
+        darkTheme = false
+    ) {
         CompactLocationTopBar(
             locationName = "London, United Kingdom",
             isLoading = false

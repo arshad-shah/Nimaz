@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +27,10 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,14 +38,16 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.launch
 
 @Composable
 fun CustomTabs(
-    pagerState: PagerState,
+    selectedPage: Int,
     titles: List<String>,
+    onPageSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
@@ -57,9 +61,9 @@ fun CustomTabs(
 
     ElevatedCard(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(8.dp)
             .scale(scale),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.large,
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 4.dp,
             pressedElevation = 8.dp
@@ -72,24 +76,28 @@ fun CustomTabs(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             TabRow(
-                selectedTabIndex = pagerState.currentPage,
+                selectedTabIndex = selectedPage,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                 containerColor = Color.Transparent,
                 indicator = { tabPositions ->
                     TabIndicator(
-                        pagerState = pagerState,
+                        selectedPage = selectedPage,
                         tabPositions = tabPositions
                     )
                 },
                 divider = {}
             ) {
-                TabsList(pagerState = pagerState, titles = titles)
+                TabsList(
+                    selectedPage = selectedPage,
+                    titles = titles,
+                    onPageSelected = onPageSelected
+                )
             }
         }
     }
@@ -97,13 +105,12 @@ fun CustomTabs(
 
 @Composable
 private fun TabsList(
-    pagerState: PagerState,
-    titles: List<String>
+    selectedPage: Int,
+    titles: List<String>,
+    onPageSelected: (Int) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
     titles.forEachIndexed { index, title ->
-        val selected = pagerState.currentPage == index
+        val selected = selectedPage == index
 
         val alpha by animateFloatAsState(
             targetValue = if (selected) 1f else 0.7f,
@@ -122,28 +129,17 @@ private fun TabsList(
 
         Surface(
             modifier = Modifier
-                .padding(4.dp)
                 .zIndex(2f)
                 .scale(scale),
             color = if (selected)
                 MaterialTheme.colorScheme.primaryContainer
             else
                 Color.Transparent,
-            shape = RoundedCornerShape(12.dp)
+            shape = MaterialTheme.shapes.medium
         ) {
             Tab(
                 selected = selected,
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(
-                            page = index,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessLow
-                            )
-                        )
-                    }
-                },
+                onClick = { onPageSelected(index) },
                 text = {
                     Text(
                         text = title,
@@ -164,10 +160,10 @@ private fun TabsList(
 
 @Composable
 private fun TabIndicator(
-    pagerState: PagerState,
+    selectedPage: Int,
     tabPositions: List<TabPosition>
 ) {
-    val transition = updateTransition(pagerState.currentPage, label = "indicatorTransition")
+    val transition = updateTransition(selectedPage, label = "indicatorTransition")
 
     val indicatorStart by transition.animateDp(
         transitionSpec = {
@@ -204,8 +200,47 @@ private fun TabIndicator(
             .fillMaxSize()
             .zIndex(1f),
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(12.dp)
+        shape = MaterialTheme.shapes.large
     ) {
         Box(modifier = Modifier.fillMaxSize())
     }
+}
+
+// Preview-specific wrapper for PagerState version
+@Composable
+fun CustomTabsWithPager(
+    pagerState: PagerState,
+    titles: List<String>,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+    CustomTabs(
+        selectedPage = pagerState.currentPage,
+        titles = titles,
+        onPageSelected = { page ->
+            // Launch in the composable's scope
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(
+                    page = page,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Preview(device = "id:small_phone")
+@Composable
+fun CustomTabsPreview() {
+    var selectedPage by remember { mutableIntStateOf(0) }
+
+    CustomTabs(
+        selectedPage = selectedPage,
+        titles = listOf("Sura", "Tab 2", "My Quran"),
+        onPageSelected = { selectedPage = it }
+    )
 }

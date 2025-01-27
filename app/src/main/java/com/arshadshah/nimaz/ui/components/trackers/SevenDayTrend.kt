@@ -2,14 +2,16 @@ package com.arshadshah.nimaz.ui.components.trackers
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.ui.components.common.ProgressBarCustom
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.viewModel.PrayerTrakerForWeek
 import java.time.LocalDate
 
@@ -36,7 +39,7 @@ fun SevenDayTrend(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -46,7 +49,7 @@ fun SevenDayTrend(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Header
@@ -55,26 +58,16 @@ fun SevenDayTrend(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Weekly Progress",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
+                HeaderWithIcon(
+                    title = "Weekly Progress",
+                    contentDescription = "Weekly Progress",
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
 
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = MaterialTheme.shapes.medium,
                 ) {
                     Text(
                         text = "${trackersForWeek.value.count { it.progress > 0 }}/7",
@@ -88,7 +81,7 @@ fun SevenDayTrend(
             // Progress Bars
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -99,14 +92,26 @@ fun SevenDayTrend(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     trackersForWeek.value.forEachIndexed { index, prayerTracker ->
-                        ProgressBarCustom(
-                            progress = prayerTracker.progress.toFloat(),
-                            progressColor = determineColor(prayerTracker),
-                            radius = 24.dp,
-                            label = prayerTracker.date.dayOfWeek.name.take(1),
-                            strokeWidth = 6.dp,
-                            strokeBackgroundWidth = 3.dp,
-                        )
+//                        ProgressBarCustom(
+//                            progress = prayerTracker.progress.toFloat(),
+//                            progressColor = determineColor(prayerTracker),
+//                            radius = 16.dp,
+//                            label = prayerTracker.date.dayOfWeek.name.take(1),
+//                            strokeWidth = 8.dp,
+//                            strokeBackgroundWidth = 3.dp,
+//                        )
+
+                        Box(
+                            modifier = Modifier,
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = prayerTracker.date.dayOfWeek.name.take(1))
+                            CircularProgressIndicator(
+                                progress = { prayerTracker.progress.toFloat() / 100 },
+                                trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
+                                color = determineColor(prayerTracker),
+                            )
+                        }
                     }
                 }
             }
@@ -125,7 +130,7 @@ private fun determineColor(prayerTracker: PrayerTrakerForWeek): Color {
     }
 }
 
-@Preview
+@Preview(device = "id:small_phone")
 @Composable
 fun SevenDayTrendPreview() {
     val trackers = remember {
@@ -140,8 +145,10 @@ fun SevenDayTrendPreview() {
         )
     }
     val date = remember { mutableStateOf(LocalDate.now()) }
-    SevenDayTrend(
-        trackersForWeek = remember { mutableStateOf(trackers) },
-        dateState = date
-    )
+    NimazTheme {
+        SevenDayTrend(
+            trackersForWeek = remember { mutableStateOf(trackers) },
+            dateState = date
+        )
+    }
 }

@@ -39,7 +39,7 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
-import com.arshadshah.nimaz.ui.components.common.CustomTabs
+import com.arshadshah.nimaz.ui.components.common.CustomTabsWithPager
 import com.arshadshah.nimaz.ui.components.common.DropDownHeader
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
 import com.arshadshah.nimaz.ui.components.common.NoResultFound
@@ -129,7 +129,7 @@ fun ListOfTasbih(
                 .testTag(AppConstants.TEST_TAG_QURAN)
         ) {
 
-            CustomTabs(pagerState, titles)
+            CustomTabsWithPager(pagerState, titles)
 
             HorizontalPager(
                 pageSize = PageSize.Fill,

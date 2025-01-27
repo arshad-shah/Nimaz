@@ -17,10 +17,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,12 +39,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalChapter
+import com.arshadshah.nimaz.ui.components.common.NoResultFound
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
+import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.viewModel.DuaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,11 +110,15 @@ fun ChapterList(
                 .padding(paddingValues)
         ) {
             when (uiState) {
-                is DuaViewModel.UiState.Loading -> LoadingState()
-                is DuaViewModel.UiState.Error -> ErrorState((uiState as DuaViewModel.UiState.Error).message)
+                is DuaViewModel.UiState.Loading -> PageLoading()
+                is DuaViewModel.UiState.Error -> PageErrorState((uiState as DuaViewModel.UiState.Error).message)
                 is DuaViewModel.UiState.Success<*> -> {
                     when {
-                        chapters.isEmpty() -> EmptyState()
+                        chapters.isEmpty() -> NoResultFound(
+                            title = "No Chapters Found",
+                            subtitle = "No chapters found for this category",
+                        )
+
                         else -> ChaptersContent(
                             chapters = chapters,
                             listState = listState,
@@ -123,58 +126,6 @@ fun ChapterList(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LoadingState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(48.dp)
-        )
-    }
-}
-
-@Composable
-private fun ErrorState(message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.errorContainer,
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Error,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.error
-                )
-                Text(
-                    text = "Error",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
@@ -221,7 +172,7 @@ private fun ChapterGroupCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Section
@@ -287,7 +238,7 @@ private fun ChapterItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -295,7 +246,7 @@ private fun ChapterItem(
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer,
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(48.dp)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -336,44 +287,6 @@ private fun ChapterItem(
     }
 }
 
-@Composable
-private fun EmptyState() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.quran_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "No Chapters Found",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "This category appears to be empty",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
 
 object SharedPreferencesUtil {
     fun saveLastVisibleItemIndex(context: Context, index: Int) {

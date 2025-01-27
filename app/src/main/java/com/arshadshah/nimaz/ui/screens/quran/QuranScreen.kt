@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.common.CustomTabs
+import com.arshadshah.nimaz.ui.components.common.CustomTabsWithPager
 import com.arshadshah.nimaz.ui.components.quran.JuzList
 import com.arshadshah.nimaz.ui.components.quran.SurahList
 import com.arshadshah.nimaz.viewModel.QuranViewModel
@@ -85,7 +85,7 @@ fun QuranScreen(
     ) {
 
         Column(modifier = Modifier.padding(it)) {
-            CustomTabs(
+            CustomTabsWithPager(
                 pagerState = pagerState,
                 titles = pages.map { it.title }
             )

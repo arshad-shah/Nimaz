@@ -14,10 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +30,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -52,8 +51,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalDua
+import com.arshadshah.nimaz.ui.components.common.NoResultFound
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
+import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.DuaViewModel
+import kotlinx.coroutines.coroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,16 +69,22 @@ fun DuaList(
     val duas by viewModel.duas.collectAsState()
     val listState = rememberLazyListState()
 
+    val chapterName = remember { mutableStateOf("Supplications") }
+
     LaunchedEffect(Unit) {
         viewModel.getDuas(chapterId.toInt())
+    }
+
+    LaunchedEffect(chapterId) {
+        val chapter = coroutineScope { viewModel.getChapterById(chapterId.toInt()) }
+        chapterName.value = chapter?.english_title ?: "Supplications"
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    val chapter = viewModel.getChapterById(chapterId.toInt())
-                    Text(text = chapter?.english_title ?: "Supplications")
+                    Text(text = chapterName.value)
                 },
                 navigationIcon = {
                     OutlinedIconButton(
@@ -101,11 +110,15 @@ fun DuaList(
                 .padding(paddingValues)
         ) {
             when (uiState) {
-                is DuaViewModel.UiState.Loading -> LoadingState()
-                is DuaViewModel.UiState.Error -> ErrorState((uiState as DuaViewModel.UiState.Error).message)
+                is DuaViewModel.UiState.Loading -> PageLoading()
+                is DuaViewModel.UiState.Error -> PageErrorState((uiState as DuaViewModel.UiState.Error).message)
                 is DuaViewModel.UiState.Success<*> -> {
                     when {
-                        duas.isEmpty() -> EmptyState()
+                        duas.isEmpty() -> NoResultFound(
+                            title = "No Duas Found",
+                            subtitle = "This chapter appears to be empty"
+                        )
+
                         else -> DuasContent(
                             duas = duas,
                             listState = listState,
@@ -113,58 +126,6 @@ fun DuaList(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LoadingState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(48.dp)
-        )
-    }
-}
-
-@Composable
-private fun ErrorState(message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.errorContainer,
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Error,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.error
-                )
-                Text(
-                    text = "Error",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
@@ -211,7 +172,7 @@ private fun DuaGroupCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Section
@@ -274,7 +235,7 @@ private fun DuaItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Favorite Button and Arabic Text Header

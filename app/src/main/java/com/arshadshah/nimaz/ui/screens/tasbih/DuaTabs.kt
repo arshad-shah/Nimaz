@@ -1,5 +1,17 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,34 +30,37 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.automirrored.rounded.KeyboardReturn
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -57,8 +72,11 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalCategory
 import com.arshadshah.nimaz.data.local.models.LocalDua
+import com.arshadshah.nimaz.ui.components.common.CustomTabs
+import com.arshadshah.nimaz.ui.components.common.NoResultFound
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.DuaViewModel
+import kotlinx.coroutines.coroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,23 +99,11 @@ fun DuaTabs(
             .padding(paddingValues)
     ) {
 
-        // Tab Row
-        TabRow(selectedTabIndex = selectedTabIndex) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
-                    icon = {
-                        when (index) {
-                            0 -> Icon(Icons.Default.Category, contentDescription = null)
-                            1 -> Icon(Icons.Default.Favorite, contentDescription = null)
-                            2 -> Icon(Icons.Default.Search, contentDescription = null)
-                        }
-                    },
-                    text = { Text(title) }
-                )
-            }
-        }
+        CustomTabs(
+            selectedPage = selectedTabIndex,
+            onPageSelected = { selectedTabIndex = it },
+            titles = tabs
+        )
 
         // Tab Content
         when (selectedTabIndex) {
@@ -159,16 +165,20 @@ private fun CategoryGroupCard(
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Section with animation
@@ -234,7 +244,7 @@ private fun CategoryItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(16.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -245,7 +255,7 @@ private fun CategoryItem(
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -293,16 +303,27 @@ private fun FavoritesContent(
     viewModel: DuaViewModel,
     onDuaClick: (LocalDua) -> Unit
 ) {
-    viewModel.getFavorites()
-    if (favorites.isEmpty()) {
-        EmptyFavorites()
-    } else {
-        val groupedFavorites = favorites.groupBy { dua ->
-            val chapter = viewModel.getChapterById(dua.chapter_id)
-            val category = viewModel.getCategoryById(chapter?.category_id ?: 0)
-            category?.name ?: "Uncategorized"
-        }
+    // State to hold the grouped favorites
+    var groupedFavorites by remember { mutableStateOf<Map<String, List<LocalDua>>>(emptyMap()) }
 
+    // Launch effect to load the grouped data
+    LaunchedEffect(favorites) {
+        // Group favorites with coroutine calls
+        groupedFavorites = favorites.groupBy { dua ->
+            coroutineScope {
+                val chapter = viewModel.getChapterById(dua.chapter_id)
+                val category = viewModel.getCategoryById(chapter?.category_id ?: 0)
+                category?.name ?: "Uncategorized"
+            }
+        }
+    }
+
+    if (favorites.isEmpty()) {
+        NoResultFound(
+            title = "No Favorites Yet",
+            subtitle = "Add duas to favorites to see them here"
+        )
+    } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp)
@@ -311,7 +332,13 @@ private fun FavoritesContent(
                 stickyHeader {
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.fillMaxWidth()
+                        shape = RoundedCornerShape(
+                            topStart = 12.dp,
+                            topEnd = 12.dp
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
                     ) {
                         Text(
                             text = category,
@@ -322,11 +349,14 @@ private fun FavoritesContent(
                     }
                 }
 
-                items(duas) { dua ->
+                items(
+                    items = duas,
+                    key = { it._id }
+                ) { dua ->
                     DuaCard(
                         dua = dua,
                         onClick = { onDuaClick(dua) },
-                        onFavoriteClick = { viewModel.toggleFavorite(dua) }
+                        onFavoriteClick = { viewModel.toggleFavorite(dua) },
                     )
                 }
             }
@@ -343,65 +373,140 @@ private fun SearchContent(
     onSearchQueryChange: (String) -> Unit,
     onDuaClick: (LocalDua) -> Unit
 ) {
+    var isSearchFocused by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxSize()) {
-        // Search Bar
-        Row(
+        // Animated Search Bar Card
+        ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                modifier = Modifier
-                    .fillMaxWidth(0.8f),
-                placeholder = { Text("Search duas...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { onSearchClear() }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear search")
-                        }
-                    }
-                },
-                singleLine = true
+                .padding(16.dp)
+                .scale(
+                    animateFloatAsState(
+                        targetValue = if (isSearchFocused) 1.02f else 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "searchScale"
+                    ).value
+                ),
+            shape = RoundedCornerShape(28.dp),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = if (isSearchFocused) 8.dp else 4.dp
             )
-            //enter button
-            FilledIconButton(
-                onClick = {
-                    onSearch(searchQuery)
-                },
+        ) {
+            Row(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardReturn,
-                    contentDescription = "Enter",
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                        .onFocusChanged { isSearchFocused = it.isFocused },
+                    placeholder = {
+                        Text(
+                            "Search duas...",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Rounded.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingIcon = {
+                        AnimatedVisibility(
+                            visible = searchQuery.isNotEmpty(),
+                            enter = fadeIn() + scaleIn(),
+                            exit = fadeOut() + scaleOut()
+                        ) {
+                            IconButton(
+                                onClick = onSearchClear,
+                                modifier = Modifier.scale(0.8f)
+                            ) {
+                                Icon(
+                                    Icons.Rounded.Clear,
+                                    contentDescription = "Clear search",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    ),
+                    shape = RoundedCornerShape(24.dp)
                 )
+
+                FilledIconButton(
+                    onClick = { onSearch(searchQuery) },
+                    modifier = Modifier.scale(0.9f),
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardReturn,
+                        contentDescription = "Search",
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
 
-        if (filteredDuas.isEmpty() && searchQuery.isNotEmpty()) {
-            EmptySearchResults()
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(filteredDuas) { dua ->
-                    DuaCard(
-                        dua = dua,
-                        onClick = { onDuaClick(dua) },
-                        onFavoriteClick = null // Optional: Add favorite toggle functionality
+        AnimatedContent(
+            targetState = Pair(filteredDuas.isEmpty(), searchQuery.isNotEmpty()),
+            transitionSpec = {
+                fadeIn() + slideInVertically() togetherWith fadeOut() + slideOutVertically()
+            },
+            label = "contentTransition"
+        ) { (isEmpty, hasQuery) ->
+            when {
+                isEmpty && hasQuery -> {
+                    NoResultFound(
+                        title = "No Results Found",
+                        subtitle = "Try different search terms",
                     )
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = filteredDuas,
+                            key = { it._id }
+                        ) { dua ->
+                            DuaCard(
+                                dua = dua,
+                                onClick = { onDuaClick(dua) },
+                                onFavoriteClick = null,
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 private fun DuaCard(
@@ -460,64 +565,6 @@ private fun DuaCard(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun EmptyFavorites() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.FavoriteBorder,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "No Favorites Yet",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = "Add duas to favorites to see them here",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun EmptySearchResults() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.SearchOff,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "No Results Found",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = "Try different search terms",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
