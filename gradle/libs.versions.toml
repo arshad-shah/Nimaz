@@ -24,6 +24,7 @@ hiltAndroid = "2.51"
 hiltAndroidTestingVersion = "2.51"
 hiltNavigationCompose = "1.2.0"
 hiltWork = "1.2.0"
+introshowcaseview = "2.0.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 kotlin = "1.9.22"
@@ -91,6 +92,7 @@ firebase-crashlytics-buildtools = { module = "com.google.firebase:firebase-crash
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
+introshowcaseview = { module = "com.canopas.intro-showcase-view:introshowcaseview", version.ref = "introshowcaseview" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }

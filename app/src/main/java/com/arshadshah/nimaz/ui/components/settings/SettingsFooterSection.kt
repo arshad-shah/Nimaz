@@ -3,7 +3,13 @@ package com.arshadshah.nimaz.ui.components.settings
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,9 +30,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -35,9 +48,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.ArrowRight
 import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
@@ -267,34 +280,100 @@ fun AppCopyright(
     appVersion: String = getAppVersion(LocalContext.current)
 ) {
     val currentYear = remember { LocalDateTime.now().year }
+    var isHovered by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isHovered) 1.02f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 8.dp),
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-        tonalElevation = 2.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .semantics { contentDescription = "Copyright information" },
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("© $currentYear ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Nimaz")
-                    }
-                    append(" • Version: $appVersion")
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
+            .padding(vertical = 16.dp, horizontal = 8.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .shadow(
+                elevation = if (isHovered) 8.dp else 4.dp,
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(24.dp)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            width = 1.dp,
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                )
             )
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .semantics { contentDescription = "Copyright information" },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Copyright text
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                append("Nimaz")
+                            }
+                            append(" © $currentYear")
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    // Version info with badge
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "Version $appVersion",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

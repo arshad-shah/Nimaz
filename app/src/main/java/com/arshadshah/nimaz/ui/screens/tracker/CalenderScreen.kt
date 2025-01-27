@@ -68,6 +68,7 @@ fun CalendarScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val calendarData by viewModel.calendarData.collectAsState()
+    val showcaseState by viewModel.showcaseState.collectAsState()
     val calendarState = rememberCalendarState()
 
     // Observe calendar state changes
@@ -97,6 +98,17 @@ fun CalendarScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            viewModel.showcaseToggle()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.info_icon),
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                     if (uiState.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -136,6 +148,8 @@ fun CalendarScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Calendar(
+                    showcaseState = showcaseState,
+                    onShowcaseDismiss = viewModel::showcaseToggle,
                     selectedDate = calendarState.selectedDate,
                     currentMonth = calendarState.currentMonth,
                     trackers = calendarData.monthlyTrackers,

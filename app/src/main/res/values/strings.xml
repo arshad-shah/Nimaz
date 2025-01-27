@@ -2,14 +2,4 @@
     <string name="app_name">Nimaz</string>
     <string name="app_widget_description">Nimaz daily prayer times at a glance.</string>
     <string name="app_widget_tracker_description">Prayer Tracker widget for Nimaz.</string>
-    <string name="fajr">Fajr</string>
-    <string name="zuhar">Dhuhr</string>
-    <string name="asar">Asr</string>
-    <string name="maghrib">Maghrib</string>
-    <string name="ishaa">Isha</string>
-    <string name="fajr_time">00:00</string>
-    <string name="Zuhar_time">00:00</string>
-    <string name="Asar_time">00:00</string>
-    <string name="Maghrib_time">00:00</string>
-    <string name="Ishaa_time">00:00</string>
 </resources>

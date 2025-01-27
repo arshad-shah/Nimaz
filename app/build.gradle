@@ -210,4 +210,8 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
     testImplementation libs.junit.jupiter
 
+
+    implementation libs.introshowcaseview
+
+
 }

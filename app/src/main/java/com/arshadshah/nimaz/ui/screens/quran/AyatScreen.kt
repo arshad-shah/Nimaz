@@ -5,15 +5,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -26,7 +23,7 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.quran.AyaListUI
-import com.arshadshah.nimaz.ui.components.quran.MoreMenu
+import com.arshadshah.nimaz.ui.components.quran.QuranBottomBar
 import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
@@ -63,24 +60,24 @@ fun AyatScreen(
     val translationFontSize = viewModel.translation_Font_size.collectAsState()
     val translation = viewModel.translation.collectAsState()
     val scrollToVerse = viewModel.scrollToAya.collectAsState()
-    val (menuOpen, setMenuOpen) = remember { mutableStateOf(false) }
 
 
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                TopBarMenu(
-                    number = number.toInt(),
-                    isSurah = isSurah.toBoolean(),
-                    getAllAyats = { itemNumber: Int, language: String ->
-                        if (isSurah.toBoolean()) {
-                            viewModel.getAllAyaForSurah(itemNumber, language)
-                        } else {
-                            viewModel.getAllAyaForJuz(itemNumber, language)
-                        }
-                    },
-                )
-            },
+            TopAppBar(
+                title = {
+                    TopBarMenu(
+                        number = number.toInt(),
+                        isSurah = isSurah.toBoolean(),
+                        getAllAyats = { itemNumber: Int, language: String ->
+                            if (isSurah.toBoolean()) {
+                                viewModel.getAllAyaForSurah(itemNumber, language)
+                            } else {
+                                viewModel.getAllAyaForJuz(itemNumber, language)
+                            }
+                        },
+                    )
+                },
                 navigationIcon = {
                     OutlinedIconButton(
                         modifier = Modifier
@@ -96,31 +93,14 @@ fun AyatScreen(
                         )
                     }
                 },
-                actions = {
-                    //open the menu
-                    IconButton(onClick = {
-                        setMenuOpen(
-                            true
-                        )
-                    }) {
-                        Icon(
-                            modifier = Modifier.size(
-                                24.dp
-                            ),
-                            painter = painterResource(
-                                id = R.drawable.settings_sliders_icon
-                            ),
-                            contentDescription = "Menu"
-                        )
-                    }
-                    MoreMenu(
-                        menuOpen = menuOpen,
-                        setMenuOpen = setMenuOpen,
-                        handleEvents = viewModel::handleQuranMenuEvents
-                    )
-                }
             )
         },
+        bottomBar = {
+            QuranBottomBar(
+                handleEvents = viewModel::handleQuranMenuEvents,
+                modifier = Modifier
+            )
+        }
     ) {
         if (error.value != "") {
             BannerSmall(title = "Error", message = error.value, variant = BannerVariant.Error)

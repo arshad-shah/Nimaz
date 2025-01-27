@@ -4,7 +4,6 @@ import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
-import com.arshadshah.nimaz.ui.components.calender.ImportanceLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -64,7 +63,12 @@ class CalendarViewModelTest {
         val endDate = currentMonth.atEndOfMonth()
 
         whenever(dataStore.getTrackersForMonth(startDate, endDate)).thenReturn(flowOf(emptyPrayers))
-        whenever(dataStore.getFastTrackersForMonth(startDate, endDate)).thenReturn(flowOf(emptyFasts))
+        whenever(
+            dataStore.getFastTrackersForMonth(
+                startDate,
+                endDate
+            )
+        ).thenReturn(flowOf(emptyFasts))
         whenever(dataStore.getMenstruatingState(any())).thenReturn(flowOf(false))
 
         // When

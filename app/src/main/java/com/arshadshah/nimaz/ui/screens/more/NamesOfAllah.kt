@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -208,7 +209,7 @@ private fun NameCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -218,7 +219,7 @@ private fun NameCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Section with Number
@@ -229,7 +230,7 @@ private fun NameCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -261,8 +262,8 @@ private fun NameCard(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Arabic Name
                     Surface(
@@ -305,6 +306,7 @@ private fun NameCard(
                             color = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier
                                 .size(40.dp)
+                                .clip(CircleShape)
                                 .clickable { isExpanded = !isExpanded }
                         ) {
                             Icon(
@@ -334,7 +336,7 @@ private fun NameCard(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         DetailItem(
@@ -372,7 +374,7 @@ private fun DetailItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.Top
         ) {

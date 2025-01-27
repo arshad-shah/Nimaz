@@ -1,23 +1,27 @@
 package com.arshadshah.nimaz.viewModel
 
+import com.arshadshah.nimaz.services.CurrencyInfo
+import com.arshadshah.nimaz.services.NisabType
+import com.arshadshah.nimaz.services.PreciousMetalService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.Assert.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
-import org.junit.After
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import com.arshadshah.nimaz.services.PreciousMetalService
-import com.arshadshah.nimaz.services.CurrencyInfo
-import com.arshadshah.nimaz.services.NisabType
 import java.util.Locale
-import kotlinx.coroutines.test.runTest
-import org.mockito.ArgumentMatchers.any
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ZakatViewModelTest {
@@ -46,7 +50,9 @@ class ZakatViewModelTest {
         )
 
         // Mock for any Locale
-        `when`(metalService.getNisabThresholdsWithCache(Locale.getDefault())).thenReturn(mockThresholds)
+        `when`(metalService.getNisabThresholdsWithCache(Locale.getDefault())).thenReturn(
+            mockThresholds
+        )
         `when`(metalService.getNisabThresholds(Locale.getDefault())).thenReturn(mockThresholds)
     }
 
@@ -380,7 +386,11 @@ class ZakatViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         val state = viewModel.zakatState.value
-        assertEquals(6000.0, state.netAssets, 0.01)  // Extremely negative value should be treated as 0
+        assertEquals(
+            6000.0,
+            state.netAssets,
+            0.01
+        )  // Extremely negative value should be treated as 0
         assertEquals(150.0, state.totalZakat, 0.01)
         assertTrue(state.isEligible)
     }

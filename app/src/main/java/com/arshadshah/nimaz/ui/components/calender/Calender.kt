@@ -21,9 +21,12 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
+import kotlin.reflect.KFunction0
 
 @Composable
 fun Calendar(
+    showcaseState: Boolean,
+    onShowcaseDismiss: KFunction0<Unit>,
     selectedDate: LocalDate,
     currentMonth: YearMonth,
     trackers: List<LocalPrayersTracker>,
@@ -69,6 +72,10 @@ fun Calendar(
         ) {
             items(days, key = { it.date.toString() }) { dayInfo ->
                 CalendarDay(
+                    showcaseState = showcaseState,
+                    onShowcaseDismiss = {
+                        onShowcaseDismiss()
+                    },
                     date = dayInfo.date,
                     isSelected = dayInfo.date == selectedDate,
                     isToday = dayInfo.date == LocalDate.now(),

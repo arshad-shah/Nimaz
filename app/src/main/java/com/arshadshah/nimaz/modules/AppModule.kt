@@ -4,6 +4,7 @@ import android.content.Context
 import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
+import com.arshadshah.nimaz.utils.ShowcaseDataStore
 import com.arshadshah.nimaz.utils.ThemeDataStore
 import com.arshadshah.nimaz.utils.alarms.Alarms
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
@@ -75,4 +76,10 @@ object AppModule {
     fun provideThemeDataStore(
         @ApplicationContext context: Context
     ): ThemeDataStore = ThemeDataStore(context)
+
+    @Provides
+    @Singleton
+    fun provideShowcaseDataStore(
+        @ApplicationContext context: Context
+    ): ShowcaseDataStore = ShowcaseDataStore(context)
 }

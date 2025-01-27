@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.repositories.FastTrackerRepository
 import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
+import com.arshadshah.nimaz.utils.ShowcaseDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -44,11 +45,20 @@ data class CalendarData(
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     private val prayerRepository: PrayerTrackerRepository,
-    private val fastRepository: FastTrackerRepository
+    private val fastRepository: FastTrackerRepository,
+    private val showcaseDataStore: ShowcaseDataStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalendarUiState())
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
+
+    // Convert Flow to StateFlow for UI state
+    val showcaseState = showcaseDataStore.calendarShowcaseShown
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     private var monthLoadJob: Job? = null
 
@@ -188,6 +198,18 @@ class CalendarViewModel @Inject constructor(
                     error = "Failed to update fasting status: ${e.message}",
                     isLoading = false
                 )
+            }
+        }
+    }
+
+    //showcasetoggle function to show all showcase for the calendar
+    fun showcaseToggle() {
+        viewModelScope.launch {
+            Log.d("Nimaz: showcaseToggle", "showcaseToggle called with showcaseState: ${showcaseState.value}")
+            if (showcaseState.value) {
+                showcaseDataStore.resetCalendarShowcase()
+            } else {
+                showcaseDataStore.markCalendarShowcaseAsShown()
             }
         }
     }

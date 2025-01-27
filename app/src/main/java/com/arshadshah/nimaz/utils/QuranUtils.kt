@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.utils
 
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.ui.components.settings.state.FloatPreferenceSettingValueState
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -39,5 +40,38 @@ object QuranUtils {
         }
 
         return "$arabic $unicodeWithNumber"
+    }
+
+    fun setFontBasedOnFontStyle(
+        fontStyle: String,
+        arabicFontSizeState: FloatPreferenceSettingValueState,
+        translationFontSizeState: FloatPreferenceSettingValueState,
+    ) {
+        when (fontStyle) {
+            "Default" -> {
+                arabicFontSizeState.value = 26f
+                translationFontSizeState.value = 16f
+            }
+
+            "Quranme" -> {
+                arabicFontSizeState.value = 24f
+                translationFontSizeState.value = 16f
+            }
+
+            "Hidayat" -> {
+                arabicFontSizeState.value = 24f
+                translationFontSizeState.value = 16f
+            }
+
+            "Amiri" -> {
+                arabicFontSizeState.value = 24f
+                translationFontSizeState.value = 16f
+            }
+
+            "IndoPak" -> {
+                arabicFontSizeState.value = 32f
+                translationFontSizeState.value = 16f
+            }
+        }
     }
 }

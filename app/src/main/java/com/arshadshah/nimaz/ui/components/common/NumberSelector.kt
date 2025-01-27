@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.common
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,8 +22,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
 fun NumberSelector(
@@ -55,9 +58,16 @@ fun NumberSelector(
         }
 
         Surface(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .padding(horizontal = 16.dp)
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.onSurface,
+                    shape = RoundedCornerShape(16.dp)
+                ),
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             tonalElevation = 2.dp
         ) {
             Text(
@@ -86,14 +96,16 @@ fun NumberSelector(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun NumberSelectorPreview() {
     var value by remember { mutableStateOf(0f) }
-    NumberSelector(
-        value = value,
-        onValueChange = { value = it },
-        minValue = 0f,
-        maxValue = 100f
-    )
+    NimazTheme {
+        NumberSelector(
+            value = value,
+            onValueChange = { value = it },
+            minValue = 0f,
+            maxValue = 100f
+        )
+    }
 }

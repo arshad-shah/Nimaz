@@ -83,11 +83,13 @@ class PreciousMetalServiceTest {
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
+
                 "/XAG/USD" -> respond(
                     content = sampleSilverResponse,
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
+
                 else -> error("Unhandled ${request.url.encodedPath}")
             }
         }
