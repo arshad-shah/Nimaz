@@ -182,7 +182,7 @@ private fun QiblaInfoCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Section
@@ -219,13 +219,13 @@ private fun QiblaInfoCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Location Info
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).padding(start = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
@@ -275,7 +275,7 @@ private fun QiblaInfoCard(
                             imageVector = Icons.Rounded.Navigation,
                             contentDescription = null,
                             modifier = Modifier
-                                .padding(20.dp)
+                                .padding(16.dp)
                                 .size(32.dp),
                             tint = MaterialTheme.colorScheme.onSecondaryContainer
                         )
@@ -338,7 +338,7 @@ private fun QiblaCompassCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Surface(
@@ -412,7 +412,7 @@ private fun QiblaStyleSelector(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Surface(
