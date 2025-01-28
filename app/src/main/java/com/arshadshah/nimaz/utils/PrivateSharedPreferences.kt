@@ -47,10 +47,6 @@ class PrivateSharedPreferences @Inject constructor(
         editor.apply()
     }
 
-    fun getDataLong(key: String): Long {
-        return sharedPreferences.getLong(key, 0)
-    }
-
     fun saveDataFloat(customkey: String, data: Float) {
         editor.putFloat(customkey, data)
         editor.apply()
@@ -86,10 +82,6 @@ class PrivateSharedPreferences @Inject constructor(
     fun removeData(key: String) {
         editor.remove(key)
         editor.apply()
-    }
-
-    fun containsData(key: String): Boolean {
-        return sharedPreferences.contains(key)
     }
 
     fun getAllData(): Map<String, *> {

@@ -1,141 +1,137 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.viewModel.DuaViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Categories(
-    viewModel: DuaViewModel = viewModel(
-        key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY
-    ),
-    paddingValues: PaddingValues,
+    viewModel: DuaViewModel = hiltViewModel(),
+    navController: NavHostController,
     onNavigateToChapterListScreen: (String, Int) -> Unit,
 ) {
-    LaunchedEffect(true) { // If getCategories should be called only once, use a more meaningful key
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val categories by viewModel.categories.collectAsState()
+
+    LaunchedEffect(Unit) {
         viewModel.getCategories()
     }
 
-    val categories = viewModel.categories.collectAsState()
-    val loading = viewModel.isLoading.collectAsState()
-
-    // Determine the item count and content based on loading state
-    val itemCount = if (loading.value) 5 else categories.value.size
-    val itemContent: @Composable (Int) -> Unit = { index ->
-        if (loading.value) {
-            Category(
-                title = "Category $index",
-                onClicked = {},
-                loading = true,
-                number = index
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = "Hisnul Muslim",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        AnimatedVisibility(
+                            visible = categories.isNotEmpty(),
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Text(
+                                text = "${categories.size} Categories Available",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = { navController.popBackStack() }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    // Refresh action
+                    IconButton(onClick = {
+                        viewModel.refreshData()
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Refreshing categories...")
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh"
+                        )
+                    }
+                }
             )
-        } else {
-            Category(
-                number = index + 1,
-                title = categories.value[index].name,
-                loading = false,
-                onClicked = {
-                    onNavigateToChapterListScreen(
-                        categories.value[index].name,
-                        categories.value[index].id
+        }
+    ) { paddingValues ->
+        DuaTabs(
+            viewModel = viewModel,
+            navController = navController,
+            paddingValues = paddingValues,
+            onDuaClick = { dua ->
+                scope.launch {
+                    // Handle suspending functions in a coroutine
+                    val chapter = viewModel.getChapterById(dua.chapter_id)
+                    val category = viewModel.getCategoryById(chapter?.category_id ?: 0)
+
+                    // Navigate after getting the data
+                    navController.navigate(
+                        CHAPTER_SCREEN_ROUTE
+                            .replace(
+                                "{chapterId}",
+                                dua.chapter_id.toString()
+                            )
+                            .replace(
+                                "{categoryName}",
+                                category?.name ?: "Uncategorized"
+                            )
                     )
                 }
-            )
-        }
-    }
-
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-        modifier = Modifier
-            .padding(paddingValues)
-            .padding(8.dp)
-            .fillMaxWidth(),
-    ) {
-        LazyColumn {
-            items(itemCount) {
-                itemContent(it)
-                //if (it < itemCount - 1) Divider()
-                if (it < itemCount - 1) {
-                    HorizontalDivider()
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun Category(
-    title: String,
-    icon: Int? = null,
-    description: String = "",
-    onClicked: () -> Unit = {},
-    loading: Boolean,
-    number: Int,
-) {
-    Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .fillMaxWidth()
-            .clickable(onClick = onClicked, enabled = !loading)
-            .placeholder(
-                visible = loading,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(4.dp),
-                highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
-    ) {
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text = "${number}.",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            },
+            onNavigateToChapterListScreen = onNavigateToChapterListScreen
         )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        icon?.let {
-            Image(
-                painter = painterResource(id = it),
-                contentDescription = description,
-                modifier = Modifier.size(32.dp)
-            )
-        }
     }
 }

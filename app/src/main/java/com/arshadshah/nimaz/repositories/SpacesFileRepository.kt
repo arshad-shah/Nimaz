@@ -2,169 +2,115 @@ package com.arshadshah.nimaz.repositories
 
 import android.content.Context
 import android.util.Log
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferType
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
-import com.amazonaws.regions.Region
-import com.amazonaws.services.s3.AmazonS3Client
+import com.arshadshah.nimaz.BuildConfig
+import dagger.hilt.android.qualifiers.ApplicationContext
 import es.dmoral.toasty.Toasty
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
 
-interface SpaceRegionRepresentable {
-
-    fun endpoint(): String
-}
-
-/**
- * Represents a region in which a Digital Ocean Space can be created
- */
-enum class SpaceRegion : SpaceRegionRepresentable {
-
-    //new york
-    NYC {
-
-        override fun endpoint(): String {
-            return "https://nyc3.digitaloceanspaces.com"
-        }
-    },
-}
-
-class SpacesFileRepository(context: Context) {
-
-    private val accesskey = "DO00P7G3HY2YDGKTKTLL"
-    private val secretkey = "dkCegR9Rb7B5LexhVifi85mfSTComyDpy8Z/sl6dY/U"
-    private val spacename = "quran-audio"
-    private val spaceregion = SpaceRegion.NYC
-
-    private val filetype = "mp3"
-
-    private var transferUtility: TransferUtility
-    private var appContext: Context
-
-    init {
-        val credentials = StaticCredentialsProvider(BasicAWSCredentials(accesskey, secretkey))
-        val client = AmazonS3Client(credentials, Region.getRegion("us-east-1"))
-        client.endpoint = spaceregion.endpoint()
-        transferUtility = TransferUtility.builder().s3Client(client).context(context).build()
-        appContext = context
+@Singleton
+class SpacesFileRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val transferUtility: TransferUtility
+) {
+    companion object {
+        private const val TAG = "SpacesFileRepository"
+        private const val FILE_TYPE = "mp3"
+        private const val BASE_PATH = "mishary"
     }
 
-    //get all ayat for a surah
-
-
     /**
-     * Downloads example file from a DO Space
+     * Downloads aya file from Digital Ocean Space
      */
     fun downloadAyaFile(
         suraNumber: Int,
         ayaNumber: Int,
         callback: (File?, Exception?, progress: Int, completed: Boolean) -> Unit,
     ) {
-        val surahNumber = if (suraNumber < 10)
-            "00$suraNumber"
-        else if (suraNumber < 100)
-            "0$suraNumber"
-        else
-            "$suraNumber"
+        try {
+            val formattedSura = formatNumber(suraNumber)
+            val formattedAya = formatNumber(ayaNumber)
 
-        val ayahNumber = if (ayaNumber < 10)
-            "00$ayaNumber"
-        else if (ayaNumber < 100)
-            "0$ayaNumber"
-        else
-            "$ayaNumber"
-
-        //Create a local File object to save the remote file to
-        val file = File("${appContext.filesDir}/quran/$surahNumber/$ayahNumber.$filetype")
-
-        //Download the file from DO Space
-        //mishary/quran-surah-001-verse-001.mp3
-        val listener = transferUtility.download(
-            spacename,
-            "mishary/quran-surah-$surahNumber-verse-$ayahNumber.$filetype",
-            file
-        )
-
-        //Listen to the progress of the download, and call the callback when the download is complete
-        listener.setTransferListener(object : TransferListener {
-            override fun onProgressChanged(
-                id: Int,
-                bytesCurrent: Long,
-                bytesTotal: Long,
-            ) {
-                Log.d(
-                    "S3 Download",
-                    "Progress ${((bytesCurrent / bytesTotal) * 100)}"
-                )
-                callback(
-                    null,
-                    null,
-                    ((bytesCurrent / bytesTotal) * 100).toInt(),
-                    false
-                )
+            // Create directories if they don't exist
+            val directory = File("${context.filesDir}/quran/$formattedSura").apply {
+                mkdirs()
             }
 
-            override fun onStateChanged(
-                id: Int,
-                state: TransferState?,
-            ) {
-                when (state) {
-                    TransferState.COMPLETED -> {
-                        Log.d("S3 Download", "Completed")
-                        callback(file, null, 100, true)
-                    }
+            val file = File(directory, "$formattedAya.$FILE_TYPE")
+            val key = buildS3Key(formattedSura, formattedAya)
 
-                    TransferState.IN_PROGRESS -> {
-                        Log.d("S3 Download", "In Progress")
-                        callback(null, null, 0, false)
-                    }
+            val transfer = transferUtility.download(BuildConfig.SPACE_NAME, key, file)
 
-                    TransferState.FAILED -> {
-                        Log.d("S3 Download", "Failed")
-                        callback(
-                            null,
-                            Exception("Failed to download file"),
-                            0,
-                            false
-                        )
-                        Toasty.error(
-                            appContext,
-                            "Failed to download file"
-                        ).show()
-                    }
+            transfer.setTransferListener(createTransferListener(callback, file))
 
-                    TransferState.CANCELED -> {
-                        Log.d("S3 Download", "Canceled")
-                        callback(
-                            null,
-                            Exception("Canceled"),
-                            0,
-                            false
-                        )
-                        Toasty.error(appContext, "Canceled").show()
-                    }
-
-                    else -> {
-                        Log.d("S3 Download", "Other")
-                        callback(null, null, 0, false)
-                    }
-                }
-            }
-
-            override fun onError(id: Int, ex: Exception?) {
-                Log.e("S3 Download", ex.toString())
-                callback(null, ex, 0, false)
-                Toasty.error(appContext, ex.toString()).show()
-            }
-        })
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initiating download: ${e.message}", e)
+            callback(null, e, 0, false)
+        }
     }
 
-    //cancl all downloads
-    fun cancelAllDownloads() {
-        transferUtility.cancelAllWithType(TransferType.DOWNLOAD)
+    private fun formatNumber(number: Int): String = when {
+        number < 10 -> "00$number"
+        number < 100 -> "0$number"
+        else -> "$number"
+    }
+
+    private fun buildS3Key(sura: String, aya: String): String =
+        "$BASE_PATH/quran-surah-$sura-verse-$aya.$FILE_TYPE"
+
+    private fun createTransferListener(
+        callback: (File?, Exception?, progress: Int, completed: Boolean) -> Unit,
+        file: File
+    ) = object : TransferListener {
+        override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
+            if (bytesTotal <= 0) return
+            val progress = ((bytesCurrent.toDouble() / bytesTotal) * 100).toInt()
+            Log.d(TAG, "Download progress: $progress%")
+            callback(null, null, progress, false)
+        }
+
+        override fun onStateChanged(id: Int, state: TransferState?) {
+            when (state) {
+                TransferState.COMPLETED -> {
+                    Log.d(TAG, "Download completed")
+                    callback(file, null, 100, true)
+                }
+
+                TransferState.IN_PROGRESS -> {
+                    Log.d(TAG, "Download in progress")
+                    callback(null, null, 0, false)
+                }
+
+                TransferState.FAILED -> handleFailure("Download failed")
+                TransferState.CANCELED -> handleFailure("Download canceled")
+                else -> {
+                    Log.d(TAG, "Transfer state: $state")
+                    callback(null, null, 0, false)
+                }
+            }
+        }
+
+        override fun onError(id: Int, ex: Exception?) {
+            handleFailure("Download error: ${ex?.message}", ex)
+        }
+
+        private fun handleFailure(message: String, exception: Exception? = null) {
+            Log.e(TAG, message, exception)
+            callback(null, exception ?: Exception(message), 0, false)
+            showError(message)
+        }
+
+        private fun showError(message: String) {
+            try {
+                Toasty.error(context, message).show()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error showing toast: ${e.message}")
+            }
+        }
     }
 }

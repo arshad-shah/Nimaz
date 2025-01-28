@@ -13,8 +13,9 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
+import javax.inject.Inject
 
-class PrayerTimesService(
+class PrayerTimesService @Inject constructor(
     private val context: Context,
     private val prayerTimesRepository: PrayerTimesRepository
 ) {
@@ -240,12 +241,12 @@ class PrayerTimesService(
 }
 
 data class PrayerTimesData(
-    val fajr: LocalDateTime?,
-    val sunrise: LocalDateTime?,
-    val dhuhr: LocalDateTime?,
-    val asr: LocalDateTime?,
-    val maghrib: LocalDateTime?,
-    val isha: LocalDateTime?
+    val fajr: LocalDateTime? = null,
+    val sunrise: LocalDateTime? = null,
+    val dhuhr: LocalDateTime? = null,
+    val asr: LocalDateTime? = null,
+    val maghrib: LocalDateTime? = null,
+    val isha: LocalDateTime? = null
 )
 
 data class CurrentAndNextPrayer(

@@ -11,7 +11,7 @@ class NimazWidgetPrayerReciever : GlanceAppWidgetReceiver() {
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
-        PrayerTimesTrackerWorker.enqueue(context)
+        PrayerTimesTrackerWorker.enqueue(context, true)
     }
 
     /**

@@ -1,13 +1,27 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,293 +29,274 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
-import com.arshadshah.nimaz.R
+import androidx.compose.ui.window.PopupProperties
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBarMenu(number: Int, isSurah: Boolean, getAllAyats: (Int, String) -> Unit) {
-
-    val translationType =
-        PrivateSharedPreferences(LocalContext.current).getData(
-            key = AppConstants.TRANSLATION_LANGUAGE,
-            s = "English"
-        )
+fun TopBarMenu(
+    number: Int,
+    isSurah: Boolean,
+    getAllAyats: (Int, String) -> Unit
+) {
+    val translationType = PrivateSharedPreferences(LocalContext.current)
+        .getData(key = AppConstants.TRANSLATION_LANGUAGE, s = "English")
     val translation = when (translationType) {
         "English" -> "english"
         "Urdu" -> "urdu"
         else -> "english"
     }
 
-    //create a list with numbers from 1 to 114
-    //its expensive to create a list every time the composable is recomposed
-    //so we use remember to create the list only once
-    val surahList = remember { mutableListOf<Int>() }
-    val juzList = remember { mutableListOf<Int>() }
-    val (selectedSurah, setSelectedSurah) = remember { mutableIntStateOf(number) }
+    val list = remember {
+        if (isSurah) (1..114).toList() else (1..30).toList()
+    }
 
-    //create the list using a coroutine
-    val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            if (isSurah) {
-                for (i in 1..114) {
-                    surahList.add(i)
+    var selectedNumber by remember { mutableIntStateOf(number) }
+    var expanded by remember { mutableStateOf(false) }
+    val label = if (isSurah) "Surah" else "Juz"
+
+    val scale by animateFloatAsState(
+        targetValue = if (expanded) 1.02f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    Box {
+        ElevatedCard(
+            modifier = Modifier
+                .width(160.dp)
+                .height(52.dp)
+                .padding(start = 8.dp)
+                .scale(scale)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { expanded = !expanded },
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp
+            ),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = selectedNumber.toString(),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
-            } else {
-                for (i in 1..30) {
-                    juzList.add(i)
+
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    AnimatedContent(
+                        targetState = expanded,
+                        transitionSpec = {
+                            rotateAnimation().using(SizeTransform(clip = false))
+                        },
+                        label = "Dropdown Arrow"
+                    ) { isExpanded ->
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        if (expanded) {
+            Popup(
+                alignment = Alignment.TopStart,
+                onDismissRequest = { expanded = false },
+                properties = PopupProperties(focusable = true)
+            ) {
+                ElevatedCard(
+                    modifier = Modifier
+                        .width(160.dp)
+                        .height(320.dp)
+                        .padding(top = 4.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.elevatedCardElevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 8.dp
+                    ),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    val listState = rememberLazyListState(
+                        initialFirstVisibleItemIndex = (selectedNumber - 1).coerceAtLeast(0)
+                    )
+
+                    LazyColumn(
+                        state = listState,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(list.size) { index ->
+                            QuranSectionItem(
+                                number = list[index],
+                                label = label,
+                                isSelected = list[index] == selectedNumber,
+                                onClick = {
+                                    selectedNumber = list[index]
+                                    getAllAyats(list[index], translation)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
+}
 
-    val label = when (isSurah) {
-        true -> "Surah"
-        false -> "Juz"
+@Composable
+private fun QuranSectionItem(
+    number: Int,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val transition = updateTransition(isSelected, label = "selection")
+    val elevation by transition.animateDp { selected ->
+        if (selected) 4.dp else 1.dp
+    }
+    val scale by transition.animateFloat { selected ->
+        if (selected) 1.02f else 1f
     }
 
-    val list = when (isSurah) {
-        true -> surahList
-        false -> juzList
-    }
-
-    val expanded = remember { mutableStateOf(false) }
-    ElevatedCard(
+    Surface(
         modifier = Modifier
-            .width(160.dp)
-            .height(48.dp)
-            .padding(start = 8.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable {
-                expanded.value = !expanded.value
-            },
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
+            .fillMaxWidth()
+            .padding(4.dp)
+            .scale(scale)
+            .clickable(onClick = onClick),
+        color = if (isSelected)
+            MaterialTheme.colorScheme.primaryContainer
+        else
+            MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.medium,
+        shadowElevation = elevation,
+        tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            //the text
-            Text(
-                modifier = Modifier
-                    .padding(8.dp),
-                text = label,
-                textAlign = TextAlign.Start,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge
-            )
-            Badge(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            )
-            {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = selectedSurah.toString(),
+                    text = label,
                     style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Center,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurface
                 )
             }
-            Crossfade(
-                targetState = expanded.value,
-                animationSpec = tween(durationMillis = 300), label = ""
-            ) { expanded ->
-                if (expanded) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow_up_icon),
-                        contentDescription = "dropdown icon",
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(24.dp)
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow_down_icon),
-                        contentDescription = "dropdown icon",
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(24.dp)
-                    )
-                }
-            }
-        }
-    }
 
-    if (expanded.value) {
+            Badge(
+                containerColor = if (isSelected)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = if (isSelected)
+                    MaterialTheme.colorScheme.onPrimary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
 
-        Popup(
-            alignment = Alignment.BottomEnd,
-            onDismissRequest = { expanded.value = false },
-        ) {
-            DropdownMenuQuranSection(
-                getAllAyats = getAllAyats,
-                selectedSurah = selectedSurah,
-                setSelectedSurah = setSelectedSurah,
-                expanded = expanded,
-                list = list,
-                translation = translation,
-                label = label
-            )
-        }
-    }
-}
-
-//drop down menu
-@Composable
-fun DropdownMenuQuranSection(
-    getAllAyats: (Int, String) -> Unit,
-    expanded: MutableState<Boolean>,
-    translation: String,
-    label: String,
-    list: List<Int>,
-    setSelectedSurah: (Int) -> Unit,
-    selectedSurah: Int,
-) {
-
-    val scope = rememberCoroutineScope()
-    val onSelected = { surah: Int ->
-        scope.launch {
-            setSelectedSurah(surah)
-            getAllAyats(surah, translation)
-            expanded.value = false
-        }
-    }
-
-    val listState = rememberLazyListState(selectedSurah, -500)
-
-    ElevatedCard(
-        modifier = Modifier
-            .width(150.dp)
-            .height(300.dp)
-            .shadow(12.dp, MaterialTheme.shapes.medium)
-            .clip(MaterialTheme.shapes.medium),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-        ),
-        shape = MaterialTheme.shapes.medium,
-    ) {
-        LazyColumn(
-            state = listState,
-        ) {
-            items(list.size) { index ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            vertical = if (index == 0 || index == list.size - 1) 3.dp else 1.dp,
-                            horizontal = 3.dp
-                        )
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable {
-                            onSelected(list[index])
-                        }
-                        .size(48.dp)
-                        .border(
-                            width = 2.dp,
-                            color = if (list[index] == selectedSurah) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                64.dp
-                            ),
-                            shape = MaterialTheme.shapes.medium
-                        )
-                        .background(
-                            color = if (list[index] == selectedSurah) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
-                            }
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "$label ${list[index]}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .padding(horizontal = 18.dp)
-                            .fillMaxWidth(),
-                        fontWeight = if (list[index] == selectedSurah) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (list[index] == selectedSurah) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
-                }
+            ) {
+                Text(
+                    text = number.toString(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DropdownMenuSurahPreview() {
-    DropdownMenuQuranSection(
-        getAllAyats = { _, _ -> },
-        expanded = remember { mutableStateOf(false) },
-        translation = "english",
-        label = "Surah",
-        list = (1..114).toList(),
-        setSelectedSurah = { },
-        selectedSurah = 1
-    )
-}
+@OptIn(ExperimentalAnimationApi::class)
+private fun rotateAnimation(
+    duration: Int = 300
+): ContentTransform =
+    (slideInVertically { height -> height } + fadeIn())
+        .togetherWith(slideOutVertically { height -> -height } + fadeOut())
 
-@Preview(showBackground = true)
-@Composable
-fun DropdownMenuJuzPreview() {
-    DropdownMenuQuranSection(
-        getAllAyats = { _, _ -> },
-        expanded = remember { mutableStateOf(false) },
-        translation = "english",
-        label = "Juz",
-        list = (1..30).toList(),
-        setSelectedSurah = { },
-        selectedSurah = 1
-    )
-}
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun DropdownMenuTogglerPreview() {
-    TopBarMenu(number = 114, isSurah = true, getAllAyats = { _, _ -> })
+fun TopBarMenuPreview() {
+    TopBarMenu(
+        number = 1,
+        isSurah = true,
+        getAllAyats = { _, _ -> }
+    )
 }

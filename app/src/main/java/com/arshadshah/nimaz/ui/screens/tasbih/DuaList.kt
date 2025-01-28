@@ -1,92 +1,408 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.tasbih.DuaListItem
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.local.models.LocalDua
+import com.arshadshah.nimaz.ui.components.common.NoResultFound
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
+import com.arshadshah.nimaz.ui.components.common.PageLoading
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.viewModel.DuaViewModel
+import kotlinx.coroutines.coroutineScope
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DuaList(chapterId: String, paddingValues: PaddingValues) {
-    val context = LocalContext.current
-    val viewModel = viewModel(
-        key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY,
-        initializer = { DuaViewModel() },
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
+fun DuaList(
+    chapterId: String,
+    navController: NavHostController,
+    viewModel: DuaViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val duas by viewModel.duas.collectAsState()
+    val listState = rememberLazyListState()
+
+    val chapterName = remember { mutableStateOf("Supplications") }
 
     LaunchedEffect(Unit) {
         viewModel.getDuas(chapterId.toInt())
     }
 
-    val duaState = remember {
-        viewModel.duas
-    }.collectAsState()
-
-    //if a new item is viewed, then scroll to that item
-    val sharedPref = context.getSharedPreferences("dua", 0)
-    val listState = rememberLazyListState()
-    val visibleItemIndex =
-        remember { mutableIntStateOf(sharedPref.getInt("visibleItemIndexDua-${chapterId}", -1)) }
-
-    //when we close the app, we want to save the index of the last item viewed so that we can scroll to it when we open the app again
-    LaunchedEffect(remember { derivedStateOf { listState.firstVisibleItemIndex } })
-    {
-        sharedPref.edit()
-            .putInt("visibleItemIndexDua-${chapterId}", listState.firstVisibleItemIndex).apply()
+    LaunchedEffect(chapterId) {
+        val chapter = coroutineScope { viewModel.getChapterById(chapterId.toInt()) }
+        chapterName.value = chapter?.english_title ?: "Supplications"
     }
 
-    //when we reopen the app, we want to scroll to the last item viewed
-    LaunchedEffect(visibleItemIndex.value)
-    {
-        if (visibleItemIndex.value != -1) {
-            listState.scrollToItem(visibleItemIndex.value)
-            //set the value back to -1 so that we don't scroll to the same item again
-            visibleItemIndex.value = -1
-        }
-    }
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(paddingValues)
-            .padding(8.dp)
-    ) {
-        LazyColumn(
-            modifier = Modifier.testTag(AppConstants.TEST_TAG_CHAPTER),
-            state = listState,
-            content = {
-                items(duaState.value.size)
-                {
-                    DuaListItem(
-                        dua = duaState.value[it],
-                        loading = false
-                    )
-                    if (it != duaState.value.size - 1) {
-                        //add a divider
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.background,
-                            thickness = 2.dp
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = chapterName.value)
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = { navController.popBackStack() }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
                         )
                     }
                 }
-            })
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(paddingValues)
+        ) {
+            when (uiState) {
+                is DuaViewModel.UiState.Loading -> PageLoading()
+                is DuaViewModel.UiState.Error -> PageErrorState((uiState as DuaViewModel.UiState.Error).message)
+                is DuaViewModel.UiState.Success<*> -> {
+                    when {
+                        duas.isEmpty() -> NoResultFound(
+                            title = "No Duas Found",
+                            subtitle = "This chapter appears to be empty"
+                        )
+
+                        else -> DuasContent(
+                            duas = duas,
+                            listState = listState,
+                            onFavoriteClick = { dua -> viewModel.toggleFavorite(dua) }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
+
+@Composable
+private fun DuasContent(
+    duas: List<LocalDua>,
+    listState: LazyListState,
+    onFavoriteClick: (LocalDua) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        item {
+            DuaGroupCard(
+                duas = duas,
+                onFavoriteClick = onFavoriteClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun DuaGroupCard(
+    duas: List<LocalDua>,
+    onFavoriteClick: (LocalDua) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Duas",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "${duas.size}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+            }
+
+            // Duas List
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                duas.forEach { dua ->
+                    DuaItem(
+                        dua = dua,
+                        onFavoriteClick = { onFavoriteClick(dua) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DuaItem(
+    dua: LocalDua,
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Favorite Button and Arabic Text Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (dua.favourite == 1)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    IconButton(
+                        onClick = onFavoriteClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(
+                                id = if (dua.favourite == 1)
+                                    R.drawable.favorite_icon
+                                else R.drawable.favorite_icon_unseletced
+                            ),
+                            contentDescription = if (dua.favourite == 1)
+                                "Remove from favorites"
+                            else "Add to favorites",
+                            tint = if (dua.favourite == 1)
+                                MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Arabic Text
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = dua.arabic_dua.cleanText(),
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = utmaniQuranFont,
+                            fontSize = 28.sp,
+                            lineHeight = 46.sp,
+                            textAlign = TextAlign.Start
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        softWrap = true,
+                        overflow = TextOverflow.Visible
+                    )
+                }
+            }
+
+            // Translation
+            Surface(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = dua.english_translation.cleanText(),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontStyle = FontStyle.Italic,
+                        lineHeight = 28.sp,
+                        letterSpacing = 0.3.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp),
+                    softWrap = true,
+                    overflow = TextOverflow.Visible
+                )
+            }
+
+            // Reference
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        ) {
+                            append("Reference: ")
+                        }
+                        withStyle(
+                            style = SpanStyle(
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.9f)
+                            )
+                        ) {
+                            append(dua.english_reference.formatReference())
+                        }
+                    },
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        lineHeight = 20.sp
+                    ),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.quran_icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "No Duas Found",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "This chapter appears to be empty",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+
+fun String.cleanText(): String {
+    return this
+        .replace(Regex("<[^>]*>"), "")  // Remove HTML tags
+        .replace("\\r\\n", "\n")        // Convert literal "\r\n" to actual line break
+        .replace("\\n", "\n")           // Convert literal "\n" to actual line break
+        .replace("\\r", "\n")           // Convert literal "\r" to line break
+        .trim()
+}
+
+/**
+ * Formats a reference string by cleaning up quotes, backslashes and whitespace.
+ */
+private fun String.formatReference(): String = this
+    .replace("\"", "")         // Remove quotes
+    .replace("\\", "")         // Remove backslashes
+    .replace(Regex("\\s+"), " ") // Normalize whitespace to single spaces
+    .trim()                    // Remove leading/trailing whitespace

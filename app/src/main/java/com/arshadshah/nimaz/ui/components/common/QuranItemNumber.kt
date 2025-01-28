@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -10,27 +10,64 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
+import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
-fun QuranItemNumber(number: Int) {
-    Box(contentAlignment = Alignment.Center) {
-        // Draw the star image
+fun QuranItemNumber(
+    number: Int,
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
+    loading: Boolean = false
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+    ) {
         Icon(
             painter = painterResource(id = R.drawable.number_back_icon),
-            tint = MaterialTheme.colorScheme.secondary,
-            contentDescription = null, // Provide a proper content description
+            contentDescription = "Number $number background",
+            tint = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
-                .size(48.dp)
+                .matchParentSize()
+                .placeholder(
+                    visible = loading,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
         )
+
         Text(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(4.dp),
             text = number.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            style = style,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(4.dp)
+                .placeholder(
+                    visible = loading,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun QuranItemNumberPreview() {
+    NimazTheme { QuranItemNumber(number = 1) }
+}
+
+//dark mode1
+@Preview(showBackground = true)
+@Composable
+fun QuranItemNumberPreviewDark() {
+    NimazTheme(darkTheme = true) { QuranItemNumber(number = 1) }
 }

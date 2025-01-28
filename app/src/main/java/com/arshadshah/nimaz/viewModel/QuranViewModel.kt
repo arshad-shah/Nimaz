@@ -5,19 +5,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.FULL_QURAN_DOWNLOADED
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalSurah
-import com.arshadshah.nimaz.utils.LocalDataStore
+import com.arshadshah.nimaz.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.QuranUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.Locale
+import javax.inject.Inject
 
-class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : ViewModel() {
+@HiltViewModel
+class QuranViewModel @Inject constructor(
+    private val sharedPreferences: PrivateSharedPreferences,
+    private val spaceFilesRepository: SpacesFileRepository,
+    private val dataStore: DataStore
+) : ViewModel() {
 
     //general state for error and loading
     private val _errorState = MutableStateFlow("")
@@ -38,7 +47,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     val ayaListState = _ayaListState.asStateFlow()
 
     private val _currentAyatScreenNumber = MutableStateFlow(1)
-    val currentAyatScreenNumber = _currentAyatScreenNumber.asStateFlow()
 
     //state for quran menu features like page display, font size, font type, etc
     private val _arabic_Font_size = MutableStateFlow(26.0f)
@@ -197,10 +205,30 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
         viewModelScope.launch(Dispatchers.IO) {
             _errorState.value = ""
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.deleteAllAyat()
             } catch (e: Exception) {
                 _errorState.value = e.message.toString()
+            }
+        }
+    }
+
+    fun downloadAyaFile(
+        surahNumber: Int,
+        ayaNumberInSurah: Int,
+        downloadCallback: (File?, Exception?, progress: Int, completed: Boolean) -> Unit,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                spaceFilesRepository.downloadAyaFile(
+                    surahNumber,
+                    ayaNumberInSurah,
+                    downloadCallback
+                )
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error downloading file: ${e.message}", e)
+                downloadCallback(null, e, 0, false)
+                _errorState.value = e.message.toString()
+                _loadingState.value = false
             }
         }
     }
@@ -210,7 +238,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
             _loadingState.value = true
             _errorState.value = ""
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val surahList = dataStore.getAllSurah().toMutableList() as ArrayList<LocalSurah>
                 _surahListState.value = surahList
                 _loadingState.value = false
@@ -228,7 +255,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
             _loadingState.value = true
             _errorState.value = ""
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val juzList = dataStore.getAllJuz().toMutableList() as ArrayList<LocalJuz>
                 _juzListState.value = juzList
                 _loadingState.value = false
@@ -247,7 +273,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
                 _loadingState.value = true
                 _errorState.value = ""
                 _ayaListState.value = ArrayList()
-                val dataStore = LocalDataStore.getDataStore()
                 val languageConverted = language.uppercase(Locale.ROOT)
                 val ayatList = dataStore.getAyasOfSurah(surahNumber)
                 val newList =
@@ -336,7 +361,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
             _errorState.value = ""
             _ayaListState.value = ArrayList()
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val languageConverted = language.uppercase(Locale.ROOT)
                 val listOfJuzAyat =
                     dataStore.getAyasOfJuz(juzNumber) as ArrayList<LocalAya>
@@ -591,7 +615,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.addAudioToAya(surahNumber, ayaNumberInSurah, audio)
             } catch (e: Exception) {
                 Log.d("addAudioToAya", e.message ?: "Unknown error")
@@ -608,7 +631,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.bookmarkAya(ayaNumber, surahNumber, ayaNumberInSurah, bookmark)
             } catch (e: Exception) {
                 Log.d("bookmarkAya", e.message ?: "Unknown error")
@@ -625,7 +647,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.favoriteAya(ayaNumber, surahNumber, ayaNumberInSurah, favorite)
             } catch (e: Exception) {
                 Log.d("favoriteAya", e.message ?: "Unknown error")
@@ -637,7 +658,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     private fun addNoteToAya(id: Int, surahNumber: Int, ayaNumberInSurah: Int, note: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.addNoteToAya(id, surahNumber, ayaNumberInSurah, note)
             } catch (e: Exception) {
                 Log.d("addNoteToAya", e.message ?: "Unknown error")
@@ -649,7 +669,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     private fun getNoteForAya(ayaNumber: Int, surahNumber: Int, ayaNumberInSurah: Int) {
         viewModelScope.launch(Dispatchers.Main) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val note = dataStore.getNoteOfAya(ayaNumber, surahNumber, ayaNumberInSurah)
             } catch (e: Exception) {
                 Log.d("getNoteForAya", e.message ?: "Unknown error")
@@ -674,7 +693,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.deleteNoteFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
                 val notes = dataStore.getAyasWithNotes()
                 _notes.value = notes
@@ -691,7 +709,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.deleteBookmarkFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
                 val bookmarks = dataStore.getBookmarkedAyas()
                 _bookmarks.value = bookmarks
@@ -708,7 +725,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 dataStore.deleteFavoriteFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
                 val favorites = dataStore.getFavoritedAyas()
                 _favorites.value = favorites
@@ -721,7 +737,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     private fun getAllNotes() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val notes = dataStore.getAyasWithNotes()
                 _notes.value = notes
             } catch (e: Exception) {
@@ -733,7 +748,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     private fun getAllFavorites() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val favorites = dataStore.getFavoritedAyas()
                 _favorites.value = favorites
             } catch (e: Exception) {
@@ -745,7 +759,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     private fun getAllBookmarks() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val bookmarks = dataStore.getBookmarkedAyas()
                 _bookmarks.value = bookmarks
             } catch (e: Exception) {
@@ -757,7 +770,6 @@ class QuranViewModel(private val sharedPreferences: PrivateSharedPreferences) : 
     fun getSurahById(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
                 val surah = dataStore.getSurahById(id)
                 _surahState.value = surah
             } catch (e: Exception) {

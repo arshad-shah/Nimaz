@@ -3,144 +3,152 @@ package com.arshadshah.nimaz.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.dashboard.getTimerText
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.data.local.models.CountDownTime
+import com.arshadshah.nimaz.ui.components.common.CompactLocationTopBar
+import com.arshadshah.nimaz.ui.components.dashboard.getEnhancedTimerText
 import com.arshadshah.nimaz.ui.components.prayerTimes.AnimatedArcView
+import com.arshadshah.nimaz.ui.components.prayerTimes.ArcViewState
 import com.arshadshah.nimaz.ui.components.prayerTimes.NextPrayerTimerText
 import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
-import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
+import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
 import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+private const val SCREEN_WIDTH_THRESHOLD = 720
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrayerTimesScreen(
-    paddingValues: PaddingValues,
+    navController: NavHostController,
+    viewModel: PrayerTimesViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
-    val viewModel = viewModel(
-        key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY,
-        initializer = { PrayerTimesViewModel(context) },
-        viewModelStoreOwner = LocalContext.current as androidx.activity.ComponentActivity
-    )
-    //reload the data when the screen is resumed
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.LOAD_LOCATION)
-        viewModel.handleEvent(context, PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
-    }
+    val prayerTimesState by viewModel.prayerTimesState.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val screenWidth = context.resources.displayMetrics.widthPixels
 
-    val prayerTimesState = viewModel.prayerTimesState.collectAsState()
-    val locationState = prayerTimesState.value.locationName
-    val latitude = prayerTimesState.value.latitude
-    val longitude = prayerTimesState.value.longitude
-
-    val isLoading = viewModel.isLoading.collectAsState()
-    val error = viewModel.error.collectAsState()
-
-
-    LaunchedEffect(locationState, latitude, longitude) {
-        //update the prayer times
-        viewModel.handleEvent(
-            context, PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-                PrayerTimesParamMapper.getParams(context)
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                navController
             )
-        )
-        viewModel.handleEvent(
-            context,
-            PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-                context
-            )
-        )
-    }
-    val currentPrayerName = prayerTimesState.value.currentPrayerName
-    val nextPrayerName = prayerTimesState.value.nextPrayerName
-    val screenWidth = LocalContext.current.resources.displayMetrics.widthPixels
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-        verticalArrangement = Arrangement.SpaceBetween,
+        }
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .weight(3f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
+                .fillMaxSize()
+                .padding(it),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            if (!isLoading.value) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(4.dp)
-                ) {
-                    //if screen is too small then hide the arc
-                    if (screenWidth > 720) {
-                        AnimatedArcView(
-                            timePoints =
-                            listOf(
-                                prayerTimesState.value.fajrTime,
-                                prayerTimesState.value.sunriseTime,
-                                prayerTimesState.value.dhuhrTime,
-                                prayerTimesState.value.asrTime,
-                                prayerTimesState.value.maghribTime,
-                                prayerTimesState.value.ishaTime
-                            ),
-                            prayerTimesState.value.countDownTime,
-                            topPadding = paddingValues.calculateTopPadding(),
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(),
-                        contentAlignment = Alignment.BottomCenter
-                    ) {
-                        NextPrayerTimerText(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            prayerNameDisplay = nextPrayerName,
-                            nextPrayerTimeDisplay = prayerTimesState.value.nextPrayerTime.format(
-                                DateTimeFormatter.ofPattern("HH:mm")
-                            ),
-                            timerText = getTimerText(prayerTimesState.value.countDownTime),
-                            isLoading = isLoading.value,
-                            horizontalPosition = Alignment.CenterHorizontally
-                        )
-                    }
+            CompactLocationTopBar(prayerTimesState.locationName, isLoading)
+
+            Box(
+                modifier = Modifier
+                    .weight(3f)
+                    .fillMaxWidth()
+            ) {
+                PrayerTimesHeader(
+                    prayerTimesState = prayerTimesState,
+                    showArc = screenWidth > SCREEN_WIDTH_THRESHOLD,
+                    isLoading = isLoading
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier.weight(7f),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                item {
+                    PrayerTimesList(
+                        prayerTimesState = prayerTimesState,
+                        isLoading = isLoading
+                    )
                 }
             }
         }
+    }
+}
 
-        LazyColumn(
-            modifier = Modifier
-                .weight(7f),
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            item {
-                PrayerTimesList(
-                    prayerTimesState,
-                    error,
-                    isLoading,
-                    handleEvents = viewModel::handleEvent
+@Composable
+private fun PrayerTimesHeader(
+    prayerTimesState: PrayerTimesViewModel.PrayerTimesState,
+    showArc: Boolean,
+    isLoading: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp)
+    ) {
+        if (showArc) {
+            AnimatedArcView(
+                state = ArcViewState(
+                    timePoints = listOf(
+                        prayerTimesState.fajrTime,
+                        prayerTimesState.sunriseTime,
+                        prayerTimesState.dhuhrTime,
+                        prayerTimesState.asrTime,
+                        prayerTimesState.maghribTime,
+                        prayerTimesState.ishaTime
+                    ),
+                    countDownTime = prayerTimesState.countDownTime
                 )
-            }
+            )
+        }
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            NextPrayerTimerText(
+                prayerNameDisplay = prayerTimesState.nextPrayerName,
+                nextPrayerTimeDisplay = prayerTimesState.nextPrayerTime.format(
+                    DateTimeFormatter.ofPattern("HH:mm")
+                ),
+                timerText = getEnhancedTimerText(prayerTimesState.countDownTime),
+                isLoading = isLoading,
+                horizontalPosition = Alignment.CenterHorizontally
+            )
         }
     }
+}
+
+
+@Preview
+@Composable
+fun PrayerTimesHeaderPreview() {
+    PrayerTimesHeader(
+        prayerTimesState = PrayerTimesViewModel.PrayerTimesState(
+            fajrTime = LocalDateTime.now(),
+            sunriseTime = LocalDateTime.now().plusHours(2),
+            dhuhrTime = LocalDateTime.now().plusHours(3),
+            asrTime = LocalDateTime.now().plusHours(4),
+            maghribTime = LocalDateTime.now().plusHours(5),
+            ishaTime = LocalDateTime.now().plusHours(6),
+            nextPrayerName = "Maghrib",
+            nextPrayerTime = LocalDateTime.now().plusHours(7),
+            locationName = "Karachi",
+            countDownTime = CountDownTime(1, 2, 5)
+        ),
+        showArc = true,
+        isLoading = false,
+    )
 }

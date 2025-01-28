@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.calender
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,192 +7,244 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import io.github.boguszpawlowski.composecalendar.header.MonthState
-import java.time.LocalDate
 import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
-import kotlin.reflect.KFunction1
 
 @Composable
-fun CalenderHeader(
-    monthState: MonthState,
-    handleEvents: KFunction1<LocalDate, Unit>
+fun CalendarHeader(
+    currentMonth: YearMonth,
+    onMonthChange: (YearMonth) -> Unit,
+    onTodayClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val currentMonthYear = monthState.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
-    val hijriDate = HijrahDate.from(monthState.currentMonth.atDay(1))
-    val hijriFormatted = getFormattedHijriDate(YearMonth.from(hijriDate))
+    val currentMonthYear by remember(currentMonth) {
+        derivedStateOf {
+            currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+        }
+    }
 
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-        modifier = Modifier
+    val hijriInfo by remember(currentMonth) {
+        derivedStateOf {
+            getHijriMonthInfo(currentMonth)
+        }
+    }
+
+    ElevatedCard(
+        modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            CalendarNavigationButton(
-                iconId = R.drawable.angle_left_icon,
-                description = "Previous Month",
-                onClick = { changeMonth(monthState, -1, handleEvents) }
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    NavigationButton(
+                        onClick = { onMonthChange(currentMonth.minusMonths(1)) },
+                        icon = R.drawable.angle_left_icon,
+                        contentDescription = "Previous Month"
+                    )
 
-            CalendarMonthDisplay(
-                currentMonthYear = currentMonthYear,
-                hijriFormatted = hijriFormatted,
-                monthState = monthState,
-                handleEvents = handleEvents
-            )
+                    MonthYearDisplay(
+                        currentMonthYear = currentMonthYear,
+                        hijriInfo = hijriInfo,
+                        isCurrentMonth = currentMonth == YearMonth.now(),
+                        showPastIcon = currentMonth.isBefore(YearMonth.now()),
+                        showFutureIcon = currentMonth.isAfter(YearMonth.now()),
+                        onTodayClick = onTodayClick
+                    )
 
-            CalendarNavigationButton(
-                iconId = R.drawable.angle_right_icon,
-                description = "Next Month",
-                onClick = { changeMonth(monthState, 1, handleEvents) }
-            )
+                    NavigationButton(
+                        onClick = { onMonthChange(currentMonth.plusMonths(1)) },
+                        icon = R.drawable.angle_right_icon,
+                        contentDescription = "Next Month"
+                    )
+                }
+            }
         }
     }
 }
 
-fun getFormattedHijriDate(yearMonth: YearMonth): String {
-    val formatterHijriMonth = DateTimeFormatter.ofPattern("MMMM")
-    val uniqueHijriMonths = linkedSetOf<String>()
-
-    // Check the start, middle, and end of the month for Hijri months
-    val daysToCheck = listOf(1, yearMonth.lengthOfMonth() / 2, yearMonth.lengthOfMonth())
-    for (day in daysToCheck) {
-        val date = LocalDate.of(yearMonth.year, yearMonth.month, day)
-        val hijriDateForDay = HijrahDate.from(date)
-        uniqueHijriMonths.add(hijriDateForDay.format(formatterHijriMonth))
+@Composable
+private fun NavigationButton(
+    onClick: () -> Unit,
+    icon: Int,
+    contentDescription: String,
+    modifier: Modifier = Modifier
+) {
+    FilledIconButton(
+        onClick = onClick,
+        modifier = modifier.size(36.dp),
+        colors = IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            contentColor = MaterialTheme.colorScheme.primary
+        ),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Icon(
+            modifier = Modifier.size(18.dp),
+            painter = painterResource(id = icon),
+            contentDescription = contentDescription
+        )
     }
-
-    val hijriDate = HijrahDate.from(yearMonth.atDay(1))
-    val hijriFormattedYear = hijriDate.format(DateTimeFormatter.ofPattern("yyyy"))
-
-    return uniqueHijriMonths.joinToString(" / ") + " $hijriFormattedYear"
 }
 
-
 @Composable
-private fun CalendarMonthDisplay(
+private fun MonthYearDisplay(
     currentMonthYear: String,
-    hijriFormatted: String,
-    monthState: MonthState,
-    handleEvents: KFunction1<LocalDate, Unit>
+    hijriInfo: String,
+    isCurrentMonth: Boolean,
+    showPastIcon: Boolean,
+    showFutureIcon: Boolean,
+    onTodayClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth(0.8f)
+        modifier = modifier
             .clip(MaterialTheme.shapes.medium)
-            .clickable { navigateToCurrentMonth(monthState, handleEvents) },
+            .clickable(onClick = onTodayClick)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        if (monthState.currentMonth == YearMonth.now()) {
-            Text(
-                modifier = Modifier.padding(top = 4.dp),
-                text = "Today",
-                style = MaterialTheme.typography.titleSmall
-            )
-        } else {
-            TodayIndicator(monthState)
-        }
+        MonthIndicator(
+            isCurrentMonth = isCurrentMonth,
+            showPastIcon = showPastIcon,
+            showFutureIcon = showFutureIcon
+        )
 
         Text(
             text = currentMonthYear,
-            style = MaterialTheme.typography.titleLarge,
-            maxLines = 1,
-            modifier = Modifier.padding(4.dp)
-        )
-
-        Text(
-            text = hijriFormatted,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 1,
-            modifier = Modifier.padding(4.dp)
-        )
-    }
-}
-
-@Composable
-private fun TodayIndicator(monthState: MonthState) {
-    Row(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.primary,
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val iconId = if (monthState.currentMonth.isAfter(YearMonth.now()))
-            R.drawable.angle_small_left_icon
-        else
-            R.drawable.angle_small_right_icon
-
-        Icon(
-            modifier = Modifier.size(16.dp),
-            painter = painterResource(id = iconId),
-            contentDescription = if (monthState.currentMonth.isAfter(YearMonth.now())) "Previous Day" else "Next Day",
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
-
-        Text(
-            text = "Today",
             style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
-            color = MaterialTheme.colorScheme.onPrimary
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Text(
+            text = hijriInfo,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
 }
 
 @Composable
-private fun CalendarNavigationButton(iconId: Int, description: String, onClick: () -> Unit) {
-    FilledIconButton(onClick = onClick) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            painter = painterResource(id = iconId),
-            contentDescription = description
-        )
+private fun MonthIndicator(
+    isCurrentMonth: Boolean,
+    showPastIcon: Boolean,
+    showFutureIcon: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = if (isCurrentMonth)
+            MaterialTheme.colorScheme.primary
+        else
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(6.dp),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (showPastIcon) {
+                NavigationIcon(
+                    icon = R.drawable.angle_small_left_icon,
+                    isCurrentMonth = isCurrentMonth
+                )
+            }
+
+            Text(
+                text = if (isCurrentMonth) "Current Month" else "Return to Current Month",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isCurrentMonth)
+                    MaterialTheme.colorScheme.onPrimary
+                else
+                    MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+
+            if (showFutureIcon) {
+                NavigationIcon(
+                    icon = R.drawable.angle_small_right_icon,
+                    isCurrentMonth = isCurrentMonth
+                )
+            }
+        }
     }
 }
 
-private fun navigateToCurrentMonth(
-    monthState: MonthState,
-    handleEvents: KFunction1<LocalDate, Unit>
+@Composable
+private fun NavigationIcon(
+    icon: Int,
+    isCurrentMonth: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    val yearMonthAtToday = YearMonth.now()
-    monthState.currentMonth = yearMonthAtToday
-    handleEvents(LocalDate.now())
+    Icon(
+        modifier = modifier.size(12.dp),
+        painter = painterResource(id = icon),
+        contentDescription = null,
+        tint = if (isCurrentMonth)
+            MaterialTheme.colorScheme.onPrimary
+        else
+            MaterialTheme.colorScheme.primary
+    )
 }
 
-private fun changeMonth(
-    monthState: MonthState,
-    monthsToAdd: Long,
-    handleEvents: KFunction1<LocalDate, Unit>
-) {
-    monthState.currentMonth = monthState.currentMonth.plusMonths(monthsToAdd)
-    val date = monthState.currentMonth.atDay(1)
-    handleEvents(date)
+private fun getHijriMonthInfo(yearMonth: YearMonth): String {
+    val formatterHijriMonth = DateTimeFormatter.ofPattern("MMMM")
+    val uniqueHijriMonths = linkedSetOf<String>()
+
+    // Check start, middle, and end of month for Hijri months
+    val daysToCheck = listOf(1, yearMonth.lengthOfMonth() / 2, yearMonth.lengthOfMonth())
+
+    for (day in daysToCheck) {
+        val date = yearMonth.atDay(day)
+        val hijriDate = HijrahDate.from(date)
+        uniqueHijriMonths.add(hijriDate.format(formatterHijriMonth))
+    }
+
+    val hijriYear = HijrahDate.from(yearMonth.atDay(1))
+        .format(DateTimeFormatter.ofPattern("yyyy"))
+
+    return uniqueHijriMonths.joinToString(" / ") + " $hijriYear"
 }

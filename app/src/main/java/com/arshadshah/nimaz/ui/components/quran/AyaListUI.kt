@@ -4,13 +4,15 @@ import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,25 +20,28 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -71,7 +76,6 @@ import kotlin.reflect.KFunction1
 fun AyaListUI(
     ayaList: ArrayList<LocalAya>,
     paddingValues: PaddingValues,
-    language: String,
     loading: Boolean,
     type: String,
     number: Int,
@@ -102,7 +106,14 @@ fun AyaListUI(
     } else {
         val sharedPref = LocalContext.current.getSharedPreferences("quran", 0)
         val visibleItemIndex =
-            remember { mutableStateOf(sharedPref.getInt("visibleItemIndex-${type}-${number}", -1)) }
+            remember {
+                mutableIntStateOf(
+                    sharedPref.getInt(
+                        "visibleItemIndex-${type}-${number}",
+                        -1
+                    )
+                )
+            }
 
         HandleScrollEffects(
             visibleItemIndex,
@@ -192,7 +203,7 @@ fun HandleScrollEffects(
     handleQuranMenuEvents: KFunction1<QuranViewModel.QuranMenuEvents, Unit>
 ) {
     // Save the last visible item index
-    LaunchedEffect(key1 = state.firstVisibleItemIndex) {
+    LaunchedEffect(key1 = remember { derivedStateOf { state.firstVisibleItemIndex } }) {
         sharedPref.edit().putInt("visibleItemIndex-${type}-${number}", state.firstVisibleItemIndex)
             .apply()
     }
@@ -289,12 +300,6 @@ fun AyaLazyColumn(
                 downloadAyaAudioFile = downloadAyaAudioFile,
                 handleAyaEvents = handleAyaEvents
             )
-            if (index != ayaList.size - 1) {
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-            }
         }
     }
 }
@@ -514,7 +519,7 @@ data class AudioPlayerState(
 
 @Composable
 fun DisposableMediaPlayerEffect(mediaPlayer: MediaPlayer) {
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
     // DisposableEffect to handle MediaPlayer lifecycle
     DisposableEffect(lifecycleOwner) {
@@ -631,29 +636,21 @@ fun AyaCard(
     downloadFile: () -> Unit,
     noteContent: MutableState<String>
 ) {
-    //a popup to show the error message
-    //it is displayed when there is an error in the audio player
-    //it should be displayed in the center of the screen on top of everything
+    // Error Dialog
     if (error.value.isNotEmpty()) {
-        Dialog(onDismissRequest = {
-            error.value = ""
-        }) {
+        Dialog(onDismissRequest = { error.value = "" }) {
             BannerLarge(
                 title = "Error",
-                isOpen = remember {
-                    mutableStateOf(true)
-                },
+                isOpen = remember { mutableStateOf(true) },
                 variant = BannerVariant.Error,
                 showFor = BannerDuration.FOREVER.value,
                 message = error.value,
-                onDismiss = {
-                    error.value = ""
-                }
+                onDismiss = { error.value = "" }
             )
         }
     }
 
-    //dialog to show the download progress
+    // Download Progress Dialog
     if (downloadInProgress.value) {
         AlertDialogNimaz(
             icon = painterResource(id = R.drawable.download_icon),
@@ -663,162 +660,188 @@ fun AyaCard(
             contentDescription = "Downloading Audio",
             title = "Downloading Audio",
             contentToShow = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                )
-                {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(50.dp),
                         strokeWidth = 8.dp,
-                        strokeCap = StrokeCap.Round,
+                        strokeCap = StrokeCap.Round
                     )
                 }
             },
-            onDismissRequest = {
-
-            },
+            onDismissRequest = { },
             showDismissButton = false,
             confirmButtonText = "Cancel",
             showConfirmButton = false,
-            onConfirm = {
-            },
-            onDismiss = {
-            })
+            onConfirm = { },
+            onDismiss = { }
+        )
     }
+
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
     if (aya.ayaNumberInSurah != 0) {
-        Card(
+        ElevatedCard(
             modifier = Modifier
-                .padding(4.dp)
-                .fillMaxWidth(),
-        ) {
-            AyatFeatures(
-                isBookMarkedVerse = isBookmarkedVerse,
-                isFavouredVerse = isFavored,
-                hasNote = hasNote,
-                handleEvents = handleAyaEvents,
-                aya = aya,
-                showNoteDialog = showNoteDialog,
-                noteContent = noteContent,
-                downloadFile = downloadFile,
-                isLoading = loading,
-                isPlaying = isPlaying,
-                isPaused = isPaused,
-                isStopped = isStopped,
-                playFile = playFile,
-                pauseFile = pauseFile,
-                stopFile = stopFile,
-                isDownloaded = isDownloaded,
-                hasAudio = hasAudio,
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .scale(scale),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 8.dp
+            ),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
-        }
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(0.90f)
         ) {
-            SelectionContainer {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        text = cleanString(aya.ayaArabic),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
-                        fontFamily = when (arabicFont) {
-                            "Default" -> {
-                                utmaniQuranFont
-                            }
-
-                            "Quranme" -> {
-                                quranFont
-                            }
-
-                            "Hidayat" -> {
-                                hidayat
-                            }
-
-                            "Amiri" -> {
-                                amiri
-                            }
-
-                            "IndoPak" -> {
-                                almajeed
-                            }
-
-                            else -> {
-                                utmaniQuranFont
-                            }
-                        },
-                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp)
-                            .placeholder(
-                                visible = loading,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(4.dp),
-                                highlight = PlaceholderHighlight.shimmer(
-                                    highlightColor = Color.White,
-                                )
-                            )
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            if (translation == "Urdu") {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        text = "${cleanString(aya.translationUrdu)} ۔",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
-                        fontFamily = urduFont,
-                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp)
-                            .placeholder(
-                                visible = loading,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(4.dp),
-                                highlight = PlaceholderHighlight.shimmer(
-                                    highlightColor = Color.White,
-                                )
-                            )
-                    )
-                }
-            }
-            if (translation == "English") {
-                Text(
-                    text = cleanString(aya.translationEnglish),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontFamily = englishQuranTranslation,
-                    fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
-                    textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp)
-                        .placeholder(
-                            visible = loading,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp),
-                            highlight = PlaceholderHighlight.shimmer(
-                                highlightColor = Color.White,
-                            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Features Section
+                if (aya.ayaNumberInSurah != 0) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        AyatFeatures(
+                            isBookMarkedVerse = isBookmarkedVerse,
+                            isFavouredVerse = isFavored,
+                            hasNote = hasNote,
+                            handleEvents = handleAyaEvents,
+                            aya = aya,
+                            showNoteDialog = showNoteDialog,
+                            noteContent = noteContent,
+                            downloadFile = downloadFile,
+                            isLoading = loading,
+                            isPlaying = isPlaying,
+                            isPaused = isPaused,
+                            isStopped = isStopped,
+                            playFile = playFile,
+                            pauseFile = pauseFile,
+                            stopFile = stopFile,
+                            isDownloaded = isDownloaded,
+                            hasAudio = hasAudio,
                         )
-                )
+                    }
+                }
+
+                // Content Section
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Arabic Text
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            SelectionContainer {
+                                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                    Text(
+                                        text = aya.ayaArabic.cleanTextFromBackslash(),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontSize = if (arabicFontSize == 0.0f) 24.sp else arabicFontSize.sp,
+                                        fontFamily = when (arabicFont) {
+                                            "Default" -> utmaniQuranFont
+                                            "Quranme" -> quranFont
+                                            "Hidayat" -> hidayat
+                                            "Amiri" -> amiri
+                                            "IndoPak" -> almajeed
+                                            else -> utmaniQuranFont
+                                        },
+                                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp)
+                                            .placeholder(
+                                                visible = loading,
+                                                highlight = PlaceholderHighlight.shimmer()
+                                            )
+                                    )
+                                }
+                            }
+                        }
+
+                        // Translation Text
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                if (translation == "Urdu") {
+                                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                        Text(
+                                            text = "${aya.translationUrdu.cleanTextFromBackslash()} ۔",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
+                                            fontFamily = urduFont,
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .placeholder(
+                                                    visible = loading,
+                                                    highlight = PlaceholderHighlight.shimmer()
+                                                )
+                                        )
+                                    }
+                                }
+                                if (translation == "English") {
+                                    Text(
+                                        text = aya.translationEnglish.cleanTextFromBackslash(),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = englishQuranTranslation,
+                                        fontSize = if (translationFontSize == 0.0f) 16.sp else translationFontSize.sp,
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                        textAlign = if (aya.ayaNumberInSurah != 0) TextAlign.Justify else TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .placeholder(
+                                                visible = loading,
+                                                highlight = PlaceholderHighlight.shimmer()
+                                            )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-// function to remove \ from the arabic text
-fun cleanString(text: String): String {
-    return text.replace("\\", "")
+fun String.cleanTextFromBackslash(): String {
+    return this
+        .replace("\\\"", "\"")  // Handle escaped quotes first
+        .replace("\\\\", "\\")  // Then handle double backslashes
+        .replace("\\n", "\n")   // Handle newlines
+        .replace("\\t", "\t")   // Handle tabs
+        .replace("\\", "")      // Finally remove any remaining single backslashes
 }

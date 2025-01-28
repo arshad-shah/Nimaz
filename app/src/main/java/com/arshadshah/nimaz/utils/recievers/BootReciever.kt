@@ -9,11 +9,23 @@ import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class BootReciever : BroadcastReceiver() {
+@AndroidEntryPoint
+class BootReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var firebaseLogger: FirebaseLogger
+
+    @Inject
+    lateinit var createAlarms: CreateAlarms
+
+    @Inject
+    lateinit var prayerTimesRepository: PrayerTimesRepository
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action.equals(Intent.ACTION_BOOT_COMPLETED) ||
@@ -22,34 +34,27 @@ class BootReciever : BroadcastReceiver() {
             Log.d(AppConstants.BOOT_RECEIVER_TAG, "Boot Completed or Locked Boot Completed!")
             Log.d(AppConstants.BOOT_RECEIVER_TAG, "Resetting Alarms after BootUp!")
 
-            if (!FirebaseLogger.isInitialized()) {
-                FirebaseLogger.init()
-                Log.d(
-                    AppConstants.BOOT_RECEIVER_TAG,
-                    "onReceived:  called and firebase logger initialized"
-                )
-            }
-
             val mapForLogging = mapOf(
-                "BootReciever" to "Boot Completed resetting Alarms"
+                "BootReceiver" to "Boot Completed resetting Alarms"
             )
-            FirebaseLogger.logEvent("Boot Receiver", mapForLogging)
+            firebaseLogger.logEvent("Boot Receiver", mapForLogging)
 
             val sharedPreferences = PrivateSharedPreferences(context)
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val repository = PrayerTimesRepository.getPrayerTimes(context)
+                    val repository = prayerTimesRepository.getPrayerTimes(context)
                     val ishaTime = repository.data?.isha?.toLocalTime()?.hour
                     val newIshaTime = if (ishaTime!! >= 22) {
                         repository.data.maghrib?.plusMinutes(60)
                     } else {
                         repository.data.isha
                     }
+
                     sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, false)
-                    val alarmLock =
-                        sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
+                    val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
+
                     if (!alarmLock) {
-                        CreateAlarms().exact(
+                        createAlarms.exact(
                             context,
                             repository.data.fajr!!,
                             repository.data.sunrise!!,
@@ -61,16 +66,15 @@ class BootReciever : BroadcastReceiver() {
                         sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
                     }
                 } catch (e: Exception) {
-                    Log.e(AppConstants.BOOT_RECEIVER_TAG, "Error in BootReciever: ${e.message}")
+                    Log.e(AppConstants.BOOT_RECEIVER_TAG, "Error in BootReceiver: ${e.message}")
                     val mapForLoggingError = mapOf(
-                        "BootReciever" to "Error in BootReciever: ${e.message}"
+                        "BootReceiver" to "Error in BootReceiver: ${e.message}"
                     )
-                    FirebaseLogger.logEvent("Boot Receiver", mapForLoggingError)
+                    firebaseLogger.logEvent("Boot Receiver", mapForLoggingError)
                 }
             }
 
             Log.d(AppConstants.BOOT_RECEIVER_TAG, "Alarms Reset after BootUp!")
-
         }
     }
 }
