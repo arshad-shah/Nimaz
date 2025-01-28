@@ -1,34 +1,44 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.quran.AyaListUI
-import com.arshadshah.nimaz.ui.components.quran.Page
+import com.arshadshah.nimaz.ui.components.quran.QuranBottomBar
+import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
 import com.arshadshah.nimaz.viewModel.QuranViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AyatScreen(
     number: String,
     isSurah: String,
     language: String,
-    paddingValues: PaddingValues,
     scrollToAya: Int? = null,
     context: MainActivity,
-    viewModel: QuranViewModel = viewModel(
-        key = AppConstants.QURAN_VIEWMODEL_KEY,
-        viewModelStoreOwner = context
-    ),  // Pass ViewModel directly
-    spaceFilesRepository: SpacesFileRepository = SpacesFileRepository(context), // Pass repository directly
+    navController: NavHostController,
+    viewModel: QuranViewModel = hiltViewModel()
 ) {
+
     // LaunchedEffect should depend on both number and isSurah
     LaunchedEffect(Unit) {
         Log.d(AppConstants.QURAN_SCREEN_TAG, "Update occurred on Ayat screen: $number")
@@ -51,36 +61,75 @@ fun AyatScreen(
     val translation = viewModel.translation.collectAsState()
     val scrollToVerse = viewModel.scrollToAya.collectAsState()
 
-    if (error.value != "") {
-        BannerSmall(title = "Error", message = error.value, variant = BannerVariant.Error)
-    }
 
-    if (pageMode.value == "List") {
-        AyaListUI(
-            ayaList = ayat.value,
-            paddingValues = paddingValues,
-            language = language,
-            loading = loading.value,
-            type = if (isSurah.toBoolean()) "surah" else "juz",
-            number = number.toInt(),
-            scrollToAya = scrollToAya,
-            surah = surah.value,
-            arabicFontSize = arabicFontSize.value,
-            arabicFont = arabicFont.value,
-            translationFontSize = translationFontSize.value,
-            translation = translation.value,
-            scrollToVerse = scrollToVerse.value,
-            handleAyaEvents = viewModel::handleAyaEvent,
-            handleQuranMenuEvents = viewModel::handleQuranMenuEvents,
-            downloadAyaAudioFile = { surahNumber, ayaNumberInSurah, downloadCallback ->
-                spaceFilesRepository.downloadAyaFile(
-                    surahNumber,
-                    ayaNumberInSurah,
-                    downloadCallback
-                )
-            }
-        )
-    } else {
-        Page(ayat.value, paddingValues, loading.value)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    TopBarMenu(
+                        number = number.toInt(),
+                        isSurah = isSurah.toBoolean(),
+                        getAllAyats = { itemNumber: Int, language: String ->
+                            if (isSurah.toBoolean()) {
+                                viewModel.getAllAyaForSurah(itemNumber, language)
+                            } else {
+                                viewModel.getAllAyaForJuz(itemNumber, language)
+                            }
+                        },
+                    )
+                },
+                navigationIcon = {
+                    OutlinedIconButton(
+                        modifier = Modifier
+                            .testTag("backButton")
+                            .padding(start = 8.dp),
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.back_icon),
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            QuranBottomBar(
+                handleEvents = viewModel::handleQuranMenuEvents,
+                modifier = Modifier
+            )
+        }
+    ) {
+        if (error.value != "") {
+            BannerSmall(title = "Error", message = error.value, variant = BannerVariant.Error)
+        }
+
+        if (pageMode.value == "List") {
+            AyaListUI(
+                ayaList = ayat.value,
+                paddingValues = it,
+                loading = loading.value,
+                type = if (isSurah.toBoolean()) "surah" else "juz",
+                number = number.toInt(),
+                scrollToAya = scrollToAya,
+                surah = surah.value,
+                arabicFontSize = arabicFontSize.value,
+                arabicFont = arabicFont.value,
+                translationFontSize = translationFontSize.value,
+                translation = translation.value,
+                scrollToVerse = scrollToVerse.value,
+                handleAyaEvents = viewModel::handleAyaEvent,
+                handleQuranMenuEvents = viewModel::handleQuranMenuEvents,
+                downloadAyaAudioFile = { surahNumber, ayaNumberInSurah, downloadCallback ->
+                    viewModel.downloadAyaFile(
+                        surahNumber,
+                        ayaNumberInSurah,
+                        downloadCallback
+                    )
+                },
+            )
+        }
     }
 }

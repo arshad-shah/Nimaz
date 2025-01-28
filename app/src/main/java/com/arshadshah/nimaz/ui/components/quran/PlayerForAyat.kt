@@ -49,6 +49,7 @@ fun PlayerForAyat(
                     enabled = !isLoading,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
+                        .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.play_icon),
@@ -76,6 +77,7 @@ fun PlayerForAyat(
                     enabled = true,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
+                        .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.pause_icon),
@@ -95,6 +97,7 @@ fun PlayerForAyat(
                     enabled = true,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
+                        .placeholder(isLoading, highlight = PlaceholderHighlight.shimmer())
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.stop_icon),

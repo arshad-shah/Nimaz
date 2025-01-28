@@ -5,53 +5,46 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.utils.FirebaseLogger
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.NotificationHelper
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
-class MissedPrayerReciever : BroadcastReceiver() {
+@AndroidEntryPoint
+class MissedPrayerReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var localDataStore: DataStore
+
+    @Inject
+    lateinit var firebaseLogger: FirebaseLogger
+
+    @Inject
+    lateinit var notificationHelper: NotificationHelper
 
     override fun onReceive(context: Context, intent: Intent) {
-
-        if (!LocalDataStore.isInitialized()) {
-            LocalDataStore.init(context)
-            Log.d(
-                AppConstants.MISSED_PRAYER_RECEIVER_TAG,
-                "onReceived:  called and local data store initialized"
-            )
-        }
-
-        if (!FirebaseLogger.isInitialized()) {
-            FirebaseLogger.init()
-            Log.d(
-                AppConstants.MISSED_PRAYER_RECEIVER_TAG,
-                "onReceived:  called and firebase logger initialized"
-            )
-        }
-
-
         val mapForLogging = mapOf(
-            "MissedPrayerReciever" to "MissedPrayerReciever called"
+            "MissedPrayerReceiver" to "MissedPrayerReceiver called"
         )
-        FirebaseLogger.logEvent("Missed Prayer Receiver", mapForLogging)
+        firebaseLogger.logEvent("Missed Prayer Receiver", mapForLogging)
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 var amountMissed = 0
                 val nameOfMissedPrayers = mutableListOf<String>()
-                val tracker =
-                    LocalDataStore.getDataStore().getTrackerForDate(LocalDate.now())
+                val tracker = localDataStore.getTrackerForDate(LocalDate.now())
 
                 Log.d(
                     AppConstants.MISSED_PRAYER_RECEIVER_TAG,
-                    "onReceived:  called and tracker is $tracker"
+                    "onReceived: called and tracker is $tracker"
                 )
-
 
                 if (!tracker.fajr) {
                     amountMissed++
@@ -74,21 +67,18 @@ class MissedPrayerReciever : BroadcastReceiver() {
                     nameOfMissedPrayers.add("Isha")
                 }
 
-
                 val title = if (amountMissed > 0) "$amountMissed prayers missed"
                 else "Well Done!"
 
-                //get time left to complete missed prayers
                 val timeLeft =
                     LocalTime.now().until(LocalTime.of(23, 59, 59), ChronoUnit.MINUTES)
 
-                //create message
                 val message =
                     if (amountMissed > 0) "You missed ${nameOfMissedPrayers.joinToString(", ")} today," +
                             "\n there is still $timeLeft minutes left to complete ${if (amountMissed > 1) "them" else "it"}"
                     else "You completed all your prayers today. Keep it up!"
 
-                NotificationHelper().createNotificationForMissedPrayer(
+                notificationHelper.createNotificationForMissedPrayer(
                     context,
                     AppConstants.CHANNEL_MISSED_PRAYER_ID,
                     AppConstants.MISSED_PRAYER_NOTIFY_ID,
@@ -99,15 +89,15 @@ class MissedPrayerReciever : BroadcastReceiver() {
             } catch (e: Exception) {
                 Log.e(
                     AppConstants.MISSED_PRAYER_RECEIVER_TAG,
-                    "Error in BootReciever: ${e.message}"
+                    "Error in BootReceiver: ${e.message}"
                 )
                 val mapForLoggingError = mapOf(
-                    "MissedPrayerReciever" to "Error in BootReciever: ${e.message}"
+                    "MissedPrayerReceiver" to "Error in BootReceiver: ${e.message}"
                 )
-                FirebaseLogger.logEvent("MissedPrayerReceiver", mapForLoggingError)
+                firebaseLogger.logEvent("MissedPrayerReceiver", mapForLoggingError)
             }
         }
 
-        Log.d(AppConstants.MISSED_PRAYER_RECEIVER_TAG, "onReceive:  called and finished")
+        Log.d(AppConstants.MISSED_PRAYER_RECEIVER_TAG, "onReceive: called and finished")
     }
 }

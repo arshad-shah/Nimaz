@@ -2,36 +2,54 @@ package com.arshadshah.nimaz.viewModel
 
 import android.content.Context
 import android.os.CountDownTimer
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.CountDownTime
+import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.Parameters
-import com.arshadshah.nimaz.repositories.LocationRepository
 import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesData
 import com.arshadshah.nimaz.services.PrayerTimesService
+import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.widgets.prayertimesthin.PrayerTimeWorker
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
-class PrayerTimesViewModel(context: Context) : ViewModel() {
-    val sharedPreferences = PrivateSharedPreferences(context)
-    private val locationService = LocationService(context, LocationRepository(context))
-    private val prayerTimesService = PrayerTimesService(context, PrayerTimesRepository)
+@HiltViewModel
+class PrayerTimesViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val prayerTimesService: PrayerTimesService,
+    private val locationService: LocationService,
+    private val sharedPreferences: PrivateSharedPreferences,
+    private val prayerTimesRepository: PrayerTimesRepository,
+    private val createAlarms: CreateAlarms
+) : ViewModel() {
 
+    // Data classes and sealed interfaces remain the same for API compatibility
     data class PrayerTimesState(
         val currentPrayerName: String = "Loading...",
+        val currentPrayerTime: LocalDateTime = LocalDateTime.now(),
         val nextPrayerName: String = "Loading...",
         val nextPrayerTime: LocalDateTime = LocalDateTime.now(),
         val fajrTime: LocalDateTime = LocalDateTime.now(),
@@ -48,16 +66,14 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
 
     sealed class PrayerTimesEvent {
         class Start(val timeToNextPrayer: Long) : PrayerTimesEvent()
-        object RELOAD : PrayerTimesEvent()
+        data object RELOAD : PrayerTimesEvent()
         class UPDATE_PRAYERTIMES(val mapOfParameters: Parameters) : PrayerTimesEvent()
         class UPDATE_WIDGET(val context: Context) : PrayerTimesEvent()
         class SET_LOADING(val isLoading: Boolean) : PrayerTimesEvent()
         class SET_ALARMS(val context: Context) : PrayerTimesEvent()
-
-        object LOAD_LOCATION : PrayerTimesEvent()
+        data object LOAD_LOCATION : PrayerTimesEvent()
+        class Init(val context: Context) : PrayerTimesEvent()
     }
-
-    private var countDownTimer: CountDownTimer? = null
 
     private val _prayerTimesState = MutableStateFlow(PrayerTimesState())
     val prayerTimesState: StateFlow<PrayerTimesState> = _prayerTimesState.asStateFlow()
@@ -68,328 +84,366 @@ class PrayerTimesViewModel(context: Context) : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private var countDownTimer: CountDownTimer? = null
+    private var activeJobs = mutableMapOf<String, Job>()
 
-    //function to handle the timer event
-    fun handleEvent(context: Context, event: PrayerTimesEvent) {
-        when (event) {
-            is PrayerTimesEvent.Start -> {
-                //this takes a timeToNextPrayer in milliseconds as a parameter on event
-                startTimer(context, event.timeToNextPrayer)
-            }
-            //event to reload the prayer times
-            is PrayerTimesEvent.RELOAD -> {
-                loadPrayerTimes()
-            }
-            //event to update the prayer times
-            is PrayerTimesEvent.UPDATE_PRAYERTIMES -> {
-                updatePrayerTimes(event.mapOfParameters)
-            }
-            //event to update the widget
-            is PrayerTimesEvent.UPDATE_WIDGET -> {
-                updateWidget(event.context)
-            }
-            //event to set the loading state
-            is PrayerTimesEvent.SET_LOADING -> {
-                _isLoading.value = event.isLoading
-            }
-            //event to set the alarms
-            is PrayerTimesEvent.SET_ALARMS -> {
-                setAlarms(event.context)
-            }
-            //event to load the location
-            is PrayerTimesEvent.LOAD_LOCATION -> {
-                loadLocation()
+    companion object {
+        private const val TAG = "Nimaz: PrayerTimesVM"
+        private const val OPERATION_TIMEOUT = 30L // seconds
+    }
+
+    init {
+        launchSafely("initialization") {
+            supervisorScope {
+                launch { initialize(context) }
             }
         }
     }
 
-    private fun setAlarms(context: Context) {
-        loadPrayerTimes()
-        CreateAlarms().exact(
-            context,
-            _prayerTimesState.value.fajrTime,
-            _prayerTimesState.value.sunriseTime,
-            _prayerTimesState.value.dhuhrTime,
-            _prayerTimesState.value.asrTime,
-            _prayerTimesState.value.maghribTime,
-            _prayerTimesState.value.ishaTime,
-        )
+    private fun launchSafely(operationName: String, block: suspend () -> Unit): Job {
+        activeJobs[operationName]?.cancel()
+        return viewModelScope.launch {
+            try {
+                withTimeout(OPERATION_TIMEOUT.seconds) {
+                    block()
+                }
+            } catch (e: Exception) {
+                when (e) {
+                    is CancellationException -> throw e
+                    else -> {
+                        Log.e(TAG, "Error in $operationName: ${e.message}", e)
+                        _error.value = "Error in $operationName: ${e.message}"
+                    }
+                }
+            } finally {
+                activeJobs.remove(operationName)
+            }
+        }.also { activeJobs[operationName] = it }
     }
 
-    private fun updateWidget(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun handleEvent(event: PrayerTimesEvent) {
+        Log.d(TAG, "Handling event: $event")
+        when (event) {
+            is PrayerTimesEvent.Start -> launchSafely("timer") {
+                withContext(Dispatchers.Main) {
+                    startTimer(event.timeToNextPrayer)
+                }
+            }
+
+            is PrayerTimesEvent.RELOAD -> launchSafely("reload") { loadPrayerTimes() }
+            is PrayerTimesEvent.UPDATE_PRAYERTIMES -> launchSafely("updatePrayerTimes") {
+                updatePrayerTimes(event.mapOfParameters)
+            }
+
+            is PrayerTimesEvent.UPDATE_WIDGET -> launchSafely("updateWidget") {
+                updateWidget(event.context)
+            }
+
+            is PrayerTimesEvent.SET_LOADING -> setLoading(event.isLoading)
+            is PrayerTimesEvent.SET_ALARMS -> launchSafely("setAlarms") {
+                setAlarms(event.context)
+            }
+
+            is PrayerTimesEvent.LOAD_LOCATION -> launchSafely("loadLocation") { loadLocation() }
+            is PrayerTimesEvent.Init -> launchSafely("init") { initialize(event.context) }
+        }
+    }
+
+    private suspend fun initialize(context: Context) = withContext(Dispatchers.Default) {
+        ViewModelLogger.d(TAG, "⭐ Starting initialization sequence")
+        setLoading(true)
+
+        try {
+            ViewModelLogger.d(TAG, "📍 Stage 1: Loading location and prayer times")
+            supervisorScope {
+                val locationJob = launch {
+                    ViewModelLogger.d(TAG, "🌍 Loading location")
+                    loadLocation()
+                    ViewModelLogger.d(
+                        TAG,
+                        "🌍 Location loaded: ${prayerTimesState.value.locationName}"
+                    )
+                }
+
+                val prayerTimesJob = launch {
+                    ViewModelLogger.d(TAG, "🕌 Loading prayer times")
+                    loadPrayerTimes()
+                    ViewModelLogger.d(TAG, "🕌 Prayer times loaded")
+                }
+
+                // Wait for critical data to be loaded
+                locationJob.join()
+                prayerTimesJob.join()
+
+                ViewModelLogger.d(TAG, "📍 Stage 2: Checking alarm lock status")
+                if (!sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)) {
+                    ViewModelLogger.d(TAG, "⏰ Setting up alarms")
+                    launch {
+                        setAlarms(context)
+                        ViewModelLogger.d(TAG, "⏰ Alarms setup completed")
+                    }
+                } else {
+                    ViewModelLogger.d(TAG, "⏰ Alarms are locked, skipping setup")
+                }
+
+                ViewModelLogger.d(TAG, "📍 Stage 3: Validating location data")
+                if (prayerTimesState.value.isValidLocation()) {
+                    ViewModelLogger.d(TAG, "✅ Location is valid, proceeding with updates")
+
+                    supervisorScope {
+                        launch {
+                            ViewModelLogger.d(TAG, "🔄 Updating prayer times with parameters")
+                            updatePrayerTimes(PrayerTimesParamMapper.getParams(context))
+                            ViewModelLogger.d(TAG, "🔄 Prayer times update completed")
+                        }
+
+                        launch {
+                            ViewModelLogger.d(TAG, "🔄 Updating widget")
+                            updateWidget(context)
+                            ViewModelLogger.d(TAG, "🔄 Widget update completed")
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            ViewModelLogger.d(TAG, "⏲️ Starting countdown timer")
+                            calculateAndStartTimer(prayerTimesState.value)
+                            ViewModelLogger.d(TAG, "⏲️ Timer started successfully")
+                        }
+                    }
+                } else {
+                    ViewModelLogger.e(TAG, "❌ Invalid location data: ${prayerTimesState.value}")
+                    _error.value = "Invalid location data"
+                }
+            }
+        } catch (e: Exception) {
+            ViewModelLogger.e(TAG, "❌ Initialization failed", e)
+            _error.value = "Initialization failed: ${e.message}"
+        } finally {
+            ViewModelLogger.d(TAG, "🏁 Initialization sequence completed")
+            setLoading(false)
+        }
+    }
+
+    private suspend fun setAlarms(context: Context) {
+        Log.d(TAG, "Setting alarms")
+        withContext(Dispatchers.Default) {
+            loadPrayerTimes()
+            _prayerTimesState.value.let { state ->
+                createAlarms.exact(
+                    context,
+                    state.fajrTime,
+                    state.sunriseTime,
+                    state.dhuhrTime,
+                    state.asrTime,
+                    state.maghribTime,
+                    state.ishaTime,
+                )
+            }
+        }
+    }
+
+    private suspend fun updateWidget(context: Context) {
+        withContext(Dispatchers.IO) {
             PrayerTimeWorker.enqueue(context, true)
         }
     }
 
-    //function to update the prayer times
-    private fun updatePrayerTimes(parameters: Parameters) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _isLoading.value = true
-            _error.value = ""
-            try {
-                val response = PrayerTimesRepository.updatePrayerTimes(parameters)
-                response.data?.let { data ->
-                    val currentAndNextPrayertimes = prayerTimesService.getCurrentAndNextPrayer(
-                        PrayerTimesData(
-                            fajr = data.fajr ?: LocalDateTime.now(),
-                            sunrise = data.sunrise ?: LocalDateTime.now(),
-                            dhuhr = data.dhuhr ?: LocalDateTime.now(),
-                            asr = data.asr ?: LocalDateTime.now(),
-                            maghrib = data.maghrib ?: LocalDateTime.now(),
-                            isha = data.isha ?: LocalDateTime.now()
-                        )
-                    )
+    private suspend fun updatePrayerTimes(parameters: Parameters) {
+        _error.value = null
+        val response = withContext(Dispatchers.IO) {
+            prayerTimesRepository.updatePrayerTimes(parameters)
+        }
 
-                    Log.d(
-                        "Nimaz: PrayerTimesViewModel",
-                        "updatePrayerTimes: $currentAndNextPrayertimes"
-                    )
+        response.data?.let {
+            updatePrayerTimesState(it)
+        } ?: throw IllegalStateException("Failed to update prayer times. Data is null.")
+    }
 
-                    _prayerTimesState.update {
-                        it.copy(
-                            currentPrayerName = currentAndNextPrayertimes.currentPrayer,
-                            nextPrayerName = currentAndNextPrayertimes.nextPrayer,
-                            nextPrayerTime = currentAndNextPrayertimes.nextPrayerTime,
-                            fajrTime = data.fajr ?: LocalDateTime.now(),
-                            sunriseTime = data.sunrise ?: LocalDateTime.now(),
-                            dhuhrTime = data.dhuhr ?: LocalDateTime.now(),
-                            asrTime = data.asr ?: LocalDateTime.now(),
-                            maghribTime = data.maghrib ?: LocalDateTime.now(),
-                            ishaTime = data.isha ?: LocalDateTime.now()
-                        )
-                    }
-                    _isLoading.value = false
-                } ?: run {
-                    _error.value = "Failed to update prayer times. Data is null."
-                    _isLoading.value = false
-                }
-            } catch (e: Exception) {
-                Log.e(
-                    AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel",
-                    "updatePrayerTimes: ${e.message}"
-                )
-                _error.value = e.message ?: "An unknown error occurred"
-                _isLoading.value = false
+    private suspend fun updatePrayerTimesState(data: LocalPrayerTimes) {
+        ViewModelLogger.d(TAG, "🔄 Updating prayer times state with data: $data")
+
+        try {
+            val currentAndNextPrayertimes = withContext(Dispatchers.Default) {
+                ViewModelLogger.d(TAG, "🕒 Calculating current and next prayer times")
+                prayerTimesService.getCurrentAndNextPrayer(data.toPrayerTimesData())
             }
+
+            ViewModelLogger.d(TAG, "📊 Current prayer: ${currentAndNextPrayertimes.currentPrayer}")
+            ViewModelLogger.d(TAG, "📊 Next prayer: ${currentAndNextPrayertimes.nextPrayer}")
+
+            _prayerTimesState.update { state ->
+                state.copy(
+                    currentPrayerName = currentAndNextPrayertimes.currentPrayer,
+                    currentPrayerTime = currentAndNextPrayertimes.currentPrayerTime,
+                    nextPrayerName = currentAndNextPrayertimes.nextPrayer,
+                    nextPrayerTime = currentAndNextPrayertimes.nextPrayerTime,
+                    fajrTime = data.fajr ?: LocalDateTime.now(),
+                    sunriseTime = data.sunrise ?: LocalDateTime.now(),
+                    dhuhrTime = data.dhuhr ?: LocalDateTime.now(),
+                    asrTime = data.asr ?: LocalDateTime.now(),
+                    maghribTime = data.maghrib ?: LocalDateTime.now(),
+                    ishaTime = data.isha ?: LocalDateTime.now()
+                )
+            }
+            ViewModelLogger.d(TAG, "✅ Prayer times state updated successfully")
+        } catch (e: Exception) {
+            ViewModelLogger.e(TAG, "❌ Failed to update prayer times state", e)
+            throw e
         }
     }
 
+    private suspend fun loadPrayerTimes() {
+        ViewModelLogger.d(TAG, "📥 Starting prayer times load")
+        _error.value = null
 
-    //load prayer times again
-    fun loadPrayerTimes() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _isLoading.value = true
-            _error.value = ""
-            try {
-                val prayerTimes = prayerTimesService.getPrayerTimes()
-                if (prayerTimes != null) {
-                    val currentAndNextPrayer =
-                        prayerTimesService.getCurrentAndNextPrayer(prayerTimes)
+        try {
+            val prayerTimes = withContext(Dispatchers.IO) {
+                ViewModelLogger.d(TAG, "🔄 Fetching prayer times from service")
+                prayerTimesService.getPrayerTimes()
+            } ?: throw IllegalStateException("Failed to load prayer times")
 
-                    _prayerTimesState.update {
-                        it.copy(
-                            currentPrayerName = currentAndNextPrayer.currentPrayer,
-                            nextPrayerName = currentAndNextPrayer.nextPrayer,
-                            nextPrayerTime = currentAndNextPrayer.nextPrayerTime,
-                            fajrTime = prayerTimes.fajr ?: LocalDateTime.now(),
-                            sunriseTime = prayerTimes.sunrise ?: LocalDateTime.now(),
-                            dhuhrTime = prayerTimes.dhuhr ?: LocalDateTime.now(),
-                            asrTime = prayerTimes.asr ?: LocalDateTime.now(),
-                            maghribTime = prayerTimes.maghrib ?: LocalDateTime.now(),
-                            ishaTime = prayerTimes.isha ?: LocalDateTime.now()
-                        )
-                    }
-                } else {
-                    _error.value = "Failed to load prayer times"
-                }
-                _isLoading.value = false
-            } catch (e: Exception) {
-                Log.e(
-                    AppConstants.PRAYER_TIMES_SCREEN_TAG + "Viewmodel",
-                    "loadPrayerTimes: ${e.message}"
-                )
-                _error.value = e.message.toString()
-                _isLoading.value = false
-            }
+            ViewModelLogger.d(TAG, "✅ Prayer times loaded successfully: $prayerTimes")
+            updatePrayerTimesState(prayerTimes.toLocalPrayerTimes())
+        } catch (e: Exception) {
+            ViewModelLogger.e(TAG, "❌ Failed to load prayer times", e)
+            throw e
         }
     }
 
+    private fun startTimer(timeToNextPrayer: Long) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            viewModelScope.launch(Dispatchers.Main) {
+                createAndStartTimer(timeToNextPrayer)
+            }
+            return
+        }
+        createAndStartTimer(timeToNextPrayer)
+    }
 
-    private fun startTimer(context: Context, timeToNextPrayer: Long) {
-        countDownTimer?.cancel()
+    private fun createAndStartTimer(timeToNextPrayer: Long) {
+        ViewModelLogger.d(TAG, "⏲️ Creating new timer with duration: ${timeToNextPrayer}ms")
+        countDownTimer?.let {
+            ViewModelLogger.d(TAG, "🛑 Cancelling existing timer")
+            it.cancel()
+        }
+
         countDownTimer = object : CountDownTimer(timeToNextPrayer, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                var diff = millisUntilFinished
-                val secondsInMilli: Long = 1000
-                val minutesInMilli = secondsInMilli * 60
-                val hoursInMilli = minutesInMilli * 60
-
-                val elapsedHours = diff / hoursInMilli
-                diff %= hoursInMilli
-
-                val elapsedMinutes = diff / minutesInMilli
-                diff %= minutesInMilli
-
-                val elapsedSeconds = diff / secondsInMilli
-                diff %= secondsInMilli
-
-                val countDownTime = CountDownTime(elapsedHours, elapsedMinutes, elapsedSeconds)
-                _prayerTimesState.update {
-                    it.copy(
-                        countDownTime = countDownTime
+                if (millisUntilFinished % 60000 == 0L) { // Log every minute
+                    ViewModelLogger.v(
+                        TAG,
+                        "⏱️ Timer tick: ${millisUntilFinished / 1000}s remaining"
                     )
                 }
+                updateCountdownState(millisUntilFinished)
             }
 
             override fun onFinish() {
-                loadPrayerTimes()
+                ViewModelLogger.d(TAG, "🏁 Timer finished, reloading prayer times")
+                launchSafely("timerFinish") { loadPrayerTimes() }
             }
         }.start()
+        ViewModelLogger.d(TAG, "✅ Timer started successfully")
     }
 
-    private fun loadLocation() {
-        val isAutoLocation = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, true)
-        locationService.loadLocation(isAutoLocation, onSuccess = { location ->
-            _prayerTimesState.update {
-                it.copy(
-                    locationName = location.locationName,
-                    latitude = location.latitude,
-                    longitude = location.longitude
+    private fun updateCountdownState(millisUntilFinished: Long) {
+        val hours = millisUntilFinished / (60 * 60 * 1000)
+        val minutes = (millisUntilFinished % (60 * 60 * 1000)) / (60 * 1000)
+        val seconds = (millisUntilFinished % (60 * 1000)) / 1000
+
+        _prayerTimesState.update {
+            it.copy(countDownTime = CountDownTime(hours, minutes, seconds))
+        }
+    }
+
+    private suspend fun loadLocation() {
+        val isAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, false)
+        ViewModelLogger.d(TAG, "📍 Loading location (Auto mode: $isAuto)")
+
+        try {
+            locationService.loadLocation(isAuto)
+                .onSuccess { location ->
+                    ViewModelLogger.d(
+                        TAG,
+                        "✅ Location loaded successfully: ${location.locationName} (${location.latitude}, ${location.longitude})"
+                    )
+                    _prayerTimesState.update {
+                        it.copy(
+                            locationName = location.locationName,
+                            latitude = location.latitude,
+                            longitude = location.longitude
+                        )
+                    }
+                }
+                .onFailure { throwable ->
+                    ViewModelLogger.e(TAG, "❌ Failed to load location", throwable)
+                    _error.value = throwable.message
+                    ViewModelLogger.d(TAG, "⚠️ Attempting to load fallback location")
+                    loadFallbackLocation()
+                }
+        } catch (e: Exception) {
+            ViewModelLogger.e(TAG, "❌ Error loading location", e)
+            _error.value = e.message
+            loadFallbackLocation()
+        }
+    }
+
+    private fun loadFallbackLocation() {
+        ViewModelLogger.d(TAG, "🔄 Loading fallback location")
+        _prayerTimesState.update {
+            it.copy(
+                locationName = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
+                latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
+                longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
+            ).also { state ->
+                ViewModelLogger.d(
+                    TAG,
+                    "✅ Fallback location loaded: ${state.locationName} (${state.latitude}, ${state.longitude})"
                 )
             }
-        },
-            onError = { errorMessage ->
-                _prayerTimesState.update {
-                    it.copy(
-                        locationName = sharedPreferences.getData(AppConstants.LOCATION_INPUT, ""),
-                        latitude = sharedPreferences.getDataDouble(AppConstants.LATITUDE, 53.3498),
-                        longitude = sharedPreferences.getDataDouble(AppConstants.LONGITUDE, -6.2603)
-                    )
-                }
-                _error.value = errorMessage
-            })
-    }
-}
-
-
-fun currentPrayer(
-    time: LocalDateTime,
-    mapOfPrayerTimes: Map<String, LocalDateTime?>,
-): Pair<String, LocalDateTime> {
-    val fajrTommorow = mapOfPrayerTimes["fajr"]?.plusDays(1)
-    val `when` = time.toInstant(ZoneOffset.UTC).toEpochMilli()
-    return when {
-        //if the difference between the current time and the isha time is less than 0 or equal to 0 than the current prayer is isha
-        mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-            Pair("isha", mapOfPrayerTimes["isha"]!!)
-        }
-
-        mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-            Pair("maghrib", mapOfPrayerTimes["maghrib"]!!)
-        }
-
-        mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-            Pair("asr", mapOfPrayerTimes["asr"]!!)
-        }
-
-        mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-            Pair("dhuhr", mapOfPrayerTimes["dhuhr"]!!)
-        }
-
-        mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-            Pair("sunrise", mapOfPrayerTimes["sunrise"]!!)
-        }
-
-        mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! - `when` <= 0 -> {
-            Pair("fajr", mapOfPrayerTimes["fajr"]!!)
-        }
-
-        `when` in fajrTommorow?.toInstant(ZoneOffset.UTC)
-            ?.toEpochMilli()!!..mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)
-            ?.toEpochMilli()!! -> {
-            Pair("isha", mapOfPrayerTimes["isha"]!!)
-        }
-
-        `when` < mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! -> {
-            Pair("fajr", mapOfPrayerTimes["fajr"]!!)
-        }
-
-        else -> {
-            Pair("none", mapOfPrayerTimes["none"]!!)
         }
     }
-}
 
-fun nextPrayer(
-    time: LocalDateTime,
-    mapOfPrayerTimes: Map<String, LocalDateTime?>,
-): Pair<String, LocalDateTime> {
-    val `when` = time.toInstant(ZoneOffset.UTC).toEpochMilli()
-    val fajrTommorow = mapOfPrayerTimes["fajr"]?.plusDays(1)
-    val isha = mapOfPrayerTimes["isha"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-    val fajr = mapOfPrayerTimes["fajr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-    val sunrise = mapOfPrayerTimes["sunrise"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-    val dhuhr = mapOfPrayerTimes["dhuhr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-    val asr = mapOfPrayerTimes["asr"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-    val maghrib = mapOfPrayerTimes["maghrib"]?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!!
-
-    return when {
-        //if the difference between the current time and the isha time is less than 0 or equal to 0 than the current prayer is isha
-        isha - `when` <= 0 -> {
-            Pair("fajr", mapOfPrayerTimes["fajr"]!!)
-        }
-
-        maghrib - `when` <= 0 -> {
-            Pair("isha", mapOfPrayerTimes["isha"]!!)
-        }
-
-        asr - `when` <= 0 -> {
-            Pair("maghrib", mapOfPrayerTimes["maghrib"]!!)
-        }
-
-        dhuhr - `when` <= 0 -> {
-            Pair("asr", mapOfPrayerTimes["asr"]!!)
-        }
-
-        sunrise - `when` <= 0 -> {
-            Pair("dhuhr", mapOfPrayerTimes["dhuhr"]!!)
-        }
-
-        fajr - `when` <= 0 -> {
-            Pair("sunrise", mapOfPrayerTimes["sunrise"]!!)
-        }
-
-        `when` in fajr..sunrise -> {
-            Pair("sunrise", mapOfPrayerTimes["sunrise"]!!)
-        }
-
-        `when` in sunrise..dhuhr -> {
-            Pair("dhuhr", mapOfPrayerTimes["dhuhr"]!!)
-        }
-
-        `when` in dhuhr..asr -> {
-            Pair("asr", mapOfPrayerTimes["asr"]!!)
-        }
-
-        `when` in asr..maghrib -> {
-            Pair("maghrib", mapOfPrayerTimes["maghrib"]!!)
-        }
-
-        `when` in maghrib..isha -> {
-            Pair("isha", mapOfPrayerTimes["isha"]!!)
-        }
-
-        `when` in isha..fajrTommorow?.toInstant(ZoneOffset.UTC)?.toEpochMilli()!! -> {
-            Pair("fajr", mapOfPrayerTimes["fajr"]!!)
-        }
-        //if the current time is less than the fajr time than the next prayer is fajr
-        `when` < fajr -> {
-            Pair("fajr", mapOfPrayerTimes["fajr"]!!)
-        }
-
-        else -> {
-            Pair("none", mapOfPrayerTimes["none"]!!)
-        }
+    override fun onCleared() {
+        super.onCleared()
+        countDownTimer?.cancel()
+        activeJobs.values.forEach { it.cancel() }
     }
+
+    private fun PrayerTimesState.isValidLocation() =
+        locationName != "Loading..." && latitude != 0.0 && longitude != 0.0
+
+    private fun calculateAndStartTimer(state: PrayerTimesState) {
+        val timeToNextPrayer = state.nextPrayerTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        val currentTime = LocalDateTime.now()
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        startTimer(timeToNextPrayer - currentTime)
+    }
+
+    private fun setLoading(loading: Boolean) {
+        _isLoading.value = loading
+    }
+
+    private fun PrayerTimesData.toLocalPrayerTimes() = LocalPrayerTimes(
+        fajr = fajr,
+        sunrise = sunrise,
+        dhuhr = dhuhr,
+        asr = asr,
+        maghrib = maghrib,
+        isha = isha
+    )
+
+    private fun LocalPrayerTimes.toPrayerTimesData() = PrayerTimesData(
+        fajr = fajr ?: LocalDateTime.now(),
+        sunrise = sunrise ?: LocalDateTime.now(),
+        dhuhr = dhuhr ?: LocalDateTime.now(),
+        asr = asr ?: LocalDateTime.now(),
+        maghrib = maghrib ?: LocalDateTime.now(),
+        isha = isha ?: LocalDateTime.now()
+    )
 }

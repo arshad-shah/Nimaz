@@ -10,22 +10,33 @@ import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.NotificationHelper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
+import dagger.hilt.android.AndroidEntryPoint
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
-class AdhanReciever : BroadcastReceiver() {
+@AndroidEntryPoint
+class AdhanReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var firebaseLogger: FirebaseLogger
+
+    @Inject
+    lateinit var notificationHelper: NotificationHelper
+
+    @Inject
+    lateinit var prayerTimesRepository: PrayerTimesRepository
+
+    @Inject
+    lateinit var createAlarms: CreateAlarms
+
+    @Inject
+    lateinit var sharedPreferences: PrivateSharedPreferences
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (!FirebaseLogger.isInitialized()) {
-            FirebaseLogger.init()
-            Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Firebase logger initialized")
-        }
-        // When the reciever is called, it will send a notification to the user
-        //send notification
-        // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
         val title = intent.extras!!.getString("title").toString()
         val CHANNEL_ID = intent.extras!!.getString("channelid").toString()
         val Notify_Id = intent.extras!!.getInt("notifyid")
@@ -33,14 +44,13 @@ class AdhanReciever : BroadcastReceiver() {
 
         val current_time = System.currentTimeMillis()
         val diff = current_time - Time_of_alarm
-        //two minutes grace period
-        val graceP = 2 * 60 * 1000
+        val graceP = 2 * 60 * 1000 // two minutes grace period
 
         Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Alarm for $title is being executed!")
-        // check if it is time to notify
-        //diff in 1 until graceP
+
         if (diff in 1 until graceP || title == "Test Adhan") {
             Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Notification for $title is being executed!")
+
             when (title) {
                 "Test Adhan" -> {
                     Toasty.info(context, "Test Adhan is being executed!").show()
@@ -54,7 +64,8 @@ class AdhanReciever : BroadcastReceiver() {
                     Toasty.info(context, "Time to pray $title").show()
                 }
             }
-            NotificationHelper().createNotification(
+
+            notificationHelper.createNotification(
                 context,
                 CHANNEL_ID,
                 title,
@@ -64,8 +75,7 @@ class AdhanReciever : BroadcastReceiver() {
             Toasty.info(context, "Time to pray $title").show()
 
             Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Alarm for $title is Successfully executed!")
-        } // end of if
-        else {
+        } else {
             Log.d(
                 AppConstants.ADHAN_RECEIVER_TAG,
                 "Notification for $title is not executed! The time has passed"
@@ -74,26 +84,26 @@ class AdhanReciever : BroadcastReceiver() {
 
         if (title == "Ishaa") {
             Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Past Isha, Re-creating alarms for tomorrow")
-            val sharedPreferences = PrivateSharedPreferences(context)
+
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val repository = PrayerTimesRepository.getPrayerTimes(
+                    val repository = prayerTimesRepository.getPrayerTimes(
                         context,
                         LocalDate.now().plusDays(1).toString()
                     )
-                    //check if the isha time is past 11 pm
-                    //if it is set the isha time to 30 mins after maghrib
+
                     val ishaTime = repository.data?.isha?.toLocalTime()?.hour
                     val newIshaTime = if (ishaTime!! >= 22) {
                         repository.data.maghrib?.plusMinutes(30)
                     } else {
                         repository.data.isha
                     }
+
                     sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, false)
-                    val alarmLock =
-                        sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
+                    val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
+
                     if (!alarmLock) {
-                        CreateAlarms().exact(
+                        createAlarms.exact(
                             context,
                             repository.data.fajr!!,
                             repository.data.sunrise!!,
@@ -105,11 +115,11 @@ class AdhanReciever : BroadcastReceiver() {
                         sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
                     }
                 } catch (e: Exception) {
-                    Log.e(AppConstants.ADHAN_RECEIVER_TAG, "Error in AdhanReciever: ${e.message}")
+                    Log.e(AppConstants.ADHAN_RECEIVER_TAG, "Error in AdhanReceiver: ${e.message}")
                     val mapForLoggingError = mapOf(
-                        "Error" to "Error in AdhanReciever: ${e.message}"
+                        "Error" to "Error in AdhanReceiver: ${e.message}"
                     )
-                    FirebaseLogger.logEvent(AppConstants.ADHAN_RECEIVER_TAG, mapForLoggingError)
+                    firebaseLogger.logEvent(AppConstants.ADHAN_RECEIVER_TAG, mapForLoggingError)
                 }
             }
         }

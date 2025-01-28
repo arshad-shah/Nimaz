@@ -14,23 +14,31 @@ apply plugin: 'com.mikepenz.aboutlibraries.plugin'
 
 android {
     namespace 'com.arshadshah.nimaz'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
-        targetSdk 33
-        versionCode 159
-        versionName '2.3.2'
+        targetSdk 35
+        versionCode 170
+        versionName '2.5.7'
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.arshadshah.nimaz.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField "String", "DO_ACCESS_KEY", "\"${getSecret("DO_ACCESS_KEY")}\""
+        buildConfigField "String", "DO_SECRET_KEY", "\"${getSecret("DO_SECRET_KEY")}\""
+        buildConfigField "String", "SPACE_NAME", "\"quran-audio\""
+        buildConfigField "String", "METAL_API_KEY", "\"${getSecret("METAL_API_KEY")}\""
     }
 
     buildTypes {
         release {
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -43,14 +51,15 @@ android {
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
@@ -67,20 +76,24 @@ android {
     }
 }
 
+def getSecret(String key) {
+    def secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(secretsFile))
+        return props.getProperty(key)
+    }
+    return ""
+}
+
 dependencies {
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.ui.test.junit4.android
+    implementation libs.androidx.ui.text.google.fonts
     coreLibraryDesugaring libs.desugar.jdk.libs
     implementation libs.androidx.monitor
     implementation libs.androidx.junit.ktx
     implementation libs.androidx.runner
-
-    testImplementation libs.junit
-    //mockito
-    testImplementation libs.mockito.core
-    //Robolectric environment
-    testImplementation libs.androidx.core
-    testImplementation libs.robolectric
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.androidx.espresso.core
 
     //navigation testing
     androidTestImplementation libs.androidx.navigation.testing
@@ -103,6 +116,9 @@ dependencies {
     implementation libs.androidx.compose.ui.tooling.preview
     implementation libs.androidx.compose.ui.graphics
     implementation libs.androidx.compose.material3
+    implementation libs.androidx.material.icons.extended
+
+    //testing
     debugImplementation libs.androidx.compose.ui.tooling
     debugImplementation libs.androidx.compose.ui.test.manifest
 
@@ -155,12 +171,47 @@ dependencies {
     implementation libs.glance.appwidget
     implementation libs.glance.material3
     implementation libs.work.manager
-
-    implementation libs.kotlinx.serialization.json
     //kotlinx date time
     implementation libs.kotlinx.datetime
 
     implementation libs.hilt.android
     ksp libs.hilt.android.compiler
+    implementation libs.androidx.hilt.navigation.compose
+    implementation libs.androidx.hilt.work
+
+    //ktor
+    // Ktor client
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+
+
+    //testing
+    testImplementation libs.ktor.client.mock
+
+    testImplementation libs.junit
+    testImplementation libs.mockito.core
+    testImplementation libs.kotlinx.coroutines.test
+
+
+    testImplementation libs.dagger.hilt.android.testing
+    kspTest libs.hilt.android.compiler
+    androidTestImplementation libs.dagger.hilt.android.testing
+    kspAndroidTest libs.hilt.android.compiler
+    testImplementation libs.mockito.kotlin
+    testImplementation libs.junit
+    //mockito
+    testImplementation libs.mockito.core
+    //Robolectric environment
+    testImplementation libs.androidx.core
+    testImplementation libs.robolectric
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+    testImplementation libs.junit.jupiter
+
+
+    implementation libs.introshowcaseview
+
 
 }

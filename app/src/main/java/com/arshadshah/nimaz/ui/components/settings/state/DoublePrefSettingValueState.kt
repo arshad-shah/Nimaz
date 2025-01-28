@@ -1,28 +1,10 @@
 package com.arshadshah.nimaz.ui.components.settings.state
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.ui.components.settings.SettingValueState
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-
-@Composable
-fun rememberPreferenceDoubleSettingState(
-    key: String,
-    defaultValue: Double = 0.0,
-    preferences: PrivateSharedPreferences = PrivateSharedPreferences(LocalContext.current),
-): DoublePreferenceSettingValueState {
-    return remember {
-        DoublePreferenceSettingValueState(
-            key = key,
-            preferences = preferences,
-            defaultValue = defaultValue
-        )
-    }
-}
 
 class DoublePreferenceSettingValueState(
     private val preferences: PrivateSharedPreferences,

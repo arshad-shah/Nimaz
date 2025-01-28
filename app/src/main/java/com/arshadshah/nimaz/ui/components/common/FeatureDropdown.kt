@@ -1,12 +1,15 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,33 +18,29 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.material3.Badge
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.ui.components.quran.CompactSurahCard
 
 @Composable
 fun <T> FeaturesDropDown(
@@ -50,210 +49,230 @@ fun <T> FeaturesDropDown(
     label: String,
     showBadge: Boolean = true,
     dropDownItem: @Composable (T) -> Unit,
-    shape: CornerBasedShape = MaterialTheme.shapes.medium
+    shape: CornerBasedShape = RoundedCornerShape(24.dp)
 ) {
-    val (
-        isExpanded,
-        setIsExpanded
-    ) = remember { mutableStateOf(false) }
+    val (isExpanded, setExpanded) = remember { mutableStateOf(false) }
 
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 6.dp),
-        modifier = modifier.fillMaxWidth(),
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    ElevatedCard(
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .scale(scale),
         shape = shape,
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
-                .clip(shape),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Header Section
             Surface(
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp),
-                modifier = modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Header(label, items.size, isExpanded, showBadge, setIsExpanded)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = { setExpanded(!isExpanded) })
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (showBadge && items.isNotEmpty()) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = items.size.toString(),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = if (isExpanded) "Collapse" else "Expand",
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(20.dp)
+                            )
+                        }
+                    }
+                }
             }
+
+            // Content Section
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
-                DropdownContent(items, label, dropDownItem)
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (items.isEmpty()) {
+                        EmptyStateContent(text = "No $label available")
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .height(200.dp)
+                                .padding(vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(items) { item -> dropDownItem(item) }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun Header(
-    label: String,
-    itemCount: Int,
-    isExpanded: Boolean,
-    showBadge: Boolean,
-    setIsExpanded: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .clickable { setIsExpanded(!isExpanded) },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier
-                .weight(1f)
-                .padding(8.dp),
-            textAlign = TextAlign.Start,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.titleLarge
-        )
-        if (showBadge && itemCount > 0) {
-            Badge(
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Text(
-                    modifier = Modifier.padding(2.dp),
-                    text = itemCount.toString(),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
-
-        FilledIconButton(
-            onClick = { setIsExpanded(!isExpanded) },
-            shape = MaterialTheme.shapes.small,
-            colors = IconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 1.dp),
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f),
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
-                    .copy(alpha = 0.32f)
-            )
-        ) {
-            Icon(
-                painter = if (isExpanded) painterResource(id = R.drawable.arrow_up_icon) else painterResource(
-                    id = R.drawable.arrow_down_icon
-                ),
-                contentDescription = "Dropdown",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(24.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun <T> DropdownContent(
-    items: List<T>,
-    label: String,
-    dropDownItem: @Composable (T) -> Unit
-) {
-    if (items.isEmpty()) {
-        DropdownPlaceholder(text = "No $label available")
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .height(200.dp)
-        ) { // Allows for scrolling through many items
-            items(items) { item ->
-                dropDownItem(item)
-            }
-        }
-    }
-}
-
-@Composable
-fun DropdownPlaceholder(
-    text: String,
-    modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp),
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-    disabledContentColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-    disabledContainerColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
-    shape: Shape = MaterialTheme.shapes.medium,
-    cardPadding: Dp = 8.dp,
-    contentPadding: PaddingValues = PaddingValues(8.dp),
-    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
-    textColor: Color = contentColor.copy(alpha = 0.6f),
-    textAlign: TextAlign = TextAlign.Center,
-    overflow: TextOverflow = TextOverflow.Ellipsis,
-    maxLines: Int = 2,
-    verticalArrangement: Arrangement.Vertical = Arrangement.Center,
-    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally
-) {
-    ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
-            disabledContentColor = disabledContentColor,
-            disabledContainerColor = disabledContainerColor,
-        ),
-        shape = shape,
-        modifier = modifier
-            .padding(cardPadding)
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(contentPadding),
-            verticalArrangement = verticalArrangement,
-            horizontalAlignment = horizontalAlignment
-        ) {
-            Text(
-                text = text,
-                style = textStyle,
-                color = textColor,
-                textAlign = textAlign,
-                overflow = overflow,
-                maxLines = maxLines,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun <T> FeatureDropdownItem(
+fun <T> DropdownListItem(
     item: T,
     onClick: (T) -> Unit,
-    itemContent: @Composable (T) -> Unit,
-    iconPainter: Painter = painterResource(id = R.drawable.angle_small_right_icon), // Default icon
-    iconDescription: String? = null, // Accessibility description for the icon
-    iconSize: Dp = 24.dp, // Icon size, default to 24.dp
-    padding: PaddingValues = PaddingValues(4.dp), // Card padding
-    showIcon: Boolean = true, // Control the visibility of the icon
+    content: @Composable (T) -> Unit,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
-    OutlinedCard(
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
-            .padding(padding)
-            .fillMaxWidth(),
-        onClick = { onClick(item) },
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .clickable { onClick(item) }
+                .padding(2.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            itemContent(item)
-            if (showIcon) {
-                Icon(
-                    painter = iconPainter,
-                    contentDescription = iconDescription,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(iconSize)
-                )
+            if (leadingIcon != null) {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        leadingIcon()
+                    }
+                }
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+                content(item)
+            }
+
+            if (trailingIcon != null) {
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        trailingIcon()
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+private fun EmptyStateContent(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun FeaturesDropDownPreview() {
+    FeaturesDropDown(
+        items = listOf("Item 1", "Item 2", "Item 3"),
+        label = "Items",
+        dropDownItem = { item ->
+            DropdownListItem(item = item, onClick = {}, content = {
+                CompactSurahCard(
+                    surah = LocalSurah(
+                        number = 1,
+                        name = "الفاتحة",
+                        englishName = "Al-Fatihah",
+                        englishNameTranslation = "The Opening",
+                        numberOfAyahs = 7,
+                        revelationType = "Meccan",
+                        startAya = 1,
+                        revelationOrder = 1,
+                        rukus = 1
+                    ),
+                    onNavigate = { _, _, _, _ -> },
+                    loading = false
+                )
+            })
+        }
+    )
 }

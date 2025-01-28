@@ -1,9 +1,7 @@
 package com.arshadshah.nimaz.widgets.prayertimestrackerthin.components
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -14,21 +12,21 @@ import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
 import androidx.glance.appwidget.appWidgetBackground
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.repositories.PrayerTrackerRepository
-import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
-import kotlinx.coroutines.launch
-import java.time.LocalDate
+import kotlinx.coroutines.Job
 
 @Composable
 fun WidgetTogglableItem(
@@ -39,42 +37,69 @@ fun WidgetTogglableItem(
     modifier: GlanceModifier,
 ) {
     Column(
-        modifier = modifier.fillMaxHeight()
-            .padding(top = 8.dp, bottom = 2.dp, start = 4.dp, end = 4.dp)
-            .background(GlanceTheme.colors.secondaryContainer)
-            .clickable {
-                onCheckedChange(!checked)
-            },
+        modifier = modifier
+            .fillMaxHeight()
+            .padding(horizontal = 4.dp, vertical = 8.dp)
+            .background(
+                if (checked)
+                    GlanceTheme.colors.primaryContainer
+                else
+                    GlanceTheme.colors.secondaryContainer
+            )
+            .cornerRadius(16.dp)
+            .clickable { onCheckedChange(!checked) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val modifierInternal = GlanceModifier.defaultWeight().padding(2.dp)
+
+        // Prayer name
         Text(
-            text = text, modifier = modifierInternal, style = TextStyle(
-                color = GlanceTheme.colors.onSecondaryContainer,
-                fontSize = TextUnit(
-                    14F, TextUnitType.Sp
-                ),
-                fontWeight = FontWeight.Bold
-            )
+            text = text,
+            style = TextStyle(
+                color = if (checked)
+                    GlanceTheme.colors.onPrimaryContainer
+                else
+                    GlanceTheme.colors.onSecondaryContainer,
+                fontSize = TextUnit(12F, TextUnitType.Sp),
+                fontWeight = FontWeight.Medium
+            ),
+            modifier = GlanceModifier.padding(top = 4.dp)
         )
 
+        // Time text
+        Text(
+            text = timeText,
+            style = TextStyle(
+                color = if (checked)
+                    GlanceTheme.colors.onPrimaryContainer
+                else
+                    GlanceTheme.colors.onSecondaryContainer,
+                fontSize = TextUnit(14F, TextUnitType.Sp),
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = GlanceModifier.padding(vertical = 2.dp)
+        )
+
+        // Custom styled checkbox
         CheckBox(
-            checked = checked, action(
-                key = "${text}-CheckBox",
-            ) {
+            checked = checked,
+            action {
                 onCheckedChange(!checked)
-            }, modifier = modifierInternal
+            },
+            modifier = GlanceModifier.padding(top = 4.dp)
         )
 
-        Text(
-            text = timeText, modifier = modifierInternal, style = TextStyle(
-                color = GlanceTheme.colors.onSecondaryContainer, fontSize = TextUnit(
-                    15F, TextUnitType.Sp
-                ),
-                fontWeight = FontWeight.Bold
-            )
-        )
+        // Optional: Checked indicator dot
+        if (checked) {
+            Box(
+                modifier = GlanceModifier
+                    .padding(top = 4.dp)
+                    .size(4.dp)
+                    .background(GlanceTheme.colors.primary)
+                    .cornerRadius(2.dp),
+                contentAlignment = Alignment.Center
+            ) {}
+        }
     }
 }
 
@@ -90,55 +115,43 @@ fun PrayerTimesTrackerRowItems(
     asrTime: MutableState<String>,
     maghribTime: MutableState<String>,
     ishaTime: MutableState<String>,
-    context: Context,
+    onUpdateTracker: (String, Boolean) -> Job,
 ) {
+    data class PrayerInfo(
+        val name: String,
+        val state: MutableState<Boolean>,
+        val time: MutableState<String>,
+    )
 
-    val scope = rememberCoroutineScope()
-
-    val prayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+    val prayers = listOf(
+        PrayerInfo("Fajr", fajr, fajrTime),
+        PrayerInfo("Dhuhr", dhuhr, dhuhrTime),
+        PrayerInfo("Asr", asr, asrTime),
+        PrayerInfo("Maghrib", maghrib, maghribTime),
+        PrayerInfo("Isha", isha, ishaTime)
+    )
 
     Row(
-        modifier = GlanceModifier.fillMaxSize().appWidgetBackground()
-            .background(GlanceTheme.colors.secondaryContainer).clickable(
-                onClick = actionStartActivity<MainActivity>()
-            )
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .appWidgetBackground()
+            .background(GlanceTheme.colors.surface)
+            .padding(8.dp)
+            .cornerRadius(24.dp)
+            .clickable(onClick = actionStartActivity<MainActivity>()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val modifier = GlanceModifier.defaultWeight()
         prayers.forEach { prayer ->
             WidgetTogglableItem(
-                text = prayer,
-                timeText = when (prayer) {
-                    "Fajr" -> fajrTime.value
-                    "Dhuhr" -> dhuhrTime.value
-                    "Asr" -> asrTime.value
-                    "Maghrib" -> maghribTime.value
-                    "Isha" -> ishaTime.value
-                    else -> ""
+                text = prayer.name,
+                timeText = prayer.time.value,
+                checked = prayer.state.value,
+                onCheckedChange = { checked ->
+                    prayer.state.value = checked
+                    onUpdateTracker(prayer.name, checked)
                 },
-                checked = when (prayer) {
-                    "Fajr" -> fajr.value
-                    "Dhuhr" -> dhuhr.value
-                    "Asr" -> asr.value
-                    "Maghrib" -> maghrib.value
-                    "Isha" -> isha.value
-                    else -> false
-                },
-                onCheckedChange = { b: Boolean ->
-                    when (prayer) {
-                        "Fajr" -> fajr.value = b
-                        "Dhuhr" -> dhuhr.value = b
-                        "Asr" -> asr.value = b
-                        "Maghrib" -> maghrib.value = b
-                        "Isha" -> isha.value = b
-                    }
-                    scope.launch {
-                        PrayerTrackerRepository.updateSpecificPrayer(LocalDate.now(), prayer, b)
-                        PrayerTimesTrackerWorker.enqueue(context, true)
-                    }
-                },
-                modifier = modifier
+                modifier = GlanceModifier.defaultWeight(),
             )
         }
-
     }
 }

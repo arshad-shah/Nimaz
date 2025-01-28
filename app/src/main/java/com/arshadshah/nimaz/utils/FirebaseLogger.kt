@@ -33,16 +33,6 @@ object FirebaseLogger {
         Log.d("Nimaz: FirebaseLogger", "Logged Event: $eventName")
     }
 
-    fun logEvent(eventName: String) {
-        firebaseAnalytics?.logEvent(eventName, null)
-        Log.d("Nimaz: FirebaseLogger", "Logged Event: $eventName")
-    }
-
-    fun getFirebaseAnalytics(): FirebaseAnalytics? {
-        Log.d("Nimaz: FirebaseLogger", "Firebase Analytics Returned")
-        return firebaseAnalytics
-    }
-
     fun isInitialized(): Boolean {
         return firebaseAnalytics != null
     }

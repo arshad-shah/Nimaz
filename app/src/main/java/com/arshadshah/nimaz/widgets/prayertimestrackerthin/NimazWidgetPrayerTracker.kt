@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -28,9 +29,12 @@ import androidx.glance.layout.padding
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.widgets.NimazWidgetColorScheme
+import com.arshadshah.nimaz.widgets.getGlanceAppWidgetManager
+import com.arshadshah.nimaz.widgets.getPrayerTrackerRepository
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.components.PrayerTimesTrackerRowItems
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class NimazWidgetPrayerTracker : GlanceAppWidget() {
@@ -39,10 +43,14 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
 
     override val sizeMode: SizeMode = SizeMode.Exact
 
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        if (!LocalDataStore.isInitialized()) {
-            LocalDataStore.init(context)
-        }
+
+        val appContext = context.applicationContext
+
+        val glanceAppWidgetManager = getGlanceAppWidgetManager(appContext)
+        val prayerTrackerRepository = getPrayerTrackerRepository(appContext)
+
 
         provideContent {
             val prayerTimesTracker = currentState<PrayerTimesTrackerWidget>()
@@ -65,6 +73,8 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
             } else {
                 DateTimeFormatter.ofPattern("hh:mm")
             }
+
+            val scope = rememberCoroutineScope()
 
             GlanceTheme(
                 colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -135,7 +145,16 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
                             asrTime = asrTime,
                             maghribTime = maghribTime,
                             ishaTime = ishaTime,
-                            context = context
+                            onUpdateTracker = { prayer: String, checked: Boolean ->
+                                scope.launch {
+                                    prayerTrackerRepository.updateSpecificPrayer(
+                                        LocalDate.now(),
+                                        prayer,
+                                        checked
+                                    )
+                                    PrayerTimesTrackerWorker.enqueue(context, true)
+                                }
+                            }
                         )
                     }
 

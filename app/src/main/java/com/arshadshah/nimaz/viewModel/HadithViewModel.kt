@@ -3,54 +3,61 @@ package com.arshadshah.nimaz.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
-import com.arshadshah.nimaz.utils.LocalDataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HadithViewModel : ViewModel() {
-    private var _allHadithBooks = MutableStateFlow(listOf<HadithMetadata>())
-    val allHadithBooks = _allHadithBooks.asStateFlow()
+sealed class ViewState<out T> {
+    data object Loading : ViewState<Nothing>()
+    data class Success<T>(val data: T) : ViewState<T>()
+    data class Error(val message: String) : ViewState<Nothing>()
+}
 
-    private var _chaptersForABook = MutableStateFlow(listOf<HadithChapter>())
-    val chaptersForABook = _chaptersForABook.asStateFlow()
+@HiltViewModel
+class HadithViewModel @Inject constructor(
+    private val dataStore: DataStore
+) : ViewModel() {
+    private var _booksState =
+        MutableStateFlow<ViewState<List<HadithMetadata>>>(ViewState.Success(emptyList()))
+    val booksState: StateFlow<ViewState<List<HadithMetadata>>> = _booksState.asStateFlow()
 
-    private var _hadithForAChapter = MutableStateFlow(listOf<HadithEntity>())
-    val hadithForAChapter = _hadithForAChapter.asStateFlow()
+    private var _chaptersState =
+        MutableStateFlow<ViewState<List<HadithChapter>>>(ViewState.Success(emptyList()))
+    val chaptersState: StateFlow<ViewState<List<HadithChapter>>> = _chaptersState.asStateFlow()
 
-    private var _allFavourites = MutableStateFlow(listOf<HadithFavourite>())
-    val allFavourites = _allFavourites.asStateFlow()
+    private var _hadithState =
+        MutableStateFlow<ViewState<List<HadithEntity>>>(ViewState.Success(emptyList()))
+    val hadithState: StateFlow<ViewState<List<HadithEntity>>> = _hadithState.asStateFlow()
 
-    private var _loading = MutableStateFlow(false)
-    val loading = _loading.asStateFlow()
-
-    private var _error = MutableStateFlow("")
-    val error = _error.asStateFlow()
+    private var _favouritesState =
+        MutableStateFlow<ViewState<List<HadithFavourite>>>(ViewState.Success(emptyList()))
+    val favouritesState: StateFlow<ViewState<List<HadithFavourite>>> =
+        _favouritesState.asStateFlow()
 
     init {
         getAllHadithBooks()
     }
 
-
     private fun getAllHadithBooks() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _loading.value = true
-                _error.value = ""
-                val dataStore = LocalDataStore.getDataStore()
-                val allHadithBooks = dataStore.getAllMetadata()
-                Log.d("All Hadith Books", allHadithBooks.toString())
-                _loading.value = false
-                _allHadithBooks.value = allHadithBooks
+                _booksState.value = ViewState.Loading
+                val books = dataStore.getAllMetadata()
+                _booksState.value = ViewState.Success(books)
+                Log.d("HadithViewModel", "Successfully loaded ${books.size} books")
             } catch (e: Exception) {
-                Log.d("getAllHadithBooks", e.message ?: "Unknown error")
-                _loading.value = false
-                _error.value = e.message ?: "Unknown error"
+                val errorMsg = e.message ?: "Unknown error while loading books"
+                Log.e("HadithViewModel", "Error loading books: $errorMsg", e)
+                _booksState.value = ViewState.Error(errorMsg)
             }
         }
     }
@@ -58,17 +65,17 @@ class HadithViewModel : ViewModel() {
     fun getAllChaptersForABook(bookId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _loading.value = true
-                _error.value = ""
-                val dataStore = LocalDataStore.getDataStore()
-                val chaptersForABook = dataStore.getAllHadithChaptersForABook(bookId)
-                Log.d("All Chapters For A Book", chaptersForABook.toString())
-                _loading.value = false
-                _chaptersForABook.value = chaptersForABook
+                _chaptersState.value = ViewState.Loading
+                val chapters = dataStore.getAllHadithChaptersForABook(bookId)
+                _chaptersState.value = ViewState.Success(chapters)
+                Log.d(
+                    "HadithViewModel",
+                    "Successfully loaded ${chapters.size} chapters for book $bookId"
+                )
             } catch (e: Exception) {
-                Log.d("getAllChaptersForABook", e.message ?: "Unknown error")
-                _loading.value = false
-                _error.value = e.message ?: "Unknown error"
+                val errorMsg = e.message ?: "Unknown error while loading chapters"
+                Log.e("HadithViewModel", "Error loading chapters for book $bookId: $errorMsg", e)
+                _chaptersState.value = ViewState.Error(errorMsg)
             }
         }
     }
@@ -76,17 +83,24 @@ class HadithViewModel : ViewModel() {
     fun getAllHadithForChapter(bookId: Int, chapterId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _loading.value = true
-                _error.value = ""
-                val dataStore = LocalDataStore.getDataStore()
-                val chaptersForABook = dataStore.getAllHadithsForABook(bookId, chapterId)
-                Log.d("All Hadith For A Chapter", chaptersForABook.toString())
-                _loading.value = false
-                _hadithForAChapter.value = chaptersForABook
+                _hadithState.value = ViewState.Loading
+                val hadiths = dataStore.getAllHadithsForABook(bookId, chapterId)
+                val hadithChapter = dataStore.getAllHadithChaptersForABook(bookId)
+                    .find { it.chapterId == chapterId }
+                _hadithState.value = ViewState.Success(hadiths)
+                _chaptersState.value = ViewState.Success(listOfNotNull(hadithChapter))
+                Log.d(
+                    "HadithViewModel",
+                    "Successfully loaded ${hadiths.size} hadiths for book $bookId, chapter $chapterId"
+                )
             } catch (e: Exception) {
-                Log.d("getAllHadithForChapter", e.message ?: "Unknown error")
-                _loading.value = false
-                _error.value = e.message ?: "Unknown error"
+                val errorMsg = e.message ?: "Unknown error while loading hadiths"
+                Log.e(
+                    "HadithViewModel",
+                    "Error loading hadiths for book $bookId, chapter $chapterId: $errorMsg",
+                    e
+                )
+                _hadithState.value = ViewState.Error(errorMsg)
             }
         }
     }
@@ -94,14 +108,24 @@ class HadithViewModel : ViewModel() {
     fun updateFavouriteStatus(bookId: Int, chapterId: Int, id: Int, favouriteStatus: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dataStore = LocalDataStore.getDataStore()
+                // Update favourite status
                 dataStore.updateFavouriteStatus(id, favouriteStatus)
+                Log.d("HadithViewModel", "Successfully updated favourite status for hadith $id")
 
-                val hadithForAChapter = dataStore.getAllHadithsForABook(bookId, chapterId)
-                _hadithForAChapter.value = hadithForAChapter
+                // Refresh hadith list
+                val hadiths = dataStore.getAllHadithsForABook(bookId, chapterId)
+                _hadithState.value = ViewState.Success(hadiths)
+
+                // Refresh favourites list
+                getAllFavourites()
             } catch (e: Exception) {
-                Log.d("updateFavouriteStatus", e.message ?: "Unknown error")
-                _error.value = e.message ?: "Unknown error"
+                val errorMsg = e.message ?: "Unknown error while updating favourite status"
+                Log.e("HadithViewModel", "Error updating favourite status: $errorMsg", e)
+                // Show error but keep existing data
+                _hadithState.value = when (val currentState = _hadithState.value) {
+                    is ViewState.Success -> currentState
+                    else -> ViewState.Error(errorMsg)
+                }
             }
         }
     }
@@ -109,19 +133,36 @@ class HadithViewModel : ViewModel() {
     fun getAllFavourites() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _loading.value = true
-                _error.value = ""
-                val dataStore = LocalDataStore.getDataStore()
-                val allFavourites = dataStore.getAllFavourites()
-                Log.d("All Favourites", allFavourites.toString())
-                _allFavourites.value = allFavourites
-                _loading.value = false
+                _favouritesState.value = ViewState.Loading
+                val favourites = dataStore.getAllFavourites()
+                _favouritesState.value = ViewState.Success(favourites)
+                Log.d("HadithViewModel", "Successfully loaded ${favourites.size} favourites")
             } catch (e: Exception) {
-                Log.d("getAllFavourites", e.message ?: "Unknown error")
-                _loading.value = false
-                _error.value = e.message ?: "Unknown error"
+                val errorMsg = e.message ?: "Unknown error while loading favourites"
+                Log.e("HadithViewModel", "Error loading favourites: $errorMsg", e)
+                _favouritesState.value = ViewState.Error(errorMsg)
             }
         }
     }
 
+    fun getChapterName(bookId: Int = 1, chapterId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val hadithChapter = dataStore.getAllHadithChaptersForABook(bookId)
+                    .find { it.chapterId == chapterId }
+                _chaptersState.value = ViewState.Success(listOfNotNull(hadithChapter))
+                Log.d("HadithViewModel", "Successfully loaded chapter $chapterId")
+            } catch (e: Exception) {
+                val errorMsg = e.message ?: "Unknown error while loading chapter"
+                Log.e("HadithViewModel", "Error loading chapter $chapterId: $errorMsg", e)
+                _chaptersState.value = ViewState.Error(errorMsg)
+            }
+        }
+    }
+
+    // Extension function to safely get current data
+    private fun <T> ViewState<T>.getCurrentData(): T? = when (this) {
+        is ViewState.Success -> data
+        else -> null
+    }
 }

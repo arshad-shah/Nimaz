@@ -30,7 +30,6 @@ import com.arshadshah.nimaz.widgets.NimazWidgetColorScheme
 import com.arshadshah.nimaz.widgets.prayertimesthin.components.WidgetPrayerTimeRowList
 
 class NimazWidget : GlanceAppWidget() {
-
     override val stateDefinition = PrayerTimesStateDefinition
 
     override val sizeMode: SizeMode = SizeMode.Exact
