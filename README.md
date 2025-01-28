@@ -1,35 +1,77 @@
 [![better commits is enabled](https://img.shields.io/badge/better--commits-enabled?style=for-the-badge&logo=git&color=a6e3a1&logoColor=D9E0EE&labelColor=302D41)](https://github.com/Everduin94/better-commits)
 # Nimaz
 
+---
 
-Nimaz is an android app that helps you keep track of your prayer times and stay connected with your faith. The app is built using Compose and Material You, with a Spring Boot backend.
+# Nimaz
 
-# Features
-- Prayer times: The app will show you the exact prayer times for your current location.
-- Timer to next prayer: The app will show you how much time is remaining until the next prayer.
-- Date in Gregorian and Hijri: The app will display the current date in both the Gregorian and Hijri calendars.
-- Prayer and fast tracking: The app will track your prayers and fasts, so you can keep track of your progress.
-- Tasbih: The app includes a tasbih feature for counting your prayers.
-- List of Tasbih: A list of tasbihs for you to choose from.
-- Compass to Qibla: The app includes a compass that points towards the Qibla, the direction of the Kaaba in Mecca.
-- Quran with English and Urdu translation: The app includes a Quran feature with both English and Urdu translations.
-- Quran Bookmark: A bookmark feature for the Quran, so you can easily keep track of where you left off.
-- Quran Favorites: A favorites feature for the Quran, so you can easily keep track of your favorite verses.
-- Quran audio: The app includes an audio feature for the Quran, so you can listen to the Quran verse by verse.
-- Prayer times customization: The app allows you to customize your prayer times according to your preferences.
-- Alarms for each prayer: The app includes alarms for each prayer, so you never miss a prayer.
-- Notification for each prayer: The app sends notifications for each prayer, so you can stay on top of your prayer schedule.
-- Automatic location: The app uses your device's GPS to automatically determine your location and show you the correct prayer times.
-- Manual location: The app also allows you to manually set your location.
-- Offline mode: The app can also be used in offline mode, so you can access your prayer times even without an internet connection.
-- Multiple Themes: The app includes multiple themes, so you can customize the app to your liking.
-- Light and Dark mode: The app includes both light and dark modes fro all themes.
-- Prayer Tracker: The app includes a prayer tracker, so you can keep track of your progress.
-- Fast Tracker: The app includes a fast tracker, so you can keep track of your progress.
-- Dual Calendar: The app includes a dual calendar, so you can keep track of both the Gregorian and Hijri calendars.
+Nimaz is an Android app that helps you keep track of your prayer times and stay connected with your faith. The app is built using Compose and Material You, with a Spring Boot backend.
 
-# Running the project
-- Clone the project
-- Open the project in Android Studio
-Android Studio will automatically download the required dependencies and setup the project.
-- Run the project on a real device or an emulator from Android Studio
+## Table of Contents
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Introduction
+Nimaz is an application that helps users keep track of their daily prayer times and provides reminders for each prayer. This project aims to enhance the user experience by providing a modern, intuitive interface and integrating new features to support users in their spiritual practices.
+
+## Features
+- Prayer times for your current location
+- Timer to next prayer
+- Date in Gregorian and Hijri calendars
+- Prayer and fast tracking
+- Tasbih for counting prayers
+- List of Tasbihs
+- Compass to Qibla
+- Quran with English and Urdu translations
+- Quran Bookmark and Favorites
+- Quran audio
+- Customizable prayer times
+- Alarms and notifications for each prayer
+- Automatic and manual location settings
+- Offline mode
+- Multiple themes with light and dark modes
+- Dual calendar to keep track of both Gregorian and Hijri calendars
+
+## Installation
+To get started with Nimaz, follow these steps:
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/arshad-shah/Nimaz.git
+   cd Nimaz
+   ```
+
+2. **Open the project in Android Studio:**
+   - Open Android Studio.
+   - Select 'Open an existing Android Studio project'.
+   - Navigate to the cloned repository and select it.
+
+3. **Build the project:**
+   - Ensure you have the necessary SDKs and dependencies installed.
+   - Sync the project with Gradle files.
+
+4. **Run the application:**
+   - Select a device or emulator.
+   - Click the 'Run' button in Android Studio.
+
+## Usage
+Once the application is installed, you can set up your location preferences and receive notifications for prayer times. The app also provides a Qibla direction feature and a hijri calendar for your convenience.
+
+## Contributing
+We welcome contributions to Nimaz. To contribute, follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
