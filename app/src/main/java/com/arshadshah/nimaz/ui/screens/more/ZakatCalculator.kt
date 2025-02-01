@@ -1,39 +1,34 @@
 package com.arshadshah.nimaz.ui.screens.more
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.ui.components.common.BannerLarge
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
+import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.ui.components.zakat.AssetsSection
 import com.arshadshah.nimaz.ui.components.zakat.CalculationResultCard
 import com.arshadshah.nimaz.ui.components.zakat.LiabilitiesSection
@@ -85,20 +80,19 @@ fun ZakatCalculator(navController: NavHostController) {
                 .padding(paddingValues)
         ) {
             if (zakatState.isLoading) {
-                LoadingOverlay()
+                PageLoading()
             } else {
 
                 // Show error snackbar if there's an error
                 zakatState.error?.let { error ->
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.BottomCenter
-                    ) {
-                        ErrorSnackbar(
-                            message = error,
-                            onDismiss = { /* Add error dismissal handling */ }
-                        )
-                    }
+                    PageErrorState(message = error)
+                    val isOpen = remember { mutableStateOf(true) }
+                    BannerLarge(
+                        message = error,
+                        title = "Error",
+                        isOpen = isOpen,
+                        onDismiss = { isOpen.value = false }
+                    )
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -162,61 +156,6 @@ fun ZakatCalculator(navController: NavHostController) {
                 }
             }
 
-        }
-    }
-}
-
-@Composable
-private fun ErrorSnackbar(
-    message: String,
-    onDismiss: () -> Unit
-) {
-    Snackbar(
-        modifier = Modifier.padding(16.dp),
-        action = {
-            TextButton(onClick = onDismiss) {
-                Text("Dismiss")
-            }
-        }
-    ) {
-        Text(message)
-    }
-}
-
-@Composable
-private fun LoadingOverlay() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.padding(24.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(48.dp),
-                        strokeWidth = 4.dp
-                    )
-
-                    Text(
-                        text = "Loading...",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
         }
     }
 }

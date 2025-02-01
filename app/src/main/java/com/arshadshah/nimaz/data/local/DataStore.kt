@@ -10,342 +10,196 @@ import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.data.local.systems.DuaSystem
+import com.arshadshah.nimaz.data.local.systems.HadithSystem
+import com.arshadshah.nimaz.data.local.systems.PrayerSystem
+import com.arshadshah.nimaz.data.local.systems.QuranSystem
+import com.arshadshah.nimaz.data.local.systems.TafsirSystem
+import com.arshadshah.nimaz.data.local.systems.TasbihSystem
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DataStore<Tafsir> @Inject constructor(
-    db: AppDatabase
+class DataStore @Inject constructor(
+    private val hadithSystem: HadithSystem,
+    private val tasbihSystem: TasbihSystem,
+    private val prayerSystem: PrayerSystem,
+    private val quranSystem: QuranSystem,
+    private val duaSystem: DuaSystem,
+    private val tafsirSystem: TafsirSystem
 ) {
-    private val ayaDao = db.ayaDao
-    private val juzDao = db.juz
-    private val surahDao = db.surah
-    private val prayerTimesDao = db.prayerTimes
-    private val duaDao = db.dua
-    private val prayerTrackerDao = db.prayersTracker
-    private val fastTrackerDao = db.fastTracker
-    private val tasbihTrackerDao = db.tasbihTracker
-    private val categoryDao = db.category
-    private val hadithDao = db.hadith
-    private val tafsirDao = db.tafsirDao
-    private val tafsirEditionDao = db.tafsirEditionDao
-
-    suspend fun getAllMetadata(): List<HadithMetadata> = hadithDao.getAllMetadata()
+    // Hadith Operations
+    suspend fun getAllMetadata(): List<HadithMetadata> = hadithSystem.getAllMetadata()
     suspend fun getAllHadithChaptersForABook(bookId: Int): List<HadithChapter> =
-        hadithDao.getAllHadithChaptersForABook(bookId)
+        hadithSystem.getAllHadithChaptersForABook(bookId)
 
     suspend fun getAllHadithsForABook(bookId: Int, chapterId: Int): List<HadithEntity> =
-        hadithDao.getAllHadithsForABook(bookId, chapterId)
+        hadithSystem.getAllHadithsForABook(bookId, chapterId)
 
     suspend fun updateFavouriteStatus(id: Int, favourite: Boolean) =
-        hadithDao.updateFavouriteStatus(id, favourite)
+        hadithSystem.updateFavouriteStatus(id, favourite)
 
-    //getAllFavourites
-    suspend fun getAllFavourites(): List<HadithFavourite> = hadithDao.getAllFavourites()
+    suspend fun getAllFavourites(): List<HadithFavourite> = hadithSystem.getAllFavourites()
+    suspend fun getAllCategories() = hadithSystem.getAllCategories()
 
-    suspend fun getAllCategories() = categoryDao.getAllCategories()
+    // Tasbih Operations
+    fun updateTasbih(tasbih: LocalTasbih) = tasbihSystem.updateTasbih(tasbih)
+    fun updateTasbihGoal(tasbih: LocalTasbih) = tasbihSystem.updateTasbihGoal(tasbih)
+    fun saveTasbih(tasbih: LocalTasbih) = tasbihSystem.saveTasbih(tasbih)
+    fun getTasbihById(id: Int) = tasbihSystem.getTasbihById(id)
+    fun getAllTasbih() = tasbihSystem.getAllTasbih()
+    fun getTasbihForDate(date: LocalDate) = tasbihSystem.getTasbihForDate(date)
+    fun deleteTasbih(tasbih: LocalTasbih) = tasbihSystem.deleteTasbih(tasbih)
 
-    //update tasbih
-    fun updateTasbih(tasbih: LocalTasbih) =
-        tasbihTrackerDao.updateTasbih(tasbih.id, tasbih.count)
-
-    //update tasbih goal
-    fun updateTasbihGoal(tasbih: LocalTasbih) =
-        tasbihTrackerDao.updateTasbihGoal(tasbih.id, tasbih.goal)
-
-    //save a tasbih to the database
-    fun saveTasbih(tasbih: LocalTasbih) = tasbihTrackerDao.saveTasbih(tasbih)
-
-    //getTasbihById
-    fun getTasbihById(id: Int) = tasbihTrackerDao.getTasbihById(id)
-
-    //get all the tasbih
-    fun getAllTasbih() = tasbihTrackerDao.getAll()
-
-    //get all the tasbih for a specific date
-    fun getTasbihForDate(date: LocalDate) =
-        tasbihTrackerDao.getForDate(date)
-
-    //delete a tasbih from the database
-    fun deleteTasbih(tasbih: LocalTasbih) =
-        tasbihTrackerDao.deleteTasbih(tasbih)
-
-
-    //get trtacker for a specific date
-    suspend fun getTrackerForDate(date: LocalDate) =
-        prayerTrackerDao.getTrackerForDate(date)
-
-
+    // Prayer & Fast Operations
+    suspend fun getTrackerForDate(date: LocalDate) = prayerSystem.getTrackerForDate(date)
     fun getTrackersForMonth(
         startDate: LocalDate,
         endDate: LocalDate
-    ): Flow<List<LocalPrayersTracker>> =
-        prayerTrackerDao.getTrackersForMonth(startDate, endDate)
+    ): Flow<List<LocalPrayersTracker>> = prayerSystem.getTrackersForMonth(startDate, endDate)
 
     fun getTrackersForWeek(
         startDate: LocalDate,
         endDate: LocalDate
-    ): Flow<List<LocalPrayersTracker>> =
-        prayerTrackerDao.getTrackersForWeek(startDate, endDate)
+    ): Flow<List<LocalPrayersTracker>> = prayerSystem.getTrackersForWeek(startDate, endDate)
 
     suspend fun updateIsMenstruating(date: LocalDate, isMenstruating: Boolean) {
-        fastTrackerDao.updateIsMenstruating(date, isMenstruating)
-        prayerTrackerDao.updateMenstruationStatus(date, isMenstruating)
+        prayerSystem.updateIsMenstruating(date, isMenstruating)
     }
 
-
-    //get all the trackers
-    suspend fun getAllTrackers() = prayerTrackerDao.getAllTrackers()
-
-    //save a tracker
-    suspend fun saveTracker(tracker: LocalPrayersTracker) =
-        prayerTrackerDao.saveTracker(tracker)
-
-    //update a tracker
-    suspend fun updateTracker(tracker: LocalPrayersTracker) =
-        prayerTrackerDao.updateTracker(tracker)
-
-    //updateSpecificPrayer
+    suspend fun getAllTrackers() = prayerSystem.getAllTrackers()
+    suspend fun saveTracker(tracker: LocalPrayersTracker) = prayerSystem.saveTracker(tracker)
+    suspend fun updateTracker(tracker: LocalPrayersTracker) = prayerSystem.updateTracker(tracker)
     suspend fun updateSpecificPrayer(date: LocalDate, prayerName: String, prayerDone: Boolean) =
-        prayerTrackerDao.updateSpecificPrayer(date, prayerName, prayerDone)
+        prayerSystem.updateSpecificPrayer(date, prayerName, prayerDone)
 
-    fun getPrayersForDate(date: LocalDate) = prayerTrackerDao.getPrayersForDate(date)
+    fun getPrayersForDate(date: LocalDate) = prayerSystem.getPrayersForDate(date)
+    suspend fun checkIfTrackerExists(date: LocalDate) = prayerSystem.checkIfTrackerExists(date)
+    suspend fun getFastTrackerForDate(date: LocalDate) = prayerSystem.getFastTrackerForDate(date)
+    fun getFastTrackersForMonth(firstDay: LocalDate, lastDay: LocalDate) =
+        prayerSystem.getFastTrackersForMonth(firstDay, lastDay)
 
-
-    //check if a tracker exists
-    suspend fun checkIfTrackerExists(date: LocalDate) = prayerTrackerDao.trackerExistsForDate(date)
-
-    //fasting tracker
-
-    //get tracker for a specific date
-    suspend fun getFastTrackerForDate(date: LocalDate) =
-        fastTrackerDao.getFastTrackerForDate(date)
-
-    fun getFastTrackersForMonth(
-        firstDay: LocalDate,
-        lastDay: LocalDate
-    ): Flow<List<LocalFastTracker>> =
-        fastTrackerDao.getFastTrackersForMonth(firstDay, lastDay)
-
-    fun isFastingForDate(date: LocalDate) = fastTrackerDao.isFastingForDate(date)
-
-    //save a tracker
-    suspend fun saveFastTracker(tracker: LocalFastTracker) =
-        fastTrackerDao.saveFastTracker(tracker)
-
-    //update a tracker
+    fun isFastingForDate(date: LocalDate) = prayerSystem.isFastingForDate(date)
+    suspend fun saveFastTracker(tracker: LocalFastTracker) = prayerSystem.saveFastTracker(tracker)
     suspend fun updateFastTracker(tracker: LocalFastTracker) =
-        fastTrackerDao.updateFastTracker(tracker)
+        prayerSystem.updateFastTracker(tracker)
 
     suspend fun fastTrackerExistsForDate(date: LocalDate) =
-        fastTrackerDao.fastTrackerExistsForDate(date)
+        prayerSystem.fastTrackerExistsForDate(date)
 
+    suspend fun getPrayerTimesForADate(date: String) = prayerSystem.getPrayerTimesForADate(date)
+    suspend fun saveAllPrayerTimes(prayerTimes: LocalPrayerTimes) =
+        prayerSystem.saveAllPrayerTimes(prayerTimes)
 
-    //get all the ayas of a surah
-    fun getAyasOfSurah(surahNumber: Int) =
-        ayaDao.getAyasOfSurah(surahNumber)
+    suspend fun countPrayerTimes() = prayerSystem.countPrayerTimes()
+    fun getMenstruatingState(date: LocalDate): Flow<Boolean> =
+        prayerSystem.getMenstruatingState(date)
 
-    //get all the ayas of a juz
-    suspend fun getAyasOfJuz(juzNumber: Int) =
-        ayaDao.getAyasOfJuz(juzNumber)
-
-    //getRandomAya
-    suspend fun getRandomAya() = ayaDao.getRandomAya()
-
-    //countAllAyas
-    suspend fun countAllAyat() = ayaDao.countAllAyas()
-
-    //deleteAllAyas
-    suspend fun deleteAllAyat() = ayaDao.deleteAllAyas()
-
-    //bookmark an aya
+    // Quran Operations
+    fun getAyasOfSurah(surahNumber: Int) = quranSystem.getAyasOfSurah(surahNumber)
+    suspend fun getAyasOfJuz(juzNumber: Int) = quranSystem.getAyasOfJuz(juzNumber)
+    suspend fun getRandomAya() = quranSystem.getRandomAya()
+    suspend fun countAllAyat() = quranSystem.countAllAyat()
+    suspend fun deleteAllAyat() = quranSystem.deleteAllAyat()
     suspend fun bookmarkAya(
         ayaNumber: Int,
         surahNumber: Int,
         ayaNumberInSurah: Int,
-        bookmarkAya: Boolean,
+        bookmarkAya: Boolean
     ) =
-        ayaDao.bookmarkAya(ayaNumber, surahNumber, ayaNumberInSurah, bookmarkAya)
+        quranSystem.bookmarkAya(ayaNumber, surahNumber, ayaNumberInSurah, bookmarkAya)
 
-    //favorite an aya
     suspend fun favoriteAya(
         ayaNumber: Int,
         surahNumber: Int,
         ayaNumberInSurah: Int,
-        favoriteAya: Boolean,
+        favoriteAya: Boolean
     ) =
-        ayaDao.favoriteAya(ayaNumber, surahNumber, ayaNumberInSurah, favoriteAya)
+        quranSystem.favoriteAya(ayaNumber, surahNumber, ayaNumberInSurah, favoriteAya)
 
-    //add a note to an aya
     suspend fun addNoteToAya(
         ayaNumber: Int,
         surahNumber: Int,
         ayaNumberInSurah: Int,
-        note: String,
+        note: String
     ) =
-        ayaDao.addNoteToAya(ayaNumber, surahNumber, ayaNumberInSurah, note)
+        quranSystem.addNoteToAya(ayaNumber, surahNumber, ayaNumberInSurah, note)
 
     suspend fun getNoteOfAya(ayaNumber: Int, surahNumber: Int, ayaNumberInSurah: Int) =
-        ayaDao.getNoteOfAya(ayaNumber, surahNumber, ayaNumberInSurah)
+        quranSystem.getNoteOfAya(ayaNumber, surahNumber, ayaNumberInSurah)
 
-    //get all the bookmarked ayas
-    suspend fun getBookmarkedAyas() =
-        ayaDao.getBookmarkedAyas()
+    suspend fun getBookmarkedAyas() = quranSystem.getBookmarkedAyas()
+    suspend fun getFavoritedAyas() = quranSystem.getFavoritedAyas()
+    suspend fun getAyasWithNotes() = quranSystem.getAyasWithNotes()
+    suspend fun deleteNoteFromAya(ayaNumber: Int, surahNumber: Int, ayaNumberInSurah: Int) =
+        quranSystem.deleteNoteFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
 
-    //get all the favorited ayas
-    suspend fun getFavoritedAyas() =
-        ayaDao.getFavoritedAyas()
+    suspend fun deleteBookmarkFromAya(ayaNumber: Int, surahNumber: Int, ayaNumberInSurah: Int) =
+        quranSystem.deleteBookmarkFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
 
-    //get all the ayas with notes
-    suspend fun getAyasWithNotes() =
-        ayaDao.getAyasWithNotes()
+    suspend fun deleteFavoriteFromAya(ayaNumber: Int, surahNumber: Int, ayaNumberInSurah: Int) =
+        quranSystem.deleteFavoriteFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
 
-    suspend fun deleteNoteFromAya(
-        ayaNumber: Int,
-        surahNumber: Int,
-        ayaNumberInSurah: Int,
-    ) =
-        ayaDao.deleteNoteFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
+    suspend fun addAudioToAya(surahNumber: Int, ayaNumberInSurah: Int, audio: String) =
+        quranSystem.addAudioToAya(surahNumber, ayaNumberInSurah, audio)
 
-    suspend fun deleteBookmarkFromAya(
-        ayaNumber: Int,
-        surahNumber: Int,
-        ayaNumberInSurah: Int,
-    ) =
-        ayaDao.deleteBookmarkFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
+    suspend fun getAllJuz() = quranSystem.getAllJuz()
+    suspend fun getJuzById(number: Int) = quranSystem.getJuzById(number)
+    fun getAllSurah() = quranSystem.getAllSurah()
+    fun getSurahById(number: Int) = quranSystem.getSurahById(number)
 
-    suspend fun deleteFavoriteFromAya(
-        ayaNumber: Int,
-        surahNumber: Int,
-        ayaNumberInSurah: Int,
-    ) =
-        ayaDao.deleteFavoriteFromAya(ayaNumber, surahNumber, ayaNumberInSurah)
-
-    //addAudioToAya
-    suspend fun addAudioToAya(
-        surahNumber: Int,
-        ayaNumberInSurah: Int,
-        audio: String,
-    ) =
-        ayaDao.addAudioToAya(surahNumber, ayaNumberInSurah, audio)
-
-    //get all juz
-    suspend fun getAllJuz() = juzDao.getAllJuz()
-
-    suspend fun getJuzById(number: Int) = juzDao.getJuzById(number)
-
-    //get all surah
-    fun getAllSurah() = surahDao.getAllSurahs()
-
-    fun getSurahById(number: Int) = surahDao.getSurahById(number)
-
-    //getPrayerTimesForADate
-    suspend fun getPrayerTimesForADate(date: String) =
-        prayerTimesDao.getPrayerTimesForADate(date)
-
-    //save all prayer times by mapping the Array list of prayer times to local prayer times
-    suspend fun saveAllPrayerTimes(prayerTimes: LocalPrayerTimes) =
-        prayerTimesDao.insert(prayerTimes)
-
-    //get the count of all prayer times
-    suspend fun countPrayerTimes() = prayerTimesDao.count()
-
-    //getChaptersByCategory
-    suspend fun getChaptersByCategory(categoryId: Int) =
-        duaDao.getChaptersByCategory(categoryId)
-
-    //get duas of a chapter by chapter id
-    suspend fun getDuasOfChapter(chapterId: Int) =
-        duaDao.getDuasOfChapter(chapterId)
-
-    fun getMenstruatingState(date: LocalDate): Flow<Boolean> {
-        return prayerTrackerDao.getMenstruatingState(date)
-    }
-
-
-    suspend fun getFavoriteDuas() = duaDao.getFavoriteDuas()
-
-    fun getFavoriteDuasFlow() = duaDao.getFavoriteDuasFlow()
-
-    suspend fun updateDua(dua: LocalDua) = duaDao.updateDua(dua)
-
-    // Search
-    suspend fun searchDuas(query: String) = duaDao.searchDuas(query)
-
+    // Dua Operations
+    suspend fun getChaptersByCategory(categoryId: Int) = duaSystem.getChaptersByCategory(categoryId)
+    suspend fun getDuasOfChapter(chapterId: Int) = duaSystem.getDuasOfChapter(chapterId)
+    suspend fun getFavoriteDuas() = duaSystem.getFavoriteDuas()
+    fun getFavoriteDuasFlow() = duaSystem.getFavoriteDuasFlow()
+    suspend fun updateDua(dua: LocalDua) = duaSystem.updateDua(dua)
+    suspend fun searchDuas(query: String) = duaSystem.searchDuas(query)
     suspend fun searchDuasAdvanced(
         query: String = "",
         chapterId: Int? = null,
         isFavorite: Int? = null
-    ) = duaDao.searchDuasAdvanced(query, chapterId, isFavorite)
+    ) =
+        duaSystem.searchDuasAdvanced(query, chapterId, isFavorite)
 
-    // Single item retrieval
-    suspend fun getDuaById(duaId: Int) = duaDao.getDuaById(duaId)
-
-    suspend fun getChapterById(chapterId: Int) = duaDao.getChapterById(chapterId)
-
-    // Related content
+    suspend fun getDuaById(duaId: Int) = duaSystem.getDuaById(duaId)
+    suspend fun getChapterById(chapterId: Int) = duaSystem.getChapterById(chapterId)
     suspend fun getRelatedDuas(chapterId: Int, currentDuaId: Int) =
-        duaDao.getRelatedDuas(chapterId, currentDuaId)
+        duaSystem.getRelatedDuas(chapterId, currentDuaId)
 
-    // Bulk operations
-    suspend fun deleteAllDuas() = duaDao.deleteAllDuas()
+    suspend fun deleteAllDuas() = duaSystem.deleteAllDuas()
+    suspend fun deleteAllChapters() = duaSystem.deleteAllChapters()
+    suspend fun countFavoriteDuas() = duaSystem.countFavoriteDuas()
+    suspend fun countDuasInChapter(chapterId: Int) = duaSystem.countDuasInChapter(chapterId)
+    suspend fun getLastAccessedDua() = duaSystem.getLastAccessedDua()
+    suspend fun replaceDuas(duas: List<LocalDua>) = duaSystem.replaceDuas(duas)
+    suspend fun replaceChapters(chapters: List<LocalChapter>) = duaSystem.replaceChapters(chapters)
+    suspend fun getRandomDua() = duaSystem.getRandomDua()
+    suspend fun getRandomFavoriteDua() = duaSystem.getRandomFavoriteDua()
+    suspend fun saveDuas(duas: List<LocalDua>) = duaSystem.saveDuas(duas)
+    suspend fun saveChapters(chapters: List<LocalChapter>) = duaSystem.saveChapters(chapters)
+    suspend fun countChapters() = duaSystem.countChapters()
+    suspend fun countDuas() = duaSystem.countDuas()
 
-    suspend fun deleteAllChapters() = duaDao.deleteAllChapters()
-
-    // Statistics
-    suspend fun countFavoriteDuas() = duaDao.countFavoriteDuas()
-
-    suspend fun countDuasInChapter(chapterId: Int) = duaDao.countDuasInChapter(chapterId)
-
-    // Last accessed
-    suspend fun getLastAccessedDua() = duaDao.getLastAccessedDua()
-
-    // Bulk replace operations
-    suspend fun replaceDuas(duas: List<LocalDua>) = duaDao.replaceDuas(duas)
-
-    suspend fun replaceChapters(chapters: List<LocalChapter>) = duaDao.replaceChapters(chapters)
-
-    // Random duas
-    suspend fun getRandomDua() = duaDao.getRandomDua()
-
-    suspend fun getRandomFavoriteDua() = duaDao.getRandomFavoriteDua()
-
-    // Save operations that were missing from original
-    suspend fun saveDuas(duas: List<LocalDua>) = duaDao.saveDuas(duas)
-
-    suspend fun saveChapters(chapters: List<LocalChapter>) = duaDao.saveChapters(chapters)
-
-    // Count operations that were missing from original
-    suspend fun countChapters() = duaDao.countChapters()
-
-    suspend fun countDuas() = duaDao.countDuas()
-
-    // Tafsir operations
-    suspend fun getTafsirById(id: Long) = tafsirDao.getTafsirById(id)
-
+    // Tafsir Operations
+    suspend fun getTafsirById(id: Long) = tafsirSystem.getTafsirById(id)
     suspend fun getTafsirForAya(ayaNumber: Int, editionId: Int) =
-        tafsirDao.getTafsirForAya(ayaNumber, editionId)
+        tafsirSystem.getTafsirForAya(ayaNumber, editionId)
 
-    suspend fun getTafsirByEdition(editionId: Int) = tafsirDao.getTafsirByEdition(editionId)
-
-    suspend fun getTafsirByLanguage(language: String) = tafsirDao.getTafsirByLanguage(language)
-
-    // TafsirEdition operations
-    suspend fun getAllEditions() = tafsirEditionDao.getAllEditions()
-
-    suspend fun getEditionById(id: Int) = tafsirEditionDao.getEditionById(id)
-
+    suspend fun getTafsirByEdition(editionId: Int) = tafsirSystem.getTafsirByEdition(editionId)
+    suspend fun getTafsirByLanguage(language: String) = tafsirSystem.getTafsirByLanguage(language)
+    suspend fun getAllEditions() = tafsirSystem.getAllEditions()
+    suspend fun getEditionById(id: Int) = tafsirSystem.getEditionById(id)
     suspend fun getEditionsByLanguage(language: String) =
-        tafsirEditionDao.getEditionsByLanguage(language)
+        tafsirSystem.getEditionsByLanguage(language)
 
-    //getEditionsByLanguageAndAuthor
     suspend fun getEditionsByLanguageAndAuthor(language: String, authorName: String) =
-        tafsirEditionDao.getEditionsByLanguageAndAuthor(language, authorName)
+        tafsirSystem.getEditionsByLanguageAndAuthor(language, authorName)
 
     suspend fun getEditionsByAuthor(authorName: String) =
-        tafsirEditionDao.getEditionsByAuthor(authorName)
+        tafsirSystem.getEditionsByAuthor(authorName)
 
-    suspend fun getEditionCount() = tafsirEditionDao.getEditionCount()
+    suspend fun getEditionCount() = tafsirSystem.getEditionCount()
 }

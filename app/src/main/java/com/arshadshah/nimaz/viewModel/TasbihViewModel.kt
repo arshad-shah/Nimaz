@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TasbihViewModel @Inject constructor(
-    private val datastore: DataStore<Any?>
+    private val datastore: DataStore
 ) : ViewModel() {
 
     //state for the tasbih

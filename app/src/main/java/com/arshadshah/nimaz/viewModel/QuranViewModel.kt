@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class QuranViewModel @Inject constructor(
     sharedPreferences: PrivateSharedPreferences,
-    private val dataStore: DataStore<Any?>
+    private val dataStore: DataStore
 ) : ViewModel() {
 
     //general state for error and loading

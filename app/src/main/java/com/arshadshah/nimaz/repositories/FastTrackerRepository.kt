@@ -23,7 +23,7 @@ import javax.inject.Singleton
 
 @Singleton
 class FastTrackerRepository @Inject constructor(
-    private val dataStore: DataStore<Any?>
+    private val dataStore: DataStore
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val mutex = Mutex()

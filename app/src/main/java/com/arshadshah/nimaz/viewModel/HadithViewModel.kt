@@ -24,7 +24,7 @@ sealed class ViewState<out T> {
 
 @HiltViewModel
 class HadithViewModel @Inject constructor(
-    private val dataStore: DataStore<Any?>
+    private val dataStore: DataStore
 ) : ViewModel() {
     private var _booksState =
         MutableStateFlow<ViewState<List<HadithMetadata>>>(ViewState.Success(emptyList()))

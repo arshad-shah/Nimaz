@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TafsirViewModel @Inject constructor(
-    private val dataStore: DataStore<Any?>,
+    private val dataStore: DataStore,
     private val sharedPreferences: PrivateSharedPreferences
 ) : ViewModel() {
 

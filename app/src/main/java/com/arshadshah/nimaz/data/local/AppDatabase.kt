@@ -32,11 +32,6 @@ import com.arshadshah.nimaz.data.local.models.LocalTasbih
 import com.arshadshah.nimaz.data.local.models.Tafsir
 import com.arshadshah.nimaz.data.local.models.TafsirEdition
 
-@TypeConverters(
-    TimestampTypeConvertor::class,
-    TypeConvertorForListOfDuas::class,
-    LocalDateTimestampTypeConvertor::class,
-)
 @Database(
     entities = [
         LocalAya::class,
@@ -58,17 +53,33 @@ import com.arshadshah.nimaz.data.local.models.TafsirEdition
     version = DATABASE_VERSION,
     exportSchema = true,
 )
+@TypeConverters(
+    TimestampTypeConvertor::class,
+    TypeConvertorForListOfDuas::class,
+    LocalDateTimestampTypeConvertor::class,
+)
 abstract class AppDatabase : RoomDatabase() {
+    // Quran related DAOs
     abstract val ayaDao: AyaDao
-    abstract val juz: JuzDao
-    abstract val surah: SurahDao
-    abstract val prayerTimes: PrayerTimesDao
-    abstract val dua: DuaDao
-    abstract val prayersTracker: PrayerTrackerDao
-    abstract val fastTracker: FastTrackerDao
-    abstract val tasbihTracker: TasbihTrackerDao
-    abstract val category: CategoryDao
-    abstract val hadith: HadithDao
+    abstract val juzDao: JuzDao
+    abstract val surahDao: SurahDao
+
+    // Prayer related DAOs
+    abstract val prayerTimesDao: PrayerTimesDao
+    abstract val prayerTrackerDao: PrayerTrackerDao
+    abstract val fastTrackerDao: FastTrackerDao
+
+    // Dua related DAOs
+    abstract val duaDao: DuaDao
+    abstract val categoryDao: CategoryDao
+
+    // Tasbih related DAO
+    abstract val tasbihTrackerDao: TasbihTrackerDao
+
+    // Hadith related DAO
+    abstract val hadithDao: HadithDao
+
+    // Tafsir related DAOs
     abstract val tafsirDao: TafsirDao
     abstract val tafsirEditionDao: TafsirEditionDao
 }

@@ -16,7 +16,7 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun providePrayerTimesRepository(
-        dataStore: DataStore<Any?>
+        dataStore: DataStore
     ): PrayerTimesRepository {
         return PrayerTimesRepository(dataStore)
     }

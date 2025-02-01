@@ -49,7 +49,7 @@ data class AudioState(
 // AyatViewModel.kt
 @HiltViewModel
 class AyatViewModel @Inject constructor(
-    private val dataStore: DataStore<Any?>,
+    private val dataStore: DataStore,
     private val spaceFilesRepository: SpacesFileRepository,
     private val preferences: PrivateSharedPreferences,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
