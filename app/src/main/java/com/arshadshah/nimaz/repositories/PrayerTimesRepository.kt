@@ -20,7 +20,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PrayerTimesRepository @Inject constructor(
-    private val dataStore: DataStore
+    private val dataStore: DataStore<Any?>
 ) {
     companion object;
 

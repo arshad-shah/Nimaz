@@ -21,7 +21,7 @@ import javax.inject.Inject
 class MissedPrayerReceiver : BroadcastReceiver() {
 
     @Inject
-    lateinit var localDataStore: DataStore
+    lateinit var localDataStore: DataStore<Any?>
 
     @Inject
     lateinit var firebaseLogger: FirebaseLogger

@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
@@ -24,9 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
@@ -60,7 +62,7 @@ fun DateSelector(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -79,7 +81,7 @@ fun DateSelector(
                 ) {
                     // Previous Day Button
                     DateChangeButton(
-                        iconId = R.drawable.angle_left_icon,
+                        iconId = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         description = "Previous Day",
                         onClick = { updateDate(date, -1, updateDate) }
                     )
@@ -97,7 +99,7 @@ fun DateSelector(
 
                     // Next Day Button
                     DateChangeButton(
-                        iconId = R.drawable.angle_right_icon,
+                        iconId = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         description = "Next Day",
                         onClick = { updateDate(date, 1, updateDate) }
                     )
@@ -108,7 +110,7 @@ fun DateSelector(
 }
 
 @Composable
-private fun DateChangeButton(iconId: Int, description: String, onClick: () -> Unit) {
+private fun DateChangeButton(iconId: ImageVector, description: String, onClick: () -> Unit) {
     FilledIconButton(
         onClick = onClick,
         modifier = Modifier.size(36.dp),
@@ -119,8 +121,8 @@ private fun DateChangeButton(iconId: Int, description: String, onClick: () -> Un
         shape = RoundedCornerShape(8.dp)
     ) {
         Icon(
-            modifier = Modifier.size(18.dp),
-            painter = painterResource(id = iconId),
+            modifier = Modifier.size(32.dp),
+            imageVector = iconId,
             contentDescription = description,
         )
     }
@@ -180,7 +182,7 @@ private fun TodayIndicator(isToday: Boolean, showFutureIcon: Boolean, showPastIc
             if (showFutureIcon) {
                 Icon(
                     modifier = Modifier.size(12.dp),
-                    painter = painterResource(id = R.drawable.angle_small_left_icon),
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = "Previous Day",
                     tint = if (isToday)
                         MaterialTheme.colorScheme.onPrimary
@@ -202,7 +204,7 @@ private fun TodayIndicator(isToday: Boolean, showFutureIcon: Boolean, showPastIc
             if (showPastIcon) {
                 Icon(
                     modifier = Modifier.size(12.dp),
-                    painter = painterResource(id = R.drawable.angle_small_right_icon),
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = "Next Day",
                     tint = if (isToday)
                         MaterialTheme.colorScheme.onPrimary

@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DuaRepository @Inject constructor(
-    private val dataStore: DataStore
+    private val dataStore: DataStore<Any?>
 ) {
     // Existing functions
     suspend fun getCategories(): ApiResponse<ArrayList<LocalCategory>> {

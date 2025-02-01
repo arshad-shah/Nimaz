@@ -25,7 +25,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDataStore(database: AppDatabase): DataStore {
+    fun provideDataStore(database: AppDatabase): DataStore<Any?> {
         return DataStore(database)
     }
 }

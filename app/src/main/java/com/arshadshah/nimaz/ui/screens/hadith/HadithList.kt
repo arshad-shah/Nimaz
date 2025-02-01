@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -47,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -403,15 +403,12 @@ fun AnimatedTopBar(
                 )
             },
             navigationIcon = {
-                OutlinedIconButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.testTag("back_button")
-                ) {
+                OutlinedIconButton(onClick = {
+                    navController.popBackStack()
+                }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.back_icon),
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Navigate back"
                     )
                 }
             },
@@ -432,15 +429,12 @@ fun AnimatedTopBar(
                 )
             },
             navigationIcon = {
-                OutlinedIconButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.testTag("back_button")
-                ) {
+                OutlinedIconButton(onClick = {
+                    navController.popBackStack()
+                }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.back_icon),
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Navigate back"
                     )
                 }
             },

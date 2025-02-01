@@ -51,7 +51,7 @@ class DashboardViewModel @Inject constructor(
     private val prayerTimesService: PrayerTimesService,
     private val prayerTimesRepository: PrayerTimesRepository,
     private val prayerTrackerRepository: PrayerTrackerRepository,
-    private val dataStore: DataStore,
+    private val dataStore: DataStore<Any?>,
     private val createAlarms: CreateAlarms,
     private val locationStateManager: LocationStateManager,
 ) : ViewModel() {

@@ -21,19 +21,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.NumberSelector
 import com.arshadshah.nimaz.ui.components.common.RadioListItem
-import com.arshadshah.nimaz.ui.components.settings.rememberIntSettingState
-import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceFloatSettingState
-import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceStringSettingState
-import com.arshadshah.nimaz.utils.QuranUtils.setFontBasedOnFontStyle
-import com.arshadshah.nimaz.viewModel.QuranViewModel
+import com.arshadshah.nimaz.utils.DisplaySettings
+import com.arshadshah.nimaz.viewModel.AyatViewModel
 
+//QuranBottomBar.kt
 @Composable
 fun QuranBottomBar(
-    handleEvents: (QuranViewModel.QuranMenuEvents) -> Unit,
+    displaySettings: DisplaySettings,
+    onEvent: (AyatViewModel.AyatEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Dialog visibility states
@@ -41,26 +39,6 @@ fun QuranBottomBar(
     var showArabicSizeDialog by remember { mutableStateOf(false) }
     var showTranslationSizeDialog by remember { mutableStateOf(false) }
     var showFontStyleDialog by remember { mutableStateOf(false) }
-
-    // Settings states
-    val translationState = rememberIntSettingState()
-    val pageTypeState = rememberPreferenceStringSettingState(AppConstants.PAGE_TYPE, "List")
-    val translationLanguageState = rememberPreferenceStringSettingState(
-        AppConstants.TRANSLATION_LANGUAGE,
-        "English"
-    )
-    val arabicFontSizeState = rememberPreferenceFloatSettingState(
-        key = AppConstants.ARABIC_FONT_SIZE,
-        defaultValue = 26f
-    )
-    val translationFontSizeState = rememberPreferenceFloatSettingState(
-        key = AppConstants.TRANSLATION_FONT_SIZE,
-        defaultValue = 16f
-    )
-    val fontStyleState = rememberPreferenceStringSettingState(
-        key = AppConstants.FONT_STYLE,
-        defaultValue = "Default"
-    )
 
     // Available options
     val translationOptions = listOf("English", "Urdu")
@@ -77,11 +55,7 @@ fun QuranBottomBar(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             // Translation Button
-            IconButton(
-                onClick = {
-                    showTranslationDialog = true
-                },
-            ) {
+            IconButton(onClick = { showTranslationDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.Translate,
                     contentDescription = "Translation Language",
@@ -90,9 +64,7 @@ fun QuranBottomBar(
             }
 
             // Arabic Font Size Button
-            IconButton(
-                onClick = { showArabicSizeDialog = true }
-            ) {
+            IconButton(onClick = { showArabicSizeDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.TextFields,
                     contentDescription = "Arabic Font Size"
@@ -100,9 +72,7 @@ fun QuranBottomBar(
             }
 
             // Translation Font Size Button
-            IconButton(
-                onClick = { showTranslationSizeDialog = true }
-            ) {
+            IconButton(onClick = { showTranslationSizeDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.FontDownload,
                     contentDescription = "Translation Font Size"
@@ -110,9 +80,7 @@ fun QuranBottomBar(
             }
 
             // Font Style Button
-            IconButton(
-                onClick = { showFontStyleDialog = true }
-            ) {
+            IconButton(onClick = { showFontStyleDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.Style,
                     contentDescription = "Font Style"
@@ -132,23 +100,21 @@ fun QuranBottomBar(
             title = "Select Translation Language",
             contentToShow = {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    translationOptions.forEachIndexed { index, option ->
+                    translationOptions.forEach { option ->
                         RadioListItem(
                             item = option,
-                            isSelected = translationLanguageState.value == option,
-                            index = index,
-                            onSelected = { selectedIndex ->
-                                translationState.value = selectedIndex
-                                translationLanguageState.value = option
-                                handleEvents(
-                                    QuranViewModel.QuranMenuEvents.Change_Translation(
-                                        option
+                            isSelected = displaySettings.translation == option,
+                            index = translationOptions.indexOf(option),
+                            onSelected = {
+                                onEvent(
+                                    AyatViewModel.AyatEvent.UpdateDisplaySettings(
+                                        displaySettings.copy(translation = option)
                                     )
                                 )
+                                showTranslationDialog = false
                             }
                         )
                     }
@@ -177,17 +143,16 @@ fun QuranBottomBar(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     NumberSelector(
-                        value = arabicFontSizeState.value,
+                        value = displaySettings.arabicFontSize,
                         onValueChange = { newValue ->
-                            arabicFontSizeState.value = newValue
-                            handleEvents(
-                                QuranViewModel.QuranMenuEvents.Change_Arabic_Font_Size(
-                                    newValue
+                            onEvent(
+                                AyatViewModel.AyatEvent.UpdateDisplaySettings(
+                                    displaySettings.copy(arabicFontSize = newValue)
                                 )
                             )
                         },
-                        minValue = if (fontStyleState.value == "IndoPak") 32f else 24f,
-                        maxValue = if (fontStyleState.value == "IndoPak") 60f else 46f
+                        minValue = if (displaySettings.arabicFont == "IndoPak") 32f else 24f,
+                        maxValue = if (displaySettings.arabicFont == "IndoPak") 60f else 46f
                     )
                 }
             },
@@ -214,12 +179,11 @@ fun QuranBottomBar(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     NumberSelector(
-                        value = translationFontSizeState.value,
+                        value = displaySettings.translationFontSize,
                         onValueChange = { newValue ->
-                            translationFontSizeState.value = newValue
-                            handleEvents(
-                                QuranViewModel.QuranMenuEvents.Change_Translation_Font_Size(
-                                    newValue
+                            onEvent(
+                                AyatViewModel.AyatEvent.UpdateDisplaySettings(
+                                    displaySettings.copy(translationFontSize = newValue)
                                 )
                             )
                         },
@@ -245,28 +209,32 @@ fun QuranBottomBar(
             title = "Select Font Style",
             contentToShow = {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     fontOptions.forEach { option ->
-
                         RadioListItem(
                             item = option,
-                            isSelected = fontStyleState.value == option,
+                            isSelected = displaySettings.arabicFont == option,
                             index = fontOptions.indexOf(option),
-                            onSelected = { selectedIndex ->
-                                fontStyleState.value = option
-                                setFontBasedOnFontStyle(
-                                    option,
-                                    arabicFontSizeState,
-                                    translationFontSizeState
-                                )
-                                handleEvents(
-                                    QuranViewModel.QuranMenuEvents.Change_Arabic_Font(
-                                        option
+                            onSelected = {
+                                val newSettings = displaySettings.copy(arabicFont = option)
+                                // Adjust font sizes based on font style
+                                val adjustedSettings = when (option) {
+                                    "IndoPak" -> newSettings.copy(
+                                        arabicFontSize = maxOf(32f, newSettings.arabicFontSize)
+                                    )
+
+                                    else -> newSettings.copy(
+                                        arabicFontSize = minOf(46f, newSettings.arabicFontSize)
+                                    )
+                                }
+                                onEvent(
+                                    AyatViewModel.AyatEvent.UpdateDisplaySettings(
+                                        adjustedSettings
                                     )
                                 )
+                                showFontStyleDialog = false
                             }
                         )
                     }

@@ -1,32 +1,40 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
-import android.util.Log
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.activities.MainActivity
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.common.BannerSmall
-import com.arshadshah.nimaz.ui.components.common.BannerVariant
-import com.arshadshah.nimaz.ui.components.quran.AyaListUI
+import com.arshadshah.nimaz.constants.AppConstants.TAFSEER_SCREEN_ROUTE
+import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
+import com.arshadshah.nimaz.ui.components.common.PageLoading
+import com.arshadshah.nimaz.ui.components.quran.AyaItem
 import com.arshadshah.nimaz.ui.components.quran.QuranBottomBar
-import com.arshadshah.nimaz.ui.components.quran.TopBarMenu
-import com.arshadshah.nimaz.viewModel.QuranViewModel
+import com.arshadshah.nimaz.ui.components.quran.SurahHeader
+import com.arshadshah.nimaz.viewModel.AyatState
+import com.arshadshah.nimaz.viewModel.AyatViewModel
 
+
+// AyatScreen.kt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AyatScreen(
@@ -34,102 +42,136 @@ fun AyatScreen(
     isSurah: String,
     language: String,
     scrollToAya: Int? = null,
-    context: MainActivity,
     navController: NavHostController,
-    viewModel: QuranViewModel = hiltViewModel()
+    viewModel: AyatViewModel = hiltViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
 
-    // LaunchedEffect should depend on both number and isSurah
-    LaunchedEffect(Unit) {
-        Log.d(AppConstants.QURAN_SCREEN_TAG, "Update occurred on Ayat screen: $number")
-        if (isSurah.toBoolean()) {
-            viewModel.getAllAyaForSurah(number.toInt(), language)
-        } else {
-            viewModel.getAllAyaForJuz(number.toInt(), language)
-        }
+    LaunchedEffect(number, isSurah) {
+        viewModel.handleEvent(
+            AyatViewModel.AyatEvent.LoadAyat(
+                number = number.toInt(),
+                isSurah = isSurah.toBoolean(),
+                language = language
+            )
+        )
     }
 
-    val ayat = viewModel.ayaListState.collectAsState()
-    val loading = viewModel.loadingState.collectAsState()
-    val error = viewModel.errorState.collectAsState()
+    AyatScreenContent(
+        state = state,
+        scrollToAya = scrollToAya,
+        isSurah = isSurah.toBoolean(),
+        onNavigateBack = { navController.popBackStack() },
+        onNavigateToTafsir = { ayaNumber, surahNumber ->
+            navController.navigate(
+                TAFSEER_SCREEN_ROUTE
+                    .replace("{surahNumber}", surahNumber.toString())
+                    .replace("{ayaNumber}", ayaNumber.toString())
+            )
+        },
+        onEvent = viewModel::handleEvent
+    )
+}
 
-    val pageMode = viewModel.display_Mode.collectAsState()
-    val surah = viewModel.surahState.collectAsState()
-    val arabicFontSize = viewModel.arabic_Font_size.collectAsState()
-    val arabicFont = viewModel.arabic_Font.collectAsState()
-    val translationFontSize = viewModel.translation_Font_size.collectAsState()
-    val translation = viewModel.translation.collectAsState()
-    val scrollToVerse = viewModel.scrollToAya.collectAsState()
-
-
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AyatScreenContent(
+    state: AyatState,
+    scrollToAya: Int?,
+    onNavigateBack: () -> Unit,
+    isSurah: Boolean,
+    onNavigateToTafsir: (Int, Int) -> Unit,
+    onEvent: (AyatViewModel.AyatEvent) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    TopBarMenu(
-                        number = number.toInt(),
-                        isSurah = isSurah.toBoolean(),
-                        getAllAyats = { itemNumber: Int, language: String ->
-                            if (isSurah.toBoolean()) {
-                                viewModel.getAllAyaForSurah(itemNumber, language)
-                            } else {
-                                viewModel.getAllAyaForJuz(itemNumber, language)
-                            }
-                        },
-                    )
-                },
-                navigationIcon = {
-                    OutlinedIconButton(
-                        modifier = Modifier
-                            .testTag("backButton")
-                            .padding(start = 8.dp),
-                        onClick = {
-                            navController.popBackStack()
-                        }) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back"
+                    (if (isSurah) state.currentSurah?.englishName else state.currentJuz?.tname)?.let {
+                        Text(
+                            text = it
                         )
                     }
                 },
+                navigationIcon = {
+                    OutlinedIconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                }
             )
         },
         bottomBar = {
             QuranBottomBar(
-                handleEvents = viewModel::handleQuranMenuEvents,
-                modifier = Modifier
+                displaySettings = state.displaySettings,
+                onEvent = onEvent
             )
         }
-    ) {
-        if (error.value != "") {
-            BannerSmall(title = "Error", message = error.value, variant = BannerVariant.Error)
-        }
-
-        if (pageMode.value == "List") {
-            AyaListUI(
-                ayaList = ayat.value,
-                paddingValues = it,
-                loading = loading.value,
-                type = if (isSurah.toBoolean()) "surah" else "juz",
-                number = number.toInt(),
+    ) { padding ->
+        when {
+            state.isLoading -> PageLoading()
+            state.error != null -> PageErrorState(message = state.error)
+            else -> AyatListContainer(
+                state = state,
                 scrollToAya = scrollToAya,
-                surah = surah.value,
-                arabicFontSize = arabicFontSize.value,
-                arabicFont = arabicFont.value,
-                translationFontSize = translationFontSize.value,
-                translation = translation.value,
-                scrollToVerse = scrollToVerse.value,
-                handleAyaEvents = viewModel::handleAyaEvent,
-                handleQuranMenuEvents = viewModel::handleQuranMenuEvents,
-                downloadAyaAudioFile = { surahNumber, ayaNumberInSurah, downloadCallback ->
-                    viewModel.downloadAyaFile(
-                        surahNumber,
-                        ayaNumberInSurah,
-                        downloadCallback
-                    )
-                },
+                contentPadding = padding,
+                onNavigateToTafsir = onNavigateToTafsir,
+                onEvent = onEvent
             )
         }
     }
+}
+
+// AyatListContainer.kt
+@Composable
+fun AyatListContainer(
+    state: AyatState,
+    scrollToAya: Int?,
+    contentPadding: PaddingValues,
+    onNavigateToTafsir: (Int, Int) -> Unit,
+    onEvent: (AyatViewModel.AyatEvent) -> Unit
+) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(scrollToAya) {
+        scrollToAya?.let { index ->
+            listState.animateScrollToItem(index)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // List of Ayat
+            items(
+                items = state.ayatList,
+                key = { it.ayaNumberInQuran }
+            ) { aya ->
+                if (isSpecialAya(aya)) {
+                    onEvent(AyatViewModel.AyatEvent.GetSurahById(aya.suraNumber))
+                    SurahHeader(surah = state.currentSurah!!)
+                }
+                AyaItem(
+                    aya = aya,
+                    displaySettings = state.displaySettings,
+                    audioState = state.audioState,
+                    onTafseerClick = onNavigateToTafsir,
+                    onEvent = onEvent
+                )
+            }
+        }
+    }
+}
+
+private fun isSpecialAya(aya: LocalAya): Boolean {
+    // Define conditions for special Ayas here
+    return aya.ayaNumberInQuran == 0 ||
+            aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿١﴾" ||
+            aya.ayaArabic == "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ" ||
+            (aya.suraNumber == 9 && aya.ayaNumberInSurah == 1)
 }

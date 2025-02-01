@@ -16,7 +16,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DataStore @Inject constructor(
+class DataStore<Tafsir> @Inject constructor(
     db: AppDatabase
 ) {
     private val ayaDao = db.ayaDao
@@ -29,6 +29,9 @@ class DataStore @Inject constructor(
     private val tasbihTrackerDao = db.tasbihTracker
     private val categoryDao = db.category
     private val hadithDao = db.hadith
+    private val tafsirDao = db.tafsirDao
+    private val tafsirEditionDao = db.tafsirEditionDao
+
     suspend fun getAllMetadata(): List<HadithMetadata> = hadithDao.getAllMetadata()
     suspend fun getAllHadithChaptersForABook(bookId: Int): List<HadithChapter> =
         hadithDao.getAllHadithChaptersForABook(bookId)
@@ -318,4 +321,31 @@ class DataStore @Inject constructor(
     suspend fun countChapters() = duaDao.countChapters()
 
     suspend fun countDuas() = duaDao.countDuas()
+
+    // Tafsir operations
+    suspend fun getTafsirById(id: Long) = tafsirDao.getTafsirById(id)
+
+    suspend fun getTafsirForAya(ayaNumber: Int, editionId: Int) =
+        tafsirDao.getTafsirForAya(ayaNumber, editionId)
+
+    suspend fun getTafsirByEdition(editionId: Int) = tafsirDao.getTafsirByEdition(editionId)
+
+    suspend fun getTafsirByLanguage(language: String) = tafsirDao.getTafsirByLanguage(language)
+
+    // TafsirEdition operations
+    suspend fun getAllEditions() = tafsirEditionDao.getAllEditions()
+
+    suspend fun getEditionById(id: Int) = tafsirEditionDao.getEditionById(id)
+
+    suspend fun getEditionsByLanguage(language: String) =
+        tafsirEditionDao.getEditionsByLanguage(language)
+
+    //getEditionsByLanguageAndAuthor
+    suspend fun getEditionsByLanguageAndAuthor(language: String, authorName: String) =
+        tafsirEditionDao.getEditionsByLanguageAndAuthor(language, authorName)
+
+    suspend fun getEditionsByAuthor(authorName: String) =
+        tafsirEditionDao.getEditionsByAuthor(authorName)
+
+    suspend fun getEditionCount() = tafsirEditionDao.getEditionCount()
 }

@@ -4,28 +4,22 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.FULL_QURAN_DOWNLOADED
 import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalSurah
-import com.arshadshah.nimaz.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.QuranUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class QuranViewModel @Inject constructor(
-    private val sharedPreferences: PrivateSharedPreferences,
-    private val spaceFilesRepository: SpacesFileRepository,
-    private val dataStore: DataStore
+    sharedPreferences: PrivateSharedPreferences,
+    private val dataStore: DataStore<Any?>
 ) : ViewModel() {
 
     //general state for error and loading
@@ -43,194 +37,19 @@ class QuranViewModel @Inject constructor(
     private var _juzListState = MutableStateFlow(ArrayList<LocalJuz>(30))
     val juzListState = _juzListState.asStateFlow()
 
-    private val _ayaListState = MutableStateFlow(ArrayList<LocalAya>(100))
-    val ayaListState = _ayaListState.asStateFlow()
-
-    private val _currentAyatScreenNumber = MutableStateFlow(1)
-
-    //state for quran menu features like page display, font size, font type, etc
-    private val _arabic_Font_size = MutableStateFlow(26.0f)
-    val arabic_Font_size = _arabic_Font_size.asStateFlow()
-
-    private val _arabic_Font = MutableStateFlow("Default")
-    val arabic_Font = _arabic_Font.asStateFlow()
-
-    private val _translation_Font_size = MutableStateFlow(16.0f)
-    val translation_Font_size = _translation_Font_size.asStateFlow()
-
     private val _translation = MutableStateFlow("English")
     val translation = _translation.asStateFlow()
-
-    private val _display_Mode = MutableStateFlow("List")
-    val display_Mode = _display_Mode.asStateFlow()
 
     private val _surahState = MutableStateFlow(
         LocalSurah(0, 0, 0, "", "", "", "", 0, 0)
     )
-    val surahState = _surahState.asStateFlow()
 
-    //_scrollToAya
-    private val _scrollToAya = MutableStateFlow<LocalAya?>(null)
-    val scrollToAya = _scrollToAya.asStateFlow()
 
     init {
-        _arabic_Font.value = sharedPreferences.getData(AppConstants.FONT_STYLE, "Default")
         _translation.value =
             sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE, "English")
-
-        //if the font size is not set, set it to default 26 and 16
-
-        _arabic_Font_size.value =
-            if (sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE) == 0.0f) {
-                //save the default font size and also return it
-                sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE, 26.0f)
-                26.0f
-            } else {
-                sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
-            }
-        _translation_Font_size.value =
-            if (sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE) == 0.0f) {
-                //save the default font size and also return it
-                sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16.0f)
-                16.0f
-            } else {
-                sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
-            }
-
-        _display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE, "List")
         getSurahList()
         getJuzList()
-    }
-
-
-    //events for quran menu features like page display, font size, font type, etc
-    sealed class QuranMenuEvents {
-
-        //change arabic font
-        data class Change_Arabic_Font(val font: String) : QuranMenuEvents()
-
-        //change translation font
-        data class Change_Translation(val lang: String) : QuranMenuEvents()
-        data class Change_Arabic_Font_Size(val size: Float) : QuranMenuEvents()
-
-        //change translation font size
-        data class Change_Translation_Font_Size(val size: Float) : QuranMenuEvents()
-
-        //change display mode
-        data class Change_Display_Mode(val mode: String) : QuranMenuEvents()
-
-        //initialize quran using settings
-        object Initialize_Quran : QuranMenuEvents()
-
-        //scroll to aya
-        data class Scroll_To_Aya(val aya: LocalAya?) : QuranMenuEvents()
-
-        //reset quran data
-        object Reset_Quran_Data : QuranMenuEvents()
-    }
-
-    fun handleQuranMenuEvents(event: QuranMenuEvents) {
-        when (event) {
-            is QuranMenuEvents.Change_Arabic_Font -> {
-                _arabic_Font.value = event.font
-            }
-
-            is QuranMenuEvents.Change_Translation -> {
-                _translation.value = event.lang
-            }
-
-            is QuranMenuEvents.Change_Arabic_Font_Size -> {
-                _arabic_Font_size.value = event.size
-            }
-
-            is QuranMenuEvents.Change_Translation_Font_Size -> {
-                _translation_Font_size.value = event.size
-            }
-
-            is QuranMenuEvents.Change_Display_Mode -> {
-                _display_Mode.value = event.mode
-            }
-
-            is QuranMenuEvents.Initialize_Quran -> {
-                _arabic_Font.value = sharedPreferences.getData(AppConstants.FONT_STYLE, "Default")
-                _translation.value =
-                    sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE, "English")
-
-                //if the font size is not set, set it to default 26 and 16
-
-                _arabic_Font_size.value =
-                    if (sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE) == 0.0f) {
-                        //save the default font size and also return it
-                        sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE, 26.0f)
-                        26.0f
-                    } else {
-                        sharedPreferences.getDataFloat(AppConstants.ARABIC_FONT_SIZE)
-                    }
-                _translation_Font_size.value =
-                    if (sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE) == 0.0f) {
-                        //save the default font size and also return it
-                        sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16.0f)
-                        16.0f
-                    } else {
-                        sharedPreferences.getDataFloat(AppConstants.TRANSLATION_FONT_SIZE)
-                    }
-
-                _display_Mode.value = sharedPreferences.getData(AppConstants.PAGE_TYPE, "List")
-            }
-
-            is QuranMenuEvents.Scroll_To_Aya -> {
-                _scrollToAya.value = event.aya
-            }
-
-            is QuranMenuEvents.Reset_Quran_Data -> {
-                //reset quran data
-                _arabic_Font.value = "Default"
-                sharedPreferences.saveData(AppConstants.FONT_STYLE, "Default")
-                _translation.value = "English"
-                sharedPreferences.saveData(AppConstants.TRANSLATION_LANGUAGE, "English")
-                _arabic_Font_size.value = 26.0f
-                sharedPreferences.saveDataFloat(AppConstants.ARABIC_FONT_SIZE, 26.0f)
-                _translation_Font_size.value = 16.0f
-                sharedPreferences.saveDataFloat(AppConstants.TRANSLATION_FONT_SIZE, 16.0f)
-                _display_Mode.value = "List"
-                sharedPreferences.saveData(AppConstants.PAGE_TYPE, "List")
-                sharedPreferences.saveDataBoolean(FULL_QURAN_DOWNLOADED, false)
-                deleteAllAyat()
-            }
-        }
-    }
-
-    //deleteAllAyat
-    private fun deleteAllAyat() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _errorState.value = ""
-            try {
-                dataStore.deleteAllAyat()
-            } catch (e: Exception) {
-                _errorState.value = e.message.toString()
-            }
-        }
-    }
-
-    fun downloadAyaFile(
-        surahNumber: Int,
-        ayaNumberInSurah: Int,
-        downloadCallback: (File?, Exception?, progress: Int, completed: Boolean) -> Unit,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                spaceFilesRepository.downloadAyaFile(
-                    surahNumber,
-                    ayaNumberInSurah,
-                    downloadCallback
-                )
-            } catch (e: Exception) {
-                Log.e("QuranViewModel", "Error downloading file: ${e.message}", e)
-                downloadCallback(null, e, 0, false)
-                _errorState.value = e.message.toString()
-                _loadingState.value = false
-            }
-        }
     }
 
     fun getSurahList() {
@@ -265,191 +84,6 @@ class QuranViewModel @Inject constructor(
                 _errorState.value = e.message!!
             }
         }
-    }
-
-    fun getAllAyaForSurah(surahNumber: Int, language: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                _loadingState.value = true
-                _errorState.value = ""
-                _ayaListState.value = ArrayList()
-                val languageConverted = language.uppercase(Locale.ROOT)
-                val ayatList = dataStore.getAyasOfSurah(surahNumber)
-                val newList =
-                    addBismillahToFirstAya(
-                        ayatList as ArrayList<LocalAya>,
-                        languageConverted,
-                        surahNumber
-                    )
-                _ayaListState.value = newList
-                _loadingState.value = false
-                _errorState.value = ""
-            } catch (e: Exception) {
-                _ayaListState.value = ArrayList()
-                _loadingState.value = false
-                _errorState.value = e.message!!
-            }
-        }
-    }
-
-    private fun addBismillahToFirstAya(
-        surahAyatList: ArrayList<LocalAya>,
-        languageConverted: String,
-        surahNumber: Int,
-    ): ArrayList<LocalAya> {
-        //an empty number
-        val ayaNumberOfBismillah = 0
-        val ayaOfBismillah = when (languageConverted) {
-            "ENGLISH" -> "In the name of Allah, the Entirely Merciful, the Especially Merciful"
-            "URDU" -> "اللہ کے نام سے جو رحمان و رحیم ہے"
-
-            else -> {
-                "In the name of Allah, the Entirely Merciful, the Especially Merciful"
-            }
-        }
-        val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
-        val aya: LocalAya
-        if (languageConverted == "ENGLISH") {
-            aya = LocalAya(
-                0,
-                ayaArabicOfBismillah,
-                ayaOfBismillah,
-                "",
-                surahNumber,
-                0,
-                false,
-                false,
-                "",
-                "",
-                false,
-                "",
-                0,
-                0,
-            )
-        } else {
-            aya = LocalAya(
-                0,
-                ayaArabicOfBismillah,
-                ayaOfBismillah,
-                ayaOfBismillah,
-                surahNumber,
-                1,
-                false,
-                false,
-                "",
-                "",
-                false,
-                "",
-                0,
-                0,
-            )
-        }
-        //first check if an object like this is already in the list
-        //check all the attributes of the object bisimillah with the attributes of the object in the list at index 0
-        if (surahAyatList[0].ayaArabic != ayaArabicOfBismillah && surahAyatList[0].suraNumber != 1) {
-            if (surahNumber != 9) {
-                surahAyatList.add(0, aya)
-            }
-        }
-
-        return QuranUtils.processAyaEnd(surahAyatList)
-    }
-
-    fun getAllAyaForJuz(juzNumber: Int, language: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _loadingState.value = true
-            _errorState.value = ""
-            _ayaListState.value = ArrayList()
-            try {
-                val languageConverted = language.uppercase(Locale.ROOT)
-                val listOfJuzAyat =
-                    dataStore.getAyasOfJuz(juzNumber) as ArrayList<LocalAya>
-                val newList = addBismillahInJuz(juzNumber, languageConverted, listOfJuzAyat)
-                _ayaListState.value = newList
-                _loadingState.value = false
-                _errorState.value = ""
-
-            } catch (e: Exception) {
-                _ayaListState.value = ArrayList()
-                _loadingState.value = false
-                _errorState.value = e.message!!
-            }
-        }
-    }
-
-    //function to add biismillah to the start of every surah
-    private fun addBismillahInJuz(
-        juzNumber: Int,
-        languageConverted: String,
-        listOfJuzAyat: ArrayList<LocalAya>,
-    ): ArrayList<LocalAya> {
-
-        val ayaOfBismillah = when (languageConverted) {
-            "ENGLISH" -> "In the name of Allah, the Entirely Merciful, the Especially Merciful"
-            "URDU" -> "اللہ کے نام سے جو رحمان و رحیم ہے"
-
-            else -> {
-                "In the name of Allah, the Entirely Merciful, the Especially Merciful"
-            }
-        }
-        val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
-
-        //create a map of the aya of bismillah
-        var aya: LocalAya
-        //find all the objects in arraylist ayaForJuz where ayaForJuz[i]!!.ayaNumber = 1
-        //add object bismillah before it for every occurance of ayaForJuz[i]!!.ayaNumber = 1
-        var index = 0
-        while (index < listOfJuzAyat.size) {
-            if (listOfJuzAyat[index].ayaNumberInSurah == 1 && listOfJuzAyat[index].suraNumber != 1) {
-                //add bismillah before ayaForJuz[i]
-                if (listOfJuzAyat[index].ayaNumberInSurah == 1) {
-                    if (juzNumber + 1 != 10 && index != 36) {
-                        if (languageConverted == "ENGLISH") {
-                            aya = LocalAya(
-                                0,
-                                ayaArabicOfBismillah,
-                                ayaOfBismillah,
-                                "",
-                                listOfJuzAyat[index].suraNumber,
-                                0,
-                                false,
-                                false,
-                                "",
-                                "",
-                                false,
-                                "",
-                                0,
-                                0,
-                            )
-                        } else {
-                            aya = LocalAya(
-                                0,
-                                ayaArabicOfBismillah,
-                                "",
-                                ayaOfBismillah,
-                                listOfJuzAyat[index].suraNumber,
-                                1,
-                                false,
-                                false,
-                                "",
-                                "",
-                                false,
-                                "",
-                                0,
-                                0,
-                            )
-                        }
-                        //add the map of bismillah to ayaList at the current index
-                        listOfJuzAyat.add(index, aya)
-                        //skip the next iteration
-                        index++
-                    }
-                }
-            }
-            index++
-        }
-
-        return QuranUtils.processAyaEnd(listOfJuzAyat)
     }
 
     //events to bookmark an aya, favorite an aya, add a note to an aya
@@ -767,7 +401,7 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    fun getSurahById(id: Int) {
+    private fun getSurahById(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val surah = dataStore.getSurahById(id)

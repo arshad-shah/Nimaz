@@ -13,6 +13,8 @@ import com.arshadshah.nimaz.data.local.dao.JuzDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTimesDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
+import com.arshadshah.nimaz.data.local.dao.TafsirDao
+import com.arshadshah.nimaz.data.local.dao.TafsirEditionDao
 import com.arshadshah.nimaz.data.local.dao.TasbihTrackerDao
 import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.data.local.models.HadithEntity
@@ -27,11 +29,13 @@ import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.data.local.models.Tafsir
+import com.arshadshah.nimaz.data.local.models.TafsirEdition
 
 @TypeConverters(
     TimestampTypeConvertor::class,
     TypeConvertorForListOfDuas::class,
-    LocalDateTimestampTypeConvertor::class
+    LocalDateTimestampTypeConvertor::class,
 )
 @Database(
     entities = [
@@ -48,12 +52,13 @@ import com.arshadshah.nimaz.data.local.models.LocalTasbih
         HadithEntity::class,
         HadithMetadata::class,
         HadithChapter::class,
+        Tafsir::class,
+        TafsirEdition::class,
     ],
     version = DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
-
     abstract val ayaDao: AyaDao
     abstract val juz: JuzDao
     abstract val surah: SurahDao
@@ -64,4 +69,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val tasbihTracker: TasbihTrackerDao
     abstract val category: CategoryDao
     abstract val hadith: HadithDao
+    abstract val tafsirDao: TafsirDao
+    abstract val tafsirEditionDao: TafsirEditionDao
 }

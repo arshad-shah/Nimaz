@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PrayerTrackerRepository @Inject constructor(
-    private val dataStore: DataStore
+    private val dataStore: DataStore<Any?>
 ) {
     // Cache for monthly data to reduce database hits
     private var cachedMonth: YearMonth? = null
