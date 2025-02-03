@@ -20,7 +20,7 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 35
-        versionCode 171
+        versionCode 172
         versionName '2.5.8'
 
         testInstrumentationRunner "com.arshadshah.nimaz.HiltTestRunner"
