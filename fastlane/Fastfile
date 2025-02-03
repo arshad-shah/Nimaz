@@ -54,10 +54,13 @@ platform :android do
       task: "bundle",
       build_type: "release",
       properties: {
-        "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
-        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
-        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
-        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"],
+          "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+          "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+          "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+          "android.injected.signing.key.password" => ENV["KEY_PASSWORD"],
+          "DO_ACCESS_KEY" => ENV["DO_ACCESS_KEY"],
+          "DO_SECRET_KEY" => ENV["DO_SECRET_KEY"],
+          "METAL_API_KEY" => ENV["METAL_API_KEY"]
       }
     )
   end
