@@ -30,7 +30,7 @@ platform :android do
     increment_version_code(
             app_project_dir: "**/app",
       )
-    increment_version_name(app_project_dir: '**/app', bump_type: 'minor')
+    increment_version_name(app_project_dir: '**/app', bump_type: 'patch')
     git_add(path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle")
     git_commit(
           path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle",
