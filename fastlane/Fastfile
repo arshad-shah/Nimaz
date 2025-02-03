@@ -37,12 +37,13 @@ platform :android do
     sh "git config user.email 'CI@BOT.com'"
     sh "git config user.name 'CI-BOT'"
     increment_version_code(
-            gradle_file_path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle",
+            app_project_dir: "**/app",
       )
+    increment_version_name(app_project_dir: '**/app', bump_type: 'minor')
     git_add(path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle")
     git_commit(
           path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle",
-          message: "Bumped Version Code"
+          message: "Bumped Version Code and name"
         )
     push_to_git_remote
   end
