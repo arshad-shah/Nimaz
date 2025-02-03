@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -15,10 +14,8 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -41,98 +38,67 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import es.dmoral.toasty.Toasty
+import com.arshadshah.nimaz.viewModel.AyatViewModel
 
 @Composable
-fun NoteInput(
-    showNoteDialog: MutableState<Boolean>,
-    onClick: () -> Unit,
-    noteContent: MutableState<String>,
-    titleOfDialog: String,
+fun NoteDialog(
+    aya: LocalAya,
+    initialNote: String,
+    onDismiss: () -> Unit,
+    onEvent: (AyatViewModel.AyatEvent) -> Unit,
 ) {
-    val context = LocalContext.current
-
+    val text = remember { mutableStateOf(initialNote) }
     AlertDialogNimaz(
-        contentDescription = "Note",
-        title = titleOfDialog,
-        topDivider = false,
-        bottomDivider = false,
+        title = if (initialNote.isEmpty()) "Add Note" else "Edit Note",
         contentHeight = 250.dp,
-        properties = DialogProperties(
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        ),
         action = {
             DeleteNoteButton(
+                visible = initialNote.isNotEmpty(),
                 onClick = {
-                    noteContent.value = ""
-                    onClick()
+                    onEvent(AyatViewModel.AyatEvent.UpdateNote(aya, ""))
+                    onDismiss()
                 }
             )
         },
+        contentDescription = if (initialNote.isEmpty()) "Add Note" else "Edit Note",
+        cardContent = false,
         contentToShow = {
-
-            NoteInputField(
-                value = noteContent.value,
-                onValueChange = { noteContent.value = it }
+            EnhancedNoteInput(
+                text = text,
             )
         },
-        onDismissRequest = {
-            showNoteDialog.value = false
-            onClick()
-        },
-        confirmButtonText = "Save",
+        onDismissRequest = onDismiss,
+        dismissButtonText = if (initialNote.isEmpty()) "Cancel" else "Close",
+        showConfirmButton = if (initialNote.isEmpty()) text.value.isNotEmpty() else text.value != initialNote,
+        confirmButtonText = if (initialNote.isEmpty()) "Save" else "Update",
         onConfirm = {
-            if (noteContent.value.isEmpty()) {
-                showEmptyNoteWarning(context)
-            } else {
-                onClick()
-            }
+            onEvent(
+                AyatViewModel.AyatEvent.UpdateNote(
+                    aya = aya,
+                    note = text.value
+                )
+            )
+            onDismiss()
         },
-        dismissButtonText = "Cancel",
-        onDismiss = {
-            showNoteDialog.value = false
-            onClick()
-        }
+        onDismiss = onDismiss
     )
 }
 
 @Composable
-private fun DeleteNoteButton(onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-            .padding(8.dp)
-            .size(24.dp),
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.delete_icon),
-            contentDescription = "Delete note",
-            tint = MaterialTheme.colorScheme.error
-        )
-    }
-}
-
-@Composable
-private fun EnhancedNoteTextField(
-    value: String,
-    maxLength: Int,
-    onValueChange: (String) -> Unit,
-    onClear: () -> Unit,
-    modifier: Modifier = Modifier
+private fun EnhancedNoteInput(
+    modifier: Modifier = Modifier,
+    text: MutableState<String>,
 ) {
-    val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val maxLength = 250
 
-    // Animations
     val containerElevation by animateDpAsState(
         targetValue = if (isFocused) 4.dp else 1.dp,
         label = "elevation"
@@ -147,9 +113,7 @@ private fun EnhancedNoteTextField(
         label = "scale"
     )
 
-    val isError = value.length > maxLength
-
-    Column(modifier = modifier) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Surface(
             shape = RoundedCornerShape(16.dp),
             tonalElevation = containerElevation,
@@ -161,49 +125,33 @@ private fun EnhancedNoteTextField(
                 }
         ) {
             OutlinedTextField(
-                value = value,
+                value = text.value,
                 onValueChange = { newValue ->
-                    if (newValue.length <= maxLength + 10) { // Allow slight overflow
-                        onValueChange(newValue)
+                    if (newValue.length <= maxLength + 10) {
+                        text.value = newValue
                     }
                 },
                 textStyle = MaterialTheme.typography.bodyLarge,
-                minLines = 3,
-                maxLines = 5,
-                isError = isError,
+                minLines = 2,
+                maxLines = 8,
+                isError = text.value.length > maxLength,
                 supportingText = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        AnimatedCharacterCounter(
-                            current = value.length,
-                            max = maxLength
-                        )
-                        if (isError) {
-                            Text(
-                                text = "Character limit exceeded",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
+                    CharacterCounter(
+                        current = text.value.length,
+                        max = maxLength
+                    )
                 },
                 trailingIcon = {
                     AnimatedClearButton(
-                        visible = value.isNotEmpty(),
+                        visible = text.value.isNotEmpty(),
                         onClick = {
-                            onClear()
+                            text.value = ""
                             focusManager.clearFocus()
                         }
                     )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight()
                     .onFocusChanged { isFocused = it.isFocused },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -212,14 +160,38 @@ private fun EnhancedNoteTextField(
                     errorBorderColor = Color.Transparent,
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                ),
+                )
             )
         }
     }
 }
 
 @Composable
-private fun AnimatedCharacterCounter(
+private fun DeleteNoteButton(
+    visible: Boolean,
+    onClick: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut()
+    ) {
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier.size(48.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.delete_icon),
+                contentDescription = "Delete note",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun CharacterCounter(
     current: Int,
     max: Int
 ) {
@@ -229,51 +201,40 @@ private fun AnimatedCharacterCounter(
     )
 
     val percentage = current.toFloat() / max
-
-    // Dynamic color selection based on percentage
     val counterColor by animateColorAsState(
         targetValue = when {
             percentage > 1f -> MaterialTheme.colorScheme.error
             percentage > 0.9f -> MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
             percentage > 0.8f -> MaterialTheme.colorScheme.tertiary
-            percentage > 0.6f -> MaterialTheme.colorScheme.secondary
-            percentage > 0.4f -> MaterialTheme.colorScheme.primary
             else -> MaterialTheme.colorScheme.onSurfaceVariant
         },
         label = "counterColor"
     )
 
-    // Animated scale for emphasis
-    val scale by animateFloatAsState(
-        targetValue = if (percentage > 0.9f) 1.1f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "scale"
-    )
-
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-        }
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Counter text with background pill for emphasis when near limit
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = counterColor.copy(alpha = 0.1f),
-            modifier = Modifier.padding(vertical = 2.dp)
+            color = counterColor.copy(alpha = 0.1f)
         ) {
             Text(
                 text = "$animatedCount/$max",
                 style = MaterialTheme.typography.labelSmall,
                 color = counterColor,
-                modifier = Modifier.padding(
-                    2.dp
-                )
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
+
+        if (current > max) {
+            Text(
+                text = "Character limit exceeded",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
             )
         }
     }
@@ -291,14 +252,12 @@ private fun AnimatedClearButton(
     ) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(24.dp)
         ) {
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.cross_icon),
@@ -310,55 +269,5 @@ private fun AnimatedClearButton(
                 )
             }
         }
-    }
-}
-
-// Usage example
-@Composable
-fun NoteInputField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var text by remember { mutableStateOf(value) }
-
-    EnhancedNoteTextField(
-        value = text,
-        maxLength = 250,
-        onValueChange = {
-            text = it
-            onValueChange(it)
-        },
-        onClear = {
-            text = ""
-            onValueChange("")
-        },
-        modifier = modifier
-    )
-}
-
-private fun showEmptyNoteWarning(context: Context) {
-    Toasty.warning(
-        context,
-        "Note is empty. Closing without save.",
-        Toasty.LENGTH_SHORT
-    ).show()
-}
-
-
-@Preview(device = "id:small_phone")
-@Composable
-fun NoteInputPreview() {
-
-
-    Column(
-        modifier = Modifier
-            .height(250.dp)
-            .padding(16.dp)
-    ) {
-        NoteInputField(
-            value = "",
-            onValueChange = {}
-        )
     }
 }

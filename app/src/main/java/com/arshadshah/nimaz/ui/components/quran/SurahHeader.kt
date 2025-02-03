@@ -74,26 +74,6 @@ fun SurahHeader(
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // English Name Section
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = surah.englishName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .placeholder(
-                            visible = loading,
-                            highlight = PlaceholderHighlight.shimmer()
-                        )
-                )
-            }
 
             // Arabic Name Section
             Surface(

@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.ShowChart
 import androidx.compose.material.icons.automirrored.rounded.Sort
@@ -100,7 +101,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -132,16 +132,12 @@ fun DebugScreen(navController: NavHostController) {
             TopAppBar(
                 title = { Text(text = "Debug Menu") },
                 navigationIcon = {
-                    OutlinedIconButton(
-                        modifier = Modifier
-                            .testTag("backButton")
-                            .padding(start = 8.dp),
-                        onClick = { navController.popBackStack() }
-                    ) {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
                         )
                     }
                 },
@@ -803,7 +799,6 @@ private fun SharedTabCard(
     onExpandClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onEditClick: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     ElevatedCard(
         onClick = onExpandClick,
@@ -1213,7 +1208,6 @@ fun ActionsTab(
     val context = LocalContext.current
 
     var showConfirmDialog by remember { mutableStateOf(false) }
-    var showExportDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
     var isImporting by remember { mutableStateOf(false) }
 

@@ -87,4 +87,34 @@ class PrivateSharedPreferences @Inject constructor(
     fun getAllData(): Map<String, *> {
         return sharedPreferences.all
     }
+
+    fun saveDisplaySettings(settings: DisplaySettings) {
+        editor.apply {
+            putFloat(AppConstants.ARABIC_FONT_SIZE, settings.arabicFontSize)
+            putFloat(AppConstants.TRANSLATION_FONT_SIZE, settings.translationFontSize)
+            putString(AppConstants.FONT_STYLE, settings.arabicFont)
+            putString(AppConstants.TRANSLATION_LANGUAGE, settings.translation)
+            putString(AppConstants.PAGE_TYPE, settings.displayMode)
+            apply()
+        }
+    }
+
+    fun getDisplaySettings(): DisplaySettings {
+        return DisplaySettings(
+            arabicFontSize = getDataFloat(AppConstants.ARABIC_FONT_SIZE).takeIf { it != 0f } ?: 26f,
+            translationFontSize = getDataFloat(AppConstants.TRANSLATION_FONT_SIZE).takeIf { it != 0f }
+                ?: 16f,
+            arabicFont = getData(AppConstants.FONT_STYLE, "Default"),
+            translation = getData(AppConstants.TRANSLATION_LANGUAGE, "English"),
+            displayMode = getData(AppConstants.PAGE_TYPE, "List")
+        )
+    }
 }
+
+data class DisplaySettings(
+    val arabicFontSize: Float = 26f,
+    val translationFontSize: Float = 16f,
+    val arabicFont: String = "Default",
+    val translation: String = "English",
+    val displayMode: String = "List"
+)

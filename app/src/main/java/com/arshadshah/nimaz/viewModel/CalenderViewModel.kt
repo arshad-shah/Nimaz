@@ -203,10 +203,13 @@ class CalendarViewModel @Inject constructor(
     }
 
     //showcasetoggle function to show all showcase for the calendar
-    fun showcaseToggle() {
+    fun showcaseToggle(enable: Boolean) {
         viewModelScope.launch {
-            Log.d("Nimaz: showcaseToggle", "showcaseToggle called with showcaseState: ${showcaseState.value}")
-            if (showcaseState.value) {
+            Log.d(
+                "Nimaz: showcaseToggle",
+                "showcaseToggle called with showcaseState: ${showcaseState.value}"
+            )
+            if (enable) {
                 showcaseDataStore.resetCalendarShowcase()
             } else {
                 showcaseDataStore.markCalendarShowcaseAsShown()

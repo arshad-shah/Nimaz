@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
@@ -23,9 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
@@ -63,7 +65,7 @@ fun CalendarHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Surface(
@@ -80,7 +82,7 @@ fun CalendarHeader(
                 ) {
                     NavigationButton(
                         onClick = { onMonthChange(currentMonth.minusMonths(1)) },
-                        icon = R.drawable.angle_left_icon,
+                        icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         contentDescription = "Previous Month"
                     )
 
@@ -95,7 +97,7 @@ fun CalendarHeader(
 
                     NavigationButton(
                         onClick = { onMonthChange(currentMonth.plusMonths(1)) },
-                        icon = R.drawable.angle_right_icon,
+                        icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = "Next Month"
                     )
                 }
@@ -107,7 +109,7 @@ fun CalendarHeader(
 @Composable
 private fun NavigationButton(
     onClick: () -> Unit,
-    icon: Int,
+    icon: ImageVector,
     contentDescription: String,
     modifier: Modifier = Modifier
 ) {
@@ -121,8 +123,8 @@ private fun NavigationButton(
         shape = RoundedCornerShape(8.dp)
     ) {
         Icon(
-            modifier = Modifier.size(18.dp),
-            painter = painterResource(id = icon),
+            modifier = Modifier.size(32.dp),
+            imageVector = icon,
             contentDescription = contentDescription
         )
     }
@@ -188,7 +190,7 @@ private fun MonthIndicator(
         ) {
             if (showPastIcon) {
                 NavigationIcon(
-                    icon = R.drawable.angle_small_left_icon,
+                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     isCurrentMonth = isCurrentMonth
                 )
             }
@@ -205,7 +207,7 @@ private fun MonthIndicator(
 
             if (showFutureIcon) {
                 NavigationIcon(
-                    icon = R.drawable.angle_small_right_icon,
+                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     isCurrentMonth = isCurrentMonth
                 )
             }
@@ -215,13 +217,13 @@ private fun MonthIndicator(
 
 @Composable
 private fun NavigationIcon(
-    icon: Int,
+    icon: ImageVector,
     isCurrentMonth: Boolean,
     modifier: Modifier = Modifier
 ) {
     Icon(
         modifier = modifier.size(12.dp),
-        painter = painterResource(id = icon),
+        imageVector = icon,
         contentDescription = null,
         tint = if (isCurrentMonth)
             MaterialTheme.colorScheme.onPrimary

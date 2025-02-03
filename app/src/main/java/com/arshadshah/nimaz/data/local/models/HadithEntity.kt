@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.models
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -18,6 +19,10 @@ import androidx.room.PrimaryKey
             childColumns = ["bookId"]
         )
     ],
+    indices = [
+        Index(value = ["chapterId", "bookId"]),  // Index for the composite foreign key
+        Index(value = ["bookId"])  // Index for the single foreign key
+    ]
 )
 data class HadithEntity(
     @PrimaryKey val id: Int,

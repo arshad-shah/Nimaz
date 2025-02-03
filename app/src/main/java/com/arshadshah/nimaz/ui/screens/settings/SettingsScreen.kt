@@ -4,28 +4,20 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
@@ -33,16 +25,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DARK_RED
@@ -68,6 +54,7 @@ import com.arshadshah.nimaz.ui.theme.rustic_md_theme_light_primary
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.google.android.play.core.review.ReviewManagerFactory
+import es.dmoral.toasty.Toasty
 
 
 // Theme options with descriptions and dynamic colors
@@ -136,53 +123,7 @@ fun getThemeOptions(
     )
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SettingsTopSection(
-    onNavigateBack: () -> Unit,
-) {
-    Column {
-        LargeTopAppBar(
-            title = {
-                Column {
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Customize your prayer time experience",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .testTag("backButton")
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.back_icon),
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.largeTopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface,
-            ),
-            modifier = Modifier.shadow(elevation = 0.dp)
-        )
-    }
-}
-
-
 @Composable
 fun SettingsScreen(
     onNavigateToPrayerTimeCustomizationScreen: () -> Unit,
@@ -212,9 +153,23 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            // Top Section with App Bar and Location
-            SettingsTopSection(
-                onNavigateBack = { navController.popBackStack() },
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Settings",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                },
+                navigationIcon = {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                },
             )
         }
     ) { padding ->
@@ -302,10 +257,11 @@ fun SettingsScreen(
                         if (task.isSuccessful) {
                             manager.launchReviewFlow(activity, task.result)
                         } else {
-                            Toast.makeText(
+                            Toasty.error(
                                 context,
                                 task.exception?.message ?: "Error",
-                                Toast.LENGTH_SHORT
+                                Toasty.LENGTH_SHORT,
+                                true
                             ).show()
                         }
                     }
@@ -334,56 +290,5 @@ fun SettingsScreen(
                 onNavigateToDebug = onNavigateToDebugScreen
             )
         }
-
-        // Error Banner
-        if (uiState.error.isNotEmpty()) {
-            ErrorBanner(
-                error = uiState.error,
-                onDismiss = {
-                    // Add error dismissal handling if needed
-                }
-            )
-        }
     }
 }
-
-@Composable
-private fun ErrorBanner(
-    error: String,
-    onDismiss: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        color = MaterialTheme.colorScheme.errorContainer,
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error
-            )
-            Text(
-                text = error,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = onDismiss) {
-                Icon(
-                    imageVector = Icons.Rounded.Close,
-                    contentDescription = "Dismiss",
-                    tint = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
-        }
-    }
-}
-
-

@@ -34,6 +34,7 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholde
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 import com.arshadshah.nimaz.viewModel.TrackerViewModel
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
+import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.reflect.KFunction3
@@ -50,11 +51,14 @@ fun PrayersTrackerCard(
     val updateWidgetTracker =
         { scope.launch { PrayerTimesTrackerWorker.enqueue(context, force = true) } }
 
+    val date = dateState.value
+    val isAfterToday = date.isAfter(LocalDate.now())
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -64,7 +68,7 @@ fun PrayersTrackerCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Header
@@ -106,7 +110,7 @@ fun PrayersTrackerCard(
             // Prayer Items Grid
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -130,8 +134,18 @@ fun PrayersTrackerCard(
                             isCompleted = status,
                             enabled = !prayerTrackerState.value.isMenstruating,
                             onStatusChange = { isChecked ->
-                                updateTracker(dateState.value, name, isChecked)
-                                updateWidgetTracker()
+                                if (!prayerTrackerState.value.isMenstruating && !isAfterToday) {
+                                    updateTracker(dateState.value, name, isChecked)
+                                    updateWidgetTracker()
+                                }
+
+                                if (isAfterToday) {
+                                    Toasty.warning(
+                                        context,
+                                        "Cannot track prayers for future dates",
+                                        Toasty.LENGTH_SHORT
+                                    ).show()
+                                }
                             },
                             isLoading = isLoading.value
                         )

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.models
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     tableName = "HadithChapters",
@@ -13,6 +14,9 @@ import androidx.room.ForeignKey
             childColumns = ["bookId"]
         )
     ],
+    indices = [
+        Index(value = ["bookId"])  // Index for the foreign key
+    ]
 )
 data class HadithChapter(
     val chapterId: Int,
