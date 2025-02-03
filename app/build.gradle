@@ -34,11 +34,21 @@ android {
         buildConfigField "String", "METAL_API_KEY", "\"${getSecret("METAL_API_KEY")}\""
     }
 
+    signingConfigs {
+        release {
+            storeFile System.getenv("KEYSTORE_FILE") != null ? file(System.getenv("KEYSTORE_FILE")) : file('keystore.jks')
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             ndk {
                 debugSymbolLevel 'FULL'
             }
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
