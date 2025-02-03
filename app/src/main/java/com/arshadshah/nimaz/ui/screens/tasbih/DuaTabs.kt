@@ -303,6 +303,7 @@ private fun FavoritesContent(
     viewModel: DuaViewModel,
     onDuaClick: (LocalDua) -> Unit
 ) {
+    viewModel.getFavorites()
     // State to hold the grouped favorites
     var groupedFavorites by remember { mutableStateOf<Map<String, List<LocalDua>>>(emptyMap()) }
 
@@ -312,6 +313,7 @@ private fun FavoritesContent(
         groupedFavorites = favorites.groupBy { dua ->
             coroutineScope {
                 val chapter = viewModel.getChapterById(dua.chapter_id)
+
                 val category = viewModel.getCategoryById(chapter?.category_id ?: 0)
                 category?.name ?: "Uncategorized"
             }

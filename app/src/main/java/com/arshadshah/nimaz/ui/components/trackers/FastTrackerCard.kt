@@ -47,7 +47,7 @@ fun FastTrackerCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -57,7 +57,7 @@ fun FastTrackerCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Header
@@ -88,20 +88,19 @@ fun FastTrackerCard(
             Surface(
                 onClick = {
                     if (!isMenstrauting && !isAfterToday) {
-                        if (isAfterToday) {
-                            Toasty.warning(
-                                context,
-                                "Cannot track fasting for future dates",
-                                Toasty.LENGTH_SHORT
-                            ).show()
-                            return@Surface
-                        }
                         handleEvent(date, !isFastingToday.value)
                     }
+                    if (isAfterToday) {
+                        Toasty.warning(
+                            context,
+                            "Cannot track fasting for future dates",
+                            Toasty.LENGTH_SHORT
+                        ).show()
+                    }
                 },
-                enabled = !isMenstrauting && !isAfterToday,
+                enabled = !isMenstrauting,
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .placeholder(

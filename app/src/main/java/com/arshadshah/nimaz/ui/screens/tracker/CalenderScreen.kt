@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.CardDefaults
@@ -89,18 +90,19 @@ fun CalendarScreen(
                     Text("Calendar", style = MaterialTheme.typography.titleLarge)
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = { navController.popBackStack() }) {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back",
-                            modifier = Modifier.size(24.dp)
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
                         )
                     }
                 },
                 actions = {
                     IconButton(
                         onClick = {
-                            viewModel.showcaseToggle()
+                            viewModel.showcaseToggle(true)
                         }
                     ) {
                         Icon(
@@ -149,7 +151,9 @@ fun CalendarScreen(
             ) {
                 Calendar(
                     showcaseState = showcaseState,
-                    onShowcaseDismiss = viewModel::showcaseToggle,
+                    onShowcaseDismiss = {
+                        viewModel.showcaseToggle(false)
+                    },
                     selectedDate = calendarState.selectedDate,
                     currentMonth = calendarState.currentMonth,
                     trackers = calendarData.monthlyTrackers,

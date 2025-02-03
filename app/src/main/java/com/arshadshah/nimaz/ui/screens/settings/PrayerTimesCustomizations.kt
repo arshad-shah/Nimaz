@@ -3,10 +3,7 @@ package com.arshadshah.nimaz.ui.screens.settings
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,16 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material.icons.rounded.Remove
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,18 +27,17 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -54,8 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,54 +60,9 @@ import com.arshadshah.nimaz.ui.components.common.BannerDuration
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
+import com.arshadshah.nimaz.ui.components.common.NumberSelector
 import com.arshadshah.nimaz.ui.components.common.SettingsSelectionDialog
 import com.arshadshah.nimaz.viewModel.PrayerTimesSettingsViewModel
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PrayerTimesSettingsTopSection(
-    onNavigateBack: () -> Unit,
-) {
-    Column {
-        LargeTopAppBar(
-            title = {
-                Column {
-                    Text(
-                        text = "Prayer Times",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Customize calculation methods and adjustments",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .testTag("backButton")
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.back_icon),
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.largeTopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface,
-            ),
-            modifier = Modifier.shadow(elevation = 0.dp)
-        )
-    }
-}
 
 
 @Composable
@@ -826,6 +772,7 @@ private fun HighLatitudeRuleItem(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrayerTimesCustomizations(
     navController: NavController,
@@ -852,14 +799,39 @@ fun PrayerTimesCustomizations(
     val maghribOffset = viewModel.maghribOffset.collectAsState()
     val ishaOffset = viewModel.ishaOffset.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(PrayerTimesSettingsViewModel.SettingsEvent.LoadSettings)
-    }
+    val state = rememberPullToRefreshState()
 
     Scaffold(
         topBar = {
-            PrayerTimesSettingsTopSection(
-                onNavigateBack = { navController.popBackStack() }
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = "Prayer Times",
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
+                },
+                navigationIcon = {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        viewModel.handleEvent(PrayerTimesSettingsViewModel.SettingsEvent.LoadSettings)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = "Refresh"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -869,12 +841,10 @@ fun PrayerTimesCustomizations(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Show loading indicator if needed
             if (isLoading.value) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primaryContainer
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -883,7 +853,7 @@ fun PrayerTimesCustomizations(
                 BannerSmall(
                     variant = BannerVariant.Error,
                     title = "Error",
-                    message = error.value ?: "",
+                    message = error.value ?: "An error occurred",
                     dismissable = true,
                     showFor = BannerDuration.FOREVER.value
                 )
@@ -946,10 +916,16 @@ fun PrayerTimesCustomizations(
                 onOffsetChange = { prayer, offset ->
                     val event = when (prayer) {
                         "Fajr" -> PrayerTimesSettingsViewModel.SettingsEvent.FajrOffset(offset)
-                        "Sunrise" -> PrayerTimesSettingsViewModel.SettingsEvent.SunriseOffset(offset)
+                        "Sunrise" -> PrayerTimesSettingsViewModel.SettingsEvent.SunriseOffset(
+                            offset
+                        )
+
                         "Dhuhr" -> PrayerTimesSettingsViewModel.SettingsEvent.DhuhrOffset(offset)
                         "Asr" -> PrayerTimesSettingsViewModel.SettingsEvent.AsrOffset(offset)
-                        "Maghrib" -> PrayerTimesSettingsViewModel.SettingsEvent.MaghribOffset(offset)
+                        "Maghrib" -> PrayerTimesSettingsViewModel.SettingsEvent.MaghribOffset(
+                            offset
+                        )
+
                         "Isha" -> PrayerTimesSettingsViewModel.SettingsEvent.IshaOffset(offset)
                         else -> null
                     }
@@ -986,6 +962,7 @@ private fun NumberPickerDialog(
             contentDescription = "Adjust $title",
             confirmButtonText = "Apply",
             onDismiss = onDismiss,
+            contentHeight = 150.dp,
             onConfirm = {
                 onValueSelected(selectedValue)
                 onDismiss()
@@ -998,93 +975,12 @@ private fun NumberPickerDialog(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
 
-                    // Number display and quick controls
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Decrease button
-                        FilledIconButton(
-                            onClick = {
-                                if (selectedValue > valueRange.first) {
-                                    selectedValue--
-                                }
-                            },
-                            enabled = selectedValue > valueRange.first,
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Remove,
-                                contentDescription = "Decrease"
-                            )
-                        }
-
-                        // Current value display
-                        Surface(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            tonalElevation = 2.dp
-                        ) {
-                            Text(
-                                text = "$selectedValue$valuePostfix",
-                                style = MaterialTheme.typography.displayMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-                            )
-                        }
-
-                        // Increase button
-                        FilledIconButton(
-                            onClick = {
-                                if (selectedValue < valueRange.last) {
-                                    selectedValue++
-                                }
-                            },
-                            enabled = selectedValue < valueRange.last,
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = "Increase"
-                            )
-                        }
-                    }
-
-
-                    // Reset button (if not at neutral value)
-                    AnimatedVisibility(
-                        visible = selectedValue != neutralValue,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        OutlinedButton(
-                            onClick = { selectedValue = neutralValue },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Refresh,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Reset to $neutralValue$valuePostfix")
-                        }
-                    }
+                    NumberSelector(
+                        value = selectedValue.toFloat(),
+                        onValueChange = { selectedValue = it.toInt() },
+                        minValue = valueRange.first.toFloat(),
+                        maxValue = valueRange.last.toFloat(),
+                    )
                 }
 
             }

@@ -36,6 +36,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -102,16 +103,12 @@ fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hi
             TopAppBar(
                 title = { Text(text = "Qibla") },
                 navigationIcon = {
-                    OutlinedIconButton(
-                        modifier = Modifier
-                            .testTag("backButton")
-                            .padding(start = 8.dp),
-                        onClick = { navController.popBackStack() }
-                    ) {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
                         )
                     }
                 }
@@ -138,7 +135,7 @@ fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hi
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    QiblaCompassCard(qiblaState, isLoading, errorMessage, compassImage)
+                    QiblaCompassCard(qiblaState, compassImage)
                 }
 
                 QiblaStyleSelector(
@@ -225,7 +222,9 @@ private fun QiblaInfoCard(
                 ) {
                     // Location Info
                     Column(
-                        modifier = Modifier.weight(1f).padding(start = 8.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
@@ -290,8 +289,6 @@ private fun QiblaInfoCard(
 @Composable
 private fun QiblaCompassCard(
     bearing: Double,
-    isLoading: Boolean,
-    errorMessage: String,
     compassImage: Painter
 ) {
     val context = LocalContext.current

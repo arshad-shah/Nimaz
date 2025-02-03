@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
@@ -82,16 +83,12 @@ fun NamesOfAllah(navController: NavHostController) {
             TopAppBar(
                 title = { Text(text = "Names of Allah") },
                 navigationIcon = {
-                    OutlinedIconButton(
-                        modifier = Modifier
-                            .testTag("backButton")
-                            .padding(start = 8.dp),
-                        onClick = { navController.popBackStack() }
-                    ) {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
                         )
                     }
                 },

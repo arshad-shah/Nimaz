@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants {
 
-    const val DATABASE_VERSION = 5
+    const val DATABASE_VERSION = 6
 
     //prayer names
     const val PRAYER_NAME_FAJR = "Fajr"
@@ -148,6 +148,7 @@ object AppConstants {
     const val HADITH_SHELF_SCREEN_ROUTE = "hadith_shelf_screen"
     const val HADITH_CHAPTERS_LIST_SCREEN_ROUTE = "hadith_chapters_list_screen/{bookId}/{bookName}"
     const val HADITH_LIST_SCREEN_ROUTE = "hadith_list_screen/{bookId}/{chapterId}"
+    const val TAFSEER_SCREEN_ROUTE = "tafseer_screen/{surahNumber}/{ayaNumber}"
 
     //Test tags
     //navigation tags

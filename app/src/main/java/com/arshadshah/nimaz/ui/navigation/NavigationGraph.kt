@@ -26,6 +26,7 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.TAFSEER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.WEB_VIEW_SCREEN_ROUTE
@@ -42,6 +43,7 @@ import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.more.ZakatCalculator
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
+import com.arshadshah.nimaz.ui.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
 import com.arshadshah.nimaz.ui.screens.settings.EnhancedAboutScreen
 import com.arshadshah.nimaz.ui.screens.settings.LibraryDetailScreen
@@ -197,7 +199,6 @@ fun NavigationGraph(
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
                 scrollToAya = it.arguments?.getString("scrollTo")!!.toInt(),
-                context = context,
                 navController = navController
             )
         }
@@ -208,7 +209,6 @@ fun NavigationGraph(
                 number = it.arguments?.getString("number")!!,
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
-                context = context
             )
         }
 
@@ -473,6 +473,20 @@ fun NavigationGraph(
             LibraryDetailScreen(
                 uniqueLibId = it.arguments?.getString("id")!!,
                 onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+
+        composable(
+            TAFSEER_SCREEN_ROUTE
+        ) { backStackEntry ->
+            val surahNumber = backStackEntry.arguments?.getString("surahNumber")?.toIntOrNull() ?: 1
+            val ayaNumber = backStackEntry.arguments?.getString("ayaNumber")?.toIntOrNull() ?: 1
+
+            TafseerScreen(
+                ayaNumber = ayaNumber,
+                surahNumber = surahNumber,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

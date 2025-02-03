@@ -9,6 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Error
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -24,12 +29,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -99,22 +106,22 @@ private fun rememberBannerStyle(variant: BannerVariant): BannerStyle {
     val successStyle = BannerStyle(
         containerColor = Color(0xFFE7F6EC),
         contentColor = Color(0xFF18794E),
-        iconRes = R.drawable.checkbox_icon
+        iconRes = Icons.Rounded.CheckCircle
     )
     val errorStyle = BannerStyle(
         containerColor = Color(0xFFFFEEEE),
         contentColor = Color(0xFFD92D20),
-        iconRes = R.drawable.cross_circle_icon
+        iconRes = Icons.Rounded.Error
     )
     val infoStyle = BannerStyle(
         containerColor = Color(0xFFEEF4FF),
         contentColor = Color(0xFF1570EF),
-        iconRes = R.drawable.info_icon
+        iconRes = Icons.Rounded.Info
     )
     val warningStyle = BannerStyle(
         containerColor = Color(0xFFFEF4E6),
         contentColor = Color(0xFFB93815),
-        iconRes = R.drawable.warning_icon
+        iconRes = Icons.Rounded.Warning
     )
 
     return remember(variant) {
@@ -180,7 +187,7 @@ private fun BannerContent(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = painterResource(variant.iconRes),
+            imageVector = variant.iconRes,
             contentDescription = null,
             modifier = Modifier
                 .padding(end = 16.dp)
@@ -203,21 +210,21 @@ private fun BannerContent(
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = variant.contentColor
                 )
             }
         }
 
         if (dismissable) {
             OutlinedIconButton(
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(24.dp),
                 onClick = onDismiss
             ) {
                 Icon(
                     painter = painterResource(R.drawable.cross_icon),
                     contentDescription = "Dismiss",
                     tint = variant.contentColor,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(12.dp)
                 )
             }
         }
@@ -235,12 +242,12 @@ private fun LargeBannerContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -249,7 +256,7 @@ private fun LargeBannerContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(variant.iconRes),
+                    imageVector = variant.iconRes,
                     contentDescription = null,
                     tint = variant.contentColor,
                     modifier = Modifier.size(24.dp)
@@ -260,12 +267,12 @@ private fun LargeBannerContent(
                     color = variant.contentColor
                 )
             }
-            OutlinedIconButton(modifier = Modifier.size(32.dp), onClick = onDismiss) {
+            OutlinedIconButton(modifier = Modifier.size(24.dp), onClick = onDismiss) {
                 Icon(
                     painter = painterResource(R.drawable.cross_icon),
                     contentDescription = "Dismiss",
                     tint = variant.contentColor,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(12.dp)
                 )
             }
         }
@@ -323,7 +330,7 @@ private fun dismissBanner(
 private data class BannerStyle(
     val containerColor: Color,
     val contentColor: Color,
-    val iconRes: Int
+    val iconRes: ImageVector
 )
 
 
@@ -372,12 +379,16 @@ fun BannerPreviewInfo() {
 @Preview(showBackground = true)
 @Composable
 fun BannerPreviewInfoDismiss() {
-    BannerSmall(
-        variant = BannerVariant.Info,
-        title = "Info",
-        message = "This is an info banner",
-        dismissable = true,
-    )
+    NimazTheme(
+        darkTheme = true
+    ) {
+        BannerSmall(
+            variant = BannerVariant.Info,
+            title = "Info",
+            message = "This is an info banner",
+            dismissable = true,
+        )
+    }
 }
 
 //a dismissable banner
@@ -387,13 +398,17 @@ fun BannerPreviewDismissable() {
     val isOpen = remember {
         mutableStateOf(true)
     }
-    BannerLarge(
-        variant = BannerVariant.Info,
-        title = "Info",
-        message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long",
-        isOpen = isOpen,
-        onDismiss = {
-            isOpen.value = false
-        },
-    )
+    NimazTheme(
+        darkTheme = true
+    ) {
+        BannerLarge(
+            variant = BannerVariant.Success,
+            title = "Info",
+            message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long",
+            isOpen = isOpen,
+            onDismiss = {
+                isOpen.value = false
+            },
+        )
+    }
 }

@@ -10,12 +10,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,8 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +42,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
 import com.arshadshah.nimaz.ui.components.common.CustomTabsWithPager
@@ -78,16 +76,12 @@ fun BookShelf(
             TopAppBar(
                 title = { Text(text = "Hadith Shelf") },
                 navigationIcon = {
-                    OutlinedIconButton(
-                        modifier = Modifier
-                            .testTag("backButton")
-                            .padding(start = 8.dp),
-                        onClick = { navController.popBackStack() }
-                    ) {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.back_icon),
-                            contentDescription = "Back"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
                         )
                     }
                 }
