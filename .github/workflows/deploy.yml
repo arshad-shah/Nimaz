@@ -51,6 +51,9 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS}}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           ANDROID_JSON_KEY_FILE: ${{ steps.service_account_json_file.outputs.filePath }}
+          DO_ACCESS_KEY: ${{ secrets.DO_ACCESS_KEY }}
+          DO_SECRET_KEY: ${{ secrets.DO_SECRET_KEY }}
+          METAL_API_KEY: ${{ secrets.METAL_API_KEY }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.6.0
