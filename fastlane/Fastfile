@@ -24,15 +24,6 @@ platform :android do
     )
   end
 
-  desc "Deploy a new version to the Google Play production track"
-  lane :deploy_production do
-    build_and_sign_apk_or_aab
-    upload_to_play_store(
-      track: "production",
-      json_key: ENV["ANDROID_JSON_KEY_FILE"] # Use your Google Play JSON key
-    )
-  end
-
   private_lane :fetch_and_increment_build_number do
     sh "git config user.email 'CI@BOT.com'"
     sh "git config user.name 'CI-BOT'"
