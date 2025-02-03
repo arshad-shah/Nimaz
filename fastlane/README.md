@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Runs all the tests
 
+### android lint
+
+```sh
+[bundle exec] fastlane android lint
+```
+
+Run lint check
+
 ### android deploy_internal
 
 ```sh
@@ -38,14 +46,6 @@ Deploy a new version to the Google Play internal track
 ```
 
 Deploy a new version to the Google Play beta track
-
-### android deploy_production
-
-```sh
-[bundle exec] fastlane android deploy_production
-```
-
-Deploy a new version to the Google Play production track
 
 ----
 

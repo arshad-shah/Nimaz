@@ -16,14 +16,17 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Set up ruby env
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1.4
+          bundler-cache: true
+
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
 
-      - name: Run Tests
-        run: ./gradlew test
-
-      - name: Run Lint
-        run: ./gradlew lint
+      - name: Run Tests and Lint
+        run: bundle exec fastlane android test
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4.6.0

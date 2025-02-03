@@ -2,9 +2,16 @@ default_platform(:android)
 
 platform :android do
   desc "Runs all the tests"
-  lane :test do
-    gradle(task: "test")
-  end
+    lane :test do
+      gradle(task: "test")
+      gradle(task: "lint")
+    end
+
+    desc "Run lint check"
+    lane :lint do
+      gradle(task: "lint")
+    end
+
 
   desc "Deploy a new version to the Google Play internal track"
   lane :deploy_internal do
