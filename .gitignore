@@ -19,8 +19,6 @@ google-services.json
 /.idea/deploymentTargetDropDown.xml
 /*.html
 secrets.properties
-/Gemfile
-/Gemfile.lock
 /keystore_base64.txt
 /service_account_base64.txt
 /fastlane/play-store-credentials.json
