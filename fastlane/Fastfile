@@ -43,7 +43,15 @@ platform :android do
           path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle",
           message: "Bumped Version Code and name"
         )
-    push_to_git_remote
+    # Get the current branch name
+    current_branch = sh('git rev-parse --abbrev-ref HEAD').strip
+
+    push_to_git_remote(
+      remote: "origin",
+      local_branch: current_branch,
+      remote_branch: current_branch,
+      tags: true
+    )
   end
 
   private_lane :build_and_sign_apk_or_aab do
