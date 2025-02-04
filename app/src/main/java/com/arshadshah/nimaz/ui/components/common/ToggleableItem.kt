@@ -1,16 +1,38 @@
 package com.arshadshah.nimaz.ui.components.common
 
 import android.util.Log
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconToggleButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,294 +42,226 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.Placeholde
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 
-//toggelable item variant rowed
-//overloaded function
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ToggleableItemRow(
-	text : String ,
-	checked : Boolean ,
-	onCheckedChange : (Boolean) -> Unit ,
-	enabled : Boolean = true ,
-	modifier : Modifier ,
-					 )
-{
+    text: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier,
+    iconTint: Color = MaterialTheme.colorScheme.primary
+) {
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
+            .animateContentSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedIconToggleButton(
+            enabled = enabled,
+            colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                checkedContainerColor = iconTint,
+                checkedContentColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.errorContainer,
+                disabledContentColor = MaterialTheme.colorScheme.error
+            ),
+            checked = checked,
+            onCheckedChange = { onCheckedChange(it) },
+            border = BorderStroke(
+                1.dp,
+                if (checked) iconTint else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
+        ) {
+            AnimatedContent(
+                targetState = checked,
+                transitionSpec = { (fadeIn() + scaleIn()).togetherWith(fadeOut() + scaleOut()) },
+                label = "Toggle Animation"
+            ) { isChecked ->
+                Icon(
+                    painter = painterResource(
+                        id = if (isChecked) R.drawable.check_icon else R.drawable.cross_icon
+                    ),
+                    contentDescription = if (isChecked) "Checked" else "Unchecked",
+                    modifier = Modifier.padding(if (isChecked) 8.dp else 10.dp)
+                )
+            }
+        }
 
-	Crossfade(
-			 targetState = checked ,
-			 animationSpec = tween(durationMillis = 300) , label = ""
-			 ) { targetState ->
-
-		Column(
-				 modifier = modifier
-					 .clickable(
-							  enabled = enabled ,
-							   ) {
-						 onCheckedChange(! targetState)
-					 } ,
-				 verticalArrangement = Arrangement.Center ,
-				 horizontalAlignment = Alignment.CenterHorizontally
-			  ) {
-			//a icon button to toggle the state of the toggleable item
-			OutlinedIconToggleButton(
-					 enabled = enabled ,
-					 colors = IconButtonDefaults.outlinedIconToggleButtonColors(
-							  containerColor = MaterialTheme.colorScheme.surface ,
-							  contentColor = MaterialTheme.colorScheme.onSurface ,
-							  checkedContainerColor = MaterialTheme.colorScheme.primary ,
-							  checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
-							  disabledContentColor = Color(0xFFE91E63) ,
-							  disabledContainerColor = Color(0x1FE91E63) ,
-																			   ) ,
-					 checked = targetState ,
-					 onCheckedChange = {
-						 Log.d("ToggleableItem" , "onCheckedChange: $it")
-						 onCheckedChange(it)
-					 } ,
-									) {
-				if (! targetState)
-				{
-					Icon(
-							 painter = painterResource(id = R.drawable.cross_icon) ,
-							 contentDescription = "Uncheck" ,
-							 modifier = Modifier
-								 .padding(10.dp)
-								 .alpha(0.6f)
-						)
-				} else
-				{
-					Icon(
-							 painter = painterResource(id = R.drawable.check_icon) ,
-							 contentDescription = "Check" ,
-							 modifier = Modifier.padding(8.dp)
-						)
-				}
-			}
-
-
-			Crossfade(
-					 targetState = checked ,
-					 animationSpec = tween(durationMillis = 300) , label = ""
-					 ) { targetState ->
-				if (! targetState)
-				{
-					Text(
-							 modifier = Modifier.padding(
-									  top = 8.dp ,
-									  start = 8.dp ,
-									  end = 8.dp ,
-									  bottom = 8.dp
-														) ,
-							 text = text ,
-							 style = MaterialTheme.typography.bodySmall ,
-							 color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
-									  0xFFE91E63
-																								)
-						)
-				} else
-				{
-					Text(
-							 modifier = Modifier.padding(
-									  top = 8.dp ,
-									  start = 8.dp ,
-									  end = 8.dp ,
-									  bottom = 8.dp
-														) ,
-							 text = text ,
-							 style = MaterialTheme.typography.bodySmall ,
-							 color = if (enabled) MaterialTheme.colorScheme.primary else Color(
-									  0xFFE91E63
-																							  )
-						)
-				}
-			}
-		}
-	}
+        AnimatedContent(
+            targetState = checked,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "Text Animation"
+        ) { isChecked ->
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = when {
+                    !enabled -> MaterialTheme.colorScheme.error
+                    isChecked -> iconTint
+                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                },
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
 }
 
-//toggelable item variant columned
-//overloaded function
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ToggleableItemColumn(
-	text : String ,
-	selectedText : String? = null ,
-	checked : Boolean ,
-	onCheckedChange : (Boolean) -> Unit ,
-	enabled : Boolean = true ,
-	modifier : Modifier ,
-						)
-{
-	Crossfade(
-			 targetState = checked ,
-			 animationSpec = tween(durationMillis = 300)
-			 ) { targetState ->
-		Row(
-				 modifier = modifier
-					 .fillMaxWidth()
-					 .clickable(
-							  enabled = enabled ,
-							   ) {
-						 onCheckedChange(! targetState)
-					 } ,
-				 verticalAlignment = Alignment.CenterVertically ,
-				 horizontalArrangement = Arrangement.Start
-		   ) {
-			//a icon button to toggle the state of the toggleable item
-			OutlinedIconToggleButton(
-					 enabled = enabled ,
-					 colors = IconButtonDefaults.outlinedIconToggleButtonColors(
-							  containerColor = MaterialTheme.colorScheme.surface ,
-							  contentColor = MaterialTheme.colorScheme.onSurface ,
-							  checkedContainerColor = MaterialTheme.colorScheme.primary ,
-							  checkedContentColor = MaterialTheme.colorScheme.onPrimary ,
-							  disabledContentColor = Color(0xFFE91E63) ,
-							  disabledContainerColor = Color(0x1FE91E63) ,
-																			   ) ,
-					 checked = targetState ,
-					 onCheckedChange = {
-						 Log.d("ToggleableItem" , "onCheckedChange: $it")
-						 onCheckedChange(it)
-					 } ,
-									) {
-				if (! targetState)
-				{
-					Icon(
-							 painter = painterResource(id = R.drawable.cross_icon) ,
-							 contentDescription = "Close" ,
-							 modifier = Modifier
-								 .padding(10.dp)
-								 .alpha(0.6f)
-						)
-				} else
-				{
-					Icon(
-							 painter = painterResource(id = R.drawable.check_icon) ,
-							 contentDescription = "Check" ,
-							 modifier = Modifier.padding(8.dp)
-						)
-				}
-			}
+    text: String,
+    selectedText: String? = null,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier,
+    iconTint: Color = MaterialTheme.colorScheme.primary
+) {
+    Row(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth()
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
+            .animateContentSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        OutlinedIconToggleButton(
+            enabled = enabled,
+            colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                checkedContainerColor = iconTint,
+                checkedContentColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.errorContainer,
+                disabledContentColor = MaterialTheme.colorScheme.error
+            ),
+            checked = checked,
+            onCheckedChange = { onCheckedChange(it) },
+            border = BorderStroke(
+                1.dp,
+                if (checked) iconTint else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
+        ) {
+            AnimatedContent(
+                targetState = checked,
+                transitionSpec = { (fadeIn() + scaleIn()).togetherWith(fadeOut() + scaleOut()) },
+                label = "Toggle Animation"
+            ) { isChecked ->
+                Icon(
+                    painter = painterResource(
+                        id = if (isChecked) R.drawable.check_icon else R.drawable.cross_icon
+                    ),
+                    contentDescription = if (isChecked) "Checked" else "Unchecked",
+                    modifier = Modifier.padding(if (isChecked) 8.dp else 10.dp)
+                )
+            }
+        }
 
-			Crossfade(
-					 targetState = checked ,
-					 animationSpec = tween(durationMillis = 300)
-					 ) { targetState ->
-				if (! targetState)
-				{
-					Text(
-							 modifier = Modifier.padding(
-									  top = 8.dp ,
-									  start = 8.dp ,
-									  end = 8.dp ,
-									  bottom = 8.dp
-														) ,
-							 text = text ,
-							 style = MaterialTheme.typography.bodyLarge ,
-							 color = if (enabled) MaterialTheme.colorScheme.onSurface else Color(
-									  0xFFE91E63
-																								)
-						)
-				} else
-				{
-					Text(
-							 modifier = Modifier.padding(
-									  top = 8.dp ,
-									  start = 8.dp ,
-									  end = 8.dp ,
-									  bottom = 8.dp
-														) ,
-							 text = selectedText ?: text ,
-							 style = MaterialTheme.typography.bodyLarge ,
-							 color = if (enabled) MaterialTheme.colorScheme.primary else Color(
-									  0xFFE91E63
-																							  )
-						)
-				}
-			}
-		}
-	}
+        AnimatedContent(
+            targetState = checked,
+            transitionSpec = {
+                (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
+            },
+            label = "Text Animation"
+        ) { isChecked ->
+            Text(
+                text = if (isChecked) selectedText ?: text else text,
+                style = MaterialTheme.typography.titleLarge,
+                color = when {
+                    !enabled -> MaterialTheme.colorScheme.error
+                    isChecked -> iconTint
+                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+    }
 }
 
 
-@Preview(showBackground = true , device = "id:S20 Fe")
+@Preview(showBackground = true)
 @Composable
-fun ToggleableItemRowPreview()
-{
-	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
+fun ToggleableItemRowPreview() {
+    val items = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
 
-	var isChecked by remember { mutableStateOf(false) }
-	ElevatedCard(
-			 modifier = Modifier
-				 .padding(16.dp)
-				 .fillMaxWidth()
-				) {
-		Row(
-				 modifier = Modifier
-					 .padding(8.dp)
-					 .fillMaxWidth() ,
-				 horizontalArrangement = Arrangement.SpaceBetween ,
-				 verticalAlignment = Alignment.CenterVertically
-		   ) {
-			items.forEachIndexed { index , item ->
-				ToggleableItemRow(
-						 text = item ,
-						 checked = isChecked ,
-						 onCheckedChange = {
-							 Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
-							 isChecked = it
-						 } ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = false ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 ) ,
-								 )
-			}
-		}
-	}
+    var isChecked by remember { mutableStateOf(false) }
+    ElevatedCard(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEachIndexed { index, item ->
+                ToggleableItemRow(
+                    text = item,
+                    checked = isChecked,
+                    onCheckedChange = {
+                        Log.d("ToggleableItemPreview", "onCheckedChange: $it")
+                        isChecked = it
+                    },
+                    modifier = Modifier
+                        .placeholder(
+                            visible = false,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White,
+                            )
+                        ),
+                )
+            }
+        }
+    }
 }
 
 @Preview
 @Composable
-fun ToggleableItemColumnPreview()
-{
-	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
+fun ToggleableItemColumnPreview() {
+    val items = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
 
-	var isChecked by remember { mutableStateOf(false) }
-	ElevatedCard(
-			 modifier = Modifier
-				 .fillMaxWidth()
-				) {
-		Column(
-				 modifier = Modifier
-					 .fillMaxWidth()
-					 .padding(8.dp) ,
-				 horizontalAlignment = Alignment.Start ,
-				 verticalArrangement = Arrangement.Center
-			  ) {
-			items.forEachIndexed { index , item ->
-				ToggleableItemColumn(
-						 text = item ,
-						 checked = isChecked ,
-						 onCheckedChange = {
-							 Log.d("ToggleableItemPreview" , "onCheckedChange: $it")
-							 isChecked = it
-						 } ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = false ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 ) ,
-									)
-			}
-		}
-	}
+    var isChecked by remember { mutableStateOf(false) }
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            items.forEachIndexed { index, item ->
+                ToggleableItemColumn(
+                    text = item,
+                    checked = isChecked,
+                    onCheckedChange = {
+                        Log.d("ToggleableItemPreview", "onCheckedChange: $it")
+                        isChecked = it
+                    },
+                    modifier = Modifier
+                        .placeholder(
+                            visible = false,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White,
+                            )
+                        ),
+                )
+            }
+        }
+    }
 }

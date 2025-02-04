@@ -4,80 +4,84 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.DayOfWeek
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
-fun CalenderWeekHeader(
-	weekState : List<DayOfWeek> ,
-					  )
-{
-	ElevatedCard(
-			 colors = CardDefaults.cardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-											 ) ,
-			 shape = MaterialTheme.shapes.extraLarge.copy(
-					  bottomStart = CornerSize(0.dp) ,
-					  bottomEnd = CornerSize(0.dp) ,
-														 ) ,
-			 modifier = Modifier.padding(top = 4.dp)
-				) {
-		Row(
-				 modifier = Modifier
-					 .fillMaxWidth()
-					 .padding(horizontal = 4.dp , vertical = 4.dp) ,
-				 horizontalArrangement = Arrangement.Center
-		   ) {
-			weekState.forEach { dayOfWeek ->
-				Text(
-						 text = dayOfWeek.name.substring(0 , 3) ,
-						 style = MaterialTheme.typography.titleMedium ,
-						 color = if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY)
-						 {
-							 MaterialTheme.colorScheme.error
-						 } else
-						 {
-							 MaterialTheme.colorScheme.onSurface
-						 } ,
-						 maxLines = 1 ,
-						 overflow = TextOverflow.Ellipsis ,
-						 textAlign = TextAlign.Center ,
-						 modifier = Modifier
-							 .weight(1f)
-							 .padding(4.dp)
-					)
-			}
-		}
-	}
+fun CalendarWeekHeader(
+    modifier: Modifier = Modifier,
+    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY
+) {
+    val daysOfWeek = remember(firstDayOfWeek) {
+        (0..6).map { i ->
+            val day = firstDayOfWeek.plus(i.toLong())
+            day to day.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+        }
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            daysOfWeek.forEach { (day, label) ->
+                WeekDayLabel(
+                    day = day,
+                    label = label,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
 }
 
-@Preview
 @Composable
-fun CalenderWeekHeaderPreview()
-{
-	CalenderWeekHeader(
-			 weekState = listOf(
-					  DayOfWeek.MONDAY ,
-					  DayOfWeek.TUESDAY ,
-					  DayOfWeek.WEDNESDAY ,
-					  DayOfWeek.THURSDAY ,
-					  DayOfWeek.FRIDAY ,
-					  DayOfWeek.SATURDAY ,
-					  DayOfWeek.SUNDAY
-							   )
-					  )
+private fun WeekDayLabel(
+    day: DayOfWeek,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    val isWeekend = remember(day) {
+        day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY
+    }
+
+    Surface(
+        color = if (isWeekend)
+            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+        else
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(8.dp),
+        modifier = modifier.padding(horizontal = 4.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (isWeekend)
+                MaterialTheme.colorScheme.error
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp),
+            textAlign = TextAlign.Center
+        )
+    }
 }

@@ -5,9 +5,9 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Chapter")
 data class LocalChapter(
-	@PrimaryKey
-	val _id : Int ,
-	val category : String ,
-	val arabic_title : String ,
-	val english_title : String ,
-					   )
+    @PrimaryKey
+    val _id: Int,
+    val arabic_title: String,
+    val english_title: String,
+    val category_id: Int,
+)

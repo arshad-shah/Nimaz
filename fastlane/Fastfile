@@ -1,0 +1,66 @@
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+    lane :test do
+      gradle(task: "test")
+      gradle(task: "lint")
+    end
+
+    desc "Run lint check"
+    lane :lint do
+      gradle(task: "lint")
+    end
+
+
+  desc "Deploy a new version to the Google Play internal track"
+  lane :deploy_internal do
+    build_and_sign_apk_or_aab
+    upload_to_play_store(
+      track: "internal",
+      json_key: ENV["ANDROID_JSON_KEY_FILE"] # Use your Google Play JSON key
+    )
+  end
+
+  desc "Deploy a new version to the Google Play beta track"
+  lane :deploy_beta do
+    build_and_sign_apk_or_aab
+    upload_to_play_store(
+      track: "beta",
+      json_key: ENV["ANDROID_JSON_KEY_FILE"] # Use your Google Play JSON key
+    )
+  end
+
+  private_lane :fetch_and_increment_build_number do
+    sh "git config user.email 'CI@BOT.com'"
+    sh "git config user.name 'CI-BOT'"
+    increment_version_code(
+            app_project_dir: "**/app",
+      )
+    increment_version_name(app_project_dir: '**/app', bump_type: 'patch')
+    git_add(path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle")
+    git_commit(
+          path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle",
+          message: "Bumped Version Code and name"
+        )
+    push_to_git_remote
+  end
+
+  private_lane :build_and_sign_apk_or_aab do
+    fetch_and_increment_build_number
+
+    gradle(
+      task: "bundle",
+      build_type: "release",
+      properties: {
+          "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+          "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+          "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+          "android.injected.signing.key.password" => ENV["KEY_PASSWORD"],
+          "DO_ACCESS_KEY" => ENV["DO_ACCESS_KEY"],
+          "DO_SECRET_KEY" => ENV["DO_SECRET_KEY"],
+          "METAL_API_KEY" => ENV["METAL_API_KEY"]
+      }
+    )
+  end
+end

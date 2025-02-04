@@ -18,3 +18,7 @@ google-services.json
 *.apk
 /.idea/deploymentTargetDropDown.xml
 /*.html
+secrets.properties
+/keystore_base64.txt
+/service_account_base64.txt
+/fastlane/play-store-credentials.json

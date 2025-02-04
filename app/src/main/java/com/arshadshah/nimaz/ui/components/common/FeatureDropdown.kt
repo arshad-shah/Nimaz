@@ -1,278 +1,278 @@
 package com.arshadshah.nimaz.ui.components.common
 
-import android.util.Log
-import androidx.compose.animation.*
-import androidx.compose.foundation.border
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.data.remote.models.Aya
-import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.ui.components.quran.CompactSurahCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> FeaturesDropDown(
-	items : List<T> ,
-	label : String ,
-	dropDownItem : @Composable (T) -> Unit ,
-	colors : CardColors = CardDefaults.elevatedCardColors(
-			 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
-			 contentColor = MaterialTheme.colorScheme.onSurface ,
-			 disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-			 disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-														 ) ,
-	header : @Composable (() -> Unit)? = null ,
-						)
-{
-	Log.d("FeaturesDropDown" , "FeaturesDropDown: $label")
-	Log.d("FeaturesDropDown" , "FeaturesDropDown: ${items.size}")
-	val isExpanded = remember { mutableStateOf(false) }
+    modifier: Modifier = Modifier,
+    items: List<T>,
+    label: String,
+    showBadge: Boolean = true,
+    dropDownItem: @Composable (T) -> Unit,
+    shape: CornerBasedShape = RoundedCornerShape(24.dp)
+) {
+    val (isExpanded, setExpanded) = remember { mutableStateOf(false) }
 
-	//the icon that is shown in the dropdown
-	val icon = when (isExpanded.value)
-	{
-		true -> painterResource(id = R.drawable.arrow_up_icon)
-		false -> painterResource(id = R.drawable.arrow_down_icon)
-	}
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
 
-	ElevatedCard(
-			 colors = colors ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				) {
+    ElevatedCard(
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .scale(scale),
+        shape = shape,
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = { setExpanded(!isExpanded) })
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
 
-		//an elevation card that shows the text and icon
-		ElevatedCard(
-				 colors = CardDefaults.elevatedCardColors(
-						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
-						  contentColor = MaterialTheme.colorScheme.onSurface ,
-						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-														 ) ,
-				 modifier = Modifier
-					 .fillMaxWidth()
-					 .clickable {
-						 isExpanded.value = ! isExpanded.value
-					 } ,
-				 shape = MaterialTheme.shapes.medium ,
-				 content = {
-					 Row(
-							  modifier = Modifier
-								  .padding(8.dp)
-								  .fillMaxWidth() ,
-							  verticalAlignment = Alignment.CenterVertically ,
-							  horizontalArrangement = Arrangement.SpaceBetween
-						) {
-						 Row(
-								  modifier = Modifier
-									  .fillMaxWidth(0.9f) ,
-								  verticalAlignment = Alignment.CenterVertically ,
-								  horizontalArrangement = Arrangement.Start
-							) {
-							 //the text
-							 Text(
-									  modifier = Modifier
-										  .padding(8.dp) ,
-									  text = label ,
-									  textAlign = TextAlign.Start ,
-									  maxLines = 2 ,
-									  overflow = TextOverflow.Ellipsis ,
-									  style = MaterialTheme.typography.bodyLarge
-								 )
-							 //a bubble that shows the number of features
-							 //if the list is empty then the bubble is not shown
-							 if (items.isNotEmpty())
-							 {
-								 Badge(
-										  containerColor = MaterialTheme.colorScheme.primary ,
-										  contentColor = MaterialTheme.colorScheme.onPrimary ,
-									  )
-								 {
-									 Text(
-											  text = items.size.toString() ,
-											  style = MaterialTheme.typography.bodyMedium ,
-											  textAlign = TextAlign.Center ,
-										 )
-								 }
-							 }
-						 }
-						 //the icon
-						 Icon(
-								  painter = icon ,
-								  contentDescription = "dropdown icon" ,
-								  modifier = Modifier
-									  .padding(8.dp)
-									  .size(24.dp)
-							 )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (showBadge && items.isNotEmpty()) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = items.size.toString(),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
 
-					 }
-				 }
-					)
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = if (isExpanded) "Collapse" else "Expand",
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
 
-		//when the card is clicked show the dropdown menu
-		//the menu has a list of bookmarks
-		//when a bookmark is clicked it navigates to the ayat screen
-		//the bookmark is highlighted
-		AnimatedVisibility(
-				 visible = isExpanded.value ,
-				 enter = expandVertically() + fadeIn() ,
-				 exit = shrinkVertically() + fadeOut()
-						  ) {
-			if (items.isEmpty())
-			{
-				Placeholder(nameOfDropdown = label)
-			} else
-			{
-				Column(
-						 modifier = Modifier
-							 .fillMaxWidth()
-					  ) {
-					if (header != null)
-					{
-						header()
-					}
-					(items).forEach { item ->
-						dropDownItem(item)
-					}
-				}
-			}
-		}
-	}
+            // Content Section
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (items.isEmpty()) {
+                        EmptyStateContent(text = "No $label available")
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .height(200.dp)
+                                .padding(vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(items) { item -> dropDownItem(item) }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
-fun <T> FeatureDropdownItem(
-	item : T ,
-	onClick : (T) -> Unit ,
-	itemContent : @Composable (T) -> Unit ,
-						   )
-{
-	Card(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 modifier = Modifier
-				 .padding(
-						  bottom = 4.dp ,
-						  start = 8.dp ,
-						  end = 8.dp ,
-						  top = 4.dp
-						 )
-				 .fillMaxWidth()
-				 .border(
-						  width = 2.dp ,
-						  color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f) ,
-						  shape = MaterialTheme.shapes.extraLarge
-						)
-				 .clip(MaterialTheme.shapes.extraLarge)
-				 .clickable {
-					 onClick(item)
-				 } ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 content = {
-				 Row(
-						  modifier = Modifier
-							  .padding(8.dp)
-							  .fillMaxWidth() ,
-						  verticalAlignment = Alignment.CenterVertically ,
-						  horizontalArrangement = Arrangement.SpaceBetween
-					) {
-					 itemContent(item)
-					 //the icon
-					 Icon(
-							  painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-							  contentDescription = "Navigate" ,
-							  modifier = Modifier
-								  .padding(8.dp)
-								  .size(24.dp)
-						 )
-				 }
-			 }
-		)
+fun <T> DropdownListItem(
+    item: T,
+    onClick: (T) -> Unit,
+    content: @Composable (T) -> Unit,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable { onClick(item) }
+                .padding(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (leadingIcon != null) {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        leadingIcon()
+                    }
+                }
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+                content(item)
+            }
+
+            if (trailingIcon != null) {
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        trailingIcon()
+                    }
+                }
+            }
+        }
+    }
 }
 
-//FeaturesDropDown preview
+@Composable
+private fun EmptyStateContent(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
-fun FeaturesDropDownPreview()
-{
-	//a dummy list of ayas
-	//aya
-	//al ayaNumberInQuran: Int,
-	//    val ayaNumber: Int,
-	//    val ayaArabic: String,
-	//    val ayaTranslationEnglish: String,
-	//    val ayaTranslationUrdu: String,
-	//    val suraNumber: Int,
-	//    val ayaNumberInSurah: Int,
-	//    val bookmark: Boolean,
-	//    val favorite: Boolean,
-	//    val note: String,
-	//    val audioFileLocation: String,
-	//    val sajda: Boolean,
-	//    val sajdaType: String,
-	//    val ruku: Int,
-	//    val juzNumber: Int,
-	val ayas = listOf(
-			 Aya(
-					  ayaNumberInQuran = 1 ,
-					  ayaNumber = 1 ,
-					  ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-					  ayaTranslationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful." ,
-					  ayaTranslationUrdu = "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ" ,
-					  suraNumber = 1 ,
-					  ayaNumberInSurah = 1 ,
-					  bookmark = false ,
-					  favorite = false ,
-					  note = "" ,
-					  audioFileLocation = "" ,
-					  sajda = false ,
-					  sajdaType = "" ,
-					  ruku = 1 ,
-					  juzNumber = 1
-				) ,
-					 )
-	NimazTheme {
-		FeaturesDropDown(
-				 items = ayas ,
-				 label = "Bookmarks" ,
-				 dropDownItem = {
-					 FeatureDropdownItem(
-							  item = it ,
-							  onClick = { aya ->
-								  //do nothing
-							  } ,
-							  itemContent = { aya ->
-								  //the text
-								  Text(
-										   modifier = Modifier
-											   .padding(8.dp) ,
-										   text = "Chapter " + aya.suraNumber.toString() + ":" + "Verse " + aya.ayaNumber.toString() ,
-										   textAlign = TextAlign.Start ,
-										   maxLines = 2 ,
-										   overflow = TextOverflow.Ellipsis ,
-										   style = MaterialTheme.typography.bodyLarge
-									  )
-							  } ,
-										)
-				 }
-						) {
-		}
-	}
+fun FeaturesDropDownPreview() {
+    FeaturesDropDown(
+        items = listOf("Item 1", "Item 2", "Item 3"),
+        label = "Items",
+        dropDownItem = { item ->
+            DropdownListItem(item = item, onClick = {}, content = {
+                CompactSurahCard(
+                    surah = LocalSurah(
+                        number = 1,
+                        name = "الفاتحة",
+                        englishName = "Al-Fatihah",
+                        englishNameTranslation = "The Opening",
+                        numberOfAyahs = 7,
+                        revelationType = "Meccan",
+                        startAya = 1,
+                        revelationOrder = 1,
+                        rukus = 1
+                    ),
+                    onNavigate = { _, _, _, _ -> },
+                    loading = false
+                )
+            })
+        }
+    )
 }
