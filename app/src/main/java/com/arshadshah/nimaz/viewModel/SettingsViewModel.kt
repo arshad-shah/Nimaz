@@ -242,16 +242,6 @@ class SettingsViewModel @Inject constructor(
         updateService.checkForUpdate(event.updateType) { result ->
             result.onSuccess { isUpdateAvailable ->
                 _uiState.update { it.copy(updateAvailable = isUpdateAvailable) }
-
-                // If update is available and it's an immediate update, start the flow
-                if (isUpdateAvailable && event.updateType == AppUpdateType.IMMEDIATE) {
-                    handleEvent(
-                        SettingsEvent.StartUpdate(
-                            activity = event.activity,
-                            updateType = event.updateType
-                        )
-                    )
-                }
             }.onFailure { error ->
                 _uiState.update { it.copy(error = "", updateAvailable = false) }
             }

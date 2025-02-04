@@ -9,9 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
-      - name: Setup Git User
+      - name: Switch to PR branch and setup Git
         run: |
+          git checkout ${{ github.head_ref }}
           git config --global user.email "CI@bot.com"
           git config --global user.name "CI-Bot"
 

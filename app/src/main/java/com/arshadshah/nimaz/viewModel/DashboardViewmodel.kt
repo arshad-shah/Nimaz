@@ -454,14 +454,6 @@ class DashboardViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-                if (isUpdateAvailable && event.updateType == AppUpdateType.IMMEDIATE) {
-                    handleEvent(
-                        DashboardEvent.StartUpdate(
-                            activity = event.activity,
-                            updateType = event.updateType
-                        )
-                    )
-                }
             }.onFailure { error ->
                 //if error code is -6 then do not show error message
                 if (error.message?.contains("-6") == false) {
