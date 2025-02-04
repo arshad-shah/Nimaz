@@ -141,7 +141,7 @@ fun WidgetPrayerTimeColumn(
                 else
                     GlanceTheme.colors.secondaryContainer
             )
-            .cornerRadius(16.dp),
+            .cornerRadius(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
