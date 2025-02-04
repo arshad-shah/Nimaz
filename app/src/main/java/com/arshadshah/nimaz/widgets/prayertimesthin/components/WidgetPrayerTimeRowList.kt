@@ -108,7 +108,7 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
             .fillMaxSize()
             .appWidgetBackground()
             .background(GlanceTheme.colors.surface)
-            .padding(8.dp)
+            .padding(4.dp)
             .cornerRadius(24.dp)
             .clickable(onClick = actionStartActivity<MainActivity>()),
         horizontalAlignment = Alignment.CenterHorizontally
