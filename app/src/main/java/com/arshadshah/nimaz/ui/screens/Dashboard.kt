@@ -145,7 +145,7 @@ fun Dashboard(
                         context = context,
                         onUpdateClick = {
                             viewModel.handleEvent(
-                                DashboardEvent.CheckUpdate(context)
+                                DashboardEvent.StartUpdate(context)
                             )
                         }
                     )
@@ -199,7 +199,7 @@ private fun UpdateBanner(
     }
 
     BannerSmall(
-        title = "Update Available",
+        title = "New Update Available",
         message = "Tap here to update the app",
         isOpen = isOpen,
         onClick = onUpdateClick,

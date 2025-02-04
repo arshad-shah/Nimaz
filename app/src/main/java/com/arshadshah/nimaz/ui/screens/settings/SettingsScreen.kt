@@ -284,7 +284,7 @@ fun SettingsScreen(
                 onNavigateToAbout = onNavigateToAboutScreen,
                 isUpdateAvailable = uiState.updateAvailable,
                 onUpdateApp = {
-                    viewModel.handleEvent(SettingsViewModel.SettingsEvent.CheckUpdate(activity))
+                    viewModel.handleEvent(SettingsViewModel.SettingsEvent.StartUpdate(activity))
                 },
                 isDebugMode = isDebugMode,
                 onNavigateToDebug = onNavigateToDebugScreen
