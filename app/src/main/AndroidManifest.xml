@@ -18,6 +18,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
+        android:name=".NimazApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
@@ -30,8 +31,12 @@
         android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
         <receiver
-            android:name=".utils.recievers.MissedPrayerReciever"
+            android:name=".utils.recievers.MissedPrayerReceiver"
             android:enabled="true"
             android:exported="false" />
 
@@ -43,8 +48,10 @@
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
             android:enabled="true" />
 
-        <receiver android:name=".widgets.prayertimesthin.NimazWidgetReciever"
-            android:exported="true" android:label="Prayer Times">
+        <receiver
+            android:name=".widgets.prayertimesthin.NimazWidgetReciever"
+            android:exported="true"
+            android:label="Prayer Times">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -53,8 +60,10 @@
                 android:resource="@xml/nimaz_app_widget_info" />
         </receiver>
 
-        <receiver android:name=".widgets.prayertimestrackerthin.NimazWidgetPrayerReciever"
-            android:exported="true" android:label="Prayer Tracker">
+        <receiver
+            android:name=".widgets.prayertimestrackerthin.NimazWidgetPrayerReciever"
+            android:exported="true"
+            android:label="Prayer Tracker">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -63,7 +72,7 @@
                 android:resource="@xml/nimaz_app_tracker_widget_info" />
         </receiver>
         <receiver
-            android:name=".utils.recievers.BootReciever"
+            android:name=".utils.recievers.BootReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
@@ -73,21 +82,15 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".utils.recievers.AdhanReciever"
+            android:name=".utils.recievers.AdhanReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.POST_NOTIFICATIONS" />
 
         <activity
-            android:name=".activities.Introduction"
-            android:exported="false"
-            android:label="@string/title_activity_introduction"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Nimaz" />
-        <activity
-            android:name=".activities.RoutingActivity"
+            android:name=".activities.MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
+            android:hardwareAccelerated="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -95,13 +98,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.MainActivity"
-            android:exported="true"
-            android:label="@string/title_activity_main"
-            android:screenOrientation="portrait"
-            android:hardwareAccelerated="true"
-            android:theme="@style/Theme.Nimaz" />
     </application>
 
 </manifest>

@@ -1,289 +1,431 @@
 package com.arshadshah.nimaz.ui.components.tasbih
 
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.data.remote.models.Tasbih
-import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
-import com.arshadshah.nimaz.viewModel.TasbihViewModel
-import es.dmoral.toasty.Toasty
+import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomCounter(
-	paddingValues : PaddingValues ,
-	tasbihId : String ,
-				 )
-{
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = AppConstants.TASBIH_VIEWMODEL_KEY ,
-			 initializer = { TasbihViewModel(context) } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
+    tasbihId: String,
+    increment: () -> Unit,
+    updateTasbih: (LocalTasbih) -> Unit,
+    resetTasbih: State<Boolean>,
+    count: State<Int>,
+    decrement: () -> Unit,
+    tasbih: State<LocalTasbih>,
+    objective: State<Int>,
+    setCounter: (Int) -> Unit,
+    setObjective: (Int) -> Unit,
+    setLap: (Int) -> Unit,
+    setLapCounter: (Int) -> Unit,
+    lap: State<Int>,
+    lapCounter: State<Int>,
+    resetTasbihState: () -> Unit,
+    vibrationAllowed: State<Boolean>,
+    modifier: Modifier = Modifier
+) {
+    val showObjectiveDialog = remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-	viewModel.handleEvent(TasbihViewModel.TasbihEvent.GetTasbih(tasbihId.toInt()))
+    Log.d("CustomCounter", "CustomCounter: $tasbihId")
+    //did we get the tasbih
+    Log.d("CustomCounter", "CustomCounter: $tasbih")
 
-	val resetTasbih = remember {
-		viewModel.resetButtonState
-	}.collectAsState()
+    LaunchedEffect(Unit) {
+        setObjective(tasbih.value.goal)
+        setCounter(tasbih.value.count)
+    }
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Tasbih Header Card
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = tasbih.value.englishName,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
 
-	val tasbih = remember {
-		viewModel.tasbihCreated
-	}.collectAsState()
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                Text(
+                                    text = tasbih.value.arabicName,
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontFamily = utmaniQuranFont,
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
 
-	val error = remember { viewModel.tasbihError }.collectAsState()
+                            Spacer(modifier = Modifier.height(8.dp))
 
-	val count = remember {
-		mutableStateOf(tasbih.value.count)
-	}
+                            Text(
+                                text = tasbih.value.translationName,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
 
-	LaunchedEffect(key1 = count.value) {
-		//update the tasbih
-		viewModel.handleEvent(
-				 TasbihViewModel.TasbihEvent.UpdateTasbih(
-						  Tasbih(
-								   id = tasbih.value.id ,
-								   date = tasbih.value.date ,
-								   arabicName = tasbih.value.arabicName ,
-								   englishName = tasbih.value.englishName ,
-								   translationName = tasbih.value.translationName ,
-								   goal = tasbih.value.goal ,
-								   count = count.value ,
-								)
-														 )
-							 )
-	}
+            // Stats Card
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatItem(
+                                title = "Loop",
+                                value = lap.value.toString(),
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                            StatItem(
+                                title = "Target",
+                                value = if (objective.value > 0) objective.value.toString() else "-",
+                                containerColor = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                }
+            }
 
-	val objective = remember {
-		mutableStateOf(tasbih.value.goal.toString())
-	}
+            // Counter Card
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .clickable {
+                                if (objective.value > 0 && count.value + 1 > objective.value) {
+                                    setLap(lap.value + 1)
+                                    setCounter(0)
+                                    setLapCounter(lapCounter.value + 1)
+                                    if (vibrationAllowed.value) {
+                                        performHapticFeedback(context)
+                                    }
+                                    updateTasbih(tasbih.value.copy(count = count.value))
+                                } else {
+                                    increment()
+                                    if (vibrationAllowed.value) {
+                                        performHapticFeedback(context)
+                                    }
+                                    updateTasbih(tasbih.value.copy(count = count.value))
+                                }
+                            },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = count.value.toString(),
+                                style = MaterialTheme.typography.displayLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            if (objective.value > 0) {
+                                Text(
+                                    text = "${((count.value.toFloat() / objective.value) * 100).toInt()}%",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
 
-	val showObjectiveDialog = remember { mutableStateOf(false) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ActionButton(
+                            icon = Icons.Rounded.Remove,
+                            label = "Decrement",
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            onClick = {
+                                decrement()
+                                updateTasbih(tasbih.value.copy(count = count.value))
+                            }
+                        )
 
-	//lap counter
-	val lap = remember {
-		mutableStateOf(
-				 context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih.value.id}" , 0)
-					  )
-	}
-	val lapCountCounter = remember {
-		mutableStateOf(
-				 context.getSharedPreferences("tasbih" , 0)
-					 .getInt("lapCountCounter-${tasbih.value.id}" , 0)
-					  )
-	}
+                        ActionButton(
+                            icon = Icons.Rounded.Edit,
+                            label = "Set Target",
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            onClick = { showObjectiveDialog.value = true }
+                        )
 
-	//when we firrst launch the composable, we want to set the count to the tasbih count
-	LaunchedEffect(key1 = tasbih.value.id) {
-		count.value =
-			context.getSharedPreferences("tasbih" , 0).getInt("count-${tasbih.value.id}" , 0)
-		objective.value = context.getSharedPreferences("tasbih" , 0)
-			.getString("objective-${tasbih.value.id}" , tasbih.value.goal.toString()) !!
-		lap.value = context.getSharedPreferences("tasbih" , 0).getInt("lap-${tasbih.value.id}" , 0)
-		lapCountCounter.value = context.getSharedPreferences("tasbih" , 0)
-			.getInt("lapCountCounter-${tasbih.value.id}" , 0)
-	}
+                        ActionButton(
+                            icon = Icons.Rounded.Refresh,
+                            label = "Reset",
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            onClick = resetTasbihState
+                        )
+                    }
+                }
+            }
+        }
+    }
 
-	//persist all the values in shared preferences if the activity is destroyed
-	LaunchedEffect(key1 = count.value , key2 = objective.value , key3 = lap.value)
-	{
-		//save the count
-		context.getSharedPreferences("tasbih" , 0).edit()
-			.putInt("count-${tasbih.value.id}" , count.value).apply()
-		//save the objective
-		context.getSharedPreferences("tasbih" , 0).edit()
-			.putString("objective-${tasbih.value.id}" , objective.value)
-			.apply()
-		//save the lap
-		context.getSharedPreferences("tasbih" , 0).edit()
-			.putInt("lap-${tasbih.value.id}" , lap.value).apply()
-		//save the lap count counter
-		context.getSharedPreferences("tasbih" , 0).edit()
-			.putInt("lapCountCounter-${tasbih.value.id}" , lapCountCounter.value).apply()
-	}
+    if (resetTasbih.value) {
+        ResetDialog(
+            onConfirm = {
+                setCounter(0)
+                setLap(0)
+                setLapCounter(0)
+                resetTasbihState()
+            },
+            onDismiss = resetTasbihState
+        )
+    }
 
-	Column(
-			 modifier = Modifier
-				 .fillMaxWidth()
-				 .padding(16.dp)
-				 .padding(paddingValues) ,
-			 horizontalAlignment = Alignment.CenterHorizontally ,
-			 verticalArrangement = Arrangement.Top
-		  ) {
-		//lap text
-		Text(
-				 modifier = Modifier
-					 .align(Alignment.CenterHorizontally) ,
-				 text = "Loop ${lap.value}" ,
-				 style = MaterialTheme.typography.bodyMedium ,
-				 color = MaterialTheme.colorScheme.onSurface
-			)
-		//large count text
-		Text(
-				 modifier = Modifier
-					 .align(Alignment.CenterHorizontally) ,
-				 text = count.value.toString() ,
-				 style = MaterialTheme.typography.displayMedium ,
-				 fontSize = 100.sp ,
-				 color = MaterialTheme.colorScheme.onSurface
-			)
-		Text(
-				 modifier = Modifier
-					 .align(Alignment.CenterHorizontally) ,
-				 text = tasbih.value.goal.toString() ,
-				 style = MaterialTheme.typography.bodyMedium ,
-				 color = MaterialTheme.colorScheme.onSurface
-			)
+    if (showObjectiveDialog.value) {
+        ObjectiveDialog(
+            currentObjective = objective.value,
+            onObjectiveSet = setObjective,
+            onDismiss = { showObjectiveDialog.value = false }
+        )
+    }
+}
 
-		Spacer(modifier = Modifier.height(32.dp))
-		IncrementDecrement(
-				 count = count ,
-				 lap = lap ,
-				 lapCountCounter = lapCountCounter ,
-				 objective = objective ,
-						  )
-	}
+@Composable
+private fun StatItem(
+    title: String,
+    value: String,
+    containerColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = containerColor,
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+            )
+        }
+    }
+}
 
-	if (resetTasbih.value)
-	{
-		AlertDialogNimaz(
-				 bottomDivider = false ,
-				 topDivider = false ,
-				 contentHeight = 100.dp ,
-				 contentDescription = "Reset Counter" ,
-				 title = "Reset Counter" ,
-				 confirmButtonText = "Yes" ,
-				 dismissButtonText = "No, Cancel" ,
-				 contentToShow = {
-					 Text(
-							  text = "Are you sure you want to reset the counter?" ,
-							  style = MaterialTheme.typography.bodyMedium ,
-							  modifier = Modifier.padding(8.dp)
-						 )
-				 } ,
-				 onDismissRequest = {
-					 viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
-				 } ,
-				 onConfirm = {
-					 count.value = 0
-					 lap.value = 1
-					 lapCountCounter.value = 0
-					 viewModel.handleEvent(
-							  TasbihViewModel.TasbihEvent.UpdateResetButtonState(
-									   false
-																				)
-										  )
-				 } ,
-				 onDismiss = {
-					 viewModel.handleEvent(TasbihViewModel.TasbihEvent.UpdateResetButtonState(false))
-				 })
-	}
+@Composable
+private fun ActionButton(
+    icon: ImageVector,
+    label: String,
+    containerColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .size(64.dp)
+            .clickable(onClick = onClick),
+        shape = CircleShape,
+        color = containerColor
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            modifier = Modifier.padding(16.dp),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
+}
 
-	if (showObjectiveDialog.value)
-	{
-		AlertDialogNimaz(
-				 cardContent = false ,
-				 bottomDivider = false ,
-				 topDivider = false ,
-				 contentHeight = 100.dp ,
-				 contentDescription = "Set Tasbih Objective" ,
-				 title = "Set Tasbih Objective" ,
-				 contentToShow = {
-					 OutlinedTextField(
-							  shape = MaterialTheme.shapes.extraLarge ,
-							  textStyle = MaterialTheme.typography.titleLarge ,
-							  value = objective.value ,
-							  onValueChange = { objective.value = it } ,
-							  singleLine = true ,
-							  keyboardOptions = KeyboardOptions(
-									   keyboardType = KeyboardType.Number ,
-									   imeAction = ImeAction.Done ,
-															   ) ,
-							  label = {
-								  Text(
-										   text = "Objective" ,
-									  )
-							  } ,
-							  modifier = Modifier
-								  .fillMaxWidth()
-								  .padding(horizontal = 16.dp) ,
-							  keyboardActions = KeyboardActions(
-									   onDone = {
-										   val isInt = objective.value.toIntOrNull()
-										   if (isInt != null)
-										   {
-											   if (objective.value != "" || isInt != 0)
-											   {
-												   showObjectiveDialog.value = false
-											   } else
-											   {
-												   Toasty
-													   .error(
-																context ,
-																"Objective must be greater than 0" ,
-																Toasty.LENGTH_SHORT
-															 )
-													   .show()
-											   }
-										   } else
-										   {
-											   Toasty
-												   .error(
-															context ,
-															"Objective must be greater than 0" ,
-															Toasty.LENGTH_SHORT
-														 )
-												   .show()
-										   }
-									   })
-									  )
-				 } ,
-				 onDismissRequest = {
-					 showObjectiveDialog.value = false
-				 } ,
-				 onConfirm = {
-					 val isInt = objective.value.toIntOrNull()
-					 if (isInt != null)
-					 {
-						 if (objective.value != "" || isInt != 0)
-						 {
-							 showObjectiveDialog.value = false
-						 } else
-						 {
-							 Toasty
-								 .error(
-										  context ,
-										  "Objective must be greater than 0" ,
-										  Toasty.LENGTH_SHORT
-									   )
-								 .show()
-						 }
-					 } else
-					 {
-						 Toasty
-							 .error(
-									  context ,
-									  "Objective must be greater than 0" ,
-									  Toasty.LENGTH_SHORT
-								   )
-							 .show()
-					 }
-				 } ,
-				 onDismiss = {
-					 showObjectiveDialog.value = false
-				 })
-	}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ObjectiveDialog(
+    currentObjective: Int,
+    onObjectiveSet: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Set Target") },
+        text = {
+            OutlinedTextField(
+                value = if (currentObjective == 0) "" else currentObjective.toString(),
+                onValueChange = { value ->
+                    if (value.isNotEmpty()) onObjectiveSet(value.toIntOrNull() ?: 0)
+                    else onObjectiveSet(0)
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                singleLine = true,
+                label = { Text("Target Count") }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Set") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+private fun ResetDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Reset Counter") },
+        text = { Text("Are you sure you want to reset the counter?") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("Reset") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+private fun performHapticFeedback(context: Context) {
+    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
 }

@@ -1,219 +1,239 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
+import android.content.Context
 import android.content.Intent
 import android.text.format.DateFormat
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.WbTwilight
+import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 
-
 @Composable
-fun RamadanTimesCard(isFasting : Boolean)
-{
+fun RamadanTimesCard(
+    isFasting: Boolean,
+    location: String,
+    fajrTime: LocalDateTime,
+    maghribTime: LocalDateTime,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val today = LocalDate.now()
+    val todayHijri = HijrahDate.from(today)
+    val isRamadan = todayHijri[ChronoField.MONTH_OF_YEAR] == 9 &&
+            todayHijri[ChronoField.DAY_OF_MONTH] <= 29
 
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			 initializer = { PrayerTimesViewModel() } ,
-			 viewModelStoreOwner = context as ComponentActivity
-							 )
-	val settingViewModel = viewModel(
-			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			 initializer = { SettingsViewModel(context) } ,
-			 viewModelStoreOwner = context
-									)
-	val fajrPrayerTime = remember {
-		viewModel.fajrTime
-	}.collectAsState()
-	val maghribPrayerTime = remember {
-		viewModel.maghribTime
-	}.collectAsState()
-	val location = remember {
-		settingViewModel.locationName
-	}.collectAsState()
-	//a card that shows the time left for ramadan
-	//it should only show when 40 days are left for ramadan
-	//it should show the time left for ramadan in days, hours, minutes and seconds
-	val ramadanTimeLeft = remember { mutableLongStateOf(0L) }
+    if (isRamadan || isFasting) {
+        ElevatedCard(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 8.dp
+            ),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CalendarMonth,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = "Fasting Times Today",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
 
-	val today = LocalDate.now()
-	val todayHijri = HijrahDate.from(today)
-	val ramadanStart = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 1)
-	val ramadanEnd = HijrahDate.of(todayHijri[ChronoField.YEAR] , 9 , 29)
+                    FilledIconButton(
+                        onClick = {
+                            shareRamadanTimes(
+                                context,
+                                location,
+                                today,
+                                fajrTime,
+                                maghribTime
+                            )
+                        },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.share_icon),
+                            contentDescription = "Share",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
 
-	val isAfterRamadanStart = todayHijri.isAfter(ramadanStart)
-	if (isAfterRamadanStart)
-	{
-		if (todayHijri.isBefore(ramadanEnd))
-		{
-			ramadanTimeLeft.longValue = ramadanEnd.toEpochDay() - todayHijri.toEpochDay()
-		}
-	} else
-	{
-		val diff = ramadanStart.toEpochDay() - todayHijri.toEpochDay()
-		ramadanTimeLeft.longValue = diff
-	}
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        val timeFormat =
+                            if (DateFormat.is24HourFormat(context)) "HH:mm" else "hh:mm a"
+                        val formatter = DateTimeFormatter.ofPattern(timeFormat)
 
-	//show card if it is the month of ramadan
-	val showCard =
-		todayHijri[ChronoField.MONTH_OF_YEAR] == 9 && todayHijri[ChronoField.DAY_OF_MONTH] <= 29 || isFasting
+                        FastingTimeRow(
+                            title = "Fajr (Imsak)",
+                            time = formatter.format(fajrTime),
+                            icon = Icons.Default.NightsStay,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-	//is ramadan time left less than 40 days
-	//if yes then show the card
-	if (showCard)
-	{
-		//show the card
-		Card(
-				 modifier = Modifier
-					 .fillMaxWidth()
-					 .padding(top = 8.dp , start = 8.dp , end = 8.dp) ,
-				 colors = CardDefaults.elevatedCardColors(
-						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(16.dp) ,
-						  contentColor = MaterialTheme.colorScheme.onSurface ,
-						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-														 ) ,
-				 shape = MaterialTheme.shapes.extraLarge ,
-			) {
-			Column(
-					 modifier = Modifier.padding(16.dp) ,
-					 verticalArrangement = Arrangement.Center ,
-					 horizontalAlignment = Alignment.CenterHorizontally
-				  ) {
-				Row(
-						 modifier = Modifier
-							 .fillMaxWidth()
-							 .padding(8.dp) ,
-						 verticalAlignment = Alignment.CenterVertically ,
-						 horizontalArrangement = Arrangement.SpaceBetween
-				   ) {
-					Text(
-							 text = "Fasting Times Today" ,
-							 style = MaterialTheme.typography.titleMedium
-						)
-					IconButton(
-							 modifier = Modifier.size(32.dp) ,
-							 onClick = {
-								 //share the aya
-								 val shareIntent = Intent(Intent.ACTION_SEND)
-								 shareIntent.type = "text/plain"
-								 //create the share message
-								 //with the aya text, aya translation
-								 //the sura number followed by the aya number
-								 shareIntent.putExtra(
-										  Intent.EXTRA_TEXT ,
-										  "Ramadan Fasting Times for ${location.value} \n${
-											  DateTimeFormatter.ofPattern(
-													   "EEEE, d MMMM yyyy"
-																		 ).format(today)
-										  } \n" +
-												   "Imsak (Fajr): ${
-													   DateTimeFormatter.ofPattern("hh:mm a")
-														   .format(fajrPrayerTime.value)
-												   } \n" +
-												   "Iftar (Maghrib): ${
-													   DateTimeFormatter.ofPattern("hh:mm a")
-														   .format(maghribPrayerTime.value)
-												   } \n" +
-												   "Times are Provided by Nimaz : https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
-													 )
-								 shareIntent.putExtra(Intent.EXTRA_SUBJECT , "Ramadan Times")
-								 shareIntent.putExtra(Intent.EXTRA_TITLE , "Ramadan Times")
-
-								 //start the share intent
-								 context.startActivity(
-										  Intent.createChooser(
-												   shareIntent ,
-												   "Share Ramadan Times"
-															  )
-													  )
-							 }) {
-						Icon(
-								 modifier = Modifier.size(24.dp) ,
-								 painter = painterResource(id = R.drawable.share_icon) ,
-								 contentDescription = "Share Ramadan Times" ,
-							)
-					}
-				}
-
-				val deviceTimeFormat =
-					DateFormat.is24HourFormat(LocalContext.current)
-				//if the device time format is 24 hour then use the 24 hour format
-				val formatter = if (deviceTimeFormat)
-				{
-					DateTimeFormatter.ofPattern("HH:mm")
-				} else
-				{
-					DateTimeFormatter.ofPattern("hh:mm a")
-				}
-
-				Row(
-						 modifier = Modifier
-							 .fillMaxWidth() ,
-						 verticalAlignment = Alignment.CenterVertically ,
-						 horizontalArrangement = Arrangement.SpaceBetween
-				   ) {
-					Column(
-							 modifier = Modifier.fillMaxWidth() ,
-							 verticalArrangement = Arrangement.Center ,
-							 horizontalAlignment = Alignment.CenterHorizontally
-						  ) {
-						TimeComponent(
-								 title = "Fajr (Imsak)" ,
-								 fajrPrayerTime = formatter.format(fajrPrayerTime.value)
-									 )
-						TimeComponent(
-								 title = "Maghrib (Iftar)" ,
-								 fajrPrayerTime = formatter.format(maghribPrayerTime.value)
-									 )
-					}
-				}
-			}
-		}
-	}
+                        FastingTimeRow(
+                            title = "Maghrib (Iftar)",
+                            time = formatter.format(maghribTime),
+                            icon = Icons.Default.WbTwilight,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
-//compoennt to show the fajr time with a label
 @Composable
-fun TimeComponent(title : String = "Suhoor Time" , fajrPrayerTime : String)
-{
-	Row(
-			 modifier = Modifier
-				 .fillMaxWidth()
-				 .padding(8.dp) ,
-			 verticalAlignment = Alignment.CenterVertically ,
-			 horizontalArrangement = Arrangement.SpaceBetween
-	   ) {
-		Text(text = title , style = MaterialTheme.typography.titleLarge)
-		Text(text = fajrPrayerTime , style = MaterialTheme.typography.titleLarge)
-	}
+private fun FastingTimeRow(
+    title: String,
+    time: String,
+    icon: ImageVector,
+    color: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = color.copy(alpha = 0.2f),
+                modifier = Modifier.size(36.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = color.copy(alpha = 0.1f)
+        ) {
+            Text(
+                text = time,
+                style = MaterialTheme.typography.bodyMedium,
+                color = color,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+    }
+}
+
+private fun shareRamadanTimes(
+    context: Context,
+    location: String,
+    date: LocalDate,
+    fajrTime: LocalDateTime,
+    maghribTime: LocalDateTime
+) {
+    val shareText = buildString {
+        append("Ramadan Fasting Times for $location\n")
+        append(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy").format(date))
+        append("\nImsak (Fajr): ${DateTimeFormatter.ofPattern("hh:mm a").format(fajrTime)}")
+        append("\nIftar (Maghrib): ${DateTimeFormatter.ofPattern("hh:mm a").format(maghribTime)}")
+        append("\nTimes provided by Nimaz: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+    }
+
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        putExtra(Intent.EXTRA_SUBJECT, "Ramadan Times")
+        putExtra(Intent.EXTRA_TITLE, "Ramadan Times")
+    }
+
+    context.startActivity(Intent.createChooser(intent, "Share Ramadan Times"))
 }

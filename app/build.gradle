@@ -1,65 +1,79 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
-    id 'com.google.firebase.firebase-perf'
-    id "com.google.devtools.ksp"
-    id "com.mikepenz.aboutlibraries.plugin" version "10.6.2"
-    id("com.apollographql.apollo3") version "4.0.0-alpha.3"
+    alias libs.plugins.android.application
+    alias libs.plugins.kotlin.android
+    alias libs.plugins.kotlin.serialization
+    alias libs.plugins.google.services
+    alias libs.plugins.firebase.crashlytics
+    alias libs.plugins.firebase.perf
+    alias libs.plugins.ksp
+    alias libs.plugins.about.libs.plugin
+    alias libs.plugins.hilt
 }
 
 apply plugin: 'com.mikepenz.aboutlibraries.plugin'
 
-apollo {
-    service("service") {
-        packageName.set("com.arshadshah.nimaz")
-    }
-}
-
 android {
     namespace 'com.arshadshah.nimaz'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
-        targetSdk 33
-        versionCode 147
-        versionName '1.6.1'
+        targetSdk 35
+        versionCode 173
+        versionName '2.6.0'
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.arshadshah.nimaz.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary true
+        }
+
+        buildConfigField "String", "DO_ACCESS_KEY", "\"${getSecret("DO_ACCESS_KEY")}\""
+        buildConfigField "String", "DO_SECRET_KEY", "\"${getSecret("DO_SECRET_KEY")}\""
+        buildConfigField "String", "SPACE_NAME", "\"quran-audio\""
+        buildConfigField "String", "METAL_API_KEY", "\"${getSecret("METAL_API_KEY")}\""
+    }
+
+    signingConfigs {
+        release {
+            storeFile System.getenv("KEYSTORE_FILE") != null ? file(System.getenv("KEYSTORE_FILE")) : file('keystore.jks')
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
         }
     }
 
     buildTypes {
         release {
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
+            testCoverageEnabled true
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = "11"
     }
     buildFeatures {
-        compose true
-        viewBinding true
+        compose = true
+        buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.4'
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     packagingOptions {
         resources {
@@ -67,104 +81,148 @@ android {
             pickFirst '**'
         }
     }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
+
+def getSecret(String key) {
+    def secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(secretsFile))
+        return props.getProperty(key)
+    }
+    return ""
 }
 
 dependencies {
-    implementation 'androidx.test:monitor:1.6.1'
-    implementation 'androidx.test.ext:junit-ktx:1.1.5'
-    implementation 'androidx.test:runner:1.5.2'
-
-    testImplementation "junit:junit:$junit_version"
-    //mockito
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    //Robolectric environment
-    testImplementation "androidx.test:core:$test_core_version"
-    testImplementation "org.robolectric:robolectric:$robolectric_version"
-    androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.ui.test.junit4.android
+    implementation libs.androidx.ui.text.google.fonts
+    coreLibraryDesugaring libs.desugar.jdk.libs
+    implementation libs.androidx.monitor
+    implementation libs.androidx.junit.ktx
+    implementation libs.androidx.runner
 
     //navigation testing
-    androidTestImplementation "androidx.navigation:navigation-testing:$navigation_testing_version"
+    androidTestImplementation libs.androidx.navigation.testing
 
-    implementation "androidx.core:core-ktx:$core_ktx_version"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$navigation_ui_ktx_version"
-    implementation "androidx.preference:preference-ktx:$preference_ktx_version"
-    implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
+    implementation libs.androidx.ktx
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.navigation.ui.ktx
+    implementation libs.androidx.preference.ktx
+    implementation libs.androidx.core.splashscreen
 
-    implementation platform('com.google.firebase:firebase-bom:32.2.2')
-    implementation "com.google.firebase:firebase-crashlytics-ktx"
-    implementation "com.google.firebase:firebase-analytics-ktx"
-    implementation 'com.google.firebase:firebase-perf-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.9.9'
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.crashlytics.ktx
+    implementation libs.firebase.analytics.ktx
+    implementation libs.firebase.perf.ktx
+    implementation libs.firebase.crashlytics.buildtools
 
-    implementation platform('androidx.compose:compose-bom:2023.08.00')
-    implementation "androidx.activity:activity-compose"
-    implementation "androidx.compose.ui:ui"
-    implementation "androidx.compose.ui:ui-tooling-preview"
-    implementation 'androidx.compose.material:material-icons-extended'
-    implementation "androidx.compose.material3:material3"
-    debugImplementation "androidx.compose.ui:ui-tooling"
-    debugImplementation "androidx.compose.ui:ui-test-manifest"
-    androidTestImplementation('androidx.compose.ui:ui-test-junit4')
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.compose.ui.graphics
+    implementation libs.androidx.compose.material3
+    implementation libs.androidx.material.icons.extended
+
+    //testing
+    debugImplementation libs.androidx.compose.ui.tooling
+    debugImplementation libs.androidx.compose.ui.test.manifest
 
     //navigation compose
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation libs.androidx.navigation.compose
 
-    implementation "com.google.android.gms:play-services-location:$play_services_location_version"
+    implementation libs.play.services.location
 
 
-    implementation "com.github.GrenderG:Toasty:$toasty_version"
+    implementation libs.toasty
 
     //room
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    ksp "androidx.room:room-compiler:$room_version"
-    implementation "androidx.room:room-ktx:$room_version"
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
+    ksp libs.room.compiler
+    implementation libs.room.ktx
 
     //accompanist permissions
-    implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
+    implementation libs.accompanist.permissions
 
-    implementation "com.google.android.play:app-update:$app_update_version"
-    implementation "com.google.android.play:app-update-ktx:$app_update_version"
+    implementation libs.app.update
+    implementation libs.app.update.ktx
 
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation libs.gson
 
     //calendar
-    implementation 'io.github.boguszpawlowski.composecalendar:composecalendar:1.1.1'
+    implementation libs.calendar
 
     //Add AWS S3 SDK
-    implementation 'com.amazonaws:aws-android-sdk-s3:2.73.0'
+    implementation libs.aws.android.sdk.s3
 
     // Open Source Libraries Screen.
-    implementation 'com.mikepenz:aboutlibraries-core:10.8.3'
-    implementation 'com.mikepenz:aboutlibraries-compose:10.8.3'
+    implementation libs.aboutlibraries.core.v1083
+    implementation libs.aboutlibraries.compose.v1083
 
-    //markdown
-    final def markwon_version = '4.6.2'
-
-    implementation "io.noties.markwon:core:$markwon_version"
-    implementation "io.noties.markwon:ext-strikethrough:$markwon_version"
-    implementation "io.noties.markwon:ext-tables:$markwon_version"
-    implementation "io.noties.markwon:html:$markwon_version"
-    implementation "io.noties.markwon:linkify:$markwon_version"
+    implementation libs.markwon.core
+    implementation libs.markwon.ext.strikethrough
+    implementation libs.markwon.ext.tables
+    implementation libs.markwon.html
+    implementation libs.markwon.linkify
 
     //org.slf4j.impl.StaticLoggerBinder
-    implementation 'org.slf4j:slf4j-android:1.7.36'
+    implementation libs.slf4j.android
 
-    implementation("com.google.android.play:review:2.0.1")
-    implementation("com.google.android.play:review-ktx:2.0.1")
+    implementation(libs.app.review)
+    implementation(libs.app.review.ktx)
 
-    implementation "com.github.skydoves:balloon-compose:$balloon_version"
+    implementation libs.baloon
 
-    implementation("com.apollographql.apollo3:apollo-runtime:4.0.0-alpha.3")
-
-    implementation "androidx.glance:glance-appwidget:1.0.0"
-    implementation "androidx.glance:glance-material3:1.0.0"
-    implementation "androidx.work:work-runtime-ktx:2.8.1"
-
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
+    implementation libs.glance.appwidget
+    implementation libs.glance.material3
+    implementation libs.work.manager
     //kotlinx date time
-    implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.3.0'
+    implementation libs.kotlinx.datetime
+
+    implementation libs.hilt.android
+    ksp libs.hilt.android.compiler
+    implementation libs.androidx.hilt.navigation.compose
+    implementation libs.androidx.hilt.work
+
+    //ktor
+    // Ktor client
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+
+
+    //testing
+    testImplementation libs.ktor.client.mock
+
+    testImplementation libs.junit
+    testImplementation libs.mockito.core
+    testImplementation libs.kotlinx.coroutines.test
+
+
+    testImplementation libs.dagger.hilt.android.testing
+    kspTest libs.hilt.android.compiler
+    androidTestImplementation libs.dagger.hilt.android.testing
+    kspAndroidTest libs.hilt.android.compiler
+    testImplementation libs.mockito.kotlin
+    testImplementation libs.junit
+    //mockito
+    testImplementation libs.mockito.core
+    //Robolectric environment
+    testImplementation libs.androidx.core
+    testImplementation libs.robolectric
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+    testImplementation libs.junit.jupiter
+
+
+    implementation libs.introshowcaseview
+
 
 }

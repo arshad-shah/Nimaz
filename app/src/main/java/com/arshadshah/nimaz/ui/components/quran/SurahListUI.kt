@@ -1,332 +1,459 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-import android.content.Context
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_SURAH_ITEM
-import com.arshadshah.nimaz.data.remote.models.Surah
+import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.ui.components.common.QuranItemNumber
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 
 @Composable
 fun SurahListUI(
-	surahs : ArrayList<Surah> ,
-	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
-	loading : Boolean ,
-			   )
-{
-	val state = rememberLazyListState()
-	LazyColumn(
-			 state = state ,
-			 userScrollEnabled = ! loading ,
-			 modifier = Modifier.testTag(AppConstants.TEST_TAG_QURAN_SURAH)
-			  ) {
-		items(surahs.size) { index ->
-			SurahListItemUI(
-					 loading = loading ,
-					 surahNumber = surahs[index].number.toString() ,
-					 surahAyaAmount = surahs[index].numberOfAyahs.toString() ,
-					 surahName = surahs[index].name ,
-					 englishName = surahs[index].englishName ,
-					 englishNameTranslation = surahs[index].englishNameTranslation ,
-					 type = surahs[index].revelationType ,
-					 rukus = surahs[index].rukus.toString() ,
-					 onNavigateToAyatScreen = onNavigateToAyatScreen
-						   )
-		}
-	}
-}
+    surahs: ArrayList<LocalSurah>,
+    onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
+    loading: Boolean,
+) {
+    val state = rememberLazyListState()
 
-@Composable
-fun SurahListItemUI(
-	surahNumber : String ,
-	surahAyaAmount : String ,
-	surahName : String ,
-	englishName : String ,
-	englishNameTranslation : String ,
-	type : String ,
-	rukus : String ,
-	onNavigateToAyatScreen : (String , Boolean , String , Int?) -> Unit ,
-	context : Context = LocalContext.current ,
-	loading : Boolean ,
-				   )
-{
-
-	val translationType =
-		PrivateSharedPreferences(context).getData(
-				 key = AppConstants.TRANSLATION_LANGUAGE ,
-				 s = "English"
-												 )
-	val language = when (translationType)
-	{
-		"English" -> "english"
-		"Urdu" -> "urdu"
-		else -> "english"
-	}
-
-	Card(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(vertical = 4.dp , horizontal = 8.dp)
-				 .fillMaxWidth()
-				 .clip(MaterialTheme.shapes.extraLarge)
-				 .clickable(
-						  enabled = ! loading ,
-						   ) {
-					 onNavigateToAyatScreen(surahNumber , true , language , null)
-				 }
-		) {
-		Row(
-				 modifier = Modifier
-					 .padding(8.dp)
-					 .testTag(
-							  TEST_TAG_SURAH_ITEM + surahNumber
-							 )
-		   ) {
-			Text(
-					 modifier = Modifier
-						 .align(Alignment.CenterVertically)
-						 .padding(start = 8.dp)
-						 .placeholder(
-								  visible = loading ,
-								  color = MaterialTheme.colorScheme.outline ,
-								  shape = RoundedCornerShape(4.dp) ,
-								  highlight = PlaceholderHighlight.shimmer(
-										   highlightColor = Color.White ,
-																		  )
-									 ) ,
-					 text = "$surahNumber." ,
-					 style = MaterialTheme.typography.bodyMedium ,
-					 textAlign = TextAlign.Center
-				)
-
-			Column(
-					 modifier = Modifier
-						 .weight(0.4f)
-						 .align(Alignment.CenterVertically)
-				  ) {
-				Text(
-						 text = englishName ,
-						 style = MaterialTheme.typography.titleSmall ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = loading ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 )
-							 .fillMaxWidth() ,
-						 textAlign = TextAlign.Center
-					)
-				//apply quran font
-				Text(
-						 text = surahName ,
-						 style = MaterialTheme.typography.titleLarge ,
-						 fontFamily = utmaniQuranFont ,
-						 fontSize = 28.sp ,
-						 fontWeight = FontWeight.SemiBold ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = loading ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 )
-							 .fillMaxWidth() ,
-						 textAlign = TextAlign.Center
-					)
-				Text(
-						 text = englishNameTranslation ,
-						 style = MaterialTheme.typography.titleSmall ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = loading ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 )
-							 .fillMaxWidth() ,
-						 textAlign = TextAlign.Center
-					)
-			}
-
-			Column(
-					 modifier = Modifier
-						 .weight(0.3f)
-						 .align(Alignment.CenterVertically)
-						 .fillMaxWidth()
-				  ) {
-				MetadataTextUI(
-						 heading = "Type" ,
-						 value = type ,
-						 loading = loading
-							  )
-				MetadataTextUI(
-						 heading = "Ayat" ,
-						 value = surahAyaAmount ,
-						 loading = loading
-							  )
-
-				MetadataTextUI(
-						 heading = "Ruku" ,
-						 value = rukus ,
-						 loading = loading
-							  )
-			}
-			//an arrow right icon
-			Icon(
-					 painter = painterResource(id = R.drawable.angle_small_right_icon) ,
-					 contentDescription = "Clear" ,
-					 modifier = Modifier
-						 .align(Alignment.CenterVertically)
-						 .size(24.dp)
-						 .fillMaxWidth()
-						 .placeholder(
-								  visible = loading ,
-								  color = MaterialTheme.colorScheme.outline ,
-								  shape = RoundedCornerShape(4.dp) ,
-								  highlight = PlaceholderHighlight.shimmer(
-										   highlightColor = Color.White ,
-																		  )
-									 )
-				)
-		}
-	}
-}
-
-// text component for the type, ayat, ruku
-//looks like this
-//Type: Meccan
-//the heading is the type, ayat, ruku and the value is the value of the type, ayat, ruku
-//we supply the heading and the value
-@Composable
-fun MetadataTextUI(heading : String , value : String , loading : Boolean)
-{
-	Row(
-			 modifier = Modifier ,
-			 verticalAlignment = Alignment.CenterVertically ,
-			 horizontalArrangement = Arrangement.SpaceBetween
-	   ) {
-		//heading text
-		Text(
-				 text = "$heading: " ,
-				 style = MaterialTheme.typography.titleSmall ,
-				 modifier = Modifier
-					 .padding(4.dp)
-					 .placeholder(
-							  visible = loading ,
-							  color = MaterialTheme.colorScheme.outline ,
-							  shape = RoundedCornerShape(4.dp) ,
-							  highlight = PlaceholderHighlight.shimmer(
-									   highlightColor = Color.White ,
-																	  )
-								 ) ,
-				 textAlign = TextAlign.Center
-			)
-		//value text
-		Text(
-				 text = value ,
-				 style = MaterialTheme.typography.titleSmall ,
-				 modifier = Modifier
-					 .padding(4.dp)
-					 .fillMaxWidth()
-					 .placeholder(
-							  visible = loading ,
-							  color = MaterialTheme.colorScheme.outline ,
-							  shape = RoundedCornerShape(4.dp) ,
-							  highlight = PlaceholderHighlight.shimmer(
-									   highlightColor = Color.White ,
-																	  )
-								 ) ,
-				 textAlign = TextAlign.Center
-			)
-	}
+    LazyColumn(
+        state = state,
+        userScrollEnabled = !loading,
+    ) {
+        items(surahs.size) { index ->
+            SurahCard(
+                surah = surahs[index],
+                loading = loading,
+                onNavigate = onNavigateToAyatScreen
+            )
+        }
+    }
 }
 
 
-//preview
-@Preview(showBackground = true)
 @Composable
-fun SurahListItemUIPreview()
-{
-	//set the theme
-	NimazTheme {
-		SurahListItemUI(
-				 surahNumber = "1" ,
-				 surahAyaAmount = "7" ,
-				 surahName = "الفاتحة" ,
-				 englishName = "Al-Faatiha" ,
-				 englishNameTranslation = "The Opening" ,
-				 type = "Meccan" ,
-				 rukus = "1" ,
-				 onNavigateToAyatScreen = { surahNumber , isSurah , language , ayahNumber -> } ,
-				 loading = false
-					   )
-	}
+fun SurahCard(
+    surah: LocalSurah,
+    onNavigate: (String, Boolean, String, Int?) -> Unit,
+    loading: Boolean
+) {
+    val context = LocalContext.current
+    val language = remember {
+        when (PrivateSharedPreferences(context)
+            .getData(AppConstants.TRANSLATION_LANGUAGE, "English")) {
+            "Urdu" -> "urdu"
+            else -> "english"
+        }
+    }
+
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    ElevatedCard(
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth()
+            .scale(scale)
+            .clickable(
+                enabled = !loading,
+                onClick = { onNavigate(surah.number.toString(), true, language, 0) }
+            ),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header with Surah number and name
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = surah.englishName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier
+                            .placeholder(
+                                visible = loading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                            .padding(start = 8.dp)
+                    )
+
+                    QuranItemNumber(
+                        number = surah.number,
+                        loading = loading
+                    )
+                }
+            }
+
+            // Content Section
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Info Container
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = surah.englishNameTranslation,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.placeholder(
+                                visible = loading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                        )
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = "${surah.numberOfAyahs} Verses",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .placeholder(
+                                        visible = loading,
+                                        highlight = PlaceholderHighlight.shimmer()
+                                    )
+                            )
+                        }
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = surah.revelationType,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                modifier = Modifier
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    .placeholder(
+                                        visible = loading,
+                                        highlight = PlaceholderHighlight.shimmer()
+                                    )
+                            )
+                        }
+                    }
+
+                    // Arabic Name Container
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.padding(start = 16.dp)
+                    ) {
+                        Text(
+                            text = surah.name,
+                            fontFamily = utmaniQuranFont,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 16.dp)
+                                .placeholder(
+                                    visible = loading,
+                                    highlight = PlaceholderHighlight.shimmer()
+                                )
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
-//surah list item ui with the long surah name and the surah type
-@Preview(showBackground = true , device = "spec:width=1080px,height=2340px,dpi=440,isRound=true")
+
 @Composable
-fun SurahListItemUIPreview2()
-{
-	//set the theme
-	NimazTheme {
-		SurahListItemUI(
-				 surahNumber = "114" ,
-				 surahAyaAmount = "182" ,
-				 surahName = "المعارج" ,
-				 englishName = "As-Saaffaat" ,
-				 englishNameTranslation = "Those drawn up in Ranks" ,
-				 type = "Medinan" ,
-				 rukus = "1" ,
-				 onNavigateToAyatScreen = { surahNumber , isSurah , language , ayahNumber -> } ,
-				 loading = false
-					   )
-	}
+fun CompactSurahCard(
+    surah: LocalSurah,
+    onNavigate: (String, Boolean, String, Int?) -> Unit,
+    loading: Boolean
+) {
+    val context = LocalContext.current
+    val language = remember {
+        when (PrivateSharedPreferences(context)
+            .getData(AppConstants.TRANSLATION_LANGUAGE, "English")) {
+            "Urdu" -> "urdu"
+            else -> "english"
+        }
+    }
+
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    ElevatedCard(
+        modifier = Modifier
+            .padding(horizontal = 2.dp, vertical = 2.dp)
+            .height(64.dp)
+            .fillMaxWidth()
+            .scale(scale)
+            .clickable(
+                enabled = !loading,
+                onClick = { onNavigate(surah.number.toString(), true, language, 0) }
+            ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Surah Number
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    QuranItemNumber(
+                        modifier = Modifier.size(48.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        number = surah.number,
+                        loading = loading,
+                    )
+                }
+            }
+
+            // Middle Section (Names and Verses)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = surah.englishName,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f)
+                            .placeholder(
+                                visible = loading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                    )
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "${surah.numberOfAyahs} Verses",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .placeholder(
+                                    visible = loading,
+                                    highlight = PlaceholderHighlight.shimmer()
+                                )
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = surah.englishNameTranslation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f)
+                            .placeholder(
+                                visible = loading,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                    )
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = surah.revelationType,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .placeholder(
+                                    visible = loading,
+                                    highlight = PlaceholderHighlight.shimmer()
+                                )
+                        )
+                    }
+                }
+            }
+
+            // Arabic Name
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier
+                    .width(52.dp)
+                    .fillMaxHeight(0.8f)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = surah.name,
+                        fontFamily = utmaniQuranFont,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.placeholder(
+                            visible = loading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun SurahCardPreview() {
+    SurahCard(
+        surah = LocalSurah(
+            number = 1,
+            name = "الفاتحة",
+            englishName = "Al-Fatihah",
+            englishNameTranslation = "The Opening",
+            numberOfAyahs = 7,
+            revelationType = "Meccan",
+            startAya = 1,
+            revelationOrder = 1,
+            rukus = 1
+        ),
+        onNavigate = { _, _, _, _ -> },
+        loading = false
+    )
+}
+
+@Preview
+@Composable
+fun CompactSurahCardPreview() {
+    CompactSurahCard(
+        surah = LocalSurah(
+            number = 1,
+            name = "الفاتحة",
+            englishName = "Al-Fatihah",
+            englishNameTranslation = "The Opening",
+            numberOfAyahs = 7,
+            revelationType = "Meccan",
+            startAya = 1,
+            revelationOrder = 1,
+            rukus = 1
+        ),
+        onNavigate = { _, _, _, _ -> },
+        loading = false
+    )
 }

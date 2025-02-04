@@ -1,585 +1,368 @@
 package com.arshadshah.nimaz.ui.components.settings
 
 import android.Manifest
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import androidx.activity.ComponentActivity
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
-import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.ui.components.settings.state.BooleanPreferenceSettingValueState
-import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
-import com.arshadshah.nimaz.utils.FeatureThatRequiresLocationPermission
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
-import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
+import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import es.dmoral.toasty.Toasty
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun LocationSettings(
+    location: String,
+    isLoading: Boolean,
+    locationSettingsState: SettingsViewModel.LocationSettingsState,
+    onToggleLocation: (Boolean) -> Unit,
+    onLocationInput: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val locationInput = remember { mutableStateOf(location) }
+    val locationPermissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    )
+    val focusRequester = remember { FocusRequester() }
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = MaterialTheme.shapes.large,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            HeaderWithIcon(
+                icon = Icons.Rounded.LocationOn,
+                title = "Location Settings",
+                contentDescription = "Location settings",
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            LocationModeSelector(
+                locationSettingsState = locationSettingsState,
+                locationPermissionState = locationPermissionState,
+                onToggleLocation = onToggleLocation
+            )
+            CurrentLocationDisplay(
+                location = location,
+                isLoading = isLoading
+            )
+            AnimatedVisibility(
+                visible = !locationSettingsState.isAuto,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                LocationSearch(
+                    locationInput = locationInput.value,
+                    onSearch = {
+                        onLocationInput(it)
+                        focusRequester.freeFocus()
+                    },
+                    focusRequester = focusRequester
+                )
+            }
+        }
+    }
+}
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun LocationSettings(isIntro : Boolean = false)
-{
+fun LocationModeSelector(
+    locationSettingsState: SettingsViewModel.LocationSettingsState,
+    locationPermissionState: MultiplePermissionsState,
+    onToggleLocation: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        LocationModeCard(
+            title = "Automatic",
+            icon = R.drawable.marker_icon,
+            isSelected = locationSettingsState.isAuto,
+            onClick = {
+                if (!locationSettingsState.isAuto) {
+                    if (locationPermissionState.allPermissionsGranted) {
+                        onToggleLocation(true)
+                    } else {
+                        locationPermissionState.launchMultiplePermissionRequest()
+                    }
+                }
+            }
+        )
 
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			 initializer = { SettingsViewModel(context) } ,
-			 viewModelStoreOwner = context as ComponentActivity
-							 )
-	val viewModelPrayerTimes = viewModel(
-			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			 initializer = { PrayerTimesViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-										)
-
-	val locationNameState = remember {
-		viewModel.locationName
-	}.collectAsState()
-
-	val latitudeState = remember {
-		viewModel.latitude
-	}.collectAsState()
-
-	val longitudeState = remember {
-		viewModel.longitude
-	}.collectAsState()
-
-	val isError = remember {
-		viewModel.isError
-	}.collectAsState()
-
-	LaunchedEffect(locationNameState.value , latitudeState.value , longitudeState.value) {
-		viewModelPrayerTimes.handleEvent(
-				 context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-				 PrayerTimesParamMapper.getParams(context)
-																				   )
-										)
-	}
-
-	if (isError.value.isNotBlank())
-	{
-		Toasty.error(context , isError.value , Toasty.LENGTH_SHORT).show()
-	} else
-	{
-
-		//location permission state
-		val locationPermissionState = rememberMultiplePermissionsState(
-				 permissions = listOf(
-						  Manifest.permission.ACCESS_COARSE_LOCATION ,
-						  Manifest.permission.ACCESS_FINE_LOCATION
-									 )
-																	  )
-		//the state of the switch
-		val state =
-			rememberPreferenceBooleanSettingState(
-					 AppConstants.LOCATION_TYPE ,
-					 false
-												 )
-
-
-
-
-		if (state.value)
-		{
-			FeatureThatRequiresLocationPermission(locationPermissionState , state)
-		}
-
-		val latitude = remember {
-			viewModel.latitude
-		}.collectAsState()
-		val longitude = remember {
-			viewModel.longitude
-		}.collectAsState()
-
-		val autoParams = remember {
-			viewModel.autoParams
-		}.collectAsState()
-
-		LaunchedEffect(
-				 key1 = locationNameState.value ,
-				 key2 = latitudeState.value ,
-				 key3 = longitudeState.value
-					  ) {
-
-			if (autoParams.value)
-			{
-				//set method to other
-				viewModel.handleEvent(
-						 SettingsViewModel.SettingsEvent.CalculationMethod(
-								  "OTHER"
-																		  )
-									 )
-				//set fajr angle
-				viewModel.handleEvent(
-						 SettingsViewModel.SettingsEvent.FajrAngle(
-								  AutoAnglesCalc().calculateFajrAngle(
-										   context ,
-										   latitude.value ,
-										   longitude.value
-																	 ).toString()
-																  )
-									 )
-				//set ishaa angle
-				viewModel.handleEvent(
-						 SettingsViewModel.SettingsEvent.IshaAngle(
-								  AutoAnglesCalc().calculateIshaaAngle(
-										   context ,
-										   latitude.value ,
-										   longitude.value
-																	  ).toString()
-																  )
-									 )
-				//set high latitude method
-				viewModel.handleEvent(
-						 SettingsViewModel.SettingsEvent.HighLatitude(
-								  "TWILIGHT_ANGLE"
-																	 )
-									 )
-				viewModel.handleEvent(
-						 SettingsViewModel.SettingsEvent.LoadSettings
-									 )
-			}
-
-
-			viewModelPrayerTimes.handleEvent(
-					 context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-					 PrayerTimesParamMapper.getParams(context)
-																					   )
-											)
-
-			viewModelPrayerTimes.handleEvent(
-					 context ,
-					 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-							  context
-																		)
-											)
-
-		}
-
-		if (isIntro)
-		{
-			LocationToggleSwitch(
-					 state = state ,
-					 locationPermissionState = locationPermissionState ,
-					 isIntro = true ,
-								)
-			AnimatedVisibility(
-					 visible = ! state.value ,
-					 enter = expandVertically() ,
-					 exit = shrinkVertically()
-							  ) {
-				ElevatedCard(
-						 colors = CardDefaults.cardColors(
-								  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-										   elevation = 8.dp
-																									) ,
-								  contentColor = MaterialTheme.colorScheme.onSurface ,
-								  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-										   alpha = 0.38f
-																								 ) ,
-								  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-										   alpha = 0.38f
-																								 ) ,
-														 ) ,
-						 shape = MaterialTheme.shapes.extraLarge ,
-						 modifier = Modifier
-							 .padding(8.dp)
-							 .fillMaxWidth()
-							) {
-					ManualLocationInput()
-				}
-			}
-		} else
-		{
-			SettingsGroup(title = { Text(text = "Location") }) {
-				LocationToggleSwitch(
-						 state = state ,
-						 locationPermissionState = locationPermissionState ,
-						 isIntro = false ,
-									)
-				AnimatedVisibility(
-						 visible = ! state.value ,
-						 enter = expandVertically() ,
-						 exit = shrinkVertically()
-								  ) {
-					Column {
-						ElevatedCard(
-								 colors = CardDefaults.elevatedCardColors(
-										  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-												   elevation = 32.dp
-																											) ,
-										  contentColor = MaterialTheme.colorScheme.onSurface ,
-										  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(
-												   alpha = 0.38f
-																										 ) ,
-										  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(
-												   alpha = 0.38f
-																										 ) ,
-																		 ) ,
-								 shape = MaterialTheme.shapes.extraLarge ,
-								 modifier = Modifier
-									 .padding(8.dp)
-									 .fillMaxWidth()
-									) {
-							ManualLocationInput()
-						}
-						CoordinatesView(
-								 longitudeState = longitudeState ,
-								 latitudeState = latitudeState ,
-									   )
-					}
-				}
-			}
-		}
-
-
-	}
+        LocationModeCard(
+            title = "Manual",
+            icon = R.drawable.location_marker_edit_icon,
+            isSelected = !locationSettingsState.isAuto,
+            onClick = { onToggleLocation(false) }
+        )
+    }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun LocationToggleSwitch(
-	state : BooleanPreferenceSettingValueState ,
-	locationPermissionState : MultiplePermissionsState ,
-	isIntro : Boolean ,
-						)
-{
-	val context = LocalContext.current
-	val viewModel = viewModel(
-			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			 initializer = { SettingsViewModel(context) } ,
-			 viewModelStoreOwner = context as ComponentActivity
-							 )
-	val viewModelPrayerTimes = viewModel(
-			 key = AppConstants.PRAYER_TIMES_VIEWMODEL_KEY ,
-			 initializer = { PrayerTimesViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-										)
-	val isLocationAuto = remember {
-		viewModel.isLocationAuto
-	}.collectAsState()
-	val locationNameState = remember {
-		viewModel.locationName
-	}.collectAsState()
-	val isLoading = remember {
-		viewModel.isLoading
-	}.collectAsState()
-
-	val isChecked = remember {
-		mutableStateOf(isLocationAuto.value)
-	}
-
-	val lifecycle = LocalLifecycleOwner.current.lifecycle
-	DisposableEffect(lifecycle) {
-		val observer = LifecycleEventObserver { _ , event ->
-			when (event)
-			{
-				Lifecycle.Event.ON_RESUME ->
-				{
-					if (locationPermissionState.permissions[0].status.isGranted || locationPermissionState.permissions[1].status.isGranted)
-					{
-						//check if the value saved in the shared preferences is true
-						val isLocationAutoInPref = PrivateSharedPreferences(context).getDataBoolean(
-								 AppConstants.LOCATION_TYPE ,
-								 false
-																								   )
-						if (isLocationAutoInPref)
-						{
-							viewModel.handleEvent(
-									 SettingsViewModel.SettingsEvent.LocationToggle(
-											  context ,
-											  true
-																				   )
-												 )
-							viewModelPrayerTimes.handleEvent(
-									 context ,
-									 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-											  PrayerTimesParamMapper.getParams(context)
-																							 )
-															)
-							viewModelPrayerTimes.handleEvent(
-									 context ,
-									 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-											  context
-																						)
-															)
-							isChecked.value = true
-						} else
-						{
-							viewModel.handleEvent(
-									 SettingsViewModel.SettingsEvent.LocationToggle(
-											  context ,
-											  false
-																				   )
-												 )
-							isChecked.value = false
-						}
-					}
-				}
-
-				else ->
-				{
-
-				}
-			}
-		}
-
-		lifecycle.addObserver(observer)
-		onDispose {
-			lifecycle.removeObserver(observer)
-		}
-	}
-
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 32.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .fillMaxWidth()
-				 .testTag("LocationSwitch")
-				) {
-		SettingsSwitch(
-				 state = state ,
-				 icon = {
-					 Icon(
-							  modifier = Modifier.size(24.dp) ,
-							  painter = painterResource(id = R.drawable.marker_icon) ,
-							  contentDescription = "Location"
-						 )
-				 } ,
-				 title = {
-					 if (isIntro)
-					 {
-						 Text(text = "Enable Auto Location")
-					 } else
-					 {
-						 if (state.value)
-						 {
-							 Text(text = "Automatic")
-						 } else
-						 {
-							 Text(text = "Manual")
-						 }
-					 }
-				 } ,
-				 subtitle = {
-					 //if the permission is granted, show a checkmark and text saying "Allowed"
-					 if (isIntro)
-					 {
-						 if (isChecked.value)
-						 {
-							 Row(
-									  verticalAlignment = Alignment.CenterVertically
-								) {
-								 Icon(
-										  modifier = Modifier
-											  .size(18.dp)
-											  .padding(end = 4.dp) ,
-										  painter = painterResource(id = R.drawable.checkbox_icon) ,
-										  contentDescription = "Location Allowed"
-									 )
-								 Text(text = "Enabled")
-							 }
-						 } else
-						 {
-							 //if the permission is not granted, show a notification icon and text saying "Not Allowed"
-							 Row(
-									  verticalAlignment = Alignment.CenterVertically
-								) {
-								 Icon(
-										  modifier = Modifier
-											  .size(18.dp)
-											  .padding(end = 4.dp) ,
-										  painter = painterResource(id = R.drawable.cross_circle_icon) ,
-										  contentDescription = "Location Not Allowed"
-									 )
-								 Text(text = "Disabled")
-							 }
-						 }
-					 } else
-					 {
-						 if (isLocationAuto.value)
-						 {
-							 Text(text = locationNameState.value)
-						 }
-					 }
-				 } ,
-				 onCheckedChange = {
-					 if (it)
-					 {
-						 if (locationPermissionState.allPermissionsGranted)
-						 {
-							 viewModel.handleEvent(
-									  SettingsViewModel.SettingsEvent.LocationToggle(
-											   context ,
-											   true
-																					)
-												  )
-							 viewModelPrayerTimes.handleEvent(
-									  context ,
-									  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-											   PrayerTimesParamMapper.getParams(context)
-																							  )
-															 )
-							 viewModelPrayerTimes.handleEvent(
-									  context ,
-									  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-											   context
-																						 )
-															 )
-							 PrivateSharedPreferences(context).saveDataBoolean(
-									  AppConstants.ALARM_LOCK ,
-									  false
-																			  )
-						 } else
-						 {
-							 locationPermissionState.launchMultiplePermissionRequest()
-						 }
-					 } else
-					 {
-						 viewModel.handleEvent(
-								  SettingsViewModel.SettingsEvent.LocationToggle(
-										   context ,
-										   it
-																				)
-											  )
-						 viewModelPrayerTimes.handleEvent(
-								  context ,
-								  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-										   PrayerTimesParamMapper.getParams(context)
-																						  )
-														 )
-						 viewModelPrayerTimes.handleEvent(
-								  context ,
-								  PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-										   context
-																					 )
-														 )
-						 PrivateSharedPreferences(context).saveDataBoolean(
-								  AppConstants.ALARM_LOCK ,
-								  false
-																		  )
-						 isChecked.value = false
-						 if (isIntro)
-						 {
-							 Toasty.info(
-									  context ,
-									  "Please disable location permission for Nimaz in \n Permissions -> Location -> Don't Allow" ,
-									  Toasty.LENGTH_LONG
-										).show()
-							 //send the user to the location settings of the app
-							 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-							 with(intent) {
-								 data = Uri.fromParts("package" , context.packageName , null)
-								 addCategory(Intent.CATEGORY_DEFAULT)
-								 addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-							 }
-
-							 context.startActivity(intent)
-						 }
-					 }
-				 }
-					  )
-	}
-
-	if (state.value && isIntro)
-	{
-		//if locationNameState is longer than 10 characters, than add an ellipsis
-		val locationName = if (locationNameState.value.length > 15)
-		{
-			if (isLoading.value)
-			{
-				"Loading..."
-			} else
-			{
-				locationNameState.value.substring(0 , 15) + "..."
-			}
-		} else
-		{
-			if (isLoading.value)
-			{
-				"Loading..."
-			} else
-			{
-				locationNameState.value
-			}
-		}
-		ElevatedCard(
-				 colors = CardDefaults.elevatedCardColors(
-						  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-								   elevation = 32.dp
-																							) ,
-						  contentColor = MaterialTheme.colorScheme.onSurface ,
-						  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-						  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-														 ) ,
-				 shape = MaterialTheme.shapes.extraLarge ,
-				 modifier = Modifier
-					 .padding(8.dp)
-					 .fillMaxWidth()
-					) {
-			SettingsMenuLink(
-					 icon = {
-						 Icon(
-								  modifier = Modifier.size(24.dp) ,
-								  painter = painterResource(id = R.drawable.target_icon) ,
-								  contentDescription = "Location"
-							 )
-					 } ,
-					 title = {
-						 Text(
-								  textAlign = TextAlign.Center ,
-								  text = locationName ,
-								  modifier = Modifier
-									  .padding(16.dp)
-									  .placeholder(
-											   visible = isLoading.value ,
-											   color = MaterialTheme.colorScheme.outline ,
-											   shape = RoundedCornerShape(4.dp) ,
-											   highlight = PlaceholderHighlight.shimmer(
-														highlightColor = Color.White ,
-																					   )
-
-												  ) ,
-								  style = MaterialTheme.typography.bodyMedium
-							 )
-					 }) {
-
-			}
-		}
-	}
+private fun RowScope.LocationModeCard(
+    title: String,
+    @DrawableRes icon: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .weight(1f)
+            .clickable(onClick = onClick),
+        color = when {
+            isSelected -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        },
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = when {
+                    isSelected -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.surfaceVariant
+                },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = title,
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxSize(),
+                    tint = when {
+                        isSelected -> MaterialTheme.colorScheme.onPrimary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                color = when {
+                    isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
+    }
 }
+
+@Composable
+fun CurrentLocationDisplay(
+    location: String,
+    isLoading: Boolean
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxSize(),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Current Location",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = location,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (isLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LocationSearch(
+    locationInput: String,
+    onSearch: (String) -> Unit,
+    focusRequester: FocusRequester
+) {
+
+    val locationInputValue = remember { mutableStateOf(locationInput) }
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Search Location",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Surface(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = MaterialTheme.shapes.small,
+                ) {
+                    Text(
+                        text = "Custom Location",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.background,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = locationInputValue.value,
+                        onValueChange = { locationInputValue.value = it },
+                        placeholder = {
+                            Text(
+                                "Enter city or address",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent
+                        ),
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { onSearch(locationInputValue.value) })
+                    )
+
+                    FilledIconButton(
+                        onClick = {
+                            onSearch(locationInputValue.value)
+                        },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Search,
+                            contentDescription = "Search location",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+

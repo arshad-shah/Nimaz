@@ -1,291 +1,223 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants.TRACKING_VIEWMODEL_KEY
-import com.arshadshah.nimaz.data.remote.models.PrayerTracker
-import com.arshadshah.nimaz.ui.components.common.ToggleableItemRow
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.PlaceholderHighlight
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.placeholder
 import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
-import com.arshadshah.nimaz.viewModel.TrackerViewModel
+import com.arshadshah.nimaz.viewModel.DashboardEvent
+import com.arshadshah.nimaz.viewModel.TrackerState
 import com.arshadshah.nimaz.widgets.prayertimestrackerthin.PrayerTimesTrackerWorker
-import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.reflect.KFunction1
 
 @Composable
-fun DashboardPrayerTracker()
-{
+fun DashboardPrayerTracker(
+    handleEvents: KFunction1<DashboardEvent, Unit>,
+    dashboardPrayerTracker: TrackerState,
+    isLoading: State<Boolean>,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val updateWidget = { scope.launch { PrayerTimesTrackerWorker.enqueue(context, force = true) } }
 
-	val viewModel = viewModel(
-			 key = TRACKING_VIEWMODEL_KEY ,
-			 initializer = { TrackerViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
+    val prayers = listOf(
+        PRAYER_NAME_FAJR to dashboardPrayerTracker.fajr,
+        PRAYER_NAME_DHUHR to dashboardPrayerTracker.dhuhr,
+        PRAYER_NAME_ASR to dashboardPrayerTracker.asr,
+        PRAYER_NAME_MAGHRIB to dashboardPrayerTracker.maghrib,
+        PRAYER_NAME_ISHA to dashboardPrayerTracker.isha
+    )
 
-	val mutableDate = remember { mutableStateOf(LocalDate.now()) }
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.tracker_icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "Daily Prayers",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
 
-	LaunchedEffect(key1 = "getTrackerForDate") {
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.SHOW_DATE_SELECTOR(false))
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.SET_DATE(mutableDate.value.toString()))
-		viewModel.onEvent(TrackerViewModel.TrackerEvent.GET_TRACKER_FOR_DATE(mutableDate.value.toString()))
-	}
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "${prayers.count { it.second }}/5",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
 
-	val dateState = remember {
-		viewModel.dateState
-	}.collectAsState()
-
-	val stateOfTrackerForToday = remember {
-		viewModel.trackerState
-	}.collectAsState()
-
-	val fajrState = remember {
-		viewModel.fajrState
-	}.collectAsState()
-
-	val zuhrState = remember {
-		viewModel.zuhrState
-	}.collectAsState()
-
-	val asrState = remember {
-		viewModel.asrState
-	}.collectAsState()
-
-	val maghribState = remember {
-		viewModel.maghribState
-	}.collectAsState()
-
-	val ishaState = remember {
-		viewModel.ishaState
-	}.collectAsState()
-
-	val progressState = remember {
-		viewModel.progressState
-	}.collectAsState()
-
-	val isMenstrating = remember {
-		viewModel.isMenstrauting
-	}.collectAsState()
-
-	val context = LocalContext.current
-
-	//a list of booleans to keep track of the state of the toggleable items
-	val fajrChecked = remember { mutableStateOf(false) }
-	val zuhrChecked = remember { mutableStateOf(false) }
-	val asrChecked = remember { mutableStateOf(false) }
-	val maghribChecked = remember { mutableStateOf(false) }
-	val ishaChecked = remember { mutableStateOf(false) }
-	val progress = remember { mutableFloatStateOf(0f) }
-
-	Box {
-		when (stateOfTrackerForToday.value)
-		{
-			is TrackerViewModel.TrackerState.Loading ->
-			{
-				Log.d("Tracker" , "Loading")
-				PrayerTrackerListItemsRow(
-						 loading = true ,
-						 fajrChecked = fajrChecked ,
-						 zuhrChecked = zuhrChecked ,
-						 asrChecked = asrChecked ,
-						 maghribChecked = maghribChecked ,
-						 ishaChecked = ishaChecked ,
-						 handleEvent = viewModel::onEvent ,
-						 dateState = dateState ,
-						 progress = progress ,
-						 isMenstrating = isMenstrating
-										 )
-			}
-
-			is TrackerViewModel.TrackerState.Tracker ->
-			{
-				fajrChecked.value = fajrState.value
-				zuhrChecked.value = zuhrState.value
-				asrChecked.value = asrState.value
-				maghribChecked.value = maghribState.value
-				ishaChecked.value = ishaState.value
-				progress.value = progressState.value.toFloat()
-				PrayerTrackerListItemsRow(
-						 loading = false ,
-						 fajrChecked = fajrChecked ,
-						 zuhrChecked = zuhrChecked ,
-						 asrChecked = asrChecked ,
-						 maghribChecked = maghribChecked ,
-						 ishaChecked = ishaChecked ,
-						 handleEvent = viewModel::onEvent ,
-						 dateState = dateState ,
-						 progress = progress ,
-						 isMenstrating = isMenstrating
-										 )
-			}
-
-			is TrackerViewModel.TrackerState.Error ->
-			{
-				Toasty.error(
-						 context ,
-						 (stateOfTrackerForToday.value as TrackerViewModel.TrackerState.Error).message ,
-						 Toast.LENGTH_SHORT ,
-						 true
-							).show()
-			}
-
-		}
-	}
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    prayers.forEach { (name, status) ->
+                        CompactPrayerItem(
+                            name = name,
+                            isCompleted = status,
+                            enabled = !dashboardPrayerTracker.isMenstruating,
+                            onStatusChange = { isChecked ->
+                                handleEvents(
+                                    DashboardEvent.UpdatePrayerTracker(
+                                        date = LocalDate.now(),
+                                        prayerName = name,
+                                        prayerDone = isChecked
+                                    )
+                                )
+                                updateWidget()
+                            },
+                            isLoading = isLoading.value
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
-//the prayer tracker list items
 @Composable
-fun PrayerTrackerListItemsRow(
-	loading : Boolean ,
-	fajrChecked : MutableState<Boolean> ,
-	zuhrChecked : MutableState<Boolean> ,
-	asrChecked : MutableState<Boolean> ,
-	maghribChecked : MutableState<Boolean> ,
-	ishaChecked : MutableState<Boolean> ,
-	handleEvent : KFunction1<TrackerViewModel.TrackerEvent , Unit> ,
-	dateState : State<String> ,
-	progress : MutableState<Float> ,
-	isMenstrating : State<Boolean> ,
-							 )
-{
-	val context = LocalContext.current
-	val items = listOf("Fajr" , "Dhuhr" , "Asr" , "Maghrib" , "Isha")
-	val dateForTracker = LocalDate.parse(dateState.value)
-	val isAfterToday = dateForTracker.isAfter(LocalDate.now())
+private fun CompactPrayerItem(
+    name: String,
+    isCompleted: Boolean,
+    enabled: Boolean,
+    onStatusChange: (Boolean) -> Unit,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = { if (enabled) onStatusChange(!isCompleted) },
+        enabled = enabled,
+        color = when {
+            !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            isCompleted -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.surface
+        },
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+            .placeholder(
+                visible = isLoading,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(12.dp),
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = if (isCompleted)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(28.dp)
+            ) {
+                Icon(
+                    imageVector = if (isCompleted)
+                        Icons.Rounded.Check
+                    else
+                        Icons.Rounded.RadioButtonUnchecked,
+                    contentDescription = if (isCompleted) "Completed" else "Not completed",
+                    tint = if (isCompleted)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(16.dp)
+                )
+            }
 
-	val scope = rememberCoroutineScope()
-	val updateWidgetTracker = {
-		scope.launch {
-			PrayerTimesTrackerWorker.enqueue(context , force = true)
-		}
-	}
-
-	ElevatedCard(
-			 colors = CardDefaults.elevatedCardColors(
-					  containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(32.dp) ,
-					  contentColor = MaterialTheme.colorScheme.onSurface ,
-					  disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) ,
-					  disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f) ,
-													 ) ,
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .fillMaxWidth()
-				) {
-		//if not then show the items
-		Row(
-				 modifier = Modifier
-					 .padding(8.dp)
-					 .fillMaxWidth() ,
-				 horizontalArrangement = Arrangement.SpaceEvenly ,
-				 verticalAlignment = Alignment.CenterVertically
-		   ) {
-			items.forEachIndexed { index , item ->
-				//the toggleable item
-				ToggleableItemRow(
-						 enabled = ! isMenstrating.value ,
-						 text = item ,
-						 checked = when (item)
-						 {
-							 //if the date is after today then disable the toggle
-							 "Fajr" -> if (isAfterToday) false else fajrChecked.value
-							 "Dhuhr" -> if (isAfterToday) false else zuhrChecked.value
-							 "Asr" -> if (isAfterToday) false else asrChecked.value
-							 "Maghrib" -> if (isAfterToday) false else maghribChecked.value
-							 "Isha" -> if (isAfterToday) false else ishaChecked.value
-							 else -> false
-						 } ,
-						 onCheckedChange = {
-							 if (isAfterToday)
-							 {
-								 Toasty.info(
-										  context ,
-										  "Oops! you cant update the tracker for a date in the future" ,
-										  Toasty.LENGTH_SHORT ,
-										  true
-											).show()
-								 return@ToggleableItemRow
-							 }
-							 when (item)
-							 {
-								 //if the date is after today then disable the toggle
-								 "Fajr" -> fajrChecked.value = it
-								 "Dhuhr" -> zuhrChecked.value = it
-								 "Asr" -> asrChecked.value = it
-								 "Maghrib" -> maghribChecked.value = it
-								 "Isha" -> ishaChecked.value = it
-							 }
-
-							 //for each of the checked items add 20 to the progress any unchecked item subtracts 20
-							 progress.value = when (item)
-							 {
-								 "Fajr" -> if (it) progress.value + 20 else progress.value - 20
-								 "Dhuhr" -> if (it) progress.value + 20 else progress.value - 20
-								 "Asr" -> if (it) progress.value + 20 else progress.value - 20
-								 "Maghrib" -> if (it) progress.value + 20 else progress.value - 20
-								 "Isha" -> if (it) progress.value + 20 else progress.value - 20
-								 else -> 0f
-							 }
-
-							 handleEvent(
-									  TrackerViewModel.TrackerEvent.UPDATE_TRACKER(
-											   PrayerTracker(
-														fajr = fajrChecked.value ,
-														dhuhr = zuhrChecked.value ,
-														asr = asrChecked.value ,
-														maghrib = maghribChecked.value ,
-														isha = ishaChecked.value ,
-														date = dateState.value ,
-														progress = progress.value.toInt()
-															)
-																				  )
-										)
-							 handleEvent(
-									  TrackerViewModel.TrackerEvent.GET_PROGRESS_FOR_MONTH(
-											   dateState.value
-																						  )
-										)
-							 updateWidgetTracker()
-						 } ,
-						 modifier = Modifier
-							 .placeholder(
-									  visible = loading ,
-									  color = MaterialTheme.colorScheme.outline ,
-									  shape = RoundedCornerShape(4.dp) ,
-									  highlight = PlaceholderHighlight.shimmer(
-											   highlightColor = Color.White ,
-																			  )
-										 ) ,
-								 )
-			}
-		}
-	}
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isCompleted)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
 }

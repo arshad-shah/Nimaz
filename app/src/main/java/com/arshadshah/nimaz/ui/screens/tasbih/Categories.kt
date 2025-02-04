@@ -1,130 +1,127 @@
 package com.arshadshah.nimaz.ui.screens.tasbih
 
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.constants.AppConstants
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.viewModel.DuaViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Categories(
-	paddingValues : PaddingValues ,
-	onNavigateToChapterListScreen : (String , Int) -> Unit ,
-			  )
-{
-	val viewModel = viewModel(
-			 key = AppConstants.DUA_CHAPTERS_VIEWMODEL_KEY ,
-			 initializer = { DuaViewModel() } ,
-			 viewModelStoreOwner = LocalContext.current as ComponentActivity
-							 )
+    viewModel: DuaViewModel = hiltViewModel(),
+    navController: NavHostController,
+    onNavigateToChapterListScreen: (String, Int) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-	LaunchedEffect(Unit) {
-		viewModel.getCategories()
-	}
+    val categories by viewModel.categories.collectAsState()
 
-	val categories = remember { viewModel.categories }.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.getCategories()
+    }
 
-	//if the categories are not null, and not empty, then show them
-	if (categories.value.isNotEmpty())
-	{
-		//sort the categories alphabetically
-		categories.value.sortBy { it.name }
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = "Hisnul Muslim",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        AnimatedVisibility(
+                            visible = categories.isNotEmpty(),
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Text(
+                                text = "${categories.size} Categories Available",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                navigationIcon = {
+                    OutlinedIconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                },
+                actions = {
+                    // Refresh action
+                    IconButton(onClick = {
+                        viewModel.refreshData()
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Refreshing categories...")
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        DuaTabs(
+            viewModel = viewModel,
+            navController = navController,
+            paddingValues = paddingValues,
+            onDuaClick = { dua ->
+                scope.launch {
+                    // Handle suspending functions in a coroutine
+                    val chapter = viewModel.getChapterById(dua.chapter_id)
+                    val category = viewModel.getCategoryById(chapter?.category_id ?: 0)
 
-		LazyVerticalGrid(
-				 columns = GridCells.Adaptive(minSize = 128.dp) ,
-				 contentPadding = paddingValues
-						) {
-			items(categories.value.size) {
-				Category(
-						 title = categories.value[it].name ,
-						 onClicked = {
-							 onNavigateToChapterListScreen(
-									  categories.value[it].name ,
-									  categories.value[it].id
-														  )
-						 }
-						)
-			}
-		}
-	}
-}
-
-//one category
-@Composable
-fun Category(
-	title : String ,
-	icon : Int? = null ,
-	description : String = "" ,
-	onClicked : () -> Unit = {} ,
-			)
-{
-	ElevatedCard(
-			 shape = MaterialTheme.shapes.large ,
-			 modifier = Modifier
-				 .padding(8.dp)
-				 .fillMaxWidth()
-				 .fillMaxHeight()
-				 .clickable {
-					 onClicked()
-				 }
-				) {
-		Row(
-				 modifier = Modifier
-					 .padding(8.dp)
-					 .fillMaxWidth() ,
-				 verticalAlignment = Alignment.CenterVertically ,
-				 horizontalArrangement = Arrangement.SpaceBetween
-		   ) {
-			Column(
-					 modifier = Modifier
-						 .padding(8.dp)
-						 .fillMaxWidth() ,
-					 verticalArrangement = Arrangement.SpaceAround ,
-					 horizontalAlignment = Alignment.Start
-				  ) {
-				Text(text = title , style = MaterialTheme.typography.titleMedium)
-			}
-			if (icon != null)
-			{
-				Image(
-						 painter = painterResource(id = icon) ,
-						 contentDescription = description ,
-						 modifier = Modifier
-							 .padding(8.dp)
-							 .size(32.dp)
-					 )
-			}
-		}
-	}
-}
-
-@Preview
-@Composable
-fun PreviewCategory()
-{
-	Category(title = "Subhanallah")
+                    // Navigate after getting the data
+                    navController.navigate(
+                        CHAPTER_SCREEN_ROUTE
+                            .replace(
+                                "{chapterId}",
+                                dua.chapter_id.toString()
+                            )
+                            .replace(
+                                "{categoryName}",
+                                category?.name ?: "Uncategorized"
+                            )
+                    )
+                }
+            },
+            onNavigateToChapterListScreen = onNavigateToChapterListScreen
+        )
+    }
 }

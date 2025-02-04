@@ -6,16 +6,11 @@
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
         <item name="colorPrimary">?attr/colorPrimaryVariant</item>
         <item name="colorPrimaryDark">?attr/colorPrimaryVariant</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
         <item name="postSplashScreenTheme">@style/Theme.Nimaz</item>
     </style>
     <!--
     Having themes.xml for v31 variant because @android:dimen/system_app_widget_background_radius
      and @android:dimen/system_app_widget_internal_padding requires API level 31
     -->
-    <style name="Theme.Nimaz.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault.DayNight">
-        <item name="appWidgetRadius">@android:dimen/system_app_widget_background_radius</item>
-        <item name="appWidgetInnerRadius">@android:dimen/system_app_widget_inner_radius</item>
-    </style>
 
 </resources>

@@ -1,101 +1,148 @@
 package com.arshadshah.nimaz.ui.components.common
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 
-//custom slider encased in a card to make it look better and two icons before and after the slider
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SliderWithIcons(
-	value : Float ,
-	onValueChange : (Float) -> Unit ,
-	valueRange : ClosedFloatingPointRange<Float> ,
-	modifier : Modifier = Modifier ,
-	leadingIcon : Painter ,
-	trailaingIcon : Painter ,
-	contentDescription1 : String ,
-	contentDescription2 : String ,
-	trailingIconSize : Dp = 24.dp ,
-	leadingIconSize : Dp = 24.dp ,
-				   )
-{
-	ElevatedCard(
-			 modifier = modifier
-				 .padding(vertical = 8.dp)
-				 .fillMaxWidth()
-				 .wrapContentHeight() ,
-			 content = {
-				 Row(
-						  modifier = Modifier
-							  .fillMaxWidth()
-							  .wrapContentHeight() ,
-						  verticalAlignment = Alignment.CenterVertically ,
-						  horizontalArrangement = Arrangement.SpaceBetween
-					) {
-					 Icon(
-							  modifier = Modifier
-								  .padding(start = 4.dp)
-								  .size(leadingIconSize)
-								  .weight(0.1f)
-								  .clickable {
-									  onValueChange(value - 1)
-								  } ,
-							  painter = leadingIcon ,
-							  contentDescription = contentDescription1
-						 )
-					 Slider(
-							  value = value ,
-							  onValueChange = onValueChange ,
-							  valueRange = valueRange ,
-							  modifier = Modifier.weight(0.8f)
-						   )
-					 //click on this icon increses the font size
-					 Icon(
-							  modifier = Modifier
-								  .padding(end = 4.dp)
-								  .size(trailingIconSize)
-								  .weight(0.1f)
-								  .clickable {
-									  onValueChange(value + 1)
-								  } ,
-							  painter = trailaingIcon ,
-							  contentDescription = contentDescription2
-						 )
-				 }
-			 }
-				)
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier,
+    steps: Int = 0,
+    enabled: Boolean = true,
+    showLabel: Boolean = true,
+    label: (Float) -> String = { it.toInt().toString() }
+) {
+    val haptic = LocalHapticFeedback.current
+    val animatedValue by animateFloatAsState(targetValue = value, label = "")
+
+    Card(
+        modifier = modifier
+            .padding(2.dp)
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (showLabel) {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Text(
+                        text = label(value),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                // Slider
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp)
+                ) {
+                    val interactionSource = remember { MutableInteractionSource() }
+                    val isPressed by interactionSource.collectIsPressedAsState()
+
+                    Slider(
+                        value = animatedValue,
+                        onValueChange = { newValue ->
+                            if (isPressed) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }
+                            onValueChange(newValue)
+                        },
+                        valueRange = valueRange,
+                        steps = steps,
+                        enabled = enabled,
+                        interactionSource = interactionSource,
+                        modifier = Modifier.scale(1.1f),
+                        thumb = {
+                            SliderDefaults.Thumb(
+                                interactionSource = interactionSource,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
-//preview
-@Preview
 @Composable
-fun SliderWithIconsPreview()
-{
-	SliderWithIcons(
-			 value = 1f ,
-			 onValueChange = { } ,
-			 valueRange = 0f .. 10f ,
-			 leadingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
-			 trailaingIcon = painterResource(id = R.drawable.english_font_size_icon) ,
-			 contentDescription1 = "decrease font size" ,
-			 contentDescription2 = "increase font size" ,
-			 trailingIconSize = 24.dp ,
-			 leadingIconSize = 16.dp ,
-				   )
+@Preview(showBackground = true)
+fun SliderWithIconsPreview() {
+    var value by remember { mutableFloatStateOf(5f) }
+    NimazTheme {
+        SliderWithIcons(
+            value = value,
+            onValueChange = { value = it },
+            valueRange = 0f..10f,
+            steps = 10,
+            showLabel = true
+        )
+    }
 }

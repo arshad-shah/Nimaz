@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="Theme.Nimaz" parent="Theme.MaterialComponents.Light">
+    <style name="Theme.Nimaz" parent="Theme.MaterialComponents.DayNight">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryVariant">@color/primaryLightColor</item>
@@ -8,9 +8,6 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryLightColor</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="SplashTheme" parent="Theme.SplashScreen">
@@ -18,22 +15,7 @@
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
         <item name="colorPrimary">?attr/colorPrimaryVariant</item>
         <item name="colorPrimaryDark">?attr/colorPrimaryVariant</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
         <item name="postSplashScreenTheme">@style/Theme.Nimaz</item>
     </style>
 
-    <style name="Theme.Nimaz.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
-        <!-- Radius of the outer bound of widgets to make the rounded corners -->
-        <item name="appWidgetRadius">32dp</item>
-        <!--
-        Radius of the inner view's bound of widgets to make the rounded corners.
-        It needs to be 8dp or less than the value of appWidgetRadius
-        -->
-        <item name="appWidgetInnerRadius">24dp</item>
-    </style>
-
-    <style name="Theme.Nimaz.AppWidgetContainer" parent="Theme.Nimaz.AppWidgetContainerParent">
-        <!-- Apply padding to avoid the content of the widget colliding with the rounded corners -->
-        <item name="appWidgetPadding">32dp</item>
-    </style>
 </resources>
