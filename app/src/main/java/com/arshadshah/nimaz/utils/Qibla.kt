@@ -10,7 +10,6 @@ class Qibla {
 
     //an object that holds the latitude and longitude of Makkah
     private object MAKKAH {
-
         const val latitude = 21.4225241
         const val longitude = 39.8261818
     }

@@ -13,14 +13,13 @@
 .externalNativeBuild
 .cxx
 local.properties
-google-services.json
+app/google-services.json
 *.aab
 *.apk
 /.idea/deploymentTargetDropDown.xml
 /*.html
 secrets.properties
-/Gemfile
-/Gemfile.lock
 /keystore_base64.txt
 /service_account_base64.txt
+/google-services-base64.txt
 /fastlane/play-store-credentials.json

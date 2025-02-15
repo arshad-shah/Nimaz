@@ -1,16 +1,21 @@
 name: Android Build & Deploy
 
 on:
-  workflow_dispatch:
+  pull_request:
+    branches: [ dev ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
-      - name: Setup Git User
+      - name: Switch to PR branch and setup Git
         run: |
+          git checkout ${{ github.head_ref }}
           git config --global user.email "CI@bot.com"
           git config --global user.name "CI-Bot"
 
@@ -23,11 +28,22 @@ jobs:
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3.0
+          ruby-version: 3.1.4
           bundler-cache: true
 
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
+
+      - name: Decode Firebase Config
+        uses: timheuer/base64-to-file@v1
+        id: firebase_config
+        with:
+          fileName: "google-services.json"
+          encodedString: ${{ secrets.FIREBASE_CONFIG }}
+
+      - name: Move Firebase Config
+        run: |
+          mv ${{ steps.firebase_config.outputs.filePath }} app/google-services.json
 
       - name: Decode Service Account Key JSON File
         uses: timheuer/base64-to-file@v1
@@ -51,9 +67,12 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS}}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           ANDROID_JSON_KEY_FILE: ${{ steps.service_account_json_file.outputs.filePath }}
+          DO_ACCESS_KEY: ${{ secrets.DO_ACCESS_KEY }}
+          DO_SECRET_KEY: ${{ secrets.DO_SECRET_KEY }}
+          METAL_API_KEY: ${{ secrets.METAL_API_KEY }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: assets
           path: |
