@@ -56,7 +56,7 @@ fun CompactLocationTopBar(
             ),
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 6.dp,
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
     ) {
         Row(
             modifier = Modifier
