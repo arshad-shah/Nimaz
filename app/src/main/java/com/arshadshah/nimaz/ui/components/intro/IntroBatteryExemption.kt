@@ -28,7 +28,6 @@ import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
 import com.arshadshah.nimaz.ui.components.settings.state.rememberPreferenceBooleanSettingState
 import com.arshadshah.nimaz.viewModel.IntroductionViewModel
-
 @SuppressLint("BatteryLife")
 @Composable
 fun IntroBatteryExemption(
@@ -49,6 +48,7 @@ fun IntroBatteryExemption(
         isExempt.value
     )
 
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     // Update ViewModel when battery state changes
     DisposableEffect(Unit) {
         val observer = LifecycleEventObserver { _, event ->
@@ -69,7 +69,6 @@ fun IntroBatteryExemption(
             lifecycle.removeObserver(observer)
         }
     }
-
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),

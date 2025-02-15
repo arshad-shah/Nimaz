@@ -54,7 +54,6 @@ fun IntroLocation(
             )
         )
     }
-
     // Lifecycle observer
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
@@ -182,7 +181,6 @@ fun IntroLocation(
             ) {
                 val locationInput = remember { mutableStateOf("") }
                 val focusRequester = remember { FocusRequester() }
-
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -249,6 +247,7 @@ fun IntroLocation(
                                     )
                                     focusRequester.freeFocus()
                                 }
+
                             )
                         )
                     }
@@ -267,7 +266,6 @@ fun IntroLocation(
                     trackColor = MaterialTheme.colorScheme.primaryContainer
                 )
             }
-
             // Location Features
             Surface(
                 modifier = Modifier.fillMaxWidth(),
@@ -295,6 +293,7 @@ fun IntroLocation(
                     )
                 }
             }
+
         }
     }
 

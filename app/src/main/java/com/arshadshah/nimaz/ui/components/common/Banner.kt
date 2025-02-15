@@ -88,6 +88,7 @@ fun BannerSmall(
                 containerColor = variantStyles.containerColor,
                 contentColor = variantStyles.contentColor
             ),
+
             elevation = CardDefaults.elevatedCardElevation(
                 defaultElevation = 2.dp,
                 pressedElevation = 4.dp
@@ -138,6 +139,7 @@ private fun rememberBannerStyle(variant: BannerVariant): BannerStyle {
 }
 
 @Composable
+
 private fun BannerContent(
     variant: BannerStyle,
     title: String?,
@@ -208,7 +210,6 @@ private fun BannerContent(
     }
 }
 
-@Composable
 fun BannerLarge(
     modifier: Modifier = Modifier,
     variant: BannerVariant = BannerVariant.Info,

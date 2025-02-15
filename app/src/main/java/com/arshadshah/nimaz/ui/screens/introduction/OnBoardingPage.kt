@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.ui.components.intro.IntroCalculation
 import com.arshadshah.nimaz.ui.components.intro.IntroLocation
 import com.arshadshah.nimaz.ui.components.intro.IntroNotification
 
+
 /**
  * Represents a single page in the onboarding flow
  * @param image Resource ID for the illustration
@@ -92,7 +93,6 @@ object OnBoardingPages {
 
     operator fun get(index: Int) = pages.getOrNull(index)
     val size get() = pages.size
-
     // Group pages by category for progress tracking
     val categories = pages.groupBy { it.category }
 }

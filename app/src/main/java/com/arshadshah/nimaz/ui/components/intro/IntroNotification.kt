@@ -36,6 +36,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
+
 fun IntroNotification(
     viewModel: IntroductionViewModel = hiltViewModel()
 ) {
@@ -84,7 +85,6 @@ fun IntroNotification(
         AppConstants.NOTIFICATION_ALLOWED,
         notificationPermissionState.status.isGranted
     )
-
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
