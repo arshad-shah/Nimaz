@@ -34,6 +34,17 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
 
+      - name: Decode Firebase Config
+        uses: timheuer/base64-to-file@v1
+        id: firebase_config
+        with:
+          fileName: "google-services.json"
+          encodedString: ${{ secrets.FIREBASE_CONFIG }}
+
+      - name: Move Firebase Config
+        run: |
+          mv ${{ steps.firebase_config.outputs.filePath }} app/google-services.json
+
       - name: Decode Service Account Key JSON File
         uses: timheuer/base64-to-file@v1
         id: service_account_json_file
