@@ -21,4 +21,5 @@ app/google-services.json
 secrets.properties
 /keystore_base64.txt
 /service_account_base64.txt
+/google-services-base64.txt
 /fastlane/play-store-credentials.json
