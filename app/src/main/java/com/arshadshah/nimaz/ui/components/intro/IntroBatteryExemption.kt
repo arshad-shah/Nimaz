@@ -35,8 +35,6 @@ fun IntroBatteryExemption(
 ) {
     val context = LocalContext.current
     val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-
     // Read battery state directly from system
     val isExempt = remember {
         mutableStateOf(powerManager.isIgnoringBatteryOptimizations(context.packageName))

@@ -210,6 +210,7 @@ private fun BannerContent(
     }
 }
 
+@Composable
 fun BannerLarge(
     modifier: Modifier = Modifier,
     variant: BannerVariant = BannerVariant.Info,
