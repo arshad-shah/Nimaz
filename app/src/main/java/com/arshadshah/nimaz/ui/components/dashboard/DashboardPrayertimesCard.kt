@@ -47,11 +47,7 @@ fun DashboardPrayerTimesCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
-        shape = RoundedCornerShape(28.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 6.dp,
-            pressedElevation = 8.dp
-        )
+        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Box(
             modifier = Modifier
@@ -60,28 +56,62 @@ fun DashboardPrayerTimesCard(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
-                        )
+                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.9f)
+                        ),
+                        startY = 0f,
+                        endY = 900f
                     )
                 )
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+                // Prayer Name and Time Section
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
-                    EnhancedPrayerIcon(
-                        prayerName = nextPrayerName,
-                        isLoading = isLoading
-                    )
+                    // Prayer Icon Section
+                    Surface(
+                        modifier = Modifier.size(100.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(28.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
+                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.05f)
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (!isLoading) {
+                                Image(
+                                    painter = painterResource(id = getPrayerIcon(nextPrayerName)),
+                                    contentDescription = "Prayer Icon",
+                                    modifier = Modifier.size(60.dp)
+                                )
+                            } else {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
 
+                    // Prayer Info Section
                     Column(
                         horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(top = 8.dp)
                     ) {
                         AnimatedVisibility(
                             visible = !isLoading,
@@ -96,80 +126,49 @@ fun DashboardPrayerTimesCard(
                         }
 
                         Surface(
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
-                            shape = RoundedCornerShape(16.dp)
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                            shape = RoundedCornerShape(20.dp)
                         ) {
                             Text(
                                 text = nextPrayerTime.format(timeFormat),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                             )
                         }
                     }
                 }
 
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                // Countdown Timer Section
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = getEnhancedTimerText(countDownTimer),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.time_calculation),
+                                    contentDescription = "Timer",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = getEnhancedTimerText(countDownTimer),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun EnhancedPrayerIcon(
-    prayerName: String,
-    isLoading: Boolean
-) {
-    Surface(
-        modifier = Modifier
-            .size(80.dp)
-            .clip(RoundedCornerShape(24.dp)),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.15f),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.1f)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (!isLoading) {
-                Image(
-                    painter = painterResource(id = getPrayerIcon(prayerName)),
-                    contentDescription = "Prayer Icon",
-                    modifier = Modifier.size(48.dp)
-                )
-            } else {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
             }
         }
     }

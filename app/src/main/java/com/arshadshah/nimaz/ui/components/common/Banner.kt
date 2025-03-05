@@ -73,7 +73,7 @@ fun BannerSmall(
     if (isOpen.value) {
         ElevatedCard(
             modifier = modifier
-                .padding(paddingValues ?: PaddingValues(8.dp))
+                .padding(paddingValues ?: PaddingValues(12.dp))
                 .clickable(
                     enabled = true,
                     role = Role.Button,
@@ -83,12 +83,16 @@ fun BannerSmall(
                         if (!dismissable) dismissBanner(isOpen, title, sharedPref)
                     }
                 ),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = variantStyles.containerColor,
                 contentColor = variantStyles.contentColor
             ),
-            elevation = CardDefaults.elevatedCardElevation(4.dp)
+
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp
+            )
         ) {
             BannerContent(
                 variant = variantStyles,
@@ -104,23 +108,23 @@ fun BannerSmall(
 @Composable
 private fun rememberBannerStyle(variant: BannerVariant): BannerStyle {
     val successStyle = BannerStyle(
-        containerColor = Color(0xFFE7F6EC),
-        contentColor = Color(0xFF18794E),
+        containerColor = Color(0xFFECFDF3),
+        contentColor = Color(0xFF027A48),
         iconRes = Icons.Rounded.CheckCircle
     )
     val errorStyle = BannerStyle(
-        containerColor = Color(0xFFFFEEEE),
-        contentColor = Color(0xFFD92D20),
+        containerColor = Color(0xFFFEF3F2),
+        contentColor = Color(0xFFB42318),
         iconRes = Icons.Rounded.Error
     )
     val infoStyle = BannerStyle(
-        containerColor = Color(0xFFEEF4FF),
-        contentColor = Color(0xFF1570EF),
+        containerColor = Color(0xFFF0F4FF),
+        contentColor = Color(0xFF1849A9),
         iconRes = Icons.Rounded.Info
     )
     val warningStyle = BannerStyle(
-        containerColor = Color(0xFFFEF4E6),
-        contentColor = Color(0xFFB93815),
+        containerColor = Color(0xFFFFFAEB),
+        contentColor = Color(0xFFB54708),
         iconRes = Icons.Rounded.Warning
     )
 
@@ -130,6 +134,78 @@ private fun rememberBannerStyle(variant: BannerVariant): BannerStyle {
             is BannerVariant.Error -> errorStyle
             is BannerVariant.Info -> infoStyle
             is BannerVariant.Warning -> warningStyle
+        }
+    }
+}
+
+@Composable
+
+private fun BannerContent(
+    variant: BannerStyle,
+    title: String?,
+    message: String?,
+    dismissable: Boolean,
+    onDismiss: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Surface(
+            color = variant.contentColor.copy(alpha = 0.1f),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.size(40.dp)
+        ) {
+            Icon(
+                imageVector = variant.iconRes,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(24.dp),
+                tint = variant.contentColor
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (title != null) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = variant.contentColor
+                )
+            }
+            if (message != null) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = variant.contentColor.copy(alpha = 0.9f)
+                )
+            }
+        }
+
+        if (dismissable) {
+            Surface(
+                modifier = Modifier.size(32.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = variant.contentColor.copy(alpha = 0.1f),
+                onClick = onDismiss
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.cross_icon),
+                    contentDescription = "Dismiss",
+                    tint = variant.contentColor,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(16.dp)
+                )
+            }
         }
     }
 }
@@ -152,7 +228,7 @@ fun BannerLarge(
     if (isOpen.value) {
         ElevatedCard(
             modifier = modifier
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(24.dp),
@@ -160,7 +236,10 @@ fun BannerLarge(
                 containerColor = variantStyles.containerColor,
                 contentColor = variantStyles.contentColor
             ),
-            elevation = CardDefaults.elevatedCardElevation(4.dp)
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp
+            )
         ) {
             LargeBannerContent(
                 variant = variantStyles,
@@ -168,65 +247,6 @@ fun BannerLarge(
                 message = message,
                 onDismiss = onDismiss
             )
-        }
-    }
-}
-
-@Composable
-private fun BannerContent(
-    variant: BannerStyle,
-    title: String?,
-    message: String?,
-    dismissable: Boolean,
-    onDismiss: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = variant.iconRes,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .size(24.dp),
-            tint = variant.contentColor
-        )
-
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            if (title != null) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = variant.contentColor
-                )
-            }
-            if (message != null) {
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = variant.contentColor
-                )
-            }
-        }
-
-        if (dismissable) {
-            OutlinedIconButton(
-                modifier = Modifier.size(24.dp),
-                onClick = onDismiss
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.cross_icon),
-                    contentDescription = "Dismiss",
-                    tint = variant.contentColor,
-                    modifier = Modifier.size(12.dp)
-                )
-            }
         }
     }
 }
@@ -241,13 +261,11 @@ private fun LargeBannerContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -255,37 +273,52 @@ private fun LargeBannerContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = variant.iconRes,
-                    contentDescription = null,
-                    tint = variant.contentColor,
-                    modifier = Modifier.size(24.dp)
-                )
+                Surface(
+                    color = variant.contentColor.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = variant.iconRes,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(24.dp),
+                        tint = variant.contentColor
+                    )
+                }
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     color = variant.contentColor
                 )
             }
-            OutlinedIconButton(modifier = Modifier.size(24.dp), onClick = onDismiss) {
+            Surface(
+                modifier = Modifier.size(32.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = variant.contentColor.copy(alpha = 0.1f),
+                onClick = onDismiss
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.cross_icon),
                     contentDescription = "Dismiss",
                     tint = variant.contentColor,
-                    modifier = Modifier.size(12.dp)
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(16.dp)
                 )
             }
         }
 
         if (!message.isNullOrEmpty()) {
             Surface(
-                color = variant.contentColor.copy(alpha = 0.1f),
+                color = variant.contentColor.copy(alpha = 0.05f),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = variant.contentColor,
+                    color = variant.contentColor.copy(alpha = 0.9f),
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -401,14 +434,43 @@ fun BannerPreviewDismissable() {
     NimazTheme(
         darkTheme = true
     ) {
-        BannerLarge(
-            variant = BannerVariant.Success,
-            title = "Info",
-            message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long",
-            isOpen = isOpen,
-            onDismiss = {
-                isOpen.value = false
-            },
-        )
+        Column {
+            BannerLarge(
+                variant = BannerVariant.Success,
+                title = "Success",
+                message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long",
+                isOpen = isOpen,
+                onDismiss = {
+                    isOpen.value = false
+                },
+            )
+            BannerLarge(
+                variant = BannerVariant.Error,
+                title = "Error",
+                message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long",
+                isOpen = isOpen,
+                onDismiss = {
+                    isOpen.value = false
+                },
+            )
+            BannerLarge(
+                variant = BannerVariant.Warning,
+                title = "Warning",
+                message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long",
+                isOpen = isOpen,
+                onDismiss = {
+                    isOpen.value = false
+                },
+            )
+            BannerLarge(
+                variant = BannerVariant.Info,
+                title = "Info",
+                message = "This is an info banner with a dismiss button and a lot of text to show how it looks when the text is too long",
+                isOpen = isOpen,
+                onDismiss = {
+                    isOpen.value = false
+                },
+            )
+        }
     }
 }

@@ -21,10 +21,10 @@ jobs:
         with:
           ruby-version: 3.1.4
           bundler-cache: true
-
-      - name: Set execution flag for gradlew
-        run: chmod +x gradlew
-
+          
+      - name: Set execution flag for gradlew 
+         run: chmod +x gradlew
+         
       - name: Run Tests and Lint
         run: bundle exec fastlane android test
 

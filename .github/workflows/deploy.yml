@@ -1,7 +1,7 @@
 name: Android Build & Deploy
 
 on:
-  push:
+  pull_request:
     branches: [ dev ]
 
 jobs:
@@ -9,9 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
-      - name: Setup Git User
+      - name: Switch to PR branch and setup Git
         run: |
+          git checkout ${{ github.head_ref }}
           git config --global user.email "CI@bot.com"
           git config --global user.name "CI-Bot"
 
@@ -29,6 +33,17 @@ jobs:
 
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
+
+      - name: Decode Firebase Config
+        uses: timheuer/base64-to-file@v1
+        id: firebase_config
+        with:
+          fileName: "google-services.json"
+          encodedString: ${{ secrets.FIREBASE_CONFIG }}
+
+      - name: Move Firebase Config
+        run: |
+          mv ${{ steps.firebase_config.outputs.filePath }} app/google-services.json
 
       - name: Decode Service Account Key JSON File
         uses: timheuer/base64-to-file@v1
