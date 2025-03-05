@@ -22,6 +22,7 @@ import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.services.PrayerTimesData
 import com.arshadshah.nimaz.services.PrayerTimesService
 import com.arshadshah.nimaz.services.UpdateService
+import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
@@ -36,9 +37,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.String.valueOf
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.chrono.HijrahDate
+import java.time.temporal.ChronoField
 import javax.inject.Inject
 
 
@@ -54,6 +58,7 @@ class DashboardViewModel @Inject constructor(
     private val dataStore: DataStore,
     private val createAlarms: CreateAlarms,
     private val locationStateManager: LocationStateManager,
+    val firebaseLogger: FirebaseLogger
 ) : ViewModel() {
     private val TAG = "DashboardViewModel"
     private var countDownTimer: CountDownTimer? = null
@@ -81,6 +86,12 @@ class DashboardViewModel @Inject constructor(
     // Location Related Functions
     private suspend fun loadLocation(isAuto: Boolean) {
         _locationState.update { it.copy(isLoading = true, error = null) }
+        // Log location loading attempt
+        firebaseLogger.logEvent(
+            "dashboard_loading_location",
+            mapOf("auto_location" to isAuto),
+            FirebaseLogger.Companion.EventCategory.PERFORMANCE
+        )
         try {
             locationService.loadLocation(isAuto)
                 .onSuccess { location ->
@@ -103,6 +114,12 @@ class DashboardViewModel @Inject constructor(
                             throwable.message ?: "Failed to load location"
                         )
                     )
+                    // Log location loading failure
+                    firebaseLogger.logError(
+                        "dashboard_location_loading_failed",
+                        throwable.message ?: "Failed to load location",
+                        mapOf("auto_location" to isAuto)
+                    )
                     loadFallbackLocation()
                 }
         } catch (e: Exception) {
@@ -112,6 +129,12 @@ class DashboardViewModel @Inject constructor(
                     error = e.message ?: "Unknown error occurred"
                 )
             }
+            // Log location loading exception
+            firebaseLogger.logError(
+                "dashboard_location_loading_exception",
+                e.message ?: "Unknown error occurred",
+                mapOf("auto_location" to isAuto)
+            )
             loadFallbackLocation()
         }
     }
@@ -136,6 +159,16 @@ class DashboardViewModel @Inject constructor(
     // Prayer Times Related Functions
     private suspend fun updatePrayerTimes(parameters: Parameters) {
         _prayerTimesState.update { it.copy(isLoading = true, error = null) }
+        // Log prayer times update attempt
+        firebaseLogger.logEvent(
+            "dashboard_updating_prayer_times",
+            mapOf(
+                "calculation_method" to valueOf(parameters.method),
+                "latitude" to parameters.latitude,
+                "longitude" to parameters.longitude
+            ),
+            FirebaseLogger.Companion.EventCategory.PERFORMANCE
+        )
         try {
             val response = withContext(Dispatchers.IO) {
                 prayerTimesRepository.updatePrayerTimes(parameters)
@@ -155,13 +188,26 @@ class DashboardViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-            } ?: run {
+                // Log prayer times update success
+                firebaseLogger.logEvent(
+                    "dashboard_prayer_times_updated",
+                    null,
+                    FirebaseLogger.Companion.EventCategory.PERFORMANCE
+                )
+            } ?:  run {
                 _prayerTimesState.update {
                     it.copy(
                         error = "Failed to update prayer times. Data is null.",
                         isLoading = false
                     )
                 }
+
+                // Log prayer times update failure
+                firebaseLogger.logError(
+                    "dashboard_prayer_times_update_failed",
+                    "Failed to update prayer times. Data is null.",
+                    mapOf("parameters" to parameters.toString())
+                )
             }
         } catch (e: Exception) {
             _prayerTimesState.update {
@@ -170,6 +216,12 @@ class DashboardViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+            // Log prayer times update exception
+            firebaseLogger.logError(
+                "dashboard_prayer_times_update_exception",
+                e.message ?: "Failed to update prayer times",
+                mapOf("parameters" to parameters.toString())
+            )
         }
     }
 
@@ -213,6 +265,11 @@ class DashboardViewModel @Inject constructor(
                     )
                 }
             }
+            firebaseLogger.logEvent(
+                "dashboard_current_next_prayer_times_fetched",
+                null,
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
         } catch (e: Exception) {
             _prayerTimesState.update {
                 it.copy(
@@ -220,11 +277,22 @@ class DashboardViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+            firebaseLogger.logError(
+                "dashboard_current_next_prayer_times_fetch_failed",
+                e.message ?: "Error fetching current/next prayer times",
+                null
+            )
         }
     }
 
     //function to clear error message for all states
     fun clearError() {
+        // Log error clearing
+        firebaseLogger.logEvent(
+            "dashboard_clear_errors",
+            null,
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
         _locationState.update { it.copy(error = null) }
         _prayerTimesState.update { it.copy(error = null) }
         _trackerState.update { it.copy(error = null) }
@@ -235,6 +303,12 @@ class DashboardViewModel @Inject constructor(
 
     private suspend fun setAlarms(context: Context) {
         _prayerTimesState.update { it.copy(isLoading = true, error = null) }
+        // Log alarm setting attempt
+        firebaseLogger.logEvent(
+            "dashboard_setting_alarms_started",
+            null,
+            FirebaseLogger.Companion.EventCategory.PERFORMANCE
+        )
         try {
             loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
             loadPrayerTimes()
@@ -264,8 +338,20 @@ class DashboardViewModel @Inject constructor(
                     )
                 }
                 sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
+                // Log alarms created
+                firebaseLogger.logEvent(
+                    "dashboard_alarms_created",
+                    null,
+                    FirebaseLogger.Companion.EventCategory.PERFORMANCE
+                )
             }
             _prayerTimesState.update { it.copy(isLoading = false) }
+            // Log alarm setting completed
+            firebaseLogger.logEvent(
+                "dashboard_setting_alarms_completed",
+                null,
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
         } catch (e: Exception) {
             _prayerTimesState.update {
                 it.copy(
@@ -273,6 +359,12 @@ class DashboardViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+            // Log alarm setting error
+            firebaseLogger.logError(
+                "dashboard_setting_alarms_failed",
+                e.message ?: "Error setting alarms",
+                null
+            )
         }
     }
 
@@ -327,8 +419,17 @@ class DashboardViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
-                    if (isFasting) fajrAndMaghribTimes()
+                    val today = LocalDate.now()
+                    val todayHijri = HijrahDate.from(today)
+                    val isRamadan = todayHijri[ChronoField.MONTH_OF_YEAR] == 9 &&
+                            todayHijri[ChronoField.DAY_OF_MONTH] <= 29
+                    if (isFasting || isRamadan) fajrAndMaghribTimes()
                 }
+            firebaseLogger.logEvent(
+                "dashboard_fasting_status_fetched",
+                null,
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
         } catch (e: Exception) {
             _trackerState.update {
                 it.copy(
@@ -337,6 +438,11 @@ class DashboardViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+            firebaseLogger.logError(
+                "dashboard_fasting_status_fetch_failed",
+                e.message ?: "Error checking fasting status",
+                null
+            )
         }
     }
 
@@ -350,7 +456,14 @@ class DashboardViewModel @Inject constructor(
                     maghribTime = prayerTimes?.maghrib ?: LocalDateTime.now(),
                     isLoading = false
                 )
+
             }
+            firebaseLogger.logEvent(
+                "dashboard_fajr_maghrib_times_fetched",
+                null,
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
+
         } catch (e: Exception) {
             _trackerState.update {
                 it.copy(
@@ -358,6 +471,11 @@ class DashboardViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+            firebaseLogger.logError(
+                "dashboard_fajr_maghrib_times_fetch_failed",
+                e.message ?: "Error fetching prayer times",
+                null
+            )
         }
     }
 
@@ -367,6 +485,16 @@ class DashboardViewModel @Inject constructor(
         prayerDone: Boolean
     ) = withContext(Dispatchers.IO) {
         _trackerState.update { it.copy(isLoading = true, error = null) }
+        // Log prayer tracker update
+        firebaseLogger.logEvent(
+            "dashboard_prayer_tracker_update",
+            mapOf(
+                "date" to date.toString(),
+                "prayer_name" to prayerName,
+                "prayer_done" to prayerDone
+            ),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
         try {
             prayerTrackerRepository.updateSpecificPrayer(date, prayerName, prayerDone)
             prayerTrackerRepository.observePrayersForDate(date)
@@ -392,6 +520,15 @@ class DashboardViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+            // Log prayer tracker update error
+            firebaseLogger.logError(
+                "dashboard_prayer_tracker_update_failed",
+                e.message ?: "Error updating prayer tracker",
+                mapOf(
+                    "date" to date.toString(),
+                    "prayer_name" to prayerName
+                )
+            )
         }
     }
 
@@ -446,6 +583,12 @@ class DashboardViewModel @Inject constructor(
     // Update Related Functions
     private fun handleCheckUpdate(event: DashboardEvent.CheckUpdate) {
         _updateState.update { it.copy(isLoading = true, error = null) }
+        // Log update check
+        firebaseLogger.logEvent(
+            "dashboard_update_check",
+            mapOf("update_type" to event.updateType),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
         updateService.checkForUpdate(event.updateType) { result ->
             result.onSuccess { isUpdateAvailable ->
                 _updateState.update { state ->
@@ -454,6 +597,12 @@ class DashboardViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
+                // Log update check result
+                firebaseLogger.logEvent(
+                    "dashboard_update_check_result",
+                    mapOf("update_available" to isUpdateAvailable),
+                    FirebaseLogger.Companion.EventCategory.USER_ACTION
+                )
             }.onFailure { error ->
                 //if error code is -6 then do not show error message
                 if (error.message?.contains("-6") == false) {
@@ -464,6 +613,12 @@ class DashboardViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                    // Log update check error
+                    firebaseLogger.logError(
+                        "dashboard_update_check_failed",
+                        error.message ?: "Update check failed",
+                        null
+                    )
                 }
             }
         }
@@ -673,6 +828,15 @@ class DashboardViewModel @Inject constructor(
                     AppConstants.RANDOM_AYAT_NUMBER_IN_SURAH_LAST_FETCHED,
                     finalAya.ayaNumberInQuran
                 )
+                // Log after successful fetch
+                firebaseLogger.logEvent(
+                    "dashboard_random_aya_fetched",
+                    mapOf(
+                        "surah_name" to surah.name,
+                        "juz_number" to juz.number
+                    ),
+                    FirebaseLogger.Companion.EventCategory.PERFORMANCE
+                )
             }
         } catch (e: Exception) {
             _quranState.update {
@@ -681,6 +845,11 @@ class DashboardViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+            firebaseLogger.logError(
+                "dashboard_random_aya_fetch_failed",
+                e.message ?: "Error fetching random aya",
+                null
+            )
         }
     }
 
@@ -743,6 +912,11 @@ class DashboardViewModel @Inject constructor(
     // Event Handler and Initialization
     fun handleEvent(event: DashboardEvent) {
         viewModelScope.launch {
+            firebaseLogger.logEvent(
+                "dashboard_event",
+                mapOf("event_type" to event.javaClass.simpleName),
+                FirebaseLogger.Companion.EventCategory.USER_ACTION
+            )
             when (event) {
                 is DashboardEvent.LoadLocation ->
                     loadLocation(sharedPreferences.getDataBoolean(LOCATION_TYPE, false))
@@ -781,6 +955,12 @@ class DashboardViewModel @Inject constructor(
 
     fun initializeData(context: Activity) {
         viewModelScope.launch {
+            // Log initialization start
+            firebaseLogger.logEvent(
+                "dashboard_initialization_started",
+                null,
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
             withContext(Dispatchers.Main) {
                 launch { setAlarms(context) }
                 launch { isFastingToday() }
@@ -790,12 +970,25 @@ class DashboardViewModel @Inject constructor(
                 launch { recreateTasbih(LocalDate.now()) }
                 launch { getRandomAya() }
             }
+            // Log initialization complete
+            firebaseLogger.logEvent(
+                "dashboard_initialization_completed",
+                null,
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         handleUnregisterUpdateListener()
+
+        // Log ViewModel cleared
+        firebaseLogger.logEvent(
+            "dashboard_viewmodel_cleared",
+            null,
+            FirebaseLogger.Companion.EventCategory.LIFECYCLE
+        )
     }
 
 }

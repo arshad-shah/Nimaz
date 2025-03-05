@@ -54,10 +54,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            testCoverageEnabled true
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            enableUnitTestCoverage true
+            enableAndroidTestCoverage true
         }
     }
     compileOptions {
@@ -223,6 +224,11 @@ dependencies {
 
 
     implementation libs.introshowcaseview
+
+
+    testImplementation libs.mockito.core
+    // Optional -- mockito-kotlin
+    testImplementation libs.mockito.kotlin
 
 
 }

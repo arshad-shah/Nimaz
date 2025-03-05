@@ -30,54 +30,85 @@ class MissedPrayerReceiver : BroadcastReceiver() {
     lateinit var notificationHelper: NotificationHelper
 
     override fun onReceive(context: Context, intent: Intent) {
-        val mapForLogging = mapOf(
-            "MissedPrayerReceiver" to "MissedPrayerReceiver called"
+        // Log receiver trigger
+        firebaseLogger.logEvent(
+            "missed_prayer_check_started",
+            mapOf("time" to LocalTime.now().toString())
         )
-        firebaseLogger.logEvent("Missed Prayer Receiver", mapForLogging)
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                var amountMissed = 0
-                val nameOfMissedPrayers = mutableListOf<String>()
-                val tracker = localDataStore.getTrackerForDate(LocalDate.now())
+                val today = LocalDate.now()
+                val tracker = localDataStore.getTrackerForDate(today)
 
                 Log.d(
                     AppConstants.MISSED_PRAYER_RECEIVER_TAG,
                     "onReceived: called and tracker is $tracker"
                 )
 
+                // Track missed prayers
+                var amountMissed = 0
+                val nameOfMissedPrayers = mutableListOf<String>()
+
+                // Check each prayer status
+                val prayerStatus = mutableMapOf<String, Boolean>()
+
+                // Fajr status
+                prayerStatus["fajr"] = tracker.fajr
                 if (!tracker.fajr) {
                     amountMissed++
                     nameOfMissedPrayers.add("Fajr")
                 }
+
+                // Dhuhr status
+                prayerStatus["dhuhr"] = tracker.dhuhr
                 if (!tracker.dhuhr) {
                     amountMissed++
                     nameOfMissedPrayers.add("Dhuhr")
                 }
+
+                // Asr status
+                prayerStatus["asr"] = tracker.asr
                 if (!tracker.asr) {
                     amountMissed++
                     nameOfMissedPrayers.add("Asr")
                 }
+
+                // Maghrib status
+                prayerStatus["maghrib"] = tracker.maghrib
                 if (!tracker.maghrib) {
                     amountMissed++
                     nameOfMissedPrayers.add("Maghrib")
                 }
+
+                // Isha status
+                prayerStatus["isha"] = tracker.isha
                 if (!tracker.isha) {
                     amountMissed++
                     nameOfMissedPrayers.add("Isha")
                 }
 
-                val title = if (amountMissed > 0) "$amountMissed prayers missed"
-                else "Well Done!"
+                // Log prayer completion status
+                firebaseLogger.logEvent(
+                    "daily_prayer_completion_status",
+                    mapOf(
+                        "date" to today.toString(),
+                        "total_completed" to (5 - amountMissed),
+                        "total_missed" to amountMissed,
+                        "completion_percentage" to ((5 - amountMissed) * 20),
+                        "missed_prayers" to if (nameOfMissedPrayers.isEmpty()) "none" else nameOfMissedPrayers.joinToString(",")
+                    )
+                )
 
-                val timeLeft =
-                    LocalTime.now().until(LocalTime.of(23, 59, 59), ChronoUnit.MINUTES)
-
+                // Prepare notification content
+                val title = if (amountMissed > 0) "$amountMissed prayers missed" else "Well Done!"
+                val timeLeft = LocalTime.now().until(LocalTime.of(23, 59, 59), ChronoUnit.MINUTES)
                 val message =
                     if (amountMissed > 0) "You missed ${nameOfMissedPrayers.joinToString(", ")} today," +
                             "\n there is still $timeLeft minutes left to complete ${if (amountMissed > 1) "them" else "it"}"
                     else "You completed all your prayers today. Keep it up!"
 
+                // Create notification
                 notificationHelper.createNotificationForMissedPrayer(
                     context,
                     AppConstants.CHANNEL_MISSED_PRAYER_ID,
@@ -86,15 +117,28 @@ class MissedPrayerReceiver : BroadcastReceiver() {
                     message
                 )
 
+                // Log notification created
+                firebaseLogger.logEvent(
+                    "missed_prayer_notification_sent",
+                    mapOf(
+                        "title" to title,
+                        "missed_count" to amountMissed,
+                        "achievement" to if (amountMissed == 0) "all_completed" else "partial_completion"
+                    )
+                )
+
             } catch (e: Exception) {
                 Log.e(
                     AppConstants.MISSED_PRAYER_RECEIVER_TAG,
-                    "Error in BootReceiver: ${e.message}"
+                    "Error in MissedPrayerReceiver: ${e.message}"
                 )
-                val mapForLoggingError = mapOf(
-                    "MissedPrayerReceiver" to "Error in BootReceiver: ${e.message}"
+
+                // Log error
+                firebaseLogger.logError(
+                    "missed_prayer_receiver_error",
+                    e.message ?: "Unknown error in MissedPrayerReceiver",
+                    mapOf("error_type" to e.javaClass.simpleName)
                 )
-                firebaseLogger.logEvent("MissedPrayerReceiver", mapForLoggingError)
             }
         }
 

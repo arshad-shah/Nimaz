@@ -29,9 +29,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.arshadshah.nimaz" />
-                  <option name="mobileSdkAppId" value="1:984713528541:android:f75e4fcce5e78e193c0734" />
-                  <option name="projectId" value="nimaz-38d37" />
-                  <option name="projectNumber" value="984713528541" />
+                  <option name="mobileSdkAppId" value="1:403350204172:android:51c52bcdf5bc98dd5fa329" />
+                  <option name="projectId" value="nimaz-c00b2" />
+                  <option name="projectNumber" value="403350204172" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

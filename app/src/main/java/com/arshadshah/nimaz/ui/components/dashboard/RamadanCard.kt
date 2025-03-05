@@ -98,8 +98,7 @@ fun RamadanCard(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = if (todayHijri[ChronoField.DAY_OF_MONTH] == 1 &&
-                            todayHijri[ChronoField.MONTH_OF_YEAR] == 9
+                        text = if (todayHijri[ChronoField.MONTH_OF_YEAR] == 9
                         )
                             "Ramadan Mubarak"
                         else

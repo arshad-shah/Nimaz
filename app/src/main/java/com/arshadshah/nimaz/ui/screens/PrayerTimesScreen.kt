@@ -33,7 +33,6 @@ import java.time.format.DateTimeFormatter
 
 private const val SCREEN_WIDTH_THRESHOLD = 720
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrayerTimesScreen(
     navController: NavHostController,

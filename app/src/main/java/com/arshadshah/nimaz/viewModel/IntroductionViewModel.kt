@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.repositories.Location
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.LocationStateManager
 import com.arshadshah.nimaz.services.PrayerTimesService
+import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
 import com.arshadshah.nimaz.utils.sunMoonUtils.AutoAnglesCalc
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @HiltViewModel
 class IntroductionViewModel @Inject constructor(
@@ -36,7 +38,8 @@ class IntroductionViewModel @Inject constructor(
     private val prayerTimesService: PrayerTimesService,
     private val locationService: LocationService,
     private val createAlarms: CreateAlarms,
-    private val locationStateManager: LocationStateManager
+    private val locationStateManager: LocationStateManager,
+    val firebaseLogger: FirebaseLogger // Added Firebase Logger
 ) : ViewModel() {
 
     // UI State
@@ -44,7 +47,8 @@ class IntroductionViewModel @Inject constructor(
         val isLoading: Boolean = false,
         val error: String? = null,
         val currentPage: Int = 0,
-        val isSetupComplete: Boolean = false
+        val isSetupComplete: Boolean = false,
+        val showLegalError: Boolean = false  // Added for displaying legal acceptance error
     )
 
     // Location Settings State
@@ -71,6 +75,13 @@ class IntroductionViewModel @Inject constructor(
         val availableCalculationMethods: Map<String, String> = AppConstants.getMethods()
     )
 
+    // Legal Acceptance State - Added new state class
+    data class LegalSettingsState(
+        val termsAccepted: Boolean = false,
+        val privacyPolicyAccepted: Boolean = false,
+        val lastAcceptedVersion: String = ""
+    )
+
     // StateFlows
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -86,6 +97,11 @@ class IntroductionViewModel @Inject constructor(
     private val _calculationSettingsState = MutableStateFlow(CalculationSettingsState())
     val calculationSettingsState: StateFlow<CalculationSettingsState> =
         _calculationSettingsState.asStateFlow()
+
+    // Added new StateFlow for legal settings
+    private val _legalSettingsState = MutableStateFlow(LegalSettingsState())
+    val legalSettingsState: StateFlow<LegalSettingsState> =
+        _legalSettingsState.asStateFlow()
 
     // Location state from manager
     val locationState = locationStateManager.locationState
@@ -120,8 +136,19 @@ class IntroductionViewModel @Inject constructor(
     private val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+    // New convenience property for checking if legal terms have been accepted
+    val termsAccepted: Boolean
+        get() = legalSettingsState.value.termsAccepted && legalSettingsState.value.privacyPolicyAccepted
+
     init {
         loadInitialState()
+
+        // Log that onboarding has started
+        firebaseLogger.logEvent(
+            "onboarding_started",
+            mapOf("app_version" to getAppVersion()),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
     }
 
     private fun loadInitialState() {
@@ -129,6 +156,13 @@ class IntroductionViewModel @Inject constructor(
             safeOperation("load initial state") {
                 loadSettings()
                 locationStateManager.cleanupRequest()
+
+                // Log initial state loaded
+                firebaseLogger.logEvent(
+                    "onboarding_state_loaded",
+                    null,
+                    FirebaseLogger.Companion.EventCategory.PERFORMANCE
+                )
             }
         }
     }
@@ -155,6 +189,13 @@ class IntroductionViewModel @Inject constructor(
         data class HandleNotificationToggle(val enabled: Boolean) : IntroEvent()
         data class HandleBatteryOptimization(val enable: Boolean) : IntroEvent()
 
+        // Legal Events - Added new event types
+        data class AcceptTerms(val accepted: Boolean) : IntroEvent()
+        data class AcceptPrivacyPolicy(val accepted: Boolean) : IntroEvent()
+        data class AcceptAllLegalTerms(val accepted: Boolean) : IntroEvent()
+        data object ShowLegalError : IntroEvent()
+        data object ClearLegalError : IntroEvent()
+
         // System Events
         data object CompleteSetup : IntroEvent()
         data object LoadState : IntroEvent()
@@ -175,36 +216,253 @@ class IntroductionViewModel @Inject constructor(
                     is IntroEvent.NavigateToPage -> {
                         _uiState.update { it.copy(currentPage = event.page) }
                         sharedPreferences.saveDataInt("current_intro_page", event.page)
+
+                        // Log page navigation
+                        firebaseLogger.logScreenView(
+                            "onboarding_page_${event.page}",
+                            "IntroPage"
+                        )
                     }
 
                     // Location Events
-                    is IntroEvent.HandleLocationToggle -> handleLocationToggle(event.enabled)
-                    is IntroEvent.LocationInput -> handleLocationInput(event.location)
-                    is IntroEvent.LoadLocation -> loadLocation(locationSettingsState.value.isAuto)
-                    is IntroEvent.UpdateLocationPermission -> handleLocationPermissionUpdate(event.granted)
+                    is IntroEvent.HandleLocationToggle -> {
+                        handleLocationToggle(event.enabled)
+
+                        // Log location toggle event
+                        firebaseLogger.logEvent(
+                            "location_auto_toggle",
+                            mapOf("enabled" to event.enabled),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.LocationInput -> {
+                        handleLocationInput(event.location)
+
+                        // Log location input event
+                        firebaseLogger.logEvent(
+                            "location_manual_input",
+                            mapOf("location" to event.location),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.LoadLocation -> {
+                        loadLocation(locationSettingsState.value.isAuto)
+
+                        // Log location loading
+                        firebaseLogger.logEvent(
+                            "location_loading",
+                            mapOf("auto_location" to locationSettingsState.value.isAuto),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.UpdateLocationPermission -> {
+                        handleLocationPermissionUpdate(event.granted)
+
+                        // Log permission update
+                        firebaseLogger.logEvent(
+                            "location_permission_update",
+                            mapOf("granted" to event.granted),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
 
                     // Settings Events
-                    is IntroEvent.UpdateAutoParams -> handleAutoParams(event.enabled)
-                    is IntroEvent.UpdateCalculationMethod -> handleMethodSelection(event.method)
-                    is IntroEvent.ToggleAutoCalculation -> handleAutoCalculation(event.enabled)
-                    is IntroEvent.UpdateNotificationPermission -> handleNotificationPermissionUpdate(
-                        event.granted
-                    )
+                    is IntroEvent.UpdateAutoParams -> {
+                        handleAutoParams(event.enabled)
 
-                    is IntroEvent.UpdateBatteryOptimization -> handleBatteryOptimizationUpdate(event.exempted)
-                    is IntroEvent.NotificationsAllowed -> handleNotificationsAllowedUpdate(event.allowed)
-                    is IntroEvent.HandleNotificationToggle -> handleNotificationToggle(event.enabled)
-                    is IntroEvent.HandleBatteryOptimization -> handleBatteryOptimizationToggle(event.enable)
+                        // Log auto params change
+                        firebaseLogger.logEvent(
+                            "calculation_auto_params",
+                            mapOf("enabled" to event.enabled),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.UpdateCalculationMethod -> {
+                        handleMethodSelection(event.method)
+
+                        // Log method selection
+                        firebaseLogger.logEvent(
+                            "calculation_method_selected",
+                            mapOf("method" to event.method),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.ToggleAutoCalculation -> {
+                        handleAutoCalculation(event.enabled)
+
+                        // Log auto calculation toggle
+                        firebaseLogger.logEvent(
+                            "auto_calculation_toggle",
+                            mapOf("enabled" to event.enabled),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.UpdateNotificationPermission -> {
+                        handleNotificationPermissionUpdate(event.granted)
+
+                        // Log notification permission update
+                        firebaseLogger.logEvent(
+                            "notification_permission_update",
+                            mapOf("granted" to event.granted),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.UpdateBatteryOptimization -> {
+                        handleBatteryOptimizationUpdate(event.exempted)
+
+                        // Log battery optimization update
+                        firebaseLogger.logEvent(
+                            "battery_optimization_update",
+                            mapOf("exempted" to event.exempted),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.NotificationsAllowed -> {
+                        handleNotificationsAllowedUpdate(event.allowed)
+
+                        // Log notifications allowed update
+                        firebaseLogger.logEvent(
+                            "notifications_allowed_update",
+                            mapOf("allowed" to event.allowed),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.HandleNotificationToggle -> {
+                        handleNotificationToggle(event.enabled)
+
+                        // Log notification toggle
+                        firebaseLogger.logEvent(
+                            "notification_toggle",
+                            mapOf("enabled" to event.enabled),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.HandleBatteryOptimization -> {
+                        handleBatteryOptimizationToggle(event.enable)
+
+                        // Log battery optimization toggle
+                        firebaseLogger.logEvent(
+                            "battery_optimization_toggle",
+                            mapOf("enable" to event.enable),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    // Legal Events - Handling for new events
+                    is IntroEvent.AcceptTerms -> {
+                        handleTermsAcceptance(event.accepted)
+
+                        // Log terms acceptance
+                        firebaseLogger.logEvent(
+                            "terms_acceptance",
+                            mapOf("accepted" to event.accepted),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.AcceptPrivacyPolicy -> {
+                        handlePrivacyPolicyAcceptance(event.accepted)
+
+                        // Log privacy policy acceptance
+                        firebaseLogger.logEvent(
+                            "privacy_policy_acceptance",
+                            mapOf("accepted" to event.accepted),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.AcceptAllLegalTerms -> {
+                        handleAllLegalTermsAcceptance(event.accepted)
+
+                        // Log all legal terms acceptance
+                        firebaseLogger.logEvent(
+                            "all_legal_terms_acceptance",
+                            mapOf("accepted" to event.accepted),
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
+
+                    is IntroEvent.ShowLegalError -> {
+                        _uiState.update { it.copy(showLegalError = true) }
+
+                        // Log legal error shown
+                        firebaseLogger.logEvent(
+                            "legal_error_shown",
+                            null,
+                            FirebaseLogger.Companion.EventCategory.APP_ERROR
+                        )
+                    }
+
+                    is IntroEvent.ClearLegalError -> {
+                        _uiState.update { it.copy(showLegalError = false) }
+                    }
 
                     // System Events
                     is IntroEvent.CompleteSetup -> {
-                        _uiState.update { it.copy(isSetupComplete = true) }
-                        sharedPreferences.saveDataBoolean(IS_FIRST_INSTALL, false)
+                        if (legalSettingsState.value.termsAccepted && legalSettingsState.value.privacyPolicyAccepted) {
+                            _uiState.update { it.copy(isSetupComplete = true) }
+                            sharedPreferences.saveDataBoolean(IS_FIRST_INSTALL, false)
+
+                            // Log setup completion
+                            firebaseLogger.logEvent(
+                                "onboarding_completed",
+                                mapOf(
+                                    "auto_location" to locationSettingsState.value.isAuto,
+                                    "calculation_method" to calculationSettingsState.value.calculationMethod,
+                                    "auto_calculation" to calculationSettingsState.value.isAutoCalculation,
+                                    "notifications_enabled" to notificationSettingsState.value.areNotificationsAllowed,
+                                    "battery_optimized" to notificationSettingsState.value.batteryOptimizationExempted
+                                ),
+                                FirebaseLogger.Companion.EventCategory.USER_ACTION
+                            )
+
+                            // Set user properties for later analysis
+                            firebaseLogger.setUserProperty(
+                                "user_location_type",
+                                if (locationSettingsState.value.isAuto) "auto" else "manual"
+                            )
+                            firebaseLogger.setUserProperty(
+                                "user_calc_method",
+                                calculationSettingsState.value.calculationMethod
+                            )
+                            firebaseLogger.setUserProperty(
+                                "user_has_notifications",
+                                notificationSettingsState.value.areNotificationsAllowed.toString()
+                            )
+                        } else {
+                            _uiState.update { it.copy(showLegalError = true) }
+
+                            // Log legal acceptance error
+                            firebaseLogger.logEvent(
+                                "onboarding_completion_blocked",
+                                mapOf("reason" to "legal_terms_not_accepted"),
+                                FirebaseLogger.Companion.EventCategory.APP_ERROR
+                            )
+                        }
                     }
 
                     is IntroEvent.LoadState -> loadInitialState()
 
-                    is IntroEvent.CreateNotificationChannels -> createNotificationChannels()
+                    is IntroEvent.CreateNotificationChannels -> {
+                        createNotificationChannels()
+
+                        // Log notification channels creation
+                        firebaseLogger.logEvent(
+                            "notification_channels_created",
+                            null,
+                            FirebaseLogger.Companion.EventCategory.USER_ACTION
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 handleError("event handling", e)
@@ -231,6 +489,17 @@ class IntroductionViewModel @Inject constructor(
     private fun handleError(operation: String, e: Exception) {
         val errorMessage = "Failed to $operation: ${e.localizedMessage}"
         _uiState.update { it.copy(error = errorMessage) }
+
+        // Log error to Firebase
+        firebaseLogger.logError(
+            "onboarding_error",
+            errorMessage,
+            mapOf(
+                "operation" to operation,
+                "exception_type" to e.javaClass.simpleName,
+                "current_page" to _uiState.value.currentPage
+            )
+        )
     }
 
     private suspend fun loadSettings() {
@@ -285,12 +554,89 @@ class IntroductionViewModel @Inject constructor(
                 )
             }
 
+            // Load Legal Settings
+            _legalSettingsState.update {
+                it.copy(
+                    termsAccepted = sharedPreferences.getDataBoolean(
+                        "terms_accepted",
+                        false
+                    ),
+                    privacyPolicyAccepted = sharedPreferences.getDataBoolean(
+                        "privacy_policy_accepted",
+                        false
+                    ),
+                    lastAcceptedVersion = sharedPreferences.getData(
+                        "legal_version_accepted",
+                        ""
+                    )
+                )
+            }
+
             // Load UI State
             _uiState.update {
                 it.copy(
                     currentPage = sharedPreferences.getDataInt("current_intro_page"),
                     isSetupComplete = sharedPreferences.getDataBoolean("setup_complete", false)
                 )
+            }
+        }
+    }
+
+    // Helper function to get app version for analytics
+    private fun getAppVersion(): String {
+        return try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "unknown"
+        } catch (e: Exception) {
+            "unknown"
+        }
+    }
+
+    // Legal handling methods - New section
+    private suspend fun handleTermsAcceptance(accepted: Boolean) {
+        safeOperation("handle terms acceptance") {
+            _legalSettingsState.update { it.copy(termsAccepted = accepted) }
+            sharedPreferences.saveDataBoolean("terms_accepted", accepted)
+            if (accepted) {
+                _uiState.update { it.copy(showLegalError = false) }
+                // Store app version to track future terms updates
+                val appVersion =
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                sharedPreferences.saveData("legal_version_accepted", appVersion ?: "unknown")
+            }
+        }
+    }
+
+    private suspend fun handlePrivacyPolicyAcceptance(accepted: Boolean) {
+        safeOperation("handle privacy policy acceptance") {
+            _legalSettingsState.update { it.copy(privacyPolicyAccepted = accepted) }
+            sharedPreferences.saveDataBoolean("privacy_policy_accepted", accepted)
+            if (accepted) {
+                _uiState.update { it.copy(showLegalError = false) }
+                // Store app version to track future policy updates
+                val appVersion =
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                sharedPreferences.saveData("legal_version_accepted", appVersion ?: "unknown")
+            }
+        }
+    }
+
+    private suspend fun handleAllLegalTermsAcceptance(accepted: Boolean) {
+        safeOperation("handle all legal terms acceptance") {
+            _legalSettingsState.update {
+                it.copy(
+                    termsAccepted = accepted,
+                    privacyPolicyAccepted = accepted
+                )
+            }
+            sharedPreferences.saveDataBoolean("terms_accepted", accepted)
+            sharedPreferences.saveDataBoolean("privacy_policy_accepted", accepted)
+
+            if (accepted) {
+                _uiState.update { it.copy(showLegalError = false) }
+                // Store app version to track future updates
+                val appVersion =
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                sharedPreferences.saveData("legal_version_accepted", appVersion ?: "unknown")
             }
         }
     }
@@ -328,6 +674,13 @@ class IntroductionViewModel @Inject constructor(
                     )
                 )
                 loadFallbackLocation()
+
+                // Log location loading error
+                firebaseLogger.logError(
+                    "location_loading_error",
+                    "Failed to load location: ${e.message}",
+                    mapOf("input_location" to location)
+                )
             }
         }
     }
@@ -348,6 +701,16 @@ class IntroductionViewModel @Inject constructor(
                         }
 
                         updatePrayerTimes()
+
+                        // Log successful location loading
+                        firebaseLogger.logEvent(
+                            "location_loaded_success",
+                            mapOf(
+                                "location_name" to location.locationName,
+                                "auto_location" to isAuto
+                            ),
+                            FirebaseLogger.Companion.EventCategory.PERFORMANCE
+                        )
                     }
                     .onFailure { throwable ->
                         locationStateManager.updateLocationState(
@@ -356,12 +719,26 @@ class IntroductionViewModel @Inject constructor(
                             )
                         )
                         loadFallbackLocation()
+
+                        // Log location loading failure
+                        firebaseLogger.logError(
+                            "location_loading_failure",
+                            throwable.message ?: "Failed to load location",
+                            mapOf("auto_location" to isAuto)
+                        )
                     }
             } catch (e: Exception) {
                 locationStateManager.updateLocationState(
                     LocationStateManager.LocationState.Error(e.message ?: "Unknown error occurred")
                 )
                 loadFallbackLocation()
+
+                // Log exception in location loading
+                firebaseLogger.logError(
+                    "location_loading_exception",
+                    e.message ?: "Unknown error occurred",
+                    mapOf("auto_location" to isAuto)
+                )
             }
         }
     }
@@ -385,6 +762,15 @@ class IntroductionViewModel @Inject constructor(
                     locationName = fallbackLocation.locationName
                 )
             }
+
+            // Log fallback location loaded
+            firebaseLogger.logEvent(
+                "fallback_location_loaded",
+                mapOf(
+                    "location_name" to fallbackLocation.locationName
+                ),
+                FirebaseLogger.Companion.EventCategory.USER_ACTION
+            )
         }
     }
 
@@ -406,14 +792,30 @@ class IntroductionViewModel @Inject constructor(
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
+
+        // Log location settings launch
+        firebaseLogger.logEvent(
+            "location_settings_launched",
+            null,
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
     }
 
     private suspend fun updatePrayerTimes() {
         safeOperation("update prayer times") {
             prayerTimesService.getPrayerTimes()
+
+            // Log prayer times update
+            firebaseLogger.logEvent(
+                "prayer_times_updated",
+                mapOf(
+                    "location" to locationSettingsState.value.locationName,
+                    "calculation_method" to calculationSettingsState.value.calculationMethod
+                ),
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
         }
     }
-
 
     // Notification handling methods
     private suspend fun handleNotificationPermissionUpdate(granted: Boolean) {
@@ -456,16 +858,30 @@ class IntroductionViewModel @Inject constructor(
             if (enable) {
                 val intent = Intent().apply {
                     action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                    data = Uri.parse("package:${context.packageName}")
+                    data = "package:${context.packageName}".toUri()
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)
+
+                // Log battery optimization request
+                firebaseLogger.logEvent(
+                    "battery_optimization_requested",
+                    null,
+                    FirebaseLogger.Companion.EventCategory.USER_ACTION
+                )
             } else {
                 val intent = Intent().apply {
                     action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)
+
+                // Log battery settings opened
+                firebaseLogger.logEvent(
+                    "battery_settings_opened",
+                    null,
+                    FirebaseLogger.Companion.EventCategory.USER_ACTION
+                )
             }
         }
     }
@@ -476,6 +892,13 @@ class IntroductionViewModel @Inject constructor(
             if (!channelLock) {
                 createAlarms.createAllNotificationChannels(context)
                 sharedPreferences.saveDataBoolean(AppConstants.CHANNEL_LOCK, true)
+
+                // Log notification channels created
+                firebaseLogger.logEvent(
+                    "notification_channels_created",
+                    null,
+                    FirebaseLogger.Companion.EventCategory.USER_ACTION
+                )
             }
         }
     }
@@ -487,6 +910,13 @@ class IntroductionViewModel @Inject constructor(
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
+
+        // Log notification settings launched
+        firebaseLogger.logEvent(
+            "notification_settings_launched",
+            null,
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
     }
 
     // Calculation method handling
@@ -540,6 +970,18 @@ class IntroductionViewModel @Inject constructor(
                     saveData(AppConstants.MAGHRIB_ADJUSTMENT, "0")
                     saveData(AppConstants.ISHA_ADJUSTMENT, "0")
                 }
+
+                // Log auto calculation enabled with angles
+                firebaseLogger.logEvent(
+                    "auto_calculation_applied",
+                    mapOf(
+                        "fajr_angle" to fajrAngle,
+                        "isha_angle" to ishaAngle,
+                        "latitude" to latitude,
+                        "longitude" to longitude
+                    ),
+                    FirebaseLogger.Companion.EventCategory.USER_ACTION
+                )
             }
 
             updatePrayerTimes()
@@ -570,6 +1012,16 @@ class IntroductionViewModel @Inject constructor(
                     saveData(AppConstants.ISHA_ANGLE, ishaAngle.toString())
                     saveData(AppConstants.HIGH_LATITUDE_RULE, "TWILIGHT_ANGLE")
                 }
+
+                // Log auto parameters applied
+                firebaseLogger.logEvent(
+                    "auto_params_applied",
+                    mapOf(
+                        "fajr_angle" to fajrAngle,
+                        "isha_angle" to ishaAngle
+                    ),
+                    FirebaseLogger.Companion.EventCategory.USER_ACTION
+                )
             }
 
             updatePrayerTimes()
@@ -590,6 +1042,12 @@ class IntroductionViewModel @Inject constructor(
             defaults["maghribAdjustment"]?.let { saveData(AppConstants.MAGHRIB_ADJUSTMENT, it) }
             defaults["ishaAdjustment"]?.let { saveData(AppConstants.ISHA_ADJUSTMENT, it) }
         }
-    }
 
+        // Log calculation defaults applied
+        firebaseLogger.logEvent(
+            "calculation_defaults_applied",
+            mapOf("method_defaults" to defaults.keys.joinToString(",")),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
+    }
 }

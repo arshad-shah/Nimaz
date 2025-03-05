@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.components.intro
 import android.Manifest
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -33,9 +34,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 fun IntroLocation(
     viewModel: IntroductionViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val locationSettings by viewModel.locationSettingsState.collectAsState()
-    val locationState by viewModel.locationState.collectAsState()
     val isLoading by viewModel.uiState.collectAsState()
     val locationNameState = viewModel.locationName.collectAsState()
 
@@ -59,11 +58,14 @@ fun IntroLocation(
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.handleEvent(
-                    IntroductionViewModel.IntroEvent.HandleLocationToggle(
-                        locationSettings.isAuto
+                Log.d("IsAuto", locationSettings.isAuto.toString())
+                if(locationPermissions.allPermissionsGranted){
+                    viewModel.handleEvent(
+                        IntroductionViewModel.IntroEvent.HandleLocationToggle(
+                            true
+                        )
                     )
-                )
+                }
             }
         }
         lifecycle.addObserver(observer)
