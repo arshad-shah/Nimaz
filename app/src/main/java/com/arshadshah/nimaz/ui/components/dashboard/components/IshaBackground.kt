@@ -329,7 +329,8 @@ fun IshaBackground(modifier: Modifier = Modifier) {
             )
 
             // Moon terminator effect (shadow edge based on phase)
-            val phaseOffset = (sin(moonPhase) * baseMoonRadius).coerceIn(-baseMoonRadius, baseMoonRadius)
+            val phaseOffset =
+                (sin(moonPhase) * baseMoonRadius).coerceIn(-baseMoonRadius, baseMoonRadius)
 
             // Draw moon craters with a single pass through the list
             for (crater in moonCraters) {
@@ -365,10 +366,12 @@ fun IshaBackground(modifier: Modifier = Modifier) {
         }
 
         // Night mist/fog near the ground
-        Canvas(modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .align(Alignment.BottomCenter)) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .align(Alignment.BottomCenter)
+        ) {
 
             val mistBrush = Brush.verticalGradient(
                 colors = listOf(
@@ -456,7 +459,17 @@ fun EnhancedStarryBackground(
                 else -> 3             // Orange-ish stars
             }
 
-            EnhancedStar(x, y, size, twinkleSpeed, phaseOffset, colorTemp, needsGlow, needsExtraGlow, colorIndex)
+            EnhancedStar(
+                x,
+                y,
+                size,
+                twinkleSpeed,
+                phaseOffset,
+                colorTemp,
+                needsGlow,
+                needsExtraGlow,
+                colorIndex
+            )
         }
     }
 
@@ -474,7 +487,8 @@ fun EnhancedStarryBackground(
     Canvas(modifier = modifier) {
         stars.forEach { star ->
             // Calculate brightness with sine wave for twinkling
-            val sinValue = (0.5f + 0.5f * sin(twinkleProgress * star.twinkleSpeed + star.phaseOffset))
+            val sinValue =
+                (0.5f + 0.5f * sin(twinkleProgress * star.twinkleSpeed + star.phaseOffset))
             val brightness = 0.3f + 0.7f * sinValue
 
             // Get star color from pre-computed index

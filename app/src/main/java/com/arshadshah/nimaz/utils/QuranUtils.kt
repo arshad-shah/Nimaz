@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.utils
 
 import com.arshadshah.nimaz.data.local.models.LocalAya
-import com.arshadshah.nimaz.ui.components.settings.state.FloatPreferenceSettingValueState
 import java.text.NumberFormat
 import java.util.Locale
 

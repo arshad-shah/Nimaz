@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.activities
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -18,7 +17,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
-import com.arshadshah.nimaz.constants.AppConstants.MAIN_ACTIVITY_TAG
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
@@ -142,22 +140,26 @@ class MainActivity : ComponentActivity() {
                 arguments?.getString("surahNumber")?.let { params["surah_number"] = it }
                 arguments?.getString("ayaNumber")?.let { params["aya_number"] = it }
             }
+
             screenRoute.contains("bookId") || screenRoute.contains("chapterId") -> {
                 arguments?.getString("bookId")?.let { params["book_id"] = it }
                 arguments?.getString("chapterId")?.let { params["chapter_id"] = it }
             }
+
             screenRoute.contains("number") || screenRoute.contains("isSurah") -> {
                 arguments?.getString("number")?.let { params["number"] = it }
                 arguments?.getString("isSurah")?.let { params["is_surah"] = it }
                 arguments?.getString("language")?.let { params["language"] = it }
                 arguments?.getString("scrollTo")?.let { params["scroll_to"] = it }
             }
+
             screenRoute.contains("id") || screenRoute.contains("arabic") -> {
                 arguments?.getString("id")?.let { params["tasbih_id"] = it }
                 // Don't log the full Arabic/translation text to avoid large event parameters
                 arguments?.getString("arabic")?.let { params["has_arabic"] = true }
                 arguments?.getString("translation")?.let { params["has_translation"] = true }
-                arguments?.getString("transliteration")?.let { params["has_transliteration"] = true }
+                arguments?.getString("transliteration")
+                    ?.let { params["has_transliteration"] = true }
             }
         }
 
@@ -169,17 +171,21 @@ class MainActivity : ComponentActivity() {
             "Qibla", QIBLA_SCREEN_ROUTE -> {
                 firebaseLogger.logEvent("qibla_finder_opened", null)
             }
+
             "Zakat" -> {
                 firebaseLogger.logEvent("zakat_calculator_opened", null)
             }
+
             "Tasbih", TASBIH_SCREEN_ROUTE -> {
                 arguments?.getString("id")?.let {
                     firebaseLogger.logEvent("tasbih_counter_used", mapOf("tasbih_id" to it))
                 }
             }
+
             "PrayerTracker", PRAYER_TRACKER_SCREEN_ROUTE -> {
                 firebaseLogger.logEvent("prayer_tracker_opened", null)
             }
+
             "Calender", CALENDER_SCREEN_ROUTE -> {
                 firebaseLogger.logEvent("calendar_opened", null)
             }

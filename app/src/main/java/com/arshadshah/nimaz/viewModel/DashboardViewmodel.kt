@@ -194,7 +194,7 @@ class DashboardViewModel @Inject constructor(
                     null,
                     FirebaseLogger.Companion.EventCategory.PERFORMANCE
                 )
-            } ?:  run {
+            } ?: run {
                 _prayerTimesState.update {
                     it.copy(
                         error = "Failed to update prayer times. Data is null.",

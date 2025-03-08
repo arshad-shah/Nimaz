@@ -2,9 +2,7 @@ package com.arshadshah.nimaz.ui.screens.more
 
 import android.content.Context
 import android.os.Build
-import android.os.CombinedVibration
 import android.os.VibrationEffect
-import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable

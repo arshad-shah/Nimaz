@@ -134,7 +134,8 @@ fun MaghribBackground(modifier: Modifier = Modifier) {
         // Combined canvas for all sun elements
         Canvas(modifier = Modifier.fillMaxSize()) {
             // Calculate sun position once
-            val sunY = size.height + 40f * density.density - (100f * density.density * (1 - sunsetProgress))
+            val sunY =
+                size.height + 40f * density.density - (100f * density.density * (1 - sunsetProgress))
             val sunCenter = Offset(size.width / 2, sunY)
 
             // Pre-compute radii in pixels

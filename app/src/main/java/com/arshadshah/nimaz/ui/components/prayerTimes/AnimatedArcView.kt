@@ -55,7 +55,6 @@ fun AnimatedArcView(
 ) {
 
 
-
     val currentPhase = remember(state.timePoints) {
 
         getCurrentPhase(state.timePoints)
@@ -94,8 +93,6 @@ fun AnimatedArcView(
     // Debug initialization values
 
 
-
-
     val animatablePosition = remember(initialPosition) {
 
         if (initialPosition.isNaN()) {
@@ -112,7 +109,6 @@ fun AnimatedArcView(
             animatablePosition.snapTo(initialPosition)
         }
     }
-
 
 
     val getNextPosition = { phase: Int ->
@@ -318,7 +314,6 @@ private fun calculateInitialPosition(
     }
 
 
-
     // Interpolate between current and next position with safety checks
     val result = (currentPos + (nextPos - currentPos) * progress)
 
@@ -366,7 +361,6 @@ private fun calculatePointOnArc(
 }
 
 private fun getCurrentPhase(timePoints: List<LocalDateTime?>): Int {
-
 
 
     val now = LocalDateTime.now()

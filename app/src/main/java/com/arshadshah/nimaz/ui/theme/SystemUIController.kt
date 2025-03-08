@@ -6,7 +6,6 @@ import android.content.ContextWrapper
 import android.os.Build
 import android.view.View
 import android.view.Window
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember

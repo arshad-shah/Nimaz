@@ -83,9 +83,11 @@ class AdhanReceiver : BroadcastReceiver() {
                 "Test Adhan" -> {
                     Toasty.info(context, "Test Adhan is being executed!").show()
                 }
+
                 "Sunrise", "شروق" -> {
                     Toasty.info(context, "The Sun is rising!").show()
                 }
+
                 else -> {
                     Toasty.info(context, "Time to pray $title").show()
                 }
@@ -145,7 +147,8 @@ class AdhanReceiver : BroadcastReceiver() {
                         // Set up alarms for tomorrow
                         repository.data?.let { data ->
                             if (data.fajr != null && data.sunrise != null && data.dhuhr != null &&
-                                data.asr != null && data.maghrib != null && newIshaTime != null) {
+                                data.asr != null && data.maghrib != null && newIshaTime != null
+                            ) {
 
                                 createAlarms.exact(
                                     context,

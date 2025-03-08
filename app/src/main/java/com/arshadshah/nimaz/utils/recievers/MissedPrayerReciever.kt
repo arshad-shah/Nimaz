@@ -96,7 +96,9 @@ class MissedPrayerReceiver : BroadcastReceiver() {
                         "total_completed" to (5 - amountMissed),
                         "total_missed" to amountMissed,
                         "completion_percentage" to ((5 - amountMissed) * 20),
-                        "missed_prayers" to if (nameOfMissedPrayers.isEmpty()) "none" else nameOfMissedPrayers.joinToString(",")
+                        "missed_prayers" to if (nameOfMissedPrayers.isEmpty()) "none" else nameOfMissedPrayers.joinToString(
+                            ","
+                        )
                     )
                 )
 

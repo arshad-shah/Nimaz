@@ -85,7 +85,8 @@ class BootReceiver : BroadcastReceiver() {
                             repository.data.dhuhr != null &&
                             repository.data.asr != null &&
                             repository.data.maghrib != null &&
-                            newIshaTime != null) {
+                            newIshaTime != null
+                        ) {
 
                             // Create alarms
                             createAlarms.exact(

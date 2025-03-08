@@ -102,6 +102,7 @@ object OnBoardingPages {
 
     operator fun get(index: Int) = pages.getOrNull(index)
     val size get() = pages.size
+
     // Group pages by category for progress tracking
     val categories = pages.groupBy { it.category }
 }

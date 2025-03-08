@@ -64,9 +64,10 @@ fun TasbihScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text("Tasbih", style = MaterialTheme.typography.titleLarge)
-            },
+            TopAppBar(
+                title = {
+                    Text("Tasbih", style = MaterialTheme.typography.titleLarge)
+                },
                 navigationIcon = {
                     OutlinedIconButton(onClick = {
                         navController.popBackStack()

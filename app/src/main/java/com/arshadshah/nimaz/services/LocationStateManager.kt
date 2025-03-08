@@ -20,7 +20,8 @@ class LocationStateManager @Inject constructor() {
     companion object {
         private const val TAG = "Nimaz: LocationStateManager"
         const val REQUEST_TIMEOUT_MS = 60_000L // 1 minute timeout
-        private const val REQUEST_CLEANUP_INTERVAL_MS = 15_000L // Check for expired requests every 15 seconds
+        private const val REQUEST_CLEANUP_INTERVAL_MS =
+            15_000L // Check for expired requests every 15 seconds
     }
 
     private val mutex = Mutex()
@@ -108,7 +109,10 @@ class LocationStateManager @Inject constructor() {
                     val request = activeLocationRequest
                     if (request != null && request.canRetry) {
                         request.incrementRetry()
-                        ViewModelLogger.d(TAG, "🔄 Retrying location request: ${request.id}, attempt ${request.retryCount}")
+                        ViewModelLogger.d(
+                            TAG,
+                            "🔄 Retrying location request: ${request.id}, attempt ${request.retryCount}"
+                        )
                         _locationState.value = LocationState.Loading
                     } else {
                         _locationState.value = state
@@ -124,7 +128,8 @@ class LocationStateManager @Inject constructor() {
         } catch (e: Exception) {
             ViewModelLogger.e(TAG, "❌ Error updating location state: ${e.message}", e)
             // Use original Error state API
-            _locationState.value = LocationState.Error("Failed to update location state: ${e.message}")
+            _locationState.value =
+                LocationState.Error("Failed to update location state: ${e.message}")
             cleanupRequest()
         }
     }
@@ -154,7 +159,10 @@ class LocationStateManager @Inject constructor() {
                     val request = activeLocationRequest
                     if (request?.isExpired == true) {
                         mutex.withLock {
-                            ViewModelLogger.d(TAG, "⏰ Periodic cleanup: Expired request ${request.id}")
+                            ViewModelLogger.d(
+                                TAG,
+                                "⏰ Periodic cleanup: Expired request ${request.id}"
+                            )
                             _locationState.value = LocationState.Error("Location request timed out")
                             cleanupRequest()
                         }

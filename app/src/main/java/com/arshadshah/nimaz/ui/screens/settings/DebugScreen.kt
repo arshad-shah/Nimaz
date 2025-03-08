@@ -594,8 +594,9 @@ private fun PreferenceFilterSheet(
                             onFilterChange(currentFilter.copy(types = newTypes))
                         },
                         label = {
-                            Text(type.name.lowercase()
-                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() })
+                            Text(
+                                type.name.lowercase()
+                                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() })
                         },
                         modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
                     )
@@ -1450,7 +1451,8 @@ private fun exportPreferences(context: Context, uri: Uri, prefs: PrivateSharedPr
     val jsonObject = JSONObject()
 
     allPrefs.forEach { (key, value) ->
-        jsonObject.put(key, when (value) {
+        jsonObject.put(
+            key, when (value) {
             is Set<*> -> JSONObject().apply {
                 put("type", "Set")
 //                put("value", JSONObject(value.map { it.toString() }))

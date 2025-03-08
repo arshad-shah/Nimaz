@@ -312,12 +312,12 @@ fun ListOfTasbih(
                                                                                 tasbih.date == dates[dateIndex]
                                                                             },
                                                                             label =
-                                                                            dates[dateIndex]
-                                                                                .format(
-                                                                                    DateTimeFormatter.ofPattern(
-                                                                                        "E dd "
-                                                                                    )
-                                                                                ),
+                                                                                dates[dateIndex]
+                                                                                    .format(
+                                                                                        DateTimeFormatter.ofPattern(
+                                                                                            "E dd "
+                                                                                        )
+                                                                                    ),
                                                                             dropDownItem = {
                                                                                 TasbihDropdownItem(
                                                                                     it,

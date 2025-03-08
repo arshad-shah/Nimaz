@@ -3,10 +3,6 @@ package com.arshadshah.nimaz.utils
 import android.os.Bundle
 import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -169,11 +165,31 @@ class FirebaseLogger @Inject constructor(
                     // Handle ArrayList by converting to appropriate array types
                     when {
                         value.isEmpty() -> bundle.putStringArray(key, emptyArray())
-                        value[0] is String -> bundle.putStringArray(key, value.filterIsInstance<String>().toTypedArray())
-                        value[0] is Int -> bundle.putIntArray(key, value.filterIsInstance<Int>().toIntArray())
-                        value[0] is Long -> bundle.putLongArray(key, value.filterIsInstance<Long>().toLongArray())
-                        value[0] is Float -> bundle.putFloatArray(key, value.filterIsInstance<Float>().toFloatArray())
-                        value[0] is Double -> bundle.putDoubleArray(key, value.filterIsInstance<Double>().toDoubleArray())
+                        value[0] is String -> bundle.putStringArray(
+                            key,
+                            value.filterIsInstance<String>().toTypedArray()
+                        )
+
+                        value[0] is Int -> bundle.putIntArray(
+                            key,
+                            value.filterIsInstance<Int>().toIntArray()
+                        )
+
+                        value[0] is Long -> bundle.putLongArray(
+                            key,
+                            value.filterIsInstance<Long>().toLongArray()
+                        )
+
+                        value[0] is Float -> bundle.putFloatArray(
+                            key,
+                            value.filterIsInstance<Float>().toFloatArray()
+                        )
+
+                        value[0] is Double -> bundle.putDoubleArray(
+                            key,
+                            value.filterIsInstance<Double>().toDoubleArray()
+                        )
+
                         value[0] is Boolean -> {
                             val boolArray = value.filterIsInstance<Boolean>()
                             val booleanArray = BooleanArray(boolArray.size) { i -> boolArray[i] }
@@ -181,9 +197,13 @@ class FirebaseLogger @Inject constructor(
                         }
                     }
                 }
+
                 else -> {
                     if (isDebugMode) {
-                        Log.w(TAG, "Unsupported parameter type for key '$key': ${value::class.java.simpleName}")
+                        Log.w(
+                            TAG,
+                            "Unsupported parameter type for key '$key': ${value::class.java.simpleName}"
+                        )
                     }
                     bundle.putString(key, value.toString())
                 }

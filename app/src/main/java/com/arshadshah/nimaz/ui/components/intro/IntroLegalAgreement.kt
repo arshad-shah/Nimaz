@@ -16,12 +16,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
-import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -29,23 +26,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.common.ToggleableItemColumn
 import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.viewModel.IntroductionViewModel
 
@@ -125,7 +116,7 @@ fun IntroLegalAgreement(
                             )
                         }
                     }
-                    if(bothAccepted){
+                    if (bothAccepted) {
                         Icon(
                             imageVector = Icons.Rounded.Check,
                             contentDescription = null,
@@ -228,19 +219,21 @@ fun IntroLegalAgreement(
                             MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.size(28.dp).clickable {
-                             if(!bothAccepted) {
-                                 viewModel.handleEvent(
-                                     IntroductionViewModel.IntroEvent.AcceptAllLegalTerms(true)
-                                 )
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clickable {
+                                if (!bothAccepted) {
+                                    viewModel.handleEvent(
+                                        IntroductionViewModel.IntroEvent.AcceptAllLegalTerms(true)
+                                    )
 
-                                 // Log analytics event
-                                 firebaseLogger.logEvent(
-                                     "all_legal_terms_toggle",
-                                     mapOf("accepted" to true),
-                                     FirebaseLogger.Companion.EventCategory.USER_ACTION
-                                 )
-                             }else{
+                                    // Log analytics event
+                                    firebaseLogger.logEvent(
+                                        "all_legal_terms_toggle",
+                                        mapOf("accepted" to true),
+                                        FirebaseLogger.Companion.EventCategory.USER_ACTION
+                                    )
+                                } else {
                                     viewModel.handleEvent(
                                         IntroductionViewModel.IntroEvent.AcceptAllLegalTerms(false)
                                     )
@@ -251,8 +244,8 @@ fun IntroLegalAgreement(
                                         mapOf("accepted" to false),
                                         FirebaseLogger.Companion.EventCategory.USER_ACTION
                                     )
-                             }
-                        }
+                                }
+                            }
                     ) {
                         Icon(
                             imageVector = if (bothAccepted)
@@ -418,9 +411,11 @@ private fun LegalFeature(
                         MaterialTheme.colorScheme.primary
                     else
                         MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.size(28.dp).clickable {
-                        onCheckedChange(!isChecked)
-                    }
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clickable {
+                            onCheckedChange(!isChecked)
+                        }
                 ) {
                     Icon(
                         imageVector = if (isChecked)

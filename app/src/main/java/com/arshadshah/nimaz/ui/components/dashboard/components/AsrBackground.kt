@@ -255,9 +255,11 @@ fun AsrBackground(modifier: Modifier = Modifier) {
         }
 
         // Long shadows characteristic of Asr time
-        Canvas(modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer(alpha = shadowIntensity)) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(alpha = shadowIntensity)
+        ) {
 
             val width = size.width
             val height = size.height
@@ -273,7 +275,8 @@ fun AsrBackground(modifier: Modifier = Modifier) {
                 lineTo(shadowStartX1 + width * 0.1f, height)
 
                 // Calculate end points once
-                val endX1 = shadowStartX1 + width * 0.1f + cos(piThird) * width * shadowLength * shadowDirection
+                val endX1 =
+                    shadowStartX1 + width * 0.1f + cos(piThird) * width * shadowLength * shadowDirection
                 val endY1 = height - sin(piThird) * height * 0.3f * shadowLength
                 val endX2 = shadowStartX1 + cos(piThird) * width * shadowLength * shadowDirection
                 val endY2 = height - sin(piThird) * height * 0.3f * shadowLength
@@ -306,7 +309,8 @@ fun AsrBackground(modifier: Modifier = Modifier) {
                 lineTo(shadowStartX2 + width * 0.05f, height)
 
                 // Calculate small shadow end points
-                val smallEndX1 = shadowStartX2 + width * 0.05f + cos(piQuarter) * width * 0.2f * shadowLength
+                val smallEndX1 =
+                    shadowStartX2 + width * 0.05f + cos(piQuarter) * width * 0.2f * shadowLength
                 val smallEndY1 = height - sin(piQuarter) * height * 0.2f * shadowLength
                 val smallEndX2 = shadowStartX2 + cos(piQuarter) * width * 0.2f * shadowLength
                 val smallEndY2 = height - sin(piQuarter) * height * 0.2f * shadowLength
@@ -341,9 +345,11 @@ fun AsrBackground(modifier: Modifier = Modifier) {
         )
 
         // Subtle dust particles in sunlight
-        Canvas(modifier = Modifier
-            .fillMaxSize()
-            .alpha(0.4f)) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(0.4f)
+        ) {
 
             val width = size.width
             val height = size.height
@@ -357,7 +363,8 @@ fun AsrBackground(modifier: Modifier = Modifier) {
                 // Only draw particles in the sunbeam area
                 if (x > sunPositionX * 0.7f && x < sunPositionX * 1.3f) {
                     // Calculate particle alpha with animation based on phase offset
-                    val particleAlpha = 0.2f + 0.3f * (0.5f + 0.5f * sin(colorShift * piTwo + particle.phaseOffset))
+                    val particleAlpha =
+                        0.2f + 0.3f * (0.5f + 0.5f * sin(colorShift * piTwo + particle.phaseOffset))
 
                     drawCircle(
                         color = goldenColor1.copy(alpha = particleAlpha),
