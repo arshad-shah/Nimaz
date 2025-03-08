@@ -8,6 +8,7 @@ plugins {
     alias libs.plugins.ksp
     alias libs.plugins.about.libs.plugin
     alias libs.plugins.hilt
+    alias(libs.plugins.kotlin.compose)
 }
 
 apply plugin: 'com.mikepenz.aboutlibraries.plugin'
@@ -20,8 +21,8 @@ android {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
         targetSdk 35
-        versionCode 184
-        versionName '2.6.11'
+        versionCode 189
+        versionName '2.6.16'
 
         testInstrumentationRunner "com.arshadshah.nimaz.HiltTestRunner"
         vectorDrawables {
@@ -54,10 +55,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            testCoverageEnabled true
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            enableUnitTestCoverage true
+            enableAndroidTestCoverage true
         }
     }
     compileOptions {
@@ -128,6 +130,7 @@ dependencies {
     implementation libs.androidx.compose.ui.graphics
     implementation libs.androidx.compose.material3
     implementation libs.androidx.material.icons.extended
+    implementation libs.androidx.material3.window.size.class1
 
     //testing
     debugImplementation libs.androidx.compose.ui.tooling
@@ -221,8 +224,10 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
     testImplementation libs.junit.jupiter
 
-
     implementation libs.introshowcaseview
+
+
+    testImplementation libs.mockk
 
 
 }

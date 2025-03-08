@@ -67,9 +67,10 @@ fun PrayerTracker(
     }
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text("Tracker", style = MaterialTheme.typography.titleLarge)
-            },
+            TopAppBar(
+                title = {
+                    Text("Tracker", style = MaterialTheme.typography.titleLarge)
+                },
                 navigationIcon = {
                     OutlinedIconButton(onClick = {
                         navController.popBackStack()

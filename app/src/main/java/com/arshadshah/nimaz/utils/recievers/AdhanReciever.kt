@@ -37,19 +37,47 @@ class AdhanReceiver : BroadcastReceiver() {
     lateinit var sharedPreferences: PrivateSharedPreferences
 
     override fun onReceive(context: Context, intent: Intent) {
-        val title = intent.extras!!.getString("title").toString()
-        val CHANNEL_ID = intent.extras!!.getString("channelid").toString()
-        val Notify_Id = intent.extras!!.getInt("notifyid")
-        val Time_of_alarm = intent.extras!!.getLong("time")
+        // Extract intent extras
+        val title = intent.extras?.getString("title") ?: "Unknown"
+        val channelId = intent.extras?.getString("channelid") ?: "default_channel"
+        val notifyId = intent.extras?.getInt("notifyid") ?: 0
+        val timeOfAlarm = intent.extras?.getLong("time") ?: 0L
 
-        val current_time = System.currentTimeMillis()
-        val diff = current_time - Time_of_alarm
-        val graceP = 2 * 60 * 1000 // two minutes grace period
+        // Log prayer notification received event
+        firebaseLogger.logEvent(
+            "prayer_notification_received",
+            mapOf(
+                "prayer_name" to title,
+                "scheduled_time" to timeOfAlarm
+            )
+        )
 
         Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Alarm for $title is being executed!")
 
-        if (diff in 1 until graceP || title == "Test Adhan") {
+        val currentTime = System.currentTimeMillis()
+        val timeDifference = currentTime - timeOfAlarm
+        val gracePeriod = 2 * 60 * 1000 // two minutes grace period
+
+        if (timeDifference in 1 until gracePeriod || title == "Test Adhan") {
             Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Notification for $title is being executed!")
+
+            // Create the notification
+            notificationHelper.createNotification(
+                context,
+                channelId,
+                title,
+                notifyId,
+                timeOfAlarm
+            )
+
+            // Log successful notification
+            firebaseLogger.logEvent(
+                "prayer_notification_displayed",
+                mapOf(
+                    "prayer_name" to title,
+                    "prayer_type" to getPrayerType(title)
+                )
+            )
 
             when (title) {
                 "Test Adhan" -> {
@@ -65,63 +93,117 @@ class AdhanReceiver : BroadcastReceiver() {
                 }
             }
 
-            notificationHelper.createNotification(
-                context,
-                CHANNEL_ID,
-                title,
-                Notify_Id,
-                Time_of_alarm
-            )
-            Toasty.info(context, "Time to pray $title").show()
-
             Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Alarm for $title is Successfully executed!")
         } else {
+            // Log missed notification due to timing
+            firebaseLogger.logEvent(
+                "prayer_notification_missed",
+                mapOf(
+                    "prayer_name" to title,
+                    "time_difference_minutes" to (timeDifference / (60 * 1000))
+                )
+            )
+
             Log.d(
                 AppConstants.ADHAN_RECEIVER_TAG,
                 "Notification for $title is not executed! The time has passed"
             )
         }
 
+        // Check if we need to reset alarms for tomorrow after Isha
         if (title == "Ishaa") {
             Log.d(AppConstants.ADHAN_RECEIVER_TAG, "Past Isha, Re-creating alarms for tomorrow")
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
+                    val tomorrowDate = LocalDate.now().plusDays(1)
+
                     val repository = prayerTimesRepository.getPrayerTimes(
                         context,
-                        LocalDate.now().plusDays(1).toString()
+                        tomorrowDate.toString()
                     )
 
+                    // Calculate adjusted Isha time if needed
                     val ishaTime = repository.data?.isha?.toLocalTime()?.hour
-                    val newIshaTime = if (ishaTime!! >= 22) {
+                    val newIshaTime = if (ishaTime != null && ishaTime >= 22) {
+                        // Log Isha time adjustment
+                        firebaseLogger.logEvent(
+                            "isha_time_adjusted",
+                            mapOf(
+                                "original_hour" to ishaTime,
+                                "adjustment" to "maghrib_plus_30min"
+                            )
+                        )
                         repository.data.maghrib?.plusMinutes(30)
                     } else {
-                        repository.data.isha
+                        repository.data?.isha
                     }
 
+                    // Check alarm lock status
                     sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, false)
                     val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK, false)
 
                     if (!alarmLock) {
-                        createAlarms.exact(
-                            context,
-                            repository.data.fajr!!,
-                            repository.data.sunrise!!,
-                            repository.data.dhuhr!!,
-                            repository.data.asr!!,
-                            repository.data.maghrib!!,
-                            newIshaTime!!
-                        )
-                        sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
+                        // Set up alarms for tomorrow
+                        repository.data?.let { data ->
+                            if (data.fajr != null && data.sunrise != null && data.dhuhr != null &&
+                                data.asr != null && data.maghrib != null && newIshaTime != null
+                            ) {
+
+                                createAlarms.exact(
+                                    context,
+                                    data.fajr!!,
+                                    data.sunrise!!,
+                                    data.dhuhr!!,
+                                    data.asr!!,
+                                    data.maghrib!!,
+                                    newIshaTime
+                                )
+
+                                sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK, true)
+
+                                // Log successful alarms creation
+                                firebaseLogger.logEvent(
+                                    "next_day_alarms_created",
+                                    mapOf("date" to tomorrowDate.toString())
+                                )
+                            } else {
+                                // Log missing prayer times error
+                                firebaseLogger.logError(
+                                    "prayer_times_missing",
+                                    "Some prayer times are null, cannot create alarms",
+                                    null
+                                )
+                            }
+                        }
                     }
                 } catch (e: Exception) {
+                    // Log error
                     Log.e(AppConstants.ADHAN_RECEIVER_TAG, "Error in AdhanReceiver: ${e.message}")
-                    val mapForLoggingError = mapOf(
-                        "Error" to "Error in AdhanReceiver: ${e.message}"
+
+                    firebaseLogger.logError(
+                        "adhan_receiver_error",
+                        e.message ?: "Unknown error",
+                        mapOf("prayer_name" to title)
                     )
-                    firebaseLogger.logEvent(AppConstants.ADHAN_RECEIVER_TAG, mapForLoggingError)
                 }
             }
+        }
+    }
+
+    /**
+     * Helper function to categorize prayer type for analytics
+     */
+    private fun getPrayerType(prayerName: String): String {
+        return when (prayerName) {
+            "Fajr", "فجر" -> "obligatory"
+            "Sunrise", "شروق" -> "non_prayer"
+            "Dhuhr", "ظهر" -> "obligatory"
+            "Asr", "عصر" -> "obligatory"
+            "Maghrib", "مغرب" -> "obligatory"
+            "Ishaa", "عشاء" -> "obligatory"
+            "Test Adhan" -> "test"
+            else -> "unknown"
         }
     }
 }

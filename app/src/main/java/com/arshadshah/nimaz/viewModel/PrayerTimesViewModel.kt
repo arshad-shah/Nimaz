@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.repositories.PrayerTimesRepository
 import com.arshadshah.nimaz.services.LocationService
 import com.arshadshah.nimaz.services.PrayerTimesData
 import com.arshadshah.nimaz.services.PrayerTimesService
+import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.PrayerTimesParamMapper
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.alarms.CreateAlarms
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import java.lang.String.valueOf
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
@@ -43,7 +45,8 @@ class PrayerTimesViewModel @Inject constructor(
     private val locationService: LocationService,
     private val sharedPreferences: PrivateSharedPreferences,
     private val prayerTimesRepository: PrayerTimesRepository,
-    private val createAlarms: CreateAlarms
+    private val createAlarms: CreateAlarms,
+    val firebaseLogger: FirebaseLogger // Add Firebase Logger
 ) : ViewModel() {
 
     // Data classes and sealed interfaces remain the same for API compatibility
@@ -113,6 +116,11 @@ class PrayerTimesViewModel @Inject constructor(
                     else -> {
                         Log.e(TAG, "Error in $operationName: ${e.message}", e)
                         _error.value = "Error in $operationName: ${e.message}"
+                        firebaseLogger.logError(
+                            "prayer_times_error",
+                            e.message ?: "Unknown error",
+                            mapOf("operation" to operationName)
+                        )
                     }
                 }
             } finally {
@@ -123,6 +131,12 @@ class PrayerTimesViewModel @Inject constructor(
 
     fun handleEvent(event: PrayerTimesEvent) {
         Log.d(TAG, "Handling event: $event")
+        // Log event
+        firebaseLogger.logEvent(
+            "prayer_times_event",
+            mapOf("event_type" to event.javaClass.simpleName),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
         when (event) {
             is PrayerTimesEvent.Start -> launchSafely("timer") {
                 withContext(Dispatchers.Main) {
@@ -152,6 +166,14 @@ class PrayerTimesViewModel @Inject constructor(
     private suspend fun initialize(context: Context) = withContext(Dispatchers.Default) {
         ViewModelLogger.d(TAG, "⭐ Starting initialization sequence")
         setLoading(true)
+
+        // Log initialization started
+        firebaseLogger.logEvent(
+            "prayer_times_initialization_started",
+            null,
+            FirebaseLogger.Companion.EventCategory.PERFORMANCE
+        )
+
 
         try {
             ViewModelLogger.d(TAG, "📍 Stage 1: Loading location and prayer times")
@@ -214,9 +236,20 @@ class PrayerTimesViewModel @Inject constructor(
                     _error.value = "Invalid location data"
                 }
             }
+            firebaseLogger.logEvent(
+                "prayer_times_initialization_completed",
+                mapOf("location" to prayerTimesState.value.locationName),
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
         } catch (e: Exception) {
             ViewModelLogger.e(TAG, "❌ Initialization failed", e)
             _error.value = "Initialization failed: ${e.message}"
+            // Log initialization error
+            firebaseLogger.logError(
+                "prayer_times_initialization_failed",
+                e.message ?: "Unknown error",
+                mapOf("exception_type" to e.javaClass.simpleName)
+            )
         } finally {
             ViewModelLogger.d(TAG, "🏁 Initialization sequence completed")
             setLoading(false)
@@ -237,6 +270,12 @@ class PrayerTimesViewModel @Inject constructor(
                     state.maghribTime,
                     state.ishaTime,
                 )
+                // Log alarms set
+                firebaseLogger.logEvent(
+                    "prayer_times_alarms_set",
+                    null,
+                    FirebaseLogger.Companion.EventCategory.USER_ACTION
+                )
             }
         }
     }
@@ -249,13 +288,39 @@ class PrayerTimesViewModel @Inject constructor(
 
     private suspend fun updatePrayerTimes(parameters: Parameters) {
         _error.value = null
+
+        // Log update attempt
+        firebaseLogger.logEvent(
+            "prayer_times_update_started",
+            mapOf(
+                "calculation_method" to valueOf(parameters.method),
+                "latitude" to parameters.latitude,
+                "longitude" to parameters.longitude
+            ),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
+
         val response = withContext(Dispatchers.IO) {
             prayerTimesRepository.updatePrayerTimes(parameters)
         }
 
         response.data?.let {
             updatePrayerTimesState(it)
-        } ?: throw IllegalStateException("Failed to update prayer times. Data is null.")
+            // Log successful update
+            firebaseLogger.logEvent(
+                "prayer_times_update_completed",
+                null,
+                FirebaseLogger.Companion.EventCategory.PERFORMANCE
+            )
+        } ?: run {
+            // Log update error
+            firebaseLogger.logError(
+                "prayer_times_update_failed",
+                "Failed to update prayer times. Data is null.",
+                mapOf("parameters" to parameters.toString())
+            )
+            throw IllegalStateException("Failed to update prayer times. Data is null.")
+        }
     }
 
     private suspend fun updatePrayerTimesState(data: LocalPrayerTimes) {
@@ -359,6 +424,13 @@ class PrayerTimesViewModel @Inject constructor(
         val isAuto = sharedPreferences.getDataBoolean(AppConstants.LOCATION_TYPE, false)
         ViewModelLogger.d(TAG, "📍 Loading location (Auto mode: $isAuto)")
 
+        // Log location load attempt
+        firebaseLogger.logEvent(
+            "prayer_times_loading_location",
+            mapOf("auto_location" to isAuto),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
+
         try {
             locationService.loadLocation(isAuto)
                 .onSuccess { location ->
@@ -373,17 +445,40 @@ class PrayerTimesViewModel @Inject constructor(
                             longitude = location.longitude
                         )
                     }
+                    // Log location success
+                    firebaseLogger.logEvent(
+                        "prayer_times_location_loaded",
+                        mapOf(
+                            "location_name" to location.locationName,
+                            "latitude" to location.latitude,
+                            "longitude" to location.longitude
+                        ),
+                        FirebaseLogger.Companion.EventCategory.PERFORMANCE
+                    )
                 }
                 .onFailure { throwable ->
                     ViewModelLogger.e(TAG, "❌ Failed to load location", throwable)
                     _error.value = throwable.message
                     ViewModelLogger.d(TAG, "⚠️ Attempting to load fallback location")
                     loadFallbackLocation()
+
+                    // Log location failure
+                    firebaseLogger.logError(
+                        "prayer_times_location_load_failed",
+                        throwable.message ?: "Unknown error",
+                        mapOf("auto_location" to isAuto)
+                    )
                 }
         } catch (e: Exception) {
             ViewModelLogger.e(TAG, "❌ Error loading location", e)
             _error.value = e.message
             loadFallbackLocation()
+            // Log location exception
+            firebaseLogger.logError(
+                "prayer_times_location_exception",
+                e.message ?: "Unknown error",
+                mapOf("auto_location" to isAuto)
+            )
         }
     }
 
@@ -423,6 +518,16 @@ class PrayerTimesViewModel @Inject constructor(
             .toEpochMilli()
 
         startTimer(timeToNextPrayer - currentTime)
+
+        // Log timer started
+        firebaseLogger.logEvent(
+            "prayer_times_timer_started",
+            mapOf(
+                "next_prayer" to state.nextPrayerName,
+                "time_to_next_prayer_ms" to (timeToNextPrayer - currentTime)
+            ),
+            FirebaseLogger.Companion.EventCategory.USER_ACTION
+        )
     }
 
     private fun setLoading(loading: Boolean) {

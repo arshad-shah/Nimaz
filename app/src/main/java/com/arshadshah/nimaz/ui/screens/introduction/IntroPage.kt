@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,9 +29,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -43,12 +47,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.ui.navigation.BottomNavItem
-import com.arshadshah.nimaz.ui.theme.NimazTheme
+import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.viewModel.IntroductionViewModel
 import kotlinx.coroutines.launch
 
@@ -57,14 +60,85 @@ fun IntroPage(
     navController: NavHostController,
     viewModel: IntroductionViewModel = hiltViewModel()
 ) {
+    val firebaseLogger = viewModel.firebaseLogger
+    // Collect state from ViewModel
+    val uiState by viewModel.uiState.collectAsState()
+    val legalState by viewModel.legalSettingsState.collectAsState()
+
+    // Check if legal terms are accepted (for final page navigation)
+    val termsAccepted = legalState.termsAccepted && legalState.privacyPolicyAccepted
+
+    // Initialize pager state
     val pagerState = rememberPagerState(0, 0f) { OnBoardingPages.size }
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Get current category from pager state
     val currentCategory = remember(pagerState.currentPage) {
         OnBoardingPages[pagerState.currentPage]?.category ?: ""
     }
 
+    // Check if the current page is the last one
+    val isLastPage = pagerState.currentPage == OnBoardingPages.size - 1
+
+    // Check if the current page is a Legal page
+    val isLegalPage = OnBoardingPages[pagerState.currentPage]?.category == "Legal"
+
+    // Log screen view when the composable is first displayed
+    DisposableEffect(Unit) {
+        firebaseLogger.logScreenView("intro_onboarding", "IntroPage")
+        onDispose {}
+    }
+
+    // Sync page changes with ViewModel
+    LaunchedEffect(pagerState.currentPage) {
+        viewModel.handleEvent(IntroductionViewModel.IntroEvent.NavigateToPage(pagerState.currentPage))
+
+        // Log page view
+        val pageName = OnBoardingPages[pagerState.currentPage]?.title ?: "Unknown"
+        firebaseLogger.logEvent(
+            "onboarding_page_viewed",
+            mapOf(
+                "page_index" to pagerState.currentPage,
+                "page_name" to pageName,
+                "page_category" to currentCategory
+            ),
+            FirebaseLogger.Companion.EventCategory.SCREEN_VIEW
+        )
+    }
+
+    // Show legal error snackbar if needed
+    LaunchedEffect(uiState.showLegalError) {
+        if (uiState.showLegalError) {
+            snackbarHostState.showSnackbar(
+                "Please accept the Terms of Service and Privacy Policy to continue."
+            )
+            viewModel.handleEvent(IntroductionViewModel.IntroEvent.ClearLegalError)
+        }
+    }
+
+    // Error handling
+    LaunchedEffect(uiState.error) {
+        if (uiState.error != null) {
+            // Show error
+            snackbarHostState.showSnackbar(uiState.error ?: "An error occurred")
+            viewModel.handleEvent(IntroductionViewModel.IntroEvent.ClearError)
+
+            // Log error encountered
+            firebaseLogger.logError(
+                "intro_page_error",
+                uiState.error ?: "Unknown error",
+                mapOf(
+                    "current_page" to pagerState.currentPage,
+                    "page_name" to (OnBoardingPages[pagerState.currentPage]?.title ?: "Unknown")
+                )
+            )
+        }
+    }
+
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -99,15 +173,18 @@ fun IntroPage(
                             animationSpec = tween(300)
                         ) + fadeOut(animationSpec = tween(300))
                     ) {
-                        if (pageContent.category == "Setup") {
+                        if (pageContent.category == "Setup" || pageContent.category == "Legal") {
                             SetupPageTemplate(
                                 modifier = Modifier.fillMaxSize(),
-                                page = pageContent
+                                page = pageContent,
+                                navController = navController,
+                                firebaseLogger = firebaseLogger
                             )
                         } else {
                             StandardPageTemplate(
                                 modifier = Modifier.fillMaxSize(),
-                                page = pageContent
+                                page = pageContent,
+                                firebaseLogger = firebaseLogger
                             )
                         }
                     }
@@ -116,22 +193,51 @@ fun IntroPage(
 
             // Navigation Button
             NavigationButton(
-                isLastPage = pagerState.currentPage == OnBoardingPages.size - 1,
+                isLastPage = isLastPage,
+                isEnabled = if (isLegalPage) termsAccepted else true,
                 onNext = {
-                    Log.d("IntroPage", "On Next Clicked - Current Page: ${pagerState.currentPage}")
                     if (pagerState.currentPage < OnBoardingPages.size - 1) {
                         scope.launch {
-                            Log.d("IntroPage", "Animating to next page - Page: ${pagerState.currentPage + 1}")
+                            // Log button press - Continue
+                            firebaseLogger.logEvent(
+                                "onboarding_continue_clicked",
+                                mapOf(
+                                    "from_page" to pagerState.currentPage,
+                                    "from_page_name" to (OnBoardingPages[pagerState.currentPage]?.title
+                                        ?: "Unknown")
+                                ),
+                                FirebaseLogger.Companion.EventCategory.USER_ACTION
+                            )
+
                             pagerState.animateScrollToPage(
                                 page = pagerState.currentPage + 1,
                                 animationSpec = tween(300)
                             )
                         }
                     } else {
-                        Log.d("IntroPage", "Completing setup")
-                        viewModel.handleEvent(IntroductionViewModel.IntroEvent.CompleteSetup)
-                        navController.navigate(BottomNavItem.Dashboard.screen_route) {
-                            popUpTo("Intro") { inclusive = true }
+                        // Checking again to be sure
+                        if (termsAccepted) {
+                            // Log button press - Complete
+                            firebaseLogger.logEvent(
+                                "onboarding_complete_clicked",
+                                null,
+                                FirebaseLogger.Companion.EventCategory.USER_ACTION
+                            )
+
+                            viewModel.handleEvent(IntroductionViewModel.IntroEvent.CompleteSetup)
+                            navController.navigate(BottomNavItem.Dashboard.screen_route) {
+                                popUpTo("Intro") { inclusive = true }
+                            }
+                        } else {
+                            // Show legal error
+                            viewModel.handleEvent(IntroductionViewModel.IntroEvent.ShowLegalError)
+
+                            // Log error
+                            firebaseLogger.logEvent(
+                                "legal_terms_not_accepted",
+                                null,
+                                FirebaseLogger.Companion.EventCategory.APP_ERROR
+                            )
                         }
                     }
                 }
@@ -143,6 +249,7 @@ fun IntroPage(
 @Composable
 private fun NavigationButton(
     isLastPage: Boolean,
+    isEnabled: Boolean,
     onNext: () -> Unit
 ) {
     Surface(
@@ -152,17 +259,21 @@ private fun NavigationButton(
     ) {
         Button(
             onClick = onNext,
+            enabled = isEnabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             elevation = ButtonDefaults.buttonElevation(
                 defaultElevation = 6.dp,
-                pressedElevation = 0.dp
+                pressedElevation = 0.dp,
+                disabledElevation = 0.dp
             )
         ) {
             Row(
@@ -180,7 +291,6 @@ private fun NavigationButton(
         }
     }
 }
-
 
 @Composable
 private fun ProgressHeader(
@@ -231,8 +341,21 @@ private fun ProgressHeader(
 @Composable
 private fun StandardPageTemplate(
     modifier: Modifier = Modifier,
-    page: OnBoardingPage
+    page: OnBoardingPage,
+    firebaseLogger: FirebaseLogger
 ) {
+    // Log template view
+    LaunchedEffect(page) {
+        firebaseLogger.logEvent(
+            "standard_template_viewed",
+            mapOf(
+                "page_title" to page.title,
+                "page_category" to page.category
+            ),
+            FirebaseLogger.Companion.EventCategory.SCREEN_VIEW
+        )
+    }
+
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -327,14 +450,28 @@ private fun StandardPageTemplate(
 @Composable
 private fun SetupPageTemplate(
     modifier: Modifier = Modifier,
-    page: OnBoardingPage
+    page: OnBoardingPage,
+    navController: NavHostController,
+    firebaseLogger: FirebaseLogger
 ) {
+    // Log template view
+    LaunchedEffect(page) {
+        firebaseLogger.logEvent(
+            "setup_template_viewed",
+            mapOf(
+                "page_title" to page.title,
+                "page_category" to page.category
+            ),
+            FirebaseLogger.Companion.EventCategory.SCREEN_VIEW
+        )
+    }
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-// Header Card with Image and Title
+        // Header Card with Image and Title
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
@@ -383,9 +520,14 @@ private fun SetupPageTemplate(
                 }
             }
         }
-        // Setup Content
-        page.extra?.let { content ->
-            content()
+
+        // Setup Content with Analytics-Aware Composable
+        val originalExtra = page.extra
+        val analyticsExtraWrapper: @Composable (NavHostController) -> Unit = { nav ->
+            // This wrapper allows us to add analytics to the extra content
+            originalExtra(nav)
         }
+
+        analyticsExtraWrapper(navController)
     }
 }

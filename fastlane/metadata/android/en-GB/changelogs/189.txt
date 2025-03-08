@@ -1,0 +1,6 @@
+🕌 Improved prayer time displays with realistic animated backgrounds
+⚡ Enhanced app performance and stability
+📊 Added better analytics for more reliable app experience
+🧭 Fixed Qibla compass vibration issues on older Android devices
+✨ UI enhancements throughout the app
+📱 Better support for different screen sizes and devices

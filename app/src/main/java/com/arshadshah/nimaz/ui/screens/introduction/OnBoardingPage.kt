@@ -1,12 +1,13 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.intro.IntroBatteryExemption
 import com.arshadshah.nimaz.ui.components.intro.IntroCalculation
+import com.arshadshah.nimaz.ui.components.intro.IntroLegalAgreement
 import com.arshadshah.nimaz.ui.components.intro.IntroLocation
 import com.arshadshah.nimaz.ui.components.intro.IntroNotification
-
 
 /**
  * Represents a single page in the onboarding flow
@@ -21,7 +22,7 @@ data class OnBoardingPage(
     val title: String,
     val description: String,
     val category: String = "",
-    val extra: (@Composable () -> Unit)? = null,
+    val extra: @Composable (NavController?) -> Unit = { _ -> },
 )
 
 /**
@@ -82,6 +83,14 @@ object OnBoardingPages {
                     "calculations based on the sun's position for precise prayer times.",
             extra = { IntroCalculation() }
         ),
+        // New legal agreement page
+        OnBoardingPage(
+            image = R.drawable.document_icon, // Use an appropriate icon from your resources
+            title = "Terms & Privacy",
+            category = "Legal",
+            description = "Before you begin your spiritual journey with Nimaz, please review and accept our terms of service and privacy policy.",
+            extra = { navController -> IntroLegalAgreement(navController!!) }
+        ),
         OnBoardingPage(
             image = R.drawable.check_mark,
             title = "Ready to Begin",
@@ -93,6 +102,7 @@ object OnBoardingPages {
 
     operator fun get(index: Int) = pages.getOrNull(index)
     val size get() = pages.size
+
     // Group pages by category for progress tracking
     val categories = pages.groupBy { it.category }
 }

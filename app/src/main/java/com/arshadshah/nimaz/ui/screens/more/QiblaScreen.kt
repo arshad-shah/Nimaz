@@ -2,9 +2,7 @@ package com.arshadshah.nimaz.ui.screens.more
 
 import android.content.Context
 import android.os.Build
-import android.os.CombinedVibration
 import android.os.VibrationEffect
-import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -285,7 +283,6 @@ private fun QiblaInfoCard(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 private fun QiblaCompassCard(
     bearing: Double,
@@ -298,24 +295,29 @@ private fun QiblaCompassCard(
     val target = (bearing - degree).toFloat()
     val rotateAnim = remember { Animatable(0f) }
     val pointingToQibla = abs(target) < 5f
-    val vibrator =
-        remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
+
+    // Use the older Vibrator API since we're supporting Android 9+
+    val vibrator = remember {
+        context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+    }
+
     val directionState = remember { mutableStateOf(QiblaDirection.getDirection(target)) }
 
     LaunchedEffect(target) {
         directionState.value = QiblaDirection.getDirection(target)
         if (pointingToQibla) {
             rotateAnim.animateTo(0f, tween(100))
+
+            // Use VibrationEffect for Android 8.0+
             vibrator.vibrate(
-                CombinedVibration.createParallel(
-                    VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
-                )
+                VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE)
             )
         } else {
             rotateAnim.animateTo(target, tween(200))
             vibrator.cancel()
         }
     }
+
 
     ElevatedCard(
         modifier = Modifier

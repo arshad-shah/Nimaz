@@ -1,13 +1,11 @@
 package com.arshadshah.nimaz.ui.theme
 
-
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
 import android.view.View
 import android.view.Window
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
@@ -176,7 +174,6 @@ internal class AndroidSystemUiController(
         }.toArgb()
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun setNavigationBarColor(
         color: Color,
         darkIcons: Boolean,
@@ -184,7 +181,9 @@ internal class AndroidSystemUiController(
         transformColorForLightContent: (Color) -> Color
     ) {
         navigationBarDarkContentEnabled = darkIcons
-        isNavigationBarContrastEnforced = navigationBarContrastEnforced
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            isNavigationBarContrastEnforced = navigationBarContrastEnforced
+        }
 
         window?.navigationBarColor = when {
             darkIcons && windowInsetsController?.isAppearanceLightNavigationBars != true -> {
@@ -243,11 +242,19 @@ internal class AndroidSystemUiController(
         }
 
     override var isNavigationBarContrastEnforced: Boolean
-        @RequiresApi(Build.VERSION_CODES.Q)
-        get() = window?.isNavigationBarContrastEnforced == true
-        @RequiresApi(Build.VERSION_CODES.Q)
+        get() {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window?.isNavigationBarContrastEnforced == true
+            } else {
+                // Return default value for API 28 and below
+                false
+            }
+        }
         set(value) {
-            window?.isNavigationBarContrastEnforced = value
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window?.isNavigationBarContrastEnforced = value
+            }
+            // No action for API 28 and below
         }
 }
 
