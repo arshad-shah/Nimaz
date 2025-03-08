@@ -8,22 +8,21 @@ import com.arshadshah.nimaz.data.local.models.LocalJuz
 
 
 @Dao
-interface JuzDao
-{
+interface JuzDao {
 
-	//get all the juz
-	@Query("SELECT * FROM Juz")
-	suspend fun getAllJuz() : List<LocalJuz>
+    //get all the juz
+    @Query("SELECT * FROM Juz")
+    suspend fun getAllJuz(): List<LocalJuz>
 
-	//get juz by id
-	@Query("SELECT * FROM Juz WHERE number = :number")
-	suspend fun getJuzById(number : Int) : LocalJuz
+    //get juz by id
+    @Query("SELECT * FROM Juz WHERE number = :number")
+    suspend fun getJuzById(number: Int): LocalJuz
 
-	//insert all the juz
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	suspend fun insert(juz : List<LocalJuz>)
+    //insert all the juz
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(juz: List<LocalJuz>)
 
-	//count the number of juz
-	@Query("SELECT COUNT(*) FROM Juz")
-	suspend fun count() : Int
+    //count the number of juz
+    @Query("SELECT COUNT(*) FROM Juz")
+    suspend fun count(): Int
 }

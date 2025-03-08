@@ -2,15 +2,26 @@ package com.arshadshah.nimaz.data.local.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity(tableName = "prayer_times")
+@Serializable
 data class LocalPrayerTimes(
-	@PrimaryKey
-	val date : String = " " ,
-	val fajr : String? = null ,
-	val sunrise : String? = null ,
-	val dhuhr : String? = null ,
-	val asr : String? = null ,
-	val maghrib : String? = null ,
-	val isha : String? = null ,
-						   )
+    @PrimaryKey
+    @Serializable(with = LocalDateSerializer::class)
+    val date: LocalDate = LocalDate.now(),
+    @Serializable(with = LocalDateTimeSerializer::class)
+    var fajr: LocalDateTime? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    var sunrise: LocalDateTime? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    var dhuhr: LocalDateTime? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    var asr: LocalDateTime? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    var maghrib: LocalDateTime? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    var isha: LocalDateTime? = null,
+)

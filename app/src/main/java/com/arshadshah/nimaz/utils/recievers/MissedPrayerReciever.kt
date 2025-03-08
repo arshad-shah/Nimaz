@@ -5,120 +5,145 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.data.local.DataStore
 import com.arshadshah.nimaz.utils.FirebaseLogger
-import com.arshadshah.nimaz.utils.LocalDataStore
 import com.arshadshah.nimaz.utils.NotificationHelper
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
-class MissedPrayerReciever : BroadcastReceiver()
-{
+@AndroidEntryPoint
+class MissedPrayerReceiver : BroadcastReceiver() {
 
-	override fun onReceive(context : Context , intent : Intent)
-	{
+    @Inject
+    lateinit var localDataStore: DataStore
 
-		if (! LocalDataStore.isInitialized())
-		{
-			LocalDataStore.init(context)
-			Log.d(
-					 AppConstants.MISSED_PRAYER_RECEIVER_TAG ,
-					 "onReceived:  called and local data store initialized"
-				 )
-		}
+    @Inject
+    lateinit var firebaseLogger: FirebaseLogger
 
-		if (! FirebaseLogger.isInitialized())
-		{
-			FirebaseLogger.init()
-			Log.d(
-					 AppConstants.MISSED_PRAYER_RECEIVER_TAG ,
-					 "onReceived:  called and firebase logger initialized"
-				 )
-		}
+    @Inject
+    lateinit var notificationHelper: NotificationHelper
 
+    override fun onReceive(context: Context, intent: Intent) {
+        // Log receiver trigger
+        firebaseLogger.logEvent(
+            "missed_prayer_check_started",
+            mapOf("time" to LocalTime.now().toString())
+        )
 
-		val mapForLogging = mapOf(
-				 "MissedPrayerReciever" to "MissedPrayerReciever called"
-								 )
-		FirebaseLogger.logEvent("Missed Prayer Receiver" , mapForLogging)
-		CoroutineScope(Dispatchers.IO).launch {
-			try
-			{
-				var amountMissed = 0
-				val nameOfMissedPrayers = mutableListOf<String>()
-				val tracker =
-					LocalDataStore.getDataStore().getTrackerForDate(LocalDate.now().toString())
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val today = LocalDate.now()
+                val tracker = localDataStore.getTrackerForDate(today)
 
-				Log.d(
-						 AppConstants.MISSED_PRAYER_RECEIVER_TAG ,
-						 "onReceived:  called and tracker is $tracker"
-					 )
+                Log.d(
+                    AppConstants.MISSED_PRAYER_RECEIVER_TAG,
+                    "onReceived: called and tracker is $tracker"
+                )
 
+                // Track missed prayers
+                var amountMissed = 0
+                val nameOfMissedPrayers = mutableListOf<String>()
 
-				if (! tracker.fajr)
-				{
-					amountMissed ++
-					nameOfMissedPrayers.add("Fajr")
-				}
-				if (! tracker.dhuhr)
-				{
-					amountMissed ++
-					nameOfMissedPrayers.add("Dhuhr")
-				}
-				if (! tracker.asr)
-				{
-					amountMissed ++
-					nameOfMissedPrayers.add("Asr")
-				}
-				if (! tracker.maghrib)
-				{
-					amountMissed ++
-					nameOfMissedPrayers.add("Maghrib")
-				}
-				if (! tracker.isha)
-				{
-					amountMissed ++
-					nameOfMissedPrayers.add("Isha")
-				}
+                // Check each prayer status
+                val prayerStatus = mutableMapOf<String, Boolean>()
 
+                // Fajr status
+                prayerStatus["fajr"] = tracker.fajr
+                if (!tracker.fajr) {
+                    amountMissed++
+                    nameOfMissedPrayers.add("Fajr")
+                }
 
-				val title = if (amountMissed > 0) "$amountMissed prayers missed"
-				else "Well Done!"
+                // Dhuhr status
+                prayerStatus["dhuhr"] = tracker.dhuhr
+                if (!tracker.dhuhr) {
+                    amountMissed++
+                    nameOfMissedPrayers.add("Dhuhr")
+                }
 
-				//get time left to complete missed prayers
-				val timeLeft =
-					LocalTime.now().until(LocalTime.of(23 , 59 , 59) , ChronoUnit.MINUTES)
+                // Asr status
+                prayerStatus["asr"] = tracker.asr
+                if (!tracker.asr) {
+                    amountMissed++
+                    nameOfMissedPrayers.add("Asr")
+                }
 
-				//create message
-				val message =
-					if (amountMissed > 0) "You missed ${nameOfMissedPrayers.joinToString(", ")} today," +
-							 "\n there is still $timeLeft minutes left to complete ${if (amountMissed > 1) "them" else "it"}"
-					else "You completed all your prayers today. Keep it up!"
+                // Maghrib status
+                prayerStatus["maghrib"] = tracker.maghrib
+                if (!tracker.maghrib) {
+                    amountMissed++
+                    nameOfMissedPrayers.add("Maghrib")
+                }
 
-				NotificationHelper().createNotificationForMissedPrayer(
-						 context ,
-						 AppConstants.CHANNEL_MISSED_PRAYER_ID ,
-						 AppConstants.MISSED_PRAYER_NOTIFY_ID ,
-						 title ,
-						 message
-																	  )
+                // Isha status
+                prayerStatus["isha"] = tracker.isha
+                if (!tracker.isha) {
+                    amountMissed++
+                    nameOfMissedPrayers.add("Isha")
+                }
 
-			} catch (e : Exception)
-			{
-				Log.e(
-						 AppConstants.MISSED_PRAYER_RECEIVER_TAG ,
-						 "Error in BootReciever: ${e.message}"
-					 )
-				val mapForLoggingError = mapOf(
-						 "MissedPrayerReciever" to "Error in BootReciever: ${e.message}"
-											  )
-				FirebaseLogger.logEvent("MissedPrayerReceiver" , mapForLoggingError)
-			}
-		}
+                // Log prayer completion status
+                firebaseLogger.logEvent(
+                    "daily_prayer_completion_status",
+                    mapOf(
+                        "date" to today.toString(),
+                        "total_completed" to (5 - amountMissed),
+                        "total_missed" to amountMissed,
+                        "completion_percentage" to ((5 - amountMissed) * 20),
+                        "missed_prayers" to if (nameOfMissedPrayers.isEmpty()) "none" else nameOfMissedPrayers.joinToString(
+                            ","
+                        )
+                    )
+                )
 
-		Log.d(AppConstants.MISSED_PRAYER_RECEIVER_TAG , "onReceive:  called and finished")
-	}
+                // Prepare notification content
+                val title = if (amountMissed > 0) "$amountMissed prayers missed" else "Well Done!"
+                val timeLeft = LocalTime.now().until(LocalTime.of(23, 59, 59), ChronoUnit.MINUTES)
+                val message =
+                    if (amountMissed > 0) "You missed ${nameOfMissedPrayers.joinToString(", ")} today," +
+                            "\n there is still $timeLeft minutes left to complete ${if (amountMissed > 1) "them" else "it"}"
+                    else "You completed all your prayers today. Keep it up!"
+
+                // Create notification
+                notificationHelper.createNotificationForMissedPrayer(
+                    context,
+                    AppConstants.CHANNEL_MISSED_PRAYER_ID,
+                    AppConstants.MISSED_PRAYER_NOTIFY_ID,
+                    title,
+                    message
+                )
+
+                // Log notification created
+                firebaseLogger.logEvent(
+                    "missed_prayer_notification_sent",
+                    mapOf(
+                        "title" to title,
+                        "missed_count" to amountMissed,
+                        "achievement" to if (amountMissed == 0) "all_completed" else "partial_completion"
+                    )
+                )
+
+            } catch (e: Exception) {
+                Log.e(
+                    AppConstants.MISSED_PRAYER_RECEIVER_TAG,
+                    "Error in MissedPrayerReceiver: ${e.message}"
+                )
+
+                // Log error
+                firebaseLogger.logError(
+                    "missed_prayer_receiver_error",
+                    e.message ?: "Unknown error in MissedPrayerReceiver",
+                    mapOf("error_type" to e.javaClass.simpleName)
+                )
+            }
+        }
+
+        Log.d(AppConstants.MISSED_PRAYER_RECEIVER_TAG, "onReceive: called and finished")
+    }
 }

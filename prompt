@@ -1,0 +1,22 @@
+Design this component using the "Nimaz Design Language":
+
+Core characteristics to maintain:
+- Material 3 surfaces with elevated cards (24.dp corners)
+- Layered information hierarchy using nested surfaces
+- Interactive elements with spring animations (DampingRatioMediumBouncy)
+- Container-based design with proper elevation hierarchy
+- Rich color system using Material 3 tokens (primary, secondary, tertiary containers)
+
+Visual elements to include:
+- Icon containers with colorful surface backgrounds
+- Pill-shaped secondary surfaces for metadata
+- Smooth state transitions and color animations
+- Shimmer loading states
+- Information density with proper spacing (16-20dp padding)
+
+Interaction patterns:
+- Scale animations on active/highlighted states
+- Content size animations using springs
+- Fade and slide transitions for content changes
+- Elevated states for active elements
+- Rich hover and press states

@@ -13,37 +13,34 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun SettingsTileIcon(
-	modifier : Modifier = Modifier ,
-	icon : @Composable (() -> Unit) ,
-							 )
-{
-	//the circle
-	Box(
+    modifier: Modifier = Modifier,
+    icon: @Composable (() -> Unit),
+) {
+    //the circle
+    Box(
 
-			 modifier = modifier
-				 .size(60.dp) ,
-			 contentAlignment = Alignment.Center
-	   ) {
-		icon()
-	}
+        modifier = modifier
+            .size(60.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        icon()
+    }
 }
 
 @Preview
 @Composable
-fun SettingsIconPreview()
-{
+fun SettingsIconPreview() {
 
-	SettingsTileIcon {
-		Icon(imageVector = Icons.Default.Clear , contentDescription = "")
-	}
+    SettingsTileIcon {
+        Icon(imageVector = Icons.Default.Clear, contentDescription = "")
+    }
 }
 
 @Preview
 @Composable
-fun SettingsIconPreviewEmpty()
-{
+fun SettingsIconPreviewEmpty() {
 
-	SettingsTileIcon(
-			 icon = { } ,
-					)
+    SettingsTileIcon(
+        icon = { },
+    )
 }

@@ -7,20 +7,19 @@ import androidx.room.Query
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 
 @Dao
-interface SurahDao
-{
+interface SurahDao {
 
-	//get all surahs
-	@Query("SELECT * FROM Surah")
-	fun getAllSurahs() : List<LocalSurah>
+    //get all surahs
+    @Query("SELECT * FROM Surah")
+    fun getAllSurahs(): List<LocalSurah>
 
-	//get surah by id
-	@Query("SELECT * FROM Surah WHERE number = :number")
-	fun getSurahById(number : Int) : LocalSurah
+    //get surah by id
+    @Query("SELECT * FROM Surah WHERE number = :number")
+    fun getSurahById(number: Int): LocalSurah
 
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	fun insert(surah : List<LocalSurah>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(surah: List<LocalSurah>)
 
-	@Query("SELECT COUNT(*) FROM Surah")
-	fun count() : Int
+    @Query("SELECT COUNT(*) FROM Surah")
+    fun count(): Int
 }

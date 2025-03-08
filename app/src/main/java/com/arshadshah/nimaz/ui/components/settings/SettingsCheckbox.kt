@@ -24,58 +24,54 @@ import com.arshadshah.nimaz.ui.components.settings.internal.SettingsTileTexts
 
 @Composable
 fun SettingsCheckbox(
-	modifier : Modifier = Modifier ,
-	state : SettingValueState<Boolean> = rememberBooleanSettingState() ,
-	icon : @Composable (() -> Unit)? = null ,
-	title : @Composable () -> Unit ,
-	subtitle : @Composable (() -> Unit)? = null ,
-	onCheckedChange : (Boolean) -> Unit = {} ,
-					)
-{
-	var storageValue by state
-	val update : (Boolean) -> Unit = { boolean ->
-		storageValue = boolean
-		onCheckedChange(storageValue)
-	}
-	Surface {
-		Row(
-				 modifier = modifier
-					 .fillMaxWidth()
-					 .toggleable(
-							  value = storageValue ,
-							  role = Role.Checkbox ,
-							  onValueChange = { update(! storageValue) }
-								) ,
-				 verticalAlignment = Alignment.CenterVertically ,
-		   ) {
-			if (icon != null)
-			{
-				SettingsTileIcon(icon = icon)
-			} else
-			{
-				Spacer(modifier = Modifier.size(24.dp))
-			}
-			SettingsTileTexts(title = title , subtitle = subtitle)
-			SettingsTileAction {
-				Checkbox(
-						 checked = storageValue ,
-						 onCheckedChange = update
-						)
-			}
-		}
-	}
+    modifier: Modifier = Modifier,
+    state: SettingValueState<Boolean> = rememberBooleanSettingState(),
+    icon: @Composable (() -> Unit)? = null,
+    title: @Composable () -> Unit,
+    subtitle: @Composable (() -> Unit)? = null,
+    onCheckedChange: (Boolean) -> Unit = {},
+) {
+    var storageValue by state
+    val update: (Boolean) -> Unit = { boolean ->
+        storageValue = boolean
+        onCheckedChange(storageValue)
+    }
+    Surface {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .toggleable(
+                    value = storageValue,
+                    role = Role.Checkbox,
+                    onValueChange = { update(!storageValue) }
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                SettingsTileIcon(icon = icon)
+            } else {
+                Spacer(modifier = Modifier.size(24.dp))
+            }
+            SettingsTileTexts(title = title, subtitle = subtitle)
+            SettingsTileAction {
+                Checkbox(
+                    checked = storageValue,
+                    onCheckedChange = update
+                )
+            }
+        }
+    }
 }
 
 @Preview
 @Composable
-internal fun SettingsCheckboxPreview()
-{
-	val storage = rememberBooleanSettingState(defaultValue = true)
-	SettingsCheckbox(
-			 state = storage ,
-			 icon = { Icon(imageVector = Icons.Default.Clear , contentDescription = "Clear") } ,
-			 title = { Text(text = "Hello") } ,
-			 subtitle = { Text(text = "This is a longer text") } ,
-			 onCheckedChange = { }
-					)
+internal fun SettingsCheckboxPreview() {
+    val storage = rememberBooleanSettingState(defaultValue = true)
+    SettingsCheckbox(
+        state = storage,
+        icon = { Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear") },
+        title = { Text(text = "Hello") },
+        subtitle = { Text(text = "This is a longer text") },
+        onCheckedChange = { }
+    )
 }

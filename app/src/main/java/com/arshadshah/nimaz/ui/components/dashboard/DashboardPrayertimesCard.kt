@@ -1,11 +1,11 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.Image
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,558 +14,367 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TIMES_VIEWMODEL_KEY
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME_PRAYER_TIMES_CARD
-import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD
-import com.arshadshah.nimaz.data.remote.models.CountDownTime
-import com.arshadshah.nimaz.utils.PrivateSharedPreferences
-import com.arshadshah.nimaz.utils.api.PrayerTimesParamMapper
-import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonCalc
-import com.arshadshah.nimaz.utils.sunMoonUtils.moon.MoonPhase
-import com.arshadshah.nimaz.viewModel.PrayerTimesViewModel
-import com.arshadshah.nimaz.viewModel.SettingsViewModel
-import kotlinx.coroutines.delay
-import java.time.LocalDate
+import com.arshadshah.nimaz.data.local.models.CountDownTime
+import com.arshadshah.nimaz.ui.components.dashboard.components.AsrBackground
+import com.arshadshah.nimaz.ui.components.dashboard.components.DhuhrBackground
+import com.arshadshah.nimaz.ui.components.dashboard.components.FajrBackground
+import com.arshadshah.nimaz.ui.components.dashboard.components.IshaBackground
+import com.arshadshah.nimaz.ui.components.dashboard.components.MaghribBackground
+import com.arshadshah.nimaz.ui.components.dashboard.components.SunriseBackground
 import java.time.LocalDateTime
-import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
-import java.util.*
 
+/**
+ * Enhanced Prayer Time Card with realistic animated backgrounds
+ * for different prayer times - displays automatically based on current time
+ */
 @Composable
-fun DashboardPrayertimesCard()
-{
+fun DashboardPrayerTimesCard(
+    nextPrayerName: String,
+    countDownTimer: CountDownTime,
+    nextPrayerTime: LocalDateTime,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier,
+    timeFormat: DateTimeFormatter,
+    height: Dp = 200.dp
+) {
 
-	val context = LocalContext.current
+    val isCompact = height < 200.dp
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+            .padding(8.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 8.dp
+        )
+    ) {
+        // Card content with animated sky background
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth()
+        ) {
 
-	val viewModel = viewModel(
-			 key = PRAYER_TIMES_VIEWMODEL_KEY ,
-			 initializer = { PrayerTimesViewModel() } ,
-			 viewModelStoreOwner = context as ComponentActivity
-							 )
-	val settingViewModel = viewModel(
-			 key = AppConstants.SETTINGS_VIEWMODEL_KEY ,
-			 initializer = { SettingsViewModel(context) } ,
-			 viewModelStoreOwner = context
-									)
-	val sharedPreferences = remember { PrivateSharedPreferences(context) }
-	LaunchedEffect(key1 = Unit) {
-		settingViewModel.handleEvent(SettingsViewModel.SettingsEvent.LoadLocation(context))
-		viewModel.handleEvent(context , PrayerTimesViewModel.PrayerTimesEvent.RELOAD)
-		//set the alarms
-		val alarmLock = sharedPreferences.getDataBoolean(AppConstants.ALARM_LOCK , false)
-		if (! alarmLock)
-		{
-			viewModel.handleEvent(
-					 context ,
-					 PrayerTimesViewModel.PrayerTimesEvent.SET_ALARMS(context)
-								 )
-			sharedPreferences.saveDataBoolean(AppConstants.ALARM_LOCK , true)
-		}
-	}
+            // Animated Sky Background based on prayer time
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(maxHeight)
+            ) {
+                // Prayer backgrounds with crossfade transitions
+                val prayerName = nextPrayerName.lowercase()
 
-	val nextPrayerName = remember {
-		viewModel.nextPrayerName
-	}.collectAsState()
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = prayerName == "fajr",
+                    enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
+                    exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                ) {
+                    FajrBackground(modifier = Modifier.fillMaxSize())
+                }
 
-	val nextPrayerTime = remember {
-		viewModel.nextPrayerTime
-	}.collectAsState()
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = prayerName == "sunrise",
+                    enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
+                    exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                ) {
+                    SunriseBackground(modifier = Modifier.fillMaxSize())
+                }
 
-	val timer = remember {
-		viewModel.timer
-	}.collectAsState()
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = prayerName == "dhuhr",
+                    enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
+                    exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                ) {
+                    DhuhrBackground(modifier = Modifier.fillMaxSize())
+                }
 
-	val locationName = remember {
-		settingViewModel.locationName
-	}.collectAsState()
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = prayerName == "asr",
+                    enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
+                    exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                ) {
+                    AsrBackground(modifier = Modifier.fillMaxSize())
+                }
 
-	val latitude = remember {
-		settingViewModel.latitude
-	}.collectAsState()
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = prayerName == "maghrib",
+                    enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
+                    exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                ) {
+                    MaghribBackground(modifier = Modifier.fillMaxSize())
+                }
 
-	val longitude = remember {
-		settingViewModel.longitude
-	}.collectAsState()
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = prayerName == "isha",
+                    enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
+                    exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                ) {
+                    IshaBackground(modifier = Modifier.fillMaxSize())
+                }
 
-	val isLoading = remember {
-		viewModel.isLoading
-	}.collectAsState()
+                // Single gradient brush creation instead of creating it for each recomposition
+                val overlayGradient = remember {
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.05f),
+                            Color.Black.copy(alpha = 0.1f),
+                            Color.Black.copy(alpha = 0.3f)
+                        )
+                    )
+                }
 
-	LaunchedEffect(locationName.value) {
-		//update the prayer times
-		viewModel.handleEvent(
-				 context , PrayerTimesViewModel.PrayerTimesEvent.UPDATE_PRAYERTIMES(
-				 PrayerTimesParamMapper.getParams(context)
-																				   )
-							 )
-		viewModel.handleEvent(
-				 context ,
-				 PrayerTimesViewModel.PrayerTimesEvent.UPDATE_WIDGET(
-						  context
-																	)
-							 )
-	}
+                // Semi-transparent overlay to ensure text readability
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(overlayGradient)
+                )
 
-	val phaseOfMoon = MoonCalc(
-			 latitude = latitude.value ,
-			 longitude = longitude.value
-							  ).getMoonPhase()
+                // Content overlay with adjusted spacing for smaller heights
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(if (isCompact) 4.dp else 8.dp),
+                    verticalArrangement = if (isCompact)
+                        Arrangement.SpaceEvenly
+                    else
+                        Arrangement.spacedBy(8.dp)
+                ) {
+                    if (!isCompact) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
+                    // Prayer Name and Time Section
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = !isLoading,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Text(
+                                text = formatPrayerName(nextPrayerName),
+                                style = if (isCompact)
+                                    MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        shadow = MaterialTheme.typography.titleLarge.shadow
+                                    )
+                                else
+                                    MaterialTheme.typography.displaySmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        shadow = MaterialTheme.typography.displaySmall.shadow
+                                    ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
-	val timeToNextPrayerLong =
-		nextPrayerTime.value?.atZone(java.time.ZoneId.systemDefault())
-			?.toInstant()
-			?.toEpochMilli()
-	val currentTime =
-		LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant()
-			.toEpochMilli()
+                        // Prayer Time Pill
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.extraLarge,
+                        ) {
+                            Text(
+                                text = nextPrayerTime.format(timeFormat),
+                                style = if (isCompact)
+                                    MaterialTheme.typography.titleMedium
+                                else
+                                    MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(if (isCompact) 6.dp else 8.dp)
+                            )
+                        }
+                    }
 
-	val difference = timeToNextPrayerLong?.minus(currentTime)
+                    // Countdown Timer Section
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(16.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(
+                                    horizontal = if (isCompact) 12.dp else 20.dp,
+                                    vertical = if (isCompact) 8.dp else 12.dp
+                                ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Timer,
+                                    contentDescription = "Countdown",
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(if (isCompact) 16.dp else 20.dp)
+                                )
 
-	val deviceTimeFormat = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
-	//if the device time format is 24 hour then use the 24 hour format
-	val formatter = if (deviceTimeFormat)
-	{
-		DateTimeFormatter.ofPattern("HH:mm")
-	} else
-	{
-		DateTimeFormatter.ofPattern("hh:mm a")
-	}
+                                // Generate countdown text only when needed
+                                val timerText by remember(countDownTimer) {
+                                    derivedStateOf { getEnhancedTimerText(countDownTimer) }
+                                }
 
-
-	viewModel.handleEvent(
-			 context ,
-			 PrayerTimesViewModel.PrayerTimesEvent.Start(difference !!)
-						 )
-
-	ElevatedCard(
-			 shape = MaterialTheme.shapes.extraLarge ,
-			 modifier = Modifier
-				 .padding(top = 8.dp , bottom = 0.dp , start = 8.dp , end = 8.dp)
-				 .fillMaxWidth()
-				 .testTag(TEST_TAG_HOME_PRAYER_TIMES_CARD) ,
-				) {
-		Column(
-				 modifier = Modifier
-					 .padding(8.dp) ,
-				 verticalArrangement = Arrangement.SpaceBetween ,
-				 horizontalAlignment = Alignment.CenterHorizontally
-			  ) {
-			Row(
-					 modifier = Modifier
-						 .padding(horizontal = 8.dp)
-						 .fillMaxWidth() ,
-					 verticalAlignment = Alignment.CenterVertically ,
-					 horizontalArrangement = Arrangement.SpaceBetween
-			   ) {
-				Column(
-						 modifier = Modifier.padding(4.dp) ,
-						 verticalArrangement = Arrangement.SpaceBetween ,
-						 horizontalAlignment = Alignment.CenterHorizontally
-					  ) {
-					Text(
-							 modifier = Modifier
-								 .padding(4.dp) ,
-							 textAlign = TextAlign.Start ,
-							 text = LocalDate.now()
-								 .format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							 style = MaterialTheme.typography.titleMedium
-						)
-					Text(
-							 modifier = Modifier
-								 .padding(4.dp) ,
-							 textAlign = TextAlign.Start ,
-							 text = HijrahDate.from(LocalDate.now())
-								 .format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) ,
-							 style = MaterialTheme.typography.titleSmall
-						)
-				}
-				if (isLoading.value)
-				{
-					Text(text = "Loading..." , style = MaterialTheme.typography.titleMedium)
-				} else
-				{
-					Text(
-							 text = locationName.value ,
-							 style = MaterialTheme.typography.titleMedium ,
-							 maxLines = 1 ,
-							 overflow = TextOverflow.Ellipsis
-						)
-				}
-
-				MoonPhaseImage(
-						 image = phaseOfMoon.phaseSvg
-							  )
-			}
-			Row(
-					 modifier = Modifier
-						 .fillMaxWidth() ,
-					 verticalAlignment = Alignment.CenterVertically ,
-					 horizontalArrangement = Arrangement.SpaceBetween
-			   ) {
-				Box(
-						 modifier = Modifier
-							 .clip(MaterialTheme.shapes.extraLarge)
-							 .size(100.dp)
-				   ) {
-					Image(
-							 modifier = Modifier
-								 .size(100.dp)
-								 .testTag(TEST_TAG_NEXT_PRAYER_ICON_DASHBOARD) ,
-							 painter = when (nextPrayerName.value)
-							 {
-								 "sunrise" ->
-								 {
-									 painterResource(id = R.drawable.sunrise_icon)
-								 }
-
-								 "fajr" ->
-								 {
-									 painterResource(id = R.drawable.fajr_icon)
-								 }
-
-								 "dhuhr" ->
-								 {
-									 painterResource(id = R.drawable.dhuhr_icon)
-								 }
-
-								 "asr" ->
-								 {
-									 painterResource(id = R.drawable.asr_icon)
-								 }
-
-								 "maghrib" ->
-								 {
-									 painterResource(id = R.drawable.maghrib_icon)
-								 }
-
-								 "isha" ->
-								 {
-									 painterResource(id = R.drawable.isha_icon)
-								 }
-
-								 else ->
-								 {
-									 painterResource(id = R.drawable.sunrise_icon)
-								 }
-							 } ,
-							 contentDescription = "Next Prayer Icon"
-						 )
-				}
-				Column(
-						 modifier = Modifier.fillMaxWidth() ,
-						 verticalArrangement = Arrangement.Center ,
-						 horizontalAlignment = Alignment.CenterHorizontally
-					  ) {
-					Text(
-							 text = nextPrayerName.value.first()
-								 .uppercase() + nextPrayerName.value.substring(1)
-								 .lowercase(
-										  Locale.ROOT
-										   ) ,
-							 style = MaterialTheme.typography.titleLarge
-						)
-					Text(
-							 text = nextPrayerTime.value.format(formatter) ,
-							 style = MaterialTheme.typography.titleLarge
-						)
-					Text(
-							 text = getTimerText(timer.value) ,
-							 style = MaterialTheme.typography.titleMedium ,
-							 textAlign = TextAlign.Center ,
-							 modifier = Modifier
-								 .fillMaxWidth()
-								 .padding(8.dp)
-						)
-				}
-			}
-		}
-	}
+                                Text(
+                                    text = timerText,
+                                    style = if (isCompact)
+                                        MaterialTheme.typography.bodyLarge
+                                    else
+                                        MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
-//a function to return in text how much time is left for the next prayer
-fun getTimerText(timeToNextPrayer : CountDownTime) : String
-{
-	return when
-	{
-		timeToNextPrayer.hours > 1 ->
-		{
-			//check if there are minutes left
-			if (timeToNextPrayer.minutes > 1)
-			{
-				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minutes Left"
-			} else if (timeToNextPrayer.minutes == 1L)
-			{
-				"${timeToNextPrayer.hours} hours ${timeToNextPrayer.minutes} minute Left"
-			} else
-			{
-				"${timeToNextPrayer.hours} hours Left"
-			}
-		}
+/**
+ * Optimized timer text generation with fewer conditional checks
+ */
+fun getEnhancedTimerText(timeToNextPrayer: CountDownTime?): String {
+    if (timeToNextPrayer == null) return "Next prayer time not available"
 
-		timeToNextPrayer.hours == 1L ->
-		{
-			//check if there are minutes left
-			if (timeToNextPrayer.minutes > 1)
-			{
-				"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minutes Left"
-			} else if (timeToNextPrayer.minutes == 1L)
-			{
-				//check if there are seconds left
-				if (timeToNextPrayer.seconds > 1)
-				{
-					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
-				} else if (timeToNextPrayer.seconds == 1L)
-				{
-					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
-				} else
-				{
-					"${timeToNextPrayer.hours} hour ${timeToNextPrayer.minutes} minute Left"
-				}
-			} else
-			{
-				"${timeToNextPrayer.hours} hour Left"
-			}
-		}
-
-		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes > 1 ->
-		{
-			//check if there are seconds left
-			if (timeToNextPrayer.seconds > 1)
-			{
-				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} seconds Left"
-			} else if (timeToNextPrayer.seconds == 1L)
-			{
-				"${timeToNextPrayer.minutes} minutes ${timeToNextPrayer.seconds} second Left"
-			} else
-			{
-				"${timeToNextPrayer.minutes} minutes Left"
-			}
-		}
-
-		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 1L ->
-		{
-			//check if there are seconds left
-			if (timeToNextPrayer.seconds > 1)
-			{
-				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} seconds Left"
-			} else if (timeToNextPrayer.seconds == 1L)
-			{
-				"${timeToNextPrayer.minutes} minute ${timeToNextPrayer.seconds} second Left"
-			} else
-			{
-				"${timeToNextPrayer.minutes} minute Left"
-			}
-		}
-
-		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds > 1 ->
-		{
-			"${timeToNextPrayer.seconds} seconds Left"
-		}
-
-		timeToNextPrayer.hours == 0L && timeToNextPrayer.minutes == 0L && timeToNextPrayer.seconds == 1L ->
-		{
-			"${timeToNextPrayer.seconds} second Left"
-		}
-
-		else ->
-		{
-			"Loading..."
-		}
-	}
+    return with(timeToNextPrayer) {
+        when {
+            hours > 0 -> "$hours hours ${minutes}min remaining"
+            minutes > 0 -> "${minutes}min ${if (minutes <= 5) "${seconds}s" else ""} remaining"
+            seconds > 30 -> "$seconds seconds remaining"
+            seconds > 0 -> "Starting momentarily"
+            else -> "Time for prayer"
+        }
+    }
 }
 
-@Composable
-fun MoonPhaseImage(image : Int)
-{
-	//a composable to show the moon phase image
-	//it takes the image as an argument
-	//and shows it in a circular shape
-	//with a white background
-	//and a black border
-	Box(
-			 modifier = Modifier
-				 .size(40.dp)
-				 .border(
-						  width = 1.dp ,
-						  color = MaterialTheme.colorScheme.outline ,
-						  shape = CircleShape
-						)
-				 .clip(shape = CircleShape)
-	   ) {
-		Image(
-				 painter = painterResource(id = image) ,
-				 contentDescription = "Moon Phase Image" ,
-				 modifier = Modifier
-					 .size(40.dp)
-					 .background(color = Color.White.copy(alpha = 0.8f))
-					 .clip(shape = CircleShape)
-			 )
-	}
+/**
+ * Simple prayer name formatter with no string allocations for lowercase conversion
+ */
+fun formatPrayerName(name: String): String {
+    if (name.equals("loading...", ignoreCase = true)) return name
+    return name.replaceFirstChar { it.uppercase() }
 }
 
 @Preview
 @Composable
-fun MoonPhaseImagePreview()
-{
-	val fraction = remember { mutableStateOf(0.0) }
-	//list of phases
-	val phases = listOf(
-			 MoonPhase.NEW_MOON ,
-			 MoonPhase.WAXING_CRESCENT ,
-			 MoonPhase.FIRST_QUARTER ,
-			 MoonPhase.WAXING_GIBBOUS ,
-			 MoonPhase.FULL_MOON ,
-			 MoonPhase.WANING_GIBBOUS ,
-			 MoonPhase.LAST_QUARTER ,
-			 MoonPhase.WANING_CRESCENT
-					   )
-	val currentPhase = remember { mutableStateOf(phases[0]) }
-	val percentage = (fraction.value * 100).toInt()
-	val imageToShow = when (currentPhase.value)
-	{
-		MoonPhase.NEW_MOON ->
-		{
-			R.drawable.new_moon
-		}
+fun DashboardPrayerTimesCardFajrPreview() {
 
-		MoonPhase.WAXING_CRESCENT ->
-		{
-			//get the image to show
-			when (percentage)
-			{
-				in 0 .. 10 -> R.drawable.waxing_cresent_7
-				in 10 .. 20 -> R.drawable.waxing_cresent_14
-				in 20 .. 30 -> R.drawable.waxing_cresent_21
-				in 30 .. 40 -> R.drawable.waxing_cresent_29
-				in 40 .. 50 -> R.drawable.waxing_cresent_36
-				else -> R.drawable.waxing_cresent_36
-			}
-		}
-
-		MoonPhase.FIRST_QUARTER ->
-		{
-			R.drawable.first_quarter_moon
-		}
-
-		MoonPhase.WAXING_GIBBOUS ->
-		{
-			//get the image to show
-			when (percentage)
-			{
-				in 50 .. 60 -> R.drawable.waxing_gib_57
-				in 60 .. 70 -> R.drawable.waxing_gib_64
-				in 70 .. 80 -> R.drawable.waxing_gib_71
-				in 80 .. 90 -> R.drawable.waxing_gib_78
-				in 90 .. 100 -> R.drawable.waxing_gib_86
-				else -> R.drawable.waxing_gib_71
-			}
-		}
-
-		MoonPhase.FULL_MOON ->
-		{
-			R.drawable.full_moon
-		}
-
-		MoonPhase.WANING_GIBBOUS ->
-		{
-			//get the image to show
-			when (100 - percentage)
-			{
-				in 0 .. 10 -> R.drawable.wanning_gib_7
-				in 10 .. 20 -> R.drawable.wanning_gib_14
-				in 20 .. 30 -> R.drawable.wanning_gib_21
-				in 30 .. 40 -> R.drawable.wanning_gib_29
-				in 40 .. 50 -> R.drawable.wanning_gib_36
-				in 50 .. 60 -> R.drawable.wanning_gib_43
-				else -> R.drawable.wanning_gib_36
-			}
-		}
-
-		MoonPhase.LAST_QUARTER ->
-		{
-			R.drawable.last_quarter_moon
-		}
-
-		MoonPhase.WANING_CRESCENT ->
-		{
-			//get the image to show
-			when (100 - percentage)
-			{
-				in 50 .. 60 -> R.drawable.wanning_cres_57
-				in 60 .. 70 -> R.drawable.wanning_cres_64
-				in 70 .. 80 -> R.drawable.wanning_cres_71
-				in 80 .. 90 -> R.drawable.wanning_cres_78
-				in 90 .. 100 -> R.drawable.wanning_cres_86
-				else -> R.drawable.wanning_cres_93
-			}
-		}
-	}
-	val dateOfCurrentPhase = remember { mutableStateOf(LocalDateTime.now()) }
-	//one hundred days  to chewck the moon phase over
-	val hundredDays = 30
-	//get one hundred dates
-	val dates = remember {
-		mutableStateOf(
-				 (0 .. hundredDays).map {
-					 LocalDateTime.now().plusDays(it.toLong())
-				 }
-					  )
-	}
-	//get a list of moon phases
-	val moonPhases = dates.value.map {
-		MoonCalc(
-				 latitude = 53.7 ,
-				 longitude = - 7.35
-				).getMoonPhase(it)
-	}
-	//a slider to change date so that the moon phase changes
-	//and we can see the different moon phases
-	Column(
-			 modifier = Modifier.fillMaxSize() ,
-			 horizontalAlignment = Alignment.CenterHorizontally ,
-			 verticalArrangement = Arrangement.Center
-		  ) {
-
-		//loop through the list of moon phases and get the fraction and phase
-		//print the date
-		LaunchedEffect(key1 = Unit) {
-			moonPhases.forEachIndexed { index , moonPhase ->
-				fraction.value = moonPhase.fraction
-				currentPhase.value = moonPhase.phaseName
-				dateOfCurrentPhase.value = dates.value[index]
-				delay(1000)
-			}
-		}
-		Text(text = "Date: ${dateOfCurrentPhase.value}")
-		Text(text = "Fraction: ${fraction.value}")
-		Text(text = "Percentage: ${percentage}")
-		Text(text = "Phase: ${currentPhase.value}")
-		Spacer(modifier = Modifier.height(10.dp))
-		MoonPhaseImage(image = imageToShow)
-	}
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Fajr",
+        countDownTimer = CountDownTime(1, 1, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+    )
 }
 
+@Preview
+@Composable
+fun DashboardPrayerTimesCardSunrisePreview() {
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Sunrise",
+        countDownTimer = CountDownTime(0, 30, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+    )
+}
+
+@Preview
+@Composable
+fun DashboardPrayerTimesCardDhuhrPreview() {
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Dhuhr",
+        countDownTimer = CountDownTime(1, 30, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+    )
+}
+
+@Preview
+@Composable
+fun DashboardPrayerTimesCardAsrPreview() {
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Asr",
+        countDownTimer = CountDownTime(0, 45, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+    )
+}
+
+@Preview
+@Composable
+fun DashboardPrayerTimesCardMaghribPreview() {
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Maghrib",
+        countDownTimer = CountDownTime(0, 15, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+    )
+}
+
+@Preview(showSystemUi = false)
+@Composable
+fun DashboardPrayerTimesCardIshaPreview() {
+
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Isha",
+        countDownTimer = CountDownTime(0, 5, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+    )
+}
+
+//compact
+@Preview
+@Composable
+fun DashboardPrayerTimesCardCompactFajrPreview() {
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Sunrise",
+        countDownTimer = CountDownTime(1, 1, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm"),
+        height = 150.dp
+    )
+}

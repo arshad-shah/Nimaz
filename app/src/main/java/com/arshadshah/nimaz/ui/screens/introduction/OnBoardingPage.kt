@@ -1,84 +1,108 @@
 package com.arshadshah.nimaz.ui.screens.introduction
 
-import android.annotation.SuppressLint
-import android.content.Intent.*
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.common.BatteryExemptionUI
-import com.arshadshah.nimaz.ui.components.common.CalculationMethodUI
-import com.arshadshah.nimaz.ui.components.common.NotificationScreenUI
-import com.arshadshah.nimaz.ui.components.settings.LocationSettings
+import com.arshadshah.nimaz.ui.components.intro.IntroBatteryExemption
+import com.arshadshah.nimaz.ui.components.intro.IntroCalculation
+import com.arshadshah.nimaz.ui.components.intro.IntroLegalAgreement
+import com.arshadshah.nimaz.ui.components.intro.IntroLocation
+import com.arshadshah.nimaz.ui.components.intro.IntroNotification
 
-sealed class OnBoardingPage(
-	val image : Int ,
-	val title : String ,
-	val description : String ,
-	val extra : @Composable (() -> Unit)? = null ,
-						   )
-{
+/**
+ * Represents a single page in the onboarding flow
+ * @param image Resource ID for the illustration
+ * @param title Page title
+ * @param description Page description
+ * @param category Optional category for grouping related pages
+ * @param extra Optional composable content for additional UI elements
+ */
+data class OnBoardingPage(
+    val image: Int,
+    val title: String,
+    val description: String,
+    val category: String = "",
+    val extra: @Composable (NavController?) -> Unit = { _ -> },
+)
 
-	object First : OnBoardingPage(
-			 image = R.drawable.praying ,
-			 title = "Assalamu alaykum" ,
-			 description = "A user-friendly, Beautifully designed app for Muslims, with accurate prayer times completely Ad-Free." ,
-								 )
+/**
+ * Contains all onboarding pages for the app
+ */
+object OnBoardingPages {
+    private val pages = listOf(
+        OnBoardingPage(
+            image = R.drawable.praying,
+            title = "Assalamu alaykum",
+            category = "Welcome",
+            description = "Experience peaceful prayer times with our beautifully designed, " +
+                    "accurate, and completely Ad-Free Islamic companion."
+        ),
+        OnBoardingPage(
+            image = R.drawable.quran,
+            title = "Spiritual Guidance",
+            category = "Features",
+            description = "Access the Holy Quran with Urdu and English translations, " +
+                    "audio recitations, and bookmarking for your spiritual journey."
+        ),
+        OnBoardingPage(
+            image = R.drawable.tracker_icon,
+            title = "Track Your Journey",
+            category = "Features",
+            description = "Stay connected with your spiritual practices through our " +
+                    "intuitive Prayer and Fasting tracker."
+        ),
+        OnBoardingPage(
+            image = R.drawable.adhan,
+            title = "Prayer Reminders",
+            category = "Setup",
+            description = "Never miss a prayer with customizable Adhan notifications " +
+                    "that respect your schedule and preferences.",
+            extra = { IntroNotification() }
+        ),
+        OnBoardingPage(
+            image = R.drawable.location_pin,
+            title = "Precise Timing",
+            category = "Setup",
+            description = "Get accurate prayer times and Qibla direction based on your location. " +
+                    "Manual location setting is also available for your convenience.",
+            extra = { IntroLocation() }
+        ),
+        OnBoardingPage(
+            image = R.drawable.battery,
+            title = "Reliable Notifications",
+            category = "Setup",
+            description = "Ensure timely notifications by optimizing battery settings " +
+                    "for uninterrupted prayer reminders.",
+            extra = { IntroBatteryExemption() }
+        ),
+        OnBoardingPage(
+            image = R.drawable.time_calculation,
+            title = "Prayer Time Calculation",
+            category = "Setup",
+            description = "Choose between the Muslim World League method or automatic " +
+                    "calculations based on the sun's position for precise prayer times.",
+            extra = { IntroCalculation() }
+        ),
+        // New legal agreement page
+        OnBoardingPage(
+            image = R.drawable.document_icon, // Use an appropriate icon from your resources
+            title = "Terms & Privacy",
+            category = "Legal",
+            description = "Before you begin your spiritual journey with Nimaz, please review and accept our terms of service and privacy policy.",
+            extra = { navController -> IntroLegalAgreement(navController!!) }
+        ),
+        OnBoardingPage(
+            image = R.drawable.check_mark,
+            title = "Ready to Begin",
+            category = "Complete",
+            description = "Your app is now perfectly configured for your spiritual journey. " +
+                    "Settings can be adjusted anytime. Please keep us in your prayers."
+        )
+    )
 
-	object Second : OnBoardingPage(
-			 image = R.drawable.quran ,
-			 title = "Quran" ,
-			 description = "Quran with Urdu and English Translations, Audio Recitation, and Bookmarking Feature for Saving Ayahs to Read Later." ,
-								  )
+    operator fun get(index: Int) = pages.getOrNull(index)
+    val size get() = pages.size
 
-	object Third : OnBoardingPage(
-			 image = R.drawable.tracker_icon ,
-			 title = "Prayer and Fasting tracker" ,
-			 description = "Stay on track with your prayers and fasts with the Prayer and Fasting tracker." ,
-								 )
-
-	//the Notification permission page
-	object Fourth : OnBoardingPage(
-			 image = R.drawable.adhan ,
-			 title = "Adhan Notifications" ,
-			 description = "Adhan Notifications for Nimaz to get Prayer reminders in the form of Adhan." ,
-			 extra = {
-				 NotificationScreenUI()
-			 }
-								  )
-
-	object Fifth : OnBoardingPage(
-			 image = R.drawable.location_pin ,
-			 title = "Location" ,
-			 description = "Nimaz needs your location to get accurate prayer times and calculate Qibla direction. You can also use manual location." ,
-			 extra = {
-				 LocationSettings(isIntro = true)
-			 }
-								 )
-
-	object Sixth : OnBoardingPage(
-			 image = R.drawable.time_calculation ,
-			 title = "Calculation Method" ,
-			 description = "Nimaz uses the Muslim World League method by default in manual mode and uses altitude of the sun to calculate prayer times in automatic mode." ,
-			 extra = {
-				 CalculationMethodUI()
-			 }
-								 )
-
-	//a page to ask for the battery optimization exemption
-	@SuppressLint("BatteryLife")
-	object Seventh : OnBoardingPage(
-			 image = R.drawable.battery ,
-			 title = "Battery Exemption" ,
-			 description = "Battery optimization can cause issues with Adhan Notifications." ,
-			 extra = {
-				 BatteryExemptionUI()
-			 }
-								   )
-
-	object Eighth : OnBoardingPage(
-			 image = R.drawable.check_mark ,
-			 title = "Onboarding Complete" ,
-			 description = "You are all set to use Nimaz. You can always change these settings later. I hope Nimaz helps you in your daily life and Kindly keep me and my family in your prayers." ,
-			 extra = {
-			 }
-								  )
+    // Group pages by category for progress tracking
+    val categories = pages.groupBy { it.category }
 }
