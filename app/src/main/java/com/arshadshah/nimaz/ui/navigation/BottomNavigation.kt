@@ -100,13 +100,7 @@ fun BottomNavigationBar(
                 },
                 selected = selected,
                 onClick = {
-                    navController.navigate(item.screen_route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navController.navigateToBottomNavItem(item.screen_route)
                 },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = selectedItemColor,

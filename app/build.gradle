@@ -130,6 +130,7 @@ dependencies {
     implementation libs.androidx.compose.ui.graphics
     implementation libs.androidx.compose.material3
     implementation libs.androidx.material.icons.extended
+    implementation libs.androidx.material3.window.size.class1
 
     //testing
     debugImplementation libs.androidx.compose.ui.tooling
@@ -223,13 +224,10 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
     testImplementation libs.junit.jupiter
 
-
     implementation libs.introshowcaseview
 
 
-    testImplementation libs.mockito.core
-    // Optional -- mockito-kotlin
-    testImplementation libs.mockito.kotlin
+    testImplementation libs.mockk
 
 
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +46,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.CountDownTime
 import com.arshadshah.nimaz.ui.components.dashboard.components.AsrBackground
@@ -59,17 +61,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 /**
- * Pre-computed data class for cloud properties to reduce calculations and object creation
- */
-private data class CloudData(
-    val initialX: Float,
-    val y: Float,
-    val scale: Float,
-    val opacity: Float,
-    val speed: Float
-)
-
-/**
  * Enhanced Prayer Time Card with realistic animated backgrounds
  * for different prayer times - displays automatically based on current time
  */
@@ -80,12 +71,15 @@ fun DashboardPrayerTimesCard(
     nextPrayerTime: LocalDateTime,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    timeFormat: DateTimeFormatter
+    timeFormat: DateTimeFormatter,
+    height: Dp = 200.dp
 ) {
+
+    val isCompact = height < 200.dp
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .height(height)
             .padding(8.dp),
         shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(
@@ -172,14 +166,19 @@ fun DashboardPrayerTimesCard(
                         .background(overlayGradient)
                 )
 
-                // Content overlay
+                // Content overlay with adjusted spacing for smaller heights
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(if (isCompact) 4.dp else 8.dp),
+                    verticalArrangement = if (isCompact)
+                        Arrangement.SpaceEvenly
+                    else
+                        Arrangement.spacedBy(8.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    if (!isCompact) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
                     // Prayer Name and Time Section
                     Column(
@@ -193,28 +192,36 @@ fun DashboardPrayerTimesCard(
                         ) {
                             Text(
                                 text = formatPrayerName(nextPrayerName),
-                                style = MaterialTheme.typography.displaySmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    shadow = MaterialTheme.typography.displaySmall.shadow
-                                ),
+                                style = if (isCompact)
+                                    MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        shadow = MaterialTheme.typography.titleLarge.shadow
+                                    )
+                                else
+                                    MaterialTheme.typography.displaySmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        shadow = MaterialTheme.typography.displaySmall.shadow
+                                    ),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
 
-
                         // Prayer Time Pill
                         Surface(
                             color = MaterialTheme.colorScheme.surface,
                             shape = MaterialTheme.shapes.extraLarge,
-                            modifier = Modifier.blur(radius = 0.5.dp)
                         ) {
                             Text(
                                 text = nextPrayerTime.format(timeFormat),
-                                style = MaterialTheme.typography.titleLarge,
+                                style = if (isCompact)
+                                    MaterialTheme.typography.titleMedium
+                                else
+                                    MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(8.dp)
+                                modifier = Modifier.padding(if (isCompact) 6.dp else 8.dp)
                             )
                         }
                     }
@@ -228,10 +235,12 @@ fun DashboardPrayerTimesCard(
                         Surface(
                             color = MaterialTheme.colorScheme.surface,
                             shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier.blur(radius = 0.5.dp)
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                                modifier = Modifier.padding(
+                                    horizontal = if (isCompact) 12.dp else 20.dp,
+                                    vertical = if (isCompact) 8.dp else 12.dp
+                                ),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
@@ -239,7 +248,7 @@ fun DashboardPrayerTimesCard(
                                     imageVector = Icons.Outlined.Timer,
                                     contentDescription = "Countdown",
                                     tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(if (isCompact) 16.dp else 20.dp)
                                 )
 
                                 // Generate countdown text only when needed
@@ -249,7 +258,10 @@ fun DashboardPrayerTimesCard(
 
                                 Text(
                                     text = timerText,
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = if (isCompact)
+                                        MaterialTheme.typography.bodyLarge
+                                    else
+                                        MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -363,4 +375,19 @@ fun DashboardPrayerTimesCardIshaPreview() {
             modifier = Modifier.fillMaxWidth(),
             timeFormat = DateTimeFormatter.ofPattern("HH:mm")
         )
+}
+
+//compact
+@Preview
+@Composable
+fun DashboardPrayerTimesCardCompactFajrPreview() {
+    DashboardPrayerTimesCard(
+        nextPrayerName = "Sunrise",
+        countDownTimer = CountDownTime(1, 1, 0),
+        nextPrayerTime = LocalDateTime.now(),
+        isLoading = false,
+        modifier = Modifier.fillMaxWidth(),
+        timeFormat = DateTimeFormatter.ofPattern("HH:mm"),
+        height = 150.dp
+    )
 }

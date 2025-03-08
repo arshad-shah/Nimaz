@@ -242,13 +242,13 @@ class SettingsViewModel @Inject constructor(
         updateService.checkForUpdate(event.updateType) { result ->
             result.onSuccess { isUpdateAvailable ->
                 _uiState.update { it.copy(updateAvailable = isUpdateAvailable) }
-            }.onFailure { error ->
+            }.onFailure {
                 _uiState.update { it.copy(error = "", updateAvailable = false) }
             }
         }
     }
 
-    private suspend fun handleStartUpdate(event: SettingsEvent.StartUpdate) {
+    private fun handleStartUpdate(event: SettingsEvent.StartUpdate) {
         updateService.startUpdateFlow(
             activity = event.activity,
             requestCode = event.requestCode,

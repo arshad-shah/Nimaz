@@ -162,7 +162,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // Log the screen view event
-        firebaseLogger.logScreenView(screenName, "com.arshadshah.nimaz.screens.$screenName")
+        firebaseLogger.logScreenView(screenName, screenName)
 
         // Log additional analytics for specific screens
         when (baseRoute) {

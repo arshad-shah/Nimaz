@@ -11,7 +11,7 @@ calendar = "1.2.0"
 core = "1.6.1"
 coreSplashscreen = "1.0.1"
 desugar_jdk_libs = "2.1.5"
-espressoCore = "3.6.1"
+espressoCore = "3.5.0"
 firebaseBom = "33.10.0"
 firebaseCrashlytics = "3.0.3"
 firebaseCrashlyticsBuildtools = "3.0.3"
@@ -40,6 +40,7 @@ markwon = "4.6.2"
 materialIconsExtended = "1.7.8"
 mockitoCore = "5.12.0"
 mockitoKotlin = "5.4.0"
+mockk = "1.13.17"
 monitor = "1.7.2"
 navigationCompose = "2.8.8"
 navigationTesting = "2.8.8"
@@ -53,7 +54,7 @@ slf4jAndroid = "1.7.36"
 toasty = "1.5.2"
 workManager = "2.10.0"
 appcompat = "1.7.0"
-junitJupiter = "5.8.1"
+junitJupiter = "5.8.2"
 uiTestJunit4Android = "1.7.8"
 uiTextGoogleFonts = "1.7.8"
 
@@ -81,6 +82,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+androidx-material3-window-size-class1 = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-monitor = { module = "androidx.test:monitor", version.ref = "monitor" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationCompose" }
@@ -102,6 +104,7 @@ ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktorCli
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientAndroid" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
