@@ -3,9 +3,19 @@ package com.arshadshah.nimaz.ui.navigation
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.arshadshah.nimaz.activities.MainActivity
@@ -59,6 +69,43 @@ import com.arshadshah.nimaz.ui.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.ui.screens.tracker.CalendarScreen
 import com.arshadshah.nimaz.ui.screens.tracker.PrayerTracker
 
+// Extension function for safer navigation with consistent options
+fun NavController.safeNavigate(
+    route: String,
+    builder: NavOptionsBuilder.() -> Unit = {
+        // Default navigation behavior - smooth transitions
+        launchSingleTop = true
+        restoreState = true
+    }
+) {
+    try {
+        navigate(route) {
+            builder()
+        }
+        Log.d("Navigation", "Navigating to: $route")
+    } catch (e: Exception) {
+        Log.e("Navigation", "Failed to navigate to $route: ${e.message}", e)
+    }
+}
+
+// Extension for bottom nav navigation
+fun NavController.navigateToBottomNavItem(route: String) {
+    safeNavigate(route) {
+        // Pop up to the start destination of the graph to
+        // avoid building up a large stack of destinations
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        // Avoid multiple copies of the same destination
+        launchSingleTop = true
+        // Restore state when reselecting a previously selected item
+        restoreState = true
+    }
+}
+
+// Default transition animation durations
+private const val NAV_ANIM_DURATION = 300
+
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun NavigationGraph(
@@ -66,78 +113,180 @@ fun NavigationGraph(
     context: MainActivity,
     isFirstInstall: Boolean,
 ) {
+    val navHostController = navController as NavHostController
+
+    // Set up navigation error tracking
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            Log.d("Navigation", "Navigated to: ${destination.route}")
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose {
+            navController.removeOnDestinationChangedListener(listener)
+        }
+    }
 
     val startDestination = if (isFirstInstall) "Intro" else BottomNavItem.Dashboard.screen_route
 
+    // Define standard transitions for all screens
+    val defaultEnterTransition = remember {
+        { _: AnimatedContentTransitionScope<NavBackStackEntry> ->
+            fadeIn(animationSpec = tween(NAV_ANIM_DURATION))
+        }
+    }
+
+    val defaultExitTransition = remember {
+        { _: AnimatedContentTransitionScope<NavBackStackEntry> ->
+            fadeOut(animationSpec = tween(NAV_ANIM_DURATION))
+        }
+    }
+
     NavHost(
-        navController = navController as NavHostController,
+        navController = navHostController,
         startDestination = startDestination,
+        enterTransition = defaultEnterTransition,
+        exitTransition = defaultExitTransition,
     ) {
         composable("Intro") {
-            IntroPage(navController = navController)
+            IntroPage(
+                navController = navController,
+            )
         }
+
+        // --- Bottom Navigation Items ---
 
         composable(BottomNavItem.Dashboard.screen_route) {
             Dashboard(
                 navController = navController,
                 context = context,
                 onNavigateToCalender = {
-                    navController.navigate(CALENDER_SCREEN_ROUTE)
+                    navController.safeNavigate(CALENDER_SCREEN_ROUTE)
                 },
                 onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int ->
-                    navController.navigate(
-                        MY_QURAN_SCREEN_ROUTE.replace(
-                            "{number}",
-                            number
-                        )
-                            .replace(
-                                "{isSurah}",
-                                isSurah.toString()
-                            )
-                            .replace(
-                                "{language}",
-                                language
-                            )
-                            .replace(
-                                "{scrollTo}",
-                                scrollToAya.toString()
-                            )
-                    )
+                    val route = MY_QURAN_SCREEN_ROUTE
+                        .replace("{number}", number)
+                        .replace("{isSurah}", isSurah.toString())
+                        .replace("{language}", language)
+                        .replace("{scrollTo}", scrollToAya.toString())
+
+                    navController.safeNavigate(route)
                 },
                 onNavigateToTasbihScreen = { id: String, arabic: String, translation: String, transliteration: String ->
-                    navController.navigate(
-                        TASBIH_SCREEN_ROUTE
-                            .replace(
-                                "{id}",
-                                id
-                            )
-                            .replace(
-                                "{arabic}",
-                                arabic
-                            )
-                            .replace(
-                                "{translation}",
-                                translation
-                            )
-                            .replace(
-                                "{transliteration}",
-                                transliteration
-                            )
-                    )
+                    val route = TASBIH_SCREEN_ROUTE
+                        .replace("{id}", id)
+                        .replace("{arabic}", arabic)
+                        .replace("{translation}", translation)
+                        .replace("{transliteration}", transliteration)
+
+                    navController.safeNavigate(route)
                 },
                 onNavigateToTasbihListScreen = {
-                    navController.navigate(TASBIH_LIST_SCREEN)
+                    navController.safeNavigate(TASBIH_LIST_SCREEN)
                 },
             )
-
         }
 
-        composable(BottomNavItem.PrayerTimesScreen.screen_route)
-        {
+        composable(BottomNavItem.PrayerTimesScreen.screen_route) {
             PrayerTimesScreen(
                 navController = navController,
             )
         }
+
+        composable(BottomNavItem.QuranScreen.screen_route) {
+            QuranScreen(
+                navController = navController,
+                onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int? ->
+                    if (scrollToAya != null) {
+                        val route = MY_QURAN_SCREEN_ROUTE
+                            .replace("{number}", number)
+                            .replace("{isSurah}", isSurah.toString())
+                            .replace("{language}", language)
+                            .replace("{scrollTo}", scrollToAya.toString())
+
+                        navController.safeNavigate(route) {
+                            // Avoid using inclusive=true as it causes animation issues
+                            popUpTo(BottomNavItem.QuranScreen.screen_route) {
+                                saveState = true
+                            }
+                        }
+                    } else {
+                        val route = QURAN_AYA_SCREEN_ROUTE
+                            .replace("{number}", number)
+                            .replace("{isSurah}", isSurah.toString())
+                            .replace("{language}", language)
+
+                        navController.safeNavigate(route)
+                    }
+                }
+            )
+        }
+
+        composable(BottomNavItem.MoreScreen.screen_route) {
+            MoreScreen(
+                navController = navController,
+                onNavigateToTasbihScreen = { id: String, arabic: String, translation: String, transliteration: String ->
+                    val route = TASBIH_SCREEN_ROUTE
+                        .replace("{id}", id)
+                        .replace("{arabic}", arabic)
+                        .replace("{translation}", translation)
+                        .replace("{transliteration}", transliteration)
+
+                    navController.safeNavigate(route)
+                },
+                onNavigateToTasbihListScreen = {
+                    navController.safeNavigate(TASBIH_LIST_SCREEN)
+                },
+                onNavigateToNames = {
+                    navController.safeNavigate(NAMESOFALLAH_SCREEN_ROUTE)
+                },
+                onNavigateToListOfTasbeeh = {
+                    navController.safeNavigate(AppConstants.CATEGORY_SCREEN_ROUTE)
+                },
+                onNavigateToQibla = {
+                    navController.safeNavigate(QIBLA_SCREEN_ROUTE)
+                },
+                onNavigateToShadah = {
+                    navController.safeNavigate(SHAHADAH_SCREEN_ROUTE)
+                },
+                onNavigateToPrayerTracker = {
+                    navController.safeNavigate(PRAYER_TRACKER_SCREEN_ROUTE)
+                },
+                onNavigateToCalender = {
+                    navController.safeNavigate(CALENDER_SCREEN_ROUTE)
+                },
+                onNavigateToZakat = {
+                    navController.safeNavigate("Zakat")
+                },
+                onNavigateToHadithShelf = {
+                    navController.safeNavigate(HADITH_SHELF_SCREEN_ROUTE)
+                }
+            )
+        }
+
+        composable(BottomNavItem.SettingsScreen.screen_route) {
+            SettingsScreen(
+                activity = context,
+                navController = navController,
+                onNavigateToPrayerTimeCustomizationScreen = {
+                    navController.safeNavigate(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE)
+                },
+                onNavigateToLicencesScreen = {
+                    navController.safeNavigate(LICENCES_SCREEN_ROUTE)
+                },
+                onNavigateToAboutScreen = {
+                    navController.safeNavigate(ABOUT_SCREEN_ROUTE)
+                },
+                onNavigateToWebViewScreen = { url: String ->
+                    val route = WEB_VIEW_SCREEN_ROUTE.replace("{url}", url)
+                    navController.safeNavigate(route)
+                },
+                onNavigateToDebugScreen = {
+                    navController.safeNavigate(DEBUG_MODE)
+                },
+            )
+        }
+
+        // --- Content Screens ---
 
         composable(CALENDER_SCREEN_ROUTE) {
             CalendarScreen(navController = navController)
@@ -146,53 +295,7 @@ fun NavigationGraph(
         composable(QIBLA_SCREEN_ROUTE) {
             QiblaScreen(navController)
         }
-        composable(BottomNavItem.QuranScreen.screen_route) {
-            QuranScreen(
-                navController = navController,
-                onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int? ->
-                    if (scrollToAya != null) {
-                        navController.navigate(
-                            MY_QURAN_SCREEN_ROUTE.replace(
-                                "{number}",
-                                number
-                            )
-                                .replace(
-                                    "{isSurah}",
-                                    isSurah.toString()
-                                )
-                                .replace(
-                                    "{language}",
-                                    language
-                                )
-                                .replace(
-                                    "{scrollTo}",
-                                    scrollToAya.toString()
-                                )
-                        ) {
-                            popUpTo(MY_QURAN_SCREEN_ROUTE) {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
-                        }
-                    } else {
-                        navController.navigate(
-                            QURAN_AYA_SCREEN_ROUTE.replace(
-                                "{number}",
-                                number
-                            )
-                                .replace(
-                                    "{isSurah}",
-                                    isSurah.toString()
-                                )
-                                .replace(
-                                    "{language}",
-                                    language
-                                )
-                        )
-                    }
-                }
-            )
-        }
+
         composable(MY_QURAN_SCREEN_ROUTE) {
             AyatScreen(
                 number = it.arguments?.getString("number")!!,
@@ -212,77 +315,22 @@ fun NavigationGraph(
             )
         }
 
-
-        composable(BottomNavItem.MoreScreen.screen_route) {
-            MoreScreen(
-                navController = navController,
-                onNavigateToTasbihScreen = { id: String, arabic: String, translation: String, transliteration: String ->
-                    navController.navigate(
-                        TASBIH_SCREEN_ROUTE
-                            .replace(
-                                "{id}",
-                                id
-                            )
-                            .replace(
-                                "{arabic}",
-                                arabic
-                            )
-                            .replace(
-                                "{translation}",
-                                translation
-                            )
-                            .replace(
-                                "{transliteration}",
-                                transliteration
-                            )
-                    )
-                },
-                onNavigateToTasbihListScreen = {
-                    navController.navigate(TASBIH_LIST_SCREEN)
-                },
-                onNavigateToNames = {
-                    navController.navigate(NAMESOFALLAH_SCREEN_ROUTE)
-                },
-                onNavigateToListOfTasbeeh = {
-                    navController.navigate(AppConstants.CATEGORY_SCREEN_ROUTE)
-                },
-                onNavigateToQibla = {
-                    navController.navigate(QIBLA_SCREEN_ROUTE)
-                },
-                onNavigateToShadah = {
-                    navController.navigate(SHAHADAH_SCREEN_ROUTE)
-                },
-                onNavigateToPrayerTracker = {
-                    navController.navigate(PRAYER_TRACKER_SCREEN_ROUTE)
-                },
-                onNavigateToCalender = {
-                    navController.navigate(CALENDER_SCREEN_ROUTE)
-                },
-                onNavigateToZakat = {
-                    navController.navigate("Zakat")
-                },
-                onNavigateToHadithShelf = {
-                    navController.navigate(HADITH_SHELF_SCREEN_ROUTE)
-                }
-            )
-        }
-
         composable(HADITH_SHELF_SCREEN_ROUTE) {
-            BookShelf(navController = navController,
+            BookShelf(
+                navController = navController,
                 onNavigateToChapterFromFavourite = { bookId: Int, chapterId: Int ->
-                    navController.navigate(
-                        HADITH_LIST_SCREEN_ROUTE.replace(
-                            "{bookId}", bookId.toString()
-                        ).replace("{chapterId}", chapterId.toString())
-                    )
+                    val route = HADITH_LIST_SCREEN_ROUTE
+                        .replace("{bookId}", bookId.toString())
+                        .replace("{chapterId}", chapterId.toString())
+
+                    navController.safeNavigate(route)
                 },
                 onNavigateToChaptersList = { id: Int, title: String ->
-                    navController.navigate(
-                        HADITH_CHAPTERS_LIST_SCREEN_ROUTE.replace(
-                            "{bookId}",
-                            id.toString()
-                        ).replace("{bookName}", title)
-                    )
+                    val route = HADITH_CHAPTERS_LIST_SCREEN_ROUTE
+                        .replace("{bookId}", id.toString())
+                        .replace("{bookName}", title)
+
+                    navController.safeNavigate(route)
                 }
             )
         }
@@ -292,11 +340,11 @@ fun NavigationGraph(
                 navController = navController,
                 bookId = it.arguments?.getString("bookId"),
                 onNavigateToAChapter = { bookId: Int, chapterId: Int ->
-                    navController.navigate(
-                        HADITH_LIST_SCREEN_ROUTE.replace(
-                            "{bookId}", bookId.toString()
-                        ).replace("{chapterId}", chapterId.toString())
-                    )
+                    val route = HADITH_LIST_SCREEN_ROUTE
+                        .replace("{bookId}", bookId.toString())
+                        .replace("{chapterId}", chapterId.toString())
+
+                    navController.safeNavigate(route)
                 }
             )
         }
@@ -309,30 +357,17 @@ fun NavigationGraph(
             )
         }
 
-
         composable(TASBIH_LIST_SCREEN) {
-            ListOfTasbih(navController = navController) { id: String, arabic: String, translation: String, transliteration: String ->
-                //replace the placeholder with the actual route TASBIH_SCREEN_ROUTE
-                //tasbih_screen/{arabic}/{translation}/{transliteration}
-                navController.navigate(
-                    TASBIH_SCREEN_ROUTE
-                        .replace(
-                            "{id}",
-                            id
-                        )
-                        .replace(
-                            "{arabic}",
-                            arabic
-                        )
-                        .replace(
-                            "{translation}",
-                            translation
-                        )
-                        .replace(
-                            "{transliteration}",
-                            transliteration
-                        )
-                )
+            ListOfTasbih(
+                navController = navController
+            ) { id: String, arabic: String, translation: String, transliteration: String ->
+                val route = TASBIH_SCREEN_ROUTE
+                    .replace("{id}", id)
+                    .replace("{arabic}", arabic)
+                    .replace("{translation}", translation)
+                    .replace("{transliteration}", transliteration)
+
+                navController.safeNavigate(route)
             }
         }
 
@@ -357,18 +392,13 @@ fun NavigationGraph(
         composable(AppConstants.CATEGORY_SCREEN_ROUTE) {
             Categories(
                 navController = navController,
-            )
-            //pass the category name to the next screen
-            { category: String, id: Int ->
+            ) { category: String, id: Int ->
                 Log.d("Category", category)
-                navController.navigate(
-                    CHAPTERS_SCREEN_ROUTE
-                        .replace(
-                            "{title}",
-                            category
-                        )
-                        .replace("{id}", id.toString())
-                )
+                val route = CHAPTERS_SCREEN_ROUTE
+                    .replace("{title}", category)
+                    .replace("{id}", id.toString())
+
+                navController.safeNavigate(route)
             }
         }
 
@@ -377,17 +407,11 @@ fun NavigationGraph(
                 categoryId = it.arguments?.getString("id")!!,
                 navController = navController,
                 onNavigateToChapter = { chapterId: Int, categoryName: String ->
-                    navController.navigate(
-                        CHAPTER_SCREEN_ROUTE
-                            .replace(
-                                "{chapterId}",
-                                chapterId.toString()
-                            )
-                            .replace(
-                                "{categoryName}",
-                                categoryName
-                            )
-                    )
+                    val route = CHAPTER_SCREEN_ROUTE
+                        .replace("{chapterId}", chapterId.toString())
+                        .replace("{categoryName}", categoryName)
+
+                    navController.safeNavigate(route)
                 },
             )
         }
@@ -403,58 +427,26 @@ fun NavigationGraph(
             ShahadahScreen(navController)
         }
 
-        composable(BottomNavItem.SettingsScreen.screen_route) {
-            SettingsScreen(
-                activity = context,
-                navController = navController,
-                onNavigateToPrayerTimeCustomizationScreen = {
-                    navController.navigate(
-                        PRAYER_TIMES_SETTINGS_SCREEN_ROUTE
-                    )
-                },
-                onNavigateToLicencesScreen = {
-                    navController.navigate(
-                        LICENCES_SCREEN_ROUTE
-                    )
-                },
-                onNavigateToAboutScreen = {
-                    navController.navigate(
-                        ABOUT_SCREEN_ROUTE
-                    )
-                },
-                onNavigateToWebViewScreen = { url: String ->
-                    navController.navigate(
-                        WEB_VIEW_SCREEN_ROUTE
-                            .replace(
-                                "{url}",
-                                url
-                            ),
-                    )
-                },
-                onNavigateToDebugScreen = {
-                    navController.navigate(
-                        DEBUG_MODE
-                    )
-                },
-            )
-        }
         composable(WEB_VIEW_SCREEN_ROUTE) {
             WebViewScreen(
                 url = it.arguments?.getString("url")!!,
                 navController = navController
             )
         }
+
         composable(ABOUT_SCREEN_ROUTE) {
             EnhancedAboutScreen(
                 navController = navController,
-                onImageClicked = { navController.navigate(DEBUG_MODE) }
+                onImageClicked = { navController.safeNavigate(DEBUG_MODE) }
             )
         }
+
         composable(LICENCES_SCREEN_ROUTE) {
             LicensesScreen(
                 navController = navController,
             )
         }
+
         composable(PRAYER_TIMES_SETTINGS_SCREEN_ROUTE) {
             PrayerTimesCustomizations(navController)
         }
@@ -476,9 +468,15 @@ fun NavigationGraph(
             )
         }
 
-
+        // Use special transition for Tafseer screen as it's content-heavy
         composable(
-            TAFSEER_SCREEN_ROUTE
+            TAFSEER_SCREEN_ROUTE,
+            enterTransition = {
+                fadeIn(animationSpec = tween(NAV_ANIM_DURATION + 100))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(NAV_ANIM_DURATION))
+            }
         ) { backStackEntry ->
             val surahNumber = backStackEntry.arguments?.getString("surahNumber")?.toIntOrNull() ?: 1
             val ayaNumber = backStackEntry.arguments?.getString("ayaNumber")?.toIntOrNull() ?: 1
