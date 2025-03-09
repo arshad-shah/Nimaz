@@ -121,7 +121,7 @@ fun DhuhrBackground(modifier: Modifier = Modifier) {
     val density = LocalDensity.current
 
     // Pre-calculate sun position
-    val sunPositionX = remember(density) { density.run { 140.dp.toPx() } }
+    val sunPositionX = remember(density) { density.run { 200.dp.toPx() } }
     val sunPositionY = remember(density) { density.run { 20.dp.toPx() } }
 
     Box(modifier = modifier.background(skyGradient)) {

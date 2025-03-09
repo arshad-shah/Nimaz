@@ -16,11 +16,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
+import kotlin.reflect.KFunction3
 
 @Composable
 fun Calendar(
@@ -31,6 +33,8 @@ fun Calendar(
     trackers: List<LocalPrayersTracker>,
     onDateSelected: (LocalDate) -> Unit,
     onMonthChanged: (YearMonth) -> Unit,
+    onPrayerUpdate: KFunction3<LocalDate, String, Boolean, Unit>,
+    onFastingUpdate: (LocalFastTracker) -> Unit,
     isMenstruatingProvider: (LocalDate) -> Boolean,
     isFastingProvider: (LocalDate) -> Boolean,
     modifier: Modifier = Modifier
@@ -83,6 +87,8 @@ fun Calendar(
                     isMenstruating = isMenstruatingProvider(dayInfo.date),
                     isFasting = isFastingProvider(dayInfo.date),
                     onDateClick = onDateSelected,
+                    onFastingUpdate = onFastingUpdate,
+                    onPrayerUpdate = onPrayerUpdate
                 )
             }
         }

@@ -38,7 +38,7 @@ fun MaghribBackground(modifier: Modifier = Modifier) {
     // Cache color components for reuse
     val white = remember { Color(0xFFFFFFFF) }
     val transparent = remember { Color.Transparent }
-    val sunYellow = remember { Color(0xFFFFD54F) }
+    val sunYellow = remember { Color(0xC4FFD54F) }
     val sunOrange1 = remember { Color(0xFFFF9800) }
     val sunOrange2 = remember { Color(0xFFFF7043) }
     val sunOrange3 = remember { Color(0xFFFF5722) }
@@ -136,7 +136,7 @@ fun MaghribBackground(modifier: Modifier = Modifier) {
             // Calculate sun position once
             val sunY =
                 size.height + 40f * density.density - (100f * density.density * (1 - sunsetProgress))
-            val sunCenter = Offset(size.width / 2, sunY)
+            val sunCenter = Offset(900f, sunY)
 
             // Pre-compute radii in pixels
             val largeGlowRadius = 350f * density.density
@@ -169,7 +169,7 @@ fun MaghribBackground(modifier: Modifier = Modifier) {
                     transparent
                 ),
                 center = sunCenter,
-                radius = 200f * density.density // Slightly larger than the draw radius for better gradient
+                radius = 20f * density.density // Slightly larger than the draw radius for better gradient
             )
 
             drawCircle(

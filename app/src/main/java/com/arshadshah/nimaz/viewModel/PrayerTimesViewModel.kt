@@ -104,10 +104,13 @@ class PrayerTimesViewModel @Inject constructor(
     }
 
     private fun launchSafely(operationName: String, block: suspend () -> Unit): Job {
+        ViewModelLogger.d(TAG, "🚀 Launching $operationName operation")
         activeJobs[operationName]?.cancel()
+        ViewModelLogger.d(TAG, "🚀 Cancelling existing $operationName operation")
         return viewModelScope.launch {
             try {
                 withTimeout(OPERATION_TIMEOUT.seconds) {
+                    ViewModelLogger.d(TAG, "🚀 Starting $operationName operation")
                     block()
                 }
             } catch (e: Exception) {

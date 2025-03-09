@@ -1453,16 +1453,16 @@ private fun exportPreferences(context: Context, uri: Uri, prefs: PrivateSharedPr
     allPrefs.forEach { (key, value) ->
         jsonObject.put(
             key, when (value) {
-            is Set<*> -> JSONObject().apply {
-                put("type", "Set")
+                is Set<*> -> JSONObject().apply {
+                    put("type", "Set")
 //                put("value", JSONObject(value.map { it.toString() }))
-            }
+                }
 
-            else -> JSONObject().apply {
-                put("type", value?.javaClass?.simpleName ?: "null")
-                put("value", value)
-            }
-        })
+                else -> JSONObject().apply {
+                    put("type", value?.javaClass?.simpleName ?: "null")
+                    put("value", value)
+                }
+            })
     }
 
     context.contentResolver.openOutputStream(uri)?.use { outputStream ->

@@ -56,7 +56,7 @@ fun AudioControls(
                     Icon(
                         imageVector = Icons.Default.Download,
                         contentDescription = "Download audio",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -80,7 +80,7 @@ fun AudioControls(
                     Icons.Default.Pause else Icons.Default.PlayArrow,
                 contentDescription = if (isCurrentlyPlayingAya && audioState.isPlaying)
                     "Pause" else "Play",
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -94,7 +94,7 @@ fun AudioControls(
                 Icon(
                     imageVector = Icons.Default.Stop,
                     contentDescription = "Stop",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -109,7 +109,7 @@ fun AudioControls(
                 CircularProgressIndicator(
                     progress = { audioState.downloadProgress },
                     modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
                 )
             }

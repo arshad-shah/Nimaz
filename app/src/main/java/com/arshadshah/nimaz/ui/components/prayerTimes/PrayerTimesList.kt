@@ -218,14 +218,33 @@ fun PrayerTimeRow(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = prayerTime.name.replaceFirstChar {
-                            if (it.isLowerCase()) it.titlecase(Locale.getDefault())
-                            else it.toString()
-                        },
-                        style = MaterialTheme.typography.titleSmall,
-                        color = contentColor
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = prayerTime.name.replaceFirstChar {
+                                if (it.isLowerCase()) it.titlecase(Locale.getDefault())
+                                else it.toString()
+                            },
+                            style = MaterialTheme.typography.titleSmall,
+                            color = contentColor
+                        )
+
+                        if (prayerTime.isRamadan) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = "Ramadan",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
 
                     AnimatedVisibility(
                         visible = prayerTime.description.isNotEmpty(),
@@ -237,20 +256,6 @@ fun PrayerTimeRow(
                             style = MaterialTheme.typography.bodySmall,
                             color = contentColor.copy(alpha = 0.7f)
                         )
-                    }
-
-                    if (prayerTime.isRamadan) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.tertiaryContainer,
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = "Ramadan",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
                     }
                 }
             }

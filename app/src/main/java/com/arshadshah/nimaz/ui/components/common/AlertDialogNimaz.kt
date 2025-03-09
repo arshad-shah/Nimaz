@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,16 +24,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -72,6 +67,7 @@ fun AlertDialogNimaz(
     onDismiss: () -> Unit,
     dismissButtonText: String = "Cancel",
     scrollState: LazyListState = rememberLazyListState(),
+    isFullScreen: Boolean = false, // New parameter for fullscreen mode
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -86,12 +82,13 @@ fun AlertDialogNimaz(
             label = "scale"
         )
 
+
         ElevatedCard(
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .scale(scale),
-            shape = RoundedCornerShape(24.dp),
+            shape = if (isFullScreen) RoundedCornerShape(0.dp) else RoundedCornerShape(24.dp),
             elevation = CardDefaults.elevatedCardElevation(
                 defaultElevation = 4.dp,
                 pressedElevation = 8.dp
@@ -103,9 +100,9 @@ fun AlertDialogNimaz(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(if (isFullScreen) 16.dp else 8.dp)
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Header Section
                 Surface(
@@ -115,7 +112,7 @@ fun AlertDialogNimaz(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (icon != null) {
@@ -178,10 +175,20 @@ fun AlertDialogNimaz(
                 }
 
                 // Content Section
+                val contentModifier = if (isFullScreen) {
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                } else {
+                    Modifier
+                        .height(contentHeight)
+                        .fillMaxWidth()
+                }
+
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.height(contentHeight)
+                    modifier = contentModifier
                 ) {
                     if (cardContent) {
                         Surface(
@@ -270,92 +277,19 @@ fun AlertDialogNimaz(
     }
 }
 
-
-//alert dilog nimaz preview
+//alert dialog nimaz preview with fullscreen option
 @Preview
 @Composable
-fun AlertDialogNimazPreview() {
+fun AlertDialogNimazPreviewFullScreen() {
     AlertDialogNimaz(
-        title = "Hello",
+        title = "Fullscreen Dialog",
         icon = painterResource(id = R.drawable.mail_icon),
-        contentDescription = "Add",
-        contentToShow = { Text(text = "This is a content") },
+        contentDescription = "Fullscreen",
+        contentToShow = { Text(text = "This is a fullscreen dialog content") },
         onDismissRequest = { },
         onConfirm = { },
         onDismiss = { },
-        description = "This is a description"
-    )
-}
-
-//preview of the alert dialog nimaz with action
-@Preview
-@Composable
-fun AlertDialogNimazPreviewWithAction() {
-    AlertDialogNimaz(
-        title = "very long title to test the alert dialog",
-        contentDescription = "Add",
-        contentToShow = { Text(text = "This is a content") },
-        onDismissRequest = { },
-        onConfirm = { },
-        onDismiss = { },
-        description = "This is a description",
-        action = {
-            IconButton(
-                onClick = { },
-                content = {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(id = R.drawable.play_icon),
-                        contentDescription = "Add",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            )
-        }
-    )
-}
-
-//with a oulinedTextField
-@Preview
-@Composable
-fun AlertDialogNimazPreviewWithOutlinedTextField() {
-    val textToShow = remember { mutableStateOf("") }
-    AlertDialogNimaz(
-        title = "Hello",
-        contentDescription = "Add",
-        topDivider = false,
-        bottomDivider = false,
-        contentToShow = {
-            OutlinedTextField(
-                label = { Text(text = "Enter your name") },
-                singleLine = true,
-                shape = MaterialTheme.shapes.extraLarge,
-                value = textToShow.value,
-                onValueChange = {
-                    textToShow.value = it
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-            )
-        },
-        cardContent = false,
-        contentHeight = 100.dp,
-        onDismissRequest = { },
-        onConfirm = { },
-        onDismiss = { },
-        action = {
-            IconButton(
-                onClick = { },
-                content = {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(id = R.drawable.play_icon),
-                        contentDescription = "Add",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            )
-        }
+        description = "This dialog takes up the full screen",
+        isFullScreen = true
     )
 }
