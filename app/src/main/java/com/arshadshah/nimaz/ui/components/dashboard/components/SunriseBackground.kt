@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.ui.components.dashboard.components
 
 import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.EaseInOutQuad
 import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -19,9 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 
 @Composable
@@ -59,17 +55,6 @@ fun SunriseBackground(modifier: Modifier = Modifier) {
         label = "color transition"
     )
 
-    // Sun position animation
-    val sunProgress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 0.15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(15000, easing = EaseInOutSine),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "sun position"
-    )
-
     // Glow pulse animation
     val glowPulse by infiniteTransition.animateFloat(
         initialValue = 0.7f,
@@ -79,17 +64,6 @@ fun SunriseBackground(modifier: Modifier = Modifier) {
             repeatMode = RepeatMode.Reverse
         ),
         label = "glow pulse"
-    )
-
-    // Sun ray rotation - not used in optimized version to reduce calculations
-    val sunRayRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = EaseInOutQuad),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "ray rotation"
     )
 
     // Compute sky colors only when colorProgress changes
@@ -107,11 +81,6 @@ fun SunriseBackground(modifier: Modifier = Modifier) {
     val outerGlowAlpha1 = 0.4f * glowPulse
     val outerGlowAlpha2 = 0.25f * glowPulse
     val outerGlowAlpha3 = 0.1f * glowPulse
-
-    // Reflection glow alpha values
-    val reflectionAlpha1 = 0.7f * glowPulse
-    val reflectionAlpha2 = 0.5f * glowPulse
-    val reflectionAlpha3 = 0.3f * glowPulse
 
     Box(modifier = modifier.background(skyGradient)) {
         // Combine all Canvas operations to reduce recompositions
@@ -132,8 +101,8 @@ fun SunriseBackground(modifier: Modifier = Modifier) {
             drawRect(brush = hazeGradient)
 
             // Calculate sun position once
-            val sunCenterY = height * (1.0f - sunProgress)
-            val sunCenter = Offset(width / 2, sunCenterY)
+            val sunCenterY = height * (1.0f - 0.05f)
+            val sunCenter = Offset(150f, sunCenterY)
 
             // Convert dp to px once
             val outerGlowRadius = 250f * density
@@ -190,40 +159,6 @@ fun SunriseBackground(modifier: Modifier = Modifier) {
                 center = sunCenter,
                 radius = sunRadius
             )
-
-            // Calculate reflection position based on sun position
-            // Only if we're in the bottom part of the canvas where reflection would be visible
-            if (sunCenterY > height * 0.7f) {
-                // Reflection path - create only once
-                val reflectionPath = Path().apply {
-                    moveTo(width * 0.3f, height)
-                    quadraticTo(
-                        width * 0.5f, height * 0.7f,
-                        width * 0.7f, height
-                    )
-                }
-
-                // Calculate reflection width based on pulse
-                val reflectionWidth = 8f * density * (0.8f + 0.2f * glowPulse)
-
-                val reflectionBrush = Brush.verticalGradient(
-                    colors = listOf(
-                        sunYellow4.copy(alpha = reflectionAlpha1),
-                        sunYellow2.copy(alpha = reflectionAlpha2),
-                        sunYellow3.copy(alpha = reflectionAlpha3)
-                    )
-                )
-
-                // Draw reflection
-                drawPath(
-                    path = reflectionPath,
-                    brush = reflectionBrush,
-                    style = Stroke(
-                        width = reflectionWidth,
-                        cap = StrokeCap.Round
-                    )
-                )
-            }
         }
     }
 }

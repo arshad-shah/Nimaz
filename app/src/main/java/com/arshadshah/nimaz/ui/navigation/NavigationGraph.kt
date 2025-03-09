@@ -53,6 +53,7 @@ import com.arshadshah.nimaz.ui.screens.more.ZakatCalculator
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
 import com.arshadshah.nimaz.ui.screens.quran.TafseerScreen
+import com.arshadshah.nimaz.ui.screens.settings.Appearance
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
 import com.arshadshah.nimaz.ui.screens.settings.EnhancedAboutScreen
 import com.arshadshah.nimaz.ui.screens.settings.LibraryDetailScreen
@@ -282,6 +283,9 @@ fun NavigationGraph(
                 onNavigateToDebugScreen = {
                     navController.safeNavigate(DEBUG_MODE)
                 },
+                onNavigateToAppearance = {
+                    navController.safeNavigate("Appearance")
+                }
             )
         }
 
@@ -484,6 +488,13 @@ fun NavigationGraph(
                 ayaNumber = ayaNumber,
                 surahNumber = surahNumber,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        //apperance section
+        composable("Appearance") {
+            Appearance(
+                navController = navController,
             )
         }
     }

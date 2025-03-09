@@ -343,6 +343,12 @@ class AyatViewModel @Inject constructor(
                                     )
                                 }
                                 updateAyaInList(aya.copy(audioFileLocation = audioPath))
+                                //write the path to the database
+                                dataStore.addAudioToAya(
+                                    aya.suraNumber,
+                                    aya.ayaNumberInSurah,
+                                    audioPath
+                                )
                             }
 
                             else -> {

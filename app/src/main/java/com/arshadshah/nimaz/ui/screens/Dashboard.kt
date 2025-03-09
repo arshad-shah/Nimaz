@@ -94,6 +94,7 @@ fun Dashboard(
             item {
                 // Prayer Times Card
                 DashboardPrayerTimesCard(
+                    currentPrayerPeriod = prayerTimesState.currentPrayer,
                     nextPrayerName = prayerTimesState.nextPrayer,
                     countDownTimer = prayerTimesState.countDownTime,
                     nextPrayerTime = prayerTimesState.nextPrayerTime,

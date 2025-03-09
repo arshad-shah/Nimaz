@@ -389,7 +389,7 @@ private fun FeatureButton(
         Icon(
             imageVector = icon,
             contentDescription = description,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier
                 .size(20.dp)
                 .placeholder(
@@ -497,7 +497,7 @@ fun AyatFeatures(
                     Icon(
                         imageVector = Icons.Outlined.Share,
                         contentDescription = "Share verse",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -520,7 +520,7 @@ fun AyatFeatures(
                             Icon(
                                 imageVector = Icons.Default.Download,
                                 contentDescription = "Download audio",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
@@ -581,7 +581,7 @@ private fun SajdaIndicator(
             Icon(
                 painter = painterResource(id = R.drawable.sajad_icon),
                 contentDescription = "Sajda indicator",
-                tint = MaterialTheme.colorScheme.tertiary,
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
                 modifier = Modifier.size(24.dp)
             )
         }

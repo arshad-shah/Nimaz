@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -139,7 +138,7 @@ fun AsrBackground(modifier: Modifier = Modifier) {
     val density = LocalDensity.current
 
     // Pre-calculate sun position values
-    val sunPositionXStart = remember(density) { density.run { 120.dp.toPx() } }
+    val sunPositionXStart = remember(density) { density.run { 280.dp.toPx() } }
     val sunPositionXEnd = remember(density) { density.run { 60.dp.toPx() } }
     val sunPositionYStart = remember(density) { density.run { 100.dp.toPx() } }
     val sunPositionYEnd = remember(density) { density.run { 180.dp.toPx() } }
@@ -179,18 +178,9 @@ fun AsrBackground(modifier: Modifier = Modifier) {
             drawRect(brush = atmosphericBrush)
         }
 
-        // Calculate current sun position based on animation
-        val sunPositionX = remember(colorShift, sunPositionXStart, sunPositionXEnd) {
-            lerp(sunPositionXStart, sunPositionXEnd, colorShift)
-        }
-
-        val sunPositionY = remember(colorShift, sunPositionYStart, sunPositionYEnd) {
-            lerp(sunPositionYStart, sunPositionYEnd, colorShift)
-        }
-
         // Sun and glow effects combined
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val sunCenter = Offset(sunPositionX, sunPositionY)
+            val sunCenter = Offset(sunPositionXStart, sunPositionYStart)
 
             // Pre-compute radii and alpha values
             val wideGlowRadius = 200f * density.density
@@ -361,7 +351,7 @@ fun AsrBackground(modifier: Modifier = Modifier) {
                 val y = height * particle.relativeY
 
                 // Only draw particles in the sunbeam area
-                if (x > sunPositionX * 0.7f && x < sunPositionX * 1.3f) {
+                if (x > sunPositionXStart * 0.7f && x < sunPositionXStart * 1.3f) {
                     // Calculate particle alpha with animation based on phase offset
                     val particleAlpha =
                         0.2f + 0.3f * (0.5f + 0.5f * sin(colorShift * piTwo + particle.phaseOffset))

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Timer
@@ -32,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -48,10 +48,12 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Enhanced Prayer Time Card with realistic animated backgrounds
- * for different prayer times - displays automatically based on current time
+ * for different prayer times - displays background based on current prayer period
+ * while showing information about the next prayer
  */
 @Composable
 fun DashboardPrayerTimesCard(
+    currentPrayerPeriod: String,
     nextPrayerName: String,
     countDownTimer: CountDownTime,
     nextPrayerTime: LocalDateTime,
@@ -61,33 +63,31 @@ fun DashboardPrayerTimesCard(
     height: Dp = 200.dp
 ) {
 
-    val isCompact = height < 200.dp
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .padding(8.dp),
-        shape = MaterialTheme.shapes.extraLarge,
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 8.dp
+            defaultElevation = 4.dp
         )
     ) {
         // Card content with animated sky background
         BoxWithConstraints(
             modifier = Modifier.fillMaxWidth()
         ) {
-
-            // Animated Sky Background based on prayer time
+            // Animated Sky Background based on CURRENT prayer period
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(maxHeight)
             ) {
                 // Prayer backgrounds with crossfade transitions
-                val prayerName = nextPrayerName.lowercase()
+                val currentPeriod = currentPrayerPeriod.lowercase()
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = prayerName == "fajr",
+                    visible = currentPeriod == "fajr",
                     enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
                     exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
                 ) {
@@ -95,7 +95,7 @@ fun DashboardPrayerTimesCard(
                 }
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = prayerName == "sunrise",
+                    visible = currentPeriod == "sunrise",
                     enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
                     exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
                 ) {
@@ -103,7 +103,7 @@ fun DashboardPrayerTimesCard(
                 }
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = prayerName == "dhuhr",
+                    visible = currentPeriod == "dhuhr",
                     enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
                     exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
                 ) {
@@ -111,7 +111,7 @@ fun DashboardPrayerTimesCard(
                 }
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = prayerName == "asr",
+                    visible = currentPeriod == "asr",
                     enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
                     exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
                 ) {
@@ -119,7 +119,7 @@ fun DashboardPrayerTimesCard(
                 }
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = prayerName == "maghrib",
+                    visible = currentPeriod == "maghrib",
                     enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
                     exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
                 ) {
@@ -127,130 +127,100 @@ fun DashboardPrayerTimesCard(
                 }
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = prayerName == "isha",
+                    visible = currentPeriod == "isha",
                     enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(500)),
                     exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
                 ) {
                     IshaBackground(modifier = Modifier.fillMaxSize())
                 }
 
-                // Single gradient brush creation instead of creating it for each recomposition
+                // Subtle gradient overlay for better text visibility
                 val overlayGradient = remember {
                     Brush.verticalGradient(
                         colors = listOf(
+                            Color.Black.copy(alpha = 0.01f),
                             Color.Black.copy(alpha = 0.05f),
-                            Color.Black.copy(alpha = 0.1f),
-                            Color.Black.copy(alpha = 0.3f)
+                            Color.Black.copy(alpha = 0.1f)
                         )
                     )
                 }
 
-                // Semi-transparent overlay to ensure text readability
+                // Light overlay to ensure text readability
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(overlayGradient)
                 )
 
-                // Content overlay with adjusted spacing for smaller heights
+                // Content layout
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(if (isCompact) 4.dp else 8.dp),
-                    verticalArrangement = if (isCompact)
-                        Arrangement.SpaceEvenly
-                    else
-                        Arrangement.spacedBy(8.dp)
+                        .padding(4.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (!isCompact) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                    // Next prayer pill
+                    Surface(
+                        color = Color.White.copy(alpha = 0.82f),
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = formatPrayerName(nextPrayerName),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = Color.DarkGray,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                        )
                     }
 
-                    // Prayer Name and Time Section
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = !isLoading,
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                        ) {
-                            Text(
-                                text = formatPrayerName(nextPrayerName),
-                                style = if (isCompact)
-                                    MaterialTheme.typography.titleLarge.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        shadow = MaterialTheme.typography.titleLarge.shadow
-                                    )
-                                else
-                                    MaterialTheme.typography.displaySmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        shadow = MaterialTheme.typography.displaySmall.shadow
-                                    ),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                        // Prayer Time Pill
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.extraLarge,
-                        ) {
-                            Text(
-                                text = nextPrayerTime.format(timeFormat),
-                                style = if (isCompact)
-                                    MaterialTheme.typography.titleMedium
-                                else
-                                    MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(if (isCompact) 6.dp else 8.dp)
-                            )
-                        }
+                    // Time pill
+                    Surface(
+                        color = Color.White.copy(alpha = 0.9f),
+                        shape = CircleShape,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = nextPrayerTime.format(timeFormat),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.DarkGray,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
                     }
 
-                    // Countdown Timer Section
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Timer pill
+                    Surface(
+                        color = Color.White.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(24.dp),
                     ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(16.dp),
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(
-                                    horizontal = if (isCompact) 12.dp else 20.dp,
-                                    vertical = if (isCompact) 8.dp else 12.dp
-                                ),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Timer,
-                                    contentDescription = "Countdown",
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(if (isCompact) 16.dp else 20.dp)
-                                )
+                            Icon(
+                                imageVector = Icons.Outlined.Timer,
+                                contentDescription = "Countdown",
+                                tint = Color.DarkGray,
+                                modifier = Modifier.size(18.dp)
+                            )
 
-                                // Generate countdown text only when needed
-                                val timerText by remember(countDownTimer) {
-                                    derivedStateOf { getEnhancedTimerText(countDownTimer) }
-                                }
+                            Spacer(modifier = Modifier.size(8.dp))
 
-                                Text(
-                                    text = timerText,
-                                    style = if (isCompact)
-                                        MaterialTheme.typography.bodyLarge
-                                    else
-                                        MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                            // Generate countdown text only when needed
+                            val timerText by remember(countDownTimer) {
+                                derivedStateOf { getEnhancedTimerText(countDownTimer) }
                             }
+
+                            Text(
+                                text = timerText,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.DarkGray
+                            )
                         }
                     }
                 }
@@ -284,17 +254,18 @@ fun formatPrayerName(name: String): String {
     return name.replaceFirstChar { it.uppercase() }
 }
 
+// Preview functions
 @Preview
 @Composable
 fun DashboardPrayerTimesCardFajrPreview() {
-
     DashboardPrayerTimesCard(
+        currentPrayerPeriod = "Isha",
         nextPrayerName = "Fajr",
         countDownTimer = CountDownTime(1, 1, 0),
         nextPrayerTime = LocalDateTime.now(),
         isLoading = false,
         modifier = Modifier.fillMaxWidth(),
-        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+        timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
     )
 }
 
@@ -302,12 +273,13 @@ fun DashboardPrayerTimesCardFajrPreview() {
 @Composable
 fun DashboardPrayerTimesCardSunrisePreview() {
     DashboardPrayerTimesCard(
+        currentPrayerPeriod = "Fajr",
         nextPrayerName = "Sunrise",
         countDownTimer = CountDownTime(0, 30, 0),
         nextPrayerTime = LocalDateTime.now(),
         isLoading = false,
         modifier = Modifier.fillMaxWidth(),
-        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+        timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
     )
 }
 
@@ -315,12 +287,13 @@ fun DashboardPrayerTimesCardSunrisePreview() {
 @Composable
 fun DashboardPrayerTimesCardDhuhrPreview() {
     DashboardPrayerTimesCard(
+        currentPrayerPeriod = "Sunrise",
         nextPrayerName = "Dhuhr",
         countDownTimer = CountDownTime(1, 30, 0),
         nextPrayerTime = LocalDateTime.now(),
         isLoading = false,
         modifier = Modifier.fillMaxWidth(),
-        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+        timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
     )
 }
 
@@ -328,12 +301,13 @@ fun DashboardPrayerTimesCardDhuhrPreview() {
 @Composable
 fun DashboardPrayerTimesCardAsrPreview() {
     DashboardPrayerTimesCard(
+        currentPrayerPeriod = "Dhuhr",
         nextPrayerName = "Asr",
         countDownTimer = CountDownTime(0, 45, 0),
         nextPrayerTime = LocalDateTime.now(),
         isLoading = false,
         modifier = Modifier.fillMaxWidth(),
-        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+        timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
     )
 }
 
@@ -341,40 +315,41 @@ fun DashboardPrayerTimesCardAsrPreview() {
 @Composable
 fun DashboardPrayerTimesCardMaghribPreview() {
     DashboardPrayerTimesCard(
+        currentPrayerPeriod = "Asr",
         nextPrayerName = "Maghrib",
         countDownTimer = CountDownTime(0, 15, 0),
         nextPrayerTime = LocalDateTime.now(),
         isLoading = false,
         modifier = Modifier.fillMaxWidth(),
-        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+        timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
     )
 }
 
 @Preview(showSystemUi = false)
 @Composable
 fun DashboardPrayerTimesCardIshaPreview() {
-
     DashboardPrayerTimesCard(
+        currentPrayerPeriod = "Maghrib",
         nextPrayerName = "Isha",
         countDownTimer = CountDownTime(0, 5, 0),
         nextPrayerTime = LocalDateTime.now(),
         isLoading = false,
         modifier = Modifier.fillMaxWidth(),
-        timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+        timeFormat = DateTimeFormatter.ofPattern("hh:mm a")
     )
 }
 
-//compact
 @Preview
 @Composable
 fun DashboardPrayerTimesCardCompactFajrPreview() {
     DashboardPrayerTimesCard(
+        currentPrayerPeriod = "Isha",
         nextPrayerName = "Sunrise",
         countDownTimer = CountDownTime(1, 1, 0),
         nextPrayerTime = LocalDateTime.now(),
         isLoading = false,
         modifier = Modifier.fillMaxWidth(),
-        timeFormat = DateTimeFormatter.ofPattern("HH:mm"),
+        timeFormat = DateTimeFormatter.ofPattern("hh:mm a"),
         height = 150.dp
     )
 }
