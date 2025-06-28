@@ -86,7 +86,7 @@ fun DashboardRandomAyatCard(
 
                 HeaderWithIcon(
                     title = "Verse of the Day",
-                    icon = ImageVector.vectorResource(id = R.drawable.quran_icon),
+                    icon = null,
                     contentDescription = "Quran Icon",
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer

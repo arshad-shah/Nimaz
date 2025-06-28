@@ -24,7 +24,8 @@ fun HeaderWithIcon(
     icon: ImageVector? = null,
     contentDescription: String,
     containerColor: Color,
-    contentColor: Color
+    contentColor: Color,
+    iconColor: Color = contentColor
 ) {
     // Header with Calendar Icon
     Surface(
@@ -42,7 +43,7 @@ fun HeaderWithIcon(
                     imageVector = icon,
                     contentDescription = contentDescription,
                     modifier = Modifier.size(18.dp),
-                    tint = contentColor
+                    tint = iconColor
                 )
             }
             Text(

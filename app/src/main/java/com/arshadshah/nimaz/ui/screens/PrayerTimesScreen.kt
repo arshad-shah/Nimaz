@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.arshadshah.nimaz.ui.components.common.CompactLocationTopBar
+import com.arshadshah.nimaz.ui.components.common.LocationTopBar
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTimesCard
 import com.arshadshah.nimaz.ui.components.prayerTimes.PrayerTimesList
 import com.arshadshah.nimaz.ui.navigation.BottomNavigationBar
@@ -52,7 +52,7 @@ fun PrayerTimesScreen(
                 .padding(it),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            CompactLocationTopBar(prayerTimesState.locationName, isLoading)
+            LocationTopBar(prayerTimesState.locationName, isLoading)
 
             // Prayer Times Card
             DashboardPrayerTimesCard(

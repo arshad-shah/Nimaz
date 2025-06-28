@@ -8,14 +8,15 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NightsStay
@@ -31,9 +32,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
@@ -59,7 +64,8 @@ data class PrayerTime(
     val icon: ImageVector,
     val isHighlighted: Boolean = false,
     val isRamadan: Boolean = false,
-    val description: String = ""
+    val description: String = "",
+    val gradientColors: Pair<Color, Color> = Pair(Color.Transparent, Color.Transparent)
 )
 
 @Composable
@@ -79,51 +85,70 @@ fun PrayerTimesList(
             prayerTimesState.fajrTime,
             Icons.Default.NightsStay,
             isRamadan = isRamadan,
-            description = "Dawn Prayer"
+            description = "Dawn Prayer",
+            gradientColors = Pair(
+                Color(0xFF1A237E).copy(alpha = 0.8f),
+                Color(0xFF3949AB).copy(alpha = 0.6f)
+            )
         ),
-        //R.drawable.ic_sunrise
         PrayerTime(
             PRAYER_NAME_SUNRISE,
             prayerTimesState.sunriseTime,
             ImageVector.vectorResource(id = R.drawable.sunrise),
-            description = ""
+            description = "",
+            gradientColors = Pair(
+                Color(0xFFFF6F00).copy(alpha = 0.8f),
+                Color(0xFFFFB74D).copy(alpha = 0.6f)
+            )
         ),
         PrayerTime(
             PRAYER_NAME_DHUHR,
             prayerTimesState.dhuhrTime,
             Icons.Default.WbSunny,
-            description = "Noon Prayer"
+            description = "Noon Prayer",
+            gradientColors = Pair(
+                Color(0xFFFFC107).copy(alpha = 0.8f),
+                Color(0xFFFFE082).copy(alpha = 0.6f)
+            )
         ),
         PrayerTime(
             PRAYER_NAME_ASR,
             prayerTimesState.asrTime,
             Icons.Default.WbSunny,
-            description = "Afternoon Prayer"
+            description = "Afternoon Prayer",
+            gradientColors = Pair(
+                Color(0xFFFF8F00).copy(alpha = 0.8f),
+                Color(0xFFFFC947).copy(alpha = 0.6f)
+            )
         ),
         PrayerTime(
             PRAYER_NAME_MAGHRIB,
             prayerTimesState.maghribTime,
             Icons.Default.WbTwilight,
             isRamadan = isRamadan,
-            description = "Sunset Prayer"
+            description = "Sunset Prayer",
+            gradientColors = Pair(
+                Color(0xFFE91E63).copy(alpha = 0.8f),
+                Color(0xFFF8BBD9).copy(alpha = 0.6f)
+            )
         ),
         PrayerTime(
             PRAYER_NAME_ISHA,
             prayerTimesState.ishaTime,
             Icons.Default.NightsStay,
-            description = "Night Prayer"
+            description = "Night Prayer",
+            gradientColors = Pair(
+                Color(0xFF4A148C).copy(alpha = 0.8f),
+                Color(0xFF7B1FA2).copy(alpha = 0.6f)
+            )
         )
     ).map { it.copy(isHighlighted = it.name == currentPrayerName) }
 
     ElevatedCard(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = modifier
+            .padding(8.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
-        ),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -132,7 +157,8 @@ fun PrayerTimesList(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             prayerTimes.forEachIndexed { index, prayerTime ->
                 PrayerTimeRow(
@@ -158,9 +184,9 @@ fun PrayerTimeRow(
 
     val backgroundColor by transition.animateColor(label = "backgroundColor") { (isHighlighted, isRamadan, _) ->
         when {
-            isHighlighted -> MaterialTheme.colorScheme.primaryContainer
-            isRamadan -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f)
-            else -> MaterialTheme.colorScheme.surface
+            isHighlighted -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+            isRamadan -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
         }
     }
 
@@ -174,16 +200,15 @@ fun PrayerTimeRow(
 
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 0.dp),
-        shape = RoundedCornerShape(16.dp),
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
         color = backgroundColor,
-        tonalElevation = if (prayerTime.isHighlighted) 8.dp else 0.dp
+        tonalElevation = if (prayerTime.isHighlighted) 8.dp else 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(6.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -192,14 +217,29 @@ fun PrayerTimeRow(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
-                // Prayer Icon
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (prayerTime.isHighlighted)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(44.dp)
+                // Enhanced Prayer Icon with gradient background
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (prayerTime.isHighlighted) {
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    )
+                                )
+                            } else {
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        prayerTime.gradientColors.first,
+                                        prayerTime.gradientColors.second
+                                    )
+                                )
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = prayerTime.icon,
@@ -207,40 +247,43 @@ fun PrayerTimeRow(
                         tint = if (prayerTime.isHighlighted)
                             MaterialTheme.colorScheme.onPrimary
                         else
-                            contentColor,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .size(24.dp)
+                            Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
-                // Prayer Info
+                // Prayer Info with enhanced typography
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
                             text = prayerTime.name.replaceFirstChar {
                                 if (it.isLowerCase()) it.titlecase(Locale.getDefault())
                                 else it.toString()
                             },
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = if (prayerTime.isHighlighted) FontWeight.Bold else FontWeight.Medium
+                            ),
                             color = contentColor
                         )
 
                         if (prayerTime.isRamadan) {
                             Surface(
                                 color = MaterialTheme.colorScheme.tertiaryContainer,
-                                shape = RoundedCornerShape(4.dp)
+                                shape = RoundedCornerShape(8.dp),
+                                tonalElevation = 2.dp
                             ) {
                                 Text(
                                     text = "Ramadan",
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Medium
+                                    ),
                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
                         }
@@ -260,12 +303,14 @@ fun PrayerTimeRow(
                 }
             }
 
+            // Enhanced time display
             Surface(
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 color = if (prayerTime.isHighlighted)
                     MaterialTheme.colorScheme.primary
                 else
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                tonalElevation = if (prayerTime.isHighlighted) 4.dp else 1.dp
             ) {
                 Text(
                     text = prayerTime.time?.format(
@@ -273,16 +318,18 @@ fun PrayerTimeRow(
                             if (DateFormat.is24HourFormat(LocalContext.current))
                                 "HH:mm"
                             else
-                                "hh:mm a"
+                                "h:mm a"
                         )
                     ) ?: "",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     color = if (prayerTime.isHighlighted)
                         MaterialTheme.colorScheme.onPrimary
                     else
                         contentColor,
                     modifier = Modifier
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(8.dp)
                         .placeholder(
                             visible = loading,
                             highlight = PlaceholderHighlight.shimmer()
@@ -290,9 +337,5 @@ fun PrayerTimeRow(
                 )
             }
         }
-    }
-
-    if (!isLastItem) {
-        Spacer(modifier = Modifier.height(4.dp))
     }
 }

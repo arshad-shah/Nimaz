@@ -25,7 +25,7 @@ import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_HOME
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
-import com.arshadshah.nimaz.ui.components.common.CompactLocationTopBar
+import com.arshadshah.nimaz.ui.components.common.LocationTopBar
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTimesCard
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardPrayerTracker
 import com.arshadshah.nimaz.ui.components.dashboard.DashboardRandomAyatCard
@@ -73,12 +73,12 @@ fun Dashboard(
             item {
                 // Location Section
                 when (locationState.isLoading) {
-                    true -> CompactLocationTopBar(
+                    true -> LocationTopBar(
                         locationName = "Loading location...",
                         isLoading = true
                     )
 
-                    false -> CompactLocationTopBar(
+                    false -> LocationTopBar(
                         locationName = locationState.locationName.ifEmpty { "Location unavailable" },
                         isLoading = false
                     )
