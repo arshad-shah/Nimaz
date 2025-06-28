@@ -113,7 +113,7 @@ fun SurahCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // Header with Surah number and name
             Surface(
@@ -166,17 +166,6 @@ fun SurahCard(
                             .padding(start = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = surah.englishNameTranslation,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.placeholder(
-                                visible = loading,
-                                highlight = PlaceholderHighlight.shimmer()
-                            )
-                        )
 
                         Surface(
                             color = MaterialTheme.colorScheme.primary,

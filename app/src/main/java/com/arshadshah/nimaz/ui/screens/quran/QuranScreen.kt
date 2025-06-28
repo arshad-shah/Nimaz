@@ -87,31 +87,11 @@ fun QuranScreen(
                 pageSize = PageSize.Fill,
                 state = pagerState,
             ) { page ->
-                QuranCard {
                     pages[page].content()
-                }
             }
         }
     }
 }
-
-@Composable
-private fun QuranCard(content: @Composable () -> Unit) {
-    Card(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        content()
-    }
-}
-
 @Composable
 private fun SuraContent(
     viewModel: QuranViewModel,

@@ -62,7 +62,6 @@ fun PrayerTimesScreen(
                 nextPrayerTime = prayerTimesState.nextPrayerTime,
                 isLoading = isLoading,
                 timeFormat = DateTimeFormatter.ofPattern("hh:mm a"),
-                height = if (screenHeight < 800.dp) 150.dp else 250.dp
             )
 
             LazyColumn(

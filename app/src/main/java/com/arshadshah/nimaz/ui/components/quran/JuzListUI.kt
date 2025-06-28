@@ -92,7 +92,7 @@ fun JuzListItem(
 
     ElevatedCard(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(4.dp)
             .fillMaxWidth()
             .scale(scale)
             .clickable(
@@ -113,7 +113,7 @@ fun JuzListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Header with Juz number
             Surface(
@@ -128,81 +128,22 @@ fun JuzListItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Juz $juzNumber",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        text = name,
+                        fontFamily = utmaniQuranFont,
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier
+                            .padding(start = 16.dp)
                             .placeholder(
                                 visible = isLoading,
                                 highlight = PlaceholderHighlight.shimmer()
                             )
-                            .padding(start = 8.dp)
                     )
 
                     QuranItemNumber(
                         number = juzNumber,
                         loading = isLoading
                     )
-                }
-            }
-
-            // Content Section
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Info Container
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = translatedName,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    .placeholder(
-                                        visible = isLoading,
-                                        highlight = PlaceholderHighlight.shimmer()
-                                    )
-                            )
-                        }
-                    }
-
-                    // Arabic Name Container
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        modifier = Modifier.padding(start = 16.dp)
-                    ) {
-                        Text(
-                            text = name,
-                            fontFamily = utmaniQuranFont,
-                            style = MaterialTheme.typography.displaySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 16.dp)
-                                .placeholder(
-                                    visible = isLoading,
-                                    highlight = PlaceholderHighlight.shimmer()
-                                )
-                        )
-                    }
                 }
             }
         }

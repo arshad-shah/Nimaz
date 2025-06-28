@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +14,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,11 +33,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.ui.components.common.MixedScriptText
 import com.arshadshah.nimaz.ui.components.common.PageErrorState
 import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.ui.components.quran.cleanTextFromBackslash
@@ -89,7 +91,6 @@ fun TafseerScreen(
                                 )
                             }
                         }
-
                         else -> {
                             Text(text = "Loading...")
                         }
@@ -142,7 +143,7 @@ fun TafseerScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp),
+                                    .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 // Arabic Text
@@ -153,8 +154,7 @@ fun TafseerScreen(
                                     SelectionContainer {
                                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                                             Text(
-                                                text = state.aya?.ayaArabic?.cleanTextFromBackslash()
-                                                    ?: "",
+                                                text = state.aya?.ayaArabic?.cleanTextFromBackslash() ?: "",
                                                 style = MaterialTheme.typography.headlineMedium,
                                                 fontSize = state.settings.arabicFontSize.sp,
                                                 fontFamily = when (state.settings.arabicFont) {
@@ -169,7 +169,7 @@ fun TafseerScreen(
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(8.dp)
+                                                    .padding(16.dp)
                                             )
                                         }
                                     }
@@ -183,7 +183,7 @@ fun TafseerScreen(
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(8.dp)
+                                            .padding(16.dp)
                                     ) {
                                         when (state.settings.translationLanguage) {
                                             "Urdu" -> {
@@ -199,11 +199,9 @@ fun TafseerScreen(
                                                     )
                                                 }
                                             }
-
                                             else -> {
                                                 Text(
-                                                    text = state.aya?.translationEnglish?.cleanTextFromBackslash()
-                                                        ?: "",
+                                                    text = state.aya?.translationEnglish?.cleanTextFromBackslash() ?: "",
                                                     style = MaterialTheme.typography.titleMedium,
                                                     fontFamily = englishQuranTranslation,
                                                     fontSize = state.settings.translationFontSize.sp,
@@ -219,7 +217,7 @@ fun TafseerScreen(
                         }
                     }
 
-                    // Tafseer Section
+                    // Tafseer Section with Mixed Script Support
                     item {
                         ElevatedCard(
                             modifier = Modifier
@@ -231,7 +229,7 @@ fun TafseerScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp),
+                                    .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 // Header Section
@@ -242,7 +240,7 @@ fun TafseerScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(12.dp),
+                                            .padding(16.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -251,13 +249,13 @@ fun TafseerScreen(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Surface(
-                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                                color = MaterialTheme.colorScheme.primary,
                                                 shape = RoundedCornerShape(12.dp)
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                                     contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
                                                     modifier = Modifier
                                                         .padding(8.dp)
                                                         .size(24.dp)
@@ -267,20 +265,19 @@ fun TafseerScreen(
                                                 Text(
                                                     text = "Tafsir Ibn Kathir",
                                                     style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    fontWeight = FontWeight.Bold
                                                 )
                                                 Text(
                                                     text = "Verse ${state.aya?.ayaNumberInSurah}",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                                        alpha = 0.7f
-                                                    )
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                                                 )
                                             }
                                         }
 
                                         Surface(
-                                            color = MaterialTheme.colorScheme.primary,
+                                            color = MaterialTheme.colorScheme.secondary,
                                             shape = RoundedCornerShape(12.dp)
                                         ) {
                                             Text(
@@ -289,102 +286,92 @@ fun TafseerScreen(
                                                     else it.toString()
                                                 },
                                                 style = MaterialTheme.typography.labelLarge,
-                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                color = MaterialTheme.colorScheme.onSecondary,
+                                                fontWeight = FontWeight.Bold,
                                                 modifier = Modifier.padding(
                                                     horizontal = 12.dp,
-                                                    vertical = 6.dp
+                                                    vertical = 8.dp
                                                 )
                                             )
                                         }
                                     }
                                 }
 
-                                // Content Section with Quote Decoration
+                                // Content Section with Mixed Script Support
                                 Surface(
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                                     shape = RoundedCornerShape(16.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        // Tafsir content with proper text size handling
-                                        when (state.settings.translationLanguage) {
-                                            "Urdu" -> {
-                                                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                                    Text(
-                                                        text = state.tafsir.content,
-                                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                                            fontSize = if (state.settings.translationFontSize > 0f) {
-                                                                state.settings.translationFontSize.sp
-                                                            } else {
-                                                                20.sp
-                                                            },
-                                                            lineHeight = 28.sp
-                                                        ),
-                                                        fontFamily = urduFont,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                        modifier = Modifier.fillMaxWidth()
-                                                    )
-                                                }
-                                            }
-
-                                            else -> {
-                                                Text(
-                                                    text = state.tafsir.content,
-                                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                                        fontSize = if (state.settings.translationFontSize > 0f) {
-                                                            state.settings.translationFontSize.sp
-                                                        } else {
-                                                            20.sp
-                                                        },
-                                                        lineHeight = 28.sp
-                                                    ),
-                                                    fontFamily = englishQuranTranslation,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    modifier = Modifier.fillMaxWidth()
-                                                )
-                                            }
+                                        // Mixed script tafsir content
+                                        SelectionContainer {
+                                            MixedScriptText(
+                                                text = state.tafsir.content,
+                                                arabicFontFamily = when (state.settings.arabicFont) {
+                                                    "Default" -> utmaniQuranFont
+                                                    "Quranme" -> quranFont
+                                                    "Hidayat" -> hidayat
+                                                    "Amiri" -> amiri
+                                                    "IndoPak" -> almajeed
+                                                    else -> utmaniQuranFont
+                                                },
+                                                englishFontFamily = englishQuranTranslation,
+                                                urduFontFamily = urduFont,
+                                                arabicFontSize = state.settings.arabicFontSize.sp,
+                                                englishFontSize = if (state.settings.translationFontSize > 0f) {
+                                                    state.settings.translationFontSize.sp
+                                                } else {
+                                                    18.sp
+                                                },
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                    lineHeight = 28.sp
+                                                ),
+                                                textAlign = TextAlign.Justify,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
                                         }
 
-                                        // Bottom row with source and actions
+                                        // Divider
+                                        Surface(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(1.dp),
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                        ) {}
+
+                                        // Source citation
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            // Source citation
                                             Surface(
                                                 color = MaterialTheme.colorScheme.tertiaryContainer,
                                                 shape = RoundedCornerShape(8.dp)
                                             ) {
                                                 Text(
-                                                    text = "Source: Tafsir Ibn Kathir",
+                                                    text = "📚 Tafsir Ibn Kathir",
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                    fontWeight = FontWeight.Medium,
                                                     modifier = Modifier.padding(
                                                         horizontal = 12.dp,
-                                                        vertical = 6.dp
+                                                        vertical = 8.dp
                                                     )
                                                 )
                                             }
 
-                                            // Share button
-                                            Surface(
-                                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                                shape = RoundedCornerShape(8.dp),
-                                                modifier = Modifier.padding(start = 8.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Share,
-                                                    contentDescription = "Share Tafsir",
-                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                    modifier = Modifier
-                                                        .padding(8.dp)
-                                                        .size(20.dp)
-                                                )
-                                            }
+                                            Text(
+                                                text = "Surah $surahNumber:$ayaNumber",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                fontWeight = FontWeight.Medium
+                                            )
                                         }
                                     }
                                 }

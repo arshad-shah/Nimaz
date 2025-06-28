@@ -150,15 +150,15 @@ class AyatViewModel @Inject constructor(
                     }
                 }
 
+                val ayatList = ayatDeferred.await()
+
                 val surahDeferred = async {
-                    dataStore.getSurahById(number)
+                    dataStore.getSurahById(ayatList[0].suraNumber)
                 }
 
                 val juzDeferred = async {
-                    dataStore.getJuzById(number)
+                    dataStore.getJuzById(ayatList[0].juzNumber)
                 }
-
-                val ayatList = ayatDeferred.await()
                 val surah = surahDeferred.await()
                 val juz = juzDeferred.await()
 

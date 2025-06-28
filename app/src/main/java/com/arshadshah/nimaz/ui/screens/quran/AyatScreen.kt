@@ -145,7 +145,7 @@ fun AyatListContainer(
         LazyColumn(
             state = listState,
             contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // List of Ayat
             items(

@@ -90,7 +90,7 @@ fun AyaItem(
     if (aya.ayaNumberInSurah != 0) {
         ElevatedCard(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding( 8.dp)
                 .fillMaxWidth()
                 .scale(scale),
             shape = RoundedCornerShape(24.dp),
@@ -358,8 +358,7 @@ private fun getArabicFont(fontName: String) = when (fontName) {
 private fun VerseNumberBadge(number: Int, isLoading: Boolean) {
     Badge(
         modifier = Modifier
-            .size(48.dp)
-            .padding(4.dp),
+            .size(32.dp),
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
     ) {
@@ -384,14 +383,14 @@ private fun FeatureButton(
     IconButton(
         onClick = onClick,
         enabled = !isLoading,
-        modifier = Modifier.size(36.dp)
+        modifier = Modifier.size(32.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = description,
             tint = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier
-                .size(20.dp)
+                .size(24.dp)
                 .placeholder(
                     visible = isLoading,
                     highlight = PlaceholderHighlight.shimmer()
@@ -425,7 +424,7 @@ fun AyatFeatures(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -434,7 +433,7 @@ fun AyatFeatures(
 
             // Feature Buttons
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Sajda indicator if applicable
@@ -488,42 +487,24 @@ fun AyatFeatures(
                     description = if (aya.note.isNotEmpty()) "Edit Note" else "Add Note",
                     isLoading = loading
                 )
-
                 // Share button
-                IconButton(
+                FeatureButton(
                     onClick = { shareAya(context, aya) },
-                    enabled = !loading
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Share,
-                        contentDescription = "Share verse",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                    icon = Icons.Outlined.Share,
+                    description = "Share verse",
+                    isLoading = loading
+                )
+
 
                 // Audio Controls
+
                 if (!hasAudioFile) {
-                    IconButton(
+                    FeatureButton(
                         onClick = { onEvent(AyatViewModel.AyatEvent.DownloadAudio(aya)) },
-                        enabled = !loading && !audioState.isDownloading
-                    ) {
-                        if (audioState.isDownloading) {
-                            CircularProgressIndicator(
-                                progress = {
-                                    audioState.downloadProgress
-                                },
-                                modifier = Modifier.size(24.dp),
-                                trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = "Download audio",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
+                        icon = Icons.Default.Download,
+                        description = "Download audio",
+                        isLoading = loading || audioState.isDownloading
+                    )
                 } else {
                     AudioControls(
                         aya = aya,

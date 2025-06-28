@@ -38,11 +38,11 @@ fun AudioControls(
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.height(48.dp)
     ) {
         // Download Button (shown when no audio file is available)
         if (!hasAudioFile) {
             IconButton(
+                modifier = Modifier.size(32.dp),
                 onClick = { onEvent(AyatViewModel.AyatEvent.DownloadAudio(aya)) },
                 enabled = !loading && !audioState.isDownloading
             ) {
@@ -66,6 +66,7 @@ fun AudioControls(
 
         // Play/Pause Button
         IconButton(
+            modifier = Modifier.size(32.dp),
             onClick = {
                 if (isCurrentlyPlayingAya && audioState.isPlaying) {
                     onEvent(AyatViewModel.AyatEvent.PauseAudio)
@@ -88,6 +89,7 @@ fun AudioControls(
         // Stop Button (only shown when audio is playing or paused)
         if (isCurrentlyPlayingAya && (audioState.isPlaying || audioState.isPaused)) {
             IconButton(
+                modifier = Modifier.size(32.dp),
                 onClick = { onEvent(AyatViewModel.AyatEvent.StopAudio) },
                 enabled = !loading
             ) {
