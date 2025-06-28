@@ -15,12 +15,12 @@ apply plugin: 'com.mikepenz.aboutlibraries.plugin'
 
 android {
     namespace 'com.arshadshah.nimaz'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.arshadshah.nimaz'
         minSdk 28
-        targetSdk 35
+        targetSdk 36
         versionCode 190
         versionName '2.6.17'
 
@@ -165,8 +165,9 @@ dependencies {
     implementation libs.aws.android.sdk.s3
 
     // Open Source Libraries Screen.
-    implementation libs.aboutlibraries.core.v1083
-    implementation libs.aboutlibraries.compose.v1083
+    implementation libs.aboutlibraries.core
+    implementation libs.aboutlibraries.compose
+    implementation libs.aboutlibraries.compose.m3
 
     implementation libs.markwon.core
     implementation libs.markwon.ext.strikethrough
@@ -196,7 +197,6 @@ dependencies {
     //ktor
     // Ktor client
     implementation(libs.ktor.client.android)
-    implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
 

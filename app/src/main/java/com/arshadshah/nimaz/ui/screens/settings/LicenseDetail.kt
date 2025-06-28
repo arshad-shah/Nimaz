@@ -53,9 +53,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
+import com.arshadshah.nimaz.ui.components.common.MarkdownText
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
-import com.mikepenz.aboutlibraries.ui.compose.HtmlText
 import com.mikepenz.aboutlibraries.ui.compose.util.author
 import com.mikepenz.aboutlibraries.ui.compose.util.htmlReadyLicenseContent
 import com.mikepenz.aboutlibraries.util.withContext
@@ -376,12 +376,11 @@ private fun LicenseCard(library: Library) {
                 shape = MaterialTheme.shapes.medium
             ) {
                 val licenseContent = library.licenses.firstOrNull()?.htmlReadyLicenseContent
-                HtmlText(
-                    html = licenseContent ?: "No license information available",
-                    color = MaterialTheme.colorScheme.onSurface,
+                MarkdownText(
+                    licenseContent ?: "No license information available",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(16.dp),
                 )
             }
         }

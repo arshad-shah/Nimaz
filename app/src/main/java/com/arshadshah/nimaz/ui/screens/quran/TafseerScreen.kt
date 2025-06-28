@@ -135,14 +135,14 @@ fun TafseerScreen(
                         ElevatedCard(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(8.dp),
                             shape = RoundedCornerShape(24.dp),
                             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp),
+                                    .padding(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 // Arabic Text
@@ -169,7 +169,7 @@ fun TafseerScreen(
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(16.dp)
+                                                    .padding(8.dp)
                                             )
                                         }
                                     }
@@ -183,7 +183,7 @@ fun TafseerScreen(
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(16.dp)
+                                            .padding(8.dp)
                                     ) {
                                         when (state.settings.translationLanguage) {
                                             "Urdu" -> {
@@ -231,7 +231,7 @@ fun TafseerScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp),
+                                    .padding(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 // Header Section
@@ -306,7 +306,7 @@ fun TafseerScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(16.dp),
+                                        modifier = Modifier.padding(8.dp),
                                         verticalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         // Tafsir content with proper text size handling
