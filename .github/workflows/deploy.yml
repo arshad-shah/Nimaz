@@ -12,6 +12,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
+          lfs: true  # Enable Git LFS checkout
+
+      - name: Checkout LFS objects
+        run: git lfs checkout
 
       - name: Switch to PR branch and setup Git
         run: |
