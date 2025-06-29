@@ -7,7 +7,7 @@ import kotlinx.serialization.encoding.Encoder
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalSerializationApi::class)
-@Serializer(forClass = java.time.LocalDateTime::class)
+@Serializer(forClass = LocalDateTime::class)
 object LocalDateTimeSerializer {
 
     override fun serialize(encoder: Encoder, value: LocalDateTime) {

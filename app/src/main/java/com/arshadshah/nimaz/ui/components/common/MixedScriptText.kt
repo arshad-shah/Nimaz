@@ -4,7 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -137,7 +142,12 @@ object MixedTextParser {
             // Update progress every 100 characters to avoid too many updates
             if (processedChars % 100 == 0 || processedChars == textLength) {
                 val progress = (processedChars.toFloat() / textLength * 70f) + 10f // 10-80% range
-                onProgress?.invoke(ParseProgress(progress, "Processing characters... ($processedChars/$textLength)"))
+                onProgress?.invoke(
+                    ParseProgress(
+                        progress,
+                        "Processing characters... ($processedChars/$textLength)"
+                    )
+                )
 
                 // Yield to prevent blocking
                 if (processedChars % 500 == 0) {
@@ -148,7 +158,12 @@ object MixedTextParser {
 
         // Add the last segment
         if (currentSegment.isNotEmpty()) {
-            segments.add(TextSegment(currentSegment.toString().trim(), currentType ?: ScriptType.ENGLISH))
+            segments.add(
+                TextSegment(
+                    currentSegment.toString().trim(),
+                    currentType ?: ScriptType.ENGLISH
+                )
+            )
         }
 
         return segments.filter { it.text.isNotBlank() }
@@ -251,7 +266,12 @@ object MixedTextParser {
 
         // Add the last segment
         if (currentSegment.isNotEmpty()) {
-            segments.add(TextSegment(currentSegment.toString().trim(), currentType ?: ScriptType.ENGLISH))
+            segments.add(
+                TextSegment(
+                    currentSegment.toString().trim(),
+                    currentType ?: ScriptType.ENGLISH
+                )
+            )
         }
 
         return segments.filter { it.text.isNotBlank() }
@@ -428,7 +448,10 @@ fun MixedScriptText(
                                 // Add space between segments if needed
                                 if (segment != line.segments.last() &&
                                     !segment.text.endsWith(" ") &&
-                                    !line.segments[line.segments.indexOf(segment) + 1].text.startsWith(" ")) {
+                                    !line.segments[line.segments.indexOf(segment) + 1].text.startsWith(
+                                        " "
+                                    )
+                                ) {
                                     append(" ")
                                 }
                             }

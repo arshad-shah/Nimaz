@@ -1,6 +1,11 @@
 package com.arshadshah.nimaz.utils
 
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.ui.theme.almajeed
+import com.arshadshah.nimaz.ui.theme.amiri
+import com.arshadshah.nimaz.ui.theme.hidayat
+import com.arshadshah.nimaz.ui.theme.quranFont
+import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -39,5 +44,14 @@ object QuranUtils {
         }
 
         return "$arabic $unicodeWithNumber"
+    }
+
+    fun getArabicFont(fontName: String) = when (fontName) {
+        "Default" -> utmaniQuranFont
+        "Quranme" -> quranFont
+        "Hidayat" -> hidayat
+        "Amiri" -> amiri
+        "IndoPak" -> almajeed
+        else -> utmaniQuranFont
     }
 }

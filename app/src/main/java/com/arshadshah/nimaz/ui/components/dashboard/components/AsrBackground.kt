@@ -139,9 +139,9 @@ fun AsrBackground(modifier: Modifier = Modifier) {
 
     // Pre-calculate sun position values
     val sunPositionXStart = remember(density) { density.run { 280.dp.toPx() } }
-    val sunPositionXEnd = remember(density) { density.run { 60.dp.toPx() } }
+    remember(density) { density.run { 60.dp.toPx() } }
     val sunPositionYStart = remember(density) { density.run { 100.dp.toPx() } }
-    val sunPositionYEnd = remember(density) { density.run { 180.dp.toPx() } }
+    remember(density) { density.run { 180.dp.toPx() } }
 
     // Pre-computed dust particles
     val dustParticles = remember {

@@ -77,7 +77,7 @@ fun LibraryDetailScreen(
 ) {
     var state by remember { mutableStateOf<LibraryDetailState>(LibraryDetailState.Loading) }
     val context = LocalContext.current
-    val scrollState = rememberScrollState()
+    rememberScrollState()
 
     LaunchedEffect(uniqueLibId) {
         try {

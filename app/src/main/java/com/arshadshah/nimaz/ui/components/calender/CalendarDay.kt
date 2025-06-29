@@ -226,8 +226,8 @@ fun DayDetailsDialog(
     onFastingUpdate: (LocalFastTracker) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
-    val isAfterToday = date.isAfter(LocalDate.now())
+    LocalContext.current
+    date.isAfter(LocalDate.now())
 
     // Format dates
     val gregFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")

@@ -33,7 +33,7 @@ fun PrayerTimesScreen(
     val isLoading by viewModel.isLoading.collectAsState()
 
     //get screen width
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    LocalConfiguration.current.screenHeightDp.dp
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(PrayerTimesViewModel.PrayerTimesEvent.Init(context = context))

@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.arshadshah.nimaz.data.local.models.LocalJuz
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
 
 @Composable
 fun JuzList(
@@ -39,11 +40,7 @@ fun JuzList(
             }
         }
     } else if (error.isNotEmpty()) {
-        JuzListUI(
-            juz = ArrayList(30),
-            onNavigateToAyatScreen = onNavigateToAyatScreen,
-            loading = false,
-        )
+        PageErrorState(error)
     } else {
         JuzListUI(
             juz = state.value,

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +27,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
@@ -50,11 +48,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DARK_RED
 import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
@@ -68,7 +64,6 @@ import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_dark_onPrimary
 import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_dark_primary
 import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_light_onPrimary
 import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_light_primary
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.arshadshah.nimaz.ui.theme.md_theme_dark_onPrimary
 import com.arshadshah.nimaz.ui.theme.md_theme_dark_primary
 import com.arshadshah.nimaz.ui.theme.md_theme_light_onPrimary
@@ -186,7 +181,6 @@ fun Appearance(
     val isDarkMode by viewModel.isDarkMode.collectAsState(initial = false)
 
 
-
     // Scroll behavior for collapsing toolbar
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -247,7 +241,9 @@ fun Appearance(
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -332,32 +328,32 @@ fun Appearance(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
-            HeaderWithIcon(
-                modifier = Modifier.padding(8.dp),
-                title = "Choose your theme",
-                contentDescription = "Choose your theme",
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                icon = Icons.Default.ColorLens
-            )
+                HeaderWithIcon(
+                    modifier = Modifier.padding(8.dp),
+                    title = "Choose your theme",
+                    contentDescription = "Choose your theme",
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    icon = Icons.Default.ColorLens
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            // Theme Grid
-            EnhancedThemeSelector(
-                themeOptions = getThemeOptions(
-                    context = context,
-                    isDarkMode = isDarkMode,
-                    themeState = themeName
-                ),
-                onThemeOptionSelected = { theme ->
-                    viewModel.handleEvent(SettingsViewModel.SettingsEvent.Theme(theme.themeKey))
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+                // Theme Grid
+                EnhancedThemeSelector(
+                    themeOptions = getThemeOptions(
+                        context = context,
+                        isDarkMode = isDarkMode,
+                        themeState = themeName
+                    ),
+                    onThemeOptionSelected = { theme ->
+                        viewModel.handleEvent(SettingsViewModel.SettingsEvent.Theme(theme.themeKey))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

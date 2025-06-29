@@ -129,7 +129,7 @@ fun MyQuranScreen(
             label = "Frequently Read Surahs",
             items = getFrequentlyReadSurahs().toList(),
             showBadge = false,
-            dropDownItem = { (name, details) ->
+            dropDownItem = { (_, details) ->
                 val surah = suraList.value.find { it.number == details.first.toInt() }
                 surah?.let {
                     CompactSurahCard(

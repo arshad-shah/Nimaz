@@ -185,7 +185,7 @@ fun PrayerTimeRow(
     val backgroundColor by transition.animateColor(label = "backgroundColor") { (isHighlighted, isRamadan, _) ->
         when {
             isHighlighted -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
-            isRamadan -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+            isRamadan -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.1f)
             else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
         }
     }
@@ -193,7 +193,7 @@ fun PrayerTimeRow(
     val contentColor by transition.animateColor(label = "contentColor") { (isHighlighted, isRamadan, _) ->
         when {
             isHighlighted -> MaterialTheme.colorScheme.onPrimaryContainer
-            isRamadan -> MaterialTheme.colorScheme.tertiary
+            isRamadan -> MaterialTheme.colorScheme.onSurface
             else -> MaterialTheme.colorScheme.onSurface
         }
     }

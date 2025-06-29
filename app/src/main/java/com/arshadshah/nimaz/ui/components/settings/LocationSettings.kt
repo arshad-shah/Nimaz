@@ -63,7 +63,7 @@ fun LocationSettings(
     onToggleLocation: (Boolean) -> Unit,
     onLocationInput: (String) -> Unit,
 ) {
-    val context = LocalContext.current
+    LocalContext.current
     val locationInput = remember { mutableStateOf(location) }
     val locationPermissionState = rememberMultiplePermissionsState(
         permissions = listOf(

@@ -42,7 +42,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.ui.components.common.MixedScriptText
 import com.arshadshah.nimaz.ui.components.common.PageErrorState
 import com.arshadshah.nimaz.ui.components.common.PageLoading
-import com.arshadshah.nimaz.ui.components.quran.cleanTextFromBackslash
 import com.arshadshah.nimaz.ui.theme.almajeed
 import com.arshadshah.nimaz.ui.theme.amiri
 import com.arshadshah.nimaz.ui.theme.englishQuranTranslation
@@ -50,6 +49,7 @@ import com.arshadshah.nimaz.ui.theme.hidayat
 import com.arshadshah.nimaz.ui.theme.quranFont
 import com.arshadshah.nimaz.ui.theme.urduFont
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
+import com.arshadshah.nimaz.utils.StringUtils.cleanTextFromBackslash
 import com.arshadshah.nimaz.viewModel.TafsirViewModel
 import java.util.Locale
 
@@ -91,6 +91,7 @@ fun TafseerScreen(
                                 )
                             }
                         }
+
                         else -> {
                             Text(text = "Loading...")
                         }
@@ -154,7 +155,8 @@ fun TafseerScreen(
                                     SelectionContainer {
                                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                                             Text(
-                                                text = state.aya?.ayaArabic?.cleanTextFromBackslash() ?: "",
+                                                text = state.aya?.ayaArabic?.cleanTextFromBackslash()
+                                                    ?: "",
                                                 style = MaterialTheme.typography.headlineMedium,
                                                 fontSize = state.settings.arabicFontSize.sp,
                                                 fontFamily = when (state.settings.arabicFont) {
@@ -199,9 +201,11 @@ fun TafseerScreen(
                                                     )
                                                 }
                                             }
+
                                             else -> {
                                                 Text(
-                                                    text = state.aya?.translationEnglish?.cleanTextFromBackslash() ?: "",
+                                                    text = state.aya?.translationEnglish?.cleanTextFromBackslash()
+                                                        ?: "",
                                                     style = MaterialTheme.typography.titleMedium,
                                                     fontFamily = englishQuranTranslation,
                                                     fontSize = state.settings.translationFontSize.sp,
@@ -271,7 +275,9 @@ fun TafseerScreen(
                                                 Text(
                                                     text = "Verse ${state.aya?.ayaNumberInSurah}",
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                                        alpha = 0.8f
+                                                    )
                                                 )
                                             }
                                         }
@@ -369,7 +375,9 @@ fun TafseerScreen(
                                             Text(
                                                 text = "Surah $surahNumber:$ayaNumber",
                                                 style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                    alpha = 0.7f
+                                                ),
                                                 fontWeight = FontWeight.Medium
                                             )
                                         }

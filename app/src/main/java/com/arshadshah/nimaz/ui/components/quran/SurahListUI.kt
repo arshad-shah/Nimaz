@@ -215,7 +215,7 @@ fun SurahCard(
                             style = MaterialTheme.typography.displaySmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 16.dp)
+                                .padding(16.dp)
                                 .placeholder(
                                     visible = loading,
                                     highlight = PlaceholderHighlight.shimmer()

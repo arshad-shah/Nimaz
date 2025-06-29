@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.ui.components.dashboard
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,13 +22,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR

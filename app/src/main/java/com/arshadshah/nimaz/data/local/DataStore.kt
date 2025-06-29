@@ -202,4 +202,27 @@ class DataStore @Inject constructor(
         tafsirSystem.getEditionsByAuthor(authorName)
 
     suspend fun getEditionCount() = tafsirSystem.getEditionCount()
+
+
+    suspend fun searchAyas(query: String) = quranSystem.searchAyas(query)
+
+    suspend fun searchAyasAdvanced(
+        query: String = "",
+        surahNumber: Int? = null,
+        juzNumber: Int? = null,
+        isFavorite: Int? = null,
+        isBookmarked: Int? = null,
+        hasNote: Int? = null
+    ) = quranSystem.searchAyasAdvanced(query, surahNumber, juzNumber, isFavorite, isBookmarked, hasNote)
+
+    suspend fun searchAyasInArabic(query: String) = quranSystem.searchAyasInArabic(query)
+    suspend fun searchAyasInEnglish(query: String) = quranSystem.searchAyasInEnglish(query)
+    suspend fun searchAyasInUrdu(query: String) = quranSystem.searchAyasInUrdu(query)
+
+    suspend fun searchFavoriteAyas(query: String) = quranSystem.searchFavoriteAyas(query)
+    suspend fun searchBookmarkedAyas(query: String) = quranSystem.searchBookmarkedAyas(query)
+    suspend fun searchAyasWithNotes(query: String) = quranSystem.searchAyasWithNotes(query)
+
+    suspend fun getRandomSearchAya(query: String) = quranSystem.getRandomSearchAya(query)
+    suspend fun countSearchResults(query: String) = quranSystem.countSearchResults(query)
 }

@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.data.local.systems
 import com.arshadshah.nimaz.data.local.dao.AyaDao
 import com.arshadshah.nimaz.data.local.dao.JuzDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
-
 import javax.inject.Inject
 
 class QuranSystem @Inject constructor(
@@ -11,7 +10,7 @@ class QuranSystem @Inject constructor(
     private val juzDao: JuzDao,
     private val surahDao: SurahDao
 ) {
-    // Aya Reading Operations
+    // Existing Aya Reading Operations
     fun getAyasOfSurah(surahNumber: Int) = ayaDao.getAyasOfSurah(surahNumber)
     suspend fun getAyasOfJuz(juzNumber: Int) = ayaDao.getAyasOfJuz(juzNumber)
     suspend fun getRandomAya() = ayaDao.getRandomAya()
@@ -80,6 +79,29 @@ class QuranSystem @Inject constructor(
         ayaNumberInSurah: Int,
         audio: String
     ) = ayaDao.addAudioToAya(surahNumber, ayaNumberInSurah, audio)
+
+    // NEW: Search Operations
+    suspend fun searchAyas(query: String) = ayaDao.searchAyas(query)
+
+    suspend fun searchAyasAdvanced(
+        query: String = "",
+        surahNumber: Int? = null,
+        juzNumber: Int? = null,
+        isFavorite: Int? = null,
+        isBookmarked: Int? = null,
+        hasNote: Int? = null
+    ) = ayaDao.searchAyasAdvanced(query, surahNumber, juzNumber, isFavorite, isBookmarked, hasNote)
+
+    suspend fun searchAyasInArabic(query: String) = ayaDao.searchAyasInArabic(query)
+    suspend fun searchAyasInEnglish(query: String) = ayaDao.searchAyasInEnglish(query)
+    suspend fun searchAyasInUrdu(query: String) = ayaDao.searchAyasInUrdu(query)
+
+    suspend fun searchFavoriteAyas(query: String) = ayaDao.searchFavoriteAyas(query)
+    suspend fun searchBookmarkedAyas(query: String) = ayaDao.searchBookmarkedAyas(query)
+    suspend fun searchAyasWithNotes(query: String) = ayaDao.searchAyasWithNotes(query)
+
+    suspend fun getRandomSearchAya(query: String) = ayaDao.getRandomSearchAya(query)
+    suspend fun countSearchResults(query: String) = ayaDao.countSearchResults(query)
 
     // Juz Operations
     suspend fun getAllJuz() = juzDao.getAllJuz()

@@ -85,7 +85,7 @@ fun SunriseBackground(modifier: Modifier = Modifier) {
     Box(modifier = modifier.background(skyGradient)) {
         // Combine all Canvas operations to reduce recompositions
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val width = size.width
+            size.width
             val height = size.height
 
             // Horizon atmospheric perspective - create once
