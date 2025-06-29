@@ -5,9 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.DataStore
+import com.arshadshah.nimaz.data.local.models.KhatamProgress
+import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.data.local.models.QuickJump
+import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,6 +77,16 @@ class QuranViewModel @Inject constructor(
         emptyList()
     )
 
+    data class KhatamState(
+        val activeKhatam: KhatamSession? = null,
+        val khatamHistory: List<KhatamSession> = emptyList(),
+        val isLoadingKhatam: Boolean = false,
+        val khatamError: String? = null,
+        val showKhatamDialog: Boolean = false,
+        val todayProgress: Int = 0,
+        val totalQuranAyas: Int = 6236
+    )
+
     //state for bookmarking, favoriting, adding a note
     private val _bookmarks = MutableStateFlow(listOf<LocalAya>())
     val bookmarks = _bookmarks.asStateFlow()
@@ -81,6 +96,15 @@ class QuranViewModel @Inject constructor(
 
     private val _notes = MutableStateFlow(listOf<LocalAya>())
     val notes = _notes.asStateFlow()
+
+    private val _readingProgress = MutableStateFlow<List<ReadingProgress>>(emptyList())
+    val readingProgress = _readingProgress.asStateFlow()
+
+    private val _quickJumps = MutableStateFlow<List<QuickJump>>(emptyList())
+    val quickJumps = _quickJumps.asStateFlow()
+
+    private val _khatamState = MutableStateFlow(KhatamState())
+    val khatamState = _khatamState.asStateFlow()
 
     data class SearchFilters(
         val surahNumber: Int? = null,
@@ -98,6 +122,65 @@ class QuranViewModel @Inject constructor(
         getAllBookmarks()
         getAllFavorites()
         getAllNotes()
+        getAllReadingProgress()
+        getAllQuickJumps()
+        loadActiveKhatam()
+        loadKhatamHistory()
+    }
+
+    fun getAllReadingProgress() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val progressList = dataStore.getAllProgressOrderedByCompletion()
+                _readingProgress.value = progressList
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error loading reading progress", e)
+            }
+        }
+    }
+
+    fun getAllQuickJumps() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val jumpsList = dataStore.getAllQuickJumps()
+                _quickJumps.value = jumpsList
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error loading quick jumps", e)
+            }
+        }
+    }
+
+    fun deleteQuickJump(quickJump: QuickJump) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                dataStore.deleteQuickJump(quickJump)
+                getAllQuickJumps() // Refresh
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error deleting quick jump", e)
+            }
+        }
+    }
+
+    fun deleteReadingProgress(progress: ReadingProgress) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                dataStore.deleteReadingProgress(progress)
+                getAllReadingProgress() // Refresh
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error deleting reading progress", e)
+            }
+        }
+    }
+
+    fun clearAllReadingProgress() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                dataStore.clearAllReadingProgress()
+                getAllReadingProgress() // Refresh
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error clearing reading progress", e)
+            }
+        }
     }
 
     fun getSurahList() {
@@ -367,6 +450,26 @@ class QuranViewModel @Inject constructor(
         data class SearchInLanguage(val query: String, val language: String) : AyaEvent()
         data class SearchWithFilters(val query: String, val filters: SearchFilters) : AyaEvent()
         object ClearSearch : AyaEvent()
+
+        data class StartNewKhatam(
+            val name: String,
+            val targetDate: String? = null,
+            val dailyTarget: Int? = null
+        ) : AyaEvent()
+
+        data class UpdateKhatamProgress(
+            val khatamId: Long,
+            val surahNumber: Int,
+            val ayaNumber: Int
+        ) : AyaEvent()
+
+        data class CompleteKhatam(val khatamId: Long) : AyaEvent()
+        data class PauseKhatam(val khatamId: Long) : AyaEvent()
+        data class ResumeKhatam(val khatamId: Long) : AyaEvent()
+        data class DeleteKhatam(val khatamId: Long) : AyaEvent()
+        object LoadActiveKhatam : AyaEvent()
+        object LoadKhatamHistory : AyaEvent()
+        data class ShowKhatamDialog(val show: Boolean) : AyaEvent()
     }
 
     //events handler
@@ -472,7 +575,184 @@ class QuranViewModel @Inject constructor(
             is AyaEvent.ClearSearch -> {
                 clearSearch()
             }
+            is AyaEvent.StartNewKhatam -> startNewKhatam(ayaEvent.name, ayaEvent.targetDate, ayaEvent.dailyTarget)
+            is AyaEvent.UpdateKhatamProgress -> updateKhatamProgress(ayaEvent.khatamId, ayaEvent.surahNumber, ayaEvent.ayaNumber)
+            is AyaEvent.CompleteKhatam -> completeKhatam(ayaEvent.khatamId)
+            is AyaEvent.PauseKhatam -> pauseKhatam(ayaEvent.khatamId)
+            is AyaEvent.ResumeKhatam -> resumeKhatam(ayaEvent.khatamId)
+            is AyaEvent.DeleteKhatam -> deleteKhatam(ayaEvent.khatamId)
+            is AyaEvent.LoadActiveKhatam -> loadActiveKhatam()
+            is AyaEvent.LoadKhatamHistory -> loadKhatamHistory()
+            is AyaEvent.ShowKhatamDialog -> showKhatamDialog(ayaEvent.show)
         }
+    }
+
+    private fun startNewKhatam(name: String, targetDate: String?, dailyTarget: Int?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _khatamState.update { it.copy(isLoadingKhatam = true) }
+
+                val newKhatam = KhatamSession(
+                    name = name,
+                    startDate = java.time.LocalDate.now().toString(),
+                    targetCompletionDate = targetDate,
+                    dailyTarget = dailyTarget
+                )
+
+                dataStore.insertKhatam(newKhatam)
+                loadActiveKhatam()
+
+                _khatamState.update {
+                    it.copy(
+                        isLoadingKhatam = false,
+                        showKhatamDialog = false
+                    )
+                }
+            } catch (e: Exception) {
+                _khatamState.update {
+                    it.copy(
+                        isLoadingKhatam = false,
+                        khatamError = e.message
+                    )
+                }
+                Log.e("QuranViewModel", "Error starting new khatam", e)
+            }
+        }
+    }
+
+    private fun updateKhatamProgress(khatamId: Long, surahNumber: Int, ayaNumber: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val today = java.time.LocalDate.now().toString()
+
+                // Insert progress entry
+                val progress = KhatamProgress(
+                    khatamId = khatamId,
+                    surahNumber = surahNumber,
+                    ayaNumber = ayaNumber,
+                    dateRead = today
+                )
+                dataStore.insertKhatamProgress(progress)
+
+                // Calculate total ayas read (simplified calculation)
+                val totalRead = calculateTotalAyasRead(surahNumber, ayaNumber)
+
+                // Update khatam session
+                dataStore.updateKhatamProgress(khatamId, surahNumber, ayaNumber, totalRead)
+
+                // Check if khatam is complete
+                if (totalRead >= 6236) {
+                    completeKhatam(khatamId)
+                } else {
+                    loadActiveKhatam()
+                }
+
+                loadTodayProgress(khatamId)
+
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error updating khatam progress", e)
+            }
+        }
+    }
+
+    private fun completeKhatam(khatamId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val completionDate = java.time.LocalDate.now().toString()
+                dataStore.completeKhatam(khatamId, completionDate)
+                loadActiveKhatam()
+                loadKhatamHistory()
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error completing khatam", e)
+            }
+        }
+    }
+
+    private fun pauseKhatam(khatamId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                dataStore.pauseKhatam(khatamId)
+                loadActiveKhatam()
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error pausing khatam", e)
+            }
+        }
+    }
+
+    private fun resumeKhatam(khatamId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                dataStore.resumeKhatam(khatamId)
+                loadActiveKhatam()
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error resuming khatam", e)
+            }
+        }
+    }
+
+    private fun deleteKhatam(khatamId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val khatam = dataStore.getKhatamById(khatamId)
+                khatam?.let {
+                    dataStore.deleteKhatam(it)
+                    loadActiveKhatam()
+                    loadKhatamHistory()
+                }
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error deleting khatam", e)
+            }
+        }
+    }
+
+    private fun loadActiveKhatam() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val activeKhatam = dataStore.getActiveKhatam()
+                _khatamState.update { it.copy(activeKhatam = activeKhatam) }
+
+                activeKhatam?.let { khatam ->
+                    loadTodayProgress(khatam.id)
+                }
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error loading active khatam", e)
+            }
+        }
+    }
+
+    private fun loadKhatamHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val history = dataStore.getCompletedKhatams()
+                _khatamState.update { it.copy(khatamHistory = history) }
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error loading khatam history", e)
+            }
+        }
+    }
+
+    private fun loadTodayProgress(khatamId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val today = java.time.LocalDate.now().toString()
+                val todayProgress = dataStore.getAyasReadToday(khatamId, today)
+                _khatamState.update { it.copy(todayProgress = todayProgress) }
+            } catch (e: Exception) {
+                Log.e("QuranViewModel", "Error loading today's progress", e)
+            }
+        }
+    }
+
+    fun showKhatamDialog(show: Boolean) {
+        _khatamState.update { it.copy(showKhatamDialog = show) }
+    }
+
+    // Helper method to calculate total ayas read based on current position
+    private fun calculateTotalAyasRead(surahNumber: Int, ayaNumber: Int): Int {
+        // This is a simplified calculation
+        // You would need to implement proper calculation based on your surah data
+        // For now, returning a placeholder
+        return (surahNumber - 1) * 100 + ayaNumber // Simplified calculation
     }
 
     //add audio to aya

@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.ui.components.quran
+package com.arshadshah.nimaz.ui.components.quran.aya.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable

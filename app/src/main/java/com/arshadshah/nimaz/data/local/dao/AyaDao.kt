@@ -246,4 +246,44 @@ interface AyaDao {
         )
     """)
     suspend fun countSearchResults(query: String): Int
+
+    @Query("""
+        SELECT ayaNumberInSurah FROM Aya 
+        WHERE suraNumber = :surahNumber AND bookmark = 1
+        ORDER BY ayaNumberInSurah ASC
+    """)
+    suspend fun getBookmarkedAyaNumbers(surahNumber: Int): List<Int>
+
+    @Query("""
+        SELECT ayaNumberInSurah FROM Aya 
+        WHERE suraNumber = :surahNumber AND favorite = 1
+        ORDER BY ayaNumberInSurah ASC
+    """)
+    suspend fun getFavoriteAyaNumbers(surahNumber: Int): List<Int>
+
+    @Query("""
+        SELECT ayaNumberInSurah FROM Aya 
+        WHERE suraNumber = :surahNumber AND note != ''
+        ORDER BY ayaNumberInSurah ASC
+    """)
+    suspend fun getNotedAyaNumbers(surahNumber: Int): List<Int>
+
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE ayaNumberInQuran = :currentAyaNumber - 1
+        LIMIT 1
+    """)
+    suspend fun getPreviousAya(currentAyaNumber: Int): LocalAya?
+
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE ayaNumberInQuran = :currentAyaNumber + 1
+        LIMIT 1
+    """)
+    suspend fun getNextAya(currentAyaNumber: Int): LocalAya?
+
+    @Query("""
+        SELECT COUNT(*) FROM Aya WHERE suraNumber = :surahNumber
+    """)
+    suspend fun getTotalAyasInSurah(surahNumber: Int): Int
 }

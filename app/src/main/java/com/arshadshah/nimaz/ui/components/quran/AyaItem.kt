@@ -19,6 +19,7 @@ import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.quran.aya.components.AyatContent
 import com.arshadshah.nimaz.ui.components.quran.aya.components.AyatFeatures
 import com.arshadshah.nimaz.ui.components.quran.aya.components.SpecialAyat
+import com.arshadshah.nimaz.ui.components.quran.aya.components.TafseerSection
 import com.arshadshah.nimaz.utils.DisplaySettings
 import com.arshadshah.nimaz.viewModel.AudioState
 import com.arshadshah.nimaz.viewModel.AyatViewModel

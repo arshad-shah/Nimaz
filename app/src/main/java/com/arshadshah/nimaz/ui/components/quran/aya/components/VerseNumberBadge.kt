@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.ui.components.quran.aya.components
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,7 +18,7 @@ import com.arshadshah.nimaz.ui.components.common.placeholder.material.shimmer
 fun VerseNumberBadge(number: Int, isLoading: Boolean) {
     Badge(
         modifier = Modifier
-            .size(32.dp),
+            .wrapContentSize(),
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
     ) {
@@ -36,7 +37,7 @@ fun VerseNumberBadge(number: Int, isLoading: Boolean) {
 @Composable
 fun PreviewVerseNumberBadge() {
     VerseNumberBadge(
-        number = 1,
+        number = 1111,
         isLoading = false
     )
 }

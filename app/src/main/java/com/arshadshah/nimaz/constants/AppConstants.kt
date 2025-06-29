@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.constants
 
 object AppConstants {
 
-    const val DATABASE_VERSION = 6
+    const val DATABASE_VERSION = 8
 
     //prayer names
     const val PRAYER_NAME_FAJR = "Fajr"

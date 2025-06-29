@@ -137,13 +137,24 @@ private fun MyQuranContent(
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit
 ) {
     val isLoading = viewModel.loadingState.collectAsState()
+    val readingProgress = viewModel.readingProgress.collectAsState()
+    val quickJumps = viewModel.quickJumps.collectAsState()
+    val khatamState = viewModel.khatamState.collectAsState() // ADD THIS
+
     MyQuranScreen(
         bookmarks = viewModel.bookmarks.collectAsState(),
         favorites = viewModel.favorites.collectAsState(),
         notes = viewModel.notes.collectAsState(),
         suraList = viewModel.surahListState.collectAsState(),
+        readingProgress = readingProgress,
+        quickJumps = quickJumps,
+        khatamState = khatamState, // ADD THIS
         onNavigateToAyatScreen = onNavigateToAyatScreen,
         handleEvents = viewModel::handleAyaEvent,
+        onKhatamEvent = viewModel::handleAyaEvent, // ADD THIS
+        onDeleteQuickJump = viewModel::deleteQuickJump,
+        onDeleteReadingProgress = viewModel::deleteReadingProgress,
+        onClearAllProgress = viewModel::clearAllReadingProgress,
         isLoading = isLoading
     )
 }
