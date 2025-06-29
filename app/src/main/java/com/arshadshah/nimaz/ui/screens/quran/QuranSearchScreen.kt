@@ -842,7 +842,7 @@ private fun AyaArabicText(aya: LocalAya) {
 @Composable
 private fun AyaEnglishText(aya: LocalAya) {
     Text(
-        text = aya.translationEnglish,
+        text = aya.translationEnglish.cleanTextFromBackslash(),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface,
         maxLines = 3,
