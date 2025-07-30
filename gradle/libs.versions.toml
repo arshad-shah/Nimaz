@@ -2,7 +2,7 @@
 aboutLibs = "10.6.2"
 accompanistPermissions = "0.35.0-alpha"
 activityCompose = "1.10.1"
-androidGradlePlugin = "8.9.0"
+androidGradlePlugin = "8.5.2"
 androidxComposeBom = "2025.02.00"
 appUpdate = "2.1.0"
 aws = "2.75.0"
