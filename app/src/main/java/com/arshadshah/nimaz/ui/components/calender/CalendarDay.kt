@@ -42,8 +42,8 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.canopas.lib.showcase.IntroShowcase
 import com.canopas.lib.showcase.component.ShowcaseStyle
+import com.canopas.lib.showcase.introShowCaseTarget
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.chrono.HijrahDate
@@ -54,8 +54,6 @@ import java.time.temporal.WeekFields
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarDay(
-    showcaseState: Boolean,
-    onShowcaseDismiss: () -> Unit,
     date: LocalDate,
     isSelected: Boolean,
     isToday: Boolean,
@@ -64,10 +62,11 @@ fun CalendarDay(
     isMenstruating: Boolean,
     isFasting: Boolean,
     onDateClick: (LocalDate) -> Unit,
+    shouldShowShowcase: Boolean = false,
     modifier: Modifier = Modifier
 ) {
 
-    Log.d("CalendarDay: showCaseState", showcaseState.toString())
+    Log.d("CalendarDay: shouldShowShowcase", shouldShowShowcase.toString())
     val hijriDate = remember(date) {
         HijrahDate.from(date)
     }
@@ -90,89 +89,87 @@ fun CalendarDay(
 
     val showDialog = remember { mutableStateOf(false) }
 
-    IntroShowcase(
-        showIntroShowCase = isToday && !showcaseState,
-        dismissOnClickOutside = true,
-        onShowCaseCompleted = {
-            onShowcaseDismiss()
+    Surface(
+        modifier = modifier
+            .let { mod ->
+                if (shouldShowShowcase) {
+                    mod.introShowCaseTarget(
+                        index = 0,
+                        style = ShowcaseStyle.Default.copy(
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            backgroundAlpha = 0.98f,
+                            targetCircleColor = MaterialTheme.colorScheme.primaryContainer,
+                        ),
+                        // specify the content to show to introduce app feature
+                        content = {
+                            CalendarDayShowcase()
+                        }
+                    )
+                } else {
+                    mod
+                }
+            }
+            .aspectRatio(0.7f)
+            .clip(MaterialTheme.shapes.small)
+            .padding(1.dp)
+            .border(
+                width = 3.dp,
+                color = when {
+                    !isFromCurrentMonth -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                    isSelected -> MaterialTheme.colorScheme.primaryContainer
+                    isToday -> MaterialTheme.colorScheme.secondaryContainer
+                    isMenstruating -> Color(0xFFFFBCC2)
+                    importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer
+                    else -> MaterialTheme.colorScheme.surface
+                },
+                shape = MaterialTheme.shapes.small
+            )
+            .combinedClickable(
+                enabled = isFromCurrentMonth,
+                onClick = { onDateClick(date) },
+                onLongClick = {
+                    if (importantDay.first) {
+                        showDialog.value = true
+                    }
+                }
+            ),
+        shape = MaterialTheme.shapes.small,
+        contentColor = when {
+            !isFromCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+            isSelected -> MaterialTheme.colorScheme.onPrimary
+            isToday -> MaterialTheme.colorScheme.onSecondaryContainer
+            isMenstruating -> Color(0xFFFFBCC2)
+            importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.onTertiaryContainer
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
         },
     ) {
-        Surface(
-            modifier = modifier
-                .introShowCaseTarget(
-                    index = 0,
-                    style = ShowcaseStyle.Default.copy(
-                        backgroundColor = MaterialTheme.colorScheme.primary,
-                        backgroundAlpha = 0.98f,
-                        targetCircleColor = MaterialTheme.colorScheme.primaryContainer,
-                    ),
-                    // specify the content to show to introduce app feature
-                    content = {
-                        CalendarDayShowcase()
-                    }
-                )
-                .aspectRatio(0.7f)
-                .clip(MaterialTheme.shapes.small)
-                .padding(1.dp)
-                .border(
-                    width = 3.dp,
-                    color = when {
-                        !isFromCurrentMonth -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
-                        isSelected -> MaterialTheme.colorScheme.primaryContainer
-                        isToday -> MaterialTheme.colorScheme.secondaryContainer
-                        isMenstruating -> Color(0xFFFFBCC2)
-                        importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer
-                        else -> MaterialTheme.colorScheme.surface
-                    },
-                    shape = MaterialTheme.shapes.small
-                )
-                .combinedClickable(
-                    enabled = isFromCurrentMonth,
-                    onClick = { onDateClick(date) },
-                    onLongClick = {
-                        if (importantDay.first) {
-                            showDialog.value = true
-                        }
-                    }
-                ),
-            shape = MaterialTheme.shapes.small,
-            contentColor = when {
-                !isFromCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
-                isSelected -> MaterialTheme.colorScheme.onPrimary
-                isToday -> MaterialTheme.colorScheme.onSecondaryContainer
-                isMenstruating -> Color(0xFFFFBCC2)
-                importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.onTertiaryContainer
-                else -> MaterialTheme.colorScheme.onSurfaceVariant
-            },
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    if (importantDay.first || isFasting) {
-                        StatusIndicators(
-                            importantDay = importantDay,
-                            isFasting = isFasting
-                        )
-                    }
-
-                    DateDisplay(
-                        date = date,
-                        hijriDate = hijriDate,
-                        isSelected = isSelected,
-                        isToday = isToday
+                if (importantDay.first || isFasting) {
+                    StatusIndicators(
+                        importantDay = importantDay,
+                        isFasting = isFasting
                     )
+                }
 
-                    if (tracker != null) {
-                        PrayerProgressIndicators(tracker = tracker)
-                    }
+                DateDisplay(
+                    date = date,
+                    hijriDate = hijriDate,
+                    isSelected = isSelected,
+                    isToday = isToday
+                )
+
+                if (tracker != null) {
+                    PrayerProgressIndicators(tracker = tracker)
                 }
             }
         }
@@ -554,10 +551,6 @@ fun CalendarDayPreview() {
         ) {
             items(days, key = { it.date.toString() }) { dayInfo ->
                 CalendarDay(
-                    showcaseState = false,
-                    onShowcaseDismiss = {
-
-                    },
                     date = dayInfo.date,
                     isSelected = dayInfo.date == LocalDate.now(),
                     isToday = dayInfo.date == LocalDate.now(),
@@ -573,6 +566,7 @@ fun CalendarDayPreview() {
                     isMenstruating = false,
                     isFasting = true,
                     onDateClick = {},
+                    shouldShowShowcase = dayInfo.date == LocalDate.now(),
                 )
             }
         }

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
+import com.canopas.lib.showcase.IntroShowcase
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -36,54 +37,60 @@ fun Calendar(
     modifier: Modifier = Modifier
 ) {
     val weekFields = remember { WeekFields.ISO }
+    val today = remember { LocalDate.now() }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    IntroShowcase(
+        showIntroShowCase = !showcaseState,
+        dismissOnClickOutside = true,
+        onShowCaseCompleted = {
+            onShowcaseDismiss()
+        },
     ) {
-        // Header with month navigation
-        CalendarHeader(
-            currentMonth = currentMonth,
-            onMonthChange = onMonthChanged,
-            onTodayClick = { onDateSelected(LocalDate.now()) }
-        )
-
-        // Week days header
-        CalendarWeekHeader()
-
-        // Days grid
-        val days = remember(currentMonth, weekFields) {
-            generateDaysForMonth(currentMonth, weekFields)
-        }
-
-        val trackersMap = remember(trackers) {
-            trackers.associateBy { it.date }
-        }
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(max(100.dp, 500.dp)),
-            contentPadding = PaddingValues(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        Column(
+            modifier = modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(days, key = { it.date.toString() }) { dayInfo ->
-                CalendarDay(
-                    showcaseState = showcaseState,
-                    onShowcaseDismiss = {
-                        onShowcaseDismiss()
-                    },
-                    date = dayInfo.date,
-                    isSelected = dayInfo.date == selectedDate,
-                    isToday = dayInfo.date == LocalDate.now(),
-                    isFromCurrentMonth = dayInfo.isFromCurrentMonth,
-                    tracker = trackersMap[dayInfo.date],
-                    isMenstruating = isMenstruatingProvider(dayInfo.date),
-                    isFasting = isFastingProvider(dayInfo.date),
-                    onDateClick = onDateSelected,
-                )
+            // Header with month navigation
+            CalendarHeader(
+                currentMonth = currentMonth,
+                onMonthChange = onMonthChanged,
+                onTodayClick = { onDateSelected(LocalDate.now()) }
+            )
+
+            // Week days header
+            CalendarWeekHeader()
+
+            // Days grid
+            val days = remember(currentMonth, weekFields) {
+                generateDaysForMonth(currentMonth, weekFields)
+            }
+
+            val trackersMap = remember(trackers) {
+                trackers.associateBy { it.date }
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(7),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(max(100.dp, 500.dp)),
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(days, key = { it.date.toString() }) { dayInfo ->
+                    CalendarDay(
+                        date = dayInfo.date,
+                        isSelected = dayInfo.date == selectedDate,
+                        isToday = dayInfo.date == today,
+                        isFromCurrentMonth = dayInfo.isFromCurrentMonth,
+                        tracker = trackersMap[dayInfo.date],
+                        isMenstruating = isMenstruatingProvider(dayInfo.date),
+                        isFasting = isFastingProvider(dayInfo.date),
+                        onDateClick = onDateSelected,
+                        shouldShowShowcase = dayInfo.date == today && dayInfo.isFromCurrentMonth,
+                    )
+                }
             }
         }
     }
