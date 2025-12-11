@@ -349,4 +349,301 @@ internal class PrayerTimesTest {
         assertEquals("Dhuhr UTC hour", 12, dhuhrTime!!.hour)
         assertTrue("Dhuhr UTC minute", dhuhrTime.minute in 3..8)
     }
+
+    // ==================== Islamic Teachings Validation Tests ====================
+
+    @Test
+    fun testPrayerTimesChronologicalOrder() {
+        // Test that prayer times follow Islamic chronological order:
+        // Fajr < Sunrise < Dhuhr < Asr < Maghrib < Isha
+        // This is a fundamental Islamic requirement
+        val coordinates = Coordinates(24.8607, 67.0011) // Karachi
+        val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+        val calculationParameters = CalculationParameters(
+            18.0,
+            18.0,
+            CalculationMethod.KARACHI
+        )
+        val prayerTimes = PrayerTimesCalculated(coordinates, date, calculationParameters)
+        
+        val fajr = prayerTimes.timeForPrayer(Prayer.FAJR)!!
+        val sunrise = prayerTimes.timeForPrayer(Prayer.SUNRISE)!!
+        val dhuhr = prayerTimes.timeForPrayer(Prayer.DHUHR)!!
+        val asr = prayerTimes.timeForPrayer(Prayer.ASR)!!
+        val maghrib = prayerTimes.timeForPrayer(Prayer.MAGHRIB)!!
+        val isha = prayerTimes.timeForPrayer(Prayer.ISHA)!!
+        
+        // Verify chronological order - fundamental Islamic teaching
+        assertTrue("Fajr must be before Sunrise", fajr.isBefore(sunrise))
+        assertTrue("Sunrise must be before Dhuhr", sunrise.isBefore(dhuhr))
+        assertTrue("Dhuhr must be before Asr", dhuhr.isBefore(asr))
+        assertTrue("Asr must be before Maghrib", asr.isBefore(maghrib))
+        assertTrue("Maghrib must be before Isha", maghrib.isBefore(isha))
+    }
+
+    @Test
+    fun testMadhabDifference_ShafiVsHanafi() {
+        // Test that Asr time differs based on Madhab (Islamic school of thought)
+        // Shafi: Asr when shadow = object length (earlier)
+        // Hanafi: Asr when shadow = 2x object length (later)
+        val coordinates = Coordinates(24.8607, 67.0011) // Karachi
+        val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+        
+        // Shafi madhab calculation (default)
+        val shafiParams = CalculationParameters(18.0, 18.0, CalculationMethod.KARACHI)
+        shafiParams.madhab = com.arshadshah.nimaz.libs.prayertimes.enums.Madhab.SHAFI
+        val shafiPrayerTimes = PrayerTimesCalculated(coordinates, date, shafiParams)
+        val shafiAsr = shafiPrayerTimes.timeForPrayer(Prayer.ASR)!!
+        
+        // Hanafi madhab calculation
+        val hanafiParams = CalculationParameters(18.0, 18.0, CalculationMethod.KARACHI)
+        hanafiParams.madhab = com.arshadshah.nimaz.libs.prayertimes.enums.Madhab.HANAFI
+        val hanafiPrayerTimes = PrayerTimesCalculated(coordinates, date, hanafiParams)
+        val hanafiAsr = hanafiPrayerTimes.timeForPrayer(Prayer.ASR)!!
+        
+        // Hanafi Asr must be later than Shafi Asr (Islamic teaching)
+        assertTrue("Hanafi Asr must be after Shafi Asr", hanafiAsr.isAfter(shafiAsr))
+        
+        // The difference should be significant (typically 30-60 minutes)
+        val minutesDifference = java.time.Duration.between(shafiAsr, hanafiAsr).toMinutes()
+        assertTrue("Asr time difference should be 20-90 minutes", minutesDifference in 20..90)
+    }
+
+    @Test
+    fun testFajrBeforeSunrise() {
+        // Islamic teaching: Fajr prayer must end before sunrise
+        // Fajr time marks the beginning, and it must be before sunrise
+        val testLocations = listOf(
+            Triple(Coordinates(24.8607, 67.0011), "Karachi", CalculationMethod.KARACHI),
+            Triple(Coordinates(51.5074, -0.1278), "London", CalculationMethod.MWL),
+            Triple(Coordinates(40.7128, -74.0060), "New York", CalculationMethod.ISNA)
+        )
+        
+        testLocations.forEach { (coords, location, method) ->
+            val prayerTimes = PrayerTimesCalculated(
+                coords,
+                LocalDateTime.of(2024, 1, 15, 0, 0),
+                CalculationParameters(18.0, 18.0, method)
+            )
+            
+            val fajr = prayerTimes.timeForPrayer(Prayer.FAJR)!!
+            val sunrise = prayerTimes.timeForPrayer(Prayer.SUNRISE)!!
+            
+            assertTrue("$location: Fajr must be before Sunrise", fajr.isBefore(sunrise))
+            
+            // There should be reasonable time between Fajr and Sunrise (typically 60-90 min)
+            val minutesDiff = java.time.Duration.between(fajr, sunrise).toMinutes()
+            assertTrue("$location: Fajr-Sunrise gap should be 40-120 min, was $minutesDiff", 
+                minutesDiff in 40..120)
+        }
+    }
+
+    @Test
+    fun testMaghribAtSunset() {
+        // Islamic teaching: Maghrib prayer begins immediately at sunset
+        // Maghrib time should be at or very close to sunset time
+        val coordinates = Coordinates(24.8607, 67.0011) // Karachi
+        val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+        val calculationParameters = CalculationParameters(
+            18.0,
+            18.0,
+            CalculationMethod.KARACHI
+        )
+        val prayerTimes = PrayerTimesCalculated(coordinates, date, calculationParameters)
+        
+        val maghrib = prayerTimes.timeForPrayer(Prayer.MAGHRIB)!!
+        
+        // Note: In the implementation, sunset is calculated separately
+        // but Maghrib should be at or very close to sunset time
+        // We verify Maghrib is between Asr and Isha (basic sanity check)
+        val asr = prayerTimes.timeForPrayer(Prayer.ASR)!!
+        val isha = prayerTimes.timeForPrayer(Prayer.ISHA)!!
+        
+        assertTrue("Maghrib must be after Asr", maghrib.isAfter(asr))
+        assertTrue("Maghrib must be before Isha", maghrib.isBefore(isha))
+    }
+
+    @Test
+    fun testDhuhrAtSolarNoon() {
+        // Islamic teaching: Dhuhr (Zuhr) prayer begins after solar noon
+        // when the sun passes the meridian
+        val coordinates = Coordinates(24.8607, 67.0011) // Karachi
+        val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+        val calculationParameters = CalculationParameters(
+            18.0,
+            18.0,
+            CalculationMethod.KARACHI
+        )
+        val prayerTimes = PrayerTimesCalculated(coordinates, date, calculationParameters)
+        
+        val sunrise = prayerTimes.timeForPrayer(Prayer.SUNRISE)!!
+        val dhuhr = prayerTimes.timeForPrayer(Prayer.DHUHR)!!
+        val asr = prayerTimes.timeForPrayer(Prayer.ASR)!!
+        
+        // Dhuhr should be roughly halfway between sunrise and sunset
+        // or more precisely, at solar noon
+        assertTrue("Dhuhr must be after Sunrise", dhuhr.isAfter(sunrise))
+        assertTrue("Dhuhr must be before Asr", dhuhr.isBefore(asr))
+        
+        // Verify reasonable time gaps
+        val sunriseToDhuhr = java.time.Duration.between(sunrise, dhuhr).toMinutes()
+        assertTrue("Sunrise to Dhuhr should be 4-6 hours", sunriseToDhuhr in 240..360)
+    }
+
+    @Test
+    fun testIshaAfterMaghrib() {
+        // Islamic teaching: Isha prayer begins after twilight disappears
+        // This should be after Maghrib with sufficient time gap
+        val coordinates = Coordinates(24.8607, 67.0011) // Karachi
+        val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+        val calculationParameters = CalculationParameters(
+            18.0,
+            18.0,
+            CalculationMethod.KARACHI
+        )
+        val prayerTimes = PrayerTimesCalculated(coordinates, date, calculationParameters)
+        
+        val maghrib = prayerTimes.timeForPrayer(Prayer.MAGHRIB)!!
+        val isha = prayerTimes.timeForPrayer(Prayer.ISHA)!!
+        
+        assertTrue("Isha must be after Maghrib", isha.isAfter(maghrib))
+        
+        // There should be reasonable time between Maghrib and Isha
+        // (typically 60-90 minutes based on twilight disappearance)
+        val minutesDiff = java.time.Duration.between(maghrib, isha).toMinutes()
+        assertTrue("Maghrib-Isha gap should be 50-120 min, was $minutesDiff", 
+            minutesDiff in 50..120)
+    }
+
+    @Test
+    fun testPrayerTimesAcrossEquinoxes() {
+        // Test prayer times during different seasons
+        // to ensure algorithm works correctly year-round
+        val coordinates = Coordinates(24.8607, 67.0011) // Karachi
+        val calculationParameters = CalculationParameters(
+            18.0,
+            18.0,
+            CalculationMethod.KARACHI
+        )
+        
+        val seasons = listOf(
+            Triple(LocalDateTime.of(2024, 3, 20, 0, 0), "Spring Equinox", "March"),
+            Triple(LocalDateTime.of(2024, 6, 21, 0, 0), "Summer Solstice", "June"),
+            Triple(LocalDateTime.of(2024, 9, 22, 0, 0), "Autumn Equinox", "September"),
+            Triple(LocalDateTime.of(2024, 12, 21, 0, 0), "Winter Solstice", "December")
+        )
+        
+        seasons.forEach { (date, season, month) ->
+            val prayerTimes = PrayerTimesCalculated(coordinates, date, calculationParameters)
+            
+            val fajr = prayerTimes.timeForPrayer(Prayer.FAJR)
+            val sunrise = prayerTimes.timeForPrayer(Prayer.SUNRISE)
+            val dhuhr = prayerTimes.timeForPrayer(Prayer.DHUHR)
+            val asr = prayerTimes.timeForPrayer(Prayer.ASR)
+            val maghrib = prayerTimes.timeForPrayer(Prayer.MAGHRIB)
+            val isha = prayerTimes.timeForPrayer(Prayer.ISHA)
+            
+            // All prayer times must be calculated for all seasons
+            assertNotNull("$season: Fajr should be calculated", fajr)
+            assertNotNull("$season: Sunrise should be calculated", sunrise)
+            assertNotNull("$season: Dhuhr should be calculated", dhuhr)
+            assertNotNull("$season: Asr should be calculated", asr)
+            assertNotNull("$season: Maghrib should be calculated", maghrib)
+            assertNotNull("$season: Isha should be calculated", isha)
+            
+            // Verify chronological order for each season
+            assertTrue("$season: Fajr < Sunrise", fajr!!.isBefore(sunrise))
+            assertTrue("$season: Sunrise < Dhuhr", sunrise!!.isBefore(dhuhr))
+            assertTrue("$season: Dhuhr < Asr", dhuhr!!.isBefore(asr))
+            assertTrue("$season: Asr < Maghrib", asr!!.isBefore(maghrib))
+            assertTrue("$season: Maghrib < Isha", maghrib!!.isBefore(isha))
+        }
+    }
+
+    @Test
+    fun testCalculationMethodVariations() {
+        // Different Islamic organizations use different angles for Fajr and Isha
+        // Test that different methods produce valid but different results
+        val coordinates = Coordinates(24.8607, 67.0011) // Karachi
+        val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+        
+        val methods = listOf(
+            Triple(CalculationMethod.KARACHI, 18.0, 18.0),  // University of Karachi
+            Triple(CalculationMethod.ISNA, 15.0, 15.0),      // ISNA
+            Triple(CalculationMethod.MWL, 18.0, 17.0)        // Muslim World League
+        )
+        
+        val results = mutableListOf<Pair<String, LocalDateTime>>()
+        
+        methods.forEach { (method, fajrAngle, ishaAngle) ->
+            val params = CalculationParameters(fajrAngle, ishaAngle, method)
+            val prayerTimes = PrayerTimesCalculated(coordinates, date, params)
+            
+            val fajr = prayerTimes.timeForPrayer(Prayer.FAJR)!!
+            val isha = prayerTimes.timeForPrayer(Prayer.ISHA)!!
+            
+            results.add(Pair(method.name + "_Fajr", fajr))
+            results.add(Pair(method.name + "_Isha", isha))
+            
+            // All methods must produce valid chronological prayer times
+            val allPrayers = listOf(
+                prayerTimes.timeForPrayer(Prayer.FAJR)!!,
+                prayerTimes.timeForPrayer(Prayer.SUNRISE)!!,
+                prayerTimes.timeForPrayer(Prayer.DHUHR)!!,
+                prayerTimes.timeForPrayer(Prayer.ASR)!!,
+                prayerTimes.timeForPrayer(Prayer.MAGHRIB)!!,
+                prayerTimes.timeForPrayer(Prayer.ISHA)!!
+            )
+            
+            // Verify each method produces chronological times
+            for (i in 0 until allPrayers.size - 1) {
+                assertTrue("${method.name}: Prayer $i must be before prayer ${i+1}", 
+                    allPrayers[i].isBefore(allPrayers[i + 1]))
+            }
+        }
+        
+        // Verify that different methods produce different Fajr/Isha times
+        // (due to different angle calculations)
+        val karachiFajr = results.find { it.first == "KARACHI_Fajr" }!!.second
+        val isnaFajr = results.find { it.first == "ISNA_Fajr" }!!.second
+        
+        // KARACHI uses 18° while ISNA uses 15°, so times should differ
+        assertNotEquals("KARACHI and ISNA should produce different Fajr times", 
+            karachiFajr, isnaFajr)
+    }
+
+    @Test
+    fun testNoNullPrayerTimes() {
+        // Islamic requirement: All five daily prayers must have valid times
+        // This test ensures no prayer time is null under normal conditions
+        val testCases = listOf(
+            Triple(Coordinates(24.8607, 67.0011), CalculationMethod.KARACHI, "Karachi"),
+            Triple(Coordinates(21.3891, 39.8579), CalculationMethod.MAKKAH, "Makkah"),
+            Triple(Coordinates(25.2048, 55.2708), CalculationMethod.DUBAI, "Dubai"),
+            Triple(Coordinates(40.7128, -74.0060), CalculationMethod.ISNA, "New York"),
+            Triple(Coordinates(51.5074, -0.1278), CalculationMethod.MWL, "London")
+        )
+        
+        testCases.forEach { (coords, method, location) ->
+            val params = CalculationParameters(18.0, 18.0, method)
+            val prayerTimes = PrayerTimesCalculated(
+                coords,
+                LocalDateTime.of(2024, 1, 15, 0, 0),
+                params
+            )
+            
+            assertNotNull("$location: Fajr must not be null", 
+                prayerTimes.timeForPrayer(Prayer.FAJR))
+            assertNotNull("$location: Sunrise must not be null", 
+                prayerTimes.timeForPrayer(Prayer.SUNRISE))
+            assertNotNull("$location: Dhuhr must not be null", 
+                prayerTimes.timeForPrayer(Prayer.DHUHR))
+            assertNotNull("$location: Asr must not be null", 
+                prayerTimes.timeForPrayer(Prayer.ASR))
+            assertNotNull("$location: Maghrib must not be null", 
+                prayerTimes.timeForPrayer(Prayer.MAGHRIB))
+            assertNotNull("$location: Isha must not be null", 
+                prayerTimes.timeForPrayer(Prayer.ISHA))
+        }
+    }
 }
