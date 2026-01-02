@@ -32,9 +32,7 @@ fun JuzList(
             items(7) { index ->
                 JuzListItem(
                     isLoading = true,
-                    juzNumber = juz.number,
-                    name = juz.name,
-                    translatedName = juz.tname,
+                    juz = juz,
                     navigateToAyatScreen = onNavigateToAyatScreen,
                 )
             }

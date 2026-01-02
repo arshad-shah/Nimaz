@@ -1,7 +1,13 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,12 +27,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -33,11 +43,15 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
@@ -46,6 +60,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,8 +71,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -266,221 +285,270 @@ fun KhatamProgressBar(
     currentAya: Int,
     isUpdating: Boolean,
     alreadyLoggedToday: Boolean,
-    onMarkAsRead: (Int, Int) -> Unit
+    onMarkAsRead: (Int, Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var showOptions by remember { mutableStateOf(false) }
+    val progressPercent = (khatam.totalAyasRead.toFloat() / 6236f * 100).toInt()
+    val progressFraction = khatam.totalAyasRead.toFloat() / 6236f
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (khatam.isActive)
-                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-        )
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 8.dp
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Main progress row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (khatam.isActive) "📖" else "⏸️",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = khatam.name,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "${(khatam.totalAyasRead.toFloat() / 6236f * 100).toInt()}%",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-
-                        // Show last marked position
-                        Text(
-                            text = "• Last: ${khatam.currentSurah}:${khatam.currentAya}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f)
-                        )
-
-                        if (alreadyLoggedToday) {
-                            Text(
-                                text = "• ✓ Today",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-
-                    if (!khatam.isActive) {
-                        Text(
-                            text = "⏸️ Paused",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                        )
-                    }
-
-                    // Show current position if different from last marked
-                    if (currentSurah != khatam.currentSurah || currentAya != khatam.currentAya) {
-                        Text(
-                            text = "Now: ${currentSurah}:${currentAya}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    if (isUpdating) {
-                        CircularProgressIndicator(modifier = Modifier.size(32.dp), strokeWidth = 2.dp)
-                    } else {
-                        // Primary action button
-                        Button(
-                            onClick = { onMarkAsRead(currentSurah, currentAya) },
-                            modifier = Modifier.size(width = 110.dp, height = 32.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            enabled = !alreadyLoggedToday,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (alreadyLoggedToday)
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                else
-                                    MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Icon(
-                                if (alreadyLoggedToday) Icons.Default.Check else Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (alreadyLoggedToday) "Marked" else "Mark",
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-
-                        // Options toggle button
-                        if (!alreadyLoggedToday) {
-                            OutlinedButton(
-                                onClick = { showOptions = !showOptions },
-                                modifier = Modifier.size(width = 110.dp, height = 28.dp),
-                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = if (showOptions) "Hide" else "Options",
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                                Icon(
-                                    if (showOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(12.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon + Progress Ring
+            Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    progress = { progressFraction },
+                    modifier = Modifier.size(36.dp),
+                    strokeWidth = 3.dp,
+                    color = if (khatam.isActive)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.outline,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+                Icon(
+                    imageVector = if (khatam.isActive)
+                        Icons.AutoMirrored.Filled.MenuBook
+                    else
+                        Icons.Default.Pause,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = if (khatam.isActive)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.outline
+                )
             }
 
-            // Expandable options
-            AnimatedVisibility(visible = showOptions && !isUpdating && !alreadyLoggedToday) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                    modifier = Modifier.fillMaxWidth()
+            // Info Column
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier.padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = "Mark reading from last position (${khatam.currentSurah}:${khatam.currentAya}) to:",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    Text(
+                        text = khatam.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    Text(
+                        text = "$progressPercent%",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (alreadyLoggedToday) {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = "Logged today",
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            // Mark current aya
-                            OutlinedButton(
-                                onClick = {
-                                    onMarkAsRead(currentSurah, currentAya)
-                                    showOptions = false
-                                },
-                                modifier = Modifier.weight(1f),
-                                contentPadding = PaddingValues(6.dp)
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("This Aya", style = MaterialTheme.typography.labelSmall)
-                                    Text("${currentSurah}:${currentAya}", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                                }
-                            }
-
-                            // Mark end of page (estimate ~15 ayas per page)
-                            val pageEndAya = (currentAya + 15).coerceAtMost(getSurahAyaCount(currentSurah))
-                            OutlinedButton(
-                                onClick = {
-                                    onMarkAsRead(currentSurah, pageEndAya)
-                                    showOptions = false
-                                },
-                                modifier = Modifier.weight(1f),
-                                contentPadding = PaddingValues(6.dp),
-                                enabled = pageEndAya > currentAya
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("Page End", style = MaterialTheme.typography.labelSmall)
-                                    Text("~${currentSurah}:${pageEndAya}", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                                }
-                            }
-
-                            // Mark end of surah
-                            val surahEnd = getSurahAyaCount(currentSurah)
-                            OutlinedButton(
-                                onClick = {
-                                    onMarkAsRead(currentSurah, surahEnd)
-                                    showOptions = false
-                                },
-                                modifier = Modifier.weight(1f),
-                                contentPadding = PaddingValues(6.dp),
-                                enabled = surahEnd > currentAya
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("Surah End", style = MaterialTheme.typography.labelSmall)
-                                    Text("${currentSurah}:${surahEnd}", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        }
                     }
+                }
+
+                Text(
+                    text = if (currentSurah != khatam.currentSurah || currentAya != khatam.currentAya)
+                        "Last: ${khatam.currentSurah}:${khatam.currentAya} → Now: ${currentSurah}:${currentAya}"
+                    else
+                        "Position: ${khatam.currentSurah}:${khatam.currentAya}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            }
+
+            // Action Button
+            if (isUpdating) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(32.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                FilledIconButton(
+                    onClick = { onMarkAsRead(currentSurah, currentAya) },
+                    enabled = !alreadyLoggedToday && khatam.isActive,
+                    modifier = Modifier.size(36.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Icon(
+                        imageVector = if (alreadyLoggedToday)
+                            Icons.Default.Check
+                        else
+                            Icons.Default.BookmarkAdd,
+                        contentDescription = if (alreadyLoggedToday) "Already marked" else "Mark position",
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
         }
     }
 }
+
+// ==================== Previews ====================
+
+@Preview(showBackground = true)
+@Composable
+private fun KhatamProgressBarPreview_Active() {
+    MaterialTheme {
+        KhatamProgressBar(
+            khatam = KhatamSession(
+                id = 1,
+                name = "Ramadan Khatam",
+                startDate = "2024-03-10",
+                isActive = true,
+                currentSurah = 2,
+                currentAya = 142,
+                totalAyasRead = 289,
+                createdAt = "2024-03-10T08:00:00"
+            ),
+            currentSurah = 2,
+            currentAya = 150,
+            isUpdating = false,
+            alreadyLoggedToday = false,
+            onMarkAsRead = { _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun KhatamProgressBarPreview_AlreadyLogged() {
+    MaterialTheme {
+        KhatamProgressBar(
+            khatam = KhatamSession(
+                id = 1,
+                name = "Daily Reading",
+                startDate = "2024-01-01",
+                isActive = true,
+                currentSurah = 18,
+                currentAya = 45,
+                totalAyasRead = 2150,
+                createdAt = "2024-01-01T08:00:00"
+            ),
+            currentSurah = 18,
+            currentAya = 45,
+            isUpdating = false,
+            alreadyLoggedToday = true,
+            onMarkAsRead = { _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun KhatamProgressBarPreview_Paused() {
+    MaterialTheme {
+        KhatamProgressBar(
+            khatam = KhatamSession(
+                id = 2,
+                name = "Weekend Khatam",
+                startDate = "2024-02-15",
+                isActive = false,
+                currentSurah = 5,
+                currentAya = 30,
+                totalAyasRead = 750,
+                createdAt = "2024-02-15T10:00:00"
+            ),
+            currentSurah = 5,
+            currentAya = 30,
+            isUpdating = false,
+            alreadyLoggedToday = false,
+            onMarkAsRead = { _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun KhatamProgressBarPreview_Updating() {
+    MaterialTheme {
+        KhatamProgressBar(
+            khatam = KhatamSession(
+                id = 1,
+                name = "My Khatam",
+                startDate = "2024-03-01",
+                isActive = true,
+                currentSurah = 3,
+                currentAya = 100,
+                totalAyasRead = 450,
+                createdAt = "2024-03-01T08:00:00"
+            ),
+            currentSurah = 3,
+            currentAya = 110,
+            isUpdating = true,
+            alreadyLoggedToday = false,
+            onMarkAsRead = { _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun KhatamProgressBarPreview_DifferentPosition() {
+    MaterialTheme {
+        KhatamProgressBar(
+            khatam = KhatamSession(
+                id = 1,
+                name = "My Long Khatam Name Here",
+                startDate = "2024-03-10",
+                isActive = true,
+                currentSurah = 36,
+                currentAya = 12,
+                totalAyasRead = 3500,
+                createdAt = "2024-03-10T22:00:00"
+            ),
+            currentSurah = 36,
+            currentAya = 40,
+            isUpdating = false,
+            alreadyLoggedToday = false,
+            onMarkAsRead = { _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun KhatamProgressBarPreview_Dark() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        KhatamProgressBar(
+            khatam = KhatamSession(
+                id = 1,
+                name = "Night Reading",
+                startDate = "2024-03-10",
+                isActive = true,
+                currentSurah = 36,
+                currentAya = 12,
+                totalAyasRead = 3500,
+                createdAt = "2024-03-10T22:00:00"
+            ),
+            currentSurah = 36,
+            currentAya = 20,
+            isUpdating = false,
+            alreadyLoggedToday = false,
+            onMarkAsRead = { _, _ -> }
+        )
+    }
+}
+
 
 // Helper function to get surah aya count
 private fun getSurahAyaCount(surahNumber: Int): Int {

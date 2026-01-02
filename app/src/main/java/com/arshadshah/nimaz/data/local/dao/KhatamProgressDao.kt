@@ -11,6 +11,9 @@ interface KhatamProgressDao {
     @Query("SELECT * FROM khatam_progress WHERE khatamId = :khatamId AND dateRead = :date")
     suspend fun getProgressForDate(khatamId: Long, date: String): List<KhatamProgress>
 
+    @Query("SELECT * FROM khatam_progress WHERE khatamId = :khatamId AND dateRead < :date ORDER BY id DESC LIMIT 1")
+    suspend fun getLastProgressBeforeDate(khatamId: Long, date: String): KhatamProgress?
+
     @Query("SELECT COUNT(*) FROM khatam_progress WHERE khatamId = :khatamId AND dateRead = :date")
     suspend fun getAyasReadToday(khatamId: Long, date: String): Int
 

@@ -25,7 +25,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,10 +50,11 @@ fun <T> FeaturesDropDown(
     items: List<T>,
     label: String,
     showBadge: Boolean = true,
+    initiallyExpanded: Boolean = false,
     dropDownItem: @Composable (T) -> Unit,
     shape: CornerBasedShape = RoundedCornerShape(24.dp)
 ) {
-    val (isExpanded, setExpanded) = remember { mutableStateOf(false) }
+    val (isExpanded, setExpanded) = remember { mutableStateOf(initiallyExpanded) }
 
     val scale by animateFloatAsState(
         targetValue = 1f,
@@ -123,9 +126,14 @@ fun <T> FeaturesDropDown(
                             }
                         }
 
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(8.dp)
+                        OutlinedIconButton(
+                            onClick = { setExpanded(!isExpanded) },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = IconButtonDefaults.outlinedIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+
+                            )
                         ) {
                             Icon(
                                 imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,

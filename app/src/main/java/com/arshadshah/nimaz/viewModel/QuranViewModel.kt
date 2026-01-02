@@ -401,6 +401,9 @@ class QuranViewModel @Inject constructor(
 
         //get all notes
         object getNotes : AyaEvent()
+        
+        //get all reading progress
+        object GetReadingProgress : AyaEvent()
 
         //addAudioToAya
         class addAudioToAya(
@@ -508,6 +511,10 @@ class QuranViewModel @Inject constructor(
 
             is AyaEvent.getNotes -> {
                 getAllNotes()
+            }
+            
+            is AyaEvent.GetReadingProgress -> {
+                getAllReadingProgress()
             }
 
             is AyaEvent.addAudioToAya -> {

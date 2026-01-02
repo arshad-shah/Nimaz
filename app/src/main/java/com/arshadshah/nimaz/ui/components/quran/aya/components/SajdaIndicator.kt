@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,28 +19,38 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.arshadshah.nimaz.R
 
+/**
+ * Sajda indicator with popup info.
+ * Uses FilledTonalIconButton with tertiaryContainer.
+ */
 @Composable
 fun SajdaIndicator(
     sajdaType: String,
-    loading: Boolean
+    loading: Boolean,
+    modifier: Modifier = Modifier
 ) {
     var showSajdaInfo by remember { mutableStateOf(false) }
 
-    Box {
-        IconButton(
+    Box(modifier = modifier) {
+        FilledTonalIconButton(
             onClick = { showSajdaInfo = true },
-            enabled = !loading
+            enabled = !loading,
+            modifier = Modifier.size(36.dp),
+            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            )
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.sajad_icon),
                 contentDescription = "Sajda indicator",
                 tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
 
@@ -51,12 +63,14 @@ fun SajdaIndicator(
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    tonalElevation = 2.dp
+                    tonalElevation = 4.dp
                 ) {
                     Text(
-                        text = "$sajdaType sujood",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(8.dp)
+                        text = "$sajdaType Sujood",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                     )
                 }
             }

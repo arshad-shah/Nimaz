@@ -1,19 +1,18 @@
 package com.arshadshah.nimaz.ui.components.quran
 
-
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.quran.aya.components.AyatContent
@@ -24,6 +23,16 @@ import com.arshadshah.nimaz.utils.DisplaySettings
 import com.arshadshah.nimaz.viewModel.AudioState
 import com.arshadshah.nimaz.viewModel.AyatViewModel
 
+/**
+ * Individual Aya item card displayed in the Ayat list.
+ *
+ * Design System Alignment:
+ * - ElevatedCard with extraLarge shape
+ * - 4dp elevation
+ * - 8dp inner padding
+ * - 12dp section spacing
+ * - Contains: AyatFeatures (header), AyatContent (content), TafseerSection (action)
+ */
 @Composable
 fun AyaItem(
     aya: LocalAya,
@@ -31,32 +40,27 @@ fun AyaItem(
     audioState: AudioState,
     onTafseerClick: (Int, Int) -> Unit,
     onEvent: (AyatViewModel.AyatEvent) -> Unit,
-    loading: Boolean = false
+    loading: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
-    // Only create states for values that need to trigger UI updates
-    val scale by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
-    )
-
     if (aya.ayaNumberInSurah != 0) {
         ElevatedCard(
-            modifier = Modifier
-                .padding(8.dp)
+            modifier = modifier
                 .fillMaxWidth()
-                .scale(scale),
-            shape = RoundedCornerShape(24.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Features Section
+                // Header Section - Features/Actions
                 AyatFeatures(
                     aya = aya,
                     audioState = audioState,
@@ -64,29 +68,115 @@ fun AyaItem(
                     loading = loading
                 )
 
-                // Content Section
+                // Content Section - Arabic + Translation
                 AyatContent(
                     aya = aya,
                     displaySettings = displaySettings,
                     loading = loading
                 )
 
-                // Tafseer Section
-                if (aya.ayaNumberInSurah != 0) {
-                    TafseerSection(
-                        aya = aya,
-                        onOpenTafsir = onTafseerClick,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                }
+                // Action Section - Tafseer
+                TafseerSection(
+                    aya = aya,
+                    onOpenTafsir = onTafseerClick
+                )
             }
         }
     } else {
-        // Special Ayat
+        // Special Ayat (Bismillah)
         SpecialAyat(
             aya = aya,
             displaySettings = displaySettings,
-            loading = loading
+            loading = loading,
+            modifier = modifier
         )
+    }
+}
+
+// =============================================================================
+// PREVIEWS
+// =============================================================================
+
+private val previewAya = LocalAya(
+    ayaNumberInQuran = 1,
+    suraNumber = 1,
+    ayaNumberInSurah = 1,
+    ayaArabic = "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+    translationEnglish = "All praise is due to Allah, Lord of the worlds.",
+    translationUrdu = "سب تعریف اللہ کے لیے ہے جو تمام جہانوں کا پالنے والا ہے۔",
+    audioFileLocation = "",
+    sajda = false,
+    sajdaType = "",
+    bookmark = true,
+    favorite = false,
+    note = "Test note",
+    ruku = 1,
+    juzNumber = 1
+)
+
+private val previewBismillah = LocalAya(
+    ayaNumberInQuran = 0,
+    suraNumber = 1,
+    ayaNumberInSurah = 0,
+    ayaArabic = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    translationEnglish = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+    translationUrdu = "اللہ کے نام سے جو بہت مہربان نہایت رحم والا ہے۔",
+    audioFileLocation = "",
+    sajda = false,
+    sajdaType = "",
+    bookmark = false,
+    favorite = false,
+    note = "",
+    ruku = 1,
+    juzNumber = 1
+)
+
+@Preview(showBackground = true, backgroundColor = 0xFFF5F5F5)
+@Composable
+private fun AyaItemPreview() {
+    MaterialTheme {
+        AyaItem(
+            aya = previewAya,
+            displaySettings = DisplaySettings(translation = "English"),
+            audioState = AudioState(),
+            onTafseerClick = { _, _ -> },
+            onEvent = {},
+            loading = false,
+            modifier = Modifier.padding(8.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF5F5F5)
+@Composable
+private fun AyaItemPreview_Bismillah() {
+    MaterialTheme {
+        AyaItem(
+            aya = previewBismillah,
+            displaySettings = DisplaySettings(translation = "English"),
+            audioState = AudioState(),
+            onTafseerClick = { _, _ -> },
+            onEvent = {},
+            loading = false,
+            modifier = Modifier.padding(8.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun AyaItemPreview_Dark() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AyaItem(
+                aya = previewAya,
+                displaySettings = DisplaySettings(translation = "English"),
+                audioState = AudioState(),
+                onTafseerClick = { _, _ -> },
+                onEvent = {},
+                loading = false,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 }

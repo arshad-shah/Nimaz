@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.models.KhatamProgress
 import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.ReadingProgress
+import com.arshadshah.nimaz.utils.QuranUtils
 import javax.inject.Inject
 
 class QuranSystem @Inject constructor(
@@ -179,8 +180,28 @@ class QuranSystem @Inject constructor(
     suspend fun getProgressForKhatam(khatamId: Long) = khatamProgressDao.getProgressForKhatam(khatamId)
     suspend fun getProgressForDate(khatamId: Long, date: String) =
         khatamProgressDao.getProgressForDate(khatamId, date)
-    suspend fun getAyasReadToday(khatamId: Long, date: String) =
-        khatamProgressDao.getAyasReadToday(khatamId, date)
+    suspend fun getLastProgressBeforeDate(khatamId: Long, date: String) =
+        khatamProgressDao.getLastProgressBeforeDate(khatamId, date)
+    
+    suspend fun getAyasReadToday(khatamId: Long, date: String): Int {
+        // Calculate based on today's max progress - yesterday's last progress
+        val lastProgress = khatamProgressDao.getLastProgressBeforeDate(khatamId, date)
+        val startTotal = if (lastProgress != null) {
+            QuranUtils.calculateTotalAyasRead(lastProgress.surahNumber, lastProgress.ayaNumber)
+        } else {
+            0
+        }
+
+        val todayProgress = khatamProgressDao.getProgressForDate(khatamId, date)
+        if (todayProgress.isEmpty()) return 0
+
+        val maxToday = todayProgress.maxOf { 
+            QuranUtils.calculateTotalAyasRead(it.surahNumber, it.ayaNumber)
+        }
+        
+        return (maxToday - startTotal).coerceAtLeast(0)
+    }
+        
     suspend fun insertKhatamProgress(progress: KhatamProgress) =
         khatamProgressDao.insertProgress(progress)
     suspend fun deleteKhatamProgress(progress: KhatamProgress) =

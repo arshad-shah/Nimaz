@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.KhatamSession
@@ -37,10 +41,14 @@ import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.DropdownListItem
 import com.arshadshah.nimaz.ui.components.common.FeaturesDropDown
+import com.arshadshah.nimaz.ui.components.quran.ActiveKhatamCard
 import com.arshadshah.nimaz.ui.components.quran.CompactSurahCard
+import com.arshadshah.nimaz.ui.components.quran.ReadingProgressCard
 import com.arshadshah.nimaz.ui.components.tasbih.SwipeBackground
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QuranViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +91,7 @@ fun MyQuranScreen(
         handleEvents(QuranViewModel.AyaEvent.getBookmarks)
         handleEvents(QuranViewModel.AyaEvent.getFavorites)
         handleEvents(QuranViewModel.AyaEvent.getNotes)
+        handleEvents(QuranViewModel.AyaEvent.GetReadingProgress)
         // Refresh khatam data to ensure we have the latest state
         onKhatamEvent(QuranViewModel.AyaEvent.RefreshKhatamData)
     }
@@ -427,163 +436,6 @@ fun KhatamSection(
                 onEvent(QuranViewModel.AyaEvent.ShowDeleteKhatamDialog(false, null))
             }
         )
-    }
-}
-
-
-@Composable
-fun ActiveKhatamCard(
-    khatam: KhatamSession,
-    todayProgress: Int,
-    onContinueReading: () -> Unit,
-    onComplete: () -> Unit,
-    onPause: () -> Unit,
-    onResume: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit
-) {
-    val progress = khatam.totalAyasRead.toFloat() / 6236f
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Header with title and status
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = khatam.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Started: ${khatam.startDate}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-
-                Surface(
-                    color = if (khatam.isActive) Color.Green.copy(alpha = 0.2f) else Color.Yellow.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = if (khatam.isActive) "Active" else "Paused",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (khatam.isActive) Color.Green else Color(0xFFB8860B),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            // Progress info
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Surah ${khatam.currentSurah}, Aya ${khatam.currentAya}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "${(progress * 100).toInt()}% completed",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            // Progress bar
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-            )
-
-            khatam.dailyTarget?.let { target ->
-                Text(
-                    text = "Today: $todayProgress / $target ayas",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (todayProgress >= target) Color.Green else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-
-            // Action buttons row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (progress >= 0.99f) {
-                    // Nearly complete - show complete button
-                    OutlinedButton(
-                        onClick = onComplete,
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text("Complete", style = MaterialTheme.typography.labelSmall)
-                    }
-                } else {
-                    // Always show Continue Reading button
-                    OutlinedButton(
-                        onClick = onContinueReading,
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text("Continue", style = MaterialTheme.typography.labelSmall)
-                    }
-
-                    // Pause/Resume toggle
-                    OutlinedButton(
-                        onClick = if (khatam.isActive) onPause else onResume,
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            if (khatam.isActive) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            null,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            if (khatam.isActive) "Pause" else "Resume",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-
-                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(16.dp))
-                }
-
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        Icons.Default.Delete,
-                        "Delete",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -933,122 +785,6 @@ private fun ReadingProgressSection(
             )
         },
     )
-}
-
-// ============ CARD COMPONENTS ============
-
-@Composable
-private fun ReadingProgressCard(
-    progress: ReadingProgress,
-    surah: LocalSurah?,
-    onContinueReading: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = surah?.englishNameTranslation ?: "Surah ${progress.surahNumber}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Text(
-                        text = "Last read: Aya ${progress.lastReadAyaNumber}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-
-                    Text(
-                        text = "${progress.completionPercentage.toInt()}% completed",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        "Delete progress",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Progress bar
-            LinearProgressIndicator(
-                progress = { progress.completionPercentage / 100f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedButton(
-                onClick = onContinueReading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    Icons.Default.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Continue Reading")
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyStateContent(
-    icon: ImageVector,
-    title: String,
-    description: String
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(40.dp),
-            tint = MaterialTheme.colorScheme.outline
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            textAlign = TextAlign.Center
-        )
-    }
 }
 
 // ============ UPDATED DATA CLASSES ============

@@ -1,34 +1,37 @@
 package com.arshadshah.nimaz.ui.components.settings
 
+import android.content.res.Configuration
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,16 +39,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.theme.NimazTheme
 
+/**
+ * Theme option data class.
+ */
 data class ThemeOption(
     val themeName: String,
     val themeKey: String,
@@ -57,23 +61,30 @@ data class ThemeOption(
     val supportingText: String? = null
 )
 
+/**
+ * Enhanced theme selector with expandable cards.
+ *
+ * Design System Alignment:
+ * - Surface with surfaceVariant @ 0.5 alpha (or theme tinted when selected)
+ * - 16dp corners
+ * - 12dp padding
+ * - Icon container: 44dp with 10dp corners
+ * - Status indicator: 28dp with 8dp corners
+ */
 @Composable
 fun EnhancedThemeSelector(
     themeOptions: List<ThemeOption>,
     onThemeOptionSelected: (ThemeOption) -> Unit,
-    modifier: Modifier = Modifier,
-    title: String = "Theme"
+    modifier: Modifier = Modifier
 ) {
     var expandedCard by remember { mutableStateOf<String?>(null) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-
         themeOptions.forEach { themeOption ->
             ThemeListItem(
                 themeOption = themeOption,
@@ -88,6 +99,9 @@ fun EnhancedThemeSelector(
     }
 }
 
+/**
+ * Individual theme list item with expandable details.
+ */
 @Composable
 private fun ThemeListItem(
     themeOption: ThemeOption,
@@ -98,113 +112,129 @@ private fun ThemeListItem(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    val stripOpacity by animateFloatAsState(
-        targetValue = if (themeOption.isSelected) 1f else 0.3f,
-        animationSpec = tween(durationMillis = 200),
-        label = "stripOpacity"
-    )
-
     Surface(
-        color = if (themeOption.isSelected)
-            themeOption.themeColor.copy(alpha = 0.1f)
-        else
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        color = if (themeOption.isSelected) {
+            themeOption.themeColor.copy(alpha = 0.15f)
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        },
         shape = RoundedCornerShape(16.dp),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onItemClick()
+            }
     ) {
         Column {
+            // Main Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onItemClick()
-                    }
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Theme Color Circle
+                // Theme Color Container
                 Surface(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(10.dp),
                     color = themeOption.themeColor,
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(44.dp)
                 ) {
+                    // Empty - just shows the color
                 }
 
                 // Text Content
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = themeOption.themeName,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = if (themeOption.isSelected) "Active" else "Tap to expand",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = if (themeOption.isSelected) "Active theme" else "Tap to preview",
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                // Status indicator
-                if (themeOption.isSelected) {
-                    Surface(
-                        shape = CircleShape,
-                        color = themeOption.themeColor,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.check_icon), // Replace with check icon
-                            contentDescription = "Selected",
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .size(16.dp),
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                } else {
-                    // Navigation Arrow
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .size(16.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                // Status Indicator
+                AnimatedContent(
+                    targetState = themeOption.isSelected,
+                    transitionSpec = {
+                        fadeIn() + scaleIn() togetherWith fadeOut() + scaleOut()
+                    },
+                    label = "status_indicator"
+                ) { isSelected ->
+                    if (isSelected) {
+                        // Checkmark for selected
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = themeOption.themeColor,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = "Selected",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = themeOption.themeTextColor
+                                )
+                            }
+                        }
+                    } else {
+                        // Expand/collapse arrow
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = if (isExpanded)
+                                        Icons.Rounded.KeyboardArrowUp
+                                    else
+                                        Icons.Rounded.KeyboardArrowDown,
+                                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             }
 
-            // Expanded content with animation
+            // Expanded Content
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = fadeIn(animationSpec = tween(300)) +
-                        expandVertically(animationSpec = tween(300)),
-                exit = fadeOut(animationSpec = tween(200)) +
-                        shrinkVertically(animationSpec = tween(200))
+                enter = fadeIn(animationSpec = tween(200)) +
+                        expandVertically(animationSpec = tween(200)),
+                exit = fadeOut(animationSpec = tween(150)) +
+                        shrinkVertically(animationSpec = tween(150))
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.padding(
+                        start = 12.dp,
+                        end = 12.dp,
+                        bottom = 12.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Description
                     Surface(
-                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
                                 text = themeOption.description,
@@ -216,83 +246,120 @@ private fun ThemeListItem(
                                 Text(
                                     text = supportingText,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
                             }
                         }
                     }
 
-                    // Select button
+                    // Select Button
                     Button(
-                        onClick = { onSelectClick() },
-                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onSelectClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
                         enabled = !themeOption.isSelected,
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = themeOption.themeColor,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                            contentColor = themeOption.themeTextColor,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     ) {
                         Text(
-                            text = if (themeOption.isSelected) "Current Theme" else "Select Theme",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = themeOption.themeTextColor
+                            text = if (themeOption.isSelected) "Current Theme" else "Apply Theme",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
                 }
             }
-
-            // Animated color strip at bottom
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .size(4.dp)
-                    .background(themeOption.themeColor.copy(alpha = stripOpacity))
-            )
         }
     }
 }
 
-@Preview(showBackground = true)
+// =============================================================================
+// PREVIEWS
+// =============================================================================
+
+@Preview(showBackground = true, backgroundColor = 0xFFF5F5F5)
 @Composable
-fun EnhancedThemeSelectorPreview() {
-    NimazTheme {
+private fun EnhancedThemeSelectorPreview() {
+    MaterialTheme {
         val themeOptions = listOf(
             ThemeOption(
-                themeName = "Light",
-                themeKey = "light",
-                themeColor = Color(0xFFE0E0E0),
-                themeTextColor = Color(0xFF000000),
-                isSelected = false,
-                description = "A light theme with a white background and dark text.",
-                icon = R.drawable.rating_icon
+                themeName = "Forest Green",
+                themeKey = "default",
+                themeColor = Color(0xFF2E7D32),
+                themeTextColor = Color.White,
+                isSelected = true,
+                description = "A calming forest green theme inspired by nature's tranquility"
             ),
             ThemeOption(
-                themeName = "Dark",
-                themeKey = "dark",
-                themeColor = Color(0xFF121212),
-                themeTextColor = Color(0xFFFFFFFF),
-                isSelected = true,
-                description = "A dark theme with a black background and light text.",
-                icon = R.drawable.rating_icon
+                themeName = "Raisin Black",
+                themeKey = "raisin_black",
+                themeColor = Color(0xFF2D2D3A),
+                themeTextColor = Color.White,
+                isSelected = false,
+                description = "An elegant darker theme with sophisticated raisin black tones"
+            ),
+            ThemeOption(
+                themeName = "Burgundy",
+                themeKey = "dark_red",
+                themeColor = Color(0xFF800020),
+                themeTextColor = Color.White,
+                isSelected = false,
+                description = "Rich burgundy tones for a classic and timeless appearance"
             ),
             ThemeOption(
                 themeName = "System",
                 themeKey = "system",
-                themeColor = Color(0xFF2196F3),
-                themeTextColor = Color(0xFFFFFFFF),
+                themeColor = Color(0xFF6750A4),
+                themeTextColor = Color.White,
                 isSelected = false,
-                description = "A theme that follows the system settings.",
-                icon = R.drawable.rating_icon
+                description = "Automatically matches your system's theme preferences"
             )
         )
 
         EnhancedThemeSelector(
             themeOptions = themeOptions,
-            onThemeOptionSelected = { }
+            onThemeOptionSelected = {},
+            modifier = Modifier.padding(8.dp)
         )
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun EnhancedThemeSelectorPreview_Dark() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            val themeOptions = listOf(
+                ThemeOption(
+                    themeName = "Forest Green",
+                    themeKey = "default",
+                    themeColor = Color(0xFF81C784),
+                    themeTextColor = Color.Black,
+                    isSelected = false,
+                    description = "A calming forest green theme"
+                ),
+                ThemeOption(
+                    themeName = "Burgundy",
+                    themeKey = "dark_red",
+                    themeColor = Color(0xFFCF6679),
+                    themeTextColor = Color.Black,
+                    isSelected = true,
+                    description = "Rich burgundy tones"
+                )
+            )
+
+            EnhancedThemeSelector(
+                themeOptions = themeOptions,
+                onThemeOptionSelected = {},
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 }
