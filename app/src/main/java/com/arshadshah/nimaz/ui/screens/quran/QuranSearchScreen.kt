@@ -13,7 +13,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,16 +32,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardReturn
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -67,13 +69,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -109,6 +117,7 @@ fun QuranSearchScreen(
     var isSearchFocused by remember { mutableStateOf(false) }
     var showLanguageDropdown by remember { mutableStateOf(false) }
     var showFilters by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Search Bar Component
@@ -122,11 +131,26 @@ fun QuranSearchScreen(
             onSearchQueryChange = onSearchQueryChange,
             onSearchLanguageChange = onSearchLanguageChange,
             onSearchFiltersChange = onSearchFiltersChange,
-            onSearch = onSearch,
-            onAdvancedSearch = onAdvancedSearch,
-            onSearchInFavorites = onSearchInFavorites,
-            onSearchInBookmarks = onSearchInBookmarks,
-            onSearchInNotes = onSearchInNotes,
+            onSearch = {
+                onSearch(it)
+                focusManager.clearFocus()
+            },
+            onAdvancedSearch = {
+                onAdvancedSearch()
+                focusManager.clearFocus()
+            },
+            onSearchInFavorites = {
+                onSearchInFavorites(it)
+                focusManager.clearFocus()
+            },
+            onSearchInBookmarks = {
+                onSearchInBookmarks(it)
+                focusManager.clearFocus()
+            },
+            onSearchInNotes = {
+                onSearchInNotes(it)
+                focusManager.clearFocus()
+            },
             onClearSearch = onClearSearch,
             onSearchFocusChange = { isSearchFocused = it },
             onLanguageDropdownChange = { showLanguageDropdown = it },
@@ -167,28 +191,20 @@ private fun SearchBarCard(
     onLanguageDropdownChange: (Boolean) -> Unit,
     onFiltersToggle: () -> Unit
 ) {
-    ElevatedCard(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .scale(
-                animateFloatAsState(
-                    targetValue = if (isSearchFocused) 1.02f else 1f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    ),
-                    label = "searchScale"
-                ).value
-            ),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = if (isSearchFocused) 8.dp else 4.dp
-        )
+            .padding(bottom = 8.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 2.dp,
+        shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Main Search Input
             MainSearchInput(
@@ -199,17 +215,18 @@ private fun SearchBarCard(
                 onFocusChange = onSearchFocusChange
             )
 
-            // Filter Controls
-            FilterControlsRow(
+            // Filter Chips Row
+            FilterChipsRow(
                 searchLanguage = searchLanguage,
                 searchQuery = searchQuery,
-                showLanguageDropdown = showLanguageDropdown,
+                searchFilters = searchFilters,
                 onSearchLanguageChange = onSearchLanguageChange,
                 onSearchInFavorites = onSearchInFavorites,
                 onSearchInBookmarks = onSearchInBookmarks,
                 onSearchInNotes = onSearchInNotes,
                 onSearch = onSearch,
-                onLanguageDropdownChange = onLanguageDropdownChange,
+                onFiltersToggle = onFiltersToggle,
+                showFilters = showFilters
             )
 
             // Advanced Filters Panel
@@ -225,36 +242,6 @@ private fun SearchBarCard(
     }
 }
 
-@Preview
-@Composable
-fun SearchBarCardPreview() {
-    // Sample data for preview
-    val sampleSearchQuery = "Allah"
-    val sampleSearchLanguage = "Arabic"
-    val sampleSearchFilters = QuranViewModel.SearchFilters()
-
-    SearchBarCard(
-        searchQuery = sampleSearchQuery,
-        searchLanguage = sampleSearchLanguage,
-        searchFilters = sampleSearchFilters,
-        isSearchFocused = false,
-        showLanguageDropdown = false,
-        showFilters = false,
-        onSearchQueryChange = {},
-        onSearchLanguageChange = {},
-        onSearchFiltersChange = {},
-        onSearch = {},
-        onAdvancedSearch = {},
-        onSearchInFavorites = {},
-        onSearchInBookmarks = {},
-        onSearchInNotes = {},
-        onClearSearch = {},
-        onSearchFocusChange = {},
-        onLanguageDropdownChange = {},
-        onFiltersToggle = {}
-    )
-}
-
 @Composable
 private fun MainSearchInput(
     searchQuery: String,
@@ -263,40 +250,32 @@ private fun MainSearchInput(
     onClearSearch: () -> Unit,
     onFocusChange: (Boolean) -> Unit
 ) {
-    Row(
+    OutlinedTextField(
+        value = searchQuery,
+        onValueChange = onSearchQueryChange,
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = when {
-                    searchQuery.isNotEmpty() -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                },
-                shape = RoundedCornerShape(16.dp)
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChange,
-            modifier = Modifier
-                .weight(1f)
-                .onFocusChanged { onFocusChange(it.isFocused) },
-            placeholder = {
-                Text(
-                    "Search Quran...",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.Rounded.Search,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            trailingIcon = {
+            .onFocusChanged { onFocusChange(it.isFocused) },
+        placeholder = {
+            Text(
+                "Search in Quran...",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+        },
+        leadingIcon = {
+            Icon(
+                Icons.Rounded.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        trailingIcon = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(end = 8.dp)
+            ) {
                 AnimatedVisibility(
                     visible = searchQuery.isNotEmpty(),
                     enter = fadeIn() + scaleIn(),
@@ -304,7 +283,7 @@ private fun MainSearchInput(
                 ) {
                     IconButton(
                         onClick = onClearSearch,
-                        modifier = Modifier.scale(0.8f)
+                        modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
                             Icons.Rounded.Clear,
@@ -313,189 +292,180 @@ private fun MainSearchInput(
                         )
                     }
                 }
-            },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent
-            ),
-            shape = RoundedCornerShape(24.dp)
+                
+                if (searchQuery.isNotEmpty()) {
+                    FilledIconButton(
+                        onClick = { onSearch(searchQuery) },
+                        modifier = Modifier.size(36.dp),
+                        shape = CircleShape,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardReturn,
+                            contentDescription = "Search",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { onSearch(searchQuery) }),
+        shape = RoundedCornerShape(24.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         )
+    )
+}
 
-        FilledIconButton(
-            onClick = { onSearch(searchQuery) },
-            modifier = Modifier.scale(0.9f),
-            shape = CircleShape,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.KeyboardReturn,
-                contentDescription = "Search",
-                modifier = Modifier.size(20.dp)
+@Composable
+private fun FilterChipsRow(
+    searchLanguage: String,
+    searchQuery: String,
+    searchFilters: QuranViewModel.SearchFilters,
+    onSearchLanguageChange: (String) -> Unit,
+    onSearchInFavorites: (String) -> Unit,
+    onSearchInBookmarks: (String) -> Unit,
+    onSearchInNotes: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    onFiltersToggle: () -> Unit,
+    showFilters: Boolean
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        contentPadding = PaddingValues(horizontal = 2.dp)
+    ) {
+        // Advanced Filters Toggle
+        item {
+            FilterChip(
+                selected = showFilters || hasActiveFilters(searchFilters),
+                onClick = onFiltersToggle,
+                label = { Text("Filters") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Notes,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                trailingIcon = {
+                    if (hasActiveFilters(searchFilters)) {
+                        Icon(
+                            Icons.Rounded.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
             )
         }
-    }
-}
 
-@Composable
-private fun FilterControlsRow(
-    searchLanguage: String,
-    searchQuery: String,
-    showLanguageDropdown: Boolean,
-    onSearchLanguageChange: (String) -> Unit,
-    onSearchInFavorites: (String) -> Unit,
-    onSearchInBookmarks: (String) -> Unit,
-    onSearchInNotes: (String) -> Unit,
-    onSearch: (String) -> Unit,
-    onLanguageDropdownChange: (Boolean) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-            // Language Selector
-            LanguageSelector(
-                searchLanguage = searchLanguage,
-                searchQuery = searchQuery,
-                showLanguageDropdown = showLanguageDropdown,
-                onSearchLanguageChange = onSearchLanguageChange,
-                onSearchInFavorites = onSearchInFavorites,
-                onSearchInBookmarks = onSearchInBookmarks,
-                onSearchInNotes = onSearchInNotes,
-                onSearch = onSearch,
-                onLanguageDropdownChange = onLanguageDropdownChange
-            )
-
-
-
-            QuickAccessChips(
-                searchLanguage = searchLanguage,
-                searchQuery = searchQuery,
-                onSearchInFavorites = onSearchInFavorites,
-                onSearchInBookmarks = onSearchInBookmarks
-            )
-
-    }
-}
-
-@Composable
-private fun LanguageSelector(
-    searchLanguage: String,
-    searchQuery: String,
-    showLanguageDropdown: Boolean,
-    onSearchLanguageChange: (String) -> Unit,
-    onSearchInFavorites: (String) -> Unit,
-    onSearchInBookmarks: (String) -> Unit,
-    onSearchInNotes: (String) -> Unit,
-    onSearch: (String) -> Unit,
-    onLanguageDropdownChange: (Boolean) -> Unit
-) {
-    Box {
-        FilterChip(
-            onClick = { onLanguageDropdownChange(true) },
-            label = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Language,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(searchLanguage)
-                    Icon(
-                        Icons.Rounded.ExpandMore,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            },
-            selected = searchLanguage != "All",
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        )
-
-        DropdownMenu(
-            expanded = showLanguageDropdown,
-            onDismissRequest = { onLanguageDropdownChange(false) }
-        ) {
-            listOf("All", "Arabic", "English", "Urdu", "Favorites", "Bookmarks", "Notes").forEach { language ->
-                DropdownMenuItem(
-                    text = { Text(language) },
-                    onClick = {
-                        onSearchLanguageChange(language)
-                        onLanguageDropdownChange(false)
-                        if (searchQuery.isNotEmpty()) {
-                            when (language) {
-                                "Favorites" -> onSearchInFavorites(searchQuery)
-                                "Bookmarks" -> onSearchInBookmarks(searchQuery)
-                                "Notes" -> onSearchInNotes(searchQuery)
-                                else -> onSearch(searchQuery)
-                            }
-                        }
+        // Language Filter
+        item {
+            var expanded by remember { mutableStateOf(false) }
+            Box {
+                FilterChip(
+                    selected = searchLanguage !in listOf("All", "Favorites", "Bookmarks"),
+                    onClick = { expanded = true },
+                    label = { Text(if (searchLanguage in listOf("Favorites", "Bookmarks", "Notes")) "All" else searchLanguage) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Language,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 )
+                
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    listOf("All", "Arabic", "English", "Urdu").forEach { language ->
+                        DropdownMenuItem(
+                            text = { Text(language) },
+                            onClick = {
+                                onSearchLanguageChange(language)
+                                expanded = false
+                                if (searchQuery.isNotEmpty()) onSearch(searchQuery)
+                            }
+                        )
+                    }
+                }
             }
+        }
+
+        // Favorites Quick Access
+        item {
+            FilterChip(
+                selected = searchLanguage == "Favorites",
+                onClick = {
+                    val newLang = if (searchLanguage == "Favorites") "All" else "Favorites"
+                    onSearchLanguageChange(newLang)
+                    if (searchQuery.isNotEmpty()) {
+                        if (newLang == "Favorites") onSearchInFavorites(searchQuery) else onSearch(searchQuery)
+                    }
+                },
+                label = { Text("Favorites") },
+                leadingIcon = {
+                    Icon(
+                        if (searchLanguage == "Favorites") Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer,
+                    selectedLeadingIconColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            )
+        }
+
+        // Bookmarks Quick Access
+        item {
+            FilterChip(
+                selected = searchLanguage == "Bookmarks",
+                onClick = {
+                    val newLang = if (searchLanguage == "Bookmarks") "All" else "Bookmarks"
+                    onSearchLanguageChange(newLang)
+                    if (searchQuery.isNotEmpty()) {
+                        if (newLang == "Bookmarks") onSearchInBookmarks(searchQuery) else onSearch(searchQuery)
+                    }
+                },
+                label = { Text("Bookmarks") },
+                leadingIcon = {
+                    Icon(
+                        if (searchLanguage == "Bookmarks") Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
         }
     }
 }
 
-@Composable
-private fun QuickAccessChips(
-    searchLanguage: String,
-    searchQuery: String,
-    onSearchInFavorites: (String) -> Unit,
-    onSearchInBookmarks: (String) -> Unit
-) {
-        FilterChip(
-            onClick = {
-                if (searchQuery.isNotEmpty()) onSearchInFavorites(searchQuery)
-            },
-            label = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Favorite,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Favorites")
-                }
-            },
-            selected = searchLanguage == "Favorites",
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.errorContainer
-            )
-        )
-
-        FilterChip(
-            onClick = {
-                if (searchQuery.isNotEmpty()) onSearchInBookmarks(searchQuery)
-            },
-            label = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Bookmark,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Bookmarks")
-                }
-            },
-            selected = searchLanguage == "Bookmarks",
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
-        )
+private fun hasActiveFilters(filters: QuranViewModel.SearchFilters): Boolean {
+    return filters.surahNumber != null || 
+           filters.juzNumber != null || 
+           filters.isFavorite == true || 
+           filters.isBookmarked == true || 
+           filters.hasNote == true
 }
 
 @Composable
@@ -513,20 +483,18 @@ private fun AdvancedFiltersPanel(
         exit = fadeOut() + slideOutVertically()
     ) {
         Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    "Advanced Filters",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
+                    "Filter Results By:",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Row(
@@ -535,11 +503,8 @@ private fun AdvancedFiltersPanel(
                 ) {
                     FilterChip(
                         onClick = {
-                            onSearchFiltersChange(
-                                searchFilters.copy(
-                                    isFavorite = if (searchFilters.isFavorite == true) null else true
-                                )
-                            )
+                            val newValue = if (searchFilters.isFavorite == true) null else true
+                            onSearchFiltersChange(searchFilters.copy(isFavorite = newValue))
                             if (searchQuery.isNotEmpty()) onAdvancedSearch()
                         },
                         label = { Text("Favorites Only") },
@@ -549,52 +514,47 @@ private fun AdvancedFiltersPanel(
 
                     FilterChip(
                         onClick = {
-                            onSearchFiltersChange(
-                                searchFilters.copy(
-                                    isBookmarked = if (searchFilters.isBookmarked == true) null else true
-                                )
-                            )
+                            val newValue = if (searchFilters.isBookmarked == true) null else true
+                            onSearchFiltersChange(searchFilters.copy(isBookmarked = newValue))
                             if (searchQuery.isNotEmpty()) onAdvancedSearch()
                         },
-                        label = { Text("Bookmarked Only") },
+                        label = { Text("Bookmarked") },
                         selected = searchFilters.isBookmarked == true,
                         modifier = Modifier.weight(1f)
                     )
-
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     FilterChip(
                         onClick = {
-                            onSearchFiltersChange(
-                                searchFilters.copy(
-                                    hasNote = if (searchFilters.hasNote == true) null else true
-                                )
-                            )
+                            val newValue = if (searchFilters.hasNote == true) null else true
+                            onSearchFiltersChange(searchFilters.copy(hasNote = newValue))
                             if (searchQuery.isNotEmpty()) onAdvancedSearch()
                         },
-                        label = { Text("With Notes") },
+                        label = { Text("Has Notes") },
                         selected = searchFilters.hasNote == true,
                         modifier = Modifier.weight(1f)
                     )
+                    
+                    Spacer(modifier = Modifier.weight(1f))
                 }
 
-                if (searchFilters.surahNumber != null ||
-                    searchFilters.juzNumber != null ||
-                    searchFilters.isFavorite != null ||
-                    searchFilters.isBookmarked != null ||
-                    searchFilters.hasNote != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Text(
-                            "Clear Filters",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.clickable {
+                if (hasActiveFilters(searchFilters)) {
+                    Text(
+                        "Clear All Filters",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .clickable {
                                 onSearchFiltersChange(QuranViewModel.SearchFilters())
                                 if (searchQuery.isNotEmpty()) onSearch(searchQuery)
                             }
-                        )
-                    }
+                            .padding(4.dp)
+                    )
                 }
             }
         }
@@ -614,30 +574,19 @@ private fun SearchResultsSection(
     AnimatedContent(
         targetState = Triple(searchResults.isEmpty(), searchQuery.isNotEmpty(), isLoading),
         transitionSpec = {
-            fadeIn() + slideInVertically() togetherWith fadeOut() + slideOutVertically()
+            fadeIn() + slideInVertically { 20 } togetherWith fadeOut()
         },
         label = "contentTransition"
     ) { (isEmpty, hasQuery, loading) ->
         when {
-            loading -> {
-                LoadingState()
-            }
-
-            error.isNotEmpty() -> {
-                ErrorState(error = error)
-            }
-
-            isEmpty && hasQuery -> {
-                EmptyResultsState()
-            }
-
-            !hasQuery -> {
-                EmptySearchState()
-            }
-
+            loading -> LoadingState()
+            error.isNotEmpty() -> ErrorState(error = error)
+            isEmpty && hasQuery -> EmptyResultsState()
+            !hasQuery -> EmptySearchState()
             else -> {
                 SearchResultsList(
                     searchResults = searchResults,
+                    searchQuery = searchQuery,
                     onAyaClick = onAyaClick,
                     onBookmarkToggle = onBookmarkToggle,
                     onFavoriteToggle = onFavoriteToggle
@@ -653,7 +602,11 @@ private fun LoadingState() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text("Searching...")
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            androidx.compose.material3.CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Searching...", style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
@@ -666,7 +619,8 @@ private fun ErrorState(error: String) {
         Text(
             text = error,
             color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(16.dp)
         )
     }
 }
@@ -674,22 +628,23 @@ private fun ErrorState(error: String) {
 @Composable
 private fun EmptyResultsState() {
     NoResultFound(
-        title = "No Ayahs Found",
-        subtitle = "Try different search terms or change language filter"
+        title = "No Matches Found",
+        subtitle = "Try adjusting your search terms or filters"
     )
 }
 
 @Composable
 private fun EmptySearchState() {
     NoResultFound(
-        title = "Search the Holy Quran",
-        subtitle = "Search across Arabic text, translations, and your personal collection"
+        title = "Search the Quran",
+        subtitle = "Find Ayahs by Arabic text, translation, or keywords"
     )
 }
 
 @Composable
 private fun SearchResultsList(
     searchResults: List<LocalAya>,
+    searchQuery: String,
     onAyaClick: (LocalAya) -> Unit,
     onBookmarkToggle: (LocalAya) -> Unit,
     onFavoriteToggle: (LocalAya) -> Unit
@@ -702,9 +657,9 @@ private fun SearchResultsList(
         item {
             Text(
                 text = "${searchResults.size} result${if (searchResults.size != 1) "s" else ""} found",
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
             )
         }
 
@@ -714,6 +669,7 @@ private fun SearchResultsList(
         ) { aya ->
             AyaSearchCard(
                 aya = aya,
+                searchQuery = searchQuery,
                 onClick = { onAyaClick(aya) },
                 onBookmarkToggle = { onBookmarkToggle(aya) },
                 onFavoriteToggle = { onFavoriteToggle(aya) },
@@ -726,6 +682,7 @@ private fun SearchResultsList(
 @Composable
 private fun AyaSearchCard(
     aya: LocalAya,
+    searchQuery: String,
     onClick: () -> Unit,
     onBookmarkToggle: () -> Unit,
     onFavoriteToggle: () -> Unit,
@@ -734,138 +691,165 @@ private fun AyaSearchCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        onClick = onClick,
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Surah and Aya info
-            AyaCardHeader(
-                aya = aya,
-                onBookmarkToggle = onBookmarkToggle,
-                onFavoriteToggle = onFavoriteToggle
-            )
+            // Header with Surah info and actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Surah ${aya.suraNumber} : ${aya.ayaNumberInSurah}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Row {
+                    IconButton(
+                        onClick = onFavoriteToggle,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (aya.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = if (aya.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    IconButton(
+                        onClick = onBookmarkToggle,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (aya.bookmark) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                            contentDescription = "Bookmark",
+                            tint = if (aya.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Arabic Text
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Text(
+                    text = aya.ayaArabic.cleanTextFromBackslash(),
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFamily = utmaniQuranFont,
+                        lineHeight = 44.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Arabic Text
-            AyaArabicText(aya = aya)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // English Translation
-            AyaEnglishText(aya = aya)
-
-            // Show note if exists
-            AyaNoteSection(aya = aya)
-        }
-    }
-}
-
-@Composable
-private fun AyaCardHeader(
-    aya: LocalAya,
-    onBookmarkToggle: () -> Unit,
-    onFavoriteToggle: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            shape = RoundedCornerShape(12.dp)
-        ) {
+            // English Translation with Highlight
             Text(
-                text = "Surah ${aya.suraNumber} • Ayah ${aya.ayaNumberInSurah}",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-            )
-        }
-
-//        Row {
-//            IconButton(
-//                onClick = onBookmarkToggle,
-//                modifier = Modifier.scale(0.8f)
-//            ) {
-//                Icon(
-//                    imageVector = if (aya.bookmark) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-//                    contentDescription = "Toggle bookmark",
-//                    tint = if (aya.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-//                )
-//            }
-//
-//            IconButton(
-//                onClick = onFavoriteToggle,
-//                modifier = Modifier.scale(0.8f)
-//            ) {
-//                Icon(
-//                    imageVector = if (aya.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-//                    contentDescription = "Toggle favorite",
-//                    tint = if (aya.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-//                )
-//            }
-//        }
-    }
-}
-
-@Composable
-private fun AyaArabicText(aya: LocalAya) {
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Surface(
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(
-                text = aya.ayaArabic.cleanTextFromBackslash(),
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontFamily = utmaniQuranFont,
-                    fontSize = 24.sp,
-                    lineHeight = 40.sp,
-                    textAlign = TextAlign.Start
+                text = getHighlightedAnnotatedString(
+                    text = aya.translationEnglish.cleanTextFromBackslash(),
+                    query = searchQuery,
+                    color = MaterialTheme.colorScheme.primary
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                softWrap = true,
-                overflow = TextOverflow.Visible
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                lineHeight = 20.sp
             )
+
+            // Show Urdu Translation if searched or if it matches query
+            if (searchQuery.isNotEmpty() && aya.translationUrdu.contains(searchQuery, ignoreCase = true)) {
+                 Spacer(modifier = Modifier.height(8.dp))
+                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                     Text(
+                         text = getHighlightedAnnotatedString(
+                             text = aya.translationUrdu.cleanTextFromBackslash(),
+                             query = searchQuery,
+                             color = MaterialTheme.colorScheme.primary
+                         ),
+                         style = MaterialTheme.typography.bodyMedium,
+                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                         textAlign = TextAlign.Start,
+                         modifier = Modifier.fillMaxWidth()
+                     )
+                 }
+            }
+
+            // Note Section
+            if (aya.note.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier.padding(8.dp)) {
+                        Icon(
+                            Icons.Default.Notes,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(16.dp).padding(top = 2.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = getHighlightedAnnotatedString(
+                                text = aya.note,
+                                query = searchQuery,
+                                color = MaterialTheme.colorScheme.tertiary
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
-@Composable
-private fun AyaEnglishText(aya: LocalAya) {
-    Text(
-        text = aya.translationEnglish.cleanTextFromBackslash(),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis
-    )
-}
+fun getHighlightedAnnotatedString(text: String, query: String, color: Color): androidx.compose.ui.text.AnnotatedString {
+    if (query.isBlank()) return androidx.compose.ui.text.AnnotatedString(text)
 
-@Composable
-private fun AyaNoteSection(aya: LocalAya) {
-    if (aya.note.isNotEmpty()) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Surface(
-            color = MaterialTheme.colorScheme.tertiaryContainer,
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(
-                text = "Note: ${aya.note}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.padding(8.dp),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+    val lowerText = text.lowercase()
+    val lowerQuery = query.lowercase()
+    
+    val builder = androidx.compose.ui.text.AnnotatedString.Builder(text)
+    var startIndex = 0
+    
+    while (true) {
+        val index = lowerText.indexOf(lowerQuery, startIndex)
+        if (index == -1) break
+        
+        builder.addStyle(
+            style = SpanStyle(
+                background = color.copy(alpha = 0.2f),
+                fontWeight = FontWeight.Bold,
+                color = color.copy(alpha = 1f) // Make text color match highlight for visibility
+            ),
+            start = index,
+            end = index + query.length
+        )
+        startIndex = index + query.length
     }
+    
+    return builder.toAnnotatedString()
 }

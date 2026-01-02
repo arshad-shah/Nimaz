@@ -92,14 +92,14 @@ fun QuranBottomBar(
                 onClick = { showFontStyleDialog = true }
             )
 
-            // Page Mode Toggle Button
-            BottomBarItem(
-                icon = if (isPaginationMode) Icons.Default.ViewAgenda else Icons.Default.ViewStream,
-                label = if (isPaginationMode) "Page" else "Scroll",
-                contentDescription = "Toggle Pagination Mode",
-                onClick = onTogglePagination,
-                isActive = isPaginationMode
-            )
+//            // Page Mode Toggle Button
+//            BottomBarItem(
+//                icon = if (isPaginationMode) Icons.Default.ViewAgenda else Icons.Default.ViewStream,
+//                label = if (isPaginationMode) "Page" else "Scroll",
+//                contentDescription = "Toggle Pagination Mode",
+//                onClick = onTogglePagination,
+//                isActive = isPaginationMode
+//            )
         }
     }
 

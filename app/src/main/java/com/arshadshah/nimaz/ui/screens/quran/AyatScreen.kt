@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +36,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
@@ -54,6 +57,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -239,7 +243,7 @@ private fun AyatScreenContent(
                     // Navigation dialog - only for Surah view
                     if (isSurah && state.showNavigationPanel) {
                         QuranNavigationDialog(
-                            isVisible = state.showNavigationPanel,
+                            isVisible = true,
                             currentSurah = state.currentSurah?.number ?: 1,
                             currentAya = getCurrentAyaNumber(state),
                             totalAyas = state.totalAyasInSurah,
@@ -512,7 +516,7 @@ fun PageNavigationBar(
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
         )
     ) {
         Row(
@@ -522,20 +526,20 @@ fun PageNavigationBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Previous button
-            OutlinedButton(
+            IconButton(
                 onClick = onPreviousPage,
+                modifier = Modifier.size(width = 36.dp, height = 36.dp),
                 enabled = currentPage > 1,
-                modifier = Modifier.size(width = 90.dp, height = 36.dp),
-                contentPadding = PaddingValues(4.dp)
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             ) {
                 Icon(
                     Icons.Default.ChevronLeft,
                     contentDescription = "Previous Page",
                     modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(2.dp))
-                Text("Prev", style = MaterialTheme.typography.labelSmall)
             }
 
             // Page indicator (clickable to show jump dialog)
@@ -569,18 +573,20 @@ fun PageNavigationBar(
             }
 
             // Next button
-            OutlinedButton(
+
+            IconButton(
                 onClick = onNextPage,
+                modifier = Modifier.size(width = 36.dp, height = 36.dp),
                 enabled = currentPage < totalPages,
-                modifier = Modifier.size(width = 90.dp, height = 36.dp),
-                contentPadding = PaddingValues(4.dp)
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             ) {
-                Text("Next", style = MaterialTheme.typography.labelSmall)
-                Spacer(modifier = Modifier.width(2.dp))
                 Icon(
                     Icons.Default.ChevronRight,
                     contentDescription = "Next Page",
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -610,7 +616,7 @@ fun PageJumpDialog(
 ) {
     var pageInput by remember { mutableStateOf(currentPage.toString()) }
 
-    androidx.compose.material3.AlertDialog(
+    AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text("Jump to Page", style = MaterialTheme.typography.titleMedium)
@@ -628,8 +634,8 @@ fun PageJumpDialog(
                     value = pageInput,
                     onValueChange = { pageInput = it },
                     label = { Text("Page") },
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
                     ),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()

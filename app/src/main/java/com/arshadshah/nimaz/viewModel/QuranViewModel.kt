@@ -14,16 +14,19 @@ import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class QuranViewModel @Inject constructor(
     sharedPreferences: PrivateSharedPreferences,
@@ -56,7 +59,8 @@ class QuranViewModel @Inject constructor(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _searchResults = MutableStateFlow<List<LocalAya>>(emptyList())
-    val searchResults: StateFlow<List<LocalAya>> = _searchResults.asStateFlow()
+    // Remove the old simple StateFlow
+    // val searchResults: StateFlow<List<LocalAya>> = _searchResults.asStateFlow()
 
     private val _searchLanguage = MutableStateFlow("All") // All, Arabic, English, Urdu
     val searchLanguage: StateFlow<String> = _searchLanguage.asStateFlow()
@@ -64,17 +68,42 @@ class QuranViewModel @Inject constructor(
     private val _searchFilters = MutableStateFlow(SearchFilters())
     val searchFilters: StateFlow<SearchFilters> = _searchFilters.asStateFlow()
 
-    // Filtered search results based on query
-    val filteredSearchResults: StateFlow<List<LocalAya>> = combine(
-        _searchResults,
-        _searchQuery
-    ) { results, query ->
-        if (query.isBlank()) emptyList() else results
-    }.stateIn(
+    // Debounced search logic inside ViewModel
+    init {
+        // Observe search query changes and trigger search with debounce
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300) // 300ms debounce
+                .collect { query ->
+                    if (query.isNotBlank()) {
+                        searchAyasInternal(query)
+                    } else {
+                        _searchResults.value = emptyList()
+                    }
+                }
+        }
+        
+        // ... existing init code
+        _translation.value =
+            sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE, "English")
+        getSurahList()
+        getJuzList()
+        getAllBookmarks()
+        getAllFavorites()
+        getAllNotes()
+        getAllReadingProgress()
+        loadActiveKhatam()
+        loadKhatamHistory()
+        loadAllKhatams()
+    }
+    
+    // Expose searchResults using stateIn for UI consumption
+    val filteredSearchResults: StateFlow<List<LocalAya>> = _searchResults.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         emptyList()
     )
+
 
     data class KhatamState(
         val activeKhatam: KhatamSession? = null,
@@ -114,19 +143,7 @@ class QuranViewModel @Inject constructor(
         val hasNote: Boolean? = null
     )
 
-    init {
-        _translation.value =
-            sharedPreferences.getData(AppConstants.TRANSLATION_LANGUAGE, "English")
-        getSurahList()
-        getJuzList()
-        getAllBookmarks()
-        getAllFavorites()
-        getAllNotes()
-        getAllReadingProgress()
-        loadActiveKhatam()
-        loadKhatamHistory()
-        loadAllKhatams()
-    }
+    // ... [EXISTING FUNCTIONS UNCHANGED: getAllReadingProgress, deleteReadingProgress, clearAllReadingProgress, getSurahList, getJuzList]
 
     fun getAllReadingProgress() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -198,22 +215,35 @@ class QuranViewModel @Inject constructor(
     // NEW: Search functions
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
+        // Immediate clear if empty
+        if (query.isBlank()) {
+            _searchResults.value = emptyList()
+        }
     }
 
     fun setSearchLanguage(language: String) {
         _searchLanguage.value = language
+        // Trigger search again with new language if query exists
+        if (_searchQuery.value.isNotBlank()) {
+             searchAyasInternal(_searchQuery.value)
+        }
     }
 
     fun updateSearchFilters(filters: SearchFilters) {
         _searchFilters.value = filters
     }
-
-    fun searchAyas(query: String) {
-        if (query.isBlank()) {
-            clearSearch()
+    
+    // Internal function to perform the actual search logic
+    private fun searchAyasInternal(query: String) {
+        // If advanced filters are active, use that path
+        val filters = _searchFilters.value
+        if (filters.surahNumber != null || filters.juzNumber != null || 
+            filters.isFavorite == true || filters.isBookmarked == true || filters.hasNote == true) {
+            searchAyasAdvancedInternal(query, filters)
             return
         }
 
+        // Standard search
         viewModelScope.launch(Dispatchers.IO) {
             _loadingState.value = true
             _errorState.value = ""
@@ -222,6 +252,9 @@ class QuranViewModel @Inject constructor(
                     "Arabic" -> dataStore.searchAyasInArabic(query)
                     "English" -> dataStore.searchAyasInEnglish(query)
                     "Urdu" -> dataStore.searchAyasInUrdu(query)
+                    "Favorites" -> dataStore.searchFavoriteAyas(query)
+                    "Bookmarks" -> dataStore.searchBookmarkedAyas(query)
+                    "Notes" -> dataStore.searchAyasWithNotes(query)
                     else -> dataStore.searchAyas(query) // All languages
                 }
                 _searchResults.value = results
@@ -235,17 +268,9 @@ class QuranViewModel @Inject constructor(
             }
         }
     }
-
-    fun searchAyasAdvanced() {
-        val query = _searchQuery.value
-        val filters = _searchFilters.value
-
-        if (query.isBlank()) {
-            clearSearch()
-            return
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
+    
+    private fun searchAyasAdvancedInternal(query: String, filters: SearchFilters) {
+         viewModelScope.launch(Dispatchers.IO) {
             _loadingState.value = true
             _errorState.value = ""
             try {
@@ -269,58 +294,40 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    fun searchInFavorites(query: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _loadingState.value = true
-            _errorState.value = ""
-            try {
-                val results = dataStore.searchFavoriteAyas(query)
-                _searchResults.value = results
-                _loadingState.value = false
-                _errorState.value = ""
-            } catch (e: Exception) {
-                _searchResults.value = emptyList()
-                _loadingState.value = false
-                _errorState.value = e.message ?: "Favorites search failed"
-                Log.e("QuranViewModel", "Error searching favorites", e)
-            }
+    fun searchAyas(query: String) {
+        setSearchQuery(query)
+        // Manual search trigger (like pressing enter) overrides debounce
+        searchAyasInternal(query)
+    }
+
+    fun searchAyasAdvanced() {
+        val query = _searchQuery.value
+        val filters = _searchFilters.value
+
+        if (query.isBlank()) {
+            clearSearch()
+            return
         }
+        
+        searchAyasAdvancedInternal(query, filters)
+    }
+
+    fun searchInFavorites(query: String) {
+        setSearchQuery(query)
+        setSearchLanguage("Favorites")
+        // Trigger logic handled by setSearchLanguage -> searchAyasInternal
     }
 
     fun searchInBookmarks(query: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _loadingState.value = true
-            _errorState.value = ""
-            try {
-                val results = dataStore.searchBookmarkedAyas(query)
-                _searchResults.value = results
-                _loadingState.value = false
-                _errorState.value = ""
-            } catch (e: Exception) {
-                _searchResults.value = emptyList()
-                _loadingState.value = false
-                _errorState.value = e.message ?: "Bookmarks search failed"
-                Log.e("QuranViewModel", "Error searching bookmarks", e)
-            }
-        }
+        setSearchQuery(query)
+        setSearchLanguage("Bookmarks")
+        // Trigger logic handled by setSearchLanguage -> searchAyasInternal
     }
 
     fun searchInNotes(query: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _loadingState.value = true
-            _errorState.value = ""
-            try {
-                val results = dataStore.searchAyasWithNotes(query)
-                _searchResults.value = results
-                _loadingState.value = false
-                _errorState.value = ""
-            } catch (e: Exception) {
-                _searchResults.value = emptyList()
-                _loadingState.value = false
-                _errorState.value = e.message ?: "Notes search failed"
-                Log.e("QuranViewModel", "Error searching notes", e)
-            }
-        }
+        setSearchQuery(query)
+        setSearchLanguage("Notes")
+        // Trigger logic handled by setSearchLanguage -> searchAyasInternal
     }
 
     fun getRandomSearchResult(query: String) {
@@ -352,6 +359,8 @@ class QuranViewModel @Inject constructor(
         _searchQuery.value = ""
         _searchResults.value = emptyList()
         _searchFilters.value = SearchFilters()
+        _loadingState.value = false
+        _errorState.value = ""
     }
 
     //events to bookmark an aya, favorite an aya, add a note to an aya
@@ -539,18 +548,15 @@ class QuranViewModel @Inject constructor(
 
             // NEW: Handle search events
             is AyaEvent.SearchAyas -> {
-                setSearchQuery(ayaEvent.query)
                 searchAyas(ayaEvent.query)
             }
 
             is AyaEvent.SearchInLanguage -> {
                 setSearchLanguage(ayaEvent.language)
-                setSearchQuery(ayaEvent.query)
                 searchAyas(ayaEvent.query)
             }
 
             is AyaEvent.SearchWithFilters -> {
-                setSearchQuery(ayaEvent.query)
                 updateSearchFilters(ayaEvent.filters)
                 searchAyasAdvanced()
             }
@@ -827,8 +833,11 @@ class QuranViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 dataStore.bookmarkAya(ayaNumber, surahNumber, ayaNumberInSurah, bookmark)
-                // Refresh bookmarks list
-                getAllBookmarks()
+                
+                // CRITICAL FIX: Refresh the bookmarks list immediately
+                val updatedBookmarks = dataStore.getBookmarkedAyas()
+                _bookmarks.value = updatedBookmarks
+
                 // Update the current search results to reflect the change
                 if (_searchResults.value.isNotEmpty()) {
                     val updatedResults = _searchResults.value.map { aya ->
@@ -863,8 +872,11 @@ class QuranViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 dataStore.favoriteAya(ayaNumber, surahNumber, ayaNumberInSurah, favorite)
-                // Refresh favorites list
-                getAllFavorites()
+                
+                // CRITICAL FIX: Refresh the favorites list immediately
+                val updatedFavorites = dataStore.getFavoritedAyas()
+                _favorites.value = updatedFavorites
+                
                 // Update the current search results to reflect the change
                 if (_searchResults.value.isNotEmpty()) {
                     val updatedResults = _searchResults.value.map { aya ->
