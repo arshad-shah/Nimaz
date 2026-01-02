@@ -16,9 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Navigation
@@ -34,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -187,9 +192,22 @@ private fun AyatScreenContent(
                     Log.d("AyatScreen", "No active khatam - progress bar not shown")
                 }
 
+                // PAGE NAVIGATION CONTROLS (when in pagination mode)
+                if (state.isPaginationMode && state.totalPages > 0) {
+                    PageNavigationBar(
+                        currentPage = state.currentPage,
+                        totalPages = state.totalPages,
+                        onPreviousPage = { onEvent(AyatViewModel.AyatEvent.PreviousPage) },
+                        onNextPage = { onEvent(AyatViewModel.AyatEvent.NextPage) },
+                        onJumpToPage = { page -> onEvent(AyatViewModel.AyatEvent.JumpToPage(page)) }
+                    )
+                }
+
                 QuranBottomBar(
                     displaySettings = state.displaySettings,
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    isPaginationMode = state.isPaginationMode,
+                    onTogglePagination = { onEvent(AyatViewModel.AyatEvent.TogglePaginationMode) }
                 )
             }
         },
@@ -477,6 +495,194 @@ private fun getSurahAyaCount(surahNumber: Int): Int {
         5, 4, 5, 6                                        // 111-114
     )
     return if (surahNumber in 1..114) surahAyaCounts[surahNumber - 1] else 0
+}
+
+@Composable
+fun PageNavigationBar(
+    currentPage: Int,
+    totalPages: Int,
+    onPreviousPage: () -> Unit,
+    onNextPage: () -> Unit,
+    onJumpToPage: (Int) -> Unit
+) {
+    var showPageDialog by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Previous button
+            OutlinedButton(
+                onClick = onPreviousPage,
+                enabled = currentPage > 1,
+                modifier = Modifier.size(width = 90.dp, height = 36.dp),
+                contentPadding = PaddingValues(4.dp)
+            ) {
+                Icon(
+                    Icons.Default.ChevronLeft,
+                    contentDescription = "Previous Page",
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text("Prev", style = MaterialTheme.typography.labelSmall)
+            }
+
+            // Page indicator (clickable to show jump dialog)
+            Surface(
+                onClick = { showPageDialog = true },
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Page",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Text(
+                        text = "$currentPage",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Text(
+                        text = "/ $totalPages",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    )
+                }
+            }
+
+            // Next button
+            OutlinedButton(
+                onClick = onNextPage,
+                enabled = currentPage < totalPages,
+                modifier = Modifier.size(width = 90.dp, height = 36.dp),
+                contentPadding = PaddingValues(4.dp)
+            ) {
+                Text("Next", style = MaterialTheme.typography.labelSmall)
+                Spacer(modifier = Modifier.width(2.dp))
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = "Next Page",
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+
+    // Page jump dialog
+    if (showPageDialog) {
+        PageJumpDialog(
+            currentPage = currentPage,
+            totalPages = totalPages,
+            onDismiss = { showPageDialog = false },
+            onJumpToPage = { page ->
+                onJumpToPage(page)
+                showPageDialog = false
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PageJumpDialog(
+    currentPage: Int,
+    totalPages: Int,
+    onDismiss: () -> Unit,
+    onJumpToPage: (Int) -> Unit
+) {
+    var pageInput by remember { mutableStateOf(currentPage.toString()) }
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Jump to Page", style = MaterialTheme.typography.titleMedium)
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    "Enter page number (1-$totalPages):",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                OutlinedTextField(
+                    value = pageInput,
+                    onValueChange = { pageInput = it },
+                    label = { Text("Page") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Quick jump buttons
+                Text("Quick jump:", style = MaterialTheme.typography.labelMedium)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { pageInput = "1" },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(4.dp)
+                    ) {
+                        Text("First", style = MaterialTheme.typography.labelSmall)
+                    }
+                    OutlinedButton(
+                        onClick = { pageInput = (totalPages / 2).toString() },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(4.dp)
+                    ) {
+                        Text("Middle", style = MaterialTheme.typography.labelSmall)
+                    }
+                    OutlinedButton(
+                        onClick = { pageInput = totalPages.toString() },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(4.dp)
+                    ) {
+                        Text("Last", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    pageInput.toIntOrNull()?.let { page ->
+                        if (page in 1..totalPages) {
+                            onJumpToPage(page)
+                        }
+                    }
+                }
+            ) {
+                Text("Jump")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 // ============ FIXED AYAT LIST CONTAINER WITH DEBOUNCING ============

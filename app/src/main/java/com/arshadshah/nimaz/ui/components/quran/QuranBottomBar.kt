@@ -10,6 +10,8 @@ import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.ViewAgenda
+import androidx.compose.material.icons.filled.ViewStream
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,7 +36,9 @@ import com.arshadshah.nimaz.viewModel.AyatViewModel
 fun QuranBottomBar(
     displaySettings: DisplaySettings,
     onEvent: (AyatViewModel.AyatEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isPaginationMode: Boolean = false,
+    onTogglePagination: () -> Unit = {}
 ) {
     // Dialog visibility states
     var showTranslationDialog by remember { mutableStateOf(false) }
@@ -86,6 +90,15 @@ fun QuranBottomBar(
                 label = "Font Style",
                 contentDescription = "Arabic Font Style",
                 onClick = { showFontStyleDialog = true }
+            )
+
+            // Page Mode Toggle Button
+            BottomBarItem(
+                icon = if (isPaginationMode) Icons.Default.ViewAgenda else Icons.Default.ViewStream,
+                label = if (isPaginationMode) "Page" else "Scroll",
+                contentDescription = "Toggle Pagination Mode",
+                onClick = onTogglePagination,
+                isActive = isPaginationMode
             )
         }
     }
@@ -253,7 +266,8 @@ private fun BottomBarItem(
     icon: ImageVector,
     label: String,
     contentDescription: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isActive: Boolean = false
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -264,13 +278,13 @@ private fun BottomBarItem(
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
         }
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             maxLines = 1
         )
     }

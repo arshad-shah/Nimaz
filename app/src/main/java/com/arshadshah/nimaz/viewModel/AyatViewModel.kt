@@ -55,7 +55,13 @@ data class AyatState(
     val isKhatamMode: Boolean = false,
     val isUpdatingKhatam: Boolean = false,
     val khatamTodayAya: Int? = null,
-    val khatamTodaySurah: Int? = null
+    val khatamTodaySurah: Int? = null,
+
+    // Page navigation
+    val isPaginationMode: Boolean = false,
+    val currentPage: Int = 0,
+    val totalPages: Int = 0,
+    val ayasPerPage: Int = 15  // Average ayas per Mushaf page
 )
 
 data class AudioState(
@@ -124,6 +130,12 @@ class AyatViewModel @Inject constructor(
         object NavigateToNextSurah : AyatEvent()
         object NavigateToPreviousSurah : AyatEvent()
 
+        // Page navigation events
+        object TogglePaginationMode : AyatEvent()
+        object NextPage : AyatEvent()
+        object PreviousPage : AyatEvent()
+        data class JumpToPage(val page: Int) : AyatEvent()
+
         data class UpdateKhatamProgress(val surahNumber: Int, val ayaNumber: Int) : AyatEvent()
         object LoadActiveKhatam : AyatEvent()
     }
@@ -156,10 +168,19 @@ class AyatViewModel @Inject constructor(
             is AyatEvent.UpdateCurrentAyaIndex -> updateCurrentAyaIndex(event.index)
             is AyatEvent.NavigateToNextSurah -> navigateToNextSurah()
             is AyatEvent.NavigateToPreviousSurah -> navigateToPreviousSurah()
+
+            // Page navigation events
+            is AyatEvent.TogglePaginationMode -> togglePaginationMode()
+            is AyatEvent.NextPage -> nextPage()
+            is AyatEvent.PreviousPage -> previousPage()
+            is AyatEvent.JumpToPage -> jumpToPage(event.page)
+
             is AyatEvent.UpdateKhatamProgress -> updateKhatamProgress(event.surahNumber, event.ayaNumber)
             is AyatEvent.LoadActiveKhatam -> loadActiveKhatam()
         }
     }
+
+    // ============ KHATAM FUNCTIONS ============
 
     private fun loadActiveKhatam() {
         viewModelScope.launch(ioDispatcher) {
@@ -741,6 +762,74 @@ class AyatViewModel @Inject constructor(
             }
             currentState.copy(ayatList = updatedList)
         }
+    }
+
+    // ============ PAGE NAVIGATION FUNCTIONS ============
+
+    private fun togglePaginationMode() {
+        val newMode = !_state.value.isPaginationMode
+        _state.update {
+            it.copy(
+                isPaginationMode = newMode,
+                currentPage = if (newMode) calculateCurrentPage() else 0,
+                totalPages = if (newMode) calculateTotalPages() else 0
+            )
+        }
+        Log.d("AyatViewModel", "Pagination mode: $newMode, Current page: ${_state.value.currentPage}, Total pages: ${_state.value.totalPages}")
+    }
+
+    private fun calculateCurrentPage(): Int {
+        val currentIndex = _state.value.currentAyaIndex
+        val ayasPerPage = _state.value.ayasPerPage
+        return (currentIndex / ayasPerPage) + 1
+    }
+
+    private fun calculateTotalPages(): Int {
+        val totalAyas = _state.value.ayatList.size
+        val ayasPerPage = _state.value.ayasPerPage
+        return ((totalAyas + ayasPerPage - 1) / ayasPerPage).coerceAtLeast(1)
+    }
+
+    private fun nextPage() {
+        val currentPage = _state.value.currentPage
+        val totalPages = _state.value.totalPages
+
+        if (currentPage < totalPages) {
+            val newPage = currentPage + 1
+            jumpToPage(newPage)
+        } else {
+            // At last page, navigate to next surah
+            navigateToNextSurah()
+        }
+    }
+
+    private fun previousPage() {
+        val currentPage = _state.value.currentPage
+
+        if (currentPage > 1) {
+            val newPage = currentPage - 1
+            jumpToPage(newPage)
+        } else {
+            // At first page, navigate to previous surah
+            navigateToPreviousSurah()
+        }
+    }
+
+    private fun jumpToPage(page: Int) {
+        val totalPages = _state.value.totalPages
+        val validPage = page.coerceIn(1, totalPages)
+
+        val ayasPerPage = _state.value.ayasPerPage
+        val targetIndex = (validPage - 1) * ayasPerPage
+
+        _state.update {
+            it.copy(
+                currentPage = validPage,
+                currentAyaIndex = targetIndex
+            )
+        }
+
+        Log.d("AyatViewModel", "Jumped to page $validPage, index $targetIndex")
     }
 
     private fun updateAudioState(update: (AudioState) -> AudioState) {
