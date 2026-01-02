@@ -194,8 +194,11 @@ private fun AyatScreenContent(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onEvent(AyatViewModel.AyatEvent.ToggleNavigationPanel) }) {
-                Icon(imageVector = Icons.Default.Navigation, contentDescription = "Navigation")
+            // Only show navigation FAB for Surah view, not Juz
+            if (isSurah) {
+                FloatingActionButton(onClick = { onEvent(AyatViewModel.AyatEvent.ToggleNavigationPanel) }) {
+                    Icon(imageVector = Icons.Default.Navigation, contentDescription = "Quick Navigation")
+                }
             }
         }
     ) { padding ->
@@ -215,8 +218,8 @@ private fun AyatScreenContent(
                         },
                     )
 
-                    // Navigation dialog
-                    if (state.showNavigationPanel) {
+                    // Navigation dialog - only for Surah view
+                    if (isSurah && state.showNavigationPanel) {
                         QuranNavigationDialog(
                             isVisible = state.showNavigationPanel,
                             currentSurah = state.currentSurah?.number ?: 1,
