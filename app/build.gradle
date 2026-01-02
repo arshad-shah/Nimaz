@@ -29,6 +29,14 @@ android {
             useSupportLibrary true
         }
 
+        externalNativeBuild {
+            // For ndk-build, instead use the ndkBuild block.
+            cmake {
+                // Passes optional arguments to CMake.
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
+
         buildConfigField "String", "DO_ACCESS_KEY", "\"${getSecret("DO_ACCESS_KEY")}\""
         buildConfigField "String", "DO_SECRET_KEY", "\"${getSecret("DO_SECRET_KEY")}\""
         buildConfigField "String", "SPACE_NAME", "\"quran-audio\""
@@ -103,6 +111,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.androidx.ui.test.junit4.android
     implementation libs.androidx.ui.text.google.fonts
+    implementation libs.androidx.compose.foundation
     coreLibraryDesugaring libs.desugar.jdk.libs
     implementation libs.androidx.monitor
     implementation libs.androidx.junit.ktx

@@ -1,23 +1,58 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.distinctUntilChanged
+import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.constants.AppConstants.TAFSEER_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.LocalAya
@@ -26,12 +61,14 @@ import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.ui.components.quran.AyaItem
 import com.arshadshah.nimaz.ui.components.quran.QuranBottomBar
 import com.arshadshah.nimaz.ui.components.quran.SurahHeader
-import com.arshadshah.nimaz.ui.components.quran.aya.components.FloatingNavigationPanel
-import com.arshadshah.nimaz.ui.components.quran.aya.components.QuickJumpDialog
+import com.arshadshah.nimaz.ui.components.quran.aya.components.QuranNavigationDialog
 import com.arshadshah.nimaz.viewModel.AyatState
 import com.arshadshah.nimaz.viewModel.AyatViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun AyatScreen(
     number: String,
@@ -43,14 +80,21 @@ fun AyatScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    // Load ayat data and khatam data
     LaunchedEffect(number, isSurah) {
         viewModel.handleEvent(
             AyatViewModel.AyatEvent.LoadAyat(
                 number = number.toInt(),
-                isSurah = isSurah.toBoolean(),
-                language = language
+                isSurah = isSurah.toBoolean()
             )
         )
+    }
+
+    // Scroll to specific aya if provided
+    LaunchedEffect(scrollToAya) {
+        scrollToAya?.let { target ->
+            viewModel.handleEvent(AyatViewModel.AyatEvent.JumpToAya(target))
+        }
     }
 
     // Load navigation data when surah is loaded
@@ -60,9 +104,14 @@ fun AyatScreen(
         }
     }
 
+    // Debug: Log khatam state
+    LaunchedEffect(state.activeKhatam) {
+        Log.d("AyatScreen", "Active Khatam: ${state.activeKhatam?.name ?: "None"}")
+        Log.d("AyatScreen", "Is Khatam Mode: ${state.isKhatamMode}")
+    }
+
     AyatScreenContent(
         state = state,
-        scrollToAya = scrollToAya,
         isSurah = isSurah.toBoolean(),
         onNavigateBack = { navController.popBackStack() },
         onNavigateToTafsir = { ayaNumber, surahNumber ->
@@ -80,13 +129,11 @@ fun AyatScreen(
 @Composable
 private fun AyatScreenContent(
     state: AyatState,
-    scrollToAya: Int?,
     onNavigateBack: () -> Unit,
     isSurah: Boolean,
     onNavigateToTafsir: (Int, Int) -> Unit,
     onEvent: (AyatViewModel.AyatEvent) -> Unit
 ) {
-    var showQuickJumps by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -107,33 +154,48 @@ private fun AyatScreenContent(
             )
         },
         bottomBar = {
-            // ADD KHATAM PROGRESS BAR
-            state.activeKhatam?.let { khatam ->
-                KhatamProgressBar(
-                    khatam = khatam,
-                    currentSurah = state.currentSurah?.number ?: 1,
-                    currentAya = getCurrentAyaNumber(state),
-                    onMarkAsRead = { surah, aya ->
-                        onEvent(AyatViewModel.AyatEvent.UpdateKhatamProgress(surah, aya))
-                    }
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // ADD KHATAM PROGRESS BAR
+                state.activeKhatam?.let { khatam ->
+                    Log.d("AyatScreen", "Rendering Khatam Progress Bar for: ${khatam.name}")
+
+                    val currentSurahNumber = state.currentSurah?.number ?: 1
+                    val currentAyaNumber = getCurrentAyaNumber(state)
+
+                    // Check if today's progress already covers current position
+                    val todaySurah = state.khatamTodaySurah
+                    val todayAya = state.khatamTodayAya
+                    val alreadyLoggedToday = if (todaySurah != null && todayAya != null) {
+                        when {
+                            todaySurah > currentSurahNumber -> true
+                            todaySurah < currentSurahNumber -> false
+                            else -> todayAya >= currentAyaNumber
+                        }
+                    } else false
+
+                    KhatamProgressBar(
+                        khatam = khatam,
+                        currentSurah = currentSurahNumber,
+                        currentAya = currentAyaNumber,
+                        isUpdating = state.isUpdatingKhatam,
+                        alreadyLoggedToday = alreadyLoggedToday,
+                        onMarkAsRead = { surah, aya ->
+                            onEvent(AyatViewModel.AyatEvent.UpdateKhatamProgress(surah, aya))
+                        }
+                    )
+                } ?: run {
+                    Log.d("AyatScreen", "No active khatam - progress bar not shown")
+                }
+
+                QuranBottomBar(
+                    displaySettings = state.displaySettings,
+                    onEvent = onEvent
                 )
             }
-            QuranBottomBar(
-                displaySettings = state.displaySettings,
-                onEvent = onEvent
-            )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    onEvent(AyatViewModel.AyatEvent.ToggleNavigationPanel)
-                },
-                containerColor = MaterialTheme.colorScheme.primary,
-            ) {
-                Icon(
-                    Icons.Default.Navigation,
-                    contentDescription = "Quick Navigation"
-                )
+            FloatingActionButton(onClick = { onEvent(AyatViewModel.AyatEvent.ToggleNavigationPanel) }) {
+                Icon(imageVector = Icons.Default.Navigation, contentDescription = "Navigation")
             }
         }
     ) { padding ->
@@ -142,7 +204,7 @@ private fun AyatScreenContent(
             state.error != null -> PageErrorState(message = state.error)
             else -> {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // FIXED: Main content with debounced scroll tracking
+                    // Main content
                     AyatListContainer(
                         state = state,
                         contentPadding = padding,
@@ -150,41 +212,22 @@ private fun AyatScreenContent(
                         onEvent = onEvent,
                         onCurrentAyaChanged = { ayaIndex ->
                             onEvent(AyatViewModel.AyatEvent.UpdateCurrentAyaIndex(ayaIndex))
-                        }
+                        },
                     )
 
-                    // Navigation overlays
-                    FloatingNavigationPanel(
-                        isVisible = state.showNavigationPanel,
-                        currentSurah = state.currentSurah?.number ?: 1,
-                        currentAya = getCurrentAyaNumber(state),
-                        totalAyas = state.totalAyasInSurah,
-                        onDismiss = {
-                            onEvent(AyatViewModel.AyatEvent.ToggleNavigationPanel)
-                        },
-                        onJumpToAya = { ayaNumber ->
-                            onEvent(AyatViewModel.AyatEvent.JumpToAya(ayaNumber))
-                        },
-                        onShowBookmarks = { },
-                        onShowSearch = { },
-                        onShowQuickJumps = { showQuickJumps = true }
-                    )
-
-                    QuickJumpDialog(
-                        isVisible = showQuickJumps,
-                        quickJumps = state.quickJumps,
-                        onJump = { quickJump ->
-                            onEvent(AyatViewModel.AyatEvent.JumpToAya(quickJump.ayaNumberInSurah))
-                            showQuickJumps = false
-                        },
-                        onAddNew = { name ->
-                            onEvent(AyatViewModel.AyatEvent.AddQuickJump(name))
-                        },
-                        onDelete = { quickJump ->
-                            onEvent(AyatViewModel.AyatEvent.DeleteQuickJump(quickJump))
-                        },
-                        onDismiss = { showQuickJumps = false }
-                    )
+                    // Navigation dialog
+                    if (state.showNavigationPanel) {
+                        QuranNavigationDialog(
+                            isVisible = state.showNavigationPanel,
+                            currentSurah = state.currentSurah?.number ?: 1,
+                            currentAya = getCurrentAyaNumber(state),
+                            totalAyas = state.totalAyasInSurah,
+                            onDismiss = { onEvent(AyatViewModel.AyatEvent.ToggleNavigationPanel) },
+                            onJumpToAya = { onEvent(AyatViewModel.AyatEvent.JumpToAya(it)) },
+                            onNextSurah = { onEvent(AyatViewModel.AyatEvent.NavigateToNextSurah) },
+                            onPreviousSurah = { onEvent(AyatViewModel.AyatEvent.NavigateToPreviousSurah) }
+                        )
+                    }
                 }
             }
         }
@@ -196,50 +239,241 @@ fun KhatamProgressBar(
     khatam: KhatamSession,
     currentSurah: Int,
     currentAya: Int,
+    isUpdating: Boolean,
+    alreadyLoggedToday: Boolean,
     onMarkAsRead: (Int, Int) -> Unit
 ) {
+    var showOptions by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+            containerColor = if (khatam.isActive)
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+            else
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "📖 ${khatam.name}",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "${(khatam.totalAyasRead.toFloat() / 6236f * 100).toInt()}% Complete",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Main progress row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (khatam.isActive) "📖" else "⏸️",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = khatam.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${(khatam.totalAyasRead.toFloat() / 6236f * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        // Show last marked position
+                        Text(
+                            text = "• Last: ${khatam.currentSurah}:${khatam.currentAya}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f)
+                        )
+
+                        if (alreadyLoggedToday) {
+                            Text(
+                                text = "• ✓ Today",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    if (!khatam.isActive) {
+                        Text(
+                            text = "⏸️ Paused",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                        )
+                    }
+
+                    // Show current position if different from last marked
+                    if (currentSurah != khatam.currentSurah || currentAya != khatam.currentAya) {
+                        Text(
+                            text = "Now: ${currentSurah}:${currentAya}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    if (isUpdating) {
+                        CircularProgressIndicator(modifier = Modifier.size(32.dp), strokeWidth = 2.dp)
+                    } else {
+                        // Primary action button
+                        Button(
+                            onClick = { onMarkAsRead(currentSurah, currentAya) },
+                            modifier = Modifier.size(width = 110.dp, height = 32.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            enabled = !alreadyLoggedToday,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (alreadyLoggedToday)
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                if (alreadyLoggedToday) Icons.Default.Check else Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (alreadyLoggedToday) "Marked" else "Mark",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+
+                        // Options toggle button
+                        if (!alreadyLoggedToday) {
+                            OutlinedButton(
+                                onClick = { showOptions = !showOptions },
+                                modifier = Modifier.size(width = 110.dp, height = 28.dp),
+                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = if (showOptions) "Hide" else "Options",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                                Icon(
+                                    if (showOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
-            Button(
-                onClick = {
-                    onMarkAsRead(currentSurah, currentAya)
-                },
-                modifier = Modifier.size(width = 100.dp, height = 32.dp),
-                contentPadding = PaddingValues(4.dp)
-            ) {
-                Text(
-                    text = "Mark as Read",
-                    style = MaterialTheme.typography.bodySmall
-                )
+            // Expandable options
+            AnimatedVisibility(visible = showOptions && !isUpdating && !alreadyLoggedToday) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "Mark reading from last position (${khatam.currentSurah}:${khatam.currentAya}) to:",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            // Mark current aya
+                            OutlinedButton(
+                                onClick = {
+                                    onMarkAsRead(currentSurah, currentAya)
+                                    showOptions = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(6.dp)
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("This Aya", style = MaterialTheme.typography.labelSmall)
+                                    Text("${currentSurah}:${currentAya}", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            // Mark end of page (estimate ~15 ayas per page)
+                            val pageEndAya = (currentAya + 15).coerceAtMost(getSurahAyaCount(currentSurah))
+                            OutlinedButton(
+                                onClick = {
+                                    onMarkAsRead(currentSurah, pageEndAya)
+                                    showOptions = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(6.dp),
+                                enabled = pageEndAya > currentAya
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("Page End", style = MaterialTheme.typography.labelSmall)
+                                    Text("~${currentSurah}:${pageEndAya}", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            // Mark end of surah
+                            val surahEnd = getSurahAyaCount(currentSurah)
+                            OutlinedButton(
+                                onClick = {
+                                    onMarkAsRead(currentSurah, surahEnd)
+                                    showOptions = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(6.dp),
+                                enabled = surahEnd > currentAya
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("Surah End", style = MaterialTheme.typography.labelSmall)
+                                    Text("${currentSurah}:${surahEnd}", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+// Helper function to get surah aya count
+private fun getSurahAyaCount(surahNumber: Int): Int {
+    val surahAyaCounts = listOf(
+        7, 286, 200, 176, 120, 165, 206, 75, 129, 109,   // 1-10
+        123, 111, 43, 52, 99, 128, 111, 110, 98, 135,    // 11-20
+        112, 78, 118, 64, 77, 227, 93, 88, 69, 60,       // 21-30
+        34, 30, 73, 54, 45, 83, 182, 88, 75, 85,         // 31-40
+        54, 53, 89, 59, 37, 35, 38, 29, 18, 45,          // 41-50
+        60, 49, 62, 55, 78, 96, 29, 22, 24, 13,          // 51-60
+        14, 11, 11, 18, 12, 12, 30, 52, 52, 44,          // 61-70
+        28, 28, 20, 56, 40, 31, 50, 40, 46, 42,          // 71-80
+        29, 19, 36, 25, 22, 17, 19, 26, 30, 20,          // 81-90
+        15, 21, 11, 8, 8, 19, 5, 8, 8, 11,               // 91-100
+        11, 8, 3, 9, 5, 4, 7, 3, 6, 3,                   // 101-110
+        5, 4, 5, 6                                        // 111-114
+    )
+    return if (surahNumber in 1..114) surahAyaCounts[surahNumber - 1] else 0
 }
 
 // ============ FIXED AYAT LIST CONTAINER WITH DEBOUNCING ============
@@ -250,13 +484,14 @@ fun AyatListContainer(
     contentPadding: PaddingValues,
     onNavigateToTafsir: (Int, Int) -> Unit,
     onEvent: (AyatViewModel.AyatEvent) -> Unit,
-    onCurrentAyaChanged: (Int) -> Unit
+    onCurrentAyaChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
 
     // CRITICAL FIX: Track when we're in the middle of a programmatic jump
     var isJumping by remember { mutableStateOf(false) }
-    var lastProgrammaticIndex by remember { mutableStateOf(-1) }
+    var lastUpdateTime by remember { mutableStateOf(0L) }
 
     // FIXED: Debounced scroll tracking - ignores updates during jumps
     LaunchedEffect(listState) {
@@ -267,9 +502,24 @@ fun AyatListContainer(
             .collect { firstVisibleIndex ->
                 // CRITICAL: Only update if we're not in the middle of a programmatic jump
                 if (!isJumping && firstVisibleIndex >= 0 && firstVisibleIndex < state.ayatList.size) {
+                    val currentTime = System.currentTimeMillis()
+                    // Debounce: only update if at least 2 seconds have passed since last update
+                    if (currentTime - lastUpdateTime < 2000) {
+                        if (BuildConfig.DEBUG) {
+                            Log.d("ScrollTracking", "Debounced scroll event")
+                        }
+                        return@collect
+                    }
+
+                    lastUpdateTime = currentTime
                     val currentAya = state.ayatList[firstVisibleIndex]
 
-                    Log.d("ScrollTracking", "Organic scroll - Index: $firstVisibleIndex, Aya: ${currentAya.ayaNumberInSurah}")
+                    if (BuildConfig.DEBUG) {
+                        Log.d(
+                            "ScrollTracking",
+                            "Organic scroll - Index: $firstVisibleIndex, Aya: ${currentAya.ayaNumberInSurah}"
+                        )
+                    }
 
                     // Update the current index
                     onCurrentAyaChanged(firstVisibleIndex)
@@ -279,7 +529,12 @@ fun AyatListContainer(
                         onEvent(AyatViewModel.AyatEvent.UpdateReadingProgress(currentAya.ayaNumberInSurah))
                     }
                 } else if (isJumping) {
-                    Log.d("ScrollTracking", "Ignoring scroll event during jump - Index: $firstVisibleIndex")
+                    if (BuildConfig.DEBUG) {
+                        Log.d(
+                            "ScrollTracking",
+                            "Ignoring scroll event during jump - Index: $firstVisibleIndex"
+                        )
+                    }
                 }
             }
     }
@@ -287,18 +542,22 @@ fun AyatListContainer(
     // FIXED: Handle programmatic scrolling with proper debouncing
     LaunchedEffect(state.currentAyaIndex) {
         if (state.currentAyaIndex >= 0 &&
-            state.currentAyaIndex < state.ayatList.size &&
-            state.currentAyaIndex != lastProgrammaticIndex) {
+            state.currentAyaIndex < state.ayatList.size
+        ) {
 
             val visibleRange = listState.layoutInfo.visibleItemsInfo
             val isCurrentItemVisible = visibleRange.any { it.index == state.currentAyaIndex }
 
             if (!isCurrentItemVisible) {
-                Log.d("ScrollTracking", "Starting programmatic scroll to index: ${state.currentAyaIndex}")
+                if (BuildConfig.DEBUG) {
+                    Log.d(
+                        "ScrollTracking",
+                        "Starting programmatic scroll to index: ${state.currentAyaIndex}"
+                    )
+                }
 
                 // Set jumping flag to prevent interference
                 isJumping = true
-                lastProgrammaticIndex = state.currentAyaIndex
 
                 try {
                     listState.animateScrollToItem(state.currentAyaIndex)
@@ -306,7 +565,12 @@ fun AyatListContainer(
                     // CRITICAL: Wait for scroll animation to complete before re-enabling tracking
                     delay(800) // Give enough time for scroll animation
 
-                    Log.d("ScrollTracking", "Programmatic scroll completed to index: ${state.currentAyaIndex}")
+                    if (BuildConfig.DEBUG) {
+                        Log.d(
+                            "ScrollTracking",
+                            "Programmatic scroll completed to index: ${state.currentAyaIndex}"
+                        )
+                    }
                 } finally {
                     // Re-enable scroll tracking
                     isJumping = false
@@ -318,16 +582,16 @@ fun AyatListContainer(
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             state = listState,
+            modifier = modifier,
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             itemsIndexed(
                 items = state.ayatList,
-                key = { index, aya -> aya.ayaNumberInQuran }
-            ) { index, aya ->
-                Log.d("AyatScreen", "Rendering aya: ${aya.ayaNumberInQuran} at index $index")
+                key = { _, aya -> aya.ayaNumberInQuran }
+            ) { _, aya ->
+
                 if (isSpecialAya(aya)) {
-                    Log.d("AyatScreen", "Skipping special aya: ${aya.ayaNumberInQuran}")
                     onEvent(AyatViewModel.AyatEvent.GetSurahById(aya.suraNumber))
                     SurahHeader(surah = state.currentSurah!!)
                 }
@@ -356,7 +620,8 @@ private fun isSpecialAya(aya: LocalAya): Boolean {
 private fun getCurrentAyaNumber(state: AyatState): Int {
     return if (state.ayatList.isNotEmpty() &&
         state.currentAyaIndex >= 0 &&
-        state.currentAyaIndex < state.ayatList.size) {
+        state.currentAyaIndex < state.ayatList.size
+    ) {
 
         val currentAya = state.ayatList[state.currentAyaIndex]
 

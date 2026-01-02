@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,8 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,7 +33,6 @@ import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalSurah
-import com.arshadshah.nimaz.data.local.models.QuickJump
 import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.DropdownListItem
@@ -45,17 +52,17 @@ fun MyQuranScreen(
 
     // ADD THESE NEW PARAMETERS:
     readingProgress: State<List<ReadingProgress>>,
-    quickJumps: State<List<QuickJump>>,
 
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
     handleEvents: (QuranViewModel.AyaEvent) -> Unit,
 
     // ADD THESE NEW CALLBACKS:
-    onDeleteQuickJump: (QuickJump) -> Unit,
     onDeleteReadingProgress: (ReadingProgress) -> Unit,
     onClearAllProgress: () -> Unit,
     khatamState: State<QuranViewModel.KhatamState>,
     onKhatamEvent: (QuranViewModel.AyaEvent) -> Unit,
+    onNavigateToStartKhatam: () -> Unit,
+    onNavigateToEditKhatam: (Long) -> Unit,
 
     isLoading: State<Boolean>,
 ) {
@@ -71,16 +78,18 @@ fun MyQuranScreen(
     var dialogState by remember { mutableStateOf<DialogState?>(null) }
     var showClearProgressDialog by remember { mutableStateOf(false) }
 
+    // Refresh all data when screen becomes visible
     LaunchedEffect(Unit) {
         handleEvents(QuranViewModel.AyaEvent.getBookmarks)
         handleEvents(QuranViewModel.AyaEvent.getFavorites)
         handleEvents(QuranViewModel.AyaEvent.getNotes)
+        // Refresh khatam data to ensure we have the latest state
+        onKhatamEvent(QuranViewModel.AyaEvent.RefreshKhatamData)
     }
 
     // UPDATED: Add new sections for reading progress and quick jumps
     val sections = listOf(
         SectionData("Continue Reading", emptyList(), DeleteType.READING_PROGRESS),
-        SectionData("Quick Jumps", emptyList(), DeleteType.QUICK_JUMP),
         SectionData("Bookmarks", bookmarks.value, DeleteType.BOOKMARK),
         SectionData("Favorites", favorites.value, DeleteType.FAVORITE),
         SectionData("Notes", notes.value, DeleteType.NOTE)
@@ -95,6 +104,8 @@ fun MyQuranScreen(
                 khatamState = khatamState.value,
                 onEvent = onKhatamEvent,
                 onNavigateToAyatScreen = onNavigateToAyatScreen,
+                onNavigateToStartKhatam = onNavigateToStartKhatam,
+                onNavigateToEditKhatam = onNavigateToEditKhatam,
                 translation = translation
             )
         }
@@ -110,19 +121,8 @@ fun MyQuranScreen(
             )
         }
 
-        // QUICK JUMPS SECTION
-        item {
-            QuickJumpsSection(
-                quickJumps = quickJumps.value,
-                suraList = suraList.value,
-                onNavigateToAyatScreen = onNavigateToAyatScreen,
-                onDeleteQuickJump = onDeleteQuickJump,
-                translation = translation
-            )
-        }
-
         // EXISTING SECTIONS (Bookmarks, Favorites, Notes)
-        items(sections.drop(2)) { section ->
+        items(sections.drop(1)) { section ->
             FeaturesDropDown(
                 modifier = Modifier.padding(4.dp),
                 label = section.title,
@@ -253,17 +253,6 @@ fun MyQuranScreen(
             contentDescription = "Clear all reading progress"
         )
     }
-
-    if (khatamState.value.showKhatamDialog) {
-        StartKhatamDialog(
-            onDismiss = { onKhatamEvent(QuranViewModel.AyaEvent.ShowKhatamDialog(false)) },
-            onStartKhatam = { name, targetDate, dailyTarget ->
-                onKhatamEvent(
-                    QuranViewModel.AyaEvent.StartNewKhatam(name, targetDate, dailyTarget)
-                )
-            }
-        )
-    }
 }
 
 @Composable
@@ -271,72 +260,176 @@ fun KhatamSection(
     khatamState: QuranViewModel.KhatamState,
     onEvent: (QuranViewModel.AyaEvent) -> Unit,
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
+    onNavigateToStartKhatam: () -> Unit,
+    onNavigateToEditKhatam: (Long) -> Unit,
     translation: String
 ) {
-    Card(
+    var isExpanded by remember { mutableStateOf(true) }
+
+    ElevatedCard(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .padding(8.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Quran Khatam",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
+            // Header Section - matching FeaturesDropDown style
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isExpanded = !isExpanded }
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Quran Khatam",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
 
-            khatamState.activeKhatam?.let { khatam ->
-                ActiveKhatamCard(
-                    khatam = khatam,
-                    todayProgress = khatamState.todayProgress,
-                    onContinueReading = {
-                        onNavigateToAyatScreen(
-                            khatam.currentSurah.toString(),
-                            true,
-                            translation,
-                            khatam.currentAya
-                        )
-                    },
-                    onComplete = {
-                        onEvent(QuranViewModel.AyaEvent.CompleteKhatam(khatam.id))
-                    },
-                    onPause = {
-                        onEvent(QuranViewModel.AyaEvent.PauseKhatam(khatam.id))
-                    },
-                    onResume = {
-                        onEvent(QuranViewModel.AyaEvent.ResumeKhatam(khatam.id))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Badge showing active/count
+                        if (khatamState.activeKhatam != null || khatamState.allKhatams.isNotEmpty()) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = if (khatamState.activeKhatam != null) "Active" else "${khatamState.allKhatams.size}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = if (isExpanded) "Collapse" else "Expand",
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(20.dp)
+                            )
+                        }
                     }
-                )
-            } ?: run {
-                // No active khatam - show start button
-                StartNewKhatamCard(
-                    onStartNew = {
-                        onEvent(QuranViewModel.AyaEvent.ShowKhatamDialog(true))
-                    }
-                )
+                }
             }
 
-            // Show completed khatams if any
-            if (khatamState.khatamHistory.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Completed Khatams",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+            // Content Section
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        khatamState.activeKhatam?.let { khatam ->
+                            ActiveKhatamCard(
+                                khatam = khatam,
+                                todayProgress = khatamState.todayProgress,
+                                onContinueReading = {
+                                    onNavigateToAyatScreen(
+                                        khatam.currentSurah.toString(),
+                                        true,
+                                        translation,
+                                        khatam.currentAya
+                                    )
+                                },
+                                onComplete = {
+                                    onEvent(QuranViewModel.AyaEvent.CompleteKhatam(khatam.id))
+                                },
+                                onPause = {
+                                    onEvent(QuranViewModel.AyaEvent.PauseKhatam(khatam.id))
+                                },
+                                onResume = {
+                                    onEvent(QuranViewModel.AyaEvent.ResumeKhatam(khatam.id))
+                                },
+                                onEdit = {
+                                    onNavigateToEditKhatam(khatam.id)
+                                },
+                                onDelete = {
+                                    onEvent(QuranViewModel.AyaEvent.ShowDeleteKhatamDialog(true, khatam))
+                                }
+                            )
+                        } ?: run {
+                            // No active khatam - show start button
+                            StartNewKhatamCard(
+                                onStartNew = onNavigateToStartKhatam
+                            )
+                        }
 
-                khatamState.khatamHistory.take(3).forEach { khatam ->
-                    CompletedKhatamItem(khatam = khatam)
+                        // Show completed khatams if any
+                        if (khatamState.khatamHistory.isNotEmpty()) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                            Text(
+                                text = "Completed (${khatamState.khatamHistory.size})",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            khatamState.khatamHistory.take(3).forEach { khatam ->
+                                CompletedKhatamItem(
+                                    khatam = khatam,
+                                    onDelete = {
+                                        onEvent(QuranViewModel.AyaEvent.ShowDeleteKhatamDialog(true, khatam))
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+
+
+    // Delete Confirmation Dialog
+    if (khatamState.showDeleteDialog && khatamState.editingKhatam != null) {
+        DeleteKhatamConfirmDialog(
+            khatam = khatamState.editingKhatam,
+            onDismiss = { onEvent(QuranViewModel.AyaEvent.ShowDeleteKhatamDialog(false, null)) },
+            onConfirm = {
+                onEvent(QuranViewModel.AyaEvent.DeleteKhatam(khatamState.editingKhatam.id))
+                onEvent(QuranViewModel.AyaEvent.ShowDeleteKhatamDialog(false, null))
+            }
+        )
+    }
 }
+
 
 @Composable
 fun ActiveKhatamCard(
@@ -345,107 +438,308 @@ fun ActiveKhatamCard(
     onContinueReading: () -> Unit,
     onComplete: () -> Unit,
     onPause: () -> Unit,
-    onResume: () -> Unit
+    onResume: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val progress = khatam.totalAyasRead.toFloat() / 6236f
 
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Header with title and status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = khatam.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = khatam.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Started: ${khatam.startDate}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
 
-                Badge(
-                    containerColor = if (khatam.isActive) Color.Green else Color.Yellow
+                Surface(
+                    color = if (khatam.isActive) Color.Green.copy(alpha = 0.2f) else Color.Yellow.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = if (khatam.isActive) "Active" else "Paused",
-                        color = Color.White
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (khatam.isActive) Color.Green else Color(0xFFB8860B),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // Progress info
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "Surah ${khatam.currentSurah}, Aya ${khatam.currentAya}",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "${(progress * 100).toInt()}% Complete",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    text = "${(progress * 100).toInt()}% completed",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
+            // Progress bar
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+            )
+
             khatam.dailyTarget?.let { target ->
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Today: $todayProgress / $target ayas",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (todayProgress >= target) Color.Green else MaterialTheme.colorScheme.onPrimaryContainer
+                    color = if (todayProgress >= target) Color.Green else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
+            // Action buttons row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 if (progress >= 0.99f) {
-                    Button(
+                    // Nearly complete - show complete button
+                    OutlinedButton(
                         onClick = onComplete,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        Text("Complete Khatam")
+                        Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("Complete", style = MaterialTheme.typography.labelSmall)
                     }
                 } else {
-                    if (khatam.isActive) {
-                        OutlinedButton(
-                            onClick = onPause,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Pause")
-                        }
-                    } else {
-                        Button(
-                            onClick = onResume,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Resume")
-                        }
+                    // Always show Continue Reading button
+                    OutlinedButton(
+                        onClick = onContinueReading,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("Continue", style = MaterialTheme.typography.labelSmall)
                     }
 
-                    Button(
-                        onClick = onContinueReading,
-                        modifier = Modifier.weight(1f)
+                    // Pause/Resume toggle
+                    OutlinedButton(
+                        onClick = if (khatam.isActive) onPause else onResume,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        Text("Continue Reading")
+                        Icon(
+                            if (khatam.isActive) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            null,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            if (khatam.isActive) "Pause" else "Resume",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+
+                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(16.dp))
+                }
+
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        Icons.Default.Delete,
+                        "Delete",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun KhatamListItem(
+    khatam: KhatamSession,
+    onContinue: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onPause: () -> Unit,
+    onResume: () -> Unit
+) {
+    val progress = khatam.totalAyasRead.toFloat() / 6236f
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header with title and status
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = khatam.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Started: ${khatam.startDate}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                    if (khatam.isCompleted && khatam.completionDate != null) {
+                        Text(
+                            text = "Completed: ${khatam.completionDate}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Green
+                        )
+                    }
+                }
+
+                Surface(
+                    color = when {
+                        khatam.isCompleted -> Color.Green.copy(alpha = 0.2f)
+                        khatam.isActive -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        else -> Color.Yellow.copy(alpha = 0.2f)
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = when {
+                            khatam.isCompleted -> "✓"
+                            khatam.isActive -> "Active"
+                            else -> "Paused"
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = when {
+                            khatam.isCompleted -> Color.Green
+                            khatam.isActive -> MaterialTheme.colorScheme.primary
+                            else -> Color(0xFFB8860B)
+                        },
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            if (!khatam.isCompleted) {
+                // Progress info
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Surah ${khatam.currentSurah}, Aya ${khatam.currentAya}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "${(progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Progress bar
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                )
+
+                // Action buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = if (khatam.isActive) onPause else onResume,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            if (khatam.isActive) "Pause" else "Resume",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = onContinue,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("Read", style = MaterialTheme.typography.labelSmall)
+                    }
+
+                    IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(16.dp))
+                    }
+
+                    IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Default.Delete,
+                            "Delete",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            } else {
+                // For completed khatams, only show edit/delete buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(16.dp))
+                    }
+                    IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Default.Delete,
+                            "Delete",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 }
             }
@@ -457,162 +751,151 @@ fun ActiveKhatamCard(
 fun StartNewKhatamCard(
     onStartNew: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onStartNew() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Start New Khatam",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = "Begin tracking your complete Quran reading journey",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(24.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Start New Khatam",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "Begin your Quran reading journey",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = "Start",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(20.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
 fun CompletedKhatamItem(
-    khatam: KhatamSession
+    khatam: KhatamSession,
+    onDelete: () -> Unit = {}
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(8.dp)
     ) {
-        Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            tint = Color.Green,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = khatam.name,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = khatam.completionDate ?: "",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = Color.Green,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = khatam.name,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = khatam.completionDate ?: "",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
+                Icon(
+                    Icons.Default.Delete,
+                    "Delete",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
     }
 }
 
-@Composable
-fun StartKhatamDialog(
-    onDismiss: () -> Unit,
-    onStartKhatam: (String, String?, Int?) -> Unit
-) {
-    var name by remember { mutableStateOf("") }
-    var hasTargetDate by remember { mutableStateOf(false) }
-    var targetDate by remember { mutableStateOf("") }
-    var hasDailyTarget by remember { mutableStateOf(false) }
-    var dailyTarget by remember { mutableStateOf("") }
 
-    AlertDialog(
+@Composable
+fun DeleteKhatamConfirmDialog(
+    khatam: KhatamSession,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialogNimaz(
+        title = "Delete Khatam",
+        contentDescription = "Delete Khatam Confirmation",
         onDismissRequest = onDismiss,
-        title = { Text("Start New Khatam") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Khatam Name") },
-                    placeholder = { Text("e.g., Ramadan Khatam 2025") },
+        contentHeight = 180.dp,
+        confirmButtonText = "Delete",
+        dismissButtonText = "Cancel",
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+        contentToShow = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+
+                Text(
+                    text = "Are you sure you want to delete \"${khatam.name}\"?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = hasTargetDate,
-                        onCheckedChange = { hasTargetDate = it }
-                    )
-                    Text("Set target completion date")
-                }
-
-                if (hasTargetDate) {
-                    OutlinedTextField(
-                        value = targetDate,
-                        onValueChange = { targetDate = it },
-                        label = { Text("Target Date") },
-                        placeholder = { Text("YYYY-MM-DD") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = hasDailyTarget,
-                        onCheckedChange = { hasDailyTarget = it }
-                    )
-                    Text("Set daily aya target")
-                }
-
-                if (hasDailyTarget) {
-                    OutlinedTextField(
-                        value = dailyTarget,
-                        onValueChange = { dailyTarget = it },
-                        label = { Text("Daily Target") },
-                        placeholder = { Text("e.g., 20 ayas per day") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    if (name.isNotBlank()) {
-                        onStartKhatam(
-                            name,
-                            if (hasTargetDate && targetDate.isNotBlank()) targetDate else null,
-                            if (hasDailyTarget && dailyTarget.isNotBlank()) dailyTarget.toIntOrNull() else null
-                        )
-                        onDismiss()
-                    }
-                }
-            ) {
-                Text("Start Khatam")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(
+                    text = "This will permanently delete this Khatam and all its progress data. This action cannot be undone.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     )
@@ -647,37 +930,6 @@ private fun ReadingProgressSection(
                     )
                 },
                 onDelete = { onDeleteProgress(progress) }
-            )
-        },
-    )
-}
-
-@Composable
-private fun QuickJumpsSection(
-    quickJumps: List<QuickJump>,
-    suraList: List<LocalSurah>,
-    onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
-    onDeleteQuickJump: (QuickJump) -> Unit,
-    translation: String
-) {
-    FeaturesDropDown(
-        modifier = Modifier.padding(4.dp),
-        label = "Quick Jumps",
-        items = quickJumps,
-        showBadge = true,
-        dropDownItem = { quickJump ->
-            QuickJumpCard(
-                quickJump = quickJump,
-                surah = suraList.find { it.number == quickJump.surahNumber },
-                onJumpTo = {
-                    onNavigateToAyatScreen(
-                        quickJump.surahNumber.toString(),
-                        true,
-                        translation,
-                        quickJump.ayaNumberInSurah
-                    )
-                },
-                onDelete = { onDeleteQuickJump(quickJump) }
             )
         },
     )
@@ -740,7 +992,7 @@ private fun ReadingProgressCard(
 
             // Progress bar
             LinearProgressIndicator(
-                progress = progress.completionPercentage / 100f,
+                progress = { progress.completionPercentage / 100f },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(4.dp)
@@ -766,88 +1018,8 @@ private fun ReadingProgressCard(
 }
 
 @Composable
-private fun QuickJumpCard(
-    quickJump: QuickJump,
-    surah: LocalSurah?,
-    onJumpTo: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Color indicator
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .background(
-                        try {
-                            Color(android.graphics.Color.parseColor(quickJump.color))
-                        } catch (e: Exception) {
-                            MaterialTheme.colorScheme.primary
-                        },
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = quickJump.name.take(1).uppercase(),
-                    color = Color.White,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = quickJump.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Text(
-                    text = "${surah?.englishNameTranslation ?: "Surah ${quickJump.surahNumber}"}, Aya ${quickJump.ayaNumberInSurah}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-
-            // Actions
-            Row {
-                IconButton(onClick = onJumpTo) {
-                    Icon(
-                        Icons.Default.PlayArrow,
-                        "Jump to position",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        "Delete",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun EmptyStateContent(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     description: String
 ) {
@@ -889,7 +1061,7 @@ private data class SectionData(
 
 // UPDATED: Add new delete types
 private enum class DeleteType {
-    BOOKMARK, FAVORITE, NOTE, READING_PROGRESS, QUICK_JUMP
+    BOOKMARK, FAVORITE, NOTE, READING_PROGRESS
 }
 
 private data class DialogState(

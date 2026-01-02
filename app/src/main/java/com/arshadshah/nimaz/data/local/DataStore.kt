@@ -12,7 +12,6 @@ import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
-import com.arshadshah.nimaz.data.local.models.QuickJump
 import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.data.local.systems.DuaSystem
 import com.arshadshah.nimaz.data.local.systems.HadithSystem
@@ -252,19 +251,6 @@ class DataStore @Inject constructor(
     //getAllProgressOrderedByCompletion
     suspend fun getAllProgressOrderedByCompletion() =
         quranSystem.getAllProgressOrderedByCompletion()
-
-    // Quick Jump Operations
-    suspend fun getAllQuickJumps() =
-        quranSystem.getAllQuickJumps()
-
-    suspend fun getQuickJumpsForSurah(surahNumber: Int) =
-        quranSystem.getQuickJumpsForSurah(surahNumber)
-
-    suspend fun insertQuickJump(quickJump: QuickJump) =
-        quranSystem.insertQuickJump(quickJump)
-
-    suspend fun deleteQuickJump(quickJump: QuickJump) =
-        quranSystem.deleteQuickJump(quickJump)
 
     // Navigation helpers
     suspend fun getBookmarkedAyaNumbers(surahNumber: Int) =

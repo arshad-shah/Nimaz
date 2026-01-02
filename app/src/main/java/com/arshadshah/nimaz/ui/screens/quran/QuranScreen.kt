@@ -29,6 +29,8 @@ import com.arshadshah.nimaz.viewModel.QuranViewModel
 @Composable
 fun QuranScreen(
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
+    onNavigateToStartKhatam: () -> Unit,
+    onNavigateToEditKhatam: (Long) -> Unit,
     navController: NavHostController,
     viewModel: QuranViewModel = hiltViewModel()
 ) {
@@ -40,7 +42,22 @@ fun QuranScreen(
             JuzContent(viewModel, onNavigateToAyatScreen)
         },
         QuranPage("My Quran") {
-            MyQuranContent(viewModel, onNavigateToAyatScreen)
+            MyQuranScreen(
+                bookmarks = viewModel.bookmarks.collectAsState(),
+                favorites = viewModel.favorites.collectAsState(),
+                notes = viewModel.notes.collectAsState(),
+                suraList = viewModel.surahListState.collectAsState(),
+                readingProgress = viewModel.readingProgress.collectAsState(),
+                khatamState = viewModel.khatamState.collectAsState(), // ADD THIS
+                onNavigateToAyatScreen = onNavigateToAyatScreen,
+                handleEvents = viewModel::handleAyaEvent,
+                onKhatamEvent = viewModel::handleAyaEvent, // ADD THIS
+                onDeleteReadingProgress = viewModel::deleteReadingProgress,
+                onClearAllProgress = viewModel::clearAllReadingProgress,
+                onNavigateToStartKhatam = onNavigateToStartKhatam,
+                onNavigateToEditKhatam = onNavigateToEditKhatam,
+                isLoading = viewModel.loadingState.collectAsState()
+            )
         },
         QuranPage("Search") {
             SearchContent(viewModel, onAyaClick = {
@@ -128,34 +145,6 @@ private fun JuzContent(
         state = juzListState,
         loading = isLoading.value,
         error = error.value
-    )
-}
-
-@Composable
-private fun MyQuranContent(
-    viewModel: QuranViewModel,
-    onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit
-) {
-    val isLoading = viewModel.loadingState.collectAsState()
-    val readingProgress = viewModel.readingProgress.collectAsState()
-    val quickJumps = viewModel.quickJumps.collectAsState()
-    val khatamState = viewModel.khatamState.collectAsState() // ADD THIS
-
-    MyQuranScreen(
-        bookmarks = viewModel.bookmarks.collectAsState(),
-        favorites = viewModel.favorites.collectAsState(),
-        notes = viewModel.notes.collectAsState(),
-        suraList = viewModel.surahListState.collectAsState(),
-        readingProgress = readingProgress,
-        quickJumps = quickJumps,
-        khatamState = khatamState, // ADD THIS
-        onNavigateToAyatScreen = onNavigateToAyatScreen,
-        handleEvents = viewModel::handleAyaEvent,
-        onKhatamEvent = viewModel::handleAyaEvent, // ADD THIS
-        onDeleteQuickJump = viewModel::deleteQuickJump,
-        onDeleteReadingProgress = viewModel::deleteReadingProgress,
-        onClearAllProgress = viewModel::clearAllReadingProgress,
-        isLoading = isLoading
     )
 }
 

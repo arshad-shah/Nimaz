@@ -14,7 +14,6 @@ import com.arshadshah.nimaz.data.local.dao.KhatamProgressDao
 import com.arshadshah.nimaz.data.local.dao.KhatamSessionDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTimesDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
-import com.arshadshah.nimaz.data.local.dao.QuickJumpDao
 import com.arshadshah.nimaz.data.local.dao.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.dao.TafsirDao
@@ -35,10 +34,9 @@ import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.data.local.models.Tafsir
 import com.arshadshah.nimaz.data.local.models.TafsirEdition
-import com.arshadshah.nimaz.data.local.models.QuickJump
-import com.arshadshah.nimaz.data.local.models.ReadingProgress
 
 @Database(
     entities = [
@@ -58,7 +56,6 @@ import com.arshadshah.nimaz.data.local.models.ReadingProgress
         Tafsir::class,
         TafsirEdition::class,
         ReadingProgress::class,
-        QuickJump::class,
         KhatamSession::class,
         KhatamProgress::class
     ],
@@ -96,7 +93,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val tafsirEditionDao: TafsirEditionDao
 
     abstract val readingProgressDao: ReadingProgressDao
-    abstract val quickJumpDao: QuickJumpDao
 
     abstract val khatamProgressDao: KhatamProgressDao
     abstract val khatamSessionDao: KhatamSessionDao

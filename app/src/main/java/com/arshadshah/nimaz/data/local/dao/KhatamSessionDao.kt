@@ -4,7 +4,7 @@ import com.arshadshah.nimaz.data.local.models.KhatamSession
 
 @Dao
 interface KhatamSessionDao {
-    @Query("SELECT * FROM khatam_sessions WHERE isActive = 1 ORDER BY startDate DESC LIMIT 1")
+    @Query("SELECT * FROM khatam_sessions WHERE isCompleted = 0 ORDER BY startDate DESC LIMIT 1")
     suspend fun getActiveKhatam(): KhatamSession?
 
     @Query("SELECT * FROM khatam_sessions ORDER BY startDate DESC")

@@ -79,13 +79,13 @@ class PrayerTimesRepository @Inject constructor(
             )
 
             // Timezone adjustment logic
-            val isDayLightSaving = ZoneId.systemDefault().rules.isDaylightSavings(Instant.now())
             val timezoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
             val timezoneOffsetHours = timezoneOffset.totalSeconds / 3600
             val isPositive = timezoneOffsetHours > 0
             val isNegative = timezoneOffsetHours < 0
 
-            if (isDayLightSaving && isPositive) {
+
+            if (isPositive) {
                 prayerTime.apply {
                     fajr = fajr?.plusHours(timezoneOffsetHours.toLong())
                     sunrise = sunrise?.plusHours(timezoneOffsetHours.toLong())
@@ -94,7 +94,7 @@ class PrayerTimesRepository @Inject constructor(
                     maghrib = maghrib?.plusHours(timezoneOffsetHours.toLong())
                     isha = isha?.plusHours(timezoneOffsetHours.toLong())
                 }
-            } else if (isDayLightSaving && isNegative) {
+            } else if (isNegative) {
                 prayerTime.apply {
                     fajr = fajr?.minusHours((-timezoneOffsetHours).toLong())
                     sunrise = sunrise?.minusHours((-timezoneOffsetHours).toLong())

@@ -9,7 +9,6 @@ import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalJuz
 import com.arshadshah.nimaz.data.local.models.LocalSurah
-import com.arshadshah.nimaz.data.local.models.QuickJump
 import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.repositories.SpacesFileRepository
 import com.arshadshah.nimaz.utils.DisplaySettings
@@ -26,6 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 // ============ STATE CLASSES ============
@@ -44,7 +45,6 @@ data class AyatState(
     // Navigation-related states
     val showNavigationPanel: Boolean = false,
     val readingProgress: ReadingProgress? = null,
-    val quickJumps: List<QuickJump> = emptyList(),
     val currentAyaIndex: Int = 0,
     val bookmarkedAyasInSurah: List<Int> = emptyList(),
     val favoriteAyasInSurah: List<Int> = emptyList(),
@@ -52,7 +52,10 @@ data class AyatState(
     val totalAyasInSurah: Int = 0,
 
     val activeKhatam: KhatamSession? = null,
-    val isKhatamMode: Boolean = false
+    val isKhatamMode: Boolean = false,
+    val isUpdatingKhatam: Boolean = false,
+    val khatamTodayAya: Int? = null,
+    val khatamTodaySurah: Int? = null
 )
 
 data class AudioState(
@@ -71,11 +74,10 @@ class AyatViewModel @Inject constructor(
     private val dataStore: DataStore,
     private val spaceFilesRepository: SpacesFileRepository,
     private val preferences: PrivateSharedPreferences,
-    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
-    private val viewModelScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
+    private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _state = MutableStateFlow(AyatState())
     val state = _state.asStateFlow()
@@ -98,7 +100,7 @@ class AyatViewModel @Inject constructor(
 
     sealed class AyatEvent {
         // Existing events
-        data class LoadAyat(val number: Int, val isSurah: Boolean, val language: String) : AyatEvent()
+        data class LoadAyat(val number: Int, val isSurah: Boolean) : AyatEvent()
         data class UpdateDisplaySettings(val settings: DisplaySettings) : AyatEvent()
         data class ToggleBookmark(val aya: LocalAya) : AyatEvent()
         data class ToggleFavorite(val aya: LocalAya) : AyatEvent()
@@ -114,13 +116,13 @@ class AyatViewModel @Inject constructor(
         // Navigation events
         object ToggleNavigationPanel : AyatEvent()
         data class JumpToAya(val ayaNumber: Int) : AyatEvent()
-        data class AddQuickJump(val name: String) : AyatEvent()
-        data class DeleteQuickJump(val quickJump: QuickJump) : AyatEvent()
         object LoadNavigationData : AyatEvent()
         data class UpdateReadingProgress(val ayaNumber: Int) : AyatEvent()
         object NavigatePrevious : AyatEvent()
         object NavigateNext : AyatEvent()
         data class UpdateCurrentAyaIndex(val index: Int) : AyatEvent()
+        object NavigateToNextSurah : AyatEvent()
+        object NavigateToPreviousSurah : AyatEvent()
 
         data class UpdateKhatamProgress(val surahNumber: Int, val ayaNumber: Int) : AyatEvent()
         object LoadActiveKhatam : AyatEvent()
@@ -131,7 +133,7 @@ class AyatViewModel @Inject constructor(
     fun handleEvent(event: AyatEvent) {
         when (event) {
             // Existing events
-            is AyatEvent.LoadAyat -> loadAyat(event.number, event.isSurah, event.language)
+            is AyatEvent.LoadAyat -> loadAyat(event.number, event.isSurah)
             is AyatEvent.UpdateDisplaySettings -> updateDisplaySettings(event.settings)
             is AyatEvent.ToggleBookmark -> toggleBookmark(event.aya)
             is AyatEvent.ToggleFavorite -> toggleFavorite(event.aya)
@@ -147,13 +149,13 @@ class AyatViewModel @Inject constructor(
             // Navigation events
             is AyatEvent.ToggleNavigationPanel -> toggleNavigationPanel()
             is AyatEvent.JumpToAya -> jumpToAya(event.ayaNumber)
-            is AyatEvent.AddQuickJump -> addQuickJump(event.name)
-            is AyatEvent.DeleteQuickJump -> deleteQuickJump(event.quickJump)
             is AyatEvent.LoadNavigationData -> loadNavigationData()
             is AyatEvent.UpdateReadingProgress -> updateReadingProgress(event.ayaNumber)
             is AyatEvent.NavigatePrevious -> navigatePrevious()
             is AyatEvent.NavigateNext -> navigateNext()
             is AyatEvent.UpdateCurrentAyaIndex -> updateCurrentAyaIndex(event.index)
+            is AyatEvent.NavigateToNextSurah -> navigateToNextSurah()
+            is AyatEvent.NavigateToPreviousSurah -> navigateToPreviousSurah()
             is AyatEvent.UpdateKhatamProgress -> updateKhatamProgress(event.surahNumber, event.ayaNumber)
             is AyatEvent.LoadActiveKhatam -> loadActiveKhatam()
         }
@@ -163,45 +165,132 @@ class AyatViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             safeCall {
                 val activeKhatam = dataStore.getActiveKhatam()
+
+                Log.d("AyatViewModel", "Loading active khatam: ${activeKhatam?.name ?: "None"}")
+                Log.d("AyatViewModel", "Khatam details: isActive=${activeKhatam?.isActive}, isCompleted=${activeKhatam?.isCompleted}")
+
                 _state.update {
                     it.copy(
                         activeKhatam = activeKhatam,
                         isKhatamMode = activeKhatam != null
                     )
                 }
+
+                activeKhatam?.let { loadKhatamDailyProgress(it.id) }
+            }
+        }
+    }
+
+    private fun loadKhatamDailyProgress(khatamId: Long) {
+        viewModelScope.launch(ioDispatcher) {
+            safeCall {
+                val today = LocalDate.now().toString()
+                val todayProgress = dataStore.getProgressForDate(khatamId, today)
+
+                // Get the latest progress entry for today based on total ayas read
+                val latest = todayProgress.maxByOrNull {
+                    calculateTotalAyasRead(it.surahNumber, it.ayaNumber)
+                }
+
+                // Store both surah and aya for proper comparison
+                _state.update {
+                    it.copy(
+                        khatamTodayAya = latest?.ayaNumber,
+                        khatamTodaySurah = latest?.surahNumber
+                    )
+                }
+
+                Log.d("AyatViewModel", "Today's khatam progress: Surah ${latest?.surahNumber}, Aya ${latest?.ayaNumber}")
             }
         }
     }
 
     private fun updateKhatamProgress(surahNumber: Int, ayaNumber: Int) {
         viewModelScope.launch(ioDispatcher) {
-            safeCall {
-                val activeKhatam = _state.value.activeKhatam
-                activeKhatam?.let { khatam ->
-                    val today = java.time.LocalDate.now().toString()
+            if (_state.value.isUpdatingKhatam) return@launch
+
+            _state.update { it.copy(isUpdatingKhatam = true) }
+            try {
+                safeCall {
+                    val activeKhatam = _state.value.activeKhatam ?: return@safeCall
+                    val today = LocalDate.now().toString()
+                    val todayEntries = dataStore.getProgressForDate(activeKhatam.id, today)
+
+                    val newTotal = calculateTotalAyasRead(surahNumber, ayaNumber)
+                    val existingTotal = todayEntries.maxOfOrNull {
+                        calculateTotalAyasRead(it.surahNumber, it.ayaNumber)
+                    } ?: -1
+
+                    // Check if this is actually new progress
+                    if (existingTotal >= newTotal) {
+                        Log.d("AyatViewModel", "Progress already marked today: $existingTotal >= $newTotal")
+                        val latest = todayEntries.maxByOrNull {
+                            calculateTotalAyasRead(it.surahNumber, it.ayaNumber)
+                        }
+                        _state.update {
+                            it.copy(
+                                khatamTodayAya = latest?.ayaNumber,
+                                khatamTodaySurah = latest?.surahNumber
+                            )
+                        }
+                        return@safeCall
+                    }
+
                     val progress = KhatamProgress(
-                        khatamId = khatam.id,
+                        khatamId = activeKhatam.id,
                         surahNumber = surahNumber,
                         ayaNumber = ayaNumber,
-                        dateRead = today
+                        dateRead = today,
+                        timestamp = LocalDateTime.now().toString()
                     )
+
                     dataStore.insertKhatamProgress(progress)
+                    dataStore.updateKhatamProgress(activeKhatam.id, surahNumber, ayaNumber, newTotal)
 
-                    // Update khatam position
-                    val totalRead = calculateTotalAyasRead(surahNumber, ayaNumber)
-                    dataStore.updateKhatamProgress(khatam.id, surahNumber, ayaNumber, totalRead)
+                    _state.update {
+                        it.copy(
+                            khatamTodayAya = ayaNumber,
+                            khatamTodaySurah = surahNumber
+                        )
+                    }
 
-                    // Reload active khatam to get updated data
+                    Log.d("AyatViewModel", "Khatam progress updated: Surah $surahNumber, Aya $ayaNumber (Total: $newTotal)")
+
                     loadActiveKhatam()
                 }
+            } finally {
+                _state.update { it.copy(isUpdatingKhatam = false) }
             }
         }
     }
 
+    // Surah aya counts for accurate progress calculation (Surah 1-114)
+    private val surahAyaCounts = listOf(
+        7, 286, 200, 176, 120, 165, 206, 75, 129, 109,   // 1-10
+        123, 111, 43, 52, 99, 128, 111, 110, 98, 135,    // 11-20
+        112, 78, 118, 64, 77, 227, 93, 88, 69, 60,       // 21-30
+        34, 30, 73, 54, 45, 83, 182, 88, 75, 85,         // 31-40
+        54, 53, 89, 59, 37, 35, 38, 29, 18, 45,          // 41-50
+        60, 49, 62, 55, 78, 96, 29, 22, 24, 13,          // 51-60
+        14, 11, 11, 18, 12, 12, 30, 52, 52, 44,          // 61-70
+        28, 28, 20, 56, 40, 31, 50, 40, 46, 42,          // 71-80
+        29, 19, 36, 25, 22, 17, 19, 26, 30, 20,          // 81-90
+        15, 21, 11, 8, 8, 19, 5, 8, 8, 11,               // 91-100
+        11, 8, 3, 9, 5, 4, 7, 3, 6, 3,                   // 101-110
+        5, 4, 5, 6                                        // 111-114
+    )
+
     private fun calculateTotalAyasRead(surahNumber: Int, ayaNumber: Int): Int {
-        // Implement proper calculation based on your data
-        // This is a placeholder
-        return (surahNumber - 1) * 100 + ayaNumber
+        if (surahNumber < 1 || surahNumber > 114) return 0
+
+        // Sum all ayas from surahs before current surah
+        var total = 0
+        for (i in 0 until (surahNumber - 1)) {
+            total += surahAyaCounts[i]
+        }
+        // Add the ayas read in current surah
+        total += ayaNumber
+        return total
     }
 
     // ============ NAVIGATION METHODS ============
@@ -228,7 +317,8 @@ class AyatViewModel @Inject constructor(
 
             if (targetIndex != -1 && targetIndex < currentList.size) {
                 _state.update {
-                    it.copy(currentAyaIndex = targetIndex)
+                    it.copy(currentAyaIndex = targetIndex
+                    )
                 }
                 updateReadingProgress(ayaNumber)
                 Log.d("JumpToAya", "Successfully set currentAyaIndex to: $targetIndex")
@@ -241,39 +331,11 @@ class AyatViewModel @Inject constructor(
         }
     }
 
-    private fun addQuickJump(name: String) {
-        viewModelScope.launch(ioDispatcher) {
-            safeCall {
-                val currentState = _state.value
-                val currentAya = currentState.ayatList.getOrNull(currentState.currentAyaIndex)
-                currentAya?.let { aya ->
-                    val quickJump = QuickJump(
-                        name = name,
-                        surahNumber = aya.suraNumber,
-                        ayaNumberInSurah = aya.ayaNumberInSurah
-                    )
-                    dataStore.insertQuickJump(quickJump)
-                    loadNavigationData() // Refresh
-                }
-            }
-        }
-    }
-
-    private fun deleteQuickJump(quickJump: QuickJump) {
-        viewModelScope.launch(ioDispatcher) {
-            safeCall {
-                dataStore.deleteQuickJump(quickJump)
-                loadNavigationData() // Refresh
-            }
-        }
-    }
-
     private fun loadNavigationData() {
         viewModelScope.launch(ioDispatcher) {
             safeCall {
                 val currentSurah = _state.value.currentSurah
                 currentSurah?.let { surah ->
-                    val quickJumps = dataStore.getQuickJumpsForSurah(surah.number)
                     val progress = dataStore.getReadingProgress(surah.number)
                     val bookmarked = dataStore.getBookmarkedAyaNumbers(surah.number)
                     val favorites = dataStore.getFavoriteAyaNumbers(surah.number)
@@ -284,7 +346,6 @@ class AyatViewModel @Inject constructor(
 
                     _state.update {
                         it.copy(
-                            quickJumps = quickJumps,
                             readingProgress = progress,
                             bookmarkedAyasInSurah = bookmarked,
                             favoriteAyasInSurah = favorites,
@@ -301,16 +362,29 @@ class AyatViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             safeCall {
                 val currentSurah = _state.value.currentSurah
-                currentSurah?.let { surah ->
-                    val progress = ReadingProgress(
-                        surahNumber = surah.number,
-                        lastReadAyaNumber = ayaNumber,
-                        completionPercentage = (ayaNumber.toFloat() / surah.numberOfAyahs) * 100,
-                        lastReadDate = java.time.LocalDate.now().toString()
-                    )
-                    dataStore.updateReadingProgress(progress)
-                    _state.update { it.copy(readingProgress = progress) }
+                if (currentSurah == null || ayaNumber <= 0) return@safeCall
+
+                val cappedAya = ayaNumber.coerceAtMost(currentSurah.numberOfAyahs)
+
+                // Only update if this is a forward progress (higher aya number than current)
+                val currentProgress = _state.value.readingProgress
+                if (currentProgress != null &&
+                    currentProgress.surahNumber == currentSurah.number &&
+                    cappedAya <= currentProgress.lastReadAyaNumber) {
+                    // Don't update if scrolling backwards
+                    return@safeCall
                 }
+
+                val progress = ReadingProgress(
+                    surahNumber = currentSurah.number,
+                    lastReadAyaNumber = cappedAya,
+                    completionPercentage = (cappedAya.toFloat() / currentSurah.numberOfAyahs) * 100,
+                    lastReadDate = LocalDate.now().toString()
+                )
+                dataStore.updateReadingProgress(progress)
+                _state.update { it.copy(readingProgress = progress) }
+
+                Log.d("AyatViewModel", "Updated reading progress: Surah ${currentSurah.number}, Aya $cappedAya")
             }
         }
     }
@@ -346,6 +420,24 @@ class AyatViewModel @Inject constructor(
         }
     }
 
+    private fun navigateToNextSurah() {
+        val currentSurah = _state.value.currentSurah
+        if (currentSurah != null && currentSurah.number < 114) {
+            val nextSurahNumber = currentSurah.number + 1
+            Log.d("AyatViewModel", "Navigating to next surah: $nextSurahNumber")
+            loadAyat(nextSurahNumber, true)
+        }
+    }
+
+    private fun navigateToPreviousSurah() {
+        val currentSurah = _state.value.currentSurah
+        if (currentSurah != null && currentSurah.number > 1) {
+            val previousSurahNumber = currentSurah.number - 1
+            Log.d("AyatViewModel", "Navigating to previous surah: $previousSurahNumber")
+            loadAyat(previousSurahNumber, true)
+        }
+    }
+
     // ============ EXISTING METHODS (UNCHANGED) ============
 
     private fun loadInitialPreferences() {
@@ -364,7 +456,7 @@ class AyatViewModel @Inject constructor(
         }
     }
 
-    private fun loadAyat(number: Int, isSurah: Boolean, language: String) {
+    private fun loadAyat(number: Int, isSurah: Boolean) {
         viewModelScope.launch(ioDispatcher) {
             safeCall {
                 setLoading(true)
@@ -392,9 +484,9 @@ class AyatViewModel @Inject constructor(
                 val juz = juzDeferred.await()
 
                 val ayatListWithBismillah = if (isSurah) {
-                    addBismillahToFirstAya(ayatList as ArrayList, language, number)
+                    addBismillahToFirstAya(ayatList as ArrayList, number)
                 } else {
-                    addBismillahInJuz(number, language, ayatList as ArrayList)
+                    addBismillahInJuz(number, ayatList as ArrayList)
                 }
 
                 _state.update {
@@ -567,10 +659,9 @@ class AyatViewModel @Inject constructor(
 
     private fun addBismillahToFirstAya(
         surahAyatList: ArrayList<LocalAya>,
-        languageConverted: String,
         surahNumber: Int,
     ): ArrayList<LocalAya> {
-        ViewModelLogger.d("addBismillahToFirstAya: $surahNumber", "Language: $languageConverted")
+        ViewModelLogger.d("addBismillahToFirstAya: $surahNumber", "Language unused")
         val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"
         val aya = LocalAya(
             0,
@@ -600,7 +691,6 @@ class AyatViewModel @Inject constructor(
 
     private fun addBismillahInJuz(
         juzNumber: Int,
-        languageConverted: String,
         listOfJuzAyat: ArrayList<LocalAya>,
     ): ArrayList<LocalAya> {
         val ayaArabicOfBismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"

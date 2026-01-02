@@ -4,12 +4,10 @@ import com.arshadshah.nimaz.data.local.dao.AyaDao
 import com.arshadshah.nimaz.data.local.dao.JuzDao
 import com.arshadshah.nimaz.data.local.dao.KhatamProgressDao
 import com.arshadshah.nimaz.data.local.dao.KhatamSessionDao
-import com.arshadshah.nimaz.data.local.dao.QuickJumpDao
 import com.arshadshah.nimaz.data.local.dao.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.models.KhatamProgress
 import com.arshadshah.nimaz.data.local.models.KhatamSession
-import com.arshadshah.nimaz.data.local.models.QuickJump
 import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import javax.inject.Inject
 
@@ -18,7 +16,6 @@ class QuranSystem @Inject constructor(
     private val juzDao: JuzDao,
     private val surahDao: SurahDao,
     private val readingProgressDao: ReadingProgressDao,
-    private val quickJumpDao: QuickJumpDao,
     private val khatamSessionDao: KhatamSessionDao,
     private val khatamProgressDao: KhatamProgressDao
 ) {
@@ -143,19 +140,6 @@ class QuranSystem @Inject constructor(
     //getAllProgressOrderedByCompletion
     suspend fun getAllProgressOrderedByCompletion() =
         readingProgressDao.getAllProgressOrderedByCompletion()
-
-    // Quick Jumps
-    suspend fun getAllQuickJumps() =
-        quickJumpDao.getAllQuickJumps()
-
-    suspend fun getQuickJumpsForSurah(surahNumber: Int) =
-        quickJumpDao.getQuickJumpsForSurah(surahNumber)
-
-    suspend fun insertQuickJump(quickJump: QuickJump) =
-        quickJumpDao.insertQuickJump(quickJump)
-
-    suspend fun deleteQuickJump(quickJump: QuickJump) =
-        quickJumpDao.deleteQuickJump(quickJump)
 
     // Navigation helpers
     suspend fun getBookmarkedAyaNumbers(surahNumber: Int) =

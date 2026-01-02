@@ -14,7 +14,6 @@ import com.arshadshah.nimaz.data.local.dao.KhatamProgressDao
 import com.arshadshah.nimaz.data.local.dao.KhatamSessionDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTimesDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
-import com.arshadshah.nimaz.data.local.dao.QuickJumpDao
 import com.arshadshah.nimaz.data.local.dao.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.dao.TafsirDao
@@ -98,10 +97,6 @@ object DatabaseModule {
     @Singleton
     fun provideReadingProgressDao(database: AppDatabase) = database.readingProgressDao
 
-    @Provides
-    @Singleton
-    fun provideQuickJumpDao(database: AppDatabase) = database.quickJumpDao
-
     // Khatam Progress DAO
     @Provides
     @Singleton
@@ -141,10 +136,9 @@ object DatabaseModule {
         juzDao: JuzDao,
         surahDao: SurahDao,
         readingProgressDao: ReadingProgressDao,
-        quickJumpDao: QuickJumpDao,
         khatamSessionDao: KhatamSessionDao,
         khatamProgressDao: KhatamProgressDao
-    ) = QuranSystem(ayaDao, juzDao, surahDao, readingProgressDao, quickJumpDao,
+    ) = QuranSystem(ayaDao, juzDao, surahDao, readingProgressDao,
         khatamSessionDao, khatamProgressDao)
 
     @Provides
