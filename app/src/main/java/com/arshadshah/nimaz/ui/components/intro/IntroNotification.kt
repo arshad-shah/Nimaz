@@ -100,7 +100,7 @@ fun IntroNotification(
         }
     }
 
-    val state = rememberPreferenceBooleanSettingState(
+    rememberPreferenceBooleanSettingState(
         AppConstants.NOTIFICATION_ALLOWED,
         notificationPermissionState.status.isGranted
     )

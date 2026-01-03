@@ -123,4 +123,167 @@ interface AyaDao {
     //delete all the ayas
     @Query("DELETE FROM Aya")
     suspend fun deleteAllAyas()
+
+
+    // Basic search operations
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%' 
+        OR LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+        OR LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchAyas(query: String): List<LocalAya>
+
+    // Advanced search with multiple criteria
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE (:surahNumber IS NULL OR suraNumber = :surahNumber)
+        AND (:juzNumber IS NULL OR juzNumber = :juzNumber)
+        AND (:isFavorite IS NULL OR favorite = :isFavorite)
+        AND (:isBookmarked IS NULL OR bookmark = :isBookmarked)
+        AND (:hasNote IS NULL OR (CASE WHEN :hasNote = 1 THEN note != '' ELSE note = '' END))
+        AND (
+            LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%' 
+            OR LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+        )
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchAyasAdvanced(
+        query: String = "",
+        surahNumber: Int? = null,
+        juzNumber: Int? = null,
+        isFavorite: Int? = null,
+        isBookmarked: Int? = null,
+        hasNote: Int? = null
+    ): List<LocalAya>
+
+    // Search specifically in Arabic text only
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%'
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchAyasInArabic(query: String): List<LocalAya>
+
+    // Search specifically in English translation only
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchAyasInEnglish(query: String): List<LocalAya>
+
+    // Search specifically in Urdu translation only
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchAyasInUrdu(query: String): List<LocalAya>
+
+    // Search in favorites only
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE favorite = 1
+        AND (
+            LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%' 
+            OR LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+        )
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchFavoriteAyas(query: String): List<LocalAya>
+
+    // Search in bookmarks only
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE bookmark = 1
+        AND (
+            LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%' 
+            OR LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+        )
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchBookmarkedAyas(query: String): List<LocalAya>
+
+    // Search in notes
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE note != ''
+        AND (
+            LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%' 
+            OR LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(note) LIKE '%' || LOWER(:query) || '%'
+        )
+        ORDER BY suraNumber ASC, ayaNumberInSurah ASC
+    """)
+    suspend fun searchAyasWithNotes(query: String): List<LocalAya>
+
+    // Get random aya from search results
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE (
+            LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%' 
+            OR LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+        )
+        ORDER BY RANDOM() 
+        LIMIT 1
+    """)
+    suspend fun getRandomSearchAya(query: String): LocalAya?
+
+    // Count search results
+    @Query("""
+        SELECT COUNT(*) FROM Aya 
+        WHERE (
+            LOWER(ayaArabic) LIKE '%' || LOWER(:query) || '%' 
+            OR LOWER(translationEnglish) LIKE '%' || LOWER(:query) || '%'
+            OR LOWER(translationUrdu) LIKE '%' || LOWER(:query) || '%'
+        )
+    """)
+    suspend fun countSearchResults(query: String): Int
+
+    @Query("""
+        SELECT ayaNumberInSurah FROM Aya 
+        WHERE suraNumber = :surahNumber AND bookmark = 1
+        ORDER BY ayaNumberInSurah ASC
+    """)
+    suspend fun getBookmarkedAyaNumbers(surahNumber: Int): List<Int>
+
+    @Query("""
+        SELECT ayaNumberInSurah FROM Aya 
+        WHERE suraNumber = :surahNumber AND favorite = 1
+        ORDER BY ayaNumberInSurah ASC
+    """)
+    suspend fun getFavoriteAyaNumbers(surahNumber: Int): List<Int>
+
+    @Query("""
+        SELECT ayaNumberInSurah FROM Aya 
+        WHERE suraNumber = :surahNumber AND note != ''
+        ORDER BY ayaNumberInSurah ASC
+    """)
+    suspend fun getNotedAyaNumbers(surahNumber: Int): List<Int>
+
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE ayaNumberInQuran = :currentAyaNumber - 1
+        LIMIT 1
+    """)
+    suspend fun getPreviousAya(currentAyaNumber: Int): LocalAya?
+
+    @Query("""
+        SELECT * FROM Aya 
+        WHERE ayaNumberInQuran = :currentAyaNumber + 1
+        LIMIT 1
+    """)
+    suspend fun getNextAya(currentAyaNumber: Int): LocalAya?
+
+    @Query("""
+        SELECT COUNT(*) FROM Aya WHERE suraNumber = :surahNumber
+    """)
+    suspend fun getTotalAyasInSurah(surahNumber: Int): Int
 }

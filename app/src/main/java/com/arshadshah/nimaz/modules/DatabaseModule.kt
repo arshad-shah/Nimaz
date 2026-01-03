@@ -10,8 +10,11 @@ import com.arshadshah.nimaz.data.local.dao.DuaDao
 import com.arshadshah.nimaz.data.local.dao.FastTrackerDao
 import com.arshadshah.nimaz.data.local.dao.HadithDao
 import com.arshadshah.nimaz.data.local.dao.JuzDao
+import com.arshadshah.nimaz.data.local.dao.KhatamProgressDao
+import com.arshadshah.nimaz.data.local.dao.KhatamSessionDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTimesDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
+import com.arshadshah.nimaz.data.local.dao.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.dao.TafsirDao
 import com.arshadshah.nimaz.data.local.dao.TafsirEditionDao
@@ -37,7 +40,7 @@ object DatabaseModule {
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(context, AppDatabase::class.java, "database")
             .createFromAsset("databases/quran_room_compatible.db")
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 
@@ -90,6 +93,20 @@ object DatabaseModule {
     @Singleton
     fun provideTafsirEditionDao(database: AppDatabase) = database.tafsirEditionDao
 
+    @Provides
+    @Singleton
+    fun provideReadingProgressDao(database: AppDatabase) = database.readingProgressDao
+
+    // Khatam Progress DAO
+    @Provides
+    @Singleton
+    fun provideKhatamProgressDao(database: AppDatabase) = database.khatamProgressDao
+
+    // Khatam Session DAO
+    @Provides
+    @Singleton
+    fun provideKhatamSessionDao(database: AppDatabase) = database.khatamSessionDao
+
     // System Providers
     @Provides
     @Singleton
@@ -117,8 +134,12 @@ object DatabaseModule {
     fun provideQuranSystem(
         ayaDao: AyaDao,
         juzDao: JuzDao,
-        surahDao: SurahDao
-    ) = QuranSystem(ayaDao, juzDao, surahDao)
+        surahDao: SurahDao,
+        readingProgressDao: ReadingProgressDao,
+        khatamSessionDao: KhatamSessionDao,
+        khatamProgressDao: KhatamProgressDao
+    ) = QuranSystem(ayaDao, juzDao, surahDao, readingProgressDao,
+        khatamSessionDao, khatamProgressDao)
 
     @Provides
     @Singleton

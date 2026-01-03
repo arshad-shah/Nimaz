@@ -51,7 +51,7 @@ fun IntroBatteryExemption(
     }
 
     // Create preference state for UI
-    val state = rememberPreferenceBooleanSettingState(
+    rememberPreferenceBooleanSettingState(
         AppConstants.BATTERY_OPTIMIZATION,
         isExempt.value
     )

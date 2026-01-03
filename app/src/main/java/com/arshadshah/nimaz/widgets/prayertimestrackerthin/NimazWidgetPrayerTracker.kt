@@ -48,7 +48,7 @@ class NimazWidgetPrayerTracker : GlanceAppWidget() {
 
         val appContext = context.applicationContext
 
-        val glanceAppWidgetManager = getGlanceAppWidgetManager(appContext)
+        getGlanceAppWidgetManager(appContext)
         val prayerTrackerRepository = getPrayerTrackerRepository(appContext)
 
 

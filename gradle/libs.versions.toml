@@ -1,68 +1,67 @@
 [versions]
-aboutLibs = "10.6.2"
-accompanistPermissions = "0.35.0-alpha"
+aboutLibs = "12.2.3"
+accompanistPermissions = "0.37.3"
 activityCompose = "1.10.1"
-androidGradlePlugin = "8.9.0"
-androidxComposeBom = "2025.02.00"
+androidGradlePlugin = "8.13.2"
+androidxComposeBom = "2025.06.01"
 appUpdate = "2.1.0"
-aws = "2.75.0"
-baloonVersion = "1.6.4"
-calendar = "1.2.0"
+aws = "2.81.0"
+baloonVersion = "1.6.12"
+calendar = "1.4.0"
 core = "1.6.1"
 coreSplashscreen = "1.0.1"
 desugar_jdk_libs = "2.1.5"
-espressoCore = "3.5.0"
-firebaseBom = "33.10.0"
-firebaseCrashlytics = "3.0.3"
-firebaseCrashlyticsBuildtools = "3.0.3"
+espressoCore = "3.6.1"
+firebaseBom = "33.16.0"
+firebaseCrashlytics = "3.0.4"
+firebaseCrashlyticsBuildtools = "3.0.4"
 firebasePerf = "1.4.2"
 glance = "1.1.1"
-googleServicesGradlePlugin = "4.4.2"
-gson = "2.10.1"
-hilt = "2.55"
-hiltAndroid = "2.55"
-hiltAndroidTestingVersion = "2.55"
+googleServicesGradlePlugin = "4.4.3"
+gson = "2.13.1"
+hilt = "2.56.2"
+hiltAndroid = "2.56.2"
+hiltAndroidTestingVersion = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 hiltWork = "1.2.0"
-introshowcaseview = "2.0.1"
+introshowcaseview = "2.0.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
-kotlin = "2.1.0"
-kotlinSerializationPlugin = "1.7.20"
-kotlinxCoroutinesTest = "1.7.3"
-kotlinxDateTime = "0.5.0"
-ksp = "2.1.0-1.0.29"
-ktorClientAndroid = "2.3.7"
-ktorClientMock = "2.3.7"
-ktx = "1.15.0"
-lifecycleRuntimeKtx = "2.8.7"
+kotlin = "2.2.0"
+kotlinSerializationPlugin = "2.2.0"
+kotlinxCoroutinesTest = "1.10.2"
+kotlinxDateTime = "0.7.0"
+ksp = "2.2.0-2.0.2"
+ktor = "2.3.12"
+ktx = "1.16.0"
+lifecycleRuntimeKtx = "2.9.1"
 markwon = "4.6.2"
 materialIconsExtended = "1.7.8"
-mockitoCore = "5.12.0"
+mockitoCore = "5.18.0"
 mockitoKotlin = "5.4.0"
-mockk = "1.13.17"
+mockk = "1.14.4"
 monitor = "1.7.2"
-navigationCompose = "2.8.8"
-navigationTesting = "2.8.8"
+navigationCompose = "2.9.0"
+navigationTesting = "2.9.0"
 playServicesLocation = "21.3.0"
 preferenceKtx = "1.2.1"
 review = "2.0.2"
-robolectric = "4.12"
-room = "2.6.1"
+robolectric = "4.15.1"
+room = "2.7.2"
 runner = "1.6.2"
 slf4jAndroid = "1.7.36"
 toasty = "1.5.2"
-workManager = "2.10.0"
-appcompat = "1.7.0"
-junitJupiter = "5.8.2"
-uiTestJunit4Android = "1.7.8"
-uiTextGoogleFonts = "1.7.8"
-
-
+workManager = "2.10.2"
+appcompat = "1.7.1"
+junitJupiter = "5.13.2"
+uiTestJunit4Android = "1.8.3"
+uiTextGoogleFonts = "1.8.3"
+foundation = "1.10.0"
 
 [libraries]
-aboutlibraries-compose-v1083 = { module = "com.mikepenz:aboutlibraries-compose", version = "11.1.1" }
-aboutlibraries-core-v1083 = { module = "com.mikepenz:aboutlibraries-core", version = "11.1.1" }
+aboutlibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutLibs" }
+aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibs" }
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibs" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-core = { module = "androidx.test:core", version.ref = "core" }
@@ -97,11 +96,14 @@ hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", ve
 introshowcaseview = { module = "com.canopas.intro-showcase-view:introshowcaseview", version.ref = "introshowcaseview" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
-ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientAndroid" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientAndroid" }
-ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktorClientMock" }
-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientAndroid" }
+
+# CORRECTED KTOR DEPENDENCIES FOR ANDROID
+# Use Android-specific engine instead of core
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
@@ -137,9 +139,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
-
-
-
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

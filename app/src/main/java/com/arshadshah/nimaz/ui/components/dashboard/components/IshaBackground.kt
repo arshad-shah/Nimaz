@@ -87,7 +87,7 @@ fun IshaBackground(modifier: Modifier = Modifier) {
     // Pre-compute math constants
     val piFloat = remember { PI.toFloat() }
     val piTwo = remember { 2f * piFloat }
-    val piByDeg = remember { piFloat / 180f }
+    remember { piFloat / 180f }
 
     // Single transition for all animations
     val infiniteTransition = rememberInfiniteTransition(label = "night animations")
@@ -158,7 +158,7 @@ fun IshaBackground(modifier: Modifier = Modifier) {
     val screenWidth = remember(configuration) {
         density.run { configuration.screenWidthDp.dp.toPx() }
     }
-    val screenHeight = remember(configuration) {
+    remember(configuration) {
         density.run { configuration.screenHeightDp.dp.toPx() }
     }
     val moonX = remember(screenWidth, density) {

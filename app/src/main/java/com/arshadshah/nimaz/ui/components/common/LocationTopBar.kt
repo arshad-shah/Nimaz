@@ -28,22 +28,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun CompactLocationTopBar(
+fun LocationTopBar(
     locationName: String,
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
+
+    val currentDate = remember {
+        LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM"))
+    }
+
+    val hijriDate = remember {
+        HijrahDate.from(LocalDate.now())
+            .format(DateTimeFormatter.ofPattern("dd MMM"))
+    }
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -55,8 +62,7 @@ fun CompactLocationTopBar(
                 )
             ),
         shape = MaterialTheme.shapes.medium,
-        tonalElevation = 6.dp,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
+        tonalElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
@@ -124,21 +130,6 @@ fun CompactLocationTopBar(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.current_date_icon),
-                        contentDescription = "Calendar",
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.size(16.dp)
-                    )
-
-                    val currentDate = remember {
-                        LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM"))
-                    }
-
-                    val hijriDate = remember {
-                        HijrahDate.from(LocalDate.now())
-                            .format(DateTimeFormatter.ofPattern("dd MMM"))
-                    }
 
                     Text(
                         text = "$currentDate • $hijriDate",
@@ -158,7 +149,7 @@ fun CompactLocationTopBarPreview() {
     NimazTheme(
         darkTheme = false
     ) {
-        CompactLocationTopBar(
+        LocationTopBar(
             locationName = "London, United Kingdom",
             isLoading = false
         )

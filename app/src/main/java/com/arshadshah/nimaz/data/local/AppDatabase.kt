@@ -10,8 +10,11 @@ import com.arshadshah.nimaz.data.local.dao.DuaDao
 import com.arshadshah.nimaz.data.local.dao.FastTrackerDao
 import com.arshadshah.nimaz.data.local.dao.HadithDao
 import com.arshadshah.nimaz.data.local.dao.JuzDao
+import com.arshadshah.nimaz.data.local.dao.KhatamProgressDao
+import com.arshadshah.nimaz.data.local.dao.KhatamSessionDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTimesDao
 import com.arshadshah.nimaz.data.local.dao.PrayerTrackerDao
+import com.arshadshah.nimaz.data.local.dao.ReadingProgressDao
 import com.arshadshah.nimaz.data.local.dao.SurahDao
 import com.arshadshah.nimaz.data.local.dao.TafsirDao
 import com.arshadshah.nimaz.data.local.dao.TafsirEditionDao
@@ -19,6 +22,8 @@ import com.arshadshah.nimaz.data.local.dao.TasbihTrackerDao
 import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
+import com.arshadshah.nimaz.data.local.models.KhatamProgress
+import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.data.local.models.LocalCategory
 import com.arshadshah.nimaz.data.local.models.LocalChapter
@@ -29,6 +34,7 @@ import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalSurah
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.data.local.models.Tafsir
 import com.arshadshah.nimaz.data.local.models.TafsirEdition
 
@@ -49,6 +55,9 @@ import com.arshadshah.nimaz.data.local.models.TafsirEdition
         HadithChapter::class,
         Tafsir::class,
         TafsirEdition::class,
+        ReadingProgress::class,
+        KhatamSession::class,
+        KhatamProgress::class
     ],
     version = DATABASE_VERSION,
     exportSchema = true,
@@ -82,4 +91,10 @@ abstract class AppDatabase : RoomDatabase() {
     // Tafsir related DAOs
     abstract val tafsirDao: TafsirDao
     abstract val tafsirEditionDao: TafsirEditionDao
+
+    abstract val readingProgressDao: ReadingProgressDao
+
+    abstract val khatamProgressDao: KhatamProgressDao
+    abstract val khatamSessionDao: KhatamSessionDao
+
 }

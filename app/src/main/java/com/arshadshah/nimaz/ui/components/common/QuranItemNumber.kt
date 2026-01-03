@@ -35,7 +35,7 @@ fun QuranItemNumber(
         Icon(
             painter = painterResource(id = R.drawable.number_back_icon),
             contentDescription = "Number $number background",
-            tint = MaterialTheme.colorScheme.tertiary,
+//            tint = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .matchParentSize()
                 .placeholder(

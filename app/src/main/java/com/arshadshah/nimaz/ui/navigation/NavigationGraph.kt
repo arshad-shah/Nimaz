@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -24,6 +25,7 @@ import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTERS_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.CHAPTER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.DEBUG_MODE
+import com.arshadshah.nimaz.constants.AppConstants.EDIT_KHATAM_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.HADITH_CHAPTERS_LIST_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.HADITH_LIST_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.HADITH_SHELF_SCREEN_ROUTE
@@ -35,6 +37,7 @@ import com.arshadshah.nimaz.constants.AppConstants.PRAYER_TRACKER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QIBLA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.QURAN_AYA_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.SHAHADAH_SCREEN_ROUTE
+import com.arshadshah.nimaz.constants.AppConstants.START_KHATAM_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TAFSEER_SCREEN_ROUTE
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_LIST_SCREEN
 import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
@@ -51,8 +54,11 @@ import com.arshadshah.nimaz.ui.screens.more.QiblaScreen
 import com.arshadshah.nimaz.ui.screens.more.ShahadahScreen
 import com.arshadshah.nimaz.ui.screens.more.ZakatCalculator
 import com.arshadshah.nimaz.ui.screens.quran.AyatScreen
+import com.arshadshah.nimaz.ui.screens.quran.EditKhatamScreen
 import com.arshadshah.nimaz.ui.screens.quran.QuranScreen
+import com.arshadshah.nimaz.ui.screens.quran.StartKhatamScreen
 import com.arshadshah.nimaz.ui.screens.quran.TafseerScreen
+import com.arshadshah.nimaz.ui.screens.settings.Appearance
 import com.arshadshah.nimaz.ui.screens.settings.DebugScreen
 import com.arshadshah.nimaz.ui.screens.settings.EnhancedAboutScreen
 import com.arshadshah.nimaz.ui.screens.settings.LibraryDetailScreen
@@ -194,6 +200,14 @@ fun NavigationGraph(
         composable(BottomNavItem.QuranScreen.screen_route) {
             QuranScreen(
                 navController = navController,
+                onNavigateToStartKhatam = {
+                    navController.safeNavigate(START_KHATAM_SCREEN_ROUTE)
+                },
+                onNavigateToEditKhatam = { khatamId ->
+                    val route = EDIT_KHATAM_SCREEN_ROUTE
+                        .replace("{khatamId}", khatamId.toString())
+                    navController.safeNavigate(route)
+                },
                 onNavigateToAyatScreen = { number: String, isSurah: Boolean, language: String, scrollToAya: Int? ->
                     if (scrollToAya != null) {
                         val route = MY_QURAN_SCREEN_ROUTE
@@ -282,6 +296,9 @@ fun NavigationGraph(
                 onNavigateToDebugScreen = {
                     navController.safeNavigate(DEBUG_MODE)
                 },
+                onNavigateToAppearance = {
+                    navController.safeNavigate("Appearance")
+                }
             )
         }
 
@@ -311,6 +328,49 @@ fun NavigationGraph(
                 number = it.arguments?.getString("number")!!,
                 isSurah = it.arguments?.getString("isSurah")!!,
                 language = it.arguments?.getString("language")!!,
+            )
+        }
+
+        composable(START_KHATAM_SCREEN_ROUTE) {
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry(AppConstants.QURAN_SCREEN_ROUTE)
+            }
+            val viewModel: com.arshadshah.nimaz.viewModel.QuranViewModel =
+                androidx.hilt.navigation.compose.hiltViewModel(parentEntry)
+
+            StartKhatamScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onStartKhatam = { name, targetDate, dailyTarget ->
+                    viewModel.handleAyaEvent(
+                        com.arshadshah.nimaz.viewModel.QuranViewModel.AyaEvent.StartNewKhatam(
+                            name, targetDate, dailyTarget
+                        )
+                    )
+                }
+            )
+        }
+
+        composable(EDIT_KHATAM_SCREEN_ROUTE) {
+            val khatamId = it.arguments?.getString("khatamId")?.toLongOrNull() ?: return@composable
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry(AppConstants.QURAN_SCREEN_ROUTE)
+            }
+            val viewModel: com.arshadshah.nimaz.viewModel.QuranViewModel =
+                androidx.hilt.navigation.compose.hiltViewModel(parentEntry)
+
+            val khatamState = viewModel.khatamState.collectAsState()
+            val khatam = khatamState.value.activeKhatam?.takeIf { it.id == khatamId }
+                ?: khatamState.value.khatamHistory.find { it.id == khatamId }
+                ?: return@composable
+
+            EditKhatamScreen(
+                khatam = khatam,
+                onNavigateBack = { navController.popBackStack() },
+                onSave = { updatedKhatam ->
+                    viewModel.handleAyaEvent(
+                        com.arshadshah.nimaz.viewModel.QuranViewModel.AyaEvent.UpdateKhatam(updatedKhatam)
+                    )
+                }
             )
         }
 
@@ -484,6 +544,13 @@ fun NavigationGraph(
                 ayaNumber = ayaNumber,
                 surahNumber = surahNumber,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        //apperance section
+        composable("Appearance") {
+            Appearance(
+                navController = navController,
             )
         }
     }

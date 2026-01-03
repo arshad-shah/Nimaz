@@ -799,7 +799,7 @@ fun PrayerTimesCustomizations(
     val maghribOffset = viewModel.maghribOffset.collectAsState()
     val ishaOffset = viewModel.ishaOffset.collectAsState()
 
-    val state = rememberPullToRefreshState()
+    rememberPullToRefreshState()
 
     Scaffold(
         topBar = {

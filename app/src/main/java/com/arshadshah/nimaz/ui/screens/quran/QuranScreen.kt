@@ -1,18 +1,14 @@
 package com.arshadshah.nimaz.ui.screens.quran
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,9 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.data.local.models.LocalAya
 import com.arshadshah.nimaz.ui.components.common.CustomTabsWithPager
 import com.arshadshah.nimaz.ui.components.quran.JuzList
 import com.arshadshah.nimaz.ui.components.quran.SurahList
@@ -33,6 +29,8 @@ import com.arshadshah.nimaz.viewModel.QuranViewModel
 @Composable
 fun QuranScreen(
     onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit,
+    onNavigateToStartKhatam: () -> Unit,
+    onNavigateToEditKhatam: (Long) -> Unit,
     navController: NavHostController,
     viewModel: QuranViewModel = hiltViewModel()
 ) {
@@ -44,7 +42,33 @@ fun QuranScreen(
             JuzContent(viewModel, onNavigateToAyatScreen)
         },
         QuranPage("My Quran") {
-            MyQuranContent(viewModel, onNavigateToAyatScreen)
+            MyQuranScreen(
+                bookmarks = viewModel.bookmarks.collectAsState(),
+                favorites = viewModel.favorites.collectAsState(),
+                notes = viewModel.notes.collectAsState(),
+                suraList = viewModel.surahListState.collectAsState(),
+                readingProgress = viewModel.readingProgress.collectAsState(),
+                khatamState = viewModel.khatamState.collectAsState(), // ADD THIS
+                onNavigateToAyatScreen = onNavigateToAyatScreen,
+                handleEvents = viewModel::handleAyaEvent,
+                onKhatamEvent = viewModel::handleAyaEvent, // ADD THIS
+                onDeleteReadingProgress = viewModel::deleteReadingProgress,
+                onClearAllProgress = viewModel::clearAllReadingProgress,
+                onNavigateToStartKhatam = onNavigateToStartKhatam,
+                onNavigateToEditKhatam = onNavigateToEditKhatam,
+                isLoading = viewModel.loadingState.collectAsState()
+            )
+        },
+        QuranPage("Search") {
+            SearchContent(viewModel, onAyaClick = {
+                //number: String, isSurah: Boolean, language: String, scrollToAya: Int?
+                onNavigateToAyatScreen(
+                    it.suraNumber.toString(),
+                    true,
+                    "English",
+                    it.ayaNumberInSurah
+                )
+            })
         }
     )
 
@@ -54,8 +78,6 @@ fun QuranScreen(
         viewModel.getSurahList()
         viewModel.getJuzList()
     }
-
-
 
     Scaffold(
         topBar = {
@@ -76,7 +98,6 @@ fun QuranScreen(
             )
         },
     ) {
-
         Column(modifier = Modifier.padding(it)) {
             CustomTabsWithPager(
                 pagerState = pagerState,
@@ -87,28 +108,9 @@ fun QuranScreen(
                 pageSize = PageSize.Fill,
                 state = pagerState,
             ) { page ->
-                QuranCard {
-                    pages[page].content()
-                }
+                pages[page].content()
             }
         }
-    }
-}
-
-@Composable
-private fun QuranCard(content: @Composable () -> Unit) {
-    Card(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        content()
     }
 }
 
@@ -147,19 +149,54 @@ private fun JuzContent(
 }
 
 @Composable
-private fun MyQuranContent(
+private fun SearchContent(
     viewModel: QuranViewModel,
-    onNavigateToAyatScreen: (String, Boolean, String, Int?) -> Unit
+    onAyaClick: (LocalAya) -> Unit
 ) {
+    val searchQuery = viewModel.searchQuery.collectAsState()
+    val searchResults = viewModel.filteredSearchResults.collectAsState()
+    val searchLanguage = viewModel.searchLanguage.collectAsState()
+    val searchFilters = viewModel.searchFilters.collectAsState()
     val isLoading = viewModel.loadingState.collectAsState()
-    MyQuranScreen(
-        bookmarks = viewModel.bookmarks.collectAsState(),
-        favorites = viewModel.favorites.collectAsState(),
-        notes = viewModel.notes.collectAsState(),
-        suraList = viewModel.surahListState.collectAsState(),
-        onNavigateToAyatScreen = onNavigateToAyatScreen,
-        handleEvents = viewModel::handleAyaEvent,
-        isLoading = isLoading
+    val error = viewModel.errorState.collectAsState()
+
+    QuranSearchScreen(
+        searchQuery = searchQuery.value,
+        searchResults = searchResults.value,
+        searchLanguage = searchLanguage.value,
+        searchFilters = searchFilters.value,
+        isLoading = isLoading.value,
+        error = error.value,
+        onSearchQueryChange = viewModel::setSearchQuery,
+        onSearchLanguageChange = viewModel::setSearchLanguage,
+        onSearchFiltersChange = viewModel::updateSearchFilters,
+        onSearch = viewModel::searchAyas,
+        onAdvancedSearch = viewModel::searchAyasAdvanced,
+        onSearchInFavorites = viewModel::searchInFavorites,
+        onSearchInBookmarks = viewModel::searchInBookmarks,
+        onSearchInNotes = viewModel::searchInNotes,
+        onClearSearch = viewModel::clearSearch,
+        onAyaClick = onAyaClick,
+        onBookmarkToggle = { aya ->
+            viewModel.handleAyaEvent(
+                QuranViewModel.AyaEvent.BookmarkAya(
+                    aya.ayaNumberInQuran,
+                    aya.suraNumber,
+                    aya.ayaNumberInSurah,
+                    !aya.bookmark
+                )
+            )
+        },
+        onFavoriteToggle = { aya ->
+            viewModel.handleAyaEvent(
+                QuranViewModel.AyaEvent.FavoriteAya(
+                    aya.ayaNumberInQuran,
+                    aya.suraNumber,
+                    aya.ayaNumberInSurah,
+                    !aya.favorite
+                )
+            )
+        }
     )
 }
 

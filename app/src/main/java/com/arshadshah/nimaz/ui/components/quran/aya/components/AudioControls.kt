@@ -1,9 +1,8 @@
-package com.arshadshah.nimaz.ui.components.quran
+package com.arshadshah.nimaz.ui.components.quran.aya.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
@@ -38,11 +37,11 @@ fun AudioControls(
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.height(48.dp)
     ) {
         // Download Button (shown when no audio file is available)
         if (!hasAudioFile) {
             IconButton(
+                modifier = Modifier.size(32.dp),
                 onClick = { onEvent(AyatViewModel.AyatEvent.DownloadAudio(aya)) },
                 enabled = !loading && !audioState.isDownloading
             ) {
@@ -56,7 +55,7 @@ fun AudioControls(
                     Icon(
                         imageVector = Icons.Default.Download,
                         contentDescription = "Download audio",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -66,6 +65,7 @@ fun AudioControls(
 
         // Play/Pause Button
         IconButton(
+            modifier = Modifier.size(32.dp),
             onClick = {
                 if (isCurrentlyPlayingAya && audioState.isPlaying) {
                     onEvent(AyatViewModel.AyatEvent.PauseAudio)
@@ -80,7 +80,7 @@ fun AudioControls(
                     Icons.Default.Pause else Icons.Default.PlayArrow,
                 contentDescription = if (isCurrentlyPlayingAya && audioState.isPlaying)
                     "Pause" else "Play",
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -88,13 +88,14 @@ fun AudioControls(
         // Stop Button (only shown when audio is playing or paused)
         if (isCurrentlyPlayingAya && (audioState.isPlaying || audioState.isPaused)) {
             IconButton(
+                modifier = Modifier.size(32.dp),
                 onClick = { onEvent(AyatViewModel.AyatEvent.StopAudio) },
                 enabled = !loading
             ) {
                 Icon(
                     imageVector = Icons.Default.Stop,
                     contentDescription = "Stop",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -109,7 +110,7 @@ fun AudioControls(
                 CircularProgressIndicator(
                     progress = { audioState.downloadProgress },
                     modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
                 )
             }

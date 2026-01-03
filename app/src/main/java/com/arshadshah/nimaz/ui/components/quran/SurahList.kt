@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.arshadshah.nimaz.data.local.models.LocalSurah
+import com.arshadshah.nimaz.ui.components.common.PageErrorState
+import com.arshadshah.nimaz.ui.components.common.PageLoading
 
 @Composable
 fun SurahList(
@@ -43,11 +45,7 @@ fun SurahList(
             }
         }
     } else if (error.isNotEmpty()) {
-        SurahListUI(
-            surahs = ArrayList(114),
-            onNavigateToAyatScreen = onNavigateToAyatScreen,
-            loading = false
-        )
+        PageErrorState(error)
     } else {
         SurahListUI(
             surahs = state.value,

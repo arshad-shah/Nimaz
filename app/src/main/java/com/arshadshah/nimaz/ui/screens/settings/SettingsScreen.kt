@@ -1,16 +1,18 @@
 package com.arshadshah.nimaz.ui.screens.settings
 
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,39 +20,27 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
-import com.arshadshah.nimaz.constants.AppConstants.THEME_DARK_RED
-import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
-import com.arshadshah.nimaz.constants.AppConstants.THEME_RAISIN_BLACK
-import com.arshadshah.nimaz.constants.AppConstants.THEME_RUSTIC_BROWN
-import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
+import com.arshadshah.nimaz.ui.components.common.SettingsOption
 import com.arshadshah.nimaz.ui.components.settings.LocationSettings
-import com.arshadshah.nimaz.ui.components.settings.SettingsAppearanceSection
 import com.arshadshah.nimaz.ui.components.settings.SettingsFooterSection
 import com.arshadshah.nimaz.ui.components.settings.SettingsPermissionsSection
 import com.arshadshah.nimaz.ui.components.settings.SettingsPrayerTimesSection
-import com.arshadshah.nimaz.ui.components.settings.ThemeOption
 import com.arshadshah.nimaz.ui.components.settings.getAppID
-import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_dark_primary
-import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_light_primary
-import com.arshadshah.nimaz.ui.theme.md_theme_dark_primary
-import com.arshadshah.nimaz.ui.theme.md_theme_light_primary
-import com.arshadshah.nimaz.ui.theme.raison_black_md_theme_dark_primary
-import com.arshadshah.nimaz.ui.theme.raison_black_md_theme_light_primary
-import com.arshadshah.nimaz.ui.theme.rustic_md_theme_dark_primary
-import com.arshadshah.nimaz.ui.theme.rustic_md_theme_light_primary
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.SettingsViewModel
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -58,70 +48,7 @@ import es.dmoral.toasty.Toasty
 
 
 // Theme options with descriptions and dynamic colors
-@Composable
-fun getThemeOptions(
-    context: Context,
-    isDarkMode: Boolean,
-    themeState: String
-): List<ThemeOption> {
-    return listOf(
-        ThemeOption(
-            themeName = "Forest Green",
-            themeKey = THEME_DEFAULT,
-            themeColor = if (isDarkMode) md_theme_dark_primary else md_theme_light_primary,
-            isSelected = themeState == THEME_DEFAULT,
-            description = "A calming forest green theme inspired by nature's tranquility"
-        ),
-        ThemeOption(
-            themeName = "Raisin Black",
-            themeKey = THEME_RAISIN_BLACK,
-            themeColor = if (isDarkMode)
-                raison_black_md_theme_light_primary
-            else
-                raison_black_md_theme_dark_primary,
-            isSelected = themeState == THEME_RAISIN_BLACK,
-            description = "An elegant darker theme with sophisticated raisin black tones"
-        ),
-        ThemeOption(
-            themeName = "Burgundy",
-            themeKey = THEME_DARK_RED,
-            themeColor = if (isDarkMode)
-                Dark_Red_md_theme_dark_primary
-            else
-                Dark_Red_md_theme_light_primary,
-            isSelected = themeState == THEME_DARK_RED,
-            description = "Rich burgundy tones for a classic and timeless appearance"
-        ),
-        ThemeOption(
-            themeName = "Rustic Brown",
-            themeKey = THEME_RUSTIC_BROWN,
-            themeColor = if (isDarkMode)
-                rustic_md_theme_dark_primary
-            else
-                rustic_md_theme_light_primary,
-            isSelected = themeState == THEME_RUSTIC_BROWN,
-            description = "Warm rustic brown hues reminiscent of natural earth tones"
-        ),
-        ThemeOption(
-            themeName = "System",
-            themeKey = THEME_SYSTEM,
-            themeColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (isDarkMode)
-                    dynamicDarkColorScheme(context).primary
-                else
-                    dynamicLightColorScheme(context).primary
-            } else {
-                if (isDarkMode)
-                    md_theme_dark_primary
-                else
-                    md_theme_light_primary
-                md_theme_light_primary
-            },
-            isSelected = themeState == THEME_SYSTEM,
-            description = "Automatically matches your system's theme preferences"
-        )
-    )
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,6 +58,7 @@ fun SettingsScreen(
     onNavigateToWebViewScreen: (String) -> Unit,
     onNavigateToLicencesScreen: () -> Unit,
     onNavigateToDebugScreen: () -> Unit,
+    onNavigateToAppearance: () -> Unit,
     activity: MainActivity,
     navController: NavHostController,
     viewModel: SettingsViewModel = hiltViewModel()
@@ -138,8 +66,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val locationSettingsState by viewModel.locationSettingsState.collectAsState()
-    val themeName by viewModel.themeName.collectAsState(initial = THEME_SYSTEM)
-    val isDarkMode by viewModel.isDarkMode.collectAsState(initial = false)
 
     // Check for updates on launch
     LaunchedEffect(Unit) {
@@ -151,7 +77,13 @@ fun SettingsScreen(
         PrivateSharedPreferences(context).getDataBoolean(AppConstants.DEBUG_MODE, false)
     }
 
+    // Scroll behavior for collapsing toolbar
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = {
@@ -170,6 +102,8 @@ fun SettingsScreen(
                         )
                     }
                 },
+                scrollBehavior = scrollBehavior,
+                modifier = Modifier.shadow(4.dp)
             )
         }
     ) { padding ->
@@ -197,6 +131,25 @@ fun SettingsScreen(
                 }
             )
 
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = MaterialTheme.shapes.extraLarge,
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                SettingsOption(
+                    icon = Icons.Default.ColorLens,
+                    title = "Appearance",
+                    description = "Customize the look and feel of the app",
+                    onClick = onNavigateToAppearance
+                )
+            }
+
 
             // Prayer Times Section
             SettingsPrayerTimesSection(
@@ -218,18 +171,6 @@ fun SettingsScreen(
                 }
             )
 
-            // Appearance Section
-            SettingsAppearanceSection(
-                isDarkMode = isDarkMode,
-                onDarkModeChange = { newValue ->
-                    viewModel.handleEvent(SettingsViewModel.SettingsEvent.DarkMode(newValue))
-                },
-                currentTheme = themeName,
-                themeOptions = getThemeOptions(context, isDarkMode, themeName),
-                onThemeSelect = { theme ->
-                    viewModel.handleEvent(SettingsViewModel.SettingsEvent.Theme(theme.themeKey))
-                }
-            )
 
             // Permissions Section
             SettingsPermissionsSection(

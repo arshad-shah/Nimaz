@@ -2,54 +2,73 @@ package com.arshadshah.nimaz.ui.components.calender
 
 
 import android.util.Log
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_DHUHR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_FAJR
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ISHA
+import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_MAGHRIB
+import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
-import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 import com.canopas.lib.showcase.IntroShowcase
 import com.canopas.lib.showcase.component.ShowcaseStyle
+import es.dmoral.toasty.Toasty
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
-import java.time.temporal.WeekFields
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -64,9 +83,10 @@ fun CalendarDay(
     isMenstruating: Boolean,
     isFasting: Boolean,
     onDateClick: (LocalDate) -> Unit,
+    onPrayerUpdate: (LocalDate, String, Boolean) -> Unit,
+    onFastingUpdate: (LocalFastTracker) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     Log.d("CalendarDay: showCaseState", showcaseState.toString())
     val hijriDate = remember(date) {
         HijrahDate.from(date)
@@ -88,7 +108,8 @@ fun CalendarDay(
         IslamicCalendarHelper.getImportanceLevel(importantDay.second)
     }
 
-    val showDialog = remember { mutableStateOf(false) }
+    // Dialog state for trackers and day details
+    var showDetailsDialog by remember { mutableStateOf(false) }
 
     IntroShowcase(
         showIntroShowCase = isToday && !showcaseState,
@@ -106,16 +127,14 @@ fun CalendarDay(
                         backgroundAlpha = 0.98f,
                         targetCircleColor = MaterialTheme.colorScheme.primaryContainer,
                     ),
-                    // specify the content to show to introduce app feature
                     content = {
                         CalendarDayShowcase()
                     }
                 )
-                .aspectRatio(0.7f)
                 .clip(MaterialTheme.shapes.small)
                 .padding(1.dp)
                 .border(
-                    width = 3.dp,
+                    width = 2.dp, // Reduced from 3dp
                     color = when {
                         !isFromCurrentMonth -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
                         isSelected -> MaterialTheme.colorScheme.primaryContainer
@@ -126,15 +145,10 @@ fun CalendarDay(
                     },
                     shape = MaterialTheme.shapes.small
                 )
-                .combinedClickable(
-                    enabled = isFromCurrentMonth,
-                    onClick = { onDateClick(date) },
-                    onLongClick = {
-                        if (importantDay.first) {
-                            showDialog.value = true
-                        }
-                    }
-                ),
+                .clickable(enabled = isFromCurrentMonth) {
+                    onDateClick(date)
+                    showDetailsDialog = true
+                },
             shape = MaterialTheme.shapes.small,
             contentColor = when {
                 !isFromCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
@@ -145,78 +159,932 @@ fun CalendarDay(
                 else -> MaterialTheme.colorScheme.onSurfaceVariant
             },
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center
+                    .padding(2.dp), // Reduced padding
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    if (importantDay.first || isFasting) {
-                        StatusIndicators(
-                            importantDay = importantDay,
-                            isFasting = isFasting
-                        )
-                    }
-
-                    DateDisplay(
-                        date = date,
-                        hijriDate = hijriDate,
-                        isSelected = isSelected,
-                        isToday = isToday
+                // Status indicators at the top
+                if (importantDay.first || isFasting) {
+                    CompactStatusIndicators(
+                        importantDay = importantDay,
+                        isFasting = isFasting
                     )
+                } else {
+                    // Add a small spacer when no indicators to maintain consistent spacing
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
 
-                    if (tracker != null) {
-                        PrayerProgressIndicators(tracker = tracker)
-                    }
+                // Date display (Gregorian and Hijri)
+                CompactDateDisplay(
+                    date = date,
+                    hijriDate = hijriDate,
+                    isSelected = isSelected,
+                    isToday = isToday
+                )
+
+                // Prayer progress indicators at the bottom
+                if (tracker != null) {
+                    CompactPrayerProgressIndicators(tracker = tracker)
+                    Spacer(modifier = Modifier.height(2.dp))
+                } else {
+                    // Add a small spacer when no tracker to maintain spacing
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
             }
         }
     }
 
-    if (showDialog.value) {
-        ImportantDayDialog(
-            title = importantDay.second,
-            onDismiss = { showDialog.value = false }
+
+    // Detailed day tracker dialog
+    if (showDetailsDialog && isFromCurrentMonth) {
+        DayDetailsDialog(
+            date = date,
+            hijriDate = hijriDate,
+            prayerTracker = tracker,
+            isMenstruating = isMenstruating,
+            isFasting = isFasting,
+            importantDay = importantDay,
+            onPrayerUpdate = onPrayerUpdate,
+            onFastingUpdate = onFastingUpdate,
+            onDismiss = { showDetailsDialog = false }
         )
     }
 }
 
 @Composable
-private fun StatusIndicators(
-    importantDay: Pair<Boolean, String>,
+fun DayDetailsDialog(
+    date: LocalDate,
+    hijriDate: HijrahDate,
+    prayerTracker: LocalPrayersTracker?,
+    isMenstruating: Boolean,
     isFasting: Boolean,
-    modifier: Modifier = Modifier
+    importantDay: Pair<Boolean, String>,
+    onPrayerUpdate: (LocalDate, String, Boolean) -> Unit,
+    onFastingUpdate: (LocalFastTracker) -> Unit,
+    onDismiss: () -> Unit
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    LocalContext.current
+    date.isAfter(LocalDate.now())
+
+    // Format dates
+    val gregFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+    val hijriFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+    val formattedGregorianDate = date.format(gregFormatter)
+    val formattedHijriDate = hijriDate.format(hijriFormatter)
+
+    // Tab selection state
+    val tabOptions = listOf("Prayers", "Fasting", "Info")
+    var selectedTabIndex by remember { mutableStateOf(0) }
+
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
     ) {
-        if (importantDay.first) {
-            StatusChip(
-                text = importantDay.second,
-                color = IslamicCalendarHelper.getImportantDayColor(importantDay),
-                modifier = Modifier.weight(1f)
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .scale(scale),
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 8.dp
+            ),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Header with dates and important day indicator
+                DateHeaderSection(
+                    gregorianDate = formattedGregorianDate,
+                    hijriDate = formattedHijriDate,
+                    importantDay = importantDay
+                )
+
+                // Tabs
+                TabSelector(
+                    options = tabOptions,
+                    selectedTabIndex = selectedTabIndex,
+                    onTabSelected = { selectedTabIndex = it },
+                    showInfoTab = importantDay.first
+                )
+
+                // Content based on selected tab
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(320.dp)
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        when (selectedTabIndex) {
+                            0 -> { // Prayers tab
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(8.dp)
+                                ) {
+                                    EnhancedPrayersTracker(
+                                        selectedDate = date,
+                                        tracker = prayerTracker ?: LocalPrayersTracker(date),
+                                        isMenstruating = isMenstruating,
+                                        onPrayerUpdate = onPrayerUpdate
+                                    )
+                                }
+                            }
+
+                            1 -> { // Fasting tab
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(8.dp)
+                                ) {
+                                    EnhancedFastingTracker(
+                                        selectedDate = date,
+                                        isMenstruating = isMenstruating,
+                                        isFasting = isFasting,
+                                        onFastingUpdate = onFastingUpdate
+                                    )
+                                }
+                            }
+
+                            2 -> { // Info tab (only visible for important days)
+                                if (importantDay.first) {
+                                    ImportantDayInfoContent(importantDay = importantDay)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Actions row
+                ActionsRow(onDismiss = onDismiss)
+            }
         }
-        if (isFasting) {
-            StatusChip(
-                text = "Fasted",
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.weight(1f)
+    }
+}
+
+@Composable
+private fun TabSelector(
+    options: List<String>,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
+    showInfoTab: Boolean
+) {
+    val visibleOptions = if (showInfoTab) options else options.dropLast(1)
+
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            visibleOptions.forEachIndexed { index, tabName ->
+                val isSelected = index == selectedTabIndex
+
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onTabSelected(index) },
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val icon = when (index) {
+                            0 -> painterResource(R.drawable.person_praying_icon) // Replace with your actual prayer icon resource
+                            1 -> painterResource(R.drawable.dark_icon)
+                            2 -> painterResource(R.drawable.info_icon) // Replace with your actual info icon resource
+                            else -> null
+                        }
+
+                        if (icon != null) {
+                            Icon(
+                                painter = icon,
+                                contentDescription = tabName,
+                                tint = if (isSelected)
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+
+                        Text(
+                            text = tabName,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (isSelected)
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DateHeaderSection(
+    gregorianDate: String,
+    hijriDate: String,
+    importantDay: Pair<Boolean, String>
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            Text(
+                text = hijriDate,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            // Gregorian date
+            Text(
+                text = gregorianDate,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
 }
 
 @Composable
-private fun DateDisplay(
+private fun ImportantDayInfoContent(importantDay: Pair<Boolean, String>) {
+    val description = IslamicCalendarHelper.getImportantDayDescription(importantDay)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "About ${importantDay.second}",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        // Suggested acts of worship for this day
+        val suggestedActs = getSuggestedActsForDay(importantDay.second)
+        if (suggestedActs.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Recommended Acts",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+
+            suggestedActs.forEach { act ->
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.rating_icon), // Replace with appropriate icon
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = act,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Helper function to get suggested acts for each important day
+private fun getSuggestedActsForDay(dayName: String): List<String> {
+    return when {
+        dayName.contains("Eid al-Fitr") -> listOf(
+            "Give Zakat al-Fitr before Eid prayer",
+            "Take a bath (ghusl) before prayer",
+            "Wear your best clothes",
+            "Recite takbeer on the way to prayer",
+            "Use different routes to and from prayer"
+        )
+
+        dayName.contains("Eid al-Adha") -> listOf(
+            "Perform Qurbani (sacrifice)",
+            "Take a bath (ghusl) before prayer",
+            "Recite takbeer on the way to prayer",
+            "Distribute meat to family, neighbors and poor"
+        )
+
+        dayName.contains("Arafah") -> listOf(
+            "Fast if not performing Hajj",
+            "Make abundant dua",
+            "Seek forgiveness"
+        )
+
+        dayName.contains("Ashura") -> listOf(
+            "Fast on the 9th and 10th of Muharram",
+            "Be generous to your family",
+            "Increase in voluntary acts of worship"
+        )
+
+        dayName.contains("Laylatul Qadr") -> listOf(
+            "Pray Tahajjud/night prayer",
+            "Recite Quran",
+            "Make abundant dua",
+            "Recite the dua for Laylatul Qadr"
+        )
+
+        dayName.contains("Ramadan") -> listOf(
+            "Fast from dawn to sunset",
+            "Pray Taraweeh",
+            "Read Quran",
+            "Give charity"
+        )
+
+        else -> emptyList()
+    }
+}
+
+@Composable
+private fun ActionsRow(onDismiss: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) {
+                    Text(
+                        text = "Close",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun TabbedDayDetailsDialogPreview() {
+    val date = LocalDate.now()
+    val hijriDate = HijrahDate.from(date)
+    val importantDay = Pair(true, "Day of Arafah")
+
+    NimazTheme {
+        DayDetailsDialog(
+            date = date,
+            hijriDate = hijriDate,
+            prayerTracker = LocalPrayersTracker(
+                date = date,
+                fajr = true,
+                dhuhr = true,
+                asr = false,
+                maghrib = false,
+                isha = false
+            ),
+            isMenstruating = false,
+            isFasting = true,
+            importantDay = importantDay,
+            onPrayerUpdate = { _, _, _ -> },
+            onFastingUpdate = { },
+            onDismiss = { }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun DayDetailsDialogPreview() {
+    val date = LocalDate.now()
+    val hijriDate = HijrahDate.from(date)
+    val importantDay = Pair(true, "Day of Arafah")
+
+    NimazTheme {
+        DayDetailsDialog(
+            date = date,
+            hijriDate = hijriDate,
+            prayerTracker = LocalPrayersTracker(
+                date = date,
+                fajr = true,
+                dhuhr = true,
+                asr = false,
+                maghrib = false,
+                isha = false
+            ),
+            isMenstruating = false,
+            isFasting = true,
+            importantDay = importantDay,
+            onPrayerUpdate = { _, _, _ -> },
+            onFastingUpdate = { },
+            onDismiss = { }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun DayDetailsDialogRegularDayPreview() {
+    val date = LocalDate.now()
+    val hijriDate = HijrahDate.from(date)
+    val importantDay = Pair(false, "")
+
+    NimazTheme {
+        DayDetailsDialog(
+            date = date,
+            hijriDate = hijriDate,
+            prayerTracker = LocalPrayersTracker(
+                date = date,
+                fajr = true,
+                dhuhr = false,
+                asr = false,
+                maghrib = false,
+                isha = false
+            ),
+            isMenstruating = false,
+            isFasting = false,
+            importantDay = importantDay,
+            onPrayerUpdate = { _, _, _ -> },
+            onFastingUpdate = { },
+            onDismiss = { }
+        )
+    }
+}
+
+@Composable
+fun EnhancedPrayersTracker(
+    selectedDate: LocalDate,
+    tracker: LocalPrayersTracker,
+    isMenstruating: Boolean,
+    onPrayerUpdate: (LocalDate, String, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val prayers = listOf(
+        PRAYER_NAME_FAJR to tracker.fajr,
+        PRAYER_NAME_DHUHR to tracker.dhuhr,
+        PRAYER_NAME_ASR to tracker.asr,
+        PRAYER_NAME_MAGHRIB to tracker.maghrib,
+        PRAYER_NAME_ISHA to tracker.isha
+    )
+
+    val progress = prayers.count { it.second }
+
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Prayer Tracker",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "$progress/5",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            // Prayer checkbox grid
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                prayers.forEach { (name, completed) ->
+                    EnhancedPrayerCheckbox(
+                        name = name,
+                        isCompleted = completed,
+                        enabled = !isMenstruating,
+                        onStatusChange = { isChecked ->
+                            onPrayerUpdate(selectedDate, name, isChecked)
+                        }
+                    )
+                }
+            }
+
+            if (isMenstruating) {
+                Surface(
+                    color = Color(0xFFFFCDD2),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Prayers tracking is disabled during menstruation",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFFB71C1C),
+                        modifier = Modifier.padding(8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EnhancedPrayerCheckbox(
+    name: String,
+    isCompleted: Boolean,
+    enabled: Boolean,
+    onStatusChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = { if (enabled) onStatusChange(!isCompleted) },
+        enabled = enabled,
+        color = when {
+            !enabled -> MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+            isCompleted -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+            else -> MaterialTheme.colorScheme.surface
+        },
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = if (isCompleted) 4.dp else 0.dp,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium,
+                color = when {
+                    !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    isCompleted -> MaterialTheme.colorScheme.onPrimaryContainer
+                    else -> MaterialTheme.colorScheme.onSurface
+                }
+            )
+
+            Surface(
+                shape = CircleShape,
+                color = when {
+                    !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    isCompleted -> MaterialTheme.colorScheme.onPrimaryContainer
+                    else -> MaterialTheme.colorScheme.surfaceVariant
+                },
+                border = if (!isCompleted && enabled)
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                else null,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (isCompleted) {
+                        Icon(
+                            imageVector = Icons.Rounded.Check,
+                            contentDescription = "Completed",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(1.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EnhancedFastingTracker(
+    selectedDate: LocalDate,
+    isMenstruating: Boolean,
+    isFasting: Boolean,
+    onFastingUpdate: (LocalFastTracker) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val isAfterToday = selectedDate.isAfter(LocalDate.now())
+    val formatter = DateTimeFormatter.ofPattern("dd MMM")
+
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Fasting Status",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp)
+            )
+
+            Surface(
+                onClick = {
+                    when {
+                        isMenstruating -> {
+                            Toasty.info(
+                                context,
+                                "Cannot track fasting during menstruation",
+                                Toasty.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        isAfterToday -> {
+                            Toasty.warning(
+                                context,
+                                "Cannot track fasting for future dates",
+                                Toasty.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        else -> {
+                            onFastingUpdate(
+                                LocalFastTracker(
+                                    date = selectedDate,
+                                    isFasting = !isFasting
+                                )
+                            )
+                        }
+                    }
+                },
+                enabled = !isMenstruating && !isAfterToday,
+                color = when {
+                    !(!isMenstruating && !isAfterToday) -> MaterialTheme.colorScheme.surface.copy(
+                        alpha = 0.5f
+                    )
+
+                    isFasting -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+                    else -> MaterialTheme.colorScheme.surface
+                },
+                shape = RoundedCornerShape(12.dp),
+                tonalElevation = if (isFasting) 4.dp else 0.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = when {
+                                selectedDate.isBefore(LocalDate.now()) -> if (isFasting)
+                                    "Fasted on ${formatter.format(selectedDate)}"
+                                else
+                                    "Did not fast"
+
+                                selectedDate.isEqual(LocalDate.now()) -> if (isFasting)
+                                    "Fasting today"
+                                else
+                                    "Not fasting today"
+
+                                else -> "Cannot track future dates"
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = if (isFasting) FontWeight.Bold else FontWeight.Normal,
+                            color = when {
+                                isAfterToday -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                isFasting -> MaterialTheme.colorScheme.onSecondaryContainer
+                                else -> MaterialTheme.colorScheme.onSurface
+                            }
+                        )
+
+                        if (isMenstruating) {
+                            Text(
+                                text = "Tracking disabled during menstruation",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFFB71C1C)
+                            )
+                        }
+                    }
+
+                    EnhancedFastingIndicator(
+                        isFasting = isFasting,
+                        enabled = !isMenstruating && !isAfterToday
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EnhancedFastingIndicator(
+    isFasting: Boolean,
+    enabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = when {
+            !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            isFasting -> MaterialTheme.colorScheme.secondaryContainer
+            else -> MaterialTheme.colorScheme.surfaceVariant
+        },
+        border = if (!isFasting && enabled)
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        else null,
+        modifier = modifier.size(width = 60.dp, height = 32.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = if (isFasting) "Yes" else "No",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = when {
+                    !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    isFasting -> MaterialTheme.colorScheme.onSecondaryContainer
+                    else -> MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun CompactStatusIndicators(
+    importantDay: Pair<Boolean, String>,
+    isFasting: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .height(if (importantDay.first && isFasting) 24.dp else 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (importantDay.first) {
+            CompactStatusChip(
+                text = importantDay.second,
+                color = IslamicCalendarHelper.getImportantDayColor(importantDay),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        if (isFasting) {
+            CompactStatusChip(
+                text = "Fasted",
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun CompactStatusChip(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    val displayText = when {
+        text.length > 12 -> text.take(10) + ".."
+        else -> text
+    }
+
+    Surface(
+        color = color.copy(alpha = 0.2f),
+        shape = RoundedCornerShape(2.dp),
+        border = BorderStroke(
+            width = 0.5.dp, // Thinner border
+            color = color.copy(alpha = 0.3f)
+        ),
+        modifier = modifier
+    ) {
+        Text(
+            text = displayText,
+            modifier = Modifier.padding(horizontal = 2.dp, vertical = 1.dp),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 6.sp // Smaller font size
+            ),
+            color = color.copy(alpha = 0.8f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun CompactDateDisplay(
     date: LocalDate,
     hijriDate: HijrahDate,
     isSelected: Boolean,
@@ -226,15 +1094,16 @@ private fun DateDisplay(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(1.dp) // Reduced spacing
     ) {
+        // Gregorian day
         Surface(
             color = if (isSelected)
                 MaterialTheme.colorScheme.primary
             else
                 MaterialTheme.colorScheme.secondaryContainer,
             shape = CircleShape,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(22.dp) // Slightly smaller
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -242,7 +1111,7 @@ private fun DateDisplay(
             ) {
                 Text(
                     text = date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.titleMedium.copy(
+                    style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = if (isToday || isSelected)
                             FontWeight.Bold else FontWeight.Normal
                     ),
@@ -254,9 +1123,12 @@ private fun DateDisplay(
             }
         }
 
+        // Hijri day
         Text(
             text = hijriDate.format(DateTimeFormatter.ofPattern("d")),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp // Smaller font size
+            ),
             color = when {
                 isSelected -> MaterialTheme.colorScheme.primary
                 isToday -> MaterialTheme.colorScheme.secondary
@@ -267,99 +1139,62 @@ private fun DateDisplay(
 }
 
 @Composable
-private fun PrayerProgressIndicators(
+private fun CompactPrayerProgressIndicators(
     tracker: LocalPrayersTracker,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp),
+            .padding(horizontal = 2.dp, vertical = 2.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PrayerDot(completed = tracker.fajr)
-        PrayerDot(completed = tracker.dhuhr)
-        PrayerDot(completed = tracker.asr)
-        PrayerDot(completed = tracker.maghrib)
-        PrayerDot(completed = tracker.isha)
+        CompactPrayerDot(completed = tracker.fajr)
+        CompactPrayerDot(completed = tracker.dhuhr)
+        CompactPrayerDot(completed = tracker.asr)
+        CompactPrayerDot(completed = tracker.maghrib)
+        CompactPrayerDot(completed = tracker.isha)
     }
 }
 
 @Composable
-private fun PrayerDot(completed: Boolean) {
+private fun CompactPrayerDot(completed: Boolean) {
     Surface(
         color = if (completed)
             MaterialTheme.colorScheme.primary
         else
             MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(4.dp),
-        modifier = Modifier.size(width = 4.dp, height = 4.dp),
-        tonalElevation = if (completed) 2.dp else 0.dp
+        shape = RoundedCornerShape(2.dp),
+        modifier = Modifier.size(3.dp), // Smaller dots
+        tonalElevation = if (completed) 1.dp else 0.dp
     ) {
         Spacer(modifier = Modifier.fillMaxSize())
     }
 }
 
 @Composable
-private fun ImportantDayDialog(
-    title: String,
-    onDismiss: () -> Unit
-) {
-    AlertDialogNimaz(
-        title = title,
-        onDismissRequest = onDismiss,
-        contentDescription = "Important Day Description",
-        confirmButtonText = "Close",
-        showDismissButton = false,
-        onConfirm = onDismiss,
-        onDismiss = {},
-        contentToShow = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = IslamicCalendarHelper.getImportantDayDescription(
-                            Pair(true, title)
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-private fun StatusChip(
-    text: String,
-    color: Color,
+fun CalendarDayShowcase(
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        color = color.copy(alpha = 0.2f),
-        shape = RoundedCornerShape(4.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = color.copy(alpha = 0.3f)
-        ),
-        modifier = modifier
-    ) {
+    Column(modifier = modifier) {
         Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = color.copy(alpha = 0.8f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            text = "Calendar Day",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
         )
+        Text(
+            text = "Tap to view prayer and fasting details",
+            color = Color.White,
+            fontSize = 16.sp
+        )
+        Text(
+            text = "See important Islamic dates and track your worship",
+            color = Color.White,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -537,70 +1372,72 @@ object IslamicCalendarHelper {
 
 }
 
-@Preview(showBackground = true)
+//EnhancedPrayersTracker
+@Preview
 @Composable
-fun CalendarDayPreview() {
-    val weekFields = remember { WeekFields.ISO }
-    val days = remember { generateDaysForMonth(YearMonth.now(), weekFields) }
+fun EnhancedPrayersTrackerPreview() {
     NimazTheme {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(max(100.dp, 500.dp)),
-            contentPadding = PaddingValues(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            items(days, key = { it.date.toString() }) { dayInfo ->
-                CalendarDay(
-                    showcaseState = false,
-                    onShowcaseDismiss = {
-
-                    },
-                    date = dayInfo.date,
-                    isSelected = dayInfo.date == LocalDate.now(),
-                    isToday = dayInfo.date == LocalDate.now(),
-                    isFromCurrentMonth = dayInfo.isFromCurrentMonth,
-                    tracker = LocalPrayersTracker(
-                        date = dayInfo.date,
-                        fajr = true,
-                        dhuhr = true,
-                        asr = true,
-                        maghrib = true,
-                        isha = true
-                    ),
-                    isMenstruating = false,
-                    isFasting = true,
-                    onDateClick = {},
-                )
-            }
-        }
+        EnhancedPrayersTracker(
+            selectedDate = LocalDate.now(),
+            tracker = LocalPrayersTracker(
+                date = LocalDate.now(),
+                fajr = true,
+                dhuhr = true,
+                asr = true,
+                maghrib = true,
+                isha = true
+            ),
+            isMenstruating = false,
+            onPrayerUpdate = { _, _, _ -> }
+        )
     }
 }
 
-
+//EnhancedFastingTracker
+@Preview
 @Composable
-fun CalendarDayShowcase(
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = "Calendar Day",
-            color = Color.White,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+fun EnhancedFastingTrackerPreview() {
+    NimazTheme {
+        EnhancedFastingTracker(
+            selectedDate = LocalDate.now(),
+            isMenstruating = false,
+            isFasting = true,
+            onFastingUpdate = { }
         )
-        Text(
-            text = "Tap to select date and view prayer progress",
-            color = Color.White,
-            fontSize = 16.sp
-        )
-        Text(
-            text = "Long press to view details of important days they are highlighted in the calendar",
-            color = Color.White,
-            fontSize = 16.sp
-        )
-        Spacer(modifier = Modifier.height(10.dp))
+    }
+}
+
+//day
+@Preview
+@Composable
+fun CalendarDayPreview() {
+    NimazTheme {
+        Column(
+            modifier = Modifier
+                .height(68.dp)
+                .width(48.dp)
+        ) {
+            CalendarDay(
+                showcaseState = false,
+                onShowcaseDismiss = { },
+                date = LocalDate.now(),
+                isSelected = false,
+                isToday = false,
+                isFromCurrentMonth = true,
+                tracker = LocalPrayersTracker(
+                    date = LocalDate.now(),
+                    fajr = true,
+                    dhuhr = true,
+                    asr = true,
+                    maghrib = true,
+                    isha = true
+                ),
+                isMenstruating = false,
+                isFasting = true,
+                onDateClick = { },
+                onPrayerUpdate = { _, _, _ -> },
+                onFastingUpdate = { }
+            )
+        }
     }
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.ui.components.common.ArrowRight
 import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
+import com.arshadshah.nimaz.ui.components.common.SettingsOption
 import com.arshadshah.nimaz.ui.theme.NimazTheme
 
 @Composable
@@ -65,54 +66,12 @@ fun SettingsPrayerTimesSection(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
-            // Settings Button
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onNavigateToPrayerSettings() }
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        modifier = Modifier.size(56.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.settings_sliders_icon),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .fillMaxSize(),
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "Configure Prayer Times",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Adjust calculation methods and preferences",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    ArrowRight()
-                }
-            }
+            SettingsOption(
+                icon = ImageVector.vectorResource(id = R.drawable.alarm_clock_icon),
+                title = "Prayer Times",
+                description = "Adjust calculation methods and preferences",
+                onClick = onNavigateToPrayerSettings
+            )
 
             // Quick Actions
             Surface(
@@ -172,55 +131,13 @@ private fun QuickActionButton(
     onClick: () -> Unit,
     showArrow: Boolean = false
 ) {
-    Surface(
-        onClick = onClick,
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                shape = CircleShape,
-                color = iconTint.copy(alpha = 0.12f),
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxSize()
-                )
-            }
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            if (showArrow) {
-                ArrowRight()
-            }
-        }
-    }
+    SettingsOption(
+        icon = ImageVector.vectorResource(id = icon),
+        title = title,
+        description = subtitle,
+        onClick = onClick
+    )
 }
 
 

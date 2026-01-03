@@ -4,12 +4,15 @@ import com.arshadshah.nimaz.data.local.models.HadithChapter
 import com.arshadshah.nimaz.data.local.models.HadithEntity
 import com.arshadshah.nimaz.data.local.models.HadithFavourite
 import com.arshadshah.nimaz.data.local.models.HadithMetadata
+import com.arshadshah.nimaz.data.local.models.KhatamProgress
+import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.LocalChapter
 import com.arshadshah.nimaz.data.local.models.LocalDua
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayerTimes
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.data.local.models.ReadingProgress
 import com.arshadshah.nimaz.data.local.systems.DuaSystem
 import com.arshadshah.nimaz.data.local.systems.HadithSystem
 import com.arshadshah.nimaz.data.local.systems.PrayerSystem
@@ -202,4 +205,100 @@ class DataStore @Inject constructor(
         tafsirSystem.getEditionsByAuthor(authorName)
 
     suspend fun getEditionCount() = tafsirSystem.getEditionCount()
+
+
+    suspend fun searchAyas(query: String) = quranSystem.searchAyas(query)
+
+    suspend fun searchAyasAdvanced(
+        query: String = "",
+        surahNumber: Int? = null,
+        juzNumber: Int? = null,
+        isFavorite: Int? = null,
+        isBookmarked: Int? = null,
+        hasNote: Int? = null
+    ) = quranSystem.searchAyasAdvanced(query, surahNumber, juzNumber, isFavorite, isBookmarked, hasNote)
+
+    suspend fun searchAyasInArabic(query: String) = quranSystem.searchAyasInArabic(query)
+    suspend fun searchAyasInEnglish(query: String) = quranSystem.searchAyasInEnglish(query)
+    suspend fun searchAyasInUrdu(query: String) = quranSystem.searchAyasInUrdu(query)
+
+    suspend fun searchFavoriteAyas(query: String) = quranSystem.searchFavoriteAyas(query)
+    suspend fun searchBookmarkedAyas(query: String) = quranSystem.searchBookmarkedAyas(query)
+    suspend fun searchAyasWithNotes(query: String) = quranSystem.searchAyasWithNotes(query)
+
+    suspend fun getRandomSearchAya(query: String) = quranSystem.getRandomSearchAya(query)
+    suspend fun countSearchResults(query: String) = quranSystem.countSearchResults(query)
+
+
+    // Reading Progress Operations
+    suspend fun getReadingProgress(surahNumber: Int) =
+        quranSystem.getReadingProgress(surahNumber)
+
+    suspend fun updateReadingProgress(progress: ReadingProgress) =
+        quranSystem.updateReadingProgress(progress)
+
+    suspend fun getRecentlyRead() =
+        quranSystem.getRecentlyRead()
+
+    //deleteReadingProgress
+    suspend fun deleteReadingProgress(progress: ReadingProgress) =
+        quranSystem.deleteReadingProgress(progress)
+
+    //clearAllReadingProgress
+    suspend fun clearAllReadingProgress() =
+        quranSystem.clearAllReadingProgress()
+
+    //getAllProgressOrderedByCompletion
+    suspend fun getAllProgressOrderedByCompletion() =
+        quranSystem.getAllProgressOrderedByCompletion()
+
+    // Navigation helpers
+    suspend fun getBookmarkedAyaNumbers(surahNumber: Int) =
+        quranSystem.getBookmarkedAyaNumbers(surahNumber)
+
+    suspend fun getFavoriteAyaNumbers(surahNumber: Int) =
+        quranSystem.getFavoriteAyaNumbers(surahNumber)
+
+    suspend fun getNotedAyaNumbers(surahNumber: Int) =
+        quranSystem.getNotedAyaNumbers(surahNumber)
+
+    suspend fun getPreviousAya(currentAyaNumber: Int) =
+        quranSystem.getPreviousAya(currentAyaNumber)
+
+    suspend fun getNextAya(currentAyaNumber: Int) =
+        quranSystem.getNextAya(currentAyaNumber)
+
+    suspend fun getTotalAyasInSurah(surahNumber: Int) =
+        quranSystem.getTotalAyasInSurah(surahNumber)
+
+    suspend fun getActiveKhatam() = quranSystem.getActiveKhatam()
+    suspend fun getAllKhatamSessions() = quranSystem.getAllKhatamSessions()
+    suspend fun getCompletedKhatams() = quranSystem.getCompletedKhatams()
+    suspend fun getKhatamById(id: Long) = quranSystem.getKhatamById(id)
+    suspend fun insertKhatam(khatam: KhatamSession) = quranSystem.insertKhatam(khatam)
+    suspend fun updateKhatam(khatam: KhatamSession) = quranSystem.updateKhatam(khatam)
+    suspend fun deleteKhatam(khatam: KhatamSession) = quranSystem.deleteKhatam(khatam)
+    suspend fun pauseKhatam(id: Long) = quranSystem.pauseKhatam(id)
+    suspend fun resumeKhatam(id: Long) = quranSystem.resumeKhatam(id)
+    suspend fun completeKhatam(id: Long, completionDate: String) =
+        quranSystem.completeKhatam(id, completionDate)
+    suspend fun updateKhatamProgress(id: Long, surah: Int, aya: Int, totalRead: Int) =
+        quranSystem.updateKhatamProgress(id, surah, aya, totalRead)
+
+    // Khatam Progress Operations
+    suspend fun getProgressForKhatam(khatamId: Long) = quranSystem.getProgressForKhatam(khatamId)
+    suspend fun getProgressForDate(khatamId: Long, date: String) =
+        quranSystem.getProgressForDate(khatamId, date)
+    suspend fun getAyasReadToday(khatamId: Long, date: String) =
+        quranSystem.getAyasReadToday(khatamId, date)
+    suspend fun insertKhatamProgress(progress: KhatamProgress) =
+        quranSystem.insertKhatamProgress(progress)
+    suspend fun deleteKhatamProgress(progress: KhatamProgress) =
+        quranSystem.deleteKhatamProgress(progress)
+    suspend fun deleteAllProgressForKhatam(khatamId: Long) =
+        quranSystem.deleteAllProgressForKhatam(khatamId)
+    suspend fun getAverageSessionDuration(khatamId: Long) =
+        quranSystem.getAverageSessionDuration(khatamId)
+    suspend fun getActiveDaysCount(khatamId: Long) =
+        quranSystem.getActiveDaysCount(khatamId)
 }

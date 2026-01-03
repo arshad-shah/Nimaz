@@ -10,16 +10,21 @@ import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.ViewAgenda
+import androidx.compose.material.icons.filled.ViewStream
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
 import com.arshadshah.nimaz.ui.components.common.NumberSelector
@@ -27,12 +32,13 @@ import com.arshadshah.nimaz.ui.components.common.RadioListItem
 import com.arshadshah.nimaz.utils.DisplaySettings
 import com.arshadshah.nimaz.viewModel.AyatViewModel
 
-//QuranBottomBar.kt
 @Composable
 fun QuranBottomBar(
     displaySettings: DisplaySettings,
     onEvent: (AyatViewModel.AyatEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isPaginationMode: Boolean = false,
+    onTogglePagination: () -> Unit = {}
 ) {
     // Dialog visibility states
     var showTranslationDialog by remember { mutableStateOf(false) }
@@ -54,38 +60,46 @@ fun QuranBottomBar(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Translation Button
-            IconButton(onClick = { showTranslationDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.Translate,
-                    contentDescription = "Translation Language",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            // Translation Button with Label
+            BottomBarItem(
+                icon = Icons.Default.Translate,
+                label = "Language",
+                contentDescription = "Translation Language",
+                onClick = { showTranslationDialog = true }
+            )
 
-            // Arabic Font Size Button
-            IconButton(onClick = { showArabicSizeDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.TextFields,
-                    contentDescription = "Arabic Font Size"
-                )
-            }
+            // Arabic Font Size Button with Label
+            BottomBarItem(
+                icon = Icons.Default.TextFields,
+                label = "Arabic Size",
+                contentDescription = "Arabic Font Size",
+                onClick = { showArabicSizeDialog = true }
+            )
 
-            // Translation Font Size Button
-            IconButton(onClick = { showTranslationSizeDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.FontDownload,
-                    contentDescription = "Translation Font Size"
-                )
-            }
+            // Translation Font Size Button with Label
+            BottomBarItem(
+                icon = Icons.Default.FontDownload,
+                label = "Trans. Size",
+                contentDescription = "Translation Font Size",
+                onClick = { showTranslationSizeDialog = true }
+            )
 
-            // Font Style Button
-            IconButton(onClick = { showFontStyleDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.Style,
-                    contentDescription = "Font Style"
-                )
-            }
+            // Font Style Button with Label
+            BottomBarItem(
+                icon = Icons.Default.Style,
+                label = "Font Style",
+                contentDescription = "Arabic Font Style",
+                onClick = { showFontStyleDialog = true }
+            )
+
+//            // Page Mode Toggle Button
+//            BottomBarItem(
+//                icon = if (isPaginationMode) Icons.Default.ViewAgenda else Icons.Default.ViewStream,
+//                label = if (isPaginationMode) "Page" else "Scroll",
+//                contentDescription = "Toggle Pagination Mode",
+//                onClick = onTogglePagination,
+//                isActive = isPaginationMode
+//            )
         }
     }
 
@@ -206,7 +220,7 @@ fun QuranBottomBar(
             dismissButtonText = "Close",
             contentHeight = 250.dp,
             contentDescription = "Font Style",
-            title = "Select Font Style",
+            title = "Select Arabic Font Style",
             contentToShow = {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -243,6 +257,35 @@ fun QuranBottomBar(
             onDismissRequest = { showFontStyleDialog = false },
             onConfirm = { showFontStyleDialog = false },
             onDismiss = { showFontStyleDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun BottomBarItem(
+    icon: ImageVector,
+    label: String,
+    contentDescription: String,
+    onClick: () -> Unit,
+    isActive: Boolean = false
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(horizontal = 4.dp)
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            maxLines = 1
         )
     }
 }
