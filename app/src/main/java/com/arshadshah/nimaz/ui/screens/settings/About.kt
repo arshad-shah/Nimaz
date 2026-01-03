@@ -456,7 +456,7 @@ private fun SocialLinksCard(
         SocialLink(
             icon = R.drawable.linkedin_icon,
             label = "LinkedIn",
-            url = "https://www.linkedin.com/in/arshad-shah/"
+            url = "https://www.linkedin.com/in/arshadshah/"
         ),
         SocialLink(
             icon = R.drawable.mail_icon,
