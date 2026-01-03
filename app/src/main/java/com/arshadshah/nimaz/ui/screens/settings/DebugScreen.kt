@@ -8,7 +8,6 @@ import android.os.StatFs
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,17 +23,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.ShowChart
 import androidx.compose.material.icons.automirrored.rounded.Sort
@@ -59,7 +55,6 @@ import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.ToggleOn
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -71,13 +66,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -86,10 +76,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,7 +86,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -107,6 +95,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.BackButton
+import com.arshadshah.nimaz.ui.components.common.NimazTextField
+import com.arshadshah.nimaz.ui.components.common.NimazTextFieldType
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -132,13 +124,8 @@ fun DebugScreen(navController: NavHostController) {
             TopAppBar(
                 title = { Text(text = "Debug Menu") },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 actions = {
@@ -176,20 +163,14 @@ fun DebugScreen(navController: NavHostController) {
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
-                OutlinedTextField(
+                NimazTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    placeholder = { Text("Search preferences...") },
-                    singleLine = true,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Search,
-                            contentDescription = null
-                        )
-                    }
+                    type = NimazTextFieldType.SEARCH,
+                    placeholder = "Search preferences...",
+                    leadingIconVector = Icons.Rounded.Search,
+                    onSearchClick = { },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
 
@@ -295,22 +276,29 @@ fun SharedPreferencesTab(searchQuery: String, snackbarHostState: SnackbarHostSta
     val sharedPreferences = remember { PrivateSharedPreferences(context) }
     val scope = rememberCoroutineScope()
 
-    var filter by remember { mutableStateOf(PreferenceFilter(searchQuery = searchQuery)) }
-    var showFilterSheet = remember { mutableStateOf(false) }
+    // Sync searchQuery from parent with local filter
+    var filter by remember { mutableStateOf(PreferenceFilter()) }
+
+    // Update filter when searchQuery changes from parent
+    LaunchedEffect(searchQuery) {
+        filter = filter.copy(searchQuery = searchQuery.trim())
+    }
+
+    var showFilterSheet by remember { mutableStateOf(false) }
 
     var showEditDialog by remember { mutableStateOf<PreferenceItem?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         PreferenceFilterBar(
             filter = filter,
-            onFilterClick = { showFilterSheet.value = true },
+            onFilterClick = { showFilterSheet = true },
             onFilterChange = { filter = it },
             onSortOptionSelected = { sortOption ->
                 filter = filter.copy(sortBy = sortOption)
             }
         )
 
-        val allData = remember(filter) {
+        val allData = remember(filter, sharedPreferences) {
             sharedPreferences.getAllData()
                 .map { (key, value) ->
                     PreferenceItem(
@@ -352,11 +340,11 @@ fun SharedPreferencesTab(searchQuery: String, snackbarHostState: SnackbarHostSta
         }
     }
 
-    if (showFilterSheet.value) {
+    if (showFilterSheet) {
         PreferenceFilterSheet(
             currentFilter = filter,
             onFilterChange = { filter = it },
-            onDismiss = { showFilterSheet.value = false }
+            onDismiss = { showFilterSheet = false }
         )
     }
 
@@ -512,129 +500,195 @@ private fun PreferenceFilterBar(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PreferenceFilterSheet(
     currentFilter: PreferenceFilter,
     onFilterChange: (PreferenceFilter) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(
+    AlertDialogNimaz(
+        icon = painterResource(id = R.drawable.settings_icon),
+        title = "Filter Preferences",
+        contentDescription = "Filter and sort preferences",
+        contentHeight = 450.dp,
+        cardContent = false,
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState()
+        onConfirm = onDismiss,
+        confirmButtonText = "Apply",
+        showDismissButton = true,
+        onDismiss = {
+            // Reset filters
+            onFilterChange(PreferenceFilter())
+            onDismiss()
+        },
+        dismissButtonText = "Reset",
+        action = {
+            // Active filters count badge
+            val activeFilters = currentFilter.categories.size + currentFilter.types.size
+            if (activeFilters > 0) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "$activeFilters active",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+        },
+        contentToShow = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Categories Section
+                FilterSection(title = "Categories") {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PreferenceCategory.entries.forEach { category ->
+                            FilterChip(
+                                selected = category in currentFilter.categories,
+                                onClick = {
+                                    val newCategories = if (category in currentFilter.categories) {
+                                        currentFilter.categories - category
+                                    } else {
+                                        currentFilter.categories + category
+                                    }
+                                    onFilterChange(currentFilter.copy(categories = newCategories))
+                                },
+                                label = {
+                                    Text(
+                                        category.name.split("_").joinToString(" ").lowercase()
+                                            .replaceFirstChar { it.uppercase() },
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = category.getIcon(),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Types Section
+                FilterSection(title = "Types") {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PreferenceType.entries.forEach { type ->
+                            FilterChip(
+                                selected = type in currentFilter.types,
+                                onClick = {
+                                    val newTypes = if (type in currentFilter.types) {
+                                        currentFilter.types - type
+                                    } else {
+                                        currentFilter.types + type
+                                    }
+                                    onFilterChange(currentFilter.copy(types = newTypes))
+                                },
+                                label = {
+                                    Text(
+                                        type.name.lowercase().replaceFirstChar { it.uppercase() },
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Sort Options Section
+                FilterSection(title = "Sort By") {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        PreferenceSortOption.entries.forEach { sortOption ->
+                            SortOptionItem(
+                                label = when (sortOption) {
+                                    PreferenceSortOption.KEY_ASC -> "Key (A to Z)"
+                                    PreferenceSortOption.KEY_DESC -> "Key (Z to A)"
+                                    PreferenceSortOption.TYPE -> "Type"
+                                    PreferenceSortOption.CATEGORY -> "Category"
+                                    PreferenceSortOption.LAST_MODIFIED -> "Last Modified"
+                                },
+                                isSelected = sortOption == currentFilter.sortBy,
+                                onClick = { onFilterChange(currentFilter.copy(sortBy = sortOption)) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun FilterSection(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Filter Preferences",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            // Categories
-            Text(
-                text = "Categories",
+                text = title,
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            FlowRow(
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                PreferenceCategory.entries.forEach { category ->
-                    FilterChip(
-                        selected = category in currentFilter.categories,
-                        onClick = {
-                            val newCategories = if (category in currentFilter.categories) {
-                                currentFilter.categories - category
-                            } else {
-                                currentFilter.categories + category
-                            }
-                            onFilterChange(currentFilter.copy(categories = newCategories))
-                        },
-                        label = {
-                            Text(
-                                category.name.split("_").joinToString(" ").lowercase()
-                                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = category.getIcon(),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
-                    )
-                }
-            }
+            content()
+        }
+    }
+}
 
-            // Types
-            Text(
-                text = "Types",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp)
+@Composable
+private fun SortOptionItem(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            RadioButton(
+                selected = isSelected,
+                onClick = onClick
             )
-            FlowRow(
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                PreferenceType.entries.forEach { type ->
-                    FilterChip(
-                        selected = type in currentFilter.types,
-                        onClick = {
-                            val newTypes = if (type in currentFilter.types) {
-                                currentFilter.types - type
-                            } else {
-                                currentFilter.types + type
-                            }
-                            onFilterChange(currentFilter.copy(types = newTypes))
-                        },
-                        label = {
-                            Text(
-                                type.name.lowercase()
-                                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() })
-                        },
-                        modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
-                    )
-                }
-            }
-
-            // Sort options
             Text(
-                text = "Sort By",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp)
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
             )
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                PreferenceSortOption.values().forEach { sortOption ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
-                    ) {
-                        RadioButton(
-                            selected = sortOption == currentFilter.sortBy,
-                            onClick = { onFilterChange(currentFilter.copy(sortBy = sortOption)) },
-                        )
-                        Text(
-                            text = when (sortOption) {
-                                PreferenceSortOption.KEY_ASC -> "Key (A to Z)"
-                                PreferenceSortOption.KEY_DESC -> "Key (Z to A)"
-                                PreferenceSortOption.TYPE -> "Type"
-                                PreferenceSortOption.CATEGORY -> "Category"
-                                PreferenceSortOption.LAST_MODIFIED -> "Last Modified"
-                            }
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -804,158 +858,198 @@ private fun SharedTabCard(
     ElevatedCard(
         onClick = onExpandClick,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(16.dp)
-            ),
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(40.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Icon(
-                            imageVector = when (item.type) {
-                                PreferenceType.STRING -> Icons.Rounded.TextFields
-                                PreferenceType.BOOLEAN -> Icons.Rounded.ToggleOn
-                                PreferenceType.INT, PreferenceType.LONG -> Icons.Rounded.Numbers
-                                PreferenceType.FLOAT, PreferenceType.DOUBLE -> Icons.AutoMirrored.Rounded.ShowChart
-                                PreferenceType.INT_SET -> Icons.AutoMirrored.Rounded.List
-                            },
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .size(24.dp)
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = when (item.type) {
+                                        PreferenceType.STRING -> Icons.Rounded.TextFields
+                                        PreferenceType.BOOLEAN -> Icons.Rounded.ToggleOn
+                                        PreferenceType.INT, PreferenceType.LONG -> Icons.Rounded.Numbers
+                                        PreferenceType.FLOAT, PreferenceType.DOUBLE -> Icons.AutoMirrored.Rounded.ShowChart
+                                        PreferenceType.INT_SET -> Icons.AutoMirrored.Rounded.List
+                                    },
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = item.displayName,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                maxLines = if (expanded) Int.MAX_VALUE else 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = item.key,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
-                    Column {
-                        Text(
-                            text = item.key,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            maxLines = if (expanded) Int.MAX_VALUE else 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Type badge
                         Surface(
                             color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(4.dp),
-                            modifier = Modifier.padding(top = 4.dp)
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
                                 text = item.type.name.lowercase(),
                                 style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
+
+                        // Expand icon
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                                contentDescription = if (expanded) "Show less" else "Show more",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(6.dp).size(18.dp)
+                            )
+                        }
                     }
-                }
-                IconButton(
-                    onClick = onExpandClick,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                        contentDescription = if (expanded) "Show less" else "Show more",
-                        modifier = Modifier.size(20.dp)
-                    )
                 }
             }
 
+            // Content Section (when expanded)
             AnimatedVisibility(
                 visible = expanded,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Value Section
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             Text(
-                                text = "Value",
+                                text = "Current Value",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Text(
-                                text = item.value.toString(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                            Surface(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp),
+                                tonalElevation = 2.dp
+                            ) {
+                                Text(
+                                    text = item.value.toString(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(12.dp)
+                                )
+                            }
                         }
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    // Actions Section
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = onDeleteClick,
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
-                            )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                Icons.Rounded.Delete,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text("Delete")
-                        }
-                        Button(
-                            onClick = onEditClick,
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
-                        ) {
-                            Icon(
-                                Icons.Rounded.Edit,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text("Edit")
+                            OutlinedButton(
+                                onClick = onDeleteClick,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.error
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Rounded.Delete,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("Delete")
+                            }
+                            Button(
+                                onClick = onEditClick,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Rounded.Edit,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("Edit")
+                            }
                         }
                     }
                 }
@@ -979,10 +1073,9 @@ fun StatisticsTab(
     }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Shared Preferences Card
         item {
@@ -1070,83 +1163,90 @@ private fun StatisticsCard(
     content: @Composable () -> Unit
 ) {
     ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(16.dp)
-            ),
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         onClick = onExpandClick
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Header Section
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.size(40.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .size(24.dp)
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                IconButton(
-                    onClick = onExpandClick,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                        contentDescription = if (isExpanded) "Show less" else "Show more",
-                        modifier = Modifier.size(20.dp)
-                    )
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                            contentDescription = if (isExpanded) "Show less" else "Show more",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(6.dp).size(18.dp)
+                        )
+                    }
                 }
             }
 
+            // Content Section (when expanded)
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    content()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        content()
+                    }
                 }
             }
         }
@@ -1159,30 +1259,75 @@ private fun StatRow(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = 1.dp,
+        modifier = modifier.fillMaxWidth()
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
-            modifier = Modifier.padding(start = 8.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = value,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    icon: ImageVector
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }
@@ -1252,16 +1397,15 @@ fun ActionsTab(
 
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Data Management Section
         item {
-            Text(
-                text = "Data Management",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp)
+            SectionHeader(
+                title = "Data Management",
+                icon = Icons.Rounded.Delete
             )
         }
 
@@ -1276,12 +1420,11 @@ fun ActionsTab(
             )
         }
 
+        // Import/Export Section
         item {
-            Text(
-                text = "Import/Export",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            SectionHeader(
+                title = "Import / Export",
+                icon = Icons.Default.Upload
             )
         }
 
@@ -1314,29 +1457,50 @@ fun ActionsTab(
 
     // Confirm Dialog for clearing data
     if (showConfirmDialog) {
-        AlertDialog(
+        AlertDialogNimaz(
+            icon = painterResource(id = R.drawable.settings_icon),
+            title = "Clear All Preferences?",
+            contentDescription = "Confirm clearing all preferences",
+            description = "This action will delete all saved preferences and cannot be undone.",
+            contentHeight = 150.dp,
+            cardContent = false,
             onDismissRequest = { showConfirmDialog = false },
-            title = { Text("Clear All Preferences?") },
-            text = { Text("This action will delete all saved preferences and cannot be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            prefs.clearData()
-                            snackbarHostState.showSnackbar("All preferences cleared")
-                            showConfirmDialog = false
-                        }
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Clear All")
+            onConfirm = {
+                scope.launch {
+                    prefs.clearData()
+                    snackbarHostState.showSnackbar("All preferences cleared")
+                    showConfirmDialog = false
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showConfirmDialog = false }) {
-                    Text("Cancel")
+            confirmButtonText = "Clear All",
+            onDismiss = { showConfirmDialog = false },
+            dismissButtonText = "Cancel",
+            contentToShow = {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "Warning: This cannot be undone!",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         )
@@ -1350,37 +1514,7 @@ fun ActionCard(
     description: String,
     icon: ImageVector,
     modifier: Modifier = Modifier,
-    iconTint: Color = LocalContentColor.current,
-    isEnabled: Boolean = true,
-    isLoading: Boolean = false,
-    rightContent: @Composable (() -> Unit)? = null,
-    onClick: () -> Unit
-) {
-    ActionCardImpl(
-        title = title,
-        description = description,
-        iconContent = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(24.dp)
-            )
-        },
-        modifier = modifier,
-        isEnabled = isEnabled,
-        isLoading = isLoading,
-        rightContent = rightContent,
-        onClick = onClick
-    )
-}
-
-@Composable
-private fun ActionCardImpl(
-    title: String,
-    description: String,
-    iconContent: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
     isEnabled: Boolean = true,
     isLoading: Boolean = false,
     rightContent: @Composable (() -> Unit)? = null,
@@ -1388,58 +1522,86 @@ private fun ActionCardImpl(
 ) {
     ElevatedCard(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 72.dp)
-            .animateContentSize(),
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         enabled = isEnabled && !isLoading
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier.size(24.dp),
-                contentAlignment = Alignment.Center
+            // Icon Section
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = if (iconTint == MaterialTheme.colorScheme.error)
+                    MaterialTheme.colorScheme.errorContainer
+                else
+                    MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(48.dp)
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    iconContent()
+                Box(contentAlignment = Alignment.Center) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = iconTint,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
 
+            // Content Section
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
+            // Right content or chevron
             if (rightContent != null) {
-                Box(
-                    modifier = Modifier.padding(start = 8.dp),
-                    contentAlignment = Alignment.Center
+                rightContent()
+            } else {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 ) {
-                    rightContent()
+                    Icon(
+                        imageVector = Icons.Rounded.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .size(18.dp)
+                    )
                 }
             }
         }
@@ -1507,49 +1669,209 @@ fun AddPreferenceDialog(
 ) {
     var key by remember { mutableStateOf("") }
     var value by remember { mutableStateOf("") }
+    var selectedType by remember { mutableStateOf(PreferenceType.STRING) }
 
-    AlertDialog(
+    AlertDialogNimaz(
+        icon = painterResource(id = R.drawable.plus_icon),
+        title = "Add New Preference",
+        contentDescription = "Add a new shared preference",
+        contentHeight = 350.dp,
+        cardContent = false,
         onDismissRequest = onDismiss,
-        title = { Text("Add New Preference") },
-        text = {
+        onConfirm = {
+            onAdd(key, value)
+            onDismiss()
+        },
+        confirmButtonText = "Add",
+        showConfirmButton = key.isNotBlank() && value.isNotBlank(),
+        onDismiss = onDismiss,
+        dismissButtonText = "Cancel",
+        contentToShow = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedTextField(
+                NimazTextField(
                     value = key,
                     onValueChange = { key = it },
-                    label = { Text("Key") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    label = "Key",
+                    placeholder = "Enter preference key"
                 )
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = { value = it },
-                    label = { Text("Value") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onAdd(key, value)
 
-                    onDismiss()
-                },
-                enabled = key.isNotBlank() && value.isNotBlank()
-            ) {
-                Text("Add")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                // Type selector
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Type",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            listOf(PreferenceType.STRING, PreferenceType.BOOLEAN, PreferenceType.INT, PreferenceType.DOUBLE).forEach { type ->
+                                FilterChip(
+                                    selected = selectedType == type,
+                                    onClick = {
+                                        selectedType = type
+                                        if (type == PreferenceType.BOOLEAN && value !in listOf("true", "false")) {
+                                            value = "false"
+                                        }
+                                    },
+                                    label = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Value input based on type
+                when (selectedType) {
+                    PreferenceType.BOOLEAN -> {
+                        BooleanSelector(
+                            value = value == "true",
+                            onValueChange = { value = it.toString() }
+                        )
+                    }
+                    PreferenceType.INT, PreferenceType.LONG -> {
+                        NimazTextField(
+                            value = value,
+                            onValueChange = { value = it },
+                            type = NimazTextFieldType.NUMBER,
+                            label = "Value",
+                            placeholder = "Enter integer value"
+                        )
+                    }
+                    PreferenceType.FLOAT, PreferenceType.DOUBLE -> {
+                        NimazTextField(
+                            value = value,
+                            onValueChange = { value = it },
+                            type = NimazTextFieldType.NUMBER,
+                            label = "Value",
+                            placeholder = "Enter decimal value"
+                        )
+                    }
+                    else -> {
+                        NimazTextField(
+                            value = value,
+                            onValueChange = { value = it },
+                            label = "Value",
+                            placeholder = "Enter string value"
+                        )
+                    }
+                }
             }
         }
     )
+}
+
+@Composable
+private fun BooleanSelector(
+    value: Boolean,
+    onValueChange: (Boolean) -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Value",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // True option
+                Surface(
+                    onClick = { onValueChange(true) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (value) MaterialTheme.colorScheme.primaryContainer
+                           else MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(
+                        1.dp,
+                        if (value) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = value,
+                            onClick = { onValueChange(true) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "True",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (value) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (value) MaterialTheme.colorScheme.onPrimaryContainer
+                                   else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+
+                // False option
+                Surface(
+                    onClick = { onValueChange(false) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (!value) MaterialTheme.colorScheme.errorContainer
+                           else MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(
+                        1.dp,
+                        if (!value) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = !value,
+                            onClick = { onValueChange(false) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "False",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (!value) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (!value) MaterialTheme.colorScheme.onErrorContainer
+                                   else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -1558,72 +1880,132 @@ fun EditPreferenceDialog(
     onDismiss: () -> Unit,
     onSave: (String, String) -> Unit
 ) {
-    var key by remember { mutableStateOf(item.key) }
     var value by remember { mutableStateOf(item.value.toString()) }
     var hasError by remember { mutableStateOf(false) }
 
-    AlertDialog(
+    // Calculate content height based on type
+    val contentHeight = when (item.type) {
+        PreferenceType.BOOLEAN -> 180.dp
+        PreferenceType.INT_SET -> 250.dp
+        else -> 200.dp
+    }
+
+    AlertDialogNimaz(
+        icon = painterResource(id = R.drawable.settings_icon),
+        title = "Edit Preference",
+        contentDescription = "Edit shared preference value",
+        description = "Key: ${item.key}",
+        contentHeight = contentHeight,
+        cardContent = false,
         onDismissRequest = onDismiss,
-        title = { Text("Edit Preference") },
-        text = {
+        onConfirm = {
+            onSave(item.key, value)
+            onDismiss()
+        },
+        confirmButtonText = "Save",
+        showConfirmButton = !hasError && value.isNotBlank(),
+        onDismiss = onDismiss,
+        dismissButtonText = "Cancel",
+        action = {
+            // Type badge
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = item.type.name.lowercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        },
+        contentToShow = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedTextField(
-                    value = key,
-                    onValueChange = { key = it },
-                    label = { Text("Key") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false // Prevent key editing
-                )
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = {
-                        value = it
-                        hasError = false
-                        try {
-                            when (item.type) {
-                                PreferenceType.BOOLEAN -> it.toBoolean()
-                                PreferenceType.INT -> it.toInt()
-                                PreferenceType.LONG -> it.toLong()
-                                PreferenceType.FLOAT -> it.toFloat()
-                                PreferenceType.DOUBLE -> it.toDouble()
-                                PreferenceType.INT_SET -> {
-                                    it.trim('[', ']').split(",").map { num -> num.trim().toInt() }
+                when (item.type) {
+                    PreferenceType.BOOLEAN -> {
+                        BooleanSelector(
+                            value = value.lowercase() == "true",
+                            onValueChange = { value = it.toString() }
+                        )
+                    }
+                    PreferenceType.INT, PreferenceType.LONG -> {
+                        NimazTextField(
+                            value = value,
+                            onValueChange = {
+                                value = it
+                                hasError = try {
+                                    if (item.type == PreferenceType.INT) it.toInt()
+                                    else it.toLong()
+                                    false
+                                } catch (e: Exception) {
+                                    it.isNotBlank()
                                 }
-
-                                else -> Unit
-                            }
-                        } catch (e: Exception) {
-                            hasError = true
-                        }
-                    },
-                    label = { Text("Value (${item.type.name})") },
-                    supportingText = if (hasError) {
-                        { Text("Invalid format for ${item.type.name}") }
-                    } else null,
-                    isError = hasError,
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onSave(key, value)
-                    onDismiss()
-                },
-                enabled = !hasError && value.isNotBlank()
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                            },
+                            type = NimazTextFieldType.NUMBER,
+                            label = "Value",
+                            placeholder = "Enter ${item.type.name.lowercase()} value",
+                            isError = hasError,
+                            errorMessage = if (hasError) "Invalid ${item.type.name.lowercase()} format" else null
+                        )
+                    }
+                    PreferenceType.FLOAT, PreferenceType.DOUBLE -> {
+                        NimazTextField(
+                            value = value,
+                            onValueChange = {
+                                value = it
+                                hasError = try {
+                                    if (item.type == PreferenceType.FLOAT) it.toFloat()
+                                    else it.toDouble()
+                                    false
+                                } catch (e: Exception) {
+                                    it.isNotBlank()
+                                }
+                            },
+                            type = NimazTextFieldType.NUMBER,
+                            label = "Value",
+                            placeholder = "Enter decimal value",
+                            isError = hasError,
+                            errorMessage = if (hasError) "Invalid decimal format" else null
+                        )
+                    }
+                    PreferenceType.INT_SET -> {
+                        NimazTextField(
+                            value = value,
+                            onValueChange = {
+                                value = it
+                                hasError = try {
+                                    it.trim('[', ']').split(",").map { num -> num.trim().toInt() }
+                                    false
+                                } catch (e: Exception) {
+                                    it.isNotBlank()
+                                }
+                            },
+                            type = NimazTextFieldType.MULTILINE,
+                            label = "Value",
+                            placeholder = "Enter comma-separated integers (e.g., 1, 2, 3)",
+                            isError = hasError,
+                            errorMessage = if (hasError) "Invalid format. Use comma-separated integers" else null,
+                            minLines = 2,
+                            maxLines = 4
+                        )
+                    }
+                    PreferenceType.STRING -> {
+                        NimazTextField(
+                            value = value,
+                            onValueChange = { value = it },
+                            type = NimazTextFieldType.MULTILINE,
+                            label = "Value",
+                            placeholder = "Enter string value",
+                            minLines = 2,
+                            maxLines = 4
+                        )
+                    }
+                }
             }
         }
     )

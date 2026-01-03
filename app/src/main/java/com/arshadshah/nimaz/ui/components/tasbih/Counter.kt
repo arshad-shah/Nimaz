@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -25,7 +24,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,10 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.NimazTextField
+import com.arshadshah.nimaz.ui.components.common.NimazTextFieldType
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction1
 
@@ -79,25 +80,28 @@ fun Counter(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Stats Card
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(24.dp),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+                shape = MaterialTheme.shapes.extraLarge,
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
@@ -106,8 +110,8 @@ fun Counter(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             StatItem(
@@ -131,82 +135,112 @@ fun Counter(
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(24.dp),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+                shape = MaterialTheme.shapes.extraLarge,
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Counter Button Surface
                     Surface(
                         modifier = Modifier
-                            .size(200.dp)
-                            .clickable {
-                                if (objective.value > 0 && count.value + 1 > objective.value) {
-                                    setLap(lap.value + 1)
-                                    setCounter(0)
-                                    setLapCounter(lapCounter.value + 1)
-                                    if (vibrationAllowed.value) {
-                                        performHapticFeedback(context, true)
-                                    }
-                                } else {
-                                    increment()
-                                    if (vibrationAllowed.value) {
-                                        performHapticFeedback(context, true)
+                            .fillMaxWidth()
+                            .weight(1f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .size(200.dp)
+                                    .clickable {
+                                        if (objective.value > 0 && count.value + 1 > objective.value) {
+                                            setLap(lap.value + 1)
+                                            setCounter(0)
+                                            setLapCounter(lapCounter.value + 1)
+                                            if (vibrationAllowed.value) {
+                                                performHapticFeedback(context, true)
+                                            }
+                                        } else {
+                                            increment()
+                                            if (vibrationAllowed.value) {
+                                                performHapticFeedback(context, true)
+                                            }
+                                        }
+                                    },
+                                shape = RoundedCornerShape(100.dp),
+                                color = MaterialTheme.colorScheme.primaryContainer
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = count.value.toString(),
+                                        style = MaterialTheme.typography.displayLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    if (objective.value > 0) {
+                                        Text(
+                                            text = "${((count.value.toFloat() / objective.value) * 100).toInt()}%",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                        )
                                     }
                                 }
-                            },
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = count.value.toString(),
-                                style = MaterialTheme.typography.displayLarge,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            if (objective.value > 0) {
-                                Text(
-                                    text = "${((count.value.toFloat() / objective.value) * 100).toInt()}%",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                )
                             }
                         }
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
+                    // Action Buttons
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        ActionButton(
-                            icon = Icons.Rounded.Remove,
-                            label = "Decrement",
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            onClick = decrement
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ActionButton(
+                                icon = Icons.Rounded.Remove,
+                                label = "Decrement",
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                onClick = decrement
+                            )
 
-                        ActionButton(
-                            icon = Icons.Rounded.Edit,
-                            label = "Set Target",
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            onClick = { showObjectiveDialog.value = true }
-                        )
+                            ActionButton(
+                                icon = Icons.Rounded.Edit,
+                                label = "Set Target",
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                onClick = { showObjectiveDialog.value = true }
+                            )
 
-                        ActionButton(
-                            icon = Icons.Rounded.Refresh,
-                            label = "Reset",
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            onClick = resetTasbihState
-                        )
+                            ActionButton(
+                                icon = Icons.Rounded.Refresh,
+                                label = "Reset",
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                onClick = resetTasbihState
+                            )
+                        }
                     }
                 }
             }
@@ -243,22 +277,24 @@ private fun StatItem(
 ) {
     Surface(
         color = containerColor,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(10.dp),
         modifier = modifier
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
             )
             Text(
                 text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
             )
         }
     }
@@ -269,22 +305,25 @@ private fun ActionButton(
     icon: ImageVector,
     label: String,
     containerColor: Color,
+    contentColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
-            .size(64.dp)
+            .size(56.dp)
             .clickable(onClick = onClick),
-        shape = CircleShape,
+        shape = RoundedCornerShape(16.dp),
         color = containerColor
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            modifier = Modifier.padding(16.dp),
-            tint = MaterialTheme.colorScheme.onSecondaryContainer
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                modifier = Modifier.size(24.dp),
+                tint = contentColor
+            )
+        }
     }
 }
 
@@ -298,24 +337,20 @@ private fun ObjectiveDialog(
         title = "Set Target",
         contentDescription = "Set the target count for the tasbih",
         contentToShow = {
-            Column {
-                OutlinedTextField(
-                    value = if (currentObjective == 0) "" else currentObjective.toString(),
-                    onValueChange = { value ->
-                        if (value.isNotEmpty()) onObjectiveSet(value.toIntOrNull() ?: 0)
-                        else onObjectiveSet(0)
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    singleLine = true,
-                    label = { Text("Target Count") }
-                )
-            }
+            NimazTextField(
+                value = if (currentObjective == 0) "" else currentObjective.toString(),
+                onValueChange = { value ->
+                    if (value.isNotEmpty()) onObjectiveSet(value.toIntOrNull() ?: 0)
+                    else onObjectiveSet(0)
+                },
+                type = NimazTextFieldType.NUMBER,
+                label = "Target Count",
+                placeholder = "Enter target",
+                requestFocus = true
+            )
         },
-        contentHeight = 100.dp,
-        cardContent = true,
+        contentHeight = 120.dp,
+        cardContent = false,
         onDismissRequest = onDismiss,
         onConfirm = onDismiss,
         confirmButtonText = "Set",
@@ -333,11 +368,13 @@ private fun ResetDialog(
         title = "Reset Counter",
         contentDescription = "Are you sure you want to reset the counter?",
         contentToShow = {
-            Column {
-                Text("Are you sure you want to reset the counter?")
-            }
+            Text(
+                text = "Are you sure you want to reset the counter?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         },
-        contentHeight = 100.dp,
+        contentHeight = 60.dp,
         cardContent = true,
         onDismissRequest = onDismiss,
         onConfirm = {

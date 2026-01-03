@@ -6,12 +6,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -59,14 +59,15 @@ fun IntroLegalAgreement(
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
             // Terms of Service Section
@@ -149,19 +150,18 @@ fun IntroLegalAgreement(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
                     Surface(
-                        shape = CircleShape,
+                        shape = RoundedCornerShape(8.dp),
                         color = if (bothAccepted)
                             MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.surfaceVariant,
                         modifier = Modifier
-                            .size(28.dp)
+                            .size(32.dp)
                             .clickable {
                                 if (!bothAccepted) {
                                     viewModel.handleEvent(
@@ -188,26 +188,28 @@ fun IntroLegalAgreement(
                                 }
                             }
                     ) {
-                        Icon(
-                            imageVector = if (bothAccepted)
-                                Icons.Rounded.Check
-                            else
-                                Icons.Rounded.RadioButtonUnchecked,
-                            contentDescription = if (bothAccepted) "Both accepted" else "Both not accepted",
-                            tint = if (bothAccepted)
-                                MaterialTheme.colorScheme.onPrimary
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .padding(6.dp)
-                                .size(16.dp)
-                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (bothAccepted)
+                                    Icons.Rounded.Check
+                                else
+                                    Icons.Rounded.RadioButtonUnchecked,
+                                contentDescription = if (bothAccepted) "Both accepted" else "Both not accepted",
+                                tint = if (bothAccepted)
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                     Text(
                         text = "I accept all terms and policies",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = if (showError && !bothAccepted)
                             MaterialTheme.colorScheme.error
                         else
@@ -233,21 +235,29 @@ fun IntroLegalAgreement(
             AnimatedVisibility(visible = showError && !bothAccepted) {
                 Surface(
                     color = MaterialTheme.colorScheme.errorContainer,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Warning,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
                         Text(
                             text = "You must accept both the Terms of Service and Privacy Policy to continue",
                             style = MaterialTheme.typography.bodySmall,
@@ -286,7 +296,7 @@ private fun LegalFeature(
         else null
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Header
@@ -299,28 +309,28 @@ private fun LegalFeature(
                         MaterialTheme.colorScheme.primaryContainer
                     else
                         MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.size(48.dp)
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.size(44.dp)
                 ) {
-
-                    Icon(
-                        painter = painterResource(id = icon),
-                        contentDescription = null,
-                        tint = if (isChecked)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .size(16.dp)
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(id = icon),
+                            contentDescription = null,
+                            tint = if (isChecked)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = if (isHighlighted)
                             MaterialTheme.colorScheme.error
                         else
@@ -337,7 +347,8 @@ private fun LegalFeature(
             // Button
             OutlinedButton(
                 onClick = onButtonClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
                     text = buttonText,
@@ -349,39 +360,40 @@ private fun LegalFeature(
             // Checkbox
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Surface(
-                    shape = CircleShape,
+                    shape = RoundedCornerShape(8.dp),
                     color = if (isChecked)
                         MaterialTheme.colorScheme.primary
                     else
                         MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier
-                        .size(28.dp)
+                        .size(32.dp)
                         .clickable {
                             onCheckedChange(!isChecked)
                         }
                 ) {
-                    Icon(
-                        imageVector = if (isChecked)
-                            Icons.Rounded.Check
-                        else
-                            Icons.Rounded.RadioButtonUnchecked,
-                        contentDescription = if (isChecked) "$title accepted" else "$title not accepted",
-                        tint = if (isChecked)
-                            MaterialTheme.colorScheme.onPrimary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .padding(6.dp)
-                            .size(16.dp)
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = if (isChecked)
+                                Icons.Rounded.Check
+                            else
+                                Icons.Rounded.RadioButtonUnchecked,
+                            contentDescription = if (isChecked) "$title accepted" else "$title not accepted",
+                            tint = if (isChecked)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
                 Text(
                     text = checkboxText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 8.dp)
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
             }

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.common.MixedScriptText
 import com.arshadshah.nimaz.ui.components.common.PageErrorState
 import com.arshadshah.nimaz.ui.components.common.PageLoading
@@ -177,13 +178,8 @@ private fun TafseerTopBar(
             }
         },
         navigationIcon = {
-            OutlinedIconButton(onClick = {
+            BackButton {
                 onNavigateBack()
-            }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Navigate back"
-                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

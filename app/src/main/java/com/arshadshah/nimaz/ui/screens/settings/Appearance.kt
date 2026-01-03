@@ -60,6 +60,7 @@ import com.arshadshah.nimaz.constants.AppConstants.THEME_DEFAULT
 import com.arshadshah.nimaz.constants.AppConstants.THEME_RAISIN_BLACK
 import com.arshadshah.nimaz.constants.AppConstants.THEME_RUSTIC_BROWN
 import com.arshadshah.nimaz.constants.AppConstants.THEME_SYSTEM
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.settings.EnhancedThemeSelector
 import com.arshadshah.nimaz.ui.components.settings.ThemeOption
 import com.arshadshah.nimaz.ui.theme.Dark_Red_md_theme_dark_onPrimary
@@ -205,13 +206,8 @@ fun Appearance(
                     }
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

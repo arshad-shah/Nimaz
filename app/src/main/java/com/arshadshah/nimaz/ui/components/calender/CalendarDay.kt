@@ -9,6 +9,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -131,10 +135,10 @@ fun CalendarDay(
                         CalendarDayShowcase()
                     }
                 )
-                .clip(MaterialTheme.shapes.small)
+                .clip(RoundedCornerShape(8.dp))
                 .padding(1.dp)
                 .border(
-                    width = 2.dp, // Reduced from 3dp
+                    width = 1.dp,
                     color = when {
                         !isFromCurrentMonth -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
                         isSelected -> MaterialTheme.colorScheme.primaryContainer
@@ -143,13 +147,13 @@ fun CalendarDay(
                         importanceLevel == ImportanceLevel.HIGH -> MaterialTheme.colorScheme.tertiaryContainer
                         else -> MaterialTheme.colorScheme.surface
                     },
-                    shape = MaterialTheme.shapes.small
+                    shape = RoundedCornerShape(8.dp)
                 )
                 .clickable(enabled = isFromCurrentMonth) {
                     onDateClick(date)
                     showDetailsDialog = true
                 },
-            shape = MaterialTheme.shapes.small,
+            shape = RoundedCornerShape(8.dp),
             contentColor = when {
                 !isFromCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
                 isSelected -> MaterialTheme.colorScheme.onPrimary
@@ -260,10 +264,9 @@ fun DayDetailsDialog(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .scale(scale),
-            shape = RoundedCornerShape(24.dp),
+            shape = MaterialTheme.shapes.extraLarge,
             elevation = CardDefaults.elevatedCardElevation(
-                defaultElevation = 4.dp,
-                pressedElevation = 8.dp
+                defaultElevation = 4.dp
             ),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -363,14 +366,14 @@ private fun TabSelector(
     val visibleOptions = if (showInfoTab) options else options.dropLast(1)
 
     Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             visibleOptions.forEachIndexed { index, tabName ->
                 val isSelected = index == selectedTabIndex
@@ -388,15 +391,15 @@ private fun TabSelector(
                 ) {
                     Row(
                         modifier = Modifier
-                            .padding(8.dp)
+                            .padding(12.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val icon = when (index) {
-                            0 -> painterResource(R.drawable.person_praying_icon) // Replace with your actual prayer icon resource
+                            0 -> painterResource(R.drawable.person_praying_icon)
                             1 -> painterResource(R.drawable.dark_icon)
-                            2 -> painterResource(R.drawable.info_icon) // Replace with your actual info icon resource
+                            2 -> painterResource(R.drawable.info_icon)
                             else -> null
                         }
 
@@ -405,22 +408,22 @@ private fun TabSelector(
                                 painter = icon,
                                 contentDescription = tabName,
                                 tint = if (isSelected)
-                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                    MaterialTheme.colorScheme.onPrimaryContainer
                                 else
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                    MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                         }
 
                         Text(
                             text = tabName,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                             color = if (isSelected)
-                                MaterialTheme.colorScheme.onSecondaryContainer
+                                MaterialTheme.colorScheme.onPrimaryContainer
                             else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -444,21 +447,19 @@ private fun DateHeaderSection(
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-
             Text(
                 text = hijriDate,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
-            // Gregorian date
             Text(
                 text = gregorianDate,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
             )
         }
     }
@@ -472,19 +473,19 @@ private fun ImportantDayInfoContent(importantDay: Pair<Boolean, String>) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = "About ${importantDay.second}",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.SemiBold
         )
 
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         // Suggested acts of worship for this day
@@ -494,33 +495,33 @@ private fun ImportantDayInfoContent(importantDay: Pair<Boolean, String>) {
 
             Text(
                 text = "Recommended Acts",
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold
             )
 
             suggestedActs.forEach { act ->
                 Surface(
                     color = MaterialTheme.colorScheme.tertiaryContainer,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
+                            .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.rating_icon), // Replace with appropriate icon
+                            painter = painterResource(id = R.drawable.rating_icon),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = act,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                     }
@@ -581,33 +582,29 @@ private fun getSuggestedActsForDay(dayName: String): List<String> {
 @Composable
 private fun ActionsRow(onDismiss: () -> Unit) {
     Surface(
-        color = MaterialTheme.colorScheme.tertiaryContainer,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(12.dp),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(12.dp)
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.height(44.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
-                Button(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = "Close",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
+                Text(
+                    text = "Close",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     }
@@ -759,7 +756,7 @@ fun EnhancedPrayersTracker(
 
             // Prayer checkbox grid
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 prayers.forEach { (name, completed) ->
                     EnhancedPrayerCheckbox(
@@ -775,14 +772,14 @@ fun EnhancedPrayersTracker(
 
             if (isMenstruating) {
                 Surface(
-                    color = Color(0xFFFFCDD2),
-                    shape = RoundedCornerShape(8.dp)
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = "Prayers tracking is disabled during menstruation",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFB71C1C),
-                        modifier = Modifier.padding(8.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(12.dp),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -803,12 +800,12 @@ fun EnhancedPrayerCheckbox(
         onClick = { if (enabled) onStatusChange(!isCompleted) },
         enabled = enabled,
         color = when {
-            !enabled -> MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-            isCompleted -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+            !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            isCompleted -> MaterialTheme.colorScheme.primaryContainer
             else -> MaterialTheme.colorScheme.surface
         },
         shape = RoundedCornerShape(12.dp),
-        tonalElevation = if (isCompleted) 4.dp else 0.dp,
+        tonalElevation = if (isCompleted) 2.dp else 0.dp,
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
@@ -820,9 +817,10 @@ fun EnhancedPrayerCheckbox(
         ) {
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isCompleted) FontWeight.SemiBold else FontWeight.Normal,
                 color = when {
-                    !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     isCompleted -> MaterialTheme.colorScheme.onPrimaryContainer
                     else -> MaterialTheme.colorScheme.onSurface
                 }
@@ -832,13 +830,13 @@ fun EnhancedPrayerCheckbox(
                 shape = CircleShape,
                 color = when {
                     !enabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    isCompleted -> MaterialTheme.colorScheme.onPrimaryContainer
+                    isCompleted -> MaterialTheme.colorScheme.primary
                     else -> MaterialTheme.colorScheme.surfaceVariant
                 },
                 border = if (!isCompleted && enabled)
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    BorderStroke(2.dp, MaterialTheme.colorScheme.outline)
                 else null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(28.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     if (isCompleted) {
@@ -846,9 +844,7 @@ fun EnhancedPrayerCheckbox(
                             imageVector = Icons.Rounded.Check,
                             contentDescription = "Completed",
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .padding(1.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -870,24 +866,21 @@ fun EnhancedFastingTracker(
     val formatter = DateTimeFormatter.ofPattern("dd MMM")
 
     Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
         shape = RoundedCornerShape(16.dp),
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 text = "Fasting Status",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 8.dp)
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold
             )
 
             Surface(
@@ -1063,18 +1056,18 @@ private fun CompactStatusChip(
 
     Surface(
         color = color.copy(alpha = 0.2f),
-        shape = RoundedCornerShape(2.dp),
+        shape = RoundedCornerShape(4.dp),
         border = BorderStroke(
-            width = 0.5.dp, // Thinner border
+            width = 0.5.dp,
             color = color.copy(alpha = 0.3f)
         ),
         modifier = modifier
     ) {
         Text(
             text = displayText,
-            modifier = Modifier.padding(horizontal = 2.dp, vertical = 1.dp),
+            modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp),
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 6.sp // Smaller font size
+                fontSize = 7.sp
             ),
             color = color.copy(alpha = 0.8f),
             maxLines = 1,
@@ -1094,7 +1087,7 @@ private fun CompactDateDisplay(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(1.dp) // Reduced spacing
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         // Gregorian day
         Surface(
@@ -1103,7 +1096,7 @@ private fun CompactDateDisplay(
             else
                 MaterialTheme.colorScheme.secondaryContainer,
             shape = CircleShape,
-            modifier = Modifier.size(22.dp) // Slightly smaller
+            modifier = Modifier.size(24.dp)
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -1111,10 +1104,9 @@ private fun CompactDateDisplay(
             ) {
                 Text(
                     text = date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = if (isToday || isSelected)
-                            FontWeight.Bold else FontWeight.Normal
-                    ),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = if (isToday || isSelected)
+                        FontWeight.SemiBold else FontWeight.Normal,
                     color = if (isSelected)
                         MaterialTheme.colorScheme.onPrimary
                     else
@@ -1127,12 +1119,12 @@ private fun CompactDateDisplay(
         Text(
             text = hijriDate.format(DateTimeFormatter.ofPattern("d")),
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 10.sp // Smaller font size
+                fontSize = 10.sp
             ),
             color = when {
                 isSelected -> MaterialTheme.colorScheme.primary
                 isToday -> MaterialTheme.colorScheme.secondary
-                else -> MaterialTheme.colorScheme.onSurface
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
             }
         )
     }
@@ -1164,9 +1156,9 @@ private fun CompactPrayerDot(completed: Boolean) {
         color = if (completed)
             MaterialTheme.colorScheme.primary
         else
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(2.dp),
-        modifier = Modifier.size(3.dp), // Smaller dots
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+        shape = RoundedCornerShape(4.dp),
+        modifier = Modifier.size(4.dp),
         tonalElevation = if (completed) 1.dp else 0.dp
     ) {
         Spacer(modifier = Modifier.fillMaxSize())

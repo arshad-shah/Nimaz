@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,7 +44,6 @@ fun LocationTopBar(
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-
     val currentDate = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM"))
     }
@@ -51,91 +52,92 @@ fun LocationTopBar(
         HijrahDate.from(LocalDate.now())
             .format(DateTimeFormatter.ofPattern("dd MMM"))
     }
-    Surface(
+
+    ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .padding(horizontal = 8.dp)
             .animateContentSize(
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
                 )
             ),
-        shape = MaterialTheme.shapes.medium,
-        tonalElevation = 2.dp
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = RoundedCornerShape(16.dp)
         ) {
-            // Location Section
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Location",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-
-                // Location Info
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    AnimatedContent(
-                        targetState = if (isLoading) "Loading..." else locationName,
-                        transitionSpec = {
-                            (slideInVertically { height -> height } + fadeIn())
-                                .togetherWith(slideOutVertically { height -> -height } + fadeOut())
-                        },
-                        label = "location"
-                    ) { text ->
-                        Text(
-                            text = text,
-                            // Updated to use titleLarge for main location text
-                            style = MaterialTheme.typography.titleLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            }
-
-            // Date Chip
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(12.dp),
-                tonalElevation = 2.dp
-            ) {
+                // Location Section
                 Row(
-                    modifier = Modifier.padding(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
+                    // Icon Container
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Location",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
 
+                    // Location Info
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        AnimatedContent(
+                            targetState = if (isLoading) "Loading..." else locationName,
+                            transitionSpec = {
+                                (slideInVertically { height -> height } + fadeIn())
+                                    .togetherWith(slideOutVertically { height -> -height } + fadeOut())
+                            },
+                            label = "location"
+                        ) { text ->
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+
+                // Date Badge
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
                     Text(
                         text = "$currentDate • $hijriDate",
-                        // Updated to use labelLarge for date text
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             }
@@ -146,12 +148,32 @@ fun LocationTopBar(
 @Preview(showBackground = true)
 @Composable
 fun CompactLocationTopBarPreview() {
-    NimazTheme(
-        darkTheme = false
-    ) {
+    NimazTheme(darkTheme = false) {
         LocationTopBar(
             locationName = "London, United Kingdom",
             isLoading = false
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CompactLocationTopBarPreviewDark() {
+    NimazTheme(darkTheme = true) {
+        LocationTopBar(
+            locationName = "London, United Kingdom",
+            isLoading = false
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CompactLocationTopBarLoadingPreview() {
+    NimazTheme(darkTheme = false) {
+        LocationTopBar(
+            locationName = "London, United Kingdom",
+            isLoading = true
         )
     }
 }

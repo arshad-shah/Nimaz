@@ -1,35 +1,48 @@
 package com.arshadshah.nimaz.ui.components.quran.aya.components
 
-import android.util.Log
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.LastPage
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.FirstPage
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.NimazTextField
+import com.arshadshah.nimaz.ui.components.common.NimazTextFieldType
 
 /**
  * Navigation dialog for Quran reading - allows jumping to specific ayas,
@@ -46,256 +59,110 @@ fun QuranNavigationDialog(
     onNextSurah: (() -> Unit)? = null,
     onPreviousSurah: (() -> Unit)? = null
 ) {
-    Log.d("QuranNavigationDialog", "isVisible=$isVisible, currentSurah=$currentSurah, currentAya=$currentAya, totalAyas=$totalAyas")
+    if (!isVisible) return
 
-    val scale by animateFloatAsState(
-        targetValue = if (isVisible) 1f else 0.8f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "scale"
-    )
+    var ayaInput by remember { mutableStateOf("") }
 
-    if (isVisible) {
-        Dialog(
-            onDismissRequest = onDismiss,
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
+    AlertDialogNimaz(
+        icon = painterResource(id = R.drawable.quran_icon),
+        title = "Quick Navigation",
+        contentDescription = "Navigate to specific aya or surah",
+        description = "Surah $currentSurah • Aya $currentAya of $totalAyas",
+        contentHeight = 320.dp,
+        cardContent = false,
+        onDismissRequest = onDismiss,
+        onConfirm = {
+            ayaInput.toIntOrNull()?.let { aya ->
+                if (aya in 1..totalAyas) {
+                    onJumpToAya(aya)
+                    onDismiss()
+                }
+            }
+        },
+        confirmButtonText = "Jump",
+        showConfirmButton = ayaInput.isNotBlank() && ayaInput.toIntOrNull()?.let { it in 1..totalAyas } == true,
+        onDismiss = onDismiss,
+        dismissButtonText = "Close",
+        action = {
+            // Progress indicator as action badge
+            ProgressBadge(
+                label = "${((currentAya.toFloat() / totalAyas.toFloat()) * 100).toInt()}%"
             )
-        ) {
-            ElevatedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .scale(scale),
-                shape = RoundedCornerShape(24.dp),
-                elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 4.dp,
-                    pressedElevation = 8.dp
-                ),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
+        },
+        contentToShow = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Header with current position
-                    NavigationHeaderSection(
+                // Jump to aya input
+                NimazTextField(
+                    value = ayaInput,
+                    onValueChange = { ayaInput = it },
+                    type = NimazTextFieldType.NUMBER,
+                    label = "Jump to Aya",
+                    placeholder = "Enter aya number (1-$totalAyas)",
+                    isError = ayaInput.isNotBlank() && ayaInput.toIntOrNull()?.let { it !in 1..totalAyas } == true,
+                    errorMessage = "Enter a number between 1 and $totalAyas"
+                )
+
+                // Quick actions
+                QuickActionsSection(
+                    totalAyas = totalAyas,
+                    onJumpToAya = onJumpToAya,
+                    onDismiss = onDismiss
+                )
+
+                // Surah navigation buttons
+                if (onPreviousSurah != null || onNextSurah != null) {
+                    SurahNavigationSection(
                         currentSurah = currentSurah,
-                        currentAya = currentAya,
-                        totalAyas = totalAyas
+                        onPreviousSurah = onPreviousSurah,
+                        onNextSurah = onNextSurah,
+                        onDismiss = onDismiss
                     )
-
-                    // Content
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(280.dp)
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(4.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surface
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(12.dp)
-                            ) {
-                                NavigationContent(
-                                    totalAyas = totalAyas,
-                                    currentSurah = currentSurah,
-                                    onJumpToAya = onJumpToAya,
-                                    onNextSurah = onNextSurah,
-                                    onPreviousSurah = onPreviousSurah,
-                                    onDismiss = onDismiss
-                                )
-                            }
-                        }
-                    }
-
-                    // Actions row
-                    NavigationActionsRow(onDismiss = onDismiss)
                 }
             }
         }
+    )
+}
+
+@Composable
+private fun ProgressBadge(
+    label: String
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
     }
 }
 
 @Composable
-private fun NavigationHeaderSection(
-    currentSurah: Int,
-    currentAya: Int,
-    totalAyas: Int
+private fun QuickActionsSection(
+    totalAyas: Int,
+    onJumpToAya: (Int) -> Unit,
+    onDismiss: () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.primaryContainer,
+        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.quran_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = "Quick Navigation",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-
-            Text(
-                text = "Surah $currentSurah • Aya $currentAya of $totalAyas",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-            )
-
-            // Progress indicator
-            val progress = currentAya.toFloat() / totalAyas.toFloat()
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun NavigationActionsRow(onDismiss: () -> Unit) {
-
-    // Buttons Section
-    Surface(
-        color = MaterialTheme.colorScheme.tertiaryContainer,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    TextButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    ) {
-                        Text(
-                            text = "Close",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-        }
-    }
-}
-
-@Composable
-private fun NavigationContent(
-    totalAyas: Int,
-    currentSurah: Int,
-    onJumpToAya: (Int) -> Unit,
-    onNextSurah: (() -> Unit)?,
-    onPreviousSurah: (() -> Unit)?,
-    onDismiss: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Jump to aya input with enhanced styling
-        var ayaInput by remember { mutableStateOf("") }
-
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(12.dp),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = ayaInput,
-                    onValueChange = { ayaInput = it },
-                    label = { Text("Jump to Aya (1-$totalAyas)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                FilledIconButton(
-                    onClick = {
-                        ayaInput.toIntOrNull()?.let { aya ->
-                            if (aya in 1..totalAyas) {
-                                onJumpToAya(aya)
-                                onDismiss()
-                            }
-                        }
-                    },
-                    modifier = Modifier.size(48.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Jump",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
-        }
-
-        // Quick actions with improved styling
-        Surface(
-            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 NavigationAction(
@@ -330,12 +197,36 @@ private fun NavigationContent(
                 )
             }
         }
+    }
+}
 
-        // Surah navigation buttons with enhanced styling
-        if (onPreviousSurah != null || onNextSurah != null) {
+@Composable
+private fun SurahNavigationSection(
+    currentSurah: Int,
+    onPreviousSurah: (() -> Unit)?,
+    onNextSurah: (() -> Unit)?,
+    onDismiss: () -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Surah Navigation",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (currentSurah > 1 && onPreviousSurah != null) {
                     FilledTonalButton(
@@ -356,8 +247,8 @@ private fun NavigationContent(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Prev Surah",
-                            style = MaterialTheme.typography.labelSmall,
+                            "Previous",
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -376,8 +267,8 @@ private fun NavigationContent(
                         )
                     ) {
                         Text(
-                            "Next Surah",
-                            style = MaterialTheme.typography.labelSmall,
+                            "Next",
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -434,7 +325,7 @@ private fun NavigationAction(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun QuranNavigationDialogPreview() {
     QuranNavigationDialog(
@@ -448,3 +339,34 @@ fun QuranNavigationDialogPreview() {
         onPreviousSurah = {}
     )
 }
+
+@Preview(showBackground = true, name = "First Surah")
+@Composable
+fun QuranNavigationDialogFirstSurahPreview() {
+    QuranNavigationDialog(
+        isVisible = true,
+        currentSurah = 1,
+        currentAya = 5,
+        totalAyas = 7,
+        onDismiss = {},
+        onJumpToAya = {},
+        onNextSurah = {},
+        onPreviousSurah = null
+    )
+}
+
+@Preview(showBackground = true, name = "Last Surah")
+@Composable
+fun QuranNavigationDialogLastSurahPreview() {
+    QuranNavigationDialog(
+        isVisible = true,
+        currentSurah = 114,
+        currentAya = 3,
+        totalAyas = 6,
+        onDismiss = {},
+        onJumpToAya = {},
+        onNextSurah = null,
+        onPreviousSurah = {}
+    )
+}
+

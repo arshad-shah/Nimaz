@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -40,7 +41,7 @@ fun SevenDayTrend(
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         shape = MaterialTheme.shapes.extraLarge,
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -67,11 +68,11 @@ fun SevenDayTrend(
 
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = MaterialTheme.shapes.medium,
+                    shape = RoundedCornerShape(8.dp),
                 ) {
                     Text(
                         text = "${trackersForWeek.value.count { it.progress > 0 }}/7",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -81,7 +82,7 @@ fun SevenDayTrend(
             // Progress Bars
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = MaterialTheme.shapes.medium,
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -92,14 +93,6 @@ fun SevenDayTrend(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     trackersForWeek.value.forEachIndexed { index, prayerTracker ->
-//                        ProgressBarCustom(
-//                            progress = prayerTracker.progress.toFloat(),
-//                            progressColor = determineColor(prayerTracker),
-//                            radius = 16.dp,
-//                            label = prayerTracker.date.dayOfWeek.name.take(1),
-//                            strokeWidth = 8.dp,
-//                            strokeBackgroundWidth = 3.dp,
-//                        )
 
                         Box(
                             modifier = Modifier,

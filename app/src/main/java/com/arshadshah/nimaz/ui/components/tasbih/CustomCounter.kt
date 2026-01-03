@@ -29,7 +29,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,6 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.LocalTasbih
+import com.arshadshah.nimaz.ui.components.common.NimazTextField
+import com.arshadshah.nimaz.ui.components.common.NimazTextFieldType
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -384,18 +385,16 @@ private fun ObjectiveDialog(
         onDismissRequest = onDismiss,
         title = { Text("Set Target") },
         text = {
-            OutlinedTextField(
+            NimazTextField(
                 value = if (currentObjective == 0) "" else currentObjective.toString(),
                 onValueChange = { value ->
                     if (value.isNotEmpty()) onObjectiveSet(value.toIntOrNull() ?: 0)
                     else onObjectiveSet(0)
                 },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-                singleLine = true,
-                label = { Text("Target Count") }
+                type = NimazTextFieldType.NUMBER,
+                label = "Target Count",
+                placeholder = "Enter target",
+                requestFocus = true
             )
         },
         confirmButton = {

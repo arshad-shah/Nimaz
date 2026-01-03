@@ -55,7 +55,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -84,6 +83,9 @@ import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.constants.AppConstants.TAFSEER_SCREEN_ROUTE
 import com.arshadshah.nimaz.data.local.models.KhatamSession
 import com.arshadshah.nimaz.data.local.models.LocalAya
+import com.arshadshah.nimaz.ui.components.common.BackButton
+import com.arshadshah.nimaz.ui.components.common.NimazTextField
+import com.arshadshah.nimaz.ui.components.common.NimazTextFieldType
 import com.arshadshah.nimaz.ui.components.common.PageErrorState
 import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.ui.components.quran.AyaItem
@@ -172,12 +174,11 @@ private fun AyatScreenContent(
                     }
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
-                    }
+                    BackButton(
+                        onBackClick = {
+                            onNavigateBack()
+                        }
+                    )
                 }
             )
         },
@@ -229,8 +230,6 @@ private fun AyatScreenContent(
                 QuranBottomBar(
                     displaySettings = state.displaySettings,
                     onEvent = onEvent,
-                    isPaginationMode = state.isPaginationMode,
-                    onTogglePagination = { onEvent(AyatViewModel.AyatEvent.TogglePaginationMode) }
                 )
             }
         },
@@ -698,15 +697,12 @@ fun PageJumpDialog(
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                OutlinedTextField(
+                NimazTextField(
                     value = pageInput,
                     onValueChange = { pageInput = it },
-                    label = { Text("Page") },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    type = NimazTextFieldType.NUMBER,
+                    label = "Page",
+                    placeholder = "Enter page number"
                 )
 
                 // Quick jump buttons

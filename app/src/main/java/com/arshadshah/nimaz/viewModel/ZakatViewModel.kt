@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 data class ZakatState(
     val currencyInfo: CurrencyInfo = CurrencyInfo("USD", "$"),
+    val isManualCurrencyOverride: Boolean = false,
     val zakatStartDate: String = "",
     val zakatEndDate: String = "",
     // Assets
@@ -78,11 +79,16 @@ class ZakatViewModel @Inject constructor(
             _zakatState.update { it.copy(isLoading = true, error = null) }
             try {
                 val thresholds = metalService.getNisabThresholdsWithCache(locale)
+                val currentState = _zakatState.value
                 _zakatState.update {
                     it.copy(
                         goldNisabThreshold = thresholds.goldNisab,
                         silverNisabThreshold = thresholds.silverNisab,
-                        currencyInfo = thresholds.currencyInfo,
+                        // Preserve manually selected currency, otherwise use API currency
+                        currencyInfo = if (currentState.isManualCurrencyOverride)
+                            currentState.currencyInfo
+                        else
+                            thresholds.currencyInfo,
                         isLoading = false
                     )
                 }
@@ -226,5 +232,52 @@ class ZakatViewModel @Inject constructor(
 
     private fun String.toNonNegativeDoubleOrNull(): Double? {
         return this.toDoubleOrNull()?.let { if (it < 0) 0.0 else it }
+    }
+
+    fun setCurrencyOverride(code: String, symbol: String) {
+        _zakatState.update {
+            it.copy(
+                currencyInfo = CurrencyInfo(
+                    code = code.uppercase(Locale.getDefault()),
+                    symbol = symbol,
+                    exchangeRate = it.currencyInfo.exchangeRate
+                ),
+                isManualCurrencyOverride = true
+            )
+        }
+    }
+
+    fun updateCurrencyManually(code: String, symbol: String) {
+        viewModelScope.launch {
+            _zakatState.update { it.copy(isLoading = true, error = null, isManualCurrencyOverride = true) }
+            try {
+                val currencyInfo = CurrencyInfo(
+                    code = code.uppercase(Locale.getDefault()),
+                    symbol = symbol
+                )
+                val thresholds = metalService.getNisabThresholdsForCurrency(currencyInfo)
+                _zakatState.update {
+                    it.copy(
+                        goldNisabThreshold = thresholds.goldNisab,
+                        silverNisabThreshold = thresholds.silverNisab,
+                        currencyInfo = thresholds.currencyInfo,
+                        isLoading = false
+                    )
+                }
+                calculateZakat()
+            } catch (e: Exception) {
+                _zakatState.update {
+                    it.copy(
+                        error = "Failed to update for currency $code: ${e.message}",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    fun resetCurrencyToLocale() {
+        _zakatState.update { it.copy(isManualCurrencyOverride = false) }
+        updateNisabThresholds(Locale.getDefault())
     }
 }

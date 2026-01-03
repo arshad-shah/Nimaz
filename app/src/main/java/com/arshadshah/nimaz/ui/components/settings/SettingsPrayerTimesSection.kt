@@ -27,7 +27,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.ui.components.common.ArrowRight
 import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
 import com.arshadshah.nimaz.ui.components.common.SettingsOption
 import com.arshadshah.nimaz.ui.theme.NimazTheme
@@ -43,7 +42,7 @@ fun SettingsPrayerTimesSection(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(8.dp),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
@@ -68,7 +67,7 @@ fun SettingsPrayerTimesSection(
 
             SettingsOption(
                 icon = ImageVector.vectorResource(id = R.drawable.alarm_clock_icon),
-                title = "Prayer Times",
+                title = "Prayer Times Settings",
                 description = "Adjust calculation methods and preferences",
                 onClick = onNavigateToPrayerSettings
             )

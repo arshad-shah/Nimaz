@@ -64,7 +64,7 @@ fun DashboardRandomAyatCard(
             .fillMaxWidth()
             .padding(8.dp),
         shape = MaterialTheme.shapes.extraLarge,
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -96,19 +96,20 @@ fun DashboardRandomAyatCard(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     ),
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(36.dp),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.share_icon),
                         contentDescription = "Share",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -147,8 +148,8 @@ fun DashboardRandomAyatCard(
             SelectionContainer {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         aya?.ayaArabic?.let { arabicText ->
@@ -167,8 +168,8 @@ fun DashboardRandomAyatCard(
             }
 
             Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 when (translationLanguage) {
@@ -211,8 +212,8 @@ fun DashboardRandomAyatCard(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = MaterialTheme.shapes.medium,
-                contentPadding = PaddingValues(8.dp),
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -221,12 +222,12 @@ fun DashboardRandomAyatCard(
                 Icon(
                     painter = painterResource(R.drawable.quran_icon),
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Read Full Surah",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }

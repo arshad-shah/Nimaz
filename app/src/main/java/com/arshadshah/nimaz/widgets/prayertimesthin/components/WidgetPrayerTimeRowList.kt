@@ -15,10 +15,13 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -49,27 +52,27 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
         PrayerInfo(
             "Fajr",
             data.fajr,
-            data.fajr?.format(timeFormatter) ?: "",
+            data.fajr?.format(timeFormatter) ?: "--:--",
         ),
         PrayerInfo(
             "Dhuhr",
             data.dhuhr,
-            data.dhuhr?.format(timeFormatter) ?: "",
+            data.dhuhr?.format(timeFormatter) ?: "--:--",
         ),
         PrayerInfo(
             "Asr",
             data.asr,
-            data.asr?.format(timeFormatter) ?: "",
+            data.asr?.format(timeFormatter) ?: "--:--",
         ),
         PrayerInfo(
             "Maghrib",
             data.maghrib,
-            data.maghrib?.format(timeFormatter) ?: "",
+            data.maghrib?.format(timeFormatter) ?: "--:--",
         ),
         PrayerInfo(
             "Isha",
             adjustedIshaTime,
-            adjustedIshaTime?.format(timeFormatter) ?: "",
+            adjustedIshaTime?.format(timeFormatter) ?: "--:--",
         )
     )
 
@@ -103,23 +106,36 @@ fun WidgetPrayerTimeRowList(data: LocalPrayerTimes) {
 
     val activePrayer = determineActivePrayer(currentDateTime, prayerTimes)
 
-    Row(
+    // Main container with proper design system alignment
+    Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
             .background(GlanceTheme.colors.surface)
-            .padding(4.dp)
             .cornerRadius(24.dp)
             .clickable(onClick = actionStartActivity<MainActivity>()),
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.Center
     ) {
-        prayerTimes.forEach { prayerInfo ->
-            WidgetPrayerTimeColumn(
-                name = prayerInfo.name,
-                time = prayerInfo.displayTime,
-                modifier = GlanceModifier.defaultWeight(),
-                isActive = prayerInfo.name == activePrayer
-            )
+        Row(
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            prayerTimes.forEachIndexed { index, prayerInfo ->
+                WidgetPrayerTimeColumn(
+                    name = prayerInfo.name,
+                    time = prayerInfo.displayTime,
+                    modifier = GlanceModifier.defaultWeight(),
+                    isActive = prayerInfo.name == activePrayer
+                )
+
+                // Add spacing between items (except after last)
+                if (index < prayerTimes.size - 1) {
+                    Spacer(modifier = GlanceModifier.width(4.dp))
+                }
+            }
         }
     }
 }
@@ -134,18 +150,18 @@ fun WidgetPrayerTimeColumn(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .padding(horizontal = 4.dp, vertical = 8.dp)
+            .padding(vertical = 6.dp)
             .background(
                 if (isActive)
                     GlanceTheme.colors.primaryContainer
                 else
-                    GlanceTheme.colors.secondaryContainer
+                    GlanceTheme.colors.surfaceVariant
             )
-            .cornerRadius(16.dp),
+            .cornerRadius(12.dp)
+            .padding(horizontal = 4.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         // Prayer Name
         Text(
             text = name,
@@ -153,12 +169,13 @@ fun WidgetPrayerTimeColumn(
                 color = if (isActive)
                     GlanceTheme.colors.onPrimaryContainer
                 else
-                    GlanceTheme.colors.onSecondaryContainer,
-                fontSize = TextUnit(12F, TextUnitType.Sp),
-                fontWeight = FontWeight.Medium
-            ),
-            modifier = GlanceModifier.padding(top = 4.dp)
+                    GlanceTheme.colors.onSurfaceVariant,
+                fontSize = TextUnit(11F, TextUnitType.Sp),
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium
+            )
         )
+
+        Spacer(modifier = GlanceModifier.height(4.dp))
 
         // Prayer Time
         Text(
@@ -167,19 +184,18 @@ fun WidgetPrayerTimeColumn(
                 color = if (isActive)
                     GlanceTheme.colors.onPrimaryContainer
                 else
-                    GlanceTheme.colors.onSecondaryContainer,
-                fontSize = TextUnit(14F, TextUnitType.Sp),
+                    GlanceTheme.colors.onSurface,
+                fontSize = TextUnit(13F, TextUnitType.Sp),
                 fontWeight = FontWeight.Bold
-            ),
-            modifier = GlanceModifier.padding(vertical = 2.dp)
+            )
         )
 
         // Active Prayer Indicator
         if (isActive) {
+            Spacer(modifier = GlanceModifier.height(6.dp))
             Box(
                 modifier = GlanceModifier
-                    .padding(top = 4.dp)
-                    .size(4.dp)
+                    .size(width = 16.dp, height = 3.dp)
                     .background(GlanceTheme.colors.primary)
                     .cornerRadius(2.dp),
                 contentAlignment = Alignment.Center

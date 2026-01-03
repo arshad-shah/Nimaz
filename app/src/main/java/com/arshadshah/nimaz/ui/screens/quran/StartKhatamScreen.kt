@@ -44,8 +44,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -68,6 +66,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.ui.components.common.BackButton
+import com.arshadshah.nimaz.ui.components.common.NimazTextField
+import com.arshadshah.nimaz.ui.components.common.NimazTextFieldType
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -108,11 +109,8 @@ fun StartKhatamScreen(
                     )
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = onNavigateBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Go back"
-                        )
+                    BackButton {
+                        onNavigateBack()
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -331,38 +329,11 @@ private fun KhatamFormCard(
                         isRequired = true,
                         isComplete = name.isNotBlank()
                     ) {
-                        OutlinedTextField(
+                        NimazTextField(
                             value = name,
                             onValueChange = onNameChange,
-                            placeholder = {
-                                Text(
-                                    "e.g., Ramadan Khatam 2026",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            trailingIcon = {
-                                if (name.isNotBlank()) {
-                                    IconButton(
-                                        onClick = { onNameChange("") },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = "Clear",
-                                            tint = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                }
-                            }
+                            placeholder = "e.g., Ramadan Khatam 2026",
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                         )
                     }
 
@@ -394,7 +365,7 @@ private fun KhatamFormCard(
                         isRequired = false,
                         isComplete = dailyTarget.isNotBlank()
                     ) {
-                        OutlinedTextField(
+                        NimazTextField(
                             value = dailyTarget,
                             onValueChange = { newValue ->
                                 // Only allow numeric input
@@ -402,53 +373,9 @@ private fun KhatamFormCard(
                                     onDailyTargetChange(newValue)
                                 }
                             },
-                            placeholder = {
-                                Text(
-                                    "e.g., 20",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Timeline,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            trailingIcon = {
-                                if (dailyTarget.isNotBlank()) {
-                                    IconButton(
-                                        onClick = { onDailyTargetChange("") },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = "Clear",
-                                            tint = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                }
-                            },
-                            suffix = {
-                                Text(
-                                    "ayat/day",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                            )
+                            type = NimazTextFieldType.NUMBER,
+                            placeholder = "e.g., 20",
+                            leadingIconVector = Icons.Default.Timeline
                         )
 
                         // Completion estimation

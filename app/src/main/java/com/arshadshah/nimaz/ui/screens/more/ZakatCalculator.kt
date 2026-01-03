@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.ui.screens.more
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,16 +23,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.PageErrorState
 import com.arshadshah.nimaz.ui.components.common.PageLoading
 import com.arshadshah.nimaz.ui.components.zakat.AssetsSection
 import com.arshadshah.nimaz.ui.components.zakat.CalculationResultCard
+import com.arshadshah.nimaz.ui.components.zakat.CurrencySelectionDialog
 import com.arshadshah.nimaz.ui.components.zakat.LiabilitiesSection
 import com.arshadshah.nimaz.ui.components.zakat.NisabCard
 import com.arshadshah.nimaz.ui.components.zakat.ZakatPeriodCard
@@ -42,6 +47,7 @@ import com.arshadshah.nimaz.viewModel.ZakatViewModel
 fun ZakatCalculator(navController: NavHostController) {
     val viewModel: ZakatViewModel = hiltViewModel()
     val zakatState by viewModel.zakatState.collectAsState()
+    var showCurrencyDialog by remember { mutableStateOf(false) }
 
     val locale = LocalConfiguration.current.locales[0]
     LaunchedEffect(locale) {
@@ -53,17 +59,19 @@ fun ZakatCalculator(navController: NavHostController) {
             TopAppBar(
                 title = { Text(text = "Zakat Calculator") },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton(onBackClick = {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
-                    }
+                    })
                 },
                 actions = {
-                    // Add refresh button
+                    // Currency selection button
+                    IconButton(onClick = { showCurrencyDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.AttachMoney,
+                            contentDescription = "Select currency"
+                        )
+                    }
+                    // Refresh button
                     IconButton(onClick = { viewModel.refreshNisabThresholds() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
@@ -96,7 +104,8 @@ fun ZakatCalculator(navController: NavHostController) {
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
                     // Add the new Zakat Period card
@@ -106,6 +115,7 @@ fun ZakatCalculator(navController: NavHostController) {
                             endDate = zakatState.zakatEndDate
                         )
                     }
+
                     // Show current metal prices
                     item {
                         NisabCard(
@@ -158,4 +168,20 @@ fun ZakatCalculator(navController: NavHostController) {
 
         }
     }
+
+    // Currency Selection Dialog
+    if (showCurrencyDialog) {
+        CurrencySelectionDialog(
+            currentCurrency = zakatState.currencyInfo,
+            onDismiss = { showCurrencyDialog = false },
+            onCurrencySelected = { code, symbol ->
+                viewModel.updateCurrencyManually(code, symbol)
+            },
+            onUseLocale = {
+                viewModel.resetCurrencyToLocale()
+                showCurrencyDialog = false
+            }
+        )
+    }
 }
+

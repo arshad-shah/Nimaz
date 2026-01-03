@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NightsStay
@@ -32,13 +32,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.PRAYER_NAME_ASR
@@ -148,7 +148,7 @@ fun PrayerTimesList(
         modifier = modifier
             .padding(8.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -158,7 +158,7 @@ fun PrayerTimesList(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             prayerTimes.forEachIndexed { index, prayerTime ->
                 PrayerTimeRow(
@@ -201,60 +201,66 @@ fun PrayerTimeRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         color = backgroundColor,
         tonalElevation = if (prayerTime.isHighlighted) 8.dp else 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
                 // Enhanced Prayer Icon with gradient background
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (prayerTime.isHighlighted) {
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary,
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                                    )
-                                )
-                            } else {
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        prayerTime.gradientColors.first,
-                                        prayerTime.gradientColors.second
-                                    )
-                                )
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.size(44.dp),
+                    color = Color.Transparent
                 ) {
-                    Icon(
-                        imageVector = prayerTime.icon,
-                        contentDescription = null,
-                        tint = if (prayerTime.isHighlighted)
-                            MaterialTheme.colorScheme.onPrimary
-                        else
-                            Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp)
+                            .background(
+                                if (prayerTime.isHighlighted) {
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                        )
+                                    )
+                                } else {
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            prayerTime.gradientColors.first,
+                                            prayerTime.gradientColors.second
+                                        )
+                                    )
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = prayerTime.icon,
+                            contentDescription = null,
+                            tint = if (prayerTime.isHighlighted)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 // Prayer Info with enhanced typography
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -265,10 +271,12 @@ fun PrayerTimeRow(
                                 if (it.isLowerCase()) it.titlecase(Locale.getDefault())
                                 else it.toString()
                             },
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = if (prayerTime.isHighlighted) FontWeight.Bold else FontWeight.Medium
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = if (prayerTime.isHighlighted) FontWeight.SemiBold else FontWeight.Medium
                             ),
-                            color = contentColor
+                            color = contentColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
 
                         if (prayerTime.isRamadan) {
@@ -305,7 +313,7 @@ fun PrayerTimeRow(
 
             // Enhanced time display
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(12.dp),
                 color = if (prayerTime.isHighlighted)
                     MaterialTheme.colorScheme.primary
                 else
@@ -321,7 +329,7 @@ fun PrayerTimeRow(
                                 "h:mm a"
                         )
                     ) ?: "",
-                    style = MaterialTheme.typography.titleMedium.copy(
+                    style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
                     color = if (prayerTime.isHighlighted)
@@ -329,7 +337,7 @@ fun PrayerTimeRow(
                     else
                         contentColor,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                         .placeholder(
                             visible = loading,
                             highlight = PlaceholderHighlight.shimmer()

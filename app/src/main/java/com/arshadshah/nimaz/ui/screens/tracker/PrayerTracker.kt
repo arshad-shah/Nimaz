@@ -31,6 +31,7 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_PRAYER_TRACKER
 import com.arshadshah.nimaz.ui.components.calender.PrayersTrackerCard
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.trackers.DateSelector
 import com.arshadshah.nimaz.ui.components.trackers.FastTrackerCard
 import com.arshadshah.nimaz.ui.components.trackers.PrayerTrackerGrid
@@ -72,13 +73,8 @@ fun PrayerTracker(
                     Text("Tracker", style = MaterialTheme.typography.titleLarge)
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 actions = {
@@ -108,7 +104,7 @@ fun PrayerTracker(
                 .verticalScroll(rememberScrollState())
                 .testTag(TEST_TAG_PRAYER_TRACKER),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             DateSelector(
                 dateState = dateState,

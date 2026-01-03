@@ -6,11 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.services.CurrencyInfo
 import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
@@ -23,23 +24,23 @@ fun LiabilitiesSection(
     onMoneyYouOweChange: (String) -> Unit,
     onOtherOutgoingsDueChange: (String) -> Unit
 ) {
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(horizontal = 8.dp),
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
+        colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 4.dp,
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
             HeaderWithIcon(
@@ -65,4 +66,21 @@ fun LiabilitiesSection(
             )
         }
     }
+}
+
+
+@Preview
+@Composable
+fun LiabilitiesSectionPreview() {
+    LiabilitiesSection(
+        moneyYouOwe = "5000",
+        otherOutgoingsDue = "2000",
+        currencyInfo = CurrencyInfo(
+            code = "USD",
+            symbol = "$",
+            exchangeRate = 1.0
+        ),
+        onMoneyYouOweChange = {},
+        onOtherOutgoingsDueChange = {}
+    )
 }

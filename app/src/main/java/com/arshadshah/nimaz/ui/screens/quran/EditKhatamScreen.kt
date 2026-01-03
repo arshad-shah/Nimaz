@@ -44,7 +44,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -67,6 +66,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.data.local.models.KhatamSession
+import com.arshadshah.nimaz.ui.components.common.BackButton
+import com.arshadshah.nimaz.ui.components.common.NimazTextField
+import com.arshadshah.nimaz.ui.components.common.NimazTextFieldType
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -126,12 +128,9 @@ fun EditKhatamScreen(
                     }
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = onNavigateBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Go back"
-                        )
-                    }
+                    BackButton(
+                        onBackClick = onNavigateBack
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
@@ -282,13 +281,10 @@ fun EditKhatamScreen(
                             )
                         }
 
-                        OutlinedTextField(
+                        NimazTextField(
                             value = name,
                             onValueChange = { name = it },
-                            placeholder = { Text("e.g., Ramadan Khatam 2026") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = MaterialTheme.shapes.medium,
+                            placeholder = "e.g., Ramadan Khatam 2026",
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                         )
                     }
@@ -457,36 +453,12 @@ fun EditKhatamScreen(
                             )
                         }
 
-                        OutlinedTextField(
+                        NimazTextField(
                             value = dailyTarget,
                             onValueChange = { dailyTarget = it },
-                            placeholder = { Text("e.g., 20") },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Timeline,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            trailingIcon = {
-                                if (dailyTarget.isNotBlank()) {
-                                    IconButton(onClick = { dailyTarget = "" }) {
-                                        Icon(
-                                            Icons.Default.Clear,
-                                            contentDescription = "Clear target",
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                            },
-                            suffix = { Text("ayas/day") },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = MaterialTheme.shapes.medium
+                            type = NimazTextFieldType.NUMBER,
+                            placeholder = "e.g., 20",
+                            leadingIconVector = Icons.Default.Timeline
                         )
 
                         // Show estimated completion if daily target is set
@@ -558,14 +530,13 @@ fun EditKhatamScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
-                        OutlinedTextField(
+                        NimazTextField(
                             value = notes,
                             onValueChange = { notes = it },
-                            placeholder = { Text("Add personal notes...") },
-                            modifier = Modifier.fillMaxWidth(),
+                            type = NimazTextFieldType.MULTILINE,
+                            placeholder = "Add personal notes...",
                             minLines = 3,
-                            maxLines = 5,
-                            shape = MaterialTheme.shapes.medium
+                            maxLines = 5
                         )
                     }
                 }

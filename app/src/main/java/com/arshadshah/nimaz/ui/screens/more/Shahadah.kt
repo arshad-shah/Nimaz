@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.common.HeaderWithIcon
 import com.arshadshah.nimaz.ui.theme.utmaniQuranFont
 
@@ -44,14 +45,11 @@ fun ShahadahScreen(navController: NavHostController) {
             TopAppBar(
                 title = { Text(text = "Shahadah") },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
-                    }
+                    BackButton(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             )
         }
@@ -77,23 +75,24 @@ fun ShahadahScreen(navController: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Header Section
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = MaterialTheme.shapes.large,
+                        shape = RoundedCornerShape(16.dp),
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = "Declaration of Faith",
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
@@ -107,12 +106,12 @@ fun ShahadahScreen(navController: NavHostController) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp),
+                                .padding(12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Surface(
-                                shape = MaterialTheme.shapes.large,
+                                shape = RoundedCornerShape(16.dp),
                                 color = MaterialTheme.colorScheme.secondaryContainer,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -129,22 +128,22 @@ fun ShahadahScreen(navController: NavHostController) {
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(8.dp)
+                                            .padding(16.dp)
                                     )
                                 }
                             }
 
                             Surface(
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 color = MaterialTheme.colorScheme.tertiaryContainer,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
                                     text = "Ash-hadu an la ilaha illa Allah wa ash-hadu anna Muhammadan Rasulullah",
-                                    style = MaterialTheme.typography.titleMedium.copy(
+                                    style = MaterialTheme.typography.bodyMedium.copy(
                                         fontStyle = FontStyle.Italic,
                                         letterSpacing = 0.7.sp,
-                                        lineHeight = 32.sp
+                                        lineHeight = 28.sp
                                     ),
                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                                     textAlign = TextAlign.Center,
@@ -156,12 +155,12 @@ fun ShahadahScreen(navController: NavHostController) {
 
                     // Translation Section
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        shape = MaterialTheme.shapes.large,
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
-                            modifier = Modifier.padding(8.dp),
+                            modifier = Modifier.padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             HeaderWithIcon(
@@ -171,19 +170,19 @@ fun ShahadahScreen(navController: NavHostController) {
                                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                             Surface(
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 color = MaterialTheme.colorScheme.surface,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
                                     text = "I bear witness that there is no god but Allah and I bear witness that Muhammad is the messenger of Allah",
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        lineHeight = 28.sp,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        lineHeight = 24.sp,
                                         letterSpacing = 0.5.sp
                                     ),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(8.dp)
+                                    modifier = Modifier.padding(16.dp)
                                 )
                             }
                         }

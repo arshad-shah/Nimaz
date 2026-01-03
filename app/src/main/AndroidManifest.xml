@@ -31,6 +31,12 @@
         android:theme="@style/SplashTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
+
+        <!-- Declare support for 16KB page sizes -->
+        <property
+            android:name="android.app.PROPERTY_COMPAT_ALLOW_16KB_PAGES"
+            android:value="true" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

@@ -93,18 +93,18 @@ class PreciousMetalService @Inject constructor() {
 
     }
 
-    private suspend fun getGoldPrice(): Result<GoldApiResponse> {
+    private suspend fun getGoldPrice(currencyCode: String = "USD"): Result<GoldApiResponse> {
         return try {
-            val response: GoldApiResponse = client.get("${BASE_URL}XAU/USD").body()
+            val response: GoldApiResponse = client.get("${BASE_URL}XAU/$currencyCode").body()
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    private suspend fun getSilverPrice(): Result<GoldApiResponse> {
+    private suspend fun getSilverPrice(currencyCode: String = "USD"): Result<GoldApiResponse> {
         return try {
-            val response: GoldApiResponse = client.get("${BASE_URL}/XAG/USD").body()
+            val response: GoldApiResponse = client.get("${BASE_URL}XAG/$currencyCode").body()
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
@@ -149,14 +149,19 @@ class PreciousMetalService @Inject constructor() {
 
     suspend fun getNisabThresholds(locale: Locale = Locale.getDefault()): NisabThresholds {
         val currencyInfo = getCurrencyInfoForLocale(locale)
-        val goldResponse = getGoldPrice()
-        val silverResponse = getSilverPrice()
+        return getNisabThresholdsForCurrency(currencyInfo)
+    }
+
+    suspend fun getNisabThresholdsForCurrency(currencyInfo: CurrencyInfo): NisabThresholds {
+        val goldResponse = getGoldPrice(currencyInfo.code)
+        val silverResponse = getSilverPrice(currencyInfo.code)
 
         val goldNisab = goldResponse.fold(
             onSuccess = { response ->
                 response.price_gram_18k * GOLD_NISAB_GRAMS
             },
             onFailure = {
+                // If currency not supported, try USD and note that conversion isn't available
                 DEFAULT_GOLD_NISAB
             }
         )

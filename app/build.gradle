@@ -11,7 +11,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-apply plugin: 'com.mikepenz.aboutlibraries.plugin'
 
 android {
     namespace 'com.arshadshah.nimaz'
@@ -29,10 +28,18 @@ android {
             useSupportLibrary true
         }
 
+        ndk {
+            // Enable 16KB page size support
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+
         externalNativeBuild {
             // For ndk-build, instead use the ndkBuild block.
             cmake {
                 // Passes optional arguments to CMake.
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+            ndkBuild {
                 arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
@@ -88,6 +95,8 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            // Exclude dump_syms binaries that are not 16KB aligned
+            excludes += ['**/dump_syms/**', 'dump_syms/**']
             pickFirst '**'
         }
     }
@@ -127,10 +136,9 @@ dependencies {
     implementation libs.androidx.core.splashscreen
 
     implementation platform(libs.firebase.bom)
-    implementation libs.firebase.crashlytics.ktx
-    implementation libs.firebase.analytics.ktx
-    implementation libs.firebase.perf.ktx
-    implementation libs.firebase.crashlytics.buildtools
+    implementation libs.firebase.crashlytics
+    implementation libs.firebase.analytics
+    implementation libs.firebase.perf
 
     implementation platform(libs.androidx.compose.bom)
     implementation libs.androidx.activity.compose
@@ -167,8 +175,6 @@ dependencies {
 
     implementation libs.gson
 
-    //calendar
-    implementation libs.calendar
 
     //Add AWS S3 SDK
     implementation libs.aws.android.sdk.s3
@@ -240,3 +246,4 @@ dependencies {
 
 
 }
+

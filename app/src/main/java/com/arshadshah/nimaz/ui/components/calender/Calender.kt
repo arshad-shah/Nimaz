@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.ui.components.calender
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,15 +15,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.data.local.models.LocalPrayersTracker
+import com.arshadshah.nimaz.ui.theme.NimazTheme
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
-import kotlin.reflect.KFunction3
 
 @Composable
 fun Calendar(
@@ -33,7 +35,7 @@ fun Calendar(
     trackers: List<LocalPrayersTracker>,
     onDateSelected: (LocalDate) -> Unit,
     onMonthChanged: (YearMonth) -> Unit,
-    onPrayerUpdate: KFunction3<LocalDate, String, Boolean, Unit>,
+    onPrayerUpdate: (LocalDate, String, Boolean) -> Unit,
     onFastingUpdate: (LocalFastTracker) -> Unit,
     isMenstruatingProvider: (LocalDate) -> Boolean,
     isFastingProvider: (LocalDate) -> Boolean,
@@ -42,7 +44,7 @@ fun Calendar(
     val weekFields = remember { WeekFields.ISO }
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Header with month navigation
@@ -68,7 +70,7 @@ fun Calendar(
             columns = GridCells.Fixed(7),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(max(100.dp, 500.dp)),
+                .height(500.dp),
             contentPadding = PaddingValues(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -153,5 +155,26 @@ class CalendarState(
 
     fun onMonthChanged(month: YearMonth) {
         currentMonth = month
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CalendarPreview(){
+    NimazTheme {
+        Calendar(
+            showcaseState = true,
+            onShowcaseDismiss = {},
+            selectedDate = LocalDate.now(),
+            currentMonth = YearMonth.now(),
+            trackers = emptyList(),
+            onDateSelected = {},
+            onMonthChanged = {},
+            onPrayerUpdate = { _, _, _ -> },
+            onFastingUpdate = {},
+            isMenstruatingProvider = { false },
+            isFastingProvider = { false },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

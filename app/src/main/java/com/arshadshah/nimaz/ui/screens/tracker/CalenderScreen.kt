@@ -16,7 +16,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,6 +36,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.models.LocalFastTracker
 import com.arshadshah.nimaz.ui.components.calender.Calendar
 import com.arshadshah.nimaz.ui.components.calender.rememberCalendarState
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.common.BannerDuration
 import com.arshadshah.nimaz.ui.components.common.BannerLarge
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
@@ -53,14 +53,9 @@ fun CalendarScreen(
     val showcaseState by viewModel.showcaseState.collectAsState()
     val calendarState = rememberCalendarState()
 
-    // State for dialog visibility
-    var showTrackerDialog by remember { mutableStateOf(false) }
-
     // Observe calendar state changes
     LaunchedEffect(calendarState.selectedDate) {
         viewModel.onDateSelected(calendarState.selectedDate)
-        // Open the dialog when a date is selected
-        showTrackerDialog = true
     }
 
     LaunchedEffect(calendarState.currentMonth) {
@@ -76,13 +71,8 @@ fun CalendarScreen(
                     Text("Calendar", style = MaterialTheme.typography.titleLarge)
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 actions = {
@@ -93,8 +83,8 @@ fun CalendarScreen(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.info_icon),
-                            contentDescription = "Settings",
-                            modifier = Modifier.size(24.dp)
+                            contentDescription = "Info",
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                     if (uiState.isLoading) {
@@ -116,7 +106,7 @@ fun CalendarScreen(
                             Icon(
                                 painter = painterResource(id = R.drawable.menstruation_icon),
                                 contentDescription = "Toggle Menstruation",
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(22.dp),
                                 tint = Color(0xFFE91E63)
                             )
                         }

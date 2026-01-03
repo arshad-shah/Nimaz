@@ -160,14 +160,16 @@ private fun BookSection(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Book Header
@@ -178,22 +180,24 @@ private fun BookSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = bookTitle,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Surface(
                         color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             text = "${favourites.size}",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
@@ -203,7 +207,7 @@ private fun BookSection(
 
             // Favourites List
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 favourites.forEach { favourite ->
                     FavouriteItem(
@@ -234,6 +238,7 @@ private fun FavouriteItem(
     ) {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -241,7 +246,7 @@ private fun FavouriteItem(
             // Chapter number container
             Surface(
                 color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(
@@ -251,13 +256,14 @@ private fun FavouriteItem(
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         Text(
                             text = favourite.chapter_title_arabic,
-                            style = MaterialTheme.typography.labelLarge.copy(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 fontFamily = utmaniQuranFont,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.SemiBold
                             ),
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -266,11 +272,11 @@ private fun FavouriteItem(
             // Title and subtitle
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = favourite.chapter_title_english,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -283,28 +289,36 @@ private fun FavouriteItem(
             }
 
             // Favourite button
-            IconButton(
-                onClick = {
-                    onFavouriteClick(
-                        favourite.bookId,
-                        favourite.chapterId,
-                        favourite.hadithId,
-                        !favourite.favourite
-                    )
-                },
-                modifier = Modifier.size(32.dp)
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = if (favourite.favourite)
+                    MaterialTheme.colorScheme.primaryContainer
+                else MaterialTheme.colorScheme.surfaceContainerHighest,
+                modifier = Modifier.size(40.dp)
             ) {
-                Icon(
-                    painter = painterResource(
-                        id = if (favourite.favourite) R.drawable.favorite_icon
-                        else R.drawable.favorite_icon_unseletced
-                    ),
-                    contentDescription = if (favourite.favourite) "Remove from favorites"
-                    else "Add to favorites",
-                    tint = if (favourite.favourite) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
-                )
+                IconButton(
+                    onClick = {
+                        onFavouriteClick(
+                            favourite.bookId,
+                            favourite.chapterId,
+                            favourite.hadithId,
+                            !favourite.favourite
+                        )
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (favourite.favourite) R.drawable.favorite_icon
+                            else R.drawable.favorite_icon_unseletced
+                        ),
+                        contentDescription = if (favourite.favourite) "Remove from favorites"
+                        else "Add to favorites",
+                        tint = if (favourite.favourite) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

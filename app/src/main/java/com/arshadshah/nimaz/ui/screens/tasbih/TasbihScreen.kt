@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_TASBIH
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.tasbih.CompactCustomCounter
 import com.arshadshah.nimaz.ui.components.tasbih.Counter
 import com.arshadshah.nimaz.viewModel.TasbihViewModel
@@ -69,13 +70,8 @@ fun TasbihScreen(
                     Text("Tasbih", style = MaterialTheme.typography.titleLarge)
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 actions = {

@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.activities.MainActivity
 import com.arshadshah.nimaz.constants.AppConstants
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.common.SettingsOption
 import com.arshadshah.nimaz.ui.components.settings.LocationSettings
 import com.arshadshah.nimaz.ui.components.settings.SettingsFooterSection
@@ -93,13 +94,8 @@ fun SettingsScreen(
                     )
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -134,7 +130,7 @@ fun SettingsScreen(
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(8.dp),
                 shape = MaterialTheme.shapes.extraLarge,
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                 colors = CardDefaults.elevatedCardColors(

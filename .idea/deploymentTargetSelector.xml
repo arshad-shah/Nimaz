@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-28T14:00:15.536710800Z">
+        <DropdownSelection timestamp="2026-01-03T22:44:11.911861400Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\shaha\.android\avd\Pixel_9_API_35.avd" />
@@ -26,7 +26,7 @@
           </targets>
         </DialogSelection>
       </SelectionState>
-      <SelectionState runConfigName="AlertDialogNimazTest">
+      <SelectionState runConfigName="NumberSelectorPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

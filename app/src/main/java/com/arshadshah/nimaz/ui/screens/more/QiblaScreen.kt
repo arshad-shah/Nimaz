@@ -60,7 +60,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -77,6 +76,7 @@ import androidx.navigation.NavHostController
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.constants.AppConstants.LOCATION_INPUT
 import com.arshadshah.nimaz.constants.AppConstants.TEST_TAG_QIBLA
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.compass.rememberSensorData
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.viewModel.QiblaViewModel
@@ -101,14 +101,11 @@ fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hi
             TopAppBar(
                 title = { Text(text = "Qibla") },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
-                    }
+                    BackButton(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             )
         }
@@ -123,8 +120,8 @@ fun QiblaScreen(navController: NavHostController, viewModel: QiblaViewModel = hi
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .testTag(TEST_TAG_QIBLA)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 QiblaInfoCard(qiblaState, isLoading, errorMessage)
 
@@ -167,7 +164,7 @@ private fun QiblaInfoCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -178,7 +175,7 @@ private fun QiblaInfoCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Header Section
             Surface(
@@ -188,20 +185,43 @@ private fun QiblaInfoCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Current Location",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Icon(
-                        imageVector = Icons.Rounded.LocationOn,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Rounded.LocationOn,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = "Current Location",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else location,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -214,68 +234,55 @@ private fun QiblaInfoCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Location Info
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    // Bearing Info
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else location,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(8.dp)
                         ) {
-                            Surface(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text(
-                                    text = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else "$bearing°",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
+                            Text(
+                                text = if (isLoading) "..." else if (errorMessage.isNotEmpty()) "Error" else "$bearing°",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
 
-                            Surface(
-                                color = MaterialTheme.colorScheme.tertiaryContainer,
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(
-                                    text = if (isLoading) "Loading..." else if (errorMessage.isNotEmpty()) "Error" else compassDirection,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                )
-                            }
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = if (isLoading) "..." else if (errorMessage.isNotEmpty()) "Error" else compassDirection,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
                         }
                     }
 
                     // Direction Icon Container
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(10.dp),
                         color = MaterialTheme.colorScheme.secondaryContainer,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.size(44.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Navigation,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .size(32.dp),
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.Navigation,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
                     }
                 }
             }
@@ -323,7 +330,7 @@ private fun QiblaCompassCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = if (pointingToQibla)
@@ -338,7 +345,7 @@ private fun QiblaCompassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Surface(
                 color = if (pointingToQibla)
@@ -349,48 +356,66 @@ private fun QiblaCompassCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = directionState.value.message,
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.titleSmall,
                         color = if (pointingToQibla)
                             MaterialTheme.colorScheme.onPrimary
                         else MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     if (directionState.value.icon != null) {
-                        Icon(
-                            imageVector = directionState.value.icon!!,
-                            contentDescription = null,
-                            tint = if (pointingToQibla)
-                                MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (pointingToQibla)
+                                MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = directionState.value.icon!!,
+                                    contentDescription = null,
+                                    tint = if (pointingToQibla)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                contentAlignment = Alignment.Center
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Image(
-                    painter = compassImage,
-                    contentDescription = "Qibla compass",
+                Box(
                     modifier = Modifier
-                        .fillMaxSize(0.9f)
-                        .rotate(rotateAnim.value)
-                        .scale(
-                            animateFloatAsState(
-                                if (pointingToQibla) 1.1f else 1f,
-                                spring(stiffness = Spring.StiffnessLow)
-                            ).value
-                        )
-                )
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = compassImage,
+                        contentDescription = "Qibla compass",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .rotate(rotateAnim.value)
+                            .scale(
+                                animateFloatAsState(
+                                    if (pointingToQibla) 1.05f else 1f,
+                                    spring(stiffness = Spring.StiffnessLow)
+                                ).value
+                            )
+                    )
+                }
             }
         }
     }
@@ -405,14 +430,18 @@ private fun QiblaStyleSelector(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -421,28 +450,35 @@ private fun QiblaStyleSelector(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Compass Style",
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
 
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp)
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                items(qiblaImages.toList()) { (index, imageRes) ->
-                    QiblaImageOption(
-                        imageRes = imageRes,
-                        isSelected = index == selectedIndex,
-                        onSelected = { onImageSelected(index) }
-                    )
+                LazyRow(
+                    modifier = Modifier.padding(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp)
+                ) {
+                    items(qiblaImages.toList()) { (index, imageRes) ->
+                        QiblaImageOption(
+                            imageRes = imageRes,
+                            isSelected = index == selectedIndex,
+                            onSelected = { onImageSelected(index) }
+                        )
+                    }
                 }
             }
         }
@@ -456,7 +492,7 @@ private fun QiblaImageOption(
     onSelected: () -> Unit
 ) {
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.1f else 0.9f,
+        targetValue = if (isSelected) 1.05f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -465,22 +501,27 @@ private fun QiblaImageOption(
 
     Surface(
         modifier = Modifier
-            .size(72.dp)
+            .size(64.dp)
             .scale(scale)
-            .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onSelected)
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(12.dp)
             ),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        shape = RoundedCornerShape(12.dp),
+        color = if (isSelected)
+            MaterialTheme.colorScheme.primaryContainer
+        else
+            MaterialTheme.colorScheme.surfaceVariant
     ) {
         Image(
             painter = painterResource(imageRes),
             contentDescription = "Compass style",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            contentScale = ContentScale.Fit
         )
     }
 }

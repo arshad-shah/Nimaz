@@ -6,9 +6,8 @@ import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.dayMs
 import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.e
 import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.rad
 import com.arshadshah.nimaz.utils.sunMoonUtils.utils.CalcConstants.zeroFive
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.collect.Lists
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.collect.Maps
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.asin
@@ -77,7 +76,7 @@ object SunAngles {
     }
 
     private fun sunCoords(d: Double): Map<String, Double> {
-        val map: MutableMap<String, Double> = Maps.newConcurrentMap()
+        val map: MutableMap<String, Double> = ConcurrentHashMap()
         val M = solarMeanAnomaly(d)
         val L = eclipticLongitude(M)
         map["dec"] = declination(L, 0.0)
@@ -94,7 +93,7 @@ object SunAngles {
      * @return
      */
     fun getPosition(date: Date, lat: Double, lng: Double): Map<String, Double> {
-        val map: MutableMap<String, Double> = Maps.newConcurrentMap()
+        val map: MutableMap<String, Double> = ConcurrentHashMap()
         val lw = rad * -lng
         val phi = rad * lat
         val d = toDays(date)
@@ -122,13 +121,13 @@ object SunAngles {
      * nauticalDawn	航海黎明（早上航海暮光之城开始）
      * dawn	黎明（早晨航海黄昏结束，早晨民间黄昏开始）
      */
-    var times: MutableList<*> = Lists.newArrayList(
-        Lists.newArrayList(-0.833, "sunrise", "sunset"),
-        Lists.newArrayList(-0.3, "sunriseEnd", "sunsetStart"),
-        Lists.newArrayList(-6.0, "dawn", "dusk"),
-        Lists.newArrayList(-12.0, "nauticalDawn", "nauticalDusk"),
-        Lists.newArrayList(-18.0, "nightEnd", "night"),
-        Lists.newArrayList(6.0, "goldenHourEnd", "goldenHour")
+    var times: MutableList<List<Any>> = mutableListOf(
+        listOf(-0.833, "sunrise", "sunset"),
+        listOf(-0.3, "sunriseEnd", "sunsetStart"),
+        listOf(-6.0, "dawn", "dusk"),
+        listOf(-12.0, "nauticalDawn", "nauticalDusk"),
+        listOf(-18.0, "nightEnd", "night"),
+        listOf(6.0, "goldenHourEnd", "goldenHour")
     )
 
     /**
@@ -196,7 +195,7 @@ object SunAngles {
         val L = eclipticLongitude(M)
         val dec = declination(L, 0.0)
         val jNoon = solarTransitJ(ds, M, L)
-        val result: MutableMap<String, Date> = Maps.newConcurrentMap()
+        val result: MutableMap<String, Date> = ConcurrentHashMap()
         result["solarNoon"] = fromJulian(jNoon)
         result["nadir"] = fromJulian(jNoon - zeroFive)
         var i = 0

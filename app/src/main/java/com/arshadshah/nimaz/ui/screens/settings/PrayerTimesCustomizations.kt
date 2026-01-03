@@ -56,6 +56,7 @@ import com.arshadshah.nimaz.constants.AppConstants.getAsrJuristic
 import com.arshadshah.nimaz.constants.AppConstants.getHighLatitudes
 import com.arshadshah.nimaz.constants.AppConstants.getMethods
 import com.arshadshah.nimaz.ui.components.common.AlertDialogNimaz
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.common.BannerDuration
 import com.arshadshah.nimaz.ui.components.common.BannerSmall
 import com.arshadshah.nimaz.ui.components.common.BannerVariant
@@ -813,13 +814,8 @@ fun PrayerTimesCustomizations(
                     }
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 actions = {

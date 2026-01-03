@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.ui.components.common.BackButton
 import com.arshadshah.nimaz.ui.components.settings.getAppVersion
 import es.dmoral.toasty.Toasty
 import kotlinx.coroutines.launch
@@ -115,13 +116,8 @@ fun EnhancedAboutScreen(
                     }
                 },
                 navigationIcon = {
-                    OutlinedIconButton(onClick = {
+                    BackButton {
                         navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
                     }
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(

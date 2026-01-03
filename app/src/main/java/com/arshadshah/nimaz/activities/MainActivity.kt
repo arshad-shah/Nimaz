@@ -3,17 +3,18 @@ package com.arshadshah.nimaz.activities
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.arshadshah.nimaz.constants.AppConstants
 import com.arshadshah.nimaz.constants.AppConstants.CALENDER_SCREEN_ROUTE
@@ -23,7 +24,6 @@ import com.arshadshah.nimaz.constants.AppConstants.TASBIH_SCREEN_ROUTE
 import com.arshadshah.nimaz.ui.navigation.BottomNavItem
 import com.arshadshah.nimaz.ui.navigation.NavigationGraph
 import com.arshadshah.nimaz.ui.theme.NimazTheme
-import com.arshadshah.nimaz.ui.theme.rememberSystemUiController
 import com.arshadshah.nimaz.utils.FirebaseLogger
 import com.arshadshah.nimaz.utils.PrivateSharedPreferences
 import com.arshadshah.nimaz.utils.ThemeDataStore
@@ -69,25 +69,42 @@ class MainActivity : ComponentActivity() {
             firebaseLogger.logEvent("returning_user", null)
         }
 
+        enableEdgeToEdge()
+
         setContent {
             // Collect theme preferences directly from ThemeDataStore
             val isDarkMode by themeDataStore.darkModeFlow.collectAsState(initial = false)
             val currentTheme by themeDataStore.themeFlow.collectAsState(initial = AppConstants.THEME_SYSTEM)
+            val backgroundOfTheme = MaterialTheme.colorScheme.background.toArgb()
+
+            DisposableEffect(isDarkMode) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(
+                        backgroundOfTheme,
+                        backgroundOfTheme,
+                    ) { isDarkMode },
+                    navigationBarStyle = SystemBarStyle.auto(
+                        backgroundOfTheme,
+                        backgroundOfTheme,
+                    ) { isDarkMode },
+                )
+                onDispose {}
+            }
 
             NimazTheme(
                 darkTheme = isDarkMode,
                 themeName = currentTheme
             ) {
-                val systemUiController = rememberSystemUiController()
-
-                systemUiController.setStatusBarColor(
-                    color = MaterialTheme.colorScheme.background,
-                    darkIcons = !isDarkMode,
-                )
-                systemUiController.setNavigationBarColor(
-                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-                    darkIcons = !isDarkMode,
-                )
+//                val systemUiController = rememberSystemUiController()
+//
+//                systemUiController.setStatusBarColor(
+//                    color = MaterialTheme.colorScheme.background,
+//                    darkIcons = !isDarkMode,
+//                )
+//                systemUiController.setNavigationBarColor(
+//                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+//                    darkIcons = !isDarkMode,
+//                )
                 val navController = rememberNavController()
                 val route =
                     remember(navController) { mutableStateOf(navController.currentDestination?.route) }
@@ -99,7 +116,6 @@ class MainActivity : ComponentActivity() {
 
                     // Log screen view
                     logScreenView(
-                        navController = controller,
                         screenRoute = newRoute,
                         arguments = arguments
                     )
@@ -118,7 +134,6 @@ class MainActivity : ComponentActivity() {
      * Log screen view to analytics
      */
     private fun logScreenView(
-        navController: NavController,
         screenRoute: String,
         arguments: Bundle?
     ) {

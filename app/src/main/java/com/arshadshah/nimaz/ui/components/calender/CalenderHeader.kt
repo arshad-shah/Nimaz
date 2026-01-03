@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.time.YearMonth
 import java.time.chrono.HijrahDate
@@ -55,8 +56,8 @@ fun CalendarHeader(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -70,13 +71,13 @@ fun CalendarHeader(
         ) {
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -115,15 +116,15 @@ private fun NavigationButton(
 ) {
     FilledIconButton(
         onClick = onClick,
-        modifier = modifier.size(36.dp),
+        modifier = modifier.size(40.dp),
         colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-            contentColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Icon(
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(20.dp),
             imageVector = icon,
             contentDescription = contentDescription
         )
@@ -142,11 +143,11 @@ private fun MonthYearDisplay(
 ) {
     Column(
         modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onTodayClick)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         MonthIndicator(
             isCurrentMonth = isCurrentMonth,
@@ -157,13 +158,14 @@ private fun MonthYearDisplay(
         Text(
             text = currentMonthYear,
             style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
         )
 
         Text(
             text = hijriInfo,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )
     }
 }
@@ -179,12 +181,12 @@ private fun MonthIndicator(
         color = if (isCurrentMonth)
             MaterialTheme.colorScheme.primary
         else
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-        shape = RoundedCornerShape(6.dp),
+            MaterialTheme.colorScheme.secondaryContainer,
+        shape = RoundedCornerShape(8.dp),
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -201,7 +203,7 @@ private fun MonthIndicator(
                 color = if (isCurrentMonth)
                     MaterialTheme.colorScheme.onPrimary
                 else
-                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
 
@@ -222,13 +224,13 @@ private fun NavigationIcon(
     modifier: Modifier = Modifier
 ) {
     Icon(
-        modifier = modifier.size(12.dp),
+        modifier = modifier.size(14.dp),
         imageVector = icon,
         contentDescription = null,
         tint = if (isCurrentMonth)
             MaterialTheme.colorScheme.onPrimary
         else
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.onSecondaryContainer
     )
 }
 
