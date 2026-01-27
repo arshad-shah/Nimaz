@@ -599,7 +599,7 @@ fun ZakatResultCard(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (isAboveNisab) {
-                NimazColors.Primary.copy(alpha = 0.1f)
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
             } else {
                 MaterialTheme.colorScheme.surfaceVariant
             }
@@ -615,7 +615,7 @@ fun ZakatResultCard(
             Icon(
                 imageVector = Icons.Default.Calculate,
                 contentDescription = null,
-                tint = if (isAboveNisab) NimazColors.Primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isAboveNisab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(48.dp)
             )
 
@@ -631,7 +631,7 @@ fun ZakatResultCard(
                 text = "$currency ${String.format("%.2f", zakatDue)}",
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
-                color = if (isAboveNisab) NimazColors.Primary else MaterialTheme.colorScheme.onSurface
+                color = if (isAboveNisab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
 
             if (!isAboveNisab) {

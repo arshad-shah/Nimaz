@@ -91,15 +91,15 @@ val defaultOnboardingSlides = listOf(
         title = "Location",
         description = "Allow location access for accurate prayer times and Qibla direction",
         icon = Icons.Default.LocationOn,
-        backgroundColor = NimazColors.Primary,
-        accentColor = NimazColors.PrimaryLight
+        backgroundColor = Color(0xFF14B8A6),
+        accentColor = Color(0xFF2DD4BF)
     ),
     OnboardingSlideData(
         title = "Notifications",
         description = "Never miss a prayer with timely Adhan notifications",
         icon = Icons.Default.Notifications,
-        backgroundColor = NimazColors.Secondary,
-        accentColor = NimazColors.SecondaryLight
+        backgroundColor = Color(0xFFEAB308),
+        accentColor = Color(0xFFFACC15)
     )
 )
 
@@ -506,8 +506,8 @@ fun WelcomeSlide(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        NimazColors.Primary,
-                        NimazColors.PrimaryDark
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.primary
                     )
                 )
             ),

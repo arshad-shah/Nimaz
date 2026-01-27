@@ -52,7 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 enum class BookmarkType(val displayName: String, val icon: ImageVector, val color: Color) {
     QURAN("Quran", Icons.Default.MenuBook, NimazColors.QuranColors.BookmarkPrimary),
     HADITH("Hadith", Icons.Default.MenuBook, NimazColors.QuranColors.BookmarkSecondary),
-    DUA("Dua", Icons.Default.Bookmark, NimazColors.Primary)
+    DUA("Dua", Icons.Default.Bookmark, Color(0xFF14B8A6))
 }
 
 /**

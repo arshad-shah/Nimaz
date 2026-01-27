@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Mosque
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -50,6 +52,7 @@ import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
+import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
@@ -62,7 +65,6 @@ import com.arshadshah.nimaz.presentation.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 
 @Composable
@@ -82,7 +84,8 @@ fun NavGraph() {
     val showBottomNav = currentDestination?.hierarchy?.any { dest ->
         dest.hasRoute<Route.Home>() ||
         dest.hasRoute<Route.Quran>() ||
-        dest.hasRoute<Route.Prayer>() ||
+        dest.hasRoute<Route.Tasbih>() ||
+        dest.hasRoute<Route.QiblaNav>() ||
         dest.hasRoute<Route.More>()
     } == true
 
@@ -92,7 +95,7 @@ fun NavGraph() {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = NimazColors.Primary)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
         return
     }
@@ -184,10 +187,17 @@ fun NavGraph() {
                 )
             }
 
-            composable<Route.Prayer> {
-                PrayerTrackerScreen(
+            composable<Route.Tasbih> {
+                TasbihScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToStats = { navController.navigate(Route.PrayerStats) }
+                    onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
+                    onNavigateToSettings = { navController.navigate(Route.Settings) }
+                )
+            }
+
+            composable<Route.QiblaNav> {
+                QiblaScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -203,6 +213,12 @@ fun NavGraph() {
                     onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
                     onNavigateToAbout = { navController.navigate(Route.SettingsAbout) },
                     onNavigateToHelp = { navController.navigate(Route.SettingsHelp) },
+                    onNavigateToHadith = { navController.navigate(Route.HadithHome) },
+                    onNavigateToFasting = { navController.navigate(Route.FastingHome) },
+                    onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
+                    onNavigateToDuas = { navController.navigate(Route.DuaHome) },
+                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
+                    onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onShareApp = { /* Implement share intent */ },
                     onRateApp = { /* Implement rate intent */ }
                 )
@@ -602,6 +618,13 @@ fun NavGraph() {
 
             composable<Route.SettingsQuran> {
                 QuranSettingsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSelectReciter = { navController.navigate(Route.SelectReciter) }
+                )
+            }
+
+            composable<Route.SelectReciter> {
+                SelectReciterScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
@@ -683,6 +706,7 @@ private data class BottomNavItem(
 private val bottomNavItems = listOf(
     BottomNavItem(Route.Home, "Home", Icons.Default.Home),
     BottomNavItem(Route.Quran, "Quran", Icons.Default.MenuBook),
-    BottomNavItem(Route.Prayer, "Prayer", Icons.Default.Mosque),
+    BottomNavItem(Route.Tasbih, "Tasbih", Icons.Default.TouchApp),
+    BottomNavItem(Route.QiblaNav, "Qibla", Icons.Default.Explore),
     BottomNavItem(Route.More, "More", Icons.Default.MoreHoriz)
 )

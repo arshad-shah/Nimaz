@@ -11,7 +11,10 @@ sealed interface Route {
     data object Quran : Route
 
     @Serializable
-    data object Prayer : Route
+    data object Tasbih : Route
+
+    @Serializable
+    data object QiblaNav : Route
 
     @Serializable
     data object More : Route
@@ -170,12 +173,17 @@ sealed interface Route {
     // Surah Info
     @Serializable
     data class SurahInfo(val surahNumber: Int) : Route
+
+    // Select Reciter
+    @Serializable
+    data object SelectReciter : Route
 }
 
 // Navigation destinations for bottom navigation
 enum class BottomNavDestination(val route: Route, val title: String, val icon: String) {
     HOME(Route.Home, "Home", "home"),
     QURAN(Route.Quran, "Quran", "menu_book"),
-    PRAYER(Route.Prayer, "Prayer", "mosque"),
+    TASBIH(Route.Tasbih, "Tasbih", "counter"),
+    QIBLA(Route.QiblaNav, "Qibla", "compass"),
     MORE(Route.More, "More", "more_horiz")
 }

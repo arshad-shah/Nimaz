@@ -327,7 +327,7 @@ fun CalendarDayCell(
     val backgroundColor = when {
         isSelected -> MaterialTheme.colorScheme.primary
         isToday -> MaterialTheme.colorScheme.primaryContainer
-        isHoliday && isCurrentMonth -> NimazColors.Secondary.copy(alpha = 0.1f)
+        isHoliday && isCurrentMonth -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
         else -> Color.Transparent
     }
 
@@ -335,7 +335,7 @@ fun CalendarDayCell(
         isSelected -> MaterialTheme.colorScheme.onPrimary
         isToday -> MaterialTheme.colorScheme.onPrimaryContainer
         !isCurrentMonth -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-        isHoliday -> NimazColors.Secondary
+        isHoliday -> MaterialTheme.colorScheme.secondary
         else -> MaterialTheme.colorScheme.onSurface
     }
 
@@ -393,7 +393,7 @@ fun CalendarDayCell(
                             color = if (isSelected) {
                                 MaterialTheme.colorScheme.onPrimary
                             } else if (isHoliday) {
-                                NimazColors.Secondary
+                                MaterialTheme.colorScheme.secondary
                             } else {
                                 MaterialTheme.colorScheme.secondary
                             }

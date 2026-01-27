@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,29 +13,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,18 +41,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.Dua
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
 
@@ -67,66 +60,44 @@ fun DuaReaderScreen(
     viewModel: DuaViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     LaunchedEffect(duaId) {
         viewModel.onEvent(DuaEvent.LoadDua(duaId))
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
                 title = state.dua?.titleEnglish ?: "Loading...",
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior,
+                subtitle = state.dua?.occasion?.displayName(),
                 actions = {
                     IconButton(
                         onClick = {
                             state.dua?.let {
-                                viewModel.onEvent(DuaEvent.ToggleFavorite(it.id, it.categoryId))
+                                viewModel.onEvent(
+                                    DuaEvent.ToggleFavorite(it.id, it.categoryId)
+                                )
                             }
                         }
                     ) {
                         val isFavorite = state.isFavorite
                         val tint by animateColorAsState(
-                            targetValue = if (isFavorite) NimazColors.Secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            targetValue = if (isFavorite) MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
                             label = "favorite_tint"
                         )
                         Icon(
-                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            imageVector = if (isFavorite) Icons.Default.Bookmark
+                            else Icons.Default.BookmarkBorder,
                             contentDescription = "Favorite",
                             tint = tint
-                        )
-                    }
-                    IconButton(onClick = { /* Share */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = "Share"
                         )
                     }
                 }
             )
         },
-        floatingActionButton = {
-            state.dua?.let { dua ->
-                val repeatCount = dua.repeatCount ?: 0
-                if (repeatCount > 0) {
-                    FloatingActionButton(
-                        onClick = {
-                            viewModel.onEvent(DuaEvent.IncrementProgress(dua.id, repeatCount))
-                        },
-                        containerColor = NimazColors.Secondary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Increment Count",
-                            tint = Color.White
-                        )
-                    }
-                }
-            }
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (state.isLoading) {
             Box(
@@ -135,80 +106,249 @@ fun DuaReaderScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             state.dua?.let { dua ->
                 val repeatCount = dua.repeatCount ?: 0
-                LazyColumn(
+
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(paddingValues)
                 ) {
-                    // Counter Card (if applicable)
-                    if (repeatCount > 0) {
-                        item {
-                            CounterCard(
+                    // Navigation bar
+                    DuaNavigationBar(
+                        currentIndex = dua.displayOrder,
+                        onPrevious = { /* nav prev */ },
+                        onNext = { /* nav next */ }
+                    )
+
+                    // Scrollable content
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 20.dp, vertical = 25.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        // Dua Card
+                        DuaCard(dua = dua, arabicFontSize = state.arabicFontSize, fontSize = state.fontSize)
+
+                        // Repeat Counter
+                        if (repeatCount > 0) {
+                            RecitationCounter(
                                 currentCount = state.progress?.completedCount ?: 0,
                                 targetCount = repeatCount,
                                 onIncrement = {
-                                    viewModel.onEvent(DuaEvent.IncrementProgress(dua.id, repeatCount))
-                                }
+                                    viewModel.onEvent(
+                                        DuaEvent.IncrementProgress(dua.id, repeatCount)
+                                    )
+                                },
+                                onDecrement = { /* decrement logic */ }
                             )
                         }
+
+                        // Virtue / Benefits card
+                        if (!dua.benefits.isNullOrEmpty()) {
+                            VirtueCard(text = dua.benefits)
+                        }
                     }
 
-                    // Arabic Text
-                    item {
-                        DuaTextCard(
-                            label = "Arabic",
-                            text = dua.textArabic,
-                            isArabic = true,
-                            fontSize = state.arabicFontSize,
-                            showContent = state.showArabic,
-                            onToggle = { viewModel.onEvent(DuaEvent.ToggleArabic) }
+                    // Bottom actions
+                    BottomActions(
+                        onAudioClick = { /* audio */ },
+                        onShareClick = { /* share */ },
+                        onDoneClick = { /* done */ }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DuaNavigationBar(
+    currentIndex: Int,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                onClick = onPrevious,
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Prev",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Text(
+                text = "${currentIndex} of ...",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Surface(
+                onClick = onNext,
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "Next",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DuaCard(
+    dua: Dua,
+    arabicFontSize: Float,
+    fontSize: Float,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        Column {
+            // Arabic section with gradient background
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainerHighest,
+                                MaterialTheme.colorScheme.surfaceContainer
+                            )
                         )
-                    }
+                    )
+                    .padding(horizontal = 25.dp, vertical = 30.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = dua.textArabic,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = arabicFontSize.sp,
+                        lineHeight = (arabicFontSize * 2.4f).sp
+                    ),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-                    // Transliteration
-                    if (!dua.textTransliteration.isNullOrEmpty()) {
-                        item {
-                            DuaTextCard(
-                                label = "Transliteration",
-                                text = dua.textTransliteration,
-                                isArabic = false,
-                                fontSize = state.fontSize,
-                                showContent = state.showTransliteration,
-                                onToggle = { viewModel.onEvent(DuaEvent.ToggleTransliteration) }
+            // Content section
+            Column(
+                modifier = Modifier.padding(25.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                // Transliteration
+                if (!dua.textTransliteration.isNullOrEmpty()) {
+                    Text(
+                        text = dua.textTransliteration,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = fontSize.sp,
+                            lineHeight = (fontSize * 1.8f).sp
+                        ),
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                // Translation
+                Text(
+                    text = dua.textEnglish,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = fontSize.sp,
+                        lineHeight = (fontSize * 1.8f).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Meta info
+                if (!dua.reference.isNullOrEmpty() || dua.repeatCount != null) {
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    )
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        // Source
+                        if (!dua.reference.isNullOrEmpty()) {
+                            MetaItem(
+                                icon = "\uD83D\uDCD6",
+                                label = "Source",
+                                value = dua.reference
                             )
                         }
-                    }
 
-                    // Translation
-                    item {
-                        DuaTextCard(
-                            label = "Translation",
-                            text = dua.textEnglish,
-                            isArabic = false,
-                            fontSize = state.fontSize,
-                            showContent = state.showTranslation,
-                            onToggle = { viewModel.onEvent(DuaEvent.ToggleTranslation) }
-                        )
-                    }
-
-                    // Reference/Source
-                    if (!dua.reference.isNullOrEmpty()) {
-                        item {
-                            ReferenceCard(source = dua.reference)
-                        }
-                    }
-
-                    // Benefits
-                    if (!dua.benefits.isNullOrEmpty()) {
-                        item {
-                            BenefitsCard(benefits = dua.benefits)
+                        // Recommended repetition
+                        dua.repeatCount?.let { count ->
+                            if (count > 0) {
+                                MetaItem(
+                                    icon = "\uD83D\uDD04",
+                                    label = "Recommended",
+                                    value = "Recite $count time${if (count > 1) "s" else ""}"
+                                )
+                            }
                         }
                     }
                 }
@@ -218,193 +358,183 @@ fun DuaReaderScreen(
 }
 
 @Composable
-private fun CounterCard(
-    currentCount: Int,
-    targetCount: Int,
-    onIncrement: () -> Unit,
+private fun MetaItem(
+    icon: String,
+    label: String,
+    value: String,
     modifier: Modifier = Modifier
 ) {
-    val progress = currentCount.toFloat() / targetCount.toFloat()
-    val isComplete = currentCount >= targetCount
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isComplete) {
-                NimazColors.StatusColors.Prayed.copy(alpha = 0.1f)
-            } else {
-                NimazColors.TasbihColors.Counter.copy(alpha = 0.1f)
-            }
-        )
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            modifier = Modifier.size(32.dp)
         ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Text(text = icon, fontSize = 14.sp)
+            }
+        }
+
+        Column {
             Text(
-                text = "Daily Target",
-                style = MaterialTheme.typography.labelMedium,
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = currentCount.toString(),
-                    style = MaterialTheme.typography.displayMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isComplete) NimazColors.StatusColors.Prayed else NimazColors.TasbihColors.Counter
-                )
-                Text(
-                    text = " / $targetCount",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Progress Bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progress.coerceIn(0f, 1f))
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(
-                            if (isComplete) NimazColors.StatusColors.Prayed else NimazColors.TasbihColors.Counter
-                        )
-                )
-            }
-
-            if (isComplete) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Target Complete!",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = NimazColors.StatusColors.Prayed
-                )
-            }
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
 
 @Composable
-private fun DuaTextCard(
-    label: String,
-    text: String,
-    isArabic: Boolean,
-    fontSize: Float,
-    showContent: Boolean,
-    onToggle: () -> Unit,
+private fun RecitationCounter(
+    currentCount: Int,
+    targetCount: Int,
+    onIncrement: () -> Unit,
+    onDecrement: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    val progress = currentCount.toFloat() / targetCount.toFloat()
+
+    Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        color = MaterialTheme.colorScheme.surfaceContainer
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
+                    text = "Recitation Counter",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Target: ${targetCount}x",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            // Counter controls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Minus button
+                Surface(
+                    onClick = onDecrement,
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    modifier = Modifier.size(50.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = "\u2212",
+                            fontSize = 24.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                // Count value
+                Text(
+                    text = currentCount.toString(),
+                    style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.width(80.dp),
+                    textAlign = TextAlign.Center
                 )
 
+                Spacer(modifier = Modifier.width(20.dp))
+
+                // Plus button
                 Surface(
-                    onClick = onToggle,
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    onClick = onIncrement,
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    Text(
-                        text = if (showContent) "Hide" else "Show",
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = "+",
+                            fontSize = 24.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
-            if (showContent) {
-                Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-                if (isArabic) {
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontSize = fontSize.sp,
-                            lineHeight = (fontSize * 2f).sp
-                        ),
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else {
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = fontSize.sp,
-                            lineHeight = (fontSize * 1.6f).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+            // Progress bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(progress.coerceIn(0f, 1f))
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ReferenceCard(
-    source: String,
+private fun VirtueCard(
+    text: String,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "Source",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
+                text = "Virtue of this Dua",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.height(4.dp))
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             Text(
-                text = source,
-                style = MaterialTheme.typography.bodyMedium,
+                text = text,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    lineHeight = 24.sp
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -412,34 +542,103 @@ private fun ReferenceCard(
 }
 
 @Composable
-private fun BenefitsCard(
-    benefits: String,
+private fun BottomActions(
+    onAudioClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onDoneClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = NimazColors.StatusColors.Prayed.copy(alpha = 0.1f)
-        )
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 8.dp
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 20.dp, vertical = 15.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = "Benefits & Virtues",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = NimazColors.StatusColors.Prayed
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = benefits,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            // Audio button
+            Surface(
+                onClick = onAudioClick,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest
+            ) {
+                Row(
+                    modifier = Modifier.padding(vertical = 14.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Audio",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Share button
+            Surface(
+                onClick = onShareClick,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest
+            ) {
+                Row(
+                    modifier = Modifier.padding(vertical = 14.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Share",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Done button (primary)
+            Surface(
+                onClick = onDoneClick,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primary
+            ) {
+                Row(
+                    modifier = Modifier.padding(vertical = 14.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Done",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
         }
     }
 }

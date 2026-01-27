@@ -1,6 +1,9 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,18 +17,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Vibration
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -34,17 +36,36 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+
+// Prayer accent colors matching the HTML prototype
+private val FajrColor = Color(0xFF6366F1)
+private val DhuhrColor = Color(0xFFEAB308)
+private val AsrColor = Color(0xFFF97316)
+private val MaghribColor = Color(0xFFEF4444)
+private val IshaColor = Color(0xFF8B5CF6)
+
+private data class PrayerNotificationData(
+    val name: String,
+    val key: String,
+    val accentColor: Color,
+    val isEnabled: Boolean,
+    val isSoundOn: Boolean
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,11 +76,21 @@ fun NotificationSettingsScreen(
     val notificationState by viewModel.notificationState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    val reminderOptions = listOf(
-        "5 minutes before" to 5,
-        "10 minutes before" to 10,
-        "15 minutes before" to 15,
-        "30 minutes before" to 30
+    val prayers = listOf(
+        PrayerNotificationData("Fajr", "fajr", FajrColor, notificationState.fajrNotification, notificationState.adhanEnabled),
+        PrayerNotificationData("Dhuhr", "dhuhr", DhuhrColor, notificationState.dhuhrNotification, notificationState.adhanEnabled),
+        PrayerNotificationData("Asr", "asr", AsrColor, notificationState.asrNotification, notificationState.adhanEnabled),
+        PrayerNotificationData("Maghrib", "maghrib", MaghribColor, notificationState.maghribNotification, notificationState.adhanEnabled),
+        PrayerNotificationData("Isha", "isha", IshaColor, notificationState.ishaNotification, notificationState.adhanEnabled)
+    )
+
+    var selectedAdhanIndex by remember { mutableIntStateOf(0) }
+
+    val adhanOptions = listOf(
+        "Mishary Rashid Alafasy" to "Kuwait",
+        "Abdul Basit Abdul Samad" to "Egypt",
+        "Makkah (Masjid al-Haram)" to "Saudi Arabia",
+        "Simple Beep" to "System sound"
     )
 
     Scaffold(
@@ -76,331 +107,403 @@ fun NotificationSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            // Master Toggle
+            // Global Toggle
             item {
-                NotificationToggleCard(
-                    title = "Prayer Notifications",
-                    subtitle = "Enable notifications for prayer times",
-                    icon = Icons.Default.Notifications,
-                    isEnabled = notificationState.notificationsEnabled,
-                    onToggle = { viewModel.onEvent(SettingsEvent.SetNotificationsEnabled(!notificationState.notificationsEnabled)) }
-                )
-            }
-
-            // Prayer-specific toggles
-            if (notificationState.notificationsEnabled) {
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SectionHeader(title = "Individual Prayers")
-                }
-
-                item {
-                    PrayerNotificationCard(
-                        prayerName = "Fajr",
-                        isEnabled = notificationState.fajrNotification,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetPrayerNotification("fajr", !notificationState.fajrNotification)) }
-                    )
-                }
-
-                item {
-                    PrayerNotificationCard(
-                        prayerName = "Sunrise",
-                        isEnabled = notificationState.sunriseNotification,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetPrayerNotification("sunrise", !notificationState.sunriseNotification)) }
-                    )
-                }
-
-                item {
-                    PrayerNotificationCard(
-                        prayerName = "Dhuhr",
-                        isEnabled = notificationState.dhuhrNotification,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetPrayerNotification("dhuhr", !notificationState.dhuhrNotification)) }
-                    )
-                }
-
-                item {
-                    PrayerNotificationCard(
-                        prayerName = "Asr",
-                        isEnabled = notificationState.asrNotification,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetPrayerNotification("asr", !notificationState.asrNotification)) }
-                    )
-                }
-
-                item {
-                    PrayerNotificationCard(
-                        prayerName = "Maghrib",
-                        isEnabled = notificationState.maghribNotification,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetPrayerNotification("maghrib", !notificationState.maghribNotification)) }
-                    )
-                }
-
-                item {
-                    PrayerNotificationCard(
-                        prayerName = "Isha",
-                        isEnabled = notificationState.ishaNotification,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetPrayerNotification("isha", !notificationState.ishaNotification)) }
-                    )
-                }
-
-                // Adhan Sound
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SectionHeader(title = "Adhan Sound")
-                }
-
-                item {
-                    NotificationToggleCard(
-                        title = "Adhan",
-                        subtitle = "Play adhan at prayer times",
-                        icon = Icons.Default.MusicNote,
-                        isEnabled = notificationState.adhanEnabled,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled)) }
-                    )
-                }
-
-                // Reminder
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SectionHeader(title = "Pre-Prayer Reminder")
-                }
-
-                item {
-                    NotificationToggleCard(
-                        title = "Reminder Before Prayer",
-                        subtitle = "Get notified before prayer time",
-                        icon = Icons.Default.Schedule,
-                        isEnabled = notificationState.showReminderBefore,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore)) }
-                    )
-                }
-
-                if (notificationState.showReminderBefore) {
-                    item {
-                        ReminderTimeCard(
-                            options = reminderOptions,
-                            selectedMinutes = notificationState.reminderMinutes,
-                            onSelected = { viewModel.onEvent(SettingsEvent.SetReminderMinutes(it)) }
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Enable Notifications",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Receive prayer time alerts",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = notificationState.notificationsEnabled,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetNotificationsEnabled(!notificationState.notificationsEnabled))
+                            }
                         )
                     }
                 }
-
-                // Additional Options
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SectionHeader(title = "Additional Options")
-                }
-
-                item {
-                    NotificationToggleCard(
-                        title = "Vibration",
-                        subtitle = "Vibrate with notification",
-                        icon = Icons.Default.Vibration,
-                        isEnabled = notificationState.vibrationEnabled,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled)) }
-                    )
-                }
-
-                item {
-                    NotificationToggleCard(
-                        title = "Persistent Notification",
-                        subtitle = "Show ongoing notification with next prayer",
-                        icon = Icons.Default.NotificationsActive,
-                        isEnabled = notificationState.persistentNotification,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetPersistentNotification(!notificationState.persistentNotification)) }
-                    )
-                }
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+            // Prayer Notifications Section
+            if (notificationState.notificationsEnabled) {
+                item {
+                    SectionTitle(title = "PRAYER NOTIFICATIONS")
+                }
+
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        Column {
+                            prayers.forEachIndexed { index, prayer ->
+                                PrayerNotificationRow(
+                                    prayer = prayer,
+                                    onToggle = {
+                                        viewModel.onEvent(
+                                            SettingsEvent.SetPrayerNotification(
+                                                prayer.key,
+                                                !prayer.isEnabled
+                                            )
+                                        )
+                                    },
+                                    onSoundToggle = {
+                                        viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
+                                    }
+                                )
+                                if (index < prayers.lastIndex) {
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .height(1.dp)
+                                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                // Adhan Sound Section
+                item {
+                    SectionTitle(title = "ADHAN SOUND")
+                }
+
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        Column {
+                            adhanOptions.forEachIndexed { index, (name, location) ->
+                                AdhanOptionRow(
+                                    name = name,
+                                    location = location,
+                                    isSelected = index == selectedAdhanIndex,
+                                    onSelect = { selectedAdhanIndex = index },
+                                    onPlay = { /* TODO: implement adhan preview */ }
+                                )
+                                if (index < adhanOptions.lastIndex) {
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .height(1.dp)
+                                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                // Additional Alerts Section
+                item {
+                    SectionTitle(title = "ADDITIONAL ALERTS")
+                }
+
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        Column {
+                            // Pre-Adhan Reminder
+                            SettingToggleRow(
+                                label = "Pre-Adhan Reminder",
+                                value = "${notificationState.reminderMinutes} minutes before",
+                                isEnabled = notificationState.showReminderBefore,
+                                onToggle = {
+                                    viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
+                                }
+                            )
+                            SettingDivider()
+
+                            // Sunrise Alert
+                            SettingToggleRow(
+                                label = "Sunrise Alert",
+                                value = "End of Fajr prayer time",
+                                isEnabled = notificationState.sunriseNotification,
+                                onToggle = {
+                                    viewModel.onEvent(
+                                        SettingsEvent.SetPrayerNotification(
+                                            "sunrise",
+                                            !notificationState.sunriseNotification
+                                        )
+                                    )
+                                }
+                            )
+                            SettingDivider()
+
+                            // Friday Prayer Reminder (maps to persistent notification)
+                            SettingToggleRow(
+                                label = "Friday Prayer Reminder",
+                                value = "1 hour before Jummah",
+                                isEnabled = notificationState.persistentNotification,
+                                onToggle = {
+                                    viewModel.onEvent(SettingsEvent.SetPersistentNotification(!notificationState.persistentNotification))
+                                }
+                            )
+                            SettingDivider()
+
+                            // Vibration
+                            SettingToggleRow(
+                                label = "Vibration",
+                                value = "Vibrate with notification",
+                                isEnabled = notificationState.vibrationEnabled,
+                                onToggle = {
+                                    viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
+                                }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                // Info Banner
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(15.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "Make sure to enable notifications in your device settings and disable battery optimization for accurate prayer alerts.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                lineHeight = 20.sp
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SectionHeader(
-    title: String,
-    modifier: Modifier = Modifier
-) {
+private fun SectionTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(vertical = 8.dp)
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        letterSpacing = 1.sp,
+        modifier = Modifier.padding(start = 5.dp, bottom = 12.dp)
     )
 }
 
 @Composable
-private fun NotificationToggleCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    isEnabled: Boolean,
+private fun PrayerNotificationRow(
+    prayer: PrayerNotificationData,
     onToggle: () -> Unit,
-    modifier: Modifier = Modifier
+    onSoundToggle: () -> Unit
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // Color accent bar
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (isEnabled) NimazColors.Primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
+                .width(4.dp)
+                .height(40.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(prayer.accentColor)
+        )
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        // Prayer info
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = prayer.name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
             )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { onToggle() }
+            Text(
+                text = "Prayer notification",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        // Sound button
+        IconButton(
+            onClick = onSoundToggle,
+            modifier = Modifier.size(36.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+            )
+        ) {
+            Icon(
+                imageVector = if (prayer.isSoundOn) Icons.AutoMirrored.Filled.VolumeUp
+                else Icons.AutoMirrored.Filled.VolumeOff,
+                contentDescription = if (prayer.isSoundOn) "Sound on" else "Sound off",
+                tint = if (prayer.isSoundOn) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        // Toggle
+        Switch(
+            checked = prayer.isEnabled,
+            onCheckedChange = { onToggle() }
+        )
     }
 }
 
 @Composable
-private fun PrayerNotificationCard(
-    prayerName: String,
-    isEnabled: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier
+private fun AdhanOptionRow(
+    name: String,
+    location: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit,
+    onPlay: () -> Unit
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onSelect)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Alarm,
-                contentDescription = null,
-                tint = if (isEnabled) NimazColors.Primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
+        // Radio indicator
+        RadioButton(
+            selected = isSelected,
+            onClick = onSelect,
+            modifier = Modifier.size(20.dp),
+            colors = RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.colorScheme.primary,
+                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        )
 
-            Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(15.dp))
 
+        // Adhan info
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = prayerName,
+                text = name,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
+                color = MaterialTheme.colorScheme.onSurface
             )
-
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { onToggle() }
-            )
-        }
-    }
-}
-
-@Composable
-private fun ReminderTimeCard(
-    options: List<Pair<String, Int>>,
-    selectedMinutes: Int,
-    onSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            options.forEach { (displayName, minutes) ->
-                ReminderOption(
-                    displayName = displayName,
-                    isSelected = selectedMinutes == minutes,
-                    onClick = { onSelected(minutes) }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReminderOption(
-    displayName: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        color = if (isSelected) {
-            NimazColors.Primary.copy(alpha = 0.1f)
-        } else {
-            MaterialTheme.colorScheme.surface
-        }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = isSelected,
-                onClick = onClick
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
             Text(
-                text = displayName,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                modifier = Modifier.weight(1f)
+                text = location,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        // Play button
+        IconButton(
+            onClick = onPlay,
+            modifier = Modifier.size(36.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Preview",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp)
             )
         }
     }
+}
+
+@Composable
+private fun SettingToggleRow(
+    label: String,
+    value: String,
+    isEnabled: Boolean,
+    onToggle: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = { onToggle() }
+        )
+    }
+}
+
+@Composable
+private fun SettingDivider() {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(1.dp)
+            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+    )
 }

@@ -267,7 +267,7 @@ fun QuickActionsGrid(
             QuickActionCard(
                 title = "Duas",
                 icon = Icons.Default.Book,
-                iconColor = NimazColors.Secondary,
+                iconColor = MaterialTheme.colorScheme.secondary,
                 onClick = onDuaClick,
                 modifier = Modifier.weight(1f)
             )
@@ -289,14 +289,14 @@ fun QuickActionsGrid(
             QuickActionCard(
                 title = "Qibla",
                 icon = Icons.Default.Explore,
-                iconColor = NimazColors.Primary,
+                iconColor = MaterialTheme.colorScheme.primary,
                 onClick = onQiblaClick,
                 modifier = Modifier.weight(1f)
             )
             QuickActionCard(
                 title = "Calendar",
                 icon = Icons.Default.CalendarMonth,
-                iconColor = NimazColors.Tertiary,
+                iconColor = MaterialTheme.colorScheme.tertiary,
                 onClick = onCalendarClick,
                 modifier = Modifier.weight(1f)
             )

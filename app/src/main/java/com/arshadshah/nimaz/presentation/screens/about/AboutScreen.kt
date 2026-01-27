@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.about
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,43 +15,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Gavel
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Policy
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
+import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
+
+private const val APP_VERSION = "1.0.0"
+private const val BUILD_NUMBER = 1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,15 +48,12 @@ fun AboutScreen(
     onShareApp: () -> Unit,
     onContactUs: () -> Unit
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
                 title = "About",
-                onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior
+                onBackClick = onNavigateBack
             )
         }
     ) { paddingValues ->
@@ -80,296 +61,217 @@ fun AboutScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // App Logo and Info
+            // App Info Header
             item {
-                AppInfoCard()
-            }
-
-            // Features
-            item {
-                FeaturesCard()
+                AppInfoSection()
             }
 
             // Links Section
             item {
-                SectionHeader(title = "Links")
+                SectionTitle(text = "Links")
             }
 
             item {
-                AboutLinkItem(
-                    title = "Rate Us",
-                    subtitle = "Love the app? Rate us on Play Store",
-                    icon = Icons.Default.Star,
-                    iconColor = NimazColors.StatusColors.Late,
-                    onClick = onRateApp
+                LinksCard(
+                    onRateApp = onRateApp,
+                    onContactUs = onContactUs,
+                    onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
+                    onNavigateToTerms = onNavigateToTerms
                 )
             }
 
+            // Credits Section
             item {
-                AboutLinkItem(
-                    title = "Share App",
-                    subtitle = "Share Nimaz Pro with friends",
-                    icon = Icons.Default.Share,
-                    iconColor = NimazColors.Secondary,
-                    onClick = onShareApp
-                )
+                SectionTitle(text = "Data Sources & Credits")
             }
 
             item {
-                AboutLinkItem(
-                    title = "Contact Us",
-                    subtitle = "Questions, feedback, or suggestions",
-                    icon = Icons.Default.Email,
-                    iconColor = NimazColors.Primary,
-                    onClick = onContactUs
-                )
-            }
-
-            // Legal Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(title = "Legal")
-            }
-
-            item {
-                AboutLinkItem(
-                    title = "Privacy Policy",
-                    subtitle = "How we handle your data",
-                    icon = Icons.Default.Policy,
-                    onClick = onNavigateToPrivacyPolicy
-                )
-            }
-
-            item {
-                AboutLinkItem(
-                    title = "Terms of Service",
-                    subtitle = "Terms and conditions",
-                    icon = Icons.Default.Gavel,
-                    onClick = onNavigateToTerms
-                )
-            }
-
-            item {
-                AboutLinkItem(
-                    title = "Open Source Licenses",
-                    subtitle = "Third-party libraries we use",
-                    icon = Icons.Default.Code,
-                    onClick = onNavigateToLicenses
-                )
-            }
-
-            // Credits
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
                 CreditsCard()
+            }
+
+            // Social Links
+            item {
+                SocialLinksRow()
             }
 
             // Footer
             item {
-                FooterCard()
+                FooterSection()
             }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
 @Composable
-private fun SectionHeader(
-    title: String,
+private fun SectionTitle(
+    text: String,
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(vertical = 8.dp)
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier.padding(start = 5.dp, top = 4.dp)
     )
 }
 
 @Composable
-private fun AppInfoCard(
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = NimazColors.Primary.copy(alpha = 0.1f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // App Icon
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(NimazColors.Primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "N",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Nimaz Pro",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "Your Complete Islamic Companion",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surface
-            ) {
-                Text(
-                    text = "Version 1.0.0 (Build 1)",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun FeaturesCard(
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Features",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            val features = listOf(
-                "Accurate prayer times with multiple calculation methods",
-                "Complete Quran with audio recitation",
-                "Authentic Hadith collections",
-                "Daily duas and supplications",
-                "Qibla compass direction",
-                "Islamic calendar with events",
-                "Prayer tracking and statistics",
-                "Fasting and Zakat calculators",
-                "Digital Tasbih counter",
-                "Beautiful widgets for home screen"
-            )
-
-            features.forEach { feature ->
-                FeatureItem(text = feature)
-            }
-        }
-    }
-}
-
-@Composable
-private fun FeatureItem(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
+private fun AppInfoSection(modifier: Modifier = Modifier) {
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.Top
+            .padding(vertical = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // App Logo
         Box(
             modifier = Modifier
-                .size(6.dp)
-                .padding(top = 6.dp)
-                .clip(CircleShape)
-                .background(NimazColors.Primary)
-        )
+                .size(100.dp)
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "\uD83D\uDD4C",
+                fontSize = 48.sp
+            )
+        }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
+            text = "Nimaz Pro",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Text(
+            text = "Version $APP_VERSION (Build $BUILD_NUMBER)",
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Text(
+            text = "Your complete Islamic companion for prayer times, Quran, and daily worship",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp,
+            modifier = Modifier.padding(horizontal = 40.dp)
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AboutLinkItem(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    iconColor: Color = NimazColors.Primary,
-    onClick: () -> Unit,
+private fun LinksCard(
+    onRateApp: () -> Unit,
+    onContactUs: () -> Unit,
+    onNavigateToPrivacyPolicy: () -> Unit,
+    onNavigateToTerms: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clip(RoundedCornerShape(16.dp))
     ) {
+        LinkItem(
+            emoji = "\u2B50",
+            title = "Rate on Play Store",
+            subtitle = "Help us reach more Muslims",
+            onClick = onRateApp,
+            showDivider = true
+        )
+        LinkItem(
+            emoji = "\uD83D\uDCE7",
+            title = "Contact Support",
+            subtitle = "support@nimazpro.app",
+            onClick = onContactUs,
+            showDivider = true
+        )
+        LinkItem(
+            emoji = "\uD83C\uDF10",
+            title = "Website",
+            subtitle = "nimazpro.app",
+            onClick = { },
+            showDivider = true
+        )
+        LinkItem(
+            emoji = "\uD83D\uDCDC",
+            title = "Privacy Policy",
+            subtitle = "How we handle your data",
+            onClick = onNavigateToPrivacyPolicy,
+            showDivider = true
+        )
+        LinkItem(
+            emoji = "\uD83D\uDCCB",
+            title = "Terms of Service",
+            subtitle = "Usage terms",
+            onClick = onNavigateToTerms,
+            showDivider = false
+        )
+    }
+}
+
+@Composable
+private fun LinkItem(
+    emoji: String,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    showDivider: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(onClick = onClick)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(24.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(10.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = emoji, fontSize = 18.sp)
+            }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(15.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = subtitle,
@@ -381,150 +283,116 @@ private fun AboutLinkItem(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(20.dp)
             )
         }
-    }
-}
 
-@Composable
-private fun CreditsCard(
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = null,
-                    tint = NimazColors.StatusColors.Missed,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Credits & Acknowledgments",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            CreditItem(
-                title = "Prayer Times",
-                description = "Calculations based on Islamic algorithms"
-            )
-            CreditItem(
-                title = "Quran Text",
-                description = "Uthmanic Hafs text from Tanzil.net"
-            )
-            CreditItem(
-                title = "Translations",
-                description = "Various scholars and translation committees"
-            )
-            CreditItem(
-                title = "Hadith Collections",
-                description = "Sunnah.com API"
-            )
-            CreditItem(
-                title = "Hijri Calendar",
-                description = "Umm al-Qura calendar system"
+        if (showDivider) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .padding(horizontal = 16.dp)
+                    .background(MaterialTheme.colorScheme.surface)
             )
         }
     }
 }
 
 @Composable
-private fun CreditItem(
-    title: String,
-    description: String,
-    modifier: Modifier = Modifier
-) {
+private fun CreditsCard(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Medium
+        val credits = listOf(
+            "Quran Text" to "Tanzil.net",
+            "Translations" to "Sahih International",
+            "Hadith Data" to "Sunnah.com",
+            "Prayer Times" to "Aladhan API",
+            "Recitations" to "Quran.com",
+            "Hijri Calendar" to "Islamic Finder"
         )
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+
+        credits.forEach { (name, source) ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = source,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
     }
 }
 
 @Composable
-private fun FooterCard(
-    modifier: Modifier = Modifier
-) {
-    Card(
+private fun SocialLinksRow(modifier: Modifier = Modifier) {
+    Row(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        val socials = listOf("X", "IG", "YT")
+        socials.forEachIndexed { index, label ->
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                    .clip(RoundedCornerShape(14.dp))
+                    .clickable { },
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Made with ",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = null,
-                    tint = NimazColors.StatusColors.Missed,
-                    modifier = Modifier.size(14.dp)
-                )
-                Text(
-                    text = " for the Ummah",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "© 2024 Nimaz Pro. All rights reserved.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = NimazColors.Primary,
-                textAlign = TextAlign.Center
-            )
+            if (index < socials.lastIndex) {
+                Spacer(modifier = Modifier.width(15.dp))
+            }
         }
+    }
+}
+
+@Composable
+private fun FooterSection(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Made with \u2764\uFE0F for the Ummah",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "\u00A9 2026 Nimaz Pro. All rights reserved.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
     }
 }

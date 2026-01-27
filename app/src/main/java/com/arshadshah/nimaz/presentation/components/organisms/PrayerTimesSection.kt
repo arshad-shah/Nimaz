@@ -39,7 +39,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.PrayerStatus
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.components.molecules.CountdownTimer
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.LocalDateTime
 import java.time.ZoneId

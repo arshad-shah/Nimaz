@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,24 +16,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.FormatSize
-import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.ScreenLockPortrait
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -37,13 +41,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -51,6 +57,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 @Composable
 fun QuranSettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToSelectReciter: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val quranState by viewModel.quranState.collectAsState()
@@ -58,18 +65,15 @@ fun QuranSettingsScreen(
 
     val translationOptions = listOf(
         "Sahih International" to "en.sahih",
-        "Yusuf Ali" to "en.yusufali",
-        "Pickthall" to "en.pickthall",
         "Muhammad Asad" to "en.asad",
-        "Dr. Mustafa Khattab" to "en.khattab"
+        "Pickthall" to "en.pickthall",
+        "Yusuf Ali" to "en.yusufali"
     )
 
-    val reciterOptions = listOf(
-        "Mishary Rashid Alafasy" to "alafasy",
-        "Abdul Rahman Al-Sudais" to "sudais",
-        "Saad Al-Ghamdi" to "ghamdi",
-        "Maher Al-Muaiqly" to "muaiqly",
-        "Abdul Basit Abdul Samad" to "abdulbasit"
+    val arabicFontOptions = listOf(
+        "Amiri Quran",
+        "KFGQPC Uthmanic Script",
+        "Scheherazade"
     )
 
     Scaffold(
@@ -86,358 +90,501 @@ fun QuranSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            // Reading Settings
+            // Preview Card
             item {
-                SectionHeader(
-                    title = "Reading",
-                    icon = Icons.Default.MenuBook
+                PreviewCard(
+                    arabicFontSize = quranState.arabicFontSize,
+                    showTransliteration = quranState.showTransliteration,
+                    showTranslation = quranState.showTranslation
                 )
+                Spacer(modifier = Modifier.height(25.dp))
             }
 
+            // Arabic Text Section
             item {
-                QuranToggleCard(
-                    title = "Show Translation",
-                    subtitle = "Display English translation below Arabic",
-                    icon = Icons.Default.Translate,
-                    isEnabled = quranState.showTranslation,
-                    onToggle = { viewModel.onEvent(SettingsEvent.SetShowTranslation(!quranState.showTranslation)) }
-                )
+                SectionTitle(title = "ARABIC TEXT")
+            }
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                ) {
+                    // Arabic Font Size Slider
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Arabic Font Size",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "${quranState.arabicFontSize.toInt()}px",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(15.dp))
+                        Slider(
+                            value = quranState.arabicFontSize,
+                            onValueChange = { viewModel.onEvent(SettingsEvent.SetArabicFontSize(it)) },
+                            valueRange = 18f..42f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        )
+                    }
+
+                    // Font Options
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        arabicFontOptions.forEachIndexed { index, fontName ->
+                            val isSelected = index == 0 // First option selected by default
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerHighest
+                                },
+                                border = if (isSelected) {
+                                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                                } else {
+                                    null
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp, 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Radio circle
+                                    Box(
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                color = if (isSelected)
+                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                                else
+                                                    MaterialTheme.colorScheme.background,
+                                                shape = CircleShape
+                                            )
+                                            .then(
+                                                if (isSelected) Modifier
+                                                else Modifier
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .clip(CircleShape)
+                                                .background(
+                                                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(
+                                                        alpha = 0.0f
+                                                    ) else MaterialTheme.colorScheme.background,
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            // Outer ring
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .clip(CircleShape)
+                                                    .background(
+                                                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                                        else MaterialTheme.colorScheme.outline,
+                                                        shape = CircleShape
+                                                    ),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(16.dp)
+                                                        .clip(CircleShape)
+                                                        .background(
+                                                            color = if (isSelected) MaterialTheme.colorScheme.primary.copy(
+                                                                alpha = 0.1f
+                                                            ) else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                                            shape = CircleShape
+                                                        ),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    if (isSelected) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(10.dp)
+                                                                .clip(CircleShape)
+                                                                .background(
+                                                                    color = MaterialTheme.colorScheme.primary,
+                                                                    shape = CircleShape
+                                                                )
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.width(15.dp))
+
+                                    Column {
+                                        Text(
+                                            text = fontName,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u064E\u0651\u0647\u0650",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontSize = 18.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.height(30.dp))
             }
 
+            // Display Options Section
             item {
-                QuranToggleCard(
-                    title = "Show Transliteration",
-                    subtitle = "Display phonetic transliteration",
-                    icon = Icons.Default.FormatSize,
-                    isEnabled = quranState.showTransliteration,
-                    onToggle = { viewModel.onEvent(SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)) }
-                )
+                SectionTitle(title = "DISPLAY OPTIONS")
+            }
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                ) {
+                    DisplayToggleItem(
+                        label = "Show Transliteration",
+                        subtitle = "Roman letters pronunciation",
+                        isEnabled = quranState.showTransliteration,
+                        onToggle = { viewModel.onEvent(SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)) }
+                    )
+                    SettingDivider()
+                    DisplayToggleItem(
+                        label = "Show Translation",
+                        subtitle = "Meaning in your language",
+                        isEnabled = quranState.showTranslation,
+                        onToggle = { viewModel.onEvent(SettingsEvent.SetShowTranslation(!quranState.showTranslation)) }
+                    )
+                    SettingDivider()
+                    DisplayToggleItem(
+                        label = "Continuous Reading",
+                        subtitle = "Continue reading between surahs",
+                        isEnabled = quranState.continuousReading,
+                        onToggle = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
+                    )
+                    SettingDivider()
+                    DisplayToggleItem(
+                        label = "Keep Screen On",
+                        subtitle = "Prevent screen from turning off",
+                        isEnabled = quranState.keepScreenOn,
+                        onToggle = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
             }
 
+            // Translation Section
             item {
-                QuranToggleCard(
-                    title = "Continuous Reading",
-                    subtitle = "Continue reading between surahs",
-                    icon = Icons.Default.MenuBook,
-                    isEnabled = quranState.continuousReading,
-                    onToggle = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
-                )
+                SectionTitle(title = "TRANSLATION")
+            }
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                ) {
+                    translationOptions.forEachIndexed { index, (displayName, value) ->
+                        val isSelected = quranState.selectedTranslatorId == value
+                        TranslationItem(
+                            name = displayName,
+                            language = "English",
+                            isSelected = isSelected,
+                            onClick = { viewModel.onEvent(SettingsEvent.SetTranslator(value)) }
+                        )
+                        if (index < translationOptions.lastIndex) {
+                            SettingDivider()
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(30.dp))
             }
 
+            // Audio Section
             item {
-                QuranToggleCard(
-                    title = "Keep Screen On",
-                    subtitle = "Prevent screen from turning off while reading",
-                    icon = Icons.Default.ScreenLockPortrait,
-                    isEnabled = quranState.keepScreenOn,
-                    onToggle = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
-                )
+                SectionTitle(title = "AUDIO")
             }
-
-            // Font Size
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(
-                    title = "Font Size",
-                    icon = Icons.Default.FormatSize
-                )
-            }
-
-            item {
-                FontSizeCard(
-                    label = "Arabic Font Size",
-                    size = quranState.arabicFontSize,
-                    onSizeChange = { viewModel.onEvent(SettingsEvent.SetArabicFontSize(it)) }
-                )
-            }
-
-            item {
-                FontSizeCard(
-                    label = "Translation Font Size",
-                    size = quranState.translationFontSize,
-                    onSizeChange = { viewModel.onEvent(SettingsEvent.SetTranslationFontSize(it)) }
-                )
-            }
-
-            // Translation
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(
-                    title = "Translation",
-                    icon = Icons.Default.Translate
-                )
-            }
-
-            item {
-                SelectionCard(
-                    options = translationOptions,
-                    selectedOption = quranState.selectedTranslatorId,
-                    onOptionSelected = { viewModel.onEvent(SettingsEvent.SetTranslator(it)) }
-                )
-            }
-
-            // Audio Settings
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(
-                    title = "Audio",
-                    icon = Icons.Default.Headphones
-                )
-            }
-
-            item {
-                SelectionCard(
-                    title = "Reciter",
-                    options = reciterOptions,
-                    selectedOption = quranState.selectedReciterId ?: "",
-                    onOptionSelected = { viewModel.onEvent(SettingsEvent.SetReciter(it)) }
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                ) {
+                    // Reciter
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigateToSelectReciter() }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Reciter",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = quranState.selectedReciterId?.let { id ->
+                                    when (id) {
+                                        "alafasy" -> "Mishary Rashid Alafasy"
+                                        "sudais" -> "Abdul Rahman Al-Sudais"
+                                        "ghamdi" -> "Saad Al-Ghamdi"
+                                        "muaiqly" -> "Maher Al-Muaiqly"
+                                        "abdulbasit" -> "Abdul Basit Abdul Samad"
+                                        else -> id
+                                    }
+                                } ?: "Mishary Rashid Alafasy",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    SettingDivider()
+                    // Auto-play toggle
+                    DisplayToggleItem(
+                        label = "Auto-play Next Verse",
+                        subtitle = "Continue to next verse",
+                        isEnabled = quranState.continuousReading,
+                        onToggle = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
     }
 }
 
 @Composable
-private fun SectionHeader(
-    title: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
+private fun PreviewCard(
+    arabicFontSize: Float,
+    showTransliteration: Boolean,
+    showTranslation: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "PREVIEW",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = 1.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(15.dp))
+            Text(
+                text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u064E\u0651\u0647\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0650\u064A\u0645\u0650",
+                style = MaterialTheme.typography.headlineLarge,
+                fontSize = arabicFontSize.sp,
+                lineHeight = (arabicFontSize * 2.4f).sp,
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (showTransliteration) {
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "Bismillahir-Rahmanir-Rahim",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            if (showTranslation) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "In the name of Allah, the Most Gracious, the Most Merciful",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 24.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        letterSpacing = 1.sp,
+        fontWeight = FontWeight.Medium,
+        modifier = Modifier.padding(start = 5.dp, bottom = 12.dp)
+    )
+}
+
+@Composable
+private fun DisplayToggleItem(
+    label: String,
+    subtitle: String,
+    isEnabled: Boolean,
+    onToggle: () -> Unit
 ) {
     Row(
-        modifier = modifier.padding(vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onToggle() }
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = NimazColors.Primary,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}
-
-@Composable
-private fun QuranToggleCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    isEnabled: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (isEnabled) NimazColors.Primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { onToggle() }
-            )
-        }
-    }
-}
-
-@Composable
-private fun FontSizeCard(
-    label: String,
-    size: Float,
-    onSizeChange: (Float) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Text(
-                    text = "${size.toInt()}sp",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = NimazColors.Primary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Slider(
-                value = size,
-                onValueChange = onSizeChange,
-                valueRange = 14f..40f,
-                steps = 25
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Small",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Large",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SelectionCard(
-    options: List<Pair<String, String>>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit,
-    title: String? = null,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            title?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                )
-            }
-
-            options.forEach { (displayName, value) ->
-                SelectionOption(
-                    displayName = displayName,
-                    isSelected = selectedOption == value,
-                    onClick = { onOptionSelected(value) }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SelectionOption(
-    displayName: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        color = if (isSelected) {
-            NimazColors.Primary.copy(alpha = 0.1f)
-        } else {
-            MaterialTheme.colorScheme.surface
-        }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = isSelected,
-                onClick = onClick
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = displayName,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                modifier = Modifier.weight(1f)
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
             )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = { onToggle() },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        )
+    }
+}
 
+@Composable
+private fun TranslationItem(
+    name: String,
+    language: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Checkbox
+        Box(
+            modifier = Modifier
+                .size(22.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(
+                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(6.dp)
+                )
+                .then(
+                    if (!isSelected) Modifier.background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(6.dp)
+                    ) else Modifier
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(6.dp)
+                        )
+                )
+            }
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = NimazColors.Primary,
-                    modifier = Modifier.size(20.dp)
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(14.dp)
                 )
             }
         }
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        Column {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = language,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
+}
+
+@Composable
+private fun SettingDivider() {
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.outlineVariant,
+        thickness = 0.5.dp
+    )
 }

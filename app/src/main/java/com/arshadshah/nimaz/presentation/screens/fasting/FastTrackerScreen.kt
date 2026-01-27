@@ -1,12 +1,14 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,45 +19,50 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.FastingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
 import java.time.LocalDate
+import java.time.Month
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,20 +75,24 @@ fun FastTrackerScreen(
     val state by viewModel.trackerState.collectAsState()
     val statsState by viewModel.statsState.collectAsState()
     val makeupState by viewModel.makeupState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val ramadanState by viewModel.ramadanState.collectAsState()
+    val calendarState by viewModel.calendarState.collectAsState()
+
+    var selectedTab by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Ramadan", "Voluntary", "Makeup")
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "Fasting Tracker",
+                title = "Fasting",
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToHistory) {
                         Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = "History"
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -92,187 +103,402 @@ fun FastTrackerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Today's Fast Card
+            // Tabs
             item {
-                TodayFastCard(
-                    isFasting = state.isFastingToday,
-                    fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
-                    fastType = state.selectedFastType,
-                    onStartFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) },
-                    onCompleteFast = { viewModel.onEvent(FastingEvent.CompleteFast(LocalDate.now())) },
-                    onBreakFast = { viewModel.onEvent(FastingEvent.BreakFast(LocalDate.now())) }
-                )
-            }
-
-            // Fast Type Selector
-            item {
-                Text(
-                    text = "Fast Type",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FastType.entries.take(4).forEach { type ->
+                    tabs.forEachIndexed { index, title ->
                         FilterChip(
-                            selected = state.selectedFastType == type,
-                            onClick = { viewModel.onEvent(FastingEvent.SetFastType(type)) },
+                            selected = selectedTab == index,
+                            onClick = {
+                                selectedTab = index
+                                when (index) {
+                                    0 -> viewModel.onEvent(FastingEvent.LoadRamadan)
+                                    2 -> {
+                                        viewModel.onEvent(FastingEvent.LoadMakeupFasts)
+                                        onNavigateToMakeup()
+                                    }
+                                }
+                            },
                             label = {
                                 Text(
-                                    text = type.displayName(),
-                                    style = MaterialTheme.typography.labelSmall
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
                                 )
-                            }
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                selectedBorderColor = MaterialTheme.colorScheme.primary,
+                                enabled = true,
+                                selected = selectedTab == index
+                            ),
+                            shape = RoundedCornerShape(12.dp)
                         )
                     }
                 }
             }
 
-            // Stats Summary
-            item {
-                StatsCard(
-                    ramadanFasted = statsState.ramadanFastedCount,
-                    voluntaryFasted = statsState.voluntaryFastCount,
-                    pendingMakeup = makeupState.pendingCount
-                )
-            }
-
-            // Makeup Fasts Card
-            if (makeupState.pendingCount > 0) {
+            // Ramadan Banner
+            if (ramadanState.isRamadan) {
                 item {
-                    MakeupFastsCard(
-                        pendingCount = makeupState.pendingCount,
-                        onClick = onNavigateToMakeup
+                    RamadanBanner(
+                        fastedDays = ramadanState.fastedDays,
+                        totalDays = ramadanState.fastedDays + ramadanState.missedDays + ramadanState.remainingDays,
+                        currentDay = ramadanState.currentDay
                     )
                 }
             }
 
-            // Quick Tips
+            // Stats Grid
             item {
-                QuickTipsCard()
+                StatsGrid(
+                    fasted = ramadanState.fastedDays,
+                    missed = ramadanState.missedDays,
+                    remaining = ramadanState.remainingDays
+                )
+            }
+
+            // Today's Fast
+            item {
+                TodayFastSection(
+                    isFasting = state.isFastingToday,
+                    fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
+                    fastType = state.selectedFastType,
+                    selectedDate = state.selectedDate,
+                    ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
+                    onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                )
+            }
+
+            // Calendar
+            item {
+                FastingCalendarSection(
+                    records = calendarState.records,
+                    selectedMonth = calendarState.selectedMonth,
+                    selectedYear = calendarState.selectedYear,
+                    onPreviousMonth = {
+                        val newMonth = if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
+                        val newYear = if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
+                        viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                    },
+                    onNextMonth = {
+                        val newMonth = if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
+                        val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
+                        viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                    },
+                    onSelectDate = { date -> viewModel.onEvent(FastingEvent.SelectDate(date)) }
+                )
+            }
+
+            // Recommended Fasts
+            item {
+                RecommendedFastsSection()
+            }
+
+            // Log Fast Button
+            item {
+                LogFastButton(
+                    onClick = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
 @Composable
-private fun TodayFastCard(
+private fun RamadanBanner(
+    fastedDays: Int,
+    totalDays: Int,
+    currentDay: Int,
+    modifier: Modifier = Modifier
+) {
+    val purpleGradient = Brush.linearGradient(
+        colors = listOf(
+            NimazColors.FastingColors.Ramadan,
+            NimazColors.FastingColors.Ramadan.copy(alpha = 0.85f)
+        )
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(purpleGradient)
+            .padding(20.dp)
+    ) {
+        Column {
+            Text(
+                text = "CURRENT",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.8f),
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Ramadan - Day $currentDay",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                LinearProgressIndicator(
+                    progress = { if (totalDays > 0) fastedDays.toFloat() / totalDays else 0f },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = Color.White,
+                    trackColor = Color.White.copy(alpha = 0.2f)
+                )
+                Text(
+                    text = "$fastedDays/$totalDays",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatsGrid(
+    fasted: Int,
+    missed: Int,
+    remaining: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        StatCard(
+            value = fasted.toString(),
+            label = "Fasted",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            value = missed.toString(),
+            label = "Missed",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            value = remaining.toString(),
+            label = "Remaining",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun StatCard(
+    value: String,
+    label: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(15.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun TodayFastSection(
     isFasting: Boolean,
     fastStatus: FastStatus,
     fastType: FastType,
-    onStartFast: () -> Unit,
-    onCompleteFast: () -> Unit,
-    onBreakFast: () -> Unit,
+    selectedDate: LocalDate,
+    ramadanDay: Int?,
+    onToggleFast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val today = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d")
 
-    val (statusColor, statusText) = when (fastStatus) {
-        FastStatus.FASTED -> NimazColors.StatusColors.Prayed to "Fast Completed"
-        FastStatus.NOT_FASTED -> MaterialTheme.colorScheme.surfaceVariant to "Not Fasting"
-        FastStatus.EXEMPTED -> NimazColors.StatusColors.Pending to "Exempted"
-        FastStatus.MAKEUP_DUE -> NimazColors.StatusColors.Missed to "Makeup Due"
-    }
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
+    Column(modifier = modifier) {
+        Text(
+            text = "Today",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(12.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            NimazColors.FastingColors.Ramadan,
-                            NimazColors.FastingColors.Ramadan.copy(alpha = 0.8f)
-                        )
-                    )
-                )
-                .padding(24.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(20.dp)
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = today.format(formatter),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color.White.copy(alpha = 0.8f)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Status Icon
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
+            Column {
+                // Header with date and status
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Icon(
-                        imageVector = when (fastStatus) {
-                            FastStatus.FASTED -> Icons.Default.Check
-                            FastStatus.NOT_FASTED -> Icons.Default.PlayArrow
-                            FastStatus.EXEMPTED -> Icons.Default.History
-                            FastStatus.MAKEUP_DUE -> Icons.Default.Restaurant
-                        },
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
+                    Column {
+                        Text(
+                            text = selectedDate.format(formatter),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (ramadanDay != null) {
+                            Text(
+                                text = "Ramadan - Day $ramadanDay",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    val (statusBg, statusColor, statusText) = when (fastStatus) {
+                        FastStatus.FASTED -> Triple(
+                            NimazColors.FastingColors.Fasted.copy(alpha = 0.2f),
+                            NimazColors.FastingColors.Fasted,
+                            "Fasting"
+                        )
+                        FastStatus.NOT_FASTED -> Triple(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                            "Not Fasting"
+                        )
+                        FastStatus.EXEMPTED -> Triple(
+                            NimazColors.FastingColors.Exempted.copy(alpha = 0.2f),
+                            NimazColors.FastingColors.Exempted,
+                            "Exempted"
+                        )
+                        FastStatus.MAKEUP_DUE -> Triple(
+                            NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
+                            NimazColors.FastingColors.Makeup,
+                            "Makeup Due"
+                        )
+                    }
 
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-
-                if (isFasting) {
-                    Text(
-                        text = fastType.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(statusBg)
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = statusText,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = statusColor
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Action Buttons
-                when (fastStatus) {
-                    FastStatus.NOT_FASTED -> {
-                        Button(
-                            onClick = onStartFast,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White,
-                                contentColor = NimazColors.FastingColors.Ramadan
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                // Suhoor and Iftar times
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(15.dp)
+                ) {
+                    // Suhoor card
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(15.dp)
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Suhoor ends",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Start Fasting")
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                text = "5:23 AM",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF818CF8) // Indigo for suhoor
+                            )
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                text = "Completed",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
-                    FastStatus.FASTED, FastStatus.EXEMPTED, FastStatus.MAKEUP_DUE -> {
-                        // Already completed or exempted - no action needed
+
+                    // Iftar card
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(15.dp)
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Iftar",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                text = "6:18 PM",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = NimazColors.FastingColors.Makeup // Orange
+                            )
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                text = "4h 32m remaining",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -281,61 +507,200 @@ private fun TodayFastCard(
 }
 
 @Composable
-private fun StatsCard(
-    ramadanFasted: Int,
-    voluntaryFasted: Int,
-    pendingMakeup: Int,
+private fun FastingCalendarSection(
+    records: List<FastRecord>,
+    selectedMonth: Int,
+    selectedYear: Int,
+    onPreviousMonth: () -> Unit,
+    onNextMonth: () -> Unit,
+    onSelectDate: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
+    val today = LocalDate.now()
+    val monthStart = LocalDate.of(selectedYear, selectedMonth, 1)
+    val daysInMonth = monthStart.lengthOfMonth()
+    val firstDayOfWeek = monthStart.dayOfWeek.value % 7 // Sunday = 0
+
+    // Build a map of date -> status from records
+    val recordMap = remember(records) {
+        records.associateBy { record ->
+            LocalDate.ofEpochDay(record.date / (24 * 60 * 60 * 1000))
+        }
+    }
+
+    Column(modifier = modifier) {
+        // Calendar header
         Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${Month.of(selectedMonth).getDisplayName(TextStyle.FULL, Locale.getDefault())} $selectedYear",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(
+                    onClick = onPreviousMonth,
+                    modifier = Modifier.size(32.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft,
+                        contentDescription = "Previous",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onNextMonth,
+                    modifier = Modifier.size(32.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Next",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Calendar grid
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(15.dp)
         ) {
-            StatColumn(
-                label = "Ramadan",
-                value = ramadanFasted.toString(),
-                color = NimazColors.FastingColors.Ramadan
-            )
-            StatColumn(
-                label = "Voluntary",
-                value = voluntaryFasted.toString(),
-                color = NimazColors.FastingColors.Voluntary
-            )
-            StatColumn(
-                label = "Makeup Due",
-                value = pendingMakeup.toString(),
-                color = NimazColors.StatusColors.Missed
-            )
+            Column {
+                // Weekday headers
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat").forEach { day ->
+                        Text(
+                            text = day,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(vertical = 5.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Days grid
+                val totalCells = firstDayOfWeek + daysInMonth
+                val rows = (totalCells + 6) / 7
+
+                for (row in 0 until rows) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        for (col in 0..6) {
+                            val cellIndex = row * 7 + col
+                            val dayNumber = cellIndex - firstDayOfWeek + 1
+
+                            if (dayNumber in 1..daysInMonth) {
+                                val date = LocalDate.of(selectedYear, selectedMonth, dayNumber)
+                                val record = recordMap[date]
+                                val isToday = date == today
+                                val isFuture = date.isAfter(today)
+                                val isFasted = record?.status == FastStatus.FASTED
+                                val isMissed = record?.status == FastStatus.MAKEUP_DUE
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .padding(2.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(
+                                            if (isToday) MaterialTheme.colorScheme.primaryContainer
+                                            else Color.Transparent
+                                        )
+                                        .clickable { onSelectDate(date) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            text = dayNumber.toString(),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = if (isToday) FontWeight.SemiBold else FontWeight.Normal,
+                                            color = when {
+                                                isToday -> MaterialTheme.colorScheme.onPrimaryContainer
+                                                isFuture -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                                else -> MaterialTheme.colorScheme.onSurface
+                                            }
+                                        )
+                                        // Status dot
+                                        if (isFasted || isMissed) {
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(6.dp)
+                                                    .clip(CircleShape)
+                                                    .background(
+                                                        if (isFasted) NimazColors.FastingColors.Fasted
+                                                        else Color(0xFFEF4444)
+                                                    )
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                // Legend
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    LegendItem(color = NimazColors.FastingColors.Fasted, label = "Fasted")
+                    Spacer(modifier = Modifier.width(20.dp))
+                    LegendItem(color = Color(0xFFEF4444), label = "Missed")
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun StatColumn(
-    label: String,
-    value: String,
+private fun LegendItem(
     color: Color,
+    label: String,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Row(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = color
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
         )
         Text(
             text = label,
@@ -345,97 +710,128 @@ private fun StatColumn(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MakeupFastsCard(
-    pendingCount: Int,
-    onClick: () -> Unit,
+private fun RecommendedFastsSection(
     modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = NimazColors.StatusColors.Missed.copy(alpha = 0.1f)
+    Column(modifier = modifier) {
+        Text(
+            text = "Recommended Fasts",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
         )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(NimazColors.StatusColors.Missed.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = pendingCount.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = NimazColors.StatusColors.Missed
-                )
-            }
+        Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Makeup Fasts Due",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Tap to view and manage",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            RecommendedFastCard(
+                icon = "\uD83D\uDCC5",
+                iconBgColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
+                name = "Monday Fasting",
+                description = "Sunnah of the Prophet \uFDFA",
+                nextDate = "Next: Mon"
+            )
+            RecommendedFastCard(
+                icon = "\uD83D\uDCC5",
+                iconBgColor = Color(0xFFA855F7).copy(alpha = 0.2f),
+                name = "Thursday Fasting",
+                description = "Sunnah of the Prophet \uFDFA",
+                nextDate = "Next: Thu"
+            )
+            RecommendedFastCard(
+                icon = "\uD83C\uDF15",
+                iconBgColor = NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
+                name = "Ayyam al-Beed",
+                description = "13th, 14th, 15th of each month",
+                nextDate = "Completed"
+            )
         }
     }
 }
 
 @Composable
-private fun QuickTipsCard(
+private fun RecommendedFastCard(
+    icon: String,
+    iconBgColor: Color,
+    name: String,
+    description: String,
+    nextDate: String,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable { }
+            .padding(15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .size(44.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(iconBgColor),
+            contentAlignment = Alignment.Center
         ) {
+            Text(text = icon, fontSize = 20.sp)
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Quick Tips",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "• Fast on Mondays and Thursdays for extra rewards",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "• The White Days (13th, 14th, 15th of each lunar month)",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "• Six days of Shawwal after Ramadan",
+                text = description,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = nextDate,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun LogFastButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = "Log Today's Fast",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }

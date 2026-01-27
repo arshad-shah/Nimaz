@@ -18,7 +18,22 @@
       "Bash(.\\\\gradlew assembleDebug:*)",
       "Bash(gradlew.bat:*)",
       "Bash(dir \"C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens\")",
-      "Bash(dir \"C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-html-screens\")"
+      "Bash(dir \"C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-html-screens\")",
+      "Bash(dir:*)",
+      "Bash(for f in \"C:/Users/shaha/Downloads/nimaz-pro-html-screens/nimaz-html-screens/\"*.html)",
+      "Bash(done)",
+      "WebFetch(domain:)",
+      "Bash(powershell.exe -Command \"Get-Content ''C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens\\\\nimaz-html-screens\\\\zakat-calculator.html'' -Raw\")",
+      "Bash(powershell.exe -NoProfile -Command \"[System.IO.File]::ReadAllText\\(''C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens\\\\nimaz-html-screens\\\\zakat-calculator.html''\\)\")",
+      "Bash(python3:*)",
+      "Bash(powershell.exe -NoProfile -Command \"$c = [System.IO.File]::ReadAllText\\(''C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens\\\\nimaz-html-screens\\\\zakat-calculator.html''\\); $i = $c.IndexOf\\(''<body''\\); if \\($i -gt 0\\) { $c.Substring\\($i, [Math]::Min\\(5000, $c.Length - $i\\)\\) } else { $c.Substring\\(0, [Math]::Min\\(3000, $c.Length\\)\\) }\")",
+      "Bash(powershell.exe -NoProfile -File - <<'PSEOF'\n$c = [System.IO.File]::ReadAllText\\('C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens\\\\nimaz-html-screens\\\\zakat-calculator.html'\\)\n$i = $c.IndexOf\\('<body'\\)\nif \\($i -gt 0\\) {\n    $len = [Math]::Min\\(8000, $c.Length - $i\\)\n    Write-Output $c.Substring\\($i, $len\\)\n} else {\n    Write-Output \"NO BODY FOUND\"\n    Write-Output $c.Substring\\(0, 3000\\)\n}\nPSEOF)",
+      "Bash(powershell.exe -NoProfile -Command \"& { $c = Get-Content -Path ''C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens\\\\nimaz-html-screens\\\\zakat-calculator.html'' -Raw -Encoding UTF8; Write-Output $c.Length }\")",
+      "Bash(powershell.exe -NoProfile -EncodedCommand \"JABjACAAPQAgAEcAZQB0AC0AQwBvAG4AdABlAG4AdAAgAC0AUABhAHQAaAAgACcAQwA6AFwAVQBzAGUAcgBzAFwAcwBoAGEAaABhAFwARABvAHcAbgBsAG8AYQBkAHMAXABuAGkAbQBhAHoALQBwAHIAbwAtAGgAdABtAGwALQBzAGMAcgBlAGUAbgBzAFwAbgBpAG0AYQB6AC0AaAB0AG0AbAAtAHMAYwByAGUAZQBuAHMAXAB6AGEAawBhAHQALQBjAGEAbABjAHUAbABhAHQAbwByAC4AaAB0AG0AbAAn\")",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read.ps1\")",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Get-ChildItem ''C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens'' -Recurse -Name\")",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read2.ps1\")",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read3.ps1\")"
     ]
   }
 }

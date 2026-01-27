@@ -42,7 +42,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
 
 /**
@@ -85,8 +84,8 @@ fun TasbihPresetCard(
                 imageVector = Icons.Default.Star,
                 size = NimazIconSize.MEDIUM,
                 containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-                backgroundColor = NimazColors.TasbihColors.Counter.copy(alpha = 0.15f),
-                iconColor = NimazColors.TasbihColors.Counter
+                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                iconColor = MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -270,7 +269,7 @@ fun FeaturedPresetCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = NimazColors.TasbihColors.Counter.copy(alpha = 0.15f)
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -282,20 +281,20 @@ fun FeaturedPresetCard(
             Text(
                 text = "Quick Tasbih",
                 style = MaterialTheme.typography.labelMedium,
-                color = NimazColors.TasbihColors.Counter.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = name,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = NimazColors.TasbihColors.Counter
+                color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
             ArabicText(
                 text = arabicText,
                 size = ArabicTextSize.MEDIUM,
-                color = NimazColors.TasbihColors.Counter
+                color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -306,13 +305,13 @@ fun FeaturedPresetCard(
                 Text(
                     text = "Target: $targetCount",
                     style = MaterialTheme.typography.labelSmall,
-                    color = NimazColors.TasbihColors.Counter.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                 )
                 if (lastUsed != null) {
                     Text(
                         text = "Last: $lastUsed",
                         style = MaterialTheme.typography.labelSmall,
-                        color = NimazColors.TasbihColors.Counter.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     )
                 }
             }

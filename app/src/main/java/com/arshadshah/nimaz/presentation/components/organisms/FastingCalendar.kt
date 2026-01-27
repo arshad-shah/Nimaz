@@ -429,17 +429,17 @@ fun FastingStatsCard(
                 StatItem(
                     value = stats.ramadanFasted.toString(),
                     label = "Ramadan\nDays",
-                    color = NimazColors.Primary
+                    color = MaterialTheme.colorScheme.primary
                 )
                 StatItem(
                     value = stats.voluntaryFasted.toString(),
                     label = "Voluntary\nFasts",
-                    color = NimazColors.Secondary
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 StatItem(
                     value = stats.currentStreak.toString(),
                     label = "Current\nStreak",
-                    color = NimazColors.Tertiary
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
 

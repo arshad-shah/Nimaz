@@ -47,14 +47,15 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 /**
  * Get icon and color for event type.
  */
+@Composable
 private fun getEventTypeDetails(eventType: HijriDateCalculator.EventType): Pair<ImageVector, Color> {
     return when (eventType) {
-        HijriDateCalculator.EventType.EID -> Icons.Default.Celebration to NimazColors.Secondary
-        HijriDateCalculator.EventType.HOLIDAY -> Icons.Default.Star to NimazColors.Primary
+        HijriDateCalculator.EventType.EID -> Icons.Default.Celebration to MaterialTheme.colorScheme.secondary
+        HijriDateCalculator.EventType.HOLIDAY -> Icons.Default.Star to MaterialTheme.colorScheme.primary
         HijriDateCalculator.EventType.RAMADAN -> Icons.Default.Nightlight to NimazColors.PrayerColors.Isha
-        HijriDateCalculator.EventType.SPECIAL_NIGHT -> Icons.Default.Nightlight to NimazColors.Tertiary
+        HijriDateCalculator.EventType.SPECIAL_NIGHT -> Icons.Default.Nightlight to MaterialTheme.colorScheme.tertiary
         HijriDateCalculator.EventType.RECOMMENDED_FAST -> Icons.Default.Restaurant to NimazColors.FastingColors.Fasted
-        HijriDateCalculator.EventType.COMMEMORATION -> Icons.Default.Event to NimazColors.Primary
+        HijriDateCalculator.EventType.COMMEMORATION -> Icons.Default.Event to MaterialTheme.colorScheme.primary
     }
 }
 

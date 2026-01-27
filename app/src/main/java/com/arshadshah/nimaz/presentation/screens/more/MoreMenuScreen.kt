@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.more
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,13 +13,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
@@ -29,6 +34,7 @@ import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -37,13 +43,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +63,13 @@ fun MoreMenuScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToHelp: () -> Unit,
     onShareApp: () -> Unit,
-    onRateApp: () -> Unit
+    onRateApp: () -> Unit,
+    onNavigateToHadith: () -> Unit,
+    onNavigateToFasting: () -> Unit,
+    onNavigateToZakat: () -> Unit,
+    onNavigateToDuas: () -> Unit,
+    onNavigateToPrayerSettings: () -> Unit,
+    onNavigateToCalculationMethod: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -75,151 +85,171 @@ fun MoreMenuScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Quick Access Section
-            item {
-                SectionHeader(title = "Quick Access")
-            }
+            item { Spacer(modifier = Modifier.height(4.dp)) }
 
+            // Features Section
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    QuickAccessCard(
+                SectionHeader(title = "Features")
+            }
+            item {
+                GroupedCard {
+                    MenuItem(
                         title = "Bookmarks",
+                        subtitle = "Saved ayahs, hadith, and duas",
                         icon = Icons.Default.Bookmark,
-                        color = NimazColors.QuranColors.Meccan,
-                        onClick = onNavigateToBookmarks,
-                        modifier = Modifier.weight(1f)
+                        onClick = onNavigateToBookmarks
                     )
-                    QuickAccessCard(
+                    MenuDivider()
+                    MenuItem(
                         title = "Calendar",
+                        subtitle = "Islamic calendar and events",
                         icon = Icons.Default.CalendarMonth,
-                        color = NimazColors.Primary,
-                        onClick = onNavigateToCalendar,
-                        modifier = Modifier.weight(1f)
+                        onClick = onNavigateToCalendar
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Hadith",
+                        subtitle = "Authentic hadith collections",
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        onClick = onNavigateToHadith
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Fasting",
+                        subtitle = "Fasting tracker and schedule",
+                        icon = Icons.Default.Fastfood,
+                        onClick = onNavigateToFasting
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Zakat",
+                        subtitle = "Zakat calculator",
+                        icon = Icons.Default.Calculate,
+                        onClick = onNavigateToZakat
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Duas",
+                        subtitle = "Daily duas and supplications",
+                        icon = Icons.Default.Mosque,
+                        onClick = onNavigateToDuas
                     )
                 }
             }
 
-            // Settings Section
+            // Prayer Settings Section
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(title = "Settings")
+                SectionHeader(title = "Prayer Settings")
+            }
+            item {
+                GroupedCard {
+                    MenuItem(
+                        title = "Prayer Settings",
+                        subtitle = "Notifications and tracking preferences",
+                        icon = Icons.Default.Notifications,
+                        onClick = onNavigateToPrayerSettings
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Calculation Method",
+                        subtitle = "Prayer time calculation parameters",
+                        icon = Icons.Default.Settings,
+                        onClick = onNavigateToCalculationMethod
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Location",
+                        subtitle = "Manage locations for prayer times",
+                        icon = Icons.Default.LocationOn,
+                        onClick = onNavigateToLocation
+                    )
+                }
             }
 
+            // App Settings Section
             item {
-                MenuItemCard(
-                    title = "General Settings",
-                    subtitle = "Prayer calculation, adjustments",
-                    icon = Icons.Default.Settings,
-                    onClick = onNavigateToSettings
-                )
+                SectionHeader(title = "App Settings")
+            }
+            item {
+                GroupedCard {
+                    MenuItem(
+                        title = "General Settings",
+                        subtitle = "App preferences and configuration",
+                        icon = Icons.Default.Settings,
+                        onClick = onNavigateToSettings
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Appearance",
+                        subtitle = "Theme, colors, and display",
+                        icon = Icons.Default.DarkMode,
+                        onClick = onNavigateToAppearance
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Language",
+                        subtitle = "App language preferences",
+                        icon = Icons.Default.Language,
+                        onClick = onNavigateToLanguage
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Notifications",
+                        subtitle = "Prayer alerts and reminders",
+                        icon = Icons.Default.Notifications,
+                        onClick = onNavigateToNotifications
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Widgets",
+                        subtitle = "Home screen widget settings",
+                        icon = Icons.Default.Widgets,
+                        onClick = onNavigateToWidgets
+                    )
+                }
             }
 
+            // Support Section
             item {
-                MenuItemCard(
-                    title = "Location",
-                    subtitle = "Manage locations for prayer times",
-                    icon = Icons.Default.LocationOn,
-                    onClick = onNavigateToLocation
-                )
+                SectionHeader(title = "Support")
             }
-
             item {
-                MenuItemCard(
-                    title = "Notifications",
-                    subtitle = "Prayer alerts and reminders",
-                    icon = Icons.Default.Notifications,
-                    onClick = onNavigateToNotifications
-                )
-            }
-
-            item {
-                MenuItemCard(
-                    title = "Appearance",
-                    subtitle = "Theme, colors, and display",
-                    icon = Icons.Default.DarkMode,
-                    onClick = onNavigateToAppearance
-                )
-            }
-
-            item {
-                MenuItemCard(
-                    title = "Language",
-                    subtitle = "App language preferences",
-                    icon = Icons.Default.Language,
-                    onClick = onNavigateToLanguage
-                )
-            }
-
-            item {
-                MenuItemCard(
-                    title = "Widgets",
-                    subtitle = "Home screen widget settings",
-                    icon = Icons.Default.Widgets,
-                    onClick = onNavigateToWidgets
-                )
-            }
-
-            // About Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(title = "About")
-            }
-
-            item {
-                MenuItemCard(
-                    title = "About Nimaz Pro",
-                    subtitle = "Version, credits, and info",
-                    icon = Icons.Default.Info,
-                    onClick = onNavigateToAbout
-                )
-            }
-
-            item {
-                MenuItemCard(
-                    title = "Help & Support",
-                    subtitle = "FAQs and contact us",
-                    icon = Icons.AutoMirrored.Filled.Help,
-                    onClick = onNavigateToHelp
-                )
-            }
-
-            // Share Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(title = "Share")
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ActionCard(
+                GroupedCard {
+                    MenuItem(
+                        title = "About Nimaz Pro",
+                        subtitle = "Version, credits, and info",
+                        icon = Icons.Default.Info,
+                        onClick = onNavigateToAbout
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Help & Support",
+                        subtitle = "FAQs and contact us",
+                        icon = Icons.AutoMirrored.Filled.Help,
+                        onClick = onNavigateToHelp
+                    )
+                    MenuDivider()
+                    MenuItem(
                         title = "Share App",
+                        subtitle = "Share Nimaz Pro with friends",
                         icon = Icons.Default.Share,
-                        color = NimazColors.Secondary,
-                        onClick = onShareApp,
-                        modifier = Modifier.weight(1f)
+                        onClick = onShareApp
                     )
-                    ActionCard(
+                    MenuDivider()
+                    MenuItem(
                         title = "Rate Us",
+                        subtitle = "Rate Nimaz Pro on the store",
                         icon = Icons.Default.Star,
-                        color = NimazColors.StatusColors.Late,
-                        onClick = onRateApp,
-                        modifier = Modifier.weight(1f)
+                        onClick = onRateApp
                     )
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
@@ -234,54 +264,40 @@ private fun SectionHeader(
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(vertical = 8.dp)
+        modifier = modifier.padding(vertical = 4.dp)
+    )
+}
+
+@Composable
+private fun GroupedCard(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun MenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 56.dp),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun QuickAccessCard(
-    title: String,
-    icon: ImageVector,
-    color: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.height(100.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.1f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                tint = color,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-                color = color
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MenuItemCard(
+private fun MenuItem(
     title: String,
     subtitle: String,
     icon: ImageVector,
@@ -291,16 +307,16 @@ private fun MenuItemCard(
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(0.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -316,7 +332,8 @@ private fun MenuItemCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = subtitle,
@@ -324,46 +341,12 @@ private fun MenuItemCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        }
-    }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ActionCard(
-    title: String,
-    icon: ImageVector,
-    color: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.1f)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
             Icon(
-                imageVector = icon,
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-                color = color
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
             )
         }
     }

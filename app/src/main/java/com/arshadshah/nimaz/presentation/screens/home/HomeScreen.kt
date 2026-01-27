@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.presentation.theme.NimazColors
+// Prayer-specific accent colors matching the design prototype
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import java.time.format.DateTimeFormatter
@@ -611,8 +611,8 @@ private fun QuickActionsGrid(
         QuickActionButton(
             icon = Icons.Default.Book,
             label = "Hadith",
-            iconColor = NimazColors.PrayerColors.Fajr,
-            backgroundColor = NimazColors.PrayerColors.Fajr.copy(alpha = 0.2f),
+            iconColor = Color(0xFF3B82F6),
+            backgroundColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
             onClick = onHadithClick,
             modifier = Modifier.weight(1f)
         )
@@ -767,15 +767,16 @@ private fun PrayerTimeCard(
     }
 }
 
+@Composable
 private fun getPrayerColor(prayerType: PrayerType?): Color {
     return when (prayerType) {
-        PrayerType.FAJR -> NimazColors.PrayerColors.Fajr
-        PrayerType.SUNRISE -> NimazColors.PrayerColors.Sunrise
-        PrayerType.DHUHR -> NimazColors.PrayerColors.Dhuhr
-        PrayerType.ASR -> NimazColors.PrayerColors.Asr
-        PrayerType.MAGHRIB -> NimazColors.PrayerColors.Maghrib
-        PrayerType.ISHA -> NimazColors.PrayerColors.Isha
-        else -> NimazColors.Primary
+        PrayerType.FAJR -> Color(0xFF6366F1)      // Indigo
+        PrayerType.SUNRISE -> Color(0xFFF59E0B)    // Amber
+        PrayerType.DHUHR -> Color(0xFFEAB308)       // Yellow
+        PrayerType.ASR -> Color(0xFFF97316)          // Orange
+        PrayerType.MAGHRIB -> Color(0xFFEF4444)    // Red
+        PrayerType.ISHA -> Color(0xFF8B5CF6)        // Violet
+        else -> MaterialTheme.colorScheme.primary
     }
 }
 

@@ -435,10 +435,10 @@ private fun CompactEventCard(
     modifier: Modifier = Modifier
 ) {
     val eventColor = when (event.eventType) {
-        IslamicEventType.HOLIDAY -> NimazColors.Secondary
+        IslamicEventType.HOLIDAY -> MaterialTheme.colorScheme.secondary
         IslamicEventType.FAST -> NimazColors.FastingColors.Fasted
-        IslamicEventType.NIGHT -> NimazColors.Tertiary
-        IslamicEventType.HISTORICAL -> NimazColors.Primary
+        IslamicEventType.NIGHT -> MaterialTheme.colorScheme.tertiary
+        IslamicEventType.HISTORICAL -> MaterialTheme.colorScheme.primary
     }
 
     Card(
@@ -485,12 +485,12 @@ private fun CompactEventCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = NimazColors.Secondary.copy(alpha = 0.2f)
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                 ) {
                     Text(
                         text = "Holiday",
                         style = MaterialTheme.typography.labelSmall,
-                        color = NimazColors.Secondary,
+                        color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }

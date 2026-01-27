@@ -1,12 +1,14 @@
 package com.arshadshah.nimaz.presentation.screens.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,14 +22,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -39,19 +41,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.CalendarDay
+import com.arshadshah.nimaz.domain.model.HijriMonth
 import com.arshadshah.nimaz.domain.model.IslamicEvent
+import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewModel
-import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewMode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -87,40 +91,26 @@ fun IslamicCalendarScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // View Mode Selector
+            // Today Card - gradient hero
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CalendarViewMode.entries.forEach { mode ->
-                        FilterChip(
-                            selected = state.viewMode == mode,
-                            onClick = { viewModel.onEvent(CalendarEvent.SetViewMode(mode)) },
-                            label = {
-                                Text(
-                                    when (mode) {
-                                        CalendarViewMode.GREGORIAN -> "Gregorian"
-                                        CalendarViewMode.HIJRI -> "Hijri"
-                                        CalendarViewMode.DUAL -> "Dual"
-                                    }
-                                )
-                            }
-                        )
-                    }
-                }
+                TodayHeroCard(
+                    selectedDate = state.selectedDate,
+                    hijriDay = state.selectedHijriDate?.day,
+                    hijriMonth = state.selectedHijriDate?.month,
+                    hijriYear = state.selectedHijriDate?.year
+                )
             }
 
-            // Month Navigator
+            // Month Navigation
             item {
                 state.currentMonth?.let { month ->
-                    MonthNavigator(
+                    CalendarMonthNavigator(
                         monthName = getHijriMonthName(month.hijriMonth),
+                        monthNameArabic = getHijriMonthArabicName(month.hijriMonth),
                         year = month.hijriYear,
-                        hijriInfo = null,
                         onPrevious = { viewModel.onEvent(CalendarEvent.NavigateToPreviousMonth) },
                         onNext = { viewModel.onEvent(CalendarEvent.NavigateToNextMonth) }
                     )
@@ -130,22 +120,10 @@ fun IslamicCalendarScreen(
             // Calendar Grid
             item {
                 state.currentMonth?.let { month ->
-                    CalendarGrid(
+                    CalendarGridCard(
                         days = month.days,
                         selectedDate = state.selectedDate,
                         onDayClick = { viewModel.onEvent(CalendarEvent.SelectDate(it)) }
-                    )
-                }
-            }
-
-            // Selected Date Info
-            item {
-                state.selectedHijriDate?.let { hijriDate ->
-                    SelectedDateCard(
-                        gregorianDate = state.selectedDate,
-                        hijriDay = hijriDate.day,
-                        hijriMonth = hijriDate.monthName,
-                        hijriYear = hijriDate.year
                     )
                 }
             }
@@ -156,126 +134,208 @@ fun IslamicCalendarScreen(
                     Text(
                         text = "Events",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
-
                 items(eventsState.eventsForSelectedDate) { event ->
-                    EventCard(event = event)
+                    EventDetailCard(event = event)
                 }
             }
 
             // Upcoming Events Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Upcoming Islamic Events",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+            if (eventsState.upcomingEvents.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Upcoming Events",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
+                items(eventsState.upcomingEvents.take(5)) { event ->
+                    UpcomingEventCard(event = event)
+                }
             }
 
-            items(eventsState.upcomingEvents.take(5)) { event ->
-                UpcomingEventCard(event = event)
+            // Bottom spacing
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+        }
+    }
+}
+
+// --- Today Hero Card ---
+
+@Composable
+private fun TodayHeroCard(
+    selectedDate: LocalDate,
+    hijriDay: Int?,
+    hijriMonth: Int?,
+    hijriYear: Int?,
+    modifier: Modifier = Modifier
+) {
+    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
+    val monthName = hijriMonth?.let { getHijriMonthName(it) } ?: ""
+    val monthArabic = hijriMonth?.let { getHijriMonthArabicName(it) } ?: ""
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ),
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .padding(25.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Today",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = if (hijriDay != null && hijriYear != null) "$hijriDay $monthName $hijriYear" else "",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                if (monthArabic.isNotEmpty()) {
+                    Text(
+                        text = "$hijriDay $monthArabic $hijriYear",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                Text(
+                    text = selectedDate.format(formatter),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                )
             }
         }
     }
 }
 
+// --- Month Navigator ---
+
 @Composable
-private fun MonthNavigator(
+private fun CalendarMonthNavigator(
     monthName: String,
+    monthNameArabic: String,
     year: Int,
-    hijriInfo: String?,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    Row(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = NimazColors.Primary.copy(alpha = 0.1f)
-        )
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onPrevious) {
+        Column {
+            Text(
+                text = "$monthName $year",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = monthNameArabic,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            IconButton(
+                onClick = onPrevious,
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                )
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous Month"
+                    contentDescription = "Previous Month",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
                 )
             }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "$monthName $year",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+            IconButton(
+                onClick = onNext,
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
-                hijriInfo?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = NimazColors.Primary
-                    )
-                }
-            }
-
-            IconButton(onClick = onNext) {
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next Month"
+                    contentDescription = "Next Month",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
     }
 }
 
+// --- Calendar Grid ---
+
 @Composable
-private fun CalendarGrid(
+private fun CalendarGridCard(
     days: List<CalendarDay>,
     selectedDate: LocalDate,
     onDayClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val eidColor = Color(0xFFEAB308)
+    val holyColor = Color(0xFF22C55E)
+    val fastColor = Color(0xFFA855F7)
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(15.dp)
         ) {
-            // Day Headers
+            // Weekday headers
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa").forEach { day ->
+                listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat").forEach { day ->
                     Text(
                         text = day,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        fontSize = 11.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Calendar Days
+            // Calendar days grid
             val firstDayOffset = days.firstOrNull()?.gregorianDate?.dayOfWeek?.value?.mod(7) ?: 0
             val paddedDays = List(firstDayOffset) { null } + days
 
@@ -286,7 +346,7 @@ private fun CalendarGrid(
                 ) {
                     week.forEach { day ->
                         if (day != null) {
-                            DayCell(
+                            CalendarDayCell(
                                 day = day,
                                 isSelected = day.gregorianDate == selectedDate,
                                 onClick = { onDayClick(day.gregorianDate) },
@@ -296,189 +356,196 @@ private fun CalendarGrid(
                             Spacer(modifier = Modifier.weight(1f))
                         }
                     }
-                    // Pad remaining days in week
                     repeat(7 - week.size) {
                         Spacer(modifier = Modifier.weight(1f))
                     }
                 }
             }
+
+            // Legend
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 15.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 15.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LegendItem(color = eidColor, label = "Eid")
+                Spacer(modifier = Modifier.width(20.dp))
+                LegendItem(color = holyColor, label = "Holy Night")
+                Spacer(modifier = Modifier.width(20.dp))
+                LegendItem(color = fastColor, label = "Fasting")
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DayCell(
+private fun LegendItem(color: Color, label: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            fontSize = 11.sp
+        )
+    }
+}
+
+@Composable
+private fun CalendarDayCell(
     day: CalendarDay,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val eidColor = Color(0xFFEAB308)
+    val holyColor = Color(0xFF22C55E)
+    val fastColor = Color(0xFFA855F7)
+
     val backgroundColor = when {
-        isSelected -> NimazColors.Primary
-        day.isToday -> NimazColors.Primary.copy(alpha = 0.2f)
-        day.events.isNotEmpty() -> NimazColors.Secondary.copy(alpha = 0.1f)
+        day.isToday -> MaterialTheme.colorScheme.primary
+        isSelected -> MaterialTheme.colorScheme.surfaceContainerHighest
         else -> Color.Transparent
     }
 
-    val isWeekend = day.gregorianDate.dayOfWeek.value in listOf(6, 7)
     val textColor = when {
-        isSelected -> Color.White
-        isWeekend -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        day.isToday -> MaterialTheme.colorScheme.onPrimary
+        !day.isCurrentMonth -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
         else -> MaterialTheme.colorScheme.onSurface
     }
 
-    Surface(
-        onClick = onClick,
-        modifier = modifier.padding(2.dp),
-        shape = CircleShape,
-        color = backgroundColor
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .padding(2.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(backgroundColor)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.padding(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = day.gregorianDate.dayOfMonth.toString(),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (day.isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = textColor
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = if (day.isToday) FontWeight.SemiBold else FontWeight.Normal,
+                color = textColor,
+                fontSize = 13.sp
             )
-            Text(
-                text = day.hijriDate.day.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = if (isSelected) Color.White.copy(alpha = 0.8f) else NimazColors.Primary
-            )
-
-            // Event indicator
-            if (day.events.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .size(4.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isSelected) Color.White else NimazColors.Secondary
-                        )
-                )
-            }
         }
-    }
-}
 
-@Composable
-private fun SelectedDateCard(
-    gregorianDate: LocalDate,
-    hijriDay: Int,
-    hijriMonth: String,
-    hijriYear: Int,
-    modifier: Modifier = Modifier
-) {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = NimazColors.Primary.copy(alpha = 0.1f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = gregorianDate.format(formatter),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "$hijriDay $hijriMonth $hijriYear AH",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = NimazColors.Primary
+        // Event dot indicator at bottom
+        if (day.events.isNotEmpty()) {
+            val dotColor = getEventDotColor(day.events, eidColor, holyColor, fastColor)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 4.dp)
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(dotColor)
             )
         }
     }
 }
 
 @Composable
-private fun EventCard(
+private fun getEventDotColor(
+    events: List<IslamicEvent>,
+    eidColor: Color,
+    holyColor: Color,
+    fastColor: Color
+): Color {
+    val primaryEvent = events.firstOrNull() ?: return MaterialTheme.colorScheme.primary
+    return when (primaryEvent.eventType) {
+        IslamicEventType.HOLIDAY -> eidColor
+        IslamicEventType.NIGHT -> holyColor
+        IslamicEventType.FAST -> fastColor
+        IslamicEventType.HISTORICAL -> holyColor
+    }
+}
+
+// --- Event Detail Card (for selected date events) ---
+
+@Composable
+private fun EventDetailCard(
     event: IslamicEvent,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (event.isHoliday) {
-                NimazColors.Secondary.copy(alpha = 0.1f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            }
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(15.dp),
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(NimazColors.Secondary.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
+            // Date column
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(50.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Event,
-                    contentDescription = null,
-                    tint = NimazColors.Secondary,
-                    modifier = Modifier.size(20.dp)
+                Text(
+                    text = event.hijriDay.toString(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = getHijriMonthName(event.hijriMonth).take(6),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 10.sp
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
+            // Info column
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = event.nameEnglish,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = event.nameArabic,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 event.description?.let { desc ->
                     Text(
                         text = desc,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp
                     )
                 }
-            }
-
-            if (event.isHoliday) {
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = NimazColors.Secondary
-                ) {
-                    Text(
-                        text = "Holiday",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+                EventBadge(event = event)
             }
         }
     }
 }
+
+// --- Upcoming Event Card ---
 
 @Composable
 private fun UpcomingEventCard(
@@ -487,59 +554,113 @@ private fun UpcomingEventCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(15.dp),
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            verticalAlignment = Alignment.Top
         ) {
+            // Date column
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(50.dp)
+            ) {
+                Text(
+                    text = event.hijriDay.toString(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = getHijriMonthName(event.hijriMonth).take(6),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 10.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Info column
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = event.nameEnglish,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = "${event.hijriDay} ${getHijriMonthName(event.hijriMonth)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = NimazColors.Primary
-                )
-            }
-
-            if (event.isFastingDay) {
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = NimazColors.FastingColors.Voluntary.copy(alpha = 0.2f)
-                ) {
+                event.description?.let { desc ->
                     Text(
-                        text = "Fast",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = NimazColors.FastingColors.Voluntary,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        text = desc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp
                     )
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                EventBadge(event = event)
             }
         }
     }
 }
 
-private fun getMonthName(month: Int): String {
-    return listOf(
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    )[month - 1]
+// --- Event Badge ---
+
+@Composable
+private fun EventBadge(event: IslamicEvent) {
+    val eidColor = Color(0xFFEAB308)
+    val holyColor = Color(0xFF22C55E)
+    val fastColor = Color(0xFFA855F7)
+
+    val badgeColor: Color
+    val badgeLabel: String
+
+    when (event.eventType) {
+        IslamicEventType.HOLIDAY -> {
+            badgeColor = eidColor
+            badgeLabel = "Eid"
+        }
+        IslamicEventType.NIGHT -> {
+            badgeColor = holyColor
+            badgeLabel = "Holy Night"
+        }
+        IslamicEventType.FAST -> {
+            badgeColor = fastColor
+            badgeLabel = if (event.isFastingDay) "Fasting" else "Fasting Month"
+        }
+        IslamicEventType.HISTORICAL -> {
+            badgeColor = holyColor
+            badgeLabel = "Historical"
+        }
+    }
+
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = badgeColor.copy(alpha = 0.2f)
+    ) {
+        Text(
+            text = badgeLabel,
+            style = MaterialTheme.typography.labelSmall,
+            color = badgeColor,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            fontSize = 11.sp
+        )
+    }
 }
 
+// --- Helper functions ---
+
 private fun getHijriMonthName(month: Int): String {
-    return listOf(
-        "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
-        "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
-        "Ramadan", "Shawwal", "Dhu al-Qa'dah", "Dhu al-Hijjah"
-    ).getOrElse(month - 1) { "Unknown" }
+    return HijriMonth.fromNumber(month)?.displayName() ?: "Unknown"
+}
+
+@Composable
+private fun getHijriMonthArabicName(month: Int): String {
+    return HijriMonth.fromNumber(month)?.arabicName() ?: ""
 }

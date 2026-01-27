@@ -22,22 +22,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,8 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,7 +54,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -70,7 +63,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.LocationEvent
 import com.arshadshah.nimaz.presentation.viewmodel.LocationViewModel
@@ -87,10 +79,8 @@ fun LocationScreen(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
 
-    // Track if we need to detect location after permission granted
     var pendingLocationDetection by remember { mutableStateOf(false) }
 
-    // Permission launcher
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -102,7 +92,6 @@ fun LocationScreen(
         }
     }
 
-    // Check if location permission is granted
     fun hasLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
@@ -114,7 +103,6 @@ fun LocationScreen(
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
 
-    // Show error in snackbar
     LaunchedEffect(state.error) {
         state.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -123,29 +111,12 @@ fun LocationScreen(
     }
 
     Scaffold(
-        containerColor = NimazColors.Neutral950,
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Location",
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = NimazColors.Neutral950
-                )
+            NimazBackTopAppBar(
+                title = "Location",
+                onBackClick = onNavigateBack
             )
         }
     ) { paddingValues ->
@@ -153,8 +124,8 @@ fun LocationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Search Bar
             item {
@@ -173,14 +144,8 @@ fun LocationScreen(
             // Search Results
             if (state.searchResults.isNotEmpty()) {
                 item {
-                    Text(
-                        text = "Search Results",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = NimazColors.Neutral400,
-                        fontWeight = FontWeight.Medium
-                    )
+                    SectionTitle(text = "Search Results")
                 }
-
                 items(state.searchResults) { location ->
                     LocationListItem(
                         location = location,
@@ -188,15 +153,12 @@ fun LocationScreen(
                         onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
                     )
                 }
-
-                item { Spacer(modifier = Modifier.height(8.dp)) }
+                item { Spacer(modifier = Modifier.height(4.dp)) }
             }
 
             // Current Location Card
             item {
-                CurrentLocationCard(
-                    currentLocation = state.currentLocation
-                )
+                CurrentLocationCard(currentLocation = state.currentLocation)
             }
 
             // Use Current Location Button
@@ -222,35 +184,22 @@ fun LocationScreen(
             // Recent Locations
             if (state.recentLocations.isNotEmpty()) {
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Recent Locations",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = NimazColors.Neutral400,
-                        fontWeight = FontWeight.Medium
-                    )
+                    SectionTitle(text = "Recent")
                 }
-
                 items(state.recentLocations) { location ->
                     LocationListItem(
                         location = location,
                         isSelected = isLocationSelected(state.currentLocation, location),
-                        onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
+                        onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) },
+                        showGlobeIcon = true
                     )
                 }
             }
 
             // Popular Cities
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Popular Cities",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = NimazColors.Neutral400,
-                    fontWeight = FontWeight.Medium
-                )
+                SectionTitle(text = "Popular Cities")
             }
-
             items(state.popularCities) { location ->
                 LocationListItem(
                     location = location,
@@ -262,6 +211,21 @@ fun LocationScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
+}
+
+@Composable
+private fun SectionTitle(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        letterSpacing = MaterialTheme.typography.labelSmall.letterSpacing,
+        modifier = modifier.padding(start = 5.dp, top = 8.dp, bottom = 4.dp)
+    )
 }
 
 private fun isLocationSelected(
@@ -286,85 +250,66 @@ private fun SearchBar(
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = NimazColors.Neutral900
-        )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(14.dp)
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = NimazColors.Neutral400,
-                modifier = Modifier.size(20.dp)
-            )
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
 
-            Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
-            BasicTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                modifier = Modifier.weight(1f),
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = Color.White
-                ),
-                cursorBrush = SolidColor(NimazColors.Primary),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = { onSearch() }
-                ),
-                decorationBox = { innerTextField ->
-                    Box {
-                        if (query.isEmpty()) {
-                            Text(
-                                text = "Search for a city...",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = NimazColors.Neutral500
-                            )
-                        }
-                        innerTextField()
+        BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.weight(1f),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.onSurface
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSearch() }),
+            decorationBox = { innerTextField ->
+                Box {
+                    if (query.isEmpty()) {
+                        Text(
+                            text = "Search city or address...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
                     }
+                    innerTextField()
                 }
-            )
-
-            AnimatedVisibility(
-                visible = isLoading,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = NimazColors.Primary,
-                    strokeWidth = 2.dp
-                )
             }
+        )
 
-            AnimatedVisibility(
-                visible = query.isNotEmpty() && !isLoading,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                IconButton(
-                    onClick = onClear,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Clear",
-                        tint = NimazColors.Neutral400,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+        AnimatedVisibility(visible = isLoading, enter = fadeIn(), exit = fadeOut()) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 2.dp
+            )
+        }
+
+        AnimatedVisibility(visible = query.isNotEmpty() && !isLoading, enter = fadeIn(), exit = fadeOut()) {
+            IconButton(onClick = onClear, modifier = Modifier.size(24.dp)) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Clear",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
             }
         }
     }
@@ -375,126 +320,95 @@ private fun CurrentLocationCard(
     currentLocation: CurrentLocationState,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        )
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+                    )
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(18.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            NimazColors.Primary800,
-                            NimazColors.Primary700
-                        )
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .padding(20.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(
-                                    color = Color.White.copy(alpha = 0.2f),
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+            // Location icon
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(14.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
 
-                        Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(15.dp))
 
-                        Column {
-                            Text(
-                                text = "Current Location",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.8f)
-                            )
-                            when (currentLocation) {
-                                is CurrentLocationState.Set -> {
-                                    Text(
-                                        text = currentLocation.name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
-                                CurrentLocationState.Loading -> {
-                                    Text(
-                                        text = "Detecting...",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
-                                CurrentLocationState.NotSet -> {
-                                    Text(
-                                        text = "Not set",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = Color.White.copy(alpha = 0.7f),
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
-                            }
-                        }
+            // Location info
+            Column(modifier = Modifier.weight(1f)) {
+                when (currentLocation) {
+                    is CurrentLocationState.Set -> {
+                        Text(
+                            text = currentLocation.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "${String.format("%.4f", currentLocation.latitude)}\u00B0 N, ${String.format("%.4f", currentLocation.longitude)}\u00B0 W",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        )
                     }
-
-                    // Current badge
-                    if (currentLocation is CurrentLocationState.Set) {
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = Color.White.copy(alpha = 0.2f),
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "Current",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.White,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                    CurrentLocationState.Loading -> {
+                        Text(
+                            text = "Detecting...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                    CurrentLocationState.NotSet -> {
+                        Text(
+                            text = "Not set",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        )
                     }
                 }
+            }
 
-                // Coordinates
-                if (currentLocation is CurrentLocationState.Set) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Lat: ${String.format("%.4f", currentLocation.latitude)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.7f)
+            // Current badge
+            if (currentLocation is CurrentLocationState.Set) {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(20.dp)
                         )
-                        Text(
-                            text = "Lng: ${String.format("%.4f", currentLocation.longitude)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "Current",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
                 }
             }
         }
@@ -507,36 +421,36 @@ private fun UseCurrentLocationButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        enabled = !isLoading,
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = NimazColors.Neutral900,
-            contentColor = Color.White
-        ),
-        contentPadding = PaddingValues(vertical = 14.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(enabled = !isLoading, onClick = onClick)
+            .padding(14.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 2.dp
             )
         } else {
             Icon(
                 imageVector = Icons.Default.MyLocation,
                 contentDescription = null,
-                tint = NimazColors.Primary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
         }
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = if (isLoading) "Detecting Location..." else "Use Current Location",
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -546,89 +460,79 @@ private fun LocationListItem(
     location: SearchLocation,
     isSelected: Boolean,
     onClick: () -> Unit,
+    showGlobeIcon: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                NimazColors.Primary.copy(alpha = 0.15f)
-            } else {
-                NimazColors.Neutral900
-            }
-        )
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
+            .clickable(onClick = onClick)
+            .padding(15.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // Icon
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(40.dp)
+                .background(
+                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    else MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(10.dp)
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            // Icon container
+            Icon(
+                imageVector = if (showGlobeIcon) Icons.Default.Public else Icons.Default.LocationOn,
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        // Location info
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = location.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = location.country,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // Selection check
+        if (isSelected) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(24.dp)
                     .background(
-                        color = if (isSelected) {
-                            NimazColors.Primary.copy(alpha = 0.2f)
-                        } else {
-                            NimazColors.Neutral800
-                        },
-                        shape = CircleShape
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.LocationOn,
+                    imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = if (isSelected) NimazColors.Primary else NimazColors.Neutral400,
-                    modifier = Modifier.size(20.dp)
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(14.dp)
                 )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Location info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = location.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = location.country,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = NimazColors.Neutral400,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Selection indicator
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .background(
-                            color = NimazColors.Primary,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
             }
         }
     }

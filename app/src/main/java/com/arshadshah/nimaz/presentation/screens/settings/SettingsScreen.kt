@@ -1,6 +1,9 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
@@ -26,6 +29,7 @@ import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,14 +38,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -74,108 +79,104 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // Prayer Settings Section
             item {
-                SectionHeader(title = "Prayer Times")
-            }
-
-            item {
-                SettingsNavigationItem(
-                    title = "Calculation Method",
-                    subtitle = "Prayer time calculation settings",
-                    icon = Icons.Default.Calculate,
-                    onClick = onNavigateToPrayerSettings
-                )
-            }
-
-            item {
-                SettingsNavigationItem(
-                    title = "Location",
-                    subtitle = "Manage prayer time locations",
-                    icon = Icons.Default.LocationOn,
-                    onClick = onNavigateToLocation
-                )
-            }
-
-            item {
-                SettingsNavigationItem(
-                    title = "Notifications",
-                    subtitle = "Prayer alerts and reminders",
-                    icon = Icons.Default.Notifications,
-                    onClick = onNavigateToNotifications
-                )
+                SettingsSection(title = "PRAYER SETTINGS") {
+                    SettingsMenuItem(
+                        icon = Icons.Default.Calculate,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        title = "Calculation Method",
+                        subtitle = "Prayer time calculation settings",
+                        onClick = onNavigateToPrayerSettings
+                    )
+                    SettingsMenuDivider()
+                    SettingsMenuItem(
+                        icon = Icons.Default.LocationOn,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        title = "Location",
+                        subtitle = "Manage prayer time locations",
+                        onClick = onNavigateToLocation
+                    )
+                    SettingsMenuDivider()
+                    SettingsMenuItem(
+                        icon = Icons.Default.Notifications,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        title = "Notifications",
+                        subtitle = "Adhan & reminders",
+                        onClick = onNavigateToNotifications
+                    )
+                }
             }
 
             // Quran Section
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(title = "Quran")
+                SettingsSection(title = "QURAN") {
+                    SettingsMenuItem(
+                        icon = Icons.Default.MenuBook,
+                        iconTint = MaterialTheme.colorScheme.tertiary,
+                        iconBackground = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
+                        title = "Quran Settings",
+                        subtitle = "Reading and audio preferences",
+                        onClick = onNavigateToQuranSettings
+                    )
+                }
             }
 
+            // App Settings Section
             item {
-                SettingsNavigationItem(
-                    title = "Quran Settings",
-                    subtitle = "Reading and audio preferences",
-                    icon = Icons.Default.MenuBook,
-                    onClick = onNavigateToQuranSettings
-                )
-            }
-
-            // App Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(title = "App")
-            }
-
-            item {
-                SettingsNavigationItem(
-                    title = "Appearance",
-                    subtitle = "Theme, colors, and display",
-                    icon = Icons.Default.DarkMode,
-                    onClick = onNavigateToAppearance
-                )
-            }
-
-            item {
-                SettingsNavigationItem(
-                    title = "Language",
-                    subtitle = "App language preferences",
-                    icon = Icons.Default.Language,
-                    onClick = onNavigateToLanguage
-                )
-            }
-
-            item {
-                SettingsNavigationItem(
-                    title = "Widgets",
-                    subtitle = "Home screen widget settings",
-                    icon = Icons.Default.Widgets,
-                    onClick = onNavigateToWidgets
-                )
+                SettingsSection(title = "APP SETTINGS") {
+                    SettingsMenuItem(
+                        icon = Icons.Default.DarkMode,
+                        iconTint = MaterialTheme.colorScheme.secondary,
+                        iconBackground = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                        title = "Appearance",
+                        subtitle = "Theme & display",
+                        onClick = onNavigateToAppearance
+                    )
+                    SettingsMenuDivider()
+                    SettingsMenuItem(
+                        icon = Icons.Default.Language,
+                        iconTint = MaterialTheme.colorScheme.secondary,
+                        iconBackground = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                        title = "Language",
+                        subtitle = "App language preferences",
+                        onClick = onNavigateToLanguage
+                    )
+                    SettingsMenuDivider()
+                    SettingsMenuItem(
+                        icon = Icons.Default.Widgets,
+                        iconTint = MaterialTheme.colorScheme.secondary,
+                        iconBackground = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                        title = "Widgets",
+                        subtitle = "Home screen widgets",
+                        onClick = onNavigateToWidgets
+                    )
+                }
             }
 
             // Data Section
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(title = "Data")
-            }
-
-            item {
-                SettingsActionItem(
-                    title = "Reset Settings",
-                    subtitle = "Restore default settings",
-                    icon = Icons.Default.Restore,
-                    iconColor = MaterialTheme.colorScheme.error,
-                    onClick = { viewModel.onEvent(SettingsEvent.ResetToDefaults) }
-                )
+                SettingsSection(title = "DATA") {
+                    SettingsMenuItem(
+                        icon = Icons.Default.Restore,
+                        iconTint = MaterialTheme.colorScheme.error,
+                        iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
+                        title = "Reset Settings",
+                        subtitle = "Restore default settings",
+                        onClick = { viewModel.onEvent(SettingsEvent.ResetToDefaults) },
+                        showArrow = false
+                    )
+                }
             }
 
             // Version Info
             item {
-                Spacer(modifier = Modifier.height(16.dp))
                 VersionInfo()
             }
         }
@@ -183,124 +184,99 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SectionHeader(
+private fun SettingsSection(
     title: String,
-    modifier: Modifier = Modifier
+    content: @Composable () -> Unit
 ) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(vertical = 8.dp)
-    )
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
+        )
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column {
+                content()
+            }
+        }
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SettingsNavigationItem(
+private fun SettingsMenuItem(
+    icon: ImageVector,
+    iconTint: Color,
+    iconBackground: Color,
     title: String,
     subtitle: String,
-    icon: ImageVector,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    showArrow: Boolean = true
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(42.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(iconBackground),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = NimazColors.Primary,
-                modifier = Modifier.size(24.dp)
+                tint = iconTint,
+                modifier = Modifier.size(22.dp)
             )
+        }
 
-            Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(15.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
+        if (showArrow) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(20.dp)
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SettingsActionItem(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    iconColor: Color = NimazColors.Primary,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = iconColor
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+private fun SettingsMenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 73.dp),
+        thickness = 0.5.dp,
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+    )
 }
 
 @Composable
@@ -308,7 +284,9 @@ private fun VersionInfo(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -317,6 +295,7 @@ private fun VersionInfo(
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = "Version 1.0.0",
             style = MaterialTheme.typography.bodySmall,

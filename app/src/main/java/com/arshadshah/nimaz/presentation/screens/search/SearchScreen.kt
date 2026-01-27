@@ -363,7 +363,7 @@ private fun HadithSearchResultCard(
 ) {
     SearchResultCard(
         icon = Icons.Default.Book,
-        iconColor = NimazColors.Primary,
+        iconColor = MaterialTheme.colorScheme.primary,
         type = "Hadith",
         title = "Hadith #${result.hadith.hadithNumber}",
         subtitle = result.bookName,
@@ -383,7 +383,7 @@ private fun DuaSearchResultCard(
 ) {
     SearchResultCard(
         icon = Icons.Default.Mosque,
-        iconColor = NimazColors.Secondary,
+        iconColor = MaterialTheme.colorScheme.secondary,
         type = "Dua",
         title = result.dua.titleEnglish,
         subtitle = result.categoryName,
@@ -496,7 +496,7 @@ private fun HighlightedText(
             withStyle(
                 SpanStyle(
                     fontWeight = FontWeight.Bold,
-                    background = NimazColors.Primary.copy(alpha = 0.2f)
+                    background = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                 )
             ) {
                 append(text.substring(index, index + query.length))

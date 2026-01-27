@@ -1,12 +1,15 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,17 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.BarChart
+
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,15 +36,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
@@ -53,8 +61,11 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,9 +75,17 @@ fun PrayerTrackerScreen(
     viewModel: PrayerTrackerViewModel = hiltViewModel()
 ) {
     val state by viewModel.trackerState.collectAsState()
+    val statsState by viewModel.statsState.collectAsState()
+    val historyState by viewModel.historyState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    val isToday = state.selectedDate == LocalDate.now()
+    var displayedMonth by remember { mutableStateOf(YearMonth.from(state.selectedDate)) }
+
+    LaunchedEffect(displayedMonth) {
+        val startDate = displayedMonth.atDay(1)
+        val endDate = displayedMonth.atEndOfMonth()
+        viewModel.onEvent(PrayerTrackerEvent.LoadHistory(startDate, endDate))
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -74,15 +93,7 @@ fun PrayerTrackerScreen(
             NimazBackTopAppBar(
                 title = "Prayer Tracker",
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior,
-                actions = {
-                    IconButton(onClick = onNavigateToStats) {
-                        Icon(
-                            imageVector = Icons.Default.BarChart,
-                            contentDescription = "Statistics"
-                        )
-                    }
-                }
+                scrollBehavior = scrollBehavior
             )
         }
     ) { paddingValues ->
@@ -90,403 +101,588 @@ fun PrayerTrackerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            // Stats Grid (2x2)
+            item {
+                StatsGrid(
+                    statsState = statsState,
+                    prayerRecords = state.prayerRecords
+                )
+            }
+
+            // Streak Card
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+                StreakCard(currentStreak = statsState.currentStreak)
+            }
+
+            // Calendar Section
+            item {
+                Spacer(modifier = Modifier.height(25.dp))
+                CalendarSection(
+                    displayedMonth = displayedMonth,
+                    selectedDate = state.selectedDate,
+                    onMonthChange = { displayedMonth = it },
+                    onDateSelected = { date ->
+                        viewModel.onEvent(PrayerTrackerEvent.SelectDate(date))
+                    },
+                    historyRecords = historyState.records
+                )
+            }
+
+            // Selected Day Detail
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+                SelectedDayDetail(
+                    selectedDate = state.selectedDate,
+                    prayerRecords = state.prayerRecords,
+                    prayerTimes = state.prayerTimes,
+                    onTogglePrayer = { prayerName, currentStatus ->
+                        if (currentStatus == PrayerStatus.PRAYED || currentStatus == PrayerStatus.LATE) {
+                            // Already prayed - could toggle off, but for now mark missed
+                            viewModel.onEvent(PrayerTrackerEvent.MarkPrayerMissed(prayerName))
+                        } else {
+                            viewModel.onEvent(
+                                PrayerTrackerEvent.MarkPrayerPrayed(
+                                    prayerName,
+                                    false
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(30.dp))
+            }
+        }
+    }
+}
+
+// --- Stats Grid ---
+
+@Composable
+private fun StatsGrid(
+    statsState: com.arshadshah.nimaz.presentation.viewmodel.PrayerStatsUiState,
+    prayerRecords: List<PrayerRecord>
+) {
+    val stats = statsState.stats
+    val totalPrayed = stats?.totalPrayed ?: 0
+    val totalExpected = if (stats != null) (stats.totalPrayed + stats.totalMissed) else 0
+    val weeklyPercent = if (totalExpected > 0) (totalPrayed * 100 / totalExpected) else 0
+    val perfectDays = if (stats != null) {
+        // Approximate: totalPrayed / 5 gives max possible perfect days
+        stats.totalPrayed / 5
+    } else 0
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Left column
+        Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Date Navigator
-            item {
-                DateNavigator(
-                    selectedDate = state.selectedDate,
-                    onPreviousDay = { viewModel.onEvent(PrayerTrackerEvent.NavigateToPreviousDay) },
-                    onNextDay = { viewModel.onEvent(PrayerTrackerEvent.NavigateToNextDay) },
-                    canNavigateForward = !isToday
-                )
-            }
-
-            // Day Summary Card
-            item {
-                DaySummaryCard(
-                    prayerRecords = state.prayerRecords,
-                    isToday = isToday
-                )
-            }
-
-            // Prayer List
-            item {
-                Text(
-                    text = "Prayers",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-
-            items(PrayerName.entries.filter { it != PrayerName.SUNRISE }) { prayerName ->
-                val record = state.prayerRecords.find { it.prayerName == prayerName }
-                val prayerTime = state.prayerTimes?.let { times ->
-                    when (prayerName) {
-                        PrayerName.FAJR -> times.fajr
-                        PrayerName.DHUHR -> times.dhuhr
-                        PrayerName.ASR -> times.asr
-                        PrayerName.MAGHRIB -> times.maghrib
-                        PrayerName.ISHA -> times.isha
-                        else -> null
-                    }
-                }
-
-                PrayerTrackerCard(
-                    prayerName = prayerName,
-                    prayerTime = prayerTime?.format(DateTimeFormatter.ofPattern("hh:mm a")),
-                    status = record?.status ?: PrayerStatus.NOT_PRAYED,
-                    isJamaah = record?.isJamaah ?: false,
-                    onMarkPrayed = {
-                        viewModel.onEvent(PrayerTrackerEvent.MarkPrayerPrayed(prayerName, false))
-                    },
-                    onMarkWithJamaah = {
-                        viewModel.onEvent(PrayerTrackerEvent.MarkPrayerPrayed(prayerName, true))
-                    },
-                    onMarkMissed = {
-                        viewModel.onEvent(PrayerTrackerEvent.MarkPrayerMissed(prayerName))
-                    }
-                )
-            }
+            // Highlight card - This Week
+            StatCard(
+                label = "This Week",
+                value = "$weeklyPercent%",
+                isHighlight = true
+            )
+            // Total Prayers
+            StatCard(
+                label = "Total Prayers",
+                value = "${stats?.totalPrayed ?: 0}",
+                isHighlight = false
+            )
         }
-    }
-}
-
-@Composable
-private fun DateNavigator(
-    selectedDate: LocalDate,
-    onPreviousDay: () -> Unit,
-    onNextDay: () -> Unit,
-    canNavigateForward: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
-    val isToday = selectedDate == LocalDate.now()
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // Right column
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            IconButton(onClick = onPreviousDay) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous Day"
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (isToday) {
-                    Text(
-                        text = "Today",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Text(
-                    text = selectedDate.format(formatter),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            IconButton(
-                onClick = onNextDay,
-                enabled = canNavigateForward
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next Day",
-                    tint = if (canNavigateForward) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                    }
-                )
-            }
+            // This Month
+            StatCard(
+                label = "This Month",
+                value = "$weeklyPercent%",
+                isHighlight = false
+            )
+            // Perfect Days
+            StatCard(
+                label = "Perfect Days",
+                value = "$perfectDays",
+                isHighlight = false
+            )
         }
     }
 }
 
 @Composable
-private fun DaySummaryCard(
-    prayerRecords: List<PrayerRecord>,
-    isToday: Boolean,
-    modifier: Modifier = Modifier
+private fun StatCard(
+    label: String,
+    value: String,
+    isHighlight: Boolean
 ) {
-    val prayed = prayerRecords.count { it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE }
-    val jamaah = prayerRecords.count { it.isJamaah }
-    val missed = prayerRecords.count { it.status == PrayerStatus.MISSED }
-    val total = 5
+    val containerColor = if (isHighlight) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier = Modifier.padding(18.dp)
         ) {
             Text(
-                text = if (isToday) "Today's Progress" else "Day Summary",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isHighlight) {
+                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (isHighlight) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(12.dp))
+// --- Streak Card ---
 
+@Composable
+private fun StreakCard(currentStreak: Int) {
+    val goldDark = Color(0xFFCA8A04)
+    val goldLight = Color(0xFFEAB308)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(goldLight, goldDark)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(20.dp)
+        ) {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.Black.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocalFireDepartment,
+                            contentDescription = null,
+                            tint = Color(0xFF1C1917),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Text(
+                        text = "Current Streak",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF1C1917)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "$currentStreak",
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1C1917),
+                    lineHeight = 48.sp
+                )
+                Text(
+                    text = "consecutive days with all prayers",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF1C1917).copy(alpha = 0.8f)
+                )
+            }
+        }
+    }
+}
+
+// --- Calendar Section ---
+
+@Composable
+private fun CalendarSection(
+    displayedMonth: YearMonth,
+    selectedDate: LocalDate,
+    onMonthChange: (YearMonth) -> Unit,
+    onDateSelected: (LocalDate) -> Unit,
+    historyRecords: List<PrayerRecord>
+) {
+    // Section header with month navigation
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Calendar",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Surface(
+                onClick = { onMonthChange(displayedMonth.minusMonths(1)) },
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft,
+                        contentDescription = "Previous month",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+            Text(
+                text = displayedMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(120.dp)
+            )
+            Surface(
+                onClick = { onMonthChange(displayedMonth.plusMonths(1)) },
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Next month",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(15.dp))
+
+    // Calendar grid
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(modifier = Modifier.padding(15.dp)) {
+            // Day name headers
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                SummaryItem(
-                    label = "Prayed",
-                    value = "$prayed/$total",
-                    color = NimazColors.StatusColors.Prayed
-                )
-                SummaryItem(
-                    label = "Jama'ah",
-                    value = jamaah.toString(),
-                    color = NimazColors.Primary
-                )
-                SummaryItem(
-                    label = "Missed",
-                    value = missed.toString(),
-                    color = NimazColors.StatusColors.Missed
-                )
+                val dayNames = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+                dayNames.forEach { name ->
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
-            // Progress Bar
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(prayed.toFloat() / total)
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(NimazColors.StatusColors.Prayed)
-                )
+            // Calendar days
+            val calendarDays = remember(displayedMonth) {
+                buildCalendarDays(displayedMonth)
+            }
+
+            val today = LocalDate.now()
+
+            // Render rows of 7
+            calendarDays.chunked(7).forEach { week ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    week.forEach { day ->
+                        val isCurrentMonth = day.month == displayedMonth.month
+                        val isToday = day == today
+                        val isSelected = day == selectedDate
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .padding(2.dp)
+                                .then(
+                                    if (isSelected) {
+                                        Modifier.border(
+                                            2.dp,
+                                            MaterialTheme.colorScheme.primary,
+                                            RoundedCornerShape(10.dp)
+                                        )
+                                    } else Modifier
+                                )
+                                .then(
+                                    if (isToday) {
+                                        Modifier
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(MaterialTheme.colorScheme.primaryContainer)
+                                    } else Modifier
+                                )
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable {
+                                    onDateSelected(day)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${day.dayOfMonth}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = when {
+                                    isToday -> MaterialTheme.colorScheme.onPrimaryContainer
+                                    !isCurrentMonth -> MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.25f
+                                    )
+
+                                    else -> MaterialTheme.colorScheme.onSurface
+                                }
+                            )
+                            // Day badge for past days in current month
+                            if (isCurrentMonth && day.isBefore(today)) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(2.dp)
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(NimazColors.StatusColors.Prayed)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
+private fun buildCalendarDays(yearMonth: YearMonth): List<LocalDate> {
+    val firstOfMonth = yearMonth.atDay(1)
+    val firstDayOfWeek = firstOfMonth.dayOfWeek
+    // Sunday = 0 offset
+    val offset = if (firstDayOfWeek == DayOfWeek.SUNDAY) 0 else firstDayOfWeek.value
+    val startDate = firstOfMonth.minusDays(offset.toLong())
+
+    val days = mutableListOf<LocalDate>()
+    val totalDays = 42 // 6 rows x 7
+    for (i in 0 until totalDays) {
+        days.add(startDate.plusDays(i.toLong()))
+    }
+    return days
+}
+
+// --- Selected Day Detail ---
+
 @Composable
-private fun SummaryItem(
-    label: String,
-    value: String,
-    color: Color,
-    modifier: Modifier = Modifier
+private fun SelectedDayDetail(
+    selectedDate: LocalDate,
+    prayerRecords: List<PrayerRecord>,
+    prayerTimes: com.arshadshah.nimaz.domain.model.PrayerTimes?,
+    onTogglePrayer: (PrayerName, PrayerStatus) -> Unit
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
+    val prayers = PrayerName.entries.filter { it != PrayerName.SUNRISE }
+    val prayedCount = prayerRecords.count {
+        it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
     ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Column(modifier = Modifier.padding(20.dp)) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = selectedDate.format(formatter),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "$prayedCount of ${prayers.size}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            // Prayer checklist
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                prayers.forEach { prayerName ->
+                    val record = prayerRecords.find { it.prayerName == prayerName }
+                    val status = record?.status ?: PrayerStatus.NOT_PRAYED
+                    val isCompleted =
+                        status == PrayerStatus.PRAYED || status == PrayerStatus.LATE
+                    val prayerTime = prayerTimes?.let { times ->
+                        when (prayerName) {
+                            PrayerName.FAJR -> times.fajr
+                            PrayerName.DHUHR -> times.dhuhr
+                            PrayerName.ASR -> times.asr
+                            PrayerName.MAGHRIB -> times.maghrib
+                            PrayerName.ISHA -> times.isha
+                            else -> null
+                        }
+                    }?.format(DateTimeFormatter.ofPattern("h:mm a"))
+
+                    PrayerCheckItem(
+                        name = prayerName.name.lowercase()
+                            .replaceFirstChar { it.uppercase() },
+                        time = prayerTime,
+                        isCompleted = isCompleted,
+                        statusText = when (status) {
+                            PrayerStatus.PRAYED -> "On time"
+                            PrayerStatus.LATE -> "Late"
+                            PrayerStatus.MISSED -> "Missed"
+                            else -> "Upcoming"
+                        },
+                        onClick = { onTogglePrayer(prayerName, status) }
+                    )
+                }
+            }
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PrayerTrackerCard(
-    prayerName: PrayerName,
-    prayerTime: String?,
-    status: PrayerStatus,
-    isJamaah: Boolean,
-    onMarkPrayed: () -> Unit,
-    onMarkWithJamaah: () -> Unit,
-    onMarkMissed: () -> Unit,
-    modifier: Modifier = Modifier
+private fun PrayerCheckItem(
+    name: String,
+    time: String?,
+    isCompleted: Boolean,
+    statusText: String,
+    onClick: () -> Unit
 ) {
-    val prayerColor = getPrayerColor(prayerName)
-    val statusColor = when (status) {
-        PrayerStatus.PRAYED -> NimazColors.StatusColors.Prayed
-        PrayerStatus.LATE -> NimazColors.StatusColors.Late
-        PrayerStatus.MISSED -> NimazColors.StatusColors.Missed
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 15.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Prayer Icon/Status
+            // Checkbox circle
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(24.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (status == PrayerStatus.NOT_PRAYED) {
-                            prayerColor.copy(alpha = 0.1f)
+                    .then(
+                        if (isCompleted) {
+                            Modifier.background(NimazColors.StatusColors.Prayed)
                         } else {
-                            statusColor.copy(alpha = 0.2f)
+                            Modifier.border(
+                                2.dp,
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                CircleShape
+                            )
                         }
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (status == PrayerStatus.PRAYED || status == PrayerStatus.LATE) {
+                if (isCompleted) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Prayed",
-                        tint = statusColor,
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else if (status == PrayerStatus.MISSED) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Missed",
-                        tint = statusColor,
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Schedule,
-                        contentDescription = "Not Prayed",
-                        tint = prayerColor,
-                        modifier = Modifier.size(24.dp)
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(14.dp)
                     )
                 }
             }
 
             Spacer(modifier = Modifier.width(12.dp))
 
+            // Prayer info
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = prayerName.name.lowercase().replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (isJamaah) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = NimazColors.Primary.copy(alpha = 0.1f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Groups,
-                                    contentDescription = "Jama'ah",
-                                    tint = NimazColors.Primary,
-                                    modifier = Modifier.size(12.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Jama'ah",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = NimazColors.Primary
-                                )
-                            }
-                        }
-                    }
-                }
-                prayerTime?.let {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                time?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            // Action Buttons
-            if (status == PrayerStatus.NOT_PRAYED) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Surface(
-                        onClick = onMarkMissed,
-                        shape = CircleShape,
-                        color = NimazColors.StatusColors.Missed.copy(alpha = 0.1f),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Mark Missed",
-                                tint = NimazColors.StatusColors.Missed,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-
-                    Surface(
-                        onClick = onMarkWithJamaah,
-                        shape = CircleShape,
-                        color = NimazColors.Primary.copy(alpha = 0.1f),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Groups,
-                                contentDescription = "Mark with Jama'ah",
-                                tint = NimazColors.Primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-
-                    Surface(
-                        onClick = onMarkPrayed,
-                        shape = CircleShape,
-                        color = NimazColors.StatusColors.Prayed.copy(alpha = 0.1f),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Mark Prayed",
-                                tint = NimazColors.StatusColors.Prayed,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
+            // Status badge
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = if (isCompleted) {
+                    NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
                 }
+            ) {
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isCompleted) {
+                        NimazColors.StatusColors.Prayed
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
             }
         }
     }

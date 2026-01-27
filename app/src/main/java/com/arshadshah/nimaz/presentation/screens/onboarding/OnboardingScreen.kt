@@ -127,7 +127,7 @@ fun OnboardingScreen(
             title = "Welcome to Nimaz Pro",
             description = "Your complete Islamic companion app for prayer times, Quran, Hadith, and more",
             icon = Icons.Default.Mosque,
-            color = NimazColors.Primary,
+            color = MaterialTheme.colorScheme.primary,
             features = listOf(
                 "Accurate prayer times",
                 "Complete Quran with audio",
@@ -139,7 +139,7 @@ fun OnboardingScreen(
             title = "Prayer Times",
             description = "Never miss a prayer with accurate times based on your location",
             icon = Icons.Default.Schedule,
-            color = NimazColors.Primary,
+            color = MaterialTheme.colorScheme.primary,
             features = listOf(
                 "Multiple calculation methods",
                 "Custom adjustments",
@@ -163,7 +163,7 @@ fun OnboardingScreen(
             title = "Location Access",
             description = "Allow location access for accurate prayer times and Qibla direction",
             icon = Icons.Default.LocationOn,
-            color = NimazColors.Secondary,
+            color = MaterialTheme.colorScheme.secondary,
             features = listOf(
                 "Automatic location detection",
                 "Precise prayer times",
@@ -208,8 +208,8 @@ fun OnboardingScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        NimazColors.Neutral950,
-                        NimazColors.Neutral900
+                        MaterialTheme.colorScheme.onSurface,
+                        MaterialTheme.colorScheme.onSurface
                     )
                 )
             )
@@ -229,7 +229,7 @@ fun OnboardingScreen(
                         viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
                         onComplete()
                     }) {
-                        Text("Skip", color = NimazColors.Neutral400)
+                        Text("Skip", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -309,7 +309,7 @@ fun OnboardingScreen(
                                 .clip(CircleShape)
                                 .background(
                                     if (isSelected) pages[index].color
-                                    else NimazColors.Neutral600
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                         )
                     }
@@ -437,7 +437,7 @@ private fun OnboardingPageContent(
             text = page.description,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
-            color = NimazColors.Neutral400
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -448,7 +448,7 @@ private fun OnboardingPageContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = NimazColors.Neutral900
+                    containerColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Column(

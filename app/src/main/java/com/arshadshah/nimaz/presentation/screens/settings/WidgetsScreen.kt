@@ -14,40 +14,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Style
-import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.AppTheme
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,15 +44,13 @@ fun WidgetsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val widgetState by viewModel.widgetState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
                 title = "Widgets",
-                onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior
+                onBackClick = onNavigateBack
             )
         }
     ) { paddingValues ->
@@ -73,229 +58,292 @@ fun WidgetsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Available Widgets
-            item {
-                SectionHeader(
-                    title = "Available Widgets",
-                    icon = Icons.Default.Widgets
-                )
-            }
-
+            // Intro text
             item {
                 Text(
-                    text = "Long press on your home screen and select Widgets to add Nimaz Pro widgets",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Add Nimaz Pro widgets to your home screen for quick access to prayer times without opening the app.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 22.sp
                 )
             }
 
-            // Widget Previews
+            // Small Widget (2x2)
             item {
-                WidgetPreviewCard(
-                    title = "Prayer Times Widget",
-                    description = "Shows all prayer times for today",
-                    preview = {
-                        PrayerTimesWidgetPreview()
-                    }
+                WidgetSection(
+                    title = "Small Widget (2\u00D72)",
+                    infoName = "Next Prayer",
+                    infoSize = "2\u00D72 \u2022 Shows countdown",
+                    infoEmoji = "\u2B1C",
+                    preview = { SmallWidgetPreview() }
                 )
             }
 
+            // Medium Widget (4x2)
             item {
-                WidgetPreviewCard(
-                    title = "Next Prayer Widget",
-                    description = "Shows countdown to next prayer",
-                    preview = {
-                        NextPrayerWidgetPreview()
-                    }
+                WidgetSection(
+                    title = "Medium Widget (4\u00D72)",
+                    infoName = "Prayer Times",
+                    infoSize = "4\u00D72 \u2022 All prayers + countdown",
+                    infoEmoji = "\uD83D\uDCCB",
+                    preview = { MediumWidgetPreview() }
                 )
             }
 
+            // Large Widget (4x4)
             item {
-                WidgetPreviewCard(
-                    title = "Hijri Date Widget",
-                    description = "Displays current Hijri date",
-                    preview = {
-                        HijriDateWidgetPreview()
-                    }
+                WidgetSection(
+                    title = "Large Widget (4\u00D74)",
+                    infoName = "Full Prayer Dashboard",
+                    infoSize = "4\u00D74 \u2022 Complete overview",
+                    infoEmoji = "\uD83D\uDCF1",
+                    preview = { LargeWidgetPreview() }
                 )
             }
 
-            // Widget Settings
+            // How to Add Widgets
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(
-                    title = "Widget Settings",
-                    icon = Icons.Default.DarkMode
-                )
-            }
-
-            item {
-                WidgetToggleCard(
-                    title = "Prayer Times Widget",
-                    subtitle = "Enable prayer times widget",
-                    isEnabled = widgetState.prayerTimesWidgetEnabled,
-                    onToggle = { viewModel.onEvent(SettingsEvent.SetPrayerTimesWidgetEnabled(!widgetState.prayerTimesWidgetEnabled)) }
+                Text(
+                    text = "How to Add Widgets",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
             item {
-                WidgetToggleCard(
-                    title = "Show Next Prayer Countdown",
-                    subtitle = "Display countdown to next prayer",
-                    isEnabled = widgetState.showNextPrayerCountdown,
-                    onToggle = { viewModel.onEvent(SettingsEvent.SetShowNextPrayerCountdown(!widgetState.showNextPrayerCountdown)) }
-                )
+                HowToAddCard()
             }
 
-            // Widget Theme
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(
-                    title = "Widget Theme",
-                    icon = Icons.Default.Style
-                )
-            }
-
-            item {
-                WidgetThemeCard(
-                    selectedTheme = widgetState.widgetTheme,
-                    onThemeSelected = { viewModel.onEvent(SettingsEvent.SetWidgetTheme(it)) }
-                )
-            }
-
-            // Widget Transparency
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                TransparencyCard(
-                    transparency = widgetState.widgetTransparency,
-                    onTransparencyChange = { viewModel.onEvent(SettingsEvent.SetWidgetTransparency(it)) }
-                )
-            }
-
-            // Help
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                HelpCard()
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
 @Composable
-private fun SectionHeader(
+private fun WidgetSection(
     title: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = NimazColors.Primary,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}
-
-@Composable
-private fun WidgetPreviewCard(
-    title: String,
-    description: String,
+    infoName: String,
+    infoSize: String,
+    infoEmoji: String,
     preview: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Column(
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        // Widget preview container
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+                        )
+                    )
+                )
+                .padding(20.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            preview()
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Preview area
+        // Widget info row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(14.dp)
+                )
+                .padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .padding(12.dp),
+                    .size(44.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                preview()
+                Text(text = infoEmoji, fontSize = 20.sp)
+            }
+
+            Spacer(modifier = Modifier.width(15.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = infoName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = infoSize,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Button(
+                onClick = { /* Add widget action */ },
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = "Add",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PrayerTimesWidgetPreview() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun SmallWidgetPreview(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(160.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .padding(15.dp)
     ) {
-        Text(
-            text = "Prayer Times",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = NimazColors.Primary
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            listOf(
-                "Fajr" to "5:30",
-                "Dhuhr" to "12:45",
-                "Asr" to "3:30",
-                "Maghrib" to "6:15",
-                "Isha" to "7:45"
-            ).forEach { (name, time) ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column {
+                Text(
+                    text = "Next Prayer",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(
+                    text = "Maghrib",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(
+                    text = "6:18 PM \u2022 2h 15m",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = "Dublin, Ireland",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MediumWidgetPreview(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .padding(15.dp),
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+        // Left side
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = "Next Prayer",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                Text(
+                    text = "Maghrib",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "6:18 PM",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Text(
+                text = "2h 15m remaining",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        // Right side - prayer list
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            val prayers = listOf(
+                "Fajr" to "5:23",
+                "Dhuhr" to "1:15",
+                "Asr" to "4:02",
+                "Maghrib" to "6:18",
+                "Isha" to "8:45"
+            )
+            prayers.forEachIndexed { index, (name, time) ->
+                val isActive = index == 3 // Maghrib
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
                         text = name,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
                         text = time,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -304,292 +352,169 @@ private fun PrayerTimesWidgetPreview() {
 }
 
 @Composable
-private fun NextPrayerWidgetPreview() {
+private fun LargeWidgetPreview(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .padding(20.dp)
     ) {
-        Text(
-            text = "Maghrib",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = NimazColors.Primary
-        )
-        Text(
-            text = "6:15 PM",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Surface(
-            shape = RoundedCornerShape(4.dp),
-            color = NimazColors.Primary.copy(alpha = 0.1f)
+        // Header row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "2h 30m remaining",
-                style = MaterialTheme.typography.labelSmall,
-                color = NimazColors.Primary,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                text = "Saturday, Jan 25",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            Text(
+                text = "\u0661\u0668 \u0631\u062C\u0628 \u0661\u0664\u0664\u0667",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
         }
-    }
-}
 
-@Composable
-private fun HijriDateWidgetPreview() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "15",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = NimazColors.Primary
-        )
-        Text(
-            text = "Rajab 1446",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
-        )
-        Text(
-            text = "Friday",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
+        Spacer(modifier = Modifier.height(15.dp))
 
-@Composable
-private fun WidgetThemeCard(
-    selectedTheme: AppTheme,
-    onThemeSelected: (AppTheme) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
+        // Countdown center
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(vertical = 15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AppTheme.entries.forEach { theme ->
-                val displayName = when (theme) {
-                    AppTheme.SYSTEM -> "System Default"
-                    AppTheme.LIGHT -> "Light"
-                    AppTheme.DARK -> "Dark"
+            Text(
+                text = "Next Prayer",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(
+                text = "Maghrib",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "6:18 PM",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(
+                text = "2 hours 15 minutes remaining",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        // Divider
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // Prayer grid
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val prayers = listOf(
+                "Fajr" to "5:23",
+                "Dhuhr" to "1:15",
+                "Asr" to "4:02",
+                "Maghrib" to "6:18",
+                "Isha" to "8:45"
+            )
+            prayers.forEachIndexed { index, (name, time) ->
+                val isActive = index == 3
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(
+                            color = if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .padding(vertical = 10.dp, horizontal = 5.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = time,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
-                ThemeOption(
-                    name = displayName,
-                    isSelected = selectedTheme == theme,
-                    onClick = { onThemeSelected(theme) }
-                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ThemeOption(
-    name: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        color = if (isSelected) {
-            NimazColors.Primary.copy(alpha = 0.1f)
-        } else {
-            MaterialTheme.colorScheme.surface
-        }
+private fun HowToAddCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = isSelected,
-                onClick = onClick
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                modifier = Modifier.weight(1f)
-            )
-
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = NimazColors.Primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TransparencyCard(
-    transparency: Float,
-    onTransparencyChange: (Float) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Widget Transparency",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Text(
-                    text = "${(transparency * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = NimazColors.Primary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Slider(
-                value = transparency,
-                onValueChange = onTransparencyChange,
-                valueRange = 0f..1f
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Transparent",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Opaque",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun WidgetToggleCard(
-    title: String,
-    subtitle: String,
-    isEnabled: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { onToggle() }
-            )
-        }
-    }
-}
-
-@Composable
-private fun HelpCard(
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        val steps = listOf(
+            "Long press on an empty area of your home screen",
+            "Tap \"Widgets\" from the menu that appears",
+            "Search for \"Nimaz Pro\" and select your preferred widget size",
+            "Drag the widget to your desired location"
         )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = null,
-                tint = NimazColors.Primary,
-                modifier = Modifier.size(20.dp)
-            )
 
-            Spacer(modifier = Modifier.width(12.dp))
+        steps.forEachIndexed { index, step ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${index + 1}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
 
-            Column {
                 Text(
-                    text = "How to add widgets",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "1. Long press on your home screen\n2. Tap 'Widgets'\n3. Find 'Nimaz Pro'\n4. Drag the widget to your home screen",
+                    text = step,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }

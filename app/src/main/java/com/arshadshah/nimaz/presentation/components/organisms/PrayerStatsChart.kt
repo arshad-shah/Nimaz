@@ -343,6 +343,7 @@ private fun RadialChart(
         modifier = modifier.size(200.dp),
         contentAlignment = Alignment.Center
     ) {
+        val chartPrimaryColor = MaterialTheme.colorScheme.primary
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2, size.height / 2)
             val maxRadius = size.minDimension / 2 - 20.dp.toPx()
@@ -398,13 +399,13 @@ private fun RadialChart(
             // Fill
             drawPath(
                 path = path,
-                color = NimazColors.Primary.copy(alpha = 0.3f)
+                color = chartPrimaryColor.copy(alpha = 0.3f)
             )
 
             // Stroke
             drawPath(
                 path = path,
-                color = NimazColors.Primary,
+                color = chartPrimaryColor,
                 style = Stroke(width = 2.dp.toPx())
             )
 
@@ -438,7 +439,7 @@ private fun RadialChart(
                 text = "$percentage%",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = NimazColors.Primary
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -488,7 +489,7 @@ private fun StatsSummary(
         StatItem(
             value = stats.longestStreak.toString(),
             label = "Longest\nStreak",
-            color = NimazColors.Secondary
+            color = MaterialTheme.colorScheme.secondary
         )
         StatItem(
             value = stats.totalJamaah.toString(),

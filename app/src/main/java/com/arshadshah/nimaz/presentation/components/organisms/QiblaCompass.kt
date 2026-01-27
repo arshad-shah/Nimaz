@@ -266,6 +266,8 @@ private fun QiblaIndicator(
     )
 
     val isAligned = isQiblaAligned(angle)
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
 
     Canvas(modifier = modifier.rotate(angle)) {
         val center = Offset(size.width / 2, size.height / 2)
@@ -276,7 +278,7 @@ private fun QiblaIndicator(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        NimazColors.Primary.copy(alpha = pulseAlpha),
+                        primaryColor.copy(alpha = pulseAlpha),
                         Color.Transparent
                     ),
                     center = center,
@@ -313,8 +315,8 @@ private fun QiblaIndicator(
             path = arrowPath,
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    if (isAligned) NimazColors.Primary else NimazColors.Secondary,
-                    if (isAligned) NimazColors.PrimaryDark else NimazColors.SecondaryDark
+                    if (isAligned) primaryColor else secondaryColor,
+                    if (isAligned) primaryColor else secondaryColor
                 )
             )
         )
@@ -337,7 +339,7 @@ private fun KaabaCenter(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (isAligned) {
-        NimazColors.Primary
+        MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.surfaceVariant
     }

@@ -48,8 +48,8 @@ import androidx.compose.ui.tooling.preview.Preview
 enum class SearchResultType(val displayName: String, val icon: ImageVector, val color: Color) {
     QURAN_AYAH("Quran", Icons.Default.MenuBook, NimazColors.QuranColors.BookmarkPrimary),
     HADITH("Hadith", Icons.Default.MenuBook, NimazColors.QuranColors.BookmarkSecondary),
-    DUA("Dua", Icons.Default.Star, NimazColors.Primary),
-    SURAH("Surah", Icons.Default.MenuBook, NimazColors.Primary)
+    DUA("Dua", Icons.Default.Star, Color(0xFF14B8A6)),
+    SURAH("Surah", Icons.Default.MenuBook, Color(0xFF14B8A6))
 }
 
 /**
